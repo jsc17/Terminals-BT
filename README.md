@@ -16,6 +16,7 @@ Originally created as a way to download CSV files generated from [MUL](http://ww
 - Build Tournament list check on top of 350 list validator
 - Login to save lists and share between devices
 - Upgrade to app or PWA for more seamless experience
+- Add Formations and SPA support to Alpha Strike list builder
 
 ## Licensing 
 

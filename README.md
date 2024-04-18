@@ -1,38 +1,30 @@
-# create-svelte
+https://bt.terminl.xyz
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+Disclaimer - I am completely self-taught and have basically been throwing this together as I've learned. It's getting better but the code can still be a mess in places.
 
-## Creating a project
+# Terminal's 'Tech Tools
 
-If you're seeing this, you've probably already done this step. Congrats!
+Originally created as a way to download CSV files generated from [MUL](http://www.masterunitlist.info) data, I decided if I was getting the JSON I might as well display and format it, and this project has expanded from there. I decided to keep working on it as a way to keep myself interested while re-teaching myself how to code after a decade. I never expected it to get this far.
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+## Development
+### Features
+- List builder for general Alpha Strike play
+- List builder with restrictions and validation for the [Wolfnet 350 format](https://wolfsdragoons.com).
+- List validator for the Wolfnet 350 format
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+### Planned
+- Build Tournament list check on top of 350 list validator
+- Login to save lists and share between devices
+- Upgrade to app or PWA for more seamless experience
 
-## Developing
+## Licensing 
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Feel free to use and modify my code as you wish. 
 
-```bash
-npm run dev
+I definitely make no claim to be associated with Battletech or the Master Unit List other than being a fan.
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+## Technology
 
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+Created using HTML, Svelte, plain CSS, and the following packages:
+- [pdf-lib](https://github.com/Hopding/pdf-lib)
+- [pdfjs-dist](https://github.com/mozilla/pdfjs-dist)

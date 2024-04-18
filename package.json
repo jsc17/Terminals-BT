@@ -1,0 +1,40 @@
+{
+	"name": "bt-as350",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"lint": "prettier --check . && eslint .",
+		"format": "prettier --write ."
+	},
+	"devDependencies": {
+		"@sveltejs/kit": "^2.5.2",
+		"@sveltejs/vite-plugin-svelte": "^3.0.2",
+		"@types/eslint": "8.56.0",
+		"@types/node": "^20.11.24",
+		"@typescript-eslint/eslint-plugin": "^6.21.0",
+		"@typescript-eslint/parser": "^6.21.0",
+		"eslint": "^8.57.0",
+		"eslint-config-prettier": "^9.1.0",
+		"eslint-plugin-svelte": "2.36.0-next.8",
+		"prettier-plugin-svelte": "^3.2.2",
+		"svelte": "^5.0.0-next.74",
+		"svelte-check": "^3.6.6",
+		"tslib": "^2.6.2",
+		"typescript": "^5.3.3",
+		"vite": "^5.1.4"
+	},
+	"type": "module",
+	"dependencies": {
+		"@sveltejs/adapter-node": "^4.0.1",
+		"mysql2": "^3.9.2",
+		"nodemailer": "^6.9.11",
+		"pdf-lib": "^1.17.1",
+		"pdfjs-dist": "^4.0.379",
+		"prettier": "^3.2.5"
+	}
+}

@@ -1,0 +1,33 @@
+Max PV 350
+Allowed units:
+    Battlemechs
+    Industrial Mechs
+    Protomechs
+    Combat Vehicles
+    Conventional Infantry
+    Battle Armor
+
+Restrictions:
+    <16 units
+    <12 Battle/Industrial Mechs
+    <8 Combat Vehicles
+    <5 Infantry (CI/BA)
+    0 or 5 Protomechs
+
+Disallowed:
+    DRO
+    Experimental Rules
+    Unknown Rules
+    Unique
+    Trailer without Hitched
+
+Skill:
+    Min: 2
+    Max: 6
+Rule of 2: 
+    2 JMPS combined total
+    Pilot skill (2 mix of 2/6 skill)
+    2 Chassis:
+        Mechs different variants
+    
+Banned Units

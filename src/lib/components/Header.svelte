@@ -45,7 +45,11 @@
 {/snippet}
 
 <header>
-	<div class="dropdown">
+	<nav
+		class="dropdown"
+		on:mouseleave={() => {
+			showLinksDropdown = false;
+		}}>
 		<button
 			class="link-button"
 			on:click={() => {
@@ -56,26 +60,26 @@
 				Alpha Strike Listbuilder
 			{:else if $page.url.pathname == "/as350"}
 				Wolfnet 350 Listbuilder
-			{:else if $page.url.pathname == "/350check"}
+			{:else if $page.url.pathname == "/350validation"}
 				350 List Validator
 			{/if}
 		</button>
 		<div class="dropdown-content" class:dropdown-hidden={!showLinksDropdown} class:dropdown-shown={showLinksDropdown}>
 			<a href="/listbuilder">Alpha Strike Listbuilder</a>
 			<a href="/as350">350 List Builder</a>
-			<a href="/350check">350 List Validator</a>
+			<a href="/350validation">350 List Validator</a>
 			<a href="http://masterunitlist.info" target="_blank">Master Unit List</a>
 			<a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">350 Rules</a>
 		</div>
-	</div>
+	</nav>
 	{#if !appWindow.isMobile}
 		<h1>Terminal's 'Tech Tools</h1>
 
-		<div class="inline gap8">
+		<nav class="inline gap8">
 			{@render settings()}
-		</div>
+		</nav>
 	{:else}
-		<div class="dropdown">
+		<nav class="dropdown">
 			<button
 				on:click={() => {
 					showSettingsDropdown = !showSettingsDropdown;
@@ -83,7 +87,7 @@
 			<div class="dropdown-content dropdown-right" class:dropdown-hidden={!showSettingsDropdown} class:dropdown-shown={showSettingsDropdown}>
 				{@render settings()}
 			</div>
-		</div>
+		</nav>
 	{/if}
 </header>
 

@@ -97,6 +97,8 @@
 		color: var(--foreground);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
+		max-height: 90%;
+		overflow: auto;
 	}
 	:global(.dialog-wide) {
 		width: 90%;

@@ -69,7 +69,7 @@
 		</div>
 	</div>
 	{#if !appWindow.isMobile}
-		<h1>Terminal's 'Tech Stuff</h1>
+		<h1>Terminal's 'Tech Tools</h1>
 
 		<div class="inline gap8">
 			{@render settings()}

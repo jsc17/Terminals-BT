@@ -6,7 +6,7 @@
 	let list: any = getContext("list");
 
 	let { status = $bindable() } = $props();
-	let headers = $derived(appWindow.isMobile ? ["Type", "PV", "Move", "Health (A+S)"] : ["Type", "PV", "Size", "Move", "TMM", "Health (A+S)"]);
+	let headers = $derived(appWindow.isMobile ? ["Type", "PV", "Move", "Health"] : ["Type", "PV", "Size", "Move", "TMM", "Health (A+S)"]);
 
 	function sort(event: Event) {
 		if (event.target instanceof HTMLElement) {
@@ -40,15 +40,15 @@
 			<col style="width:12%" />
 		{/if}
 		<col style="width:15%" />
-		<col style="width:4%" />
+		<col style="width:2%" />
 	</colgroup>
 	<thead>
 		<tr>
 			<th>
 				<div class="table-header">
-					Name - <em>{resultList.filtered.length}/{resultList.results.length} results shown</em>
 					{#if !appWindow.isMobile}
-						<button data-sort="name" on:click={sort}>
+						<button class="sort-header-button" data-sort="name" on:click={sort}>
+							Name - <em>{resultList.filtered.length}/{resultList.results.length} results shown</em>
 							{#if resultList.sort.key == "name"}
 								{#if resultList.sort.order == "asc"}
 									<img class="sort-selected button-icon" src="/icons/sort-ascending.svg" alt="sort" />
@@ -59,15 +59,28 @@
 								<img class="sort button-icon" src="/icons/sort.svg" alt="sort" />
 							{/if}
 						</button>
+					{:else}
+						<button class="sort-header-button-mobile" data-sort="name" on:click={sort}>
+							<p>Name</p>
+							{#if resultList.sort.key == "name"}
+								{#if resultList.sort.order == "asc"}
+									<img class="sort-selected button-icon" src="/icons/arrow-down-bold.svg" alt="sort" />
+								{:else}
+									<img class="sort-selected button-icon" src="/icons/arrow-up-bold.svg" alt="sort" />
+								{/if}
+							{:else}
+								<img class="sort button-icon" src="/icons/swap-vertical.svg" alt="sort" />
+							{/if}
+						</button>
 					{/if}
 				</div>
 			</th>
 			{#each headers as header}
 				<th>
 					<div class="table-header">
-						{header}
 						{#if !appWindow.isMobile}
-							<button data-sort={header.toLowerCase()} on:click={sort}>
+							<button class="sort-header-button" data-sort={header.toLowerCase()} on:click={sort}>
+								{header}
 								{#if resultList.sort.key == header.toLowerCase()}
 									{#if resultList.sort.order == "asc"}
 										<img class="sort-selected button-icon" src="/icons/sort-ascending.svg" alt="sort" />
@@ -78,11 +91,24 @@
 									<img class="sort button-icon" src="/icons/sort.svg" alt="sort" />
 								{/if}
 							</button>
+						{:else}
+							<button class="sort-header-button-mobile" data-sort={header.toLowerCase()} on:click={sort}>
+								{header}
+								{#if resultList.sort.key == header.toLowerCase()}
+									{#if resultList.sort.order == "asc"}
+										<img class="sort-selected button-icon" src="/icons/arrow-down-bold.svg" alt="sort" />
+									{:else}
+										<img class="sort-selected button-icon" src="/icons/arrow-up-bold.svg" alt="sort" />
+									{/if}
+								{:else}
+									<img class="sort button-icon" src="/icons/swap-vertical.svg" alt="sort" />
+								{/if}
+							</button>
 						{/if}
 					</div>
 				</th>
 			{/each}
-			<th><div class="table-header">Damage S/M/L - OV</div></th>
+			<th><div class="table-header">DMG S/M/L-OV</div></th>
 			<th></th>
 		</tr>
 	</thead>
@@ -151,13 +177,38 @@
 	}
 	th {
 		border: 1px solid var(--border);
+		height: 100%;
 	}
 	.table-header {
 		display: flex;
+		font-size: 0.75rem;
+		height: 100%;
+		width: 100%;
+		gap: 0px;
+	}
+	.sort-header-button {
+		background-color: transparent;
+		display: flex;
 		align-items: center;
 		justify-content: center;
+		color: var(--foreground);
+		height: 100%;
+		width: 100%;
 		gap: 4px;
-		font-size: 0.75rem;
+	}
+	.sort-header-button-mobile {
+		img {
+			width: 10px;
+			height: 10px;
+		}
+		background-color: transparent;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--foreground);
+		height: 100%;
+		width: 100%;
+		gap: 0px;
 	}
 	td {
 		padding: 5px;
@@ -171,9 +222,6 @@
 	}
 	.abilities td {
 		padding-left: 15px;
-	}
-	button[data-sort] {
-		background-color: transparent;
 	}
 	.sort {
 		filter: var(--muted-filter);

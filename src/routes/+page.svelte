@@ -1,5 +1,5 @@
 <main>
-	<h1>Terminal's 'Tech stuff</h1>
+	<h1>Terminal's 'Tech Tools</h1>
 	<p>
 		Wanted to get back into learning webpage design and figured I'd create some battletech tools for myself and anyone who finds them useful. Mostly going to be Alpha Strike
 		related since I haven't played enough classic to know what might be needed and doesn't have existing tools. Based off data retrieved from the Master Unit List.

@@ -26,8 +26,9 @@ export const actions = {
 			let page = formData.get("issuePage");
 			let era = formData.get("issueEra");
 			let faction = formData.get("issueFaction");
+			let device = formData.get("issueDevice");
 
-			body = `Issue Page:\n${page}\n\nIssue Details:\n${details}`;
+			body = `Issue Page:\n${page}\n\nIssue Device:\n${device}\n\nIssue Details:\n${details}`;
 			if (era) {
 				body += `\n\nEra:\n${era}`;
 			}
@@ -39,7 +40,7 @@ export const actions = {
 		}
 		console.log(">>", title, labels, body);
 		let issue = { title: title, labels: [labels], assignees: ["jsc17"], body: body };
-		const response = await fetch(`https://api.github.com/repos/jsc17/BT-Tools/issues`, {
+		const response = await fetch(`https://api.github.com/repos/jsc17/Terminals-BT/issues`, {
 			method: "post",
 			body: JSON.stringify(issue),
 			headers: { accept: "application/vnd.github+json", Authorization: `Bearer ${GITHUB_TOKEN}` }

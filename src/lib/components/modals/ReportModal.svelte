@@ -53,6 +53,13 @@
 		{#if issueType == "bug"}
 			<div class="inline gap8"><label for="issueTitle">Issue Title:</label><input type="text" name="issueTitle" id="issueTitle" /></div>
 			<div class="inline gap8"><label for="issuePage">Issue Page:</label><input type="text" name="issuePage" id="issuePage" value={$page.url.pathname} /></div>
+			<div class="inline gap8">
+				<label for="issueDevice">Device</label>
+				<select name="issueDevice" id="issueDevice">
+					<option value="Desktop">Desktop</option>
+					<option value="Mobile">Mobile</option>
+				</select>
+			</div>
 			<label for="issueDetails">Issue Details (Please be as specific as possible.):</label><textarea name="issueDetails" id="issueDetails" cols="60" rows="10"></textarea>
 			<div class="inline gap8">
 				<label for="issueEra">Era (optional):</label><input type="text" name="issueEra" id="issueEra" />

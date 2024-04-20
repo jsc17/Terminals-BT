@@ -22,6 +22,7 @@
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "2.36.0-next.8",
 		"prettier-plugin-svelte": "^3.2.2",
+		"prisma": "^5.12.1",
 		"svelte": "^5.0.0-next.74",
 		"svelte-check": "^3.6.6",
 		"tslib": "^2.6.2",
@@ -30,9 +31,13 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@lucia-auth/adapter-prisma": "^4.0.1",
+		"@prisma/client": "^5.12.1",
 		"@sveltejs/adapter-node": "^4.0.1",
+		"lucia": "^3.1.1",
 		"mysql2": "^3.9.2",
 		"nodemailer": "^6.9.11",
+		"oslo": "^1.2.0",
 		"pdf-lib": "^1.17.1",
 		"pdfjs-dist": "^4.0.379",
 		"prettier": "^3.2.5"

@@ -1,8 +1,8 @@
 //@ts-nocheck
 import { getDocument } from "pdfjs-dist";
 import { ValidationList, unitTypes } from "$lib/types/ValidationList";
-import { createConnection } from "mysql2";
-import { DB_USER, DB_PASSWORD } from "$env/static/private";
+import { prisma } from "$lib/server/prisma.js";
+import { fail } from "@sveltejs/kit";
 
 export const load = async ({ url }) => {
 	const id = url.searchParams.get("id");
@@ -86,31 +86,19 @@ export const actions = {
 
 		return { success: true, unitArray, valid };
 	},
+	createTournament: async ({ request }) => {
+		const { tournamentName } = Object.fromEntries(await request.formData()) as { tournamentName: string };
 
-	newTournament: async ({ request }) => {
-		const formData = await request.formData();
-		const organizerName = formData.get("organizerName");
-		const tournamentName = formData.get("tournamentName");
-		const emailAddress = formData.get("emailAddress");
-		const tournamentEra = formData.get("tournamentEra");
-		const tournamentDate = formData.get("tournamentDate");
+		try {
+			await prisma.tournaments.create({
+				data: { tournamentName }
+			});
+		} catch (err) {
+			console.error(err);
+			return fail(500, { message: "Could not create the tournament" });
+		}
 
-		let conn = createConnection({
-			host: "localhost",
-			user: DB_USER,
-			password: DB_PASSWORD,
-			database: "battletech"
-		});
-
-		conn.connect((err) => {
-			if (err) return console.error(err.message);
-			console.log("Connected!");
-			let sql = `INSERT INTO tournaments(name, organizer, organizer_email, era, date) VALUES('${tournamentName}', '${organizerName}','${emailAddress}',${tournamentEra}, '${tournamentDate}')`;
-
-			conn.query(sql);
-
-			conn.end();
-		});
+		return { status: 201 };
 	}
 };
 

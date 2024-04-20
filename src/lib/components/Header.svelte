@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { onMount } from "svelte";
+	import { getContext, onMount } from "svelte";
 	import { page } from "$app/stores";
 
 	import Changelog from "./Changelog.svelte";
 	import ReportModal from "./modals/ReportModal.svelte";
 	import { appWindow } from "$lib/utilities/responsive.svelte";
+	import LoginModal from "./modals/LoginModal.svelte";
+	import { enhance } from "$app/forms";
 
 	let theme = $state("dark");
 	let root: HTMLHtmlElement;
@@ -12,6 +14,9 @@
 	let showReportModal = $state(false);
 	let showLinksDropdown = $state(false);
 	let showSettingsDropdown = $state(false);
+	let showLoginModal = $state(false);
+
+	let user: { username: string | undefined } = getContext("user");
 
 	onMount(() => {
 		let defaultTheme = "dark";
@@ -28,21 +33,11 @@
 			root.classList.remove("light");
 		}
 	});
-</script>
 
-{#snippet settings()}
-	<button
-		class="link-button"
-		on:click={() => {
-			showChangelog = true;
-		}}>Changelog</button>
-	<button
-		class="link-button"
-		on:click={() => {
-			showReportModal = true;
-		}}>Contact me</button>
-	<a href="https://github.com/jsc17/BT-Tools" target="_blank">Github</a>
-{/snippet}
+	function handleLogout() {
+		user.username = undefined;
+	}
+</script>
 
 <header>
 	<div class="dropdown">
@@ -56,39 +51,61 @@
 				Alpha Strike Listbuilder
 			{:else if $page.url.pathname == "/as350"}
 				Wolfnet 350 Listbuilder
-			{:else if $page.url.pathname == "/350check"}
+			{:else if $page.url.pathname == "/350validation"}
 				350 List Validator
 			{/if}
 		</button>
 		<div class="dropdown-content" class:dropdown-hidden={!showLinksDropdown} class:dropdown-shown={showLinksDropdown}>
 			<a href="/listbuilder">Alpha Strike Listbuilder</a>
 			<a href="/as350">350 List Builder</a>
-			<a href="/350check">350 List Validator</a>
+			<a href="/350validation">350 List Validator</a>
 			<a href="http://masterunitlist.info" target="_blank">Master Unit List</a>
 			<a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">350 Rules</a>
 		</div>
 	</div>
 	{#if !appWindow.isMobile}
 		<h1>Terminal's 'Tech Tools</h1>
-
-		<div class="inline gap8">
-			{@render settings()}
-		</div>
-	{:else}
+	{/if}
+	<div class="inline gap8">
+		{#if user.username}
+			<form method="post" action="/login/?/logout" use:enhance={handleLogout} class="inline">
+				<p>{`Welcome, ${user.username[0].toUpperCase() + user.username.slice(1)}`}</p>
+				<button class="link-button">(log out)</button>
+			</form>
+		{:else}
+			<button
+				class="link-button"
+				on:click={() => {
+					showLoginModal = true;
+				}}>Login/Register</button>
+		{/if}
 		<div class="dropdown">
 			<button
+				class="link-button"
 				on:click={() => {
 					showSettingsDropdown = !showSettingsDropdown;
-				}}>Settings</button>
+				}}>
+				<img src="/icons/cog.svg" alt="settings menu" /></button>
 			<div class="dropdown-content dropdown-right" class:dropdown-hidden={!showSettingsDropdown} class:dropdown-shown={showSettingsDropdown}>
-				{@render settings()}
+				<button
+					class="link-button"
+					on:click={() => {
+						showChangelog = true;
+					}}>Changelog</button>
+				<button
+					class="link-button"
+					on:click={() => {
+						showReportModal = true;
+					}}>Contact me</button>
+				<a href="https://github.com/jsc17/BT-Tools" target="_blank">Github</a>
 			</div>
 		</div>
-	{/if}
+	</div>
 </header>
 
 <Changelog bind:showChangelog></Changelog>
 <ReportModal bind:showReportModal></ReportModal>
+<LoginModal bind:showLoginModal></LoginModal>
 
 <style>
 	header {

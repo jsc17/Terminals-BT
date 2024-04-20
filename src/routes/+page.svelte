@@ -13,7 +13,7 @@
 			<p><a href="/as350">AS350 List Builder</a>: List builder with built in restrictions for the wolfnet 350 rules</p>
 		</li>
 		<li>
-			<p><a href="/350check">AS350 List Validator</a>: List validator for wolfnet 350 rules</p>
+			<p><a href="/350validation">AS350 List Validator</a>: List validator for wolfnet 350 rules</p>
 		</li>
 	</ul>
 </main>

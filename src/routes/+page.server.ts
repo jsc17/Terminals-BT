@@ -14,6 +14,8 @@ import type { Unit } from "$lib/types/unit.js";
 import references from "$lib/data/reference.json";
 import { drawListHorizontal, drawListVertical } from "$lib/utilities/printSublists.js";
 import { GITHUB_TOKEN } from "$env/static/private";
+import { fail } from "@sveltejs/kit";
+import { prisma } from "$lib/server/prisma.js";
 
 export const actions = {
 	createIssue: async ({ request }) => {
@@ -38,14 +40,12 @@ export const actions = {
 		} else {
 			body = `Feature Details:\n${details}`;
 		}
-		console.log(">>", title, labels, body);
 		let issue = { title: title, labels: [labels], assignees: ["jsc17"], body: body };
 		const response = await fetch(`https://api.github.com/repos/jsc17/Terminals-BT/issues`, {
 			method: "post",
 			body: JSON.stringify(issue),
 			headers: { accept: "application/vnd.github+json", Authorization: `Bearer ${GITHUB_TOKEN}` }
 		});
-		console.log(response);
 		const json = await response.json();
 		if (response.status == 201) {
 			console.log(`Issue created successfully at ${json.url}`);
@@ -209,5 +209,53 @@ export const actions = {
 
 		const bytes = await pdf.save();
 		return { pdf: JSON.stringify(bytes) };
+	},
+	saveList: async ({ request, locals }) => {
+		if (!locals.user) {
+			return fail(401, { message: "User not logged in" });
+		}
+		const { name, era, faction, units, sublists } = Object.fromEntries(await request.formData()) as Record<string, string>;
+		const data = { userId: locals.user.id, name, era: Number(era), faction: Number(faction), units, sublists };
+		try {
+			const existingList = await prisma.list.findFirst({
+				where: {
+					userId: locals.user.id,
+					name
+				}
+			});
+			if (!existingList) {
+				await prisma.list.create({
+					data
+				});
+				return { message: "List created successfully" };
+			} else {
+				await prisma.list.update({
+					where: {
+						id: existingList.id
+					},
+					data
+				});
+				return { message: "List updated successfully" };
+			}
+		} catch (err) {
+			console.error(err);
+			return fail(400, { message: "Failed to create list in database" });
+		}
+	},
+	loadList: async ({ locals }) => {
+		if (!locals.user) {
+			return fail(401, { message: "User not logged in" });
+		}
+		const lists = await prisma.list.findMany({
+			where: {
+				userId: locals.user.id
+			}
+		});
+
+		if (!lists) {
+			return fail(400, { message: "Failed to retrieve lists" });
+		}
+
+		return { lists: JSON.stringify(lists) };
 	}
 };

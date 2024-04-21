@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
 	import { getContext } from "svelte";
+	import { appWindow } from "$lib/utilities/responsive.svelte";
 
 	let { showLoginModal = $bindable() } = $props();
 	let loginDialog: HTMLDialogElement;
+	let loginDisplay = $state<"login" | "register">("login");
 
 	$effect(() => {
 		if (showLoginModal) {
@@ -33,7 +35,6 @@
 			formData.set("username", username.toLowerCase());
 		}
 		return async ({ result, update }: any) => {
-			console.log(result);
 			if (result.status != 200) {
 				alert(result.data.message);
 			} else {
@@ -72,21 +73,47 @@
 	bind:this={loginDialog}
 	on:close={() => {
 		showLoginModal = false;
-	}}>
-	<form method="post" action="/login/?/register" class="dialog-body" use:enhance={handleSignUp}>
-		<label for="username">Username</label>
-		<input name="username" id="username" value="test" /><br />
-		<label for="password">Password</label>
-		<input type="password" name="password" id="password" value="test123" /><br />
-		<label for="email">Email Address</label>
-		<input type="email" name="email" id="email" value="gnbia@nu.com" /><br />
-		<div class="inline gap8 center"><button>Cancel</button><button>Continue</button></div>
-	</form>
-	<form method="post" action="/login/?/login" class="dialog-body" use:enhance={handleLogin}>
-		<label for="username">Username</label>
-		<input name="username" id="username" value="test" />
-		<label for="password">Password</label>
-		<input type="password" name="password" id="password" value="test123" />
-		<div class="inline gap8 center"><button>Cancel</button><button>Continue</button></div>
-	</form>
+	}}
+	class:dialog-wide={appWindow.isNarrow}>
+	{#if loginDisplay == "login"}
+		<div class="dialog-body">
+			<div class="space-between">
+				<h1>Login</h1>
+				<button
+					style:background-color="transparent"
+					style:color="var(--primary)"
+					on:click={() => {
+						loginDisplay = "register";
+					}}>Register account</button>
+			</div>
+			<form method="post" action="/login/?/login" class="dialog-body" use:enhance={handleLogin}>
+				<label for="username">Username</label>
+				<input name="username" id="username" />
+				<label for="password">Password</label>
+				<input type="password" name="password" id="password" />
+				<div class="inline gap8 center"><button>Cancel</button><button>Continue</button></div>
+			</form>
+		</div>
+	{:else if loginDisplay == "register"}
+		<div class="dialog-body">
+			<div class="space-between">
+				<h1>Register</h1>
+				<button
+					style:background-color="transparent"
+					style:color="var(--primary)"
+					on:click={() => {
+						loginDisplay = "login";
+					}}>Login to existing account</button>
+			</div>
+			<form method="post" action="/login/?/register" class="dialog-body" use:enhance={handleSignUp}>
+				<label for="username">Username</label>
+				<input name="username" id="username" />
+				<label for="password">Password</label>
+				<input type="password" name="password" id="password" />
+				<label for="email">Email Address</label>
+				<input type="email" name="email" id="email" />
+				<div class="inline gap8 center"><button>Cancel</button><button>Continue</button></div>
+			</form>
+		</div>
+	{/if}
 </dialog>

@@ -57,7 +57,6 @@ export function createResultList() {
 					}
 					if (filter.maxValue != filter.maxDefault && filter.maxValue != null) {
 						tempresultList = tempresultList.filter((unit) => {
-							console.log(unit[filter.name]);
 							return unit[filter.name] <= filter.maxValue!;
 						});
 					}

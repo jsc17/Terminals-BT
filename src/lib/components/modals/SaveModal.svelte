@@ -3,7 +3,9 @@
 	import { getContext } from "svelte";
 	import { resultList } from "$lib/utilities/resultList.svelte";
 	import type { Unit } from "$lib/types/unit";
+	import { enhance } from "$app/forms";
 
+	let user: any = getContext("user");
 	let list: any = getContext("list");
 	let { showSaveModal = $bindable() } = $props();
 	let saveDialog: HTMLDialogElement;
@@ -14,10 +16,10 @@
 
 		listCode += resultList.details.era + ":" + resultList.details.faction;
 		list.units.forEach((unit: Unit) => {
-			listCode += ":" + unit.id + "," + unit.skill;
+			listCode += `:${unit.id},${unit.skill}`;
 		});
 		listCode += "-";
-		if (list.sublists != undefined) {
+		if (list.sublists) {
 			for (const sublist of list.sublists) {
 				listCode += `${sublist.toString()}:`;
 			}
@@ -40,20 +42,46 @@
 		}
 	});
 
-	function saveList() {
-		let listNames = JSON.parse(localStorage.getItem("lists") ?? "[]");
-		let index = listNames.indexOf(list.details.name.toLowerCase());
-		if (index != -1) {
-			let accept = confirm("List with that name already exists. Overwrite it?");
-			if (!accept) {
-				return;
+	function handleSaveList({ formData, cancel }: any) {
+		const saveLocation = formData.get("saveLocation");
+
+		if (list.details.name == "") {
+			alert("list must have a name");
+			cancel();
+		} else if (user.username && saveLocation == "accountSave") {
+			formData.append("name", list.details.name);
+			formData.append("era", resultList.details.era);
+			formData.append("faction", resultList.details.faction);
+			let units = "";
+			for (const unit of list.units) {
+				units += `${unit.id},${unit.skill}:`;
 			}
+			units = units.slice(0, units.length - 1);
+			formData.append("units", units);
+			let sublistString = "";
+			if (list.sublists.length) {
+				sublistString = list.sublists.reduce((accumulator: string, current: string) => {
+					return `${accumulator}:${current}`;
+				});
+			}
+			formData.append("sublists", sublistString);
+			showSaveModal = false;
 		} else {
-			listNames.push(list.details.name.toLowerCase());
-			localStorage.setItem("lists", JSON.stringify(listNames));
+			let listNames = JSON.parse(localStorage.getItem("lists") ?? "[]");
+			let index = listNames.indexOf(list.details.name.toLowerCase());
+			if (index != -1) {
+				let accept = confirm("List with that name already exists in local storage. Overwrite it?");
+				if (!accept) {
+					return;
+				}
+			} else {
+				listNames.push(list.details.name.toLowerCase());
+				localStorage.setItem("lists", JSON.stringify(listNames));
+			}
+			localStorage.setItem(list.details.name.toLowerCase(), listCode!);
+			cancel();
+			showSaveModal = false;
 		}
-		localStorage.setItem(list.details.name.toLowerCase(), listCode!);
-		showSaveModal = false;
 	}
 
 	function exportToJeff() {
@@ -120,18 +148,40 @@
 	}}
 	class:dialog-wide={appWindow.isNarrow}>
 	<div class="dialog-body">
-		<button
-			class="close-button"
-			on:click={() => {
-				showSaveModal = false;
-			}}>X</button>
-		<h1>Save to local storage:</h1>
-		<div class="export-bar">
-			<label for="save-local">List Name: </label><input type="text" name="save-local" id="save-local" bind:value={list.details.name} />
-			<button on:click={saveList}>
-				<img src="/icons/content-save.svg" alt="save to storage" class="button-icon" />
-			</button>
+		<div class="space-between">
+			{#if user.username}
+				<div></div>
+			{:else}
+				<p>Login to save lists to account and sync lists between devices</p>
+			{/if}
+			<button
+				class="close-button"
+				on:click={() => {
+					showSaveModal = false;
+				}}>X</button>
 		</div>
+
+		<form method="post" action="/?/saveList" use:enhance={handleSaveList}>
+			<div class="inline gap8">
+				{#if user.username}
+					<input type="radio" name="saveLocation" id="accountSave" value="accountSave" checked />
+					<label for="accountSave">Save to account</label>
+					<input type="radio" name="saveLocation" id="localSave" value="localSave" />
+					<label for="LocalSave">Save to local device storage</label>
+				{:else}
+					<input type="radio" name="saveLocation" id="accountSave" value="accountSave" disabled />
+					<label for="accountSave" style:color="var(--muted)">Save to account</label>
+					<input type="radio" name="saveLocation" id="localSave" value="localSave" checked />
+					<label for="LocalSave">Save to local device storage</label>
+				{/if}
+			</div>
+			<div class="export-bar">
+				<label for="save-local">List Name: </label><input type="text" name="save-local" id="save-local" bind:value={list.details.name} />
+				<button>
+					<img src="/icons/content-save.svg" alt="save" class="button-icon" />
+				</button>
+			</div>
+		</form>
 		<h1>Export Codes:</h1>
 		<div class="export-bar">
 			<label for="list-code">List Code: </label><input type="text" name="list-code" id="list-code" disabled value={listCode} />
@@ -150,7 +200,7 @@
 			</button>
 		</div>
 		<div class="export-bar">
-			<label for="jeffs-tools">Jeff's Tools: </label><input type="text" name="jeff-tools" id="jeff's tools" value={list.details.name} />
+			<label for="jeffs-tools">Jeff's Tools: </label><input type="text" name="jeff-tools" id="jeff's tools" bind:value={list.details.name} />
 			<button
 				on:click={() => {
 					exportToJeff();
@@ -178,10 +228,5 @@
 	.export-bar > button {
 		height: 25px;
 		width: 25px;
-	}
-	.close-button {
-		position: absolute;
-		top: 8px;
-		right: 8px;
 	}
 </style>

@@ -40,7 +40,11 @@
 </script>
 
 <header>
-	<div class="dropdown">
+	<nav
+		class="dropdown"
+		on:mouseleave={() => {
+			showLinksDropdown = false;
+		}}>
 		<button
 			class="link-button"
 			on:click={() => {
@@ -62,7 +66,7 @@
 			<a href="http://masterunitlist.info" target="_blank">Master Unit List</a>
 			<a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">350 Rules</a>
 		</div>
-	</div>
+	</nav>
 	{#if !appWindow.isMobile}
 		<h1>Terminal's 'Tech Tools</h1>
 	{/if}
@@ -79,7 +83,11 @@
 					showLoginModal = true;
 				}}>Login/Register</button>
 		{/if}
-		<div class="dropdown">
+		<nav
+			class="dropdown"
+			on:mouseleave={() => {
+				showSettingsDropdown = false;
+			}}>
 			<button
 				class="link-button"
 				on:click={() => {
@@ -99,7 +107,7 @@
 					}}>Contact me</button>
 				<a href="https://github.com/jsc17/BT-Tools" target="_blank">Github</a>
 			</div>
-		</div>
+		</nav>
 	</div>
 </header>
 

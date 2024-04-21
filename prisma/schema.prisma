@@ -13,6 +13,7 @@ datasource db {
 model User {
   id       String    @id
   sessions Session[]
+  lists List[]
   username String @unique
   email String @unique
   hashedPassword String
@@ -23,4 +24,15 @@ model Session {
   userId    String
   expiresAt DateTime
   user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+}
+
+model List {
+  id Int @id @default(autoincrement())
+  userId String
+  name String
+  era Int
+  faction Int
+  units String
+  sublists String
+  user User @relation(references: [id], fields: [userId], onDelete: Cascade)
 }

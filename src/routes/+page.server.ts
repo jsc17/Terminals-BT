@@ -257,5 +257,24 @@ export const actions = {
 		}
 
 		return { lists: JSON.stringify(lists) };
+	},
+	deleteList: async ({ request, locals }) => {
+		if (!locals.user) {
+			return fail(401, { message: "User not logged in" });
+		}
+		const { name } = (await request.json()) as Record<string, string>;
+
+		try {
+			await prisma.list.deleteMany({
+				where: {
+					userId: locals.user.id,
+					name
+				}
+			});
+			return { message: "List deleted successfully" };
+		} catch (error) {
+			console.error(error);
+			return fail(400, { message: "Failed to delete list" });
+		}
 	}
 };

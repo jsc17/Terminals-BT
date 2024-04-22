@@ -9,7 +9,7 @@
 	let status = $state<"waiting" | "loading" | "loaded" | "error">("waiting");
 	let listDialog: HTMLDialogElement;
 	let showListDialog = $state(false);
-	let recentChanges: string[] = ["Added Export for Jeff's Battletech Tools"];
+	let recentChanges: string[] = ["Added authentication to sync lists between devices", "Added Export for Jeff's Battletech Tools"];
 	let description: string[] = [
 		"An Alpha Strike list builder I've created to help filter the data from the amazing work the Master Unit List team has done.",
 		"Feedback will always be welcome. If you found your way here, you probably know me on facebook or through the wolfnet discord, so feel free to ping me. (Discord - Jonathan 'Terminal' Colton)"

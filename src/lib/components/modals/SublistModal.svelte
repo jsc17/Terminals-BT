@@ -52,8 +52,10 @@
 			} else if (appWindow.isNarrow) {
 				layout = "horizontal";
 			}
+
 			sublistDialog.showModal();
 		} else {
+			loaded = false;
 			sublistDialog.close();
 		}
 	});
@@ -141,7 +143,6 @@
 				tempSublist.unitIndices.push(i);
 			}
 		}
-		console.log(tempSublist.unitIndices);
 		const removeIndex = list.sublists.findIndex((sublist: string) => {
 			return sublist == sublists[selectedSublist].unitIndices.toString();
 		});
@@ -258,7 +259,9 @@
 		);
 	}
 	function loadSublists() {
+		sublists = [];
 		loaded = true;
+
 		list.sublists.forEach((sublist: string) => {
 			const formattedSublist = sublist.split(",").map((index: string) => {
 				return parseInt(index);
@@ -276,7 +279,6 @@
 				size: 0,
 				unitIndices: formattedSublist
 			};
-			console.log(newList.unitIndices);
 			count++;
 			let tempSize = 0,
 				unitIndex = 0;
@@ -586,7 +588,6 @@
 				class:hidden={!appWindow.isMobile}
 				on:click={() => {
 					showFilters = !showFilters;
-					console.log(showFilters);
 				}}>
 				<div class="space-between">
 					<div></div>

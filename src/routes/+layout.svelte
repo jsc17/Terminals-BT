@@ -1,7 +1,11 @@
 <script lang="ts">
 	import Header from "$lib/components/Header.svelte";
 	import { appWindow } from "$lib/utilities/responsive.svelte";
-	import { onMount } from "svelte";
+	import { onMount, setContext } from "svelte";
+
+	const { data } = $props();
+	let user = $state({ username: data.username });
+	setContext("user", user);
 
 	onMount(() => {
 		appWindow.windowWidth = window.screen.availWidth;
@@ -97,11 +101,13 @@
 		color: var(--foreground);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
+		min-height: 40%;
 		max-height: 90%;
 		overflow: auto;
 	}
 	:global(.dialog-wide) {
 		width: 90%;
+		min-height: min(fit-content, 40%);
 	}
 	:global(.dialog-body) {
 		display: flex;

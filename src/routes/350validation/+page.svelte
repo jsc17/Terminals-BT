@@ -40,8 +40,8 @@
 	let submitDialog: HTMLDialogElement;
 	let reportDialog: HTMLDialogElement;
 	let tournamentDialog: HTMLDialogElement;
-	//@ts-ignore
-	async function handleForm({ formData, cancel }) {
+
+	async function handleForm({ formData, cancel }: any) {
 		status = "loading";
 		if (selectedEra == "-1") {
 			status = "waiting";
@@ -427,15 +427,12 @@
 	</div>
 	<div class="list">
 		<div class="buttons">
-			<!-- <button
-				on:click={() => {
-					tournamentDialog.showModal();
-				}}>Create Tournament Link
-				</button> -->
 			<button
 				on:click={() => {
-					reportDialog.showModal();
-				}}>Report Issue</button>
+					tournamentDialog.showModal();
+				}}
+				>Create Tournament Link
+			</button>
 		</div>
 		<div class="card">
 			<p>
@@ -486,7 +483,7 @@
 	<div class="dialog-body">
 		<form
 			class="tournamentDialog"
-			action="?/newTournament"
+			action="?/createTournament"
 			method="post"
 			use:enhance={() => {
 				tournamentDialog.close();
@@ -495,14 +492,14 @@
 				Please enter the details in the lines below. After clicking submit you will receive an email at the address provided with a link that can be shared with your players. When
 				they validate and submit the list using that link, you will receive an email with their name, list, and validation status.
 			</p>
-			<label for="organizerName">Organizer Name:</label> <input type="text" name="organizerName" id="organizerName" required />
-			<label for="emailAddress">Organizer Email:</label> <input type="email" name="emailAddress" id="emailAddress" required />
+			<!-- <label for="organizerName">Organizer Name:</label> <input type="text" name="organizerName" id="organizerName" required />
+			<label for="emailAddress">Organizer Email:</label> <input type="email" name="emailAddress" id="emailAddress" required /> -->
 			<label for="tournamentName">Tournament Name:</label> <input type="text" name="tournamentName" id="tournamentName" required />
-			<label for="tournamentDate">Date:</label><input type="date" name="tournamentDate" id="tournamentDate" />
-			<label for="tournamentEra">Era:</label><select name="tournamentEra" id="tournamentEra" required>
+			<!-- <label for="tournamentDate">Date:</label><input type="date" name="tournamentDate" id="tournamentDate" /> -->
+			<!-- <label for="tournamentEra">Era:</label><select name="tournamentEra" id="tournamentEra" required>
 				{#each data as era}
 					<option value={era.id}>{eras.get(era.id)}</option>
-				{/each}</select>
+				{/each}</select> -->
 			<button type="submit">Submit</button>
 		</form>
 	</div>

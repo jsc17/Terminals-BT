@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { onMount } from "svelte";
+	import { getContext, onMount } from "svelte";
 	import { page } from "$app/stores";
 
 	import Changelog from "./Changelog.svelte";
 	import ReportModal from "./modals/ReportModal.svelte";
 	import { appWindow } from "$lib/utilities/responsive.svelte";
+	import LoginModal from "./modals/LoginModal.svelte";
+	import { enhance } from "$app/forms";
 
 	let theme = $state("dark");
 	let root: HTMLHtmlElement;
@@ -12,6 +14,9 @@
 	let showReportModal = $state(false);
 	let showLinksDropdown = $state(false);
 	let showSettingsDropdown = $state(false);
+	let showLoginModal = $state(false);
+
+	let user: { username: string | undefined } = getContext("user");
 
 	onMount(() => {
 		let defaultTheme = "dark";
@@ -28,21 +33,11 @@
 			root.classList.remove("light");
 		}
 	});
-</script>
 
-{#snippet settings()}
-	<button
-		class="link-button"
-		on:click={() => {
-			showChangelog = true;
-		}}>Changelog</button>
-	<button
-		class="link-button"
-		on:click={() => {
-			showReportModal = true;
-		}}>Contact me</button>
-	<a href="https://github.com/jsc17/BT-Tools" target="_blank">Github</a>
-{/snippet}
+	function handleLogout() {
+		user.username = undefined;
+	}
+</script>
 
 <header>
 	<nav
@@ -56,7 +51,9 @@
 				showLinksDropdown = !showLinksDropdown;
 			}}>
 			<img src="/icons/menu.svg" alt="menu" />
-			{#if $page.url.pathname == "/listbuilder"}
+			{#if $page.url.pathname == "/"}
+				Home
+			{:else if $page.url.pathname == "/listbuilder"}
 				Alpha Strike Listbuilder
 			{:else if $page.url.pathname == "/as350"}
 				Wolfnet 350 Listbuilder
@@ -74,25 +71,53 @@
 	</nav>
 	{#if !appWindow.isMobile}
 		<h1>Terminal's 'Tech Tools</h1>
-
-		<nav class="inline gap8">
-			{@render settings()}
-		</nav>
-	{:else}
-		<nav class="dropdown">
+	{/if}
+	<div class="inline gap8">
+		{#if user.username}
+			<form method="post" action="/login/?/logout" use:enhance={handleLogout} class="inline">
+				<p>{`Welcome, ${user.username[0].toUpperCase() + user.username.slice(1)}`}</p>
+				<button class="link-button">(log out)</button>
+			</form>
+		{:else}
 			<button
+				class="link-button"
+				on:click={() => {
+					showLoginModal = true;
+				}}>Login/Register</button>
+		{/if}
+		<nav
+			class="dropdown"
+			on:mouseleave={() => {
+				showSettingsDropdown = false;
+			}}>
+
+			<button
+				class="link-button"
 				on:click={() => {
 					showSettingsDropdown = !showSettingsDropdown;
-				}}>Settings</button>
+				}}>
+				<img src="/icons/cog.svg" alt="settings menu" /></button>
 			<div class="dropdown-content dropdown-right" class:dropdown-hidden={!showSettingsDropdown} class:dropdown-shown={showSettingsDropdown}>
-				{@render settings()}
+				<button
+					class="link-button"
+					on:click={() => {
+						showChangelog = true;
+					}}>Changelog</button>
+				<button
+					class="link-button"
+					on:click={() => {
+						showReportModal = true;
+					}}>Contact me</button>
+				<a href="https://github.com/jsc17/BT-Tools" target="_blank">Github</a>
 			</div>
 		</nav>
-	{/if}
+	</div>
+
 </header>
 
 <Changelog bind:showChangelog></Changelog>
 <ReportModal bind:showReportModal></ReportModal>
+<LoginModal bind:showLoginModal></LoginModal>
 
 <style>
 	header {

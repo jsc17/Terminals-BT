@@ -14,7 +14,6 @@ Originally created as a way to download CSV files generated from [MUL](http://ww
 
 ### Planned
 - Build Tournament list check on top of 350 list validator
-- Login to save lists and share between devices
 - Upgrade to app or PWA for more seamless experience
 - Add Formations and SPA support to Alpha Strike list builder
 
@@ -26,6 +25,8 @@ I definitely make no claim to be associated with Battletech or the Master Unit L
 
 ## Technology
 
-Created using HTML, Svelte, plain CSS, and the following packages:
+Created using HTML, Svelte, plain CSS, mySQL, and the following packages:
 - [pdf-lib](https://github.com/Hopding/pdf-lib)
 - [pdfjs-dist](https://github.com/mozilla/pdfjs-dist)
+- [Lucia](https://github.com/lucia-auth/lucia)
+- [Prisma](https://github.com/prisma/prisma)

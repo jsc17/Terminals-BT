@@ -55,6 +55,7 @@
 		padding: 0;
 		padding-right: 15px;
 		width: 100dvw;
+		height: 100dvh;
 		overflow-x: hidden;
 		background-color: var(--background);
 		font-family: Arial, Helvetica, sans-serif;
@@ -107,7 +108,8 @@
 	}
 	:global(.dialog-wide) {
 		width: 90%;
-		min-height: min(fit-content, 40%);
+		height: 90%;
+		overflow: auto;
 	}
 	:global(.dialog-body) {
 		display: flex;

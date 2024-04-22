@@ -90,7 +90,6 @@
 			on:mouseleave={() => {
 				showSettingsDropdown = false;
 			}}>
-
 			<button
 				class="link-button"
 				on:click={() => {
@@ -107,12 +106,11 @@
 					class="link-button"
 					on:click={() => {
 						showReportModal = true;
-					}}>Contact me</button>
-				<a href="https://github.com/jsc17/BT-Tools" target="_blank">Github</a>
+					}}>Report Issue</button>
+				<p>Page Source Code: <a href="https://github.com/jsc17/BT-Tools" target="_blank">Github</a></p>
 			</div>
 		</nav>
 	</div>
-
 </header>
 
 <Changelog bind:showChangelog></Changelog>

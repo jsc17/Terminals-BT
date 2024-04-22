@@ -6,7 +6,7 @@ import { prisma } from "$lib/server/prisma";
 
 export const actions = {
 	register: async ({ request, cookies }) => {
-		const { username, password, email } = Object.fromEntries(await request.formData()) as Record<string, string>;
+		const { username, password, verifyPassword, email } = Object.fromEntries(await request.formData()) as Record<string, string>;
 
 		if (username.length < 3 || username.length > 31 || !/^[a-z0-9_-]+$/.test(username)) {
 			return fail(400, {
@@ -17,6 +17,9 @@ export const actions = {
 			return fail(400, {
 				message: "Invalid password"
 			});
+		}
+		if (password != verifyPassword) {
+			return fail(400, { message: "Passwords did not match" });
 		}
 
 		const id = generateId(15);

@@ -51,7 +51,9 @@
 				showLinksDropdown = !showLinksDropdown;
 			}}>
 			<img src="/icons/menu.svg" alt="menu" />
-			{#if $page.url.pathname == "/listbuilder"}
+			{#if $page.url.pathname == "/"}
+				Home
+			{:else if $page.url.pathname == "/listbuilder"}
 				Alpha Strike Listbuilder
 			{:else if $page.url.pathname == "/as350"}
 				Wolfnet 350 Listbuilder

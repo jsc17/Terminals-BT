@@ -6,7 +6,7 @@
 	import SublistModal from "./modals/SublistModal.svelte";
 
 	let list: any = getContext("list");
-	let { status = $bindable(), recentChanges, description } = $props();
+	let { status = $bindable(), recentChanges, description }: { status: any; recentChanges: string[]; description: string[] } = $props();
 	let errorDialog: HTMLDialogElement;
 	let showPrintModal = $state(false);
 	let showSaveModal = $state(false);

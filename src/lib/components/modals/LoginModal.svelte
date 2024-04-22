@@ -84,7 +84,7 @@
 					style:color="var(--primary)"
 					on:click={() => {
 						loginDisplay = "register";
-					}}>Register account</button>
+					}}>Need an account? Click here to register</button>
 			</div>
 			<form method="post" action="/login/?/login" class="dialog-body" use:enhance={handleLogin}>
 				<label for="username">Username</label>
@@ -103,13 +103,15 @@
 					style:color="var(--primary)"
 					on:click={() => {
 						loginDisplay = "login";
-					}}>Login to existing account</button>
+					}}>Already have an account? Click here to login</button>
 			</div>
 			<form method="post" action="/login/?/register" class="dialog-body" use:enhance={handleSignUp}>
 				<label for="username">Username</label>
 				<input name="username" id="username" />
 				<label for="password">Password</label>
 				<input type="password" name="password" id="password" />
+				<label for="password">Verify Password</label>
+				<input type="password" name="verifyPassword" id="verifyPassword" />
 				<label for="email">Email Address</label>
 				<input type="email" name="email" id="email" />
 				<div class="inline gap8 center"><button>Cancel</button><button>Continue</button></div>

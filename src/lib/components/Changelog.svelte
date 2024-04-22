@@ -27,6 +27,15 @@
 				showChangelog = false;
 			}}>Close</button>
 		<div class="section">
+			<h1>4-21-24</h1>
+			<ul>
+				<li><h2>Site-wide:</h2></li>
+				<ul>
+					<li>Feature: Added authentication to allow for list saving and loading between devices.</li>
+				</ul>
+			</ul>
+		</div>
+		<div class="section">
 			<h1>4-17-24</h1>
 			<ul>
 				<li><h2>Alpha Strike List builder and 350 List Builder:</h2></li>

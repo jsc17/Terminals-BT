@@ -10,7 +10,7 @@
 	let status = $state<"waiting" | "loading" | "loaded" | "error">("waiting");
 	let listDialog: HTMLDialogElement;
 	let showListDialog = $state(false);
-	let recentChanges: string[] = ["Added Export for Jeff's Battletech Tools", "Add Sublist creator"];
+	let recentChanges: string[] = ["Added authentication to sync lists between devices", "Added Export for Jeff's Battletech Tools", "Add Sublist creator"];
 	let description: string[] = [
 		"A Wolfnet 350 listbuilder I've created to help filter the data from the amazing work the Master Unit List team has done.",
 		"Designed with the restrictions and filters I feel most relevent for creating a 350 list. Feedback will always be welcome. I'm usually checking the wolfnet discord so feel free to ping me. (Jonathan 'Terminal' Colton)"

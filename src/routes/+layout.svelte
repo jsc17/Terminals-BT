@@ -101,9 +101,11 @@
 		color: var(--foreground);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
+		min-height: 40%;
 	}
 	:global(.dialog-wide) {
 		width: 90%;
+		min-height: min(fit-content, 40%);
 	}
 	:global(.dialog-body) {
 		display: flex;

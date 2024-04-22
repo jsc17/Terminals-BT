@@ -90,6 +90,7 @@
 			on:mouseleave={() => {
 				showSettingsDropdown = false;
 			}}>
+
 			<button
 				class="link-button"
 				on:click={() => {
@@ -111,6 +112,7 @@
 			</div>
 		</nav>
 	</div>
+
 </header>
 
 <Changelog bind:showChangelog></Changelog>

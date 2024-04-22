@@ -102,6 +102,8 @@
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		min-height: 40%;
+		max-height: 90%;
+		overflow: auto;
 	}
 	:global(.dialog-wide) {
 		width: 90%;

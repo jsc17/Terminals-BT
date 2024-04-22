@@ -20,27 +20,34 @@ import { prisma } from "$lib/server/prisma.js";
 export const actions = {
 	createIssue: async ({ request }) => {
 		const formData = await request.formData();
-		let title = formData.get("issueTitle"),
-			labels = formData.get("issueType"),
-			details = formData.get("issueDetails");
-		let body: string;
-		if (labels == "bug") {
-			let page = formData.get("issuePage");
-			let era = formData.get("issueEra");
-			let faction = formData.get("issueFaction");
-			let device = formData.get("issueDevice");
 
-			body = `Issue Page:\n${page}\n\nIssue Device:\n${device}\n\nIssue Details:\n${details}`;
-			if (era) {
-				body += `\n\nEra:\n${era}`;
+		const { issueTitle, issueType, issueDetails } = Object.fromEntries(formData) as { issueTitle: string; issueType: string; issueDetails: string };
+
+		let body: string;
+		let issueLabels: string[] = [];
+		issueLabels.push(issueType);
+		if (issueType == "bug") {
+			const { issuePage, issueEra, issueFaction, issueDevice, issueSeverity } = Object.fromEntries(formData) as {
+				issuePage: string;
+				issueEra: string;
+				issueFaction: string;
+				issueDevice: string;
+				issueSeverity: string;
+			};
+			issueLabels.push(issueSeverity);
+			body = `Issue Page:\n${issuePage}\n\nIssue Device:\n${issueDevice}\n\nIssue Severity:\n${issueSeverity}\n\nIssue Details:\n${issueDetails}`;
+			if (issueEra) {
+				body += `\n\nEra:\n${issueEra}`;
 			}
-			if (faction) {
-				body += `\n\nFaction:\n${faction}`;
+			if (issueFaction) {
+				body += `\n\nFaction:\n${issueFaction}`;
 			}
 		} else {
-			body = `Feature Details:\n${details}`;
+			body = `Feature Details:\n${issueDetails}`;
 		}
-		let issue = { title: title, labels: [labels], assignees: ["jsc17"], body: body };
+
+		let issue = { title: issueTitle, labels: issueLabels, assignees: ["jsc17"], body: body };
+
 		const response = await fetch(`https://api.github.com/repos/jsc17/Terminals-BT/issues`, {
 			method: "post",
 			body: JSON.stringify(issue),

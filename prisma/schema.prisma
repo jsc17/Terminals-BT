@@ -7,7 +7,6 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  // provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -15,6 +14,8 @@ model User {
   id       String    @id
   sessions Session[]
   lists List[]
+  tournamentsOrganized Tournament[]
+  tournamentsJoined TournamentParticipant[]
   username String @unique
   email String @unique
   hashedPassword String
@@ -23,17 +24,42 @@ model User {
 model Session {
   id        String   @id
   userId    String
-  expiresAt DateTime
   user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+  expiresAt DateTime
 }
 
 model List {
   id Int @id @default(autoincrement())
   userId String
+  user User @relation(references: [id], fields: [userId], onDelete: Cascade)
   name String
   era Int
   faction Int
   units String
-  sublists String
+  sublists String?
+
+}
+
+model Tournament {
+  id Int @id @default(autoincrement())
+  userId String
   user User @relation(references: [id], fields: [userId], onDelete: Cascade)
+  name String
+  organizer String
+  email String
+  era Int
+  date DateTime @db.Date 
+  passed Boolean?
+  participants TournamentParticipant[]
+}
+
+model TournamentParticipant {
+  id Int @id @default(autoincrement())
+  tournamentId Int
+  tournament Tournament @relation(references: [id], fields: [tournamentId], onDelete: Cascade)
+  userId String?
+  user User? @relation(references: [id], fields: [userId], onDelete: Cascade)
+  email String?
+  listCodes Json?
+  valid Boolean?
 }

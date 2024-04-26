@@ -7,7 +7,6 @@
 
 	let list: any = getContext("list");
 
-	let searchButton: HTMLButtonElement;
 	let { status = $bindable() } = $props();
 	let showParameters = $state(false);
 
@@ -24,13 +23,6 @@
 			return factions.get(a)! > factions.get(b)! ? 1 : -1;
 		});
 		return allowed;
-	});
-	$effect(() => {
-		if (status == "loading") {
-			searchButton.setAttribute("disabled", "");
-		} else {
-			searchButton.removeAttribute("disabled");
-		}
 	});
 
 	async function getUnits() {
@@ -106,7 +98,7 @@
 				<p>General:</p>
 				<a href={`http://masterunitlist.info/Era/FactionEraDetails?FactionId=${resultList.details.faction}&EraId=${resultList.details.era}`}>{factions.get(resultList.general)}</a>
 			</div>
-			<div><button id="getData" bind:this={searchButton} onclick={getUnits}>Search</button></div>
+			<div><button id="getData" onclick={getUnits} disabled={status == "loading"}>Search</button></div>
 		</form>
 	</div>
 </main>

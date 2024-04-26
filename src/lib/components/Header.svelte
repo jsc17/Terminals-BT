@@ -59,17 +59,20 @@
 				Wolfnet 350 Listbuilder
 			{:else if $page.url.pathname == "/350validation"}
 				350 List Validator
+			{:else if $page.url.pathname == "/tournament"}
+				Tournament Dashboard
 			{/if}
 		</button>
 		<div class="dropdown-content" class:dropdown-hidden={!showLinksDropdown} class:dropdown-shown={showLinksDropdown}>
 			<a href="/listbuilder">Alpha Strike Listbuilder</a>
 			<a href="/as350">350 List Builder</a>
 			<a href="/350validation">350 List Validator</a>
+			<a href="/tournament">350 Tournament Dashboard</a>
 			<a href="http://masterunitlist.info" target="_blank">Master Unit List</a>
 			<a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">350 Rules</a>
 		</div>
 	</nav>
-	{#if !appWindow.isMobile}
+	{#if !appWindow.isNarrow}
 		<h1>Terminal's 'Tech Tools</h1>
 	{/if}
 	<div class="inline gap8">
@@ -129,7 +132,8 @@
 		justify-content: space-between;
 		position: sticky;
 		top: 0;
-		z-index: 2;
+		z-index: 3;
+		flex-shrink: 0;
 	}
 	.link-button {
 		img {

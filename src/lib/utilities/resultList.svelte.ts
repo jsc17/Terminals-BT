@@ -1,5 +1,5 @@
 import type { Unit } from "$lib/types/unit.js";
-import { getGeneralList, getMULResults } from "$lib/utilities/bt-utils";
+import { calculateTMM, getGeneralList, getMULResults } from "$lib/utilities/bt-utils";
 import type { filter } from "$lib/types/filter";
 
 export function createResultList() {
@@ -153,25 +153,12 @@ export function createResultList() {
 					return result.Id == unit.Id;
 				}) != undefined;
 
-			let tmm = 0;
 			let tempMovement: { speed: number; type: string }[] = [];
 			unit.BFMove.split("/").forEach((movement: string) => {
 				let [moveSpeed, moveType] = movement.split('"');
 				tempMovement.push({ speed: parseInt(moveSpeed), type: moveType });
 			});
-			if (tempMovement[0].speed <= 4) {
-				tmm = 0;
-			} else if (tempMovement[0].speed <= 8) {
-				tmm = 1;
-			} else if (tempMovement[0].speed <= 12) {
-				tmm = 2;
-			} else if (tempMovement[0].speed <= 18) {
-				tmm = 3;
-			} else if (tempMovement[0].speed <= 34) {
-				tmm = 4;
-			} else if (tempMovement[0].speed >= 35) {
-				tmm = 5;
-			}
+			const tmm = calculateTMM(tempMovement[0].speed);
 			try {
 				let formattedUnit: Unit = {
 					id: unit.Id,

@@ -108,8 +108,8 @@
 	main {
 		width: 100%;
 		position: sticky;
-		top: 43px;
-		box-shadow: 0px -8px var(--background);
+		top: 35px;
+		z-index: 2;
 	}
 	.filter-list {
 		display: flex;

@@ -49,9 +49,7 @@
 					localSublists = "";
 				}
 				let [localEra, localFaction, ...localUnits] = listDetails.split(":");
-				const unitString = localUnits.reduce((accumulator: string, current: string) => {
-					return `${accumulator}:${current}`;
-				});
+				const unitString = localUnits.join(":");
 				savedLists.push({ name: localListName, era: Number(localEra), faction: Number(localFaction), units: unitString, sublists: localSublists, local: true });
 			}
 		}
@@ -152,8 +150,8 @@
 			<table class="saved-lists">
 				<colgroup>
 					<col style="width:45%" />
-					<col style="width:25%" />
-					<col style="width:25%" />
+					<col style="width:20%" />
+					<col style="width:30%" />
 					<col style="width:5%" />
 				</colgroup>
 				<tbody>
@@ -193,20 +191,21 @@
 		align-items: center;
 	}
 	.table-container {
-		min-width: 80%;
+		min-width: 100%;
 		height: 200px;
 		overflow-y: auto;
 		background-color: var(--card);
 	}
-	tr,
+	table,
 	tbody {
 		width: 100%;
 	}
 	.selected {
-		td {
-			color: var(--primary-foreground);
-		}
-		background-color: var(--primary);
+		box-shadow: 5px 0px 5px var(--primary) inset;
+	}
+	td {
+		overflow: hidden;
+		padding-left: 8px;
 	}
 	.local {
 		color: var(--error);

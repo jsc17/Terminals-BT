@@ -52,17 +52,14 @@
 			formData.append("name", list.details.name);
 			formData.append("era", resultList.details.era);
 			formData.append("faction", resultList.details.faction);
-			let units = "";
+			let units: string[] = [];
 			for (const unit of list.units) {
-				units += `${unit.id},${unit.skill}:`;
+				units.push(`${unit.id},${unit.skill}`);
 			}
-			units = units.slice(0, units.length - 1);
-			formData.append("units", units);
+			formData.append("units", units.join(":"));
 			let sublistString = "";
 			if (list.sublists.length) {
-				sublistString = list.sublists.reduce((accumulator: string, current: string) => {
-					return `${accumulator}:${current}`;
-				});
+				sublistString = list.sublists.join(":");
 			}
 			formData.append("sublists", sublistString);
 			showSaveModal = false;
@@ -215,8 +212,7 @@
 	h1 {
 		font-size: 1.25rem;
 	}
-	.export-bar,
-	.dialog-buttons {
+	.export-bar {
 		display: flex;
 		gap: 8px;
 		justify-content: center;

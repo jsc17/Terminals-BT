@@ -760,14 +760,6 @@
 		width: 100%;
 		font-size: 0.75rem;
 	}
-	.sublist-units {
-		li {
-			font-size: 0.7rem;
-			border-bottom: 1px solid var(--muted);
-		}
-		line-height: 1.5rem;
-		height: 50%;
-	}
 	.sublist-units-horizontal {
 		display: flex;
 		flex-wrap: wrap;

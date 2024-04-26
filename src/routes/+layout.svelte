@@ -55,7 +55,7 @@
 		padding: 0;
 		padding-right: 15px;
 		width: 100dvw;
-		height: 100dvh;
+		min-height: 100dvh;
 		overflow-x: hidden;
 		background-color: var(--background);
 		font-family: Arial, Helvetica, sans-serif;
@@ -189,9 +189,11 @@
 	:global(.inline) {
 		display: flex;
 		align-items: center;
+		gap: 8px;
 	}
 	:global(.column) {
 		display: flex;
 		flex-direction: column;
+		gap: 8px;
 	}
 </style>

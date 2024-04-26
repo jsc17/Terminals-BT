@@ -70,7 +70,6 @@
 					<option value="Minor">Minor</option>
 					<option value="Major">Major</option>
 				</select>
-				<p></p>
 			</div>
 			<label for="issueDetails">Issue Details* (Please be as specific as possible.):</label><textarea name="issueDetails" id="issueDetails" cols="60" rows="10"></textarea>
 			<div class="inline gap8">

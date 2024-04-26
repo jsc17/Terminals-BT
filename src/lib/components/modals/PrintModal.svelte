@@ -86,10 +86,6 @@
 	input {
 		height: 1.25em;
 	}
-	.print-list-style {
-		display: flex;
-		flex-direction: column;
-	}
 	p {
 		padding-left: 32px;
 	}

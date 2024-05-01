@@ -57,7 +57,6 @@ export const actions = {
 		return { unitList: JSON.stringify(unitList) };
 	},
 	validate: async ({ request }) => {
-		console.log("Validating");
 		let { unitList, era, faction } = Object.fromEntries(await request.formData());
 
 		unitList = JSON.parse(unitList);
@@ -118,6 +117,53 @@ export const actions = {
 		}
 		const issueList = validateList(counts);
 		return { issueList: JSON.stringify(issueList) };
+	},
+	submit: async ({ request, locals }) => {
+		const { id, unitList, issueList, name, email, message } = Object.fromEntries(await request.formData());
+
+		const unitCodes = JSON.parse(unitList).map((unit) => `${unit.mulId},${unit.skill}`);
+		const unitString = unitCodes.join(":");
+
+		const issueTitles = JSON.parse(issueList).map((issue) => issue.title);
+		const issueString = issueTitles.join(":");
+
+		console.log(">>", unitString, issueString);
+		let userId = locals.user?.id;
+
+		let existingUser = await prisma.tournamentParticipant.findFirst({
+			where: {
+				tournamentId: Number(id),
+				userId
+			}
+		});
+		if (existingUser) {
+			await prisma.listCode.create({
+				data: {
+					participantId: existingUser.id,
+					valid: issueString.length == 0,
+					issues: issueString,
+					units: unitString,
+					message
+				}
+			});
+		} else {
+			await prisma.tournamentParticipant.create({
+				data: {
+					tournamentId: Number(id),
+					name,
+					userId,
+					email,
+					listCodes: {
+						create: {
+							valid: issueString.length == 0,
+							issues: issueString,
+							units: unitString,
+							message
+						}
+					}
+				}
+			});
+		}
 	}
 };
 
@@ -192,7 +238,6 @@ function validateList(counts: any) {
 		number: string;
 		violatingUnits: string;
 	}[] = [];
-	console.log("Validating List");
 	if (counts.unavailableUnits.length) {
 		issueList.push({
 			id: crypto.randomUUID,
@@ -202,7 +247,6 @@ function validateList(counts: any) {
 			violatingUnits: counts.unavailableUnits.join(", ")
 		});
 	}
-	console.log(counts.totalPV);
 	if (counts.totalPV > 350) {
 		issueList.push({
 			id: crypto.randomUUID,

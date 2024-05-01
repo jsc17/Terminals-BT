@@ -2,6 +2,7 @@
 	import eraLists from "$lib/data/erasFactionsList.json";
 	import { eras, factions } from "$lib/data/erasFactionLookup.js";
 	import { getGeneralList } from "$lib/utilities/bt-utils";
+	import { enhance } from "$app/forms";
 
 	let searchButton: HTMLButtonElement;
 	let selectedEra = $state(-1);
@@ -88,6 +89,12 @@
 		</form>
 		<a href={link} target="_blank">{link}</a>
 	</div>
+	<form method="post" action="?/upload" class="card" use:enhance>
+		<button>Upload Factions</button>
+	</form>
+	<form method="post" action="?/uploadUnits" class="card" use:enhance>
+		<button>Upload Units</button>
+	</form>
 </main>
 
 <style>

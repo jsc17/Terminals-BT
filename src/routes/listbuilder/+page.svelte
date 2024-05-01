@@ -31,9 +31,7 @@
 			} else {
 				try {
 					listDialog.close();
-				} catch {
-					console.log(listDialog);
-				}
+				} catch (error) {}
 			}
 		}
 	});

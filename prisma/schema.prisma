@@ -57,9 +57,76 @@ model TournamentParticipant {
   id Int @id @default(autoincrement())
   tournamentId Int
   tournament Tournament @relation(references: [id], fields: [tournamentId], onDelete: Cascade)
+  name String
   userId String?
   user User? @relation(references: [id], fields: [userId], onDelete: Cascade)
   email String?
-  listCodes Json?
-  valid Boolean?
+  listCodes ListCode[]
+}
+
+model ListCode {
+  id Int @id @default(autoincrement())
+  participantId Int
+  participant TournamentParticipant @relation(references: [id], fields: [participantId], onDelete: Cascade)
+  valid Boolean
+  issues String?
+  units String
+  era Int
+  faction Int
+  message String? @db.VarChar(500)
+  dateSubmitted DateTime @default(now())
+}
+
+model Unit {
+  id Int @id @default(autoincrement())
+  mulID Int @unique
+  name String
+  class String
+  variant String?
+  technology String?
+  rules String?
+  date_introduced Int?
+  role String?
+  type String
+  size Int
+  move String
+  tmm Int
+  armor Int
+  structure Int
+  threshold Int
+  damage_s Int
+  damage_s_min Boolean
+  damage_m Int
+  damage_m_min Boolean
+  damage_l Int
+  damage_l_min Boolean
+  damage_e Int
+  damage_e_min Boolean
+  overheat Int
+  pv Int
+  abilites String?
+  tonnage String?
+  image_url String?
+
+  unit_availability UnitAvailability[]
+}
+
+model Faction{
+  era Int
+  faction Int
+  general Int
+  updated DateTime @default(now())
+  unit_availability UnitAvailability[]
+  @@id([era, faction])
+}
+
+model UnitAvailability {
+  unitId Int
+  unit Unit @relation(fields: [unitId], references: [id])
+
+  factionId Int
+  eraId Int
+  faction Faction @relation(fields: [eraId, factionId], references: [era, faction])
+
+  @@id([unitId, factionId])
 }

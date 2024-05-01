@@ -26,7 +26,7 @@ export function getNewSkillCost(newSkill: number, basePV: number) {
 }
 
 export function calculateTMM(speed: number) {
-	let tmm;
+	let tmm = 0;
 	if (speed <= 4) {
 		tmm = 0;
 	} else if (speed <= 8) {

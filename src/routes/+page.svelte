@@ -13,10 +13,10 @@
 			<p><a href="/as350">AS350 List Builder</a>: List builder with built in restrictions for the wolfnet 350 rules</p>
 		</li>
 		<li>
-			<!-- <p><a href="/350validation">AS350 List Validator</a>: List validator for wolfnet 350 rules</p> -->
+			<p><a href="/350validation">AS350 List Validator</a>: List validator for wolfnet 350 rules</p>
 		</li>
 		<li>
-			<!-- <p><a href="/tournament">AS350 Tournament Dashboard</a>: 350 Tournament manager to handle player list validation</p> -->
+			<p><a href="/tournament">AS350 Tournament Dashboard</a>: 350 Tournament manager to handle player list validation</p>
 		</li>
 	</ul>
 </main>

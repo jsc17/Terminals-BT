@@ -3,6 +3,7 @@
 	import { enhance, deserialize } from "$app/forms";
 	import { getContext } from "svelte";
 	import { dev } from "$app/environment";
+	import { type Unit } from "$lib/types/unit.js";
 
 	interface Tournament {
 		id: number;
@@ -12,14 +13,23 @@
 		email: string;
 		organizer: string;
 		passed: boolean;
+		participants: Participant[];
 	}
 	interface Participant {
 		id: number;
-		tournamentId: number;
 		name: string;
 		email?: string;
-		listCode?: string;
-		valid?: boolean;
+		listCode?: ListCode[];
+	}
+	interface ListCode {
+		id: number;
+		valid: boolean;
+		message: string;
+		dateSubmitted: Date;
+		issues: string;
+		units: Unit[];
+		era: number;
+		faction: number;
 	}
 
 	let user: { username: string | undefined } = getContext("user");
@@ -28,10 +38,8 @@
 
 	let tournamentDialog: HTMLDialogElement;
 	let tournamentList = $state<Tournament[]>([]);
-	let participantList = $state<Participant[]>([]);
 	let selectedTournament = $state<number>(-1);
 	let selectedParticipant = $state<number>(-1);
-
 	let tournamentLink = $derived.by(() => {
 		if (selectedTournament != -1) {
 			if (dev) {
@@ -44,21 +52,14 @@
 		}
 	});
 
-	let selectedTournamentEra = $derived.by(() => {
-		if (selectedTournament != -1) {
-			if (tournamentList[selectedTournament].era != -1) {
-				return eras.get(tournamentList[selectedTournament].era);
-			} else {
-				return "Any";
-			}
+	$effect(() => {
+		if (user.username) {
+			getTournaments();
 		} else {
-			return undefined;
+			tournamentList = [];
 		}
 	});
 
-	if (data.tournamentList) {
-		pushTournamentLists(JSON.parse(data.tournamentList));
-	}
 	async function getTournaments() {
 		const response: any = deserialize(await (await fetch("?/getTournaments", { method: "POST", body: "" })).text());
 		if (response.status == 200) {
@@ -66,17 +67,32 @@
 		}
 	}
 	function pushTournamentLists(list: any[]) {
+		console.log(list);
 		tournamentList = [];
 		for (const tournament of list) {
-			tournamentList.push({
+			console.log(tournament);
+			let formattedTournament: Tournament = {
 				id: tournament.id,
 				name: tournament.name,
 				era: tournament.era,
 				date: new Date(tournament.date),
 				email: tournament.email,
 				organizer: tournament.organizer,
-				passed: tournament.passed ?? false
-			});
+				passed: tournament.passed ?? false,
+				participants: []
+			};
+			for (const participant of tournament.participants) {
+				let formattedParticipant: Participant = {
+					id: participant.id,
+					email: participant.email,
+					name: participant.name,
+					listCode: []
+				};
+				console.log(formattedParticipant);
+				formattedTournament.participants.push(formattedParticipant);
+			}
+
+			tournamentList.push(formattedTournament);
 		}
 		tournamentList.sort((a: Tournament, b: Tournament) => {
 			return a.date.getTime() - b.date.getTime();
@@ -94,7 +110,6 @@
 		}
 
 		return async ({ result, update }: any) => {
-			console.log(result);
 			if (result.status == 200) {
 				getTournaments();
 				tournamentDialog.close();
@@ -115,7 +130,6 @@
 			if (response.status == 200) {
 				getTournaments();
 			} else {
-				console.log(response.data.message);
 				alert("Could not delete tournament, please try again.");
 			}
 		}
@@ -164,6 +178,7 @@
 							<tr
 								class:selected-row={selectedTournament == index}
 								on:click={() => {
+									selectedParticipant = -1;
 									selectedTournament = index;
 								}}>
 								<td>{tournament.name}</td>
@@ -193,17 +208,19 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each participantList as participant, index}
-						<tr
-							class:selected-row={selectedParticipant == index}
-							on:click={() => {
-								selectedParticipant = index;
-							}}>
-							<td>{participant.name}</td>
-							<td>{participant.valid}</td>
-							<td></td>
-						</tr>
-					{/each}
+					{#if selectedTournament != -1}
+						{#each tournamentList[selectedTournament]?.participants as participant, index}
+							<tr
+								class:selected-row={selectedParticipant == index}
+								on:click={() => {
+									selectedParticipant = index;
+								}}>
+								<td>{participant.name}</td>
+								<td></td>
+								<td></td>
+							</tr>
+						{/each}
+					{/if}
 				</tbody>
 			</table>
 		</div>
@@ -223,7 +240,7 @@
 			<p>Tournament Date:</p>
 			<p>{`${tournamentList[selectedTournament]?.date.toDateString().split(" ").slice(1).join("-") ?? ""}`}</p>
 			<p>Tournament Era:</p>
-			<p>{`${selectedTournamentEra ?? ""}`}</p>
+			<p>{`${eras.get(tournamentList[selectedTournament]?.era) ?? ""}`}</p>
 			<p>Organizer Name:</p>
 			<p>{`${tournamentList[selectedTournament]?.organizer ?? ""}`}</p>
 			<p>Contact Email:</p>
@@ -236,7 +253,12 @@
 			<button>Copy</button>
 		</div>
 	</section>
-	<section class="details">Player details</section>
+	<section class="details">
+		<p>Player details</p>
+		<div class="player-details">
+			<p>Player Name:</p>
+		</div>
+	</section>
 </main>
 
 <dialog bind:this={tournamentDialog}>

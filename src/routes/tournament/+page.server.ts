@@ -1,17 +1,6 @@
 import { type Actions, fail } from "@sveltejs/kit";
 import { prisma } from "$lib/server/prisma";
 
-export const load = async ({ locals }) => {
-	if (locals.user?.username) {
-		const tournamentList = await prisma.tournament.findMany({
-			where: {
-				userId: locals.user.id
-			}
-		});
-		return { tournamentList: JSON.stringify(tournamentList) };
-	}
-};
-
 export const actions: Actions = {
 	addTournament: async ({ request, locals }) => {
 		if (!locals.user) {
@@ -52,6 +41,13 @@ export const actions: Actions = {
 			const tournamentList = await prisma.tournament.findMany({
 				where: {
 					userId: locals.user.id
+				},
+				include: {
+					participants: {
+						include: {
+							listCodes: true
+						}
+					}
 				}
 			});
 			return { message: "Tournaments retrieved successfully", tournamentList: JSON.stringify(tournamentList) };

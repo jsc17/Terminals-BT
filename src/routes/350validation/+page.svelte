@@ -94,6 +94,16 @@
 			}
 		};
 	}
+	function handleSubmitForm({ formData, cancel }: { formData: FormData; cancel: any }) {
+		const message = formData.get("message") as string;
+		if (issueList.length && !message?.length) {
+			alert("Must include a message to the TO when submitting a list with issues");
+			cancel();
+		}
+		formData.append("id", tournamentList[selectedTournament].id.toString());
+		formData.append("unitList", JSON.stringify(unitList));
+		formData.append("issueList", JSON.stringify(issueList));
+	}
 </script>
 
 <main>
@@ -164,12 +174,7 @@
 						<div class="center">-or-</div>
 						<div class="inline">
 							<p>Load from saved Lists: (not implemented yet)</p>
-							<button
-								disabled
-								type="button"
-								on:click={() => {
-									console.log("test");
-								}}>Load</button>
+							<button disabled type="button" on:click={() => {}}>Load</button>
 						</div>
 					{:else if uploadType == "jeff"}
 						<input type="file" name="uploadData" id="uploadData" />
@@ -275,303 +280,17 @@
 				</table>
 			{/if}
 		</div>
+		<form class="card column" method="post" action="?/submit" use:enhance={handleSubmitForm}>
+			<h1>Tournament Upload</h1>
+			<p>Fill out the fields below to submit your list to the tournament organizer:</p>
+			<div class="inline"><label for="name">Name (required):</label><input type="text" id="name" name="name" required /></div>
+			<div class="inline"><label for="email">Email Address (optional: will be shared with tournament organizer):</label><input type="email" name="email" id="email" /></div>
+			<label for="message">Message to organizer:</label>
+			<textarea name="message" id="message" rows="5" maxlength="500"></textarea>
+			<div class="center"><button disabled={status != "loaded"}>Submit</button></div>
+		</form>
 	</section>
 </main>
-
-<dialog>
-	<table>
-		<colgroup>
-			<col style="width:15%" />
-			<col style="width:45%" />
-			<col style="width:5%" />
-			<col style="width:30%" />
-		</colgroup>
-		<tbody>
-			<tr>
-				<td>List PV</td>
-				<td>List may have a maximum of 350 total PV</td>
-				<!-- {#if status == "waiting"}
-							<td></td>
-						{:else if form?.success && form.valid.pv[0]}
-							<td class="valid">
-								{form.valid.pv[1]}
-							</td>
-						{:else if form?.success}
-							<td class="invalid">
-								{form.valid.pv[1]}
-							</td>
-						{/if} -->
-			</tr>
-			<tr>
-				<td>Total Units</td>
-				<td>Total Units must be equal to or less than 16</td>
-				<!-- {#if status == "waiting"}
-							<td></td>
-						{:else if form?.success && form.valid.unitNumber[0]}
-							<td class="valid">{form.valid.unitNumber[1]}</td>
-						{:else if form?.success}
-							<td class="invalid">{form.valid.unitNumber[1]}</td>
-						{/if} -->
-			</tr>
-			<tr>
-				<td>Total Mechs</td>
-				<td>Total combined number of Battlemechs and Industrial Mechs must be equal to or less than 12</td>
-				<!-- {#if status == "waiting"}
-							<td></td>
-						{:else if form?.success && form.valid.mechNumber[0]}
-							<td class="valid">{form.valid.mechNumber[1]}</td>
-						{:else if form?.success}
-							<td class="invalid">{form.valid.mechNumber[1]}</td>
-						{/if} -->
-			</tr>
-			<tr>
-				<td>Total Vehicles</td>
-				<td>Total number of combat vehicles must be equal to or less than 8</td>
-				<!-- {#if status == "waiting"}
-							<td></td>
-						{:else if form?.success && form.valid.cvNumber[0]}
-							<td class="valid">{form.valid.cvNumber[1]}</td>
-						{:else if form?.success}
-							<td class="invalid">{form.valid.cvNumber[1]}</td>
-						{/if} -->
-			</tr>
-			<tr>
-				<td>Total Infantry</td>
-				<td>Total number of infantry (including BA) must be equal to or less than 5</td>
-				<!-- {#if status == "waiting"}
-							<td></td>
-						{:else if form?.success && form.valid.infNumber[0]}
-							<td class="valid">{form.valid.infNumber[1]}</td>
-						{:else if form?.success}
-							<td class="invalid">{form.valid.infNumber[1]}</td>
-						{/if} -->
-			</tr>
-			<tr>
-				<td>Total Protomechs</td>
-				<td>Total number of Protomechs must be equal to 0 or 5</td>
-				<!-- {#if status == "waiting"}
-							<td></td>
-						{:else if form?.success && form.valid.proto[0]}
-							<td class="valid">{form.valid.proto[1]}</td>
-						{:else if form?.success}
-							<td class="invalid">{form.valid.proto[1]}</td>
-						{/if} -->
-			</tr>
-			<tr>
-				<td>Unavailable Units</td>
-				<td>Units are available to the selected faction in the selected era</td>
-				<!-- {#if status == "waiting"}
-							<td></td>
-						{:else if form?.success && form.valid.unitsUnavailable[0]}
-							<td class="valid"></td>
-						{:else if form?.success}
-							<td class="invalid"></td>
-						{/if}
-						<td>
-							{#if form?.success && !form.valid.unitsUnavailable[0]}
-								{#each form.valid.unitsUnavailable[1] as unit}
-									{unit + ", "}
-								{/each}
-							{/if}
-						</td> -->
-			</tr>
-			<tr>
-				<td>Invalid Unit Types</td>
-				<td>Units must be Battlemechs, Industrial Mechs, Protomechs, Combat Vehicles, or Infantry</td>
-				<!-- {#if status == "waiting"}
-							<td></td>
-						{:else if form?.success && form.valid.unallowedType[0]}
-							<td class="valid"></td>
-						{:else if form?.success}
-							<td class="invalid"></td>
-						{/if}
-						<td>
-							{#if form?.success && !form.valid.unallowedType[0]}
-								{#each form.valid.unallowedType[1] as unit}
-									{unit + ", "}
-								{/each}
-							{/if}
-						</td> -->
-			</tr>
-			<tr>
-				<td>Skill Threshold</td>
-				<td>Unit Skill is a minimum of 2 and a maximum of 6</td>
-				<!-- {#if status == "waiting"}
-							<td></td>
-						{:else if form?.success && form.valid.skillThreshold[0]}
-							<td class="valid"></td>
-						{:else if form?.success}
-							<td class="invalid"></td>
-						{/if}
-						<td>
-							{#if form?.success && !form.valid.skillThreshold[0]}
-								{#each form.valid.skillThreshold[1] as unit}
-									{unit + ", "}
-								{/each}
-							{/if}
-						</td> -->
-			</tr>
-			<tr>
-				<td>Skill Combinations</td>
-				<td>May only have two units at the extremes of the skill range</td>
-				<!-- {#if status == "waiting"}
-							<td></td>
-						{:else if form?.success && form.valid.skillCombo[0]}
-							<td class="valid">{form.valid.skillCombo[2]}</td>
-						{:else if form?.success}
-							<td class="invalid">{form.valid.skillCombo[2]}</td>
-						{/if}
-						<td>
-							{#if form?.success && !form.valid.skillCombo[0]}
-								{#each form.valid.skillCombo[1] as unit}
-									{unit + ", "}
-								{/each}
-							{/if}
-						</td> -->
-			</tr>
-			<tr>
-				<td>Maximum Chassis</td>
-				<td>You may have a maximum of 2 units with the same chassis</td>
-				<!-- {#if status == "waiting"}
-							<td></td>
-						{:else if form?.success && form.valid.chassis[0]}
-							<td class="valid"></td>
-						{:else if form?.success}
-							<td class="invalid"></td>
-						{/if}
-						<td>
-							{#if form?.success && !form.valid.chassis[0]}
-								{#each form.valid.chassis[1] as unit}
-									{unit + ", "}
-								{/each}
-							{/if}
-						</td> -->
-			</tr>
-			<tr>
-				<td>Maximum Variants</td>
-				<td>Each Mech must be a unique variant</td>
-				<!-- {#if status == "waiting"}
-							<td></td>
-						{:else if form?.success && form.valid.variant[0]}
-							<td class="valid"> </td>
-						{:else if form?.success}
-							<td class="invalid"></td>
-						{/if}
-						<td>
-							{#if form?.success && !form.valid.variant[0]}
-								{#each form.valid.variant[1] as unit}
-									{unit + ", "}
-								{/each}
-							{/if}
-						</td> -->
-			</tr>
-			<tr>
-				<td>JMPS</td>
-				<td>Combined total of JMPS must be equal to or less than 2</td>
-				<!-- {#if status == "waiting"}
-							<td></td>
-						{:else if form?.success && form.valid.jmps[0]}
-							<td class="valid">{form.valid.jmps[2]}</td>
-						{:else if form?.success}
-							<td class="invalid">{form.valid.jmps[2]}</td>
-						{/if}
-						<td>
-							{#if form?.success && !form.valid.jmps[0]}
-								{#each form.valid.jmps[1] as unit}
-									{unit + ", "}
-								{/each}
-							{/if}
-						</td> -->
-			</tr>
-			<tr>
-				<td>DRO</td>
-				<td>Units with the DRO special ability are prohibited</td>
-				<!-- {#if status == "waiting"}
-							<td></td>
-						{:else if form?.success && form.valid.dro[0]}
-							<td class="valid"></td>
-						{:else if form?.success}
-							<td class="invalid"></td>
-						{/if}
-						<td>
-							{#if form?.success && !form.valid.dro[0]}
-								{#each form.valid.dro[1] as unit}
-									{unit + ", "}
-								{/each}
-							{/if}</td> -->
-			</tr>
-			<tr>
-				<td>Experimental Rules</td>
-				<td>Units cannot have experimental rules</td>
-				<!-- {#if status == "waiting"}
-							<td></td>
-						{:else if form?.success && form.valid.experimental[0]}
-							<td class="valid"></td>
-						{:else if form?.success}
-							<td class="invalid"></td>
-						{/if}
-						<td>
-							{#if form?.success && !form.valid.experimental[0]}
-								{#each form.valid.experimental[1] as unit}
-									{unit + ", "}
-								{/each}
-							{/if}
-						</td> -->
-			</tr>
-			<tr>
-				<td>Unknown Rules</td>
-				<td>Units cannot have Unknown Rules</td>
-				<!-- {#if status == "waiting"}
-							<td></td>
-						{:else if form?.success && form.valid.unknown[0]}
-							<td class="valid"></td>
-						{:else if form?.success}
-							<td class="invalid"></td>
-						{/if}
-						<td>
-							{#if form?.success && !form.valid.unknown[0]}
-								{#each form.valid.unknown[1] as unit}
-									{unit + ", "}
-								{/each}
-							{/if}
-						</td> -->
-			</tr>
-			<tr>
-				<td>Unique</td>
-				<td>Unit must not be unique in the chosen era</td>
-				<!-- {#if status == "waiting"}
-							<td></td>
-						{:else if form?.success && form.valid.unique[0]}
-							<td class="valid"></td>
-						{:else if form?.success}
-							<td class="invalid"></td>
-						{/if}
-						<td>
-							{#if form?.success && !form.valid.unique[0]}
-								{#each form.valid.unique[1] as unit}
-									{unit + ", "}
-								{/each}
-							{/if}</td> -->
-			</tr>
-			<tr>
-				<td>Trailer without Hitch</td>
-				<td>Must have at least as many units with HTC as you have trailered units</td>
-				<!-- {#if status == "waiting"}
-							<td></td>
-						{:else if form?.success && form.valid.trailer[0]}
-							<td class="valid"></td>
-						{:else if form?.success}
-							<td class="invalid"></td>
-						{/if}
-						<td>
-							{#if form?.success && !form.valid.trailer[0]}
-								Trailers: {form.valid.trailer[1].toString()} Hitch: {form.valid.trailer[2].toString()}
-							{/if}
-						</td> -->
-			</tr>
-		</tbody>
-	</table>
-</dialog>
 
 <style>
 	.card {
@@ -625,5 +344,15 @@
 	td {
 		border: 1px solid var(--border);
 		line-height: 1.5rem;
+	}
+	textarea {
+		background-color: var(--popover);
+		color: var(--popover-foreground);
+		border: 1px solid var(--border);
+	}
+	input {
+		background-color: var(--popover);
+		color: var(--popover-foreground);
+		border: 1px solid var(--border);
 	}
 </style>

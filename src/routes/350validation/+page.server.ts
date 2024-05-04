@@ -2,20 +2,13 @@
 import { getDocument } from "pdfjs-dist";
 import { prisma } from "$lib/server/prisma.js";
 import { fail } from "@sveltejs/kit";
-import { parsePDF } from "./parse.js";
+import { parsePDF, parseTerminal } from "./parse.js";
 import fs from "fs/promises";
 
 export const load = async () => {
 	let allTournaments = await prisma.tournament.findMany({
 		where: {
-			OR: [
-				{
-					passed: false
-				},
-				{
-					passed: null
-				}
-			]
+			passed: false
 		}
 	});
 
@@ -50,10 +43,40 @@ export const actions = {
 				return fail(400, { message: "Failed to create pdf object" });
 			}
 		} else if (uploadType == "terminal") {
+			unitList = await parseTerminal(uploadData.toString().split("-")[0].split(":").slice(2).join(":"));
+		} else if (uploadType == "terminalSaved") {
+			unitList = await parseTerminal(uploadData.toString());
 		} else if (uploadType == "jeff") {
 		} else {
 			return fail(400, { message: "Invalid format type" });
 		}
+		return { unitList: JSON.stringify(unitList) };
+	},
+	getUserLists: async ({ locals }) => {
+		if (!locals.user) {
+			return fail(401, { message: "User not logged in" });
+		}
+		const lists = await prisma.list.findMany({
+			where: {
+				userId: locals.user.id
+			},
+			select: {
+				name: true,
+				era: true,
+				faction: true,
+				units: true,
+				sublists: true
+			}
+		});
+		return { lists };
+	},
+	getUnits: async () => {
+		let unitList = await prisma.unit.findMany({
+			select: {
+				name: true,
+				mulId: true
+			}
+		});
 		return { unitList: JSON.stringify(unitList) };
 	},
 	validate: async ({ request }) => {
@@ -101,16 +124,19 @@ export const actions = {
 			if (unit.mulId == 0) {
 				counts.unavailableUnits.push(unit.name);
 			} else {
-				let unitData = cachedFile.Units.find((tempUnit) => {
+				let unitIndex = cachedFile.Units.findIndex((tempUnit) => {
 					return tempUnit.Id == unit.mulId;
 				});
 				let uniqueIndex = uniqueFile.Units.findIndex((tempUnit) => {
 					return tempUnit.Id == unit.mulId;
 				});
+				if (unitIndex == -1) {
+					counts.unavailableUnits.push(unit.name);
+				}
 				if (uniqueIndex != -1) {
 					counts.unique.push(unit.name);
 				}
-				validateUnit(unit, unitData, counts);
+				await validateUnit(unit, counts);
 			}
 			counts.totalPV += unit.pv;
 			counts.totalUnits += 1;
@@ -119,23 +145,26 @@ export const actions = {
 		return { issueList: JSON.stringify(issueList) };
 	},
 	submit: async ({ request, locals }) => {
-		const { id, unitList, issueList, name, email, message } = Object.fromEntries(await request.formData());
+		const { id, unitList, issueList, name, email, message, era, faction } = Object.fromEntries(await request.formData());
 
 		const unitCodes = JSON.parse(unitList).map((unit) => `${unit.mulId},${unit.skill}`);
 		const unitString = unitCodes.join(":");
 
-		const issueTitles = JSON.parse(issueList).map((issue) => issue.title);
-		const issueString = issueTitles.join(":");
+		const issues = JSON.parse(issueList).map((issue) => `${issue.title}: (${issue.violatingUnits})`);
+		const issueString = issues.join(", ");
 
-		console.log(">>", unitString, issueString);
 		let userId = locals.user?.id;
 
-		let existingUser = await prisma.tournamentParticipant.findFirst({
-			where: {
-				tournamentId: Number(id),
-				userId
-			}
-		});
+		let existingUser;
+		if (userId) {
+			existingUser = await prisma.tournamentParticipant.findFirst({
+				where: {
+					tournamentId: Number(id),
+					userId
+				}
+			});
+		}
+
 		if (existingUser) {
 			await prisma.listCode.create({
 				data: {
@@ -143,7 +172,9 @@ export const actions = {
 					valid: issueString.length == 0,
 					issues: issueString,
 					units: unitString,
-					message
+					message,
+					era: Number(era),
+					faction: Number(faction)
 				}
 			});
 		} else {
@@ -158,7 +189,9 @@ export const actions = {
 							valid: issueString.length == 0,
 							issues: issueString,
 							units: unitString,
-							message
+							message,
+							era: Number(era),
+							faction: Number(faction)
 						}
 					}
 				}
@@ -167,18 +200,23 @@ export const actions = {
 	}
 };
 
-function validateUnit(unit: any, unitData: any, counts: any) {
-	switch (unitData.BFType) {
+async function validateUnit(unit: any, counts: any) {
+	const unitData = await prisma.unit.findFirst({
+		where: {
+			mulId: unit.mulId
+		}
+	});
+	switch (unitData?.type.toUpperCase()) {
 		case "BM":
 		case "IM":
 			counts.totalMechs++;
-			counts.variantList.push(unit.name);
+			counts.variantList.push(unitData.name);
 			if (
 				counts.variantList.filter((variant) => {
-					return variant == unit.name;
+					return variant == unitData.name;
 				}).length >= 2
 			) {
-				counts.variant.push(unit.name);
+				counts.variant.push(unitData.name);
 			}
 			break;
 		case "PM":
@@ -194,39 +232,39 @@ function validateUnit(unit: any, unitData: any, counts: any) {
 		case "BS":
 			break;
 		default:
-			counts.unallowedTypes.push(unit.name);
+			counts.unallowedTypes.push(unitData.name);
 	}
-	counts.chassisList.push(unitData.Name);
+	counts.chassisList.push(unitData.name);
 	if (
 		counts.chassisList.filter((chassis) => {
 			return chassis == unitData.Class;
 		}).length >= 3
 	) {
-		counts.chassis.push(unit.Class);
+		counts.chassis.push(unitData?.class);
 	}
 
-	if (unitData.Rules == "Experimental" || unitData.Rules == "Unknown") {
-		counts.rulesLevel.push(unit.name);
+	if (unitData.rules == "Experimental" || unitData.rules == "Unknown") {
+		counts.rulesLevel.push(unitData.name);
 	}
-	if (unitData.BFAbilities?.toLowerCase().includes("dro")) {
-		counts.dro.push(unit.name);
+	if (unitData?.abilites?.toLowerCase().includes("dro")) {
+		counts.dro.push(unitData.name);
 	}
-	if (unitData.BFAbilities?.toLowerCase().includes("jmps")) {
-		counts.jmpsTotal += Number(unitData.BFAbilities.match(/JMPS[1-9]/g)[0].charAt(4));
-		counts.jmps.push(unit.name);
+	if (unitData?.abilites?.toLowerCase().includes("jmps")) {
+		counts.jmpsTotal += Number(unitData.abilites.match(/JMPS[1-9]/g)[0].charAt(4));
+		counts.jmps.push(unitData.name);
 	}
-	if (unitData.BFAbilities?.toLowerCase().includes("htc")) {
+	if (unitData.abilities?.toLowerCase().includes("htc")) {
 		if (unitData.BFMove[0] == 0) {
-			counts.trailer.push(unit.name);
+			counts.trailer.push(unitData.name);
 		} else {
-			counts.htc.push(unit.name);
+			counts.htc.push(unitData.name);
 		}
 	}
 	if (unit.skill < 2 || unit.skill > 6) {
-		counts.skillThreshold.push(unit.name);
+		counts.skillThreshold.push(unitData.name);
 	}
 	if (unit.skill == 2 || unit.skill == 6) {
-		counts.skillCombination.push(unit.name);
+		counts.skillCombination.push(unitData.name);
 	}
 }
 
@@ -242,7 +280,7 @@ function validateList(counts: any) {
 		issueList.push({
 			id: crypto.randomUUID,
 			title: "Unavailable Units",
-			description: "Units are available to the selected faction in the selected era",
+			description: "Units are unavailable to the selected faction in the selected era",
 			number: `${counts.unavailableUnits.length}`,
 			violatingUnits: counts.unavailableUnits.join(", ")
 		});

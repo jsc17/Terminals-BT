@@ -29,7 +29,7 @@ export const actions = {
 			for (const unit of data.Units) {
 				try {
 					const formattedUnit = {
-						mulID: unit.Id,
+						mulId: unit.Id,
 						name: unit.Name.trim(),
 						class: unit.Class,
 						variant: unit.Variant?.trim() == "" ? null : unit.Variant?.trim(),
@@ -60,7 +60,7 @@ export const actions = {
 					};
 					const existing = await prisma.unit.findFirst({
 						where: {
-							mulID: formattedUnit.mulID
+							mulId: formattedUnit.mulId
 						}
 					});
 					if (!existing) {

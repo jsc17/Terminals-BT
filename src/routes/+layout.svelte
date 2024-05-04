@@ -117,8 +117,9 @@
 		gap: 16px;
 		padding: 16px;
 		position: relative;
-		height: 100%;
+		height: max(100%, 400px);
 		width: 100%;
+		overflow: auto;
 	}
 	:global(dialog::backdrop) {
 		background: rgba(0, 0, 0, 0.7);
@@ -195,5 +196,9 @@
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
+	}
+	:global(hr) {
+		width: 90%;
+		border-top: 1px solid var(--primary);
 	}
 </style>

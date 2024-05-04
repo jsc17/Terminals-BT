@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { eras } from "$lib/data/erasFactionLookup";
+	import { eras, factions } from "$lib/data/erasFactionLookup";
 	import { enhance, deserialize } from "$app/forms";
 	import { getContext } from "svelte";
 	import { dev } from "$app/environment";
-	import { type Unit } from "$lib/types/unit.js";
+	import { getNewSkillCost } from "$lib/utilities/bt-utils";
 
 	interface Tournament {
 		id: number;
@@ -19,7 +19,7 @@
 		id: number;
 		name: string;
 		email?: string;
-		listCode?: ListCode[];
+		listCode?: ListCode;
 	}
 	interface ListCode {
 		id: number;
@@ -27,19 +27,19 @@
 		message: string;
 		dateSubmitted: Date;
 		issues: string;
-		units: Unit[];
+		units: { id: number; skill: number }[];
 		era: number;
 		faction: number;
 	}
 
 	let user: { username: string | undefined } = getContext("user");
 
-	const { data } = $props();
-
 	let tournamentDialog: HTMLDialogElement;
 	let tournamentList = $state<Tournament[]>([]);
 	let selectedTournament = $state<number>(-1);
 	let selectedParticipant = $state<number>(-1);
+	let selectedUnitList = $state<{ name: string; skill: number; pv: number }[]>([]);
+
 	let tournamentLink = $derived.by(() => {
 		if (selectedTournament != -1) {
 			if (dev) {
@@ -49,6 +49,30 @@
 			}
 		} else {
 			return "";
+		}
+	});
+
+	$effect(() => {
+		let listCode = tournamentList[selectedTournament]?.participants[selectedParticipant]?.listCode;
+		if (listCode) {
+			const formData = new FormData();
+			const unitList = listCode.units.map((unit) => {
+				return unit.id;
+			});
+			formData.append("unitList", JSON.stringify(unitList));
+			fetch("?/getUnits", {
+				method: "POST",
+				body: formData
+			}).then((response) => {
+				response.text().then((value) => {
+					const result: any = deserialize(value);
+					selectedUnitList = [];
+					listCode.units.forEach((unit, index) => {
+						selectedUnitList.push({ name: result.data.unitList[index].name, skill: unit.skill, pv: getNewSkillCost(unit.skill, result.data.unitList[index].pv) });
+					});
+					console.log(selectedUnitList);
+				});
+			});
 		}
 	});
 
@@ -67,31 +91,49 @@
 		}
 	}
 	function pushTournamentLists(list: any[]) {
-		console.log(list);
 		tournamentList = [];
 		for (const tournament of list) {
-			console.log(tournament);
 			let formattedTournament: Tournament = {
 				id: tournament.id,
 				name: tournament.name,
 				era: tournament.era,
-				date: new Date(tournament.date),
+				date: new Date(tournament.tournament_date),
 				email: tournament.email,
 				organizer: tournament.organizer,
 				passed: tournament.passed ?? false,
 				participants: []
 			};
 			for (const participant of tournament.participants) {
+				let latestList: any = participant.listCodes[0];
+				for (const code of participant.listCodes!) {
+					if (code.id > latestList.id) {
+						latestList = code;
+					}
+				}
+				let tempUnits: { id: number; skill: number }[] = [];
+				for (const tempUnit of latestList.units.split(":")) {
+					const unitParts = tempUnit.split(",");
+					tempUnits.push({ id: unitParts[0], skill: unitParts[1] });
+				}
+				const formattedList: ListCode = {
+					id: latestList.id,
+					valid: latestList.valid,
+					message: latestList.message == "" ? "-" : latestList.message,
+					issues: latestList.issues == "" ? "-" : latestList.issues,
+					dateSubmitted: latestList.dateSubmitted,
+					era: latestList.era,
+					faction: latestList.faction,
+					units: tempUnits
+				};
+
 				let formattedParticipant: Participant = {
 					id: participant.id,
-					email: participant.email,
+					email: participant.email == "" ? "-" : participant.email,
 					name: participant.name,
-					listCode: []
+					listCode: formattedList
 				};
-				console.log(formattedParticipant);
 				formattedTournament.participants.push(formattedParticipant);
 			}
-
 			tournamentList.push(formattedTournament);
 		}
 		tournamentList.sort((a: Tournament, b: Tournament) => {
@@ -135,9 +177,11 @@
 		}
 	}
 	function formatDateString(date: Date) {
-		return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
+		return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getUTCDate().toString().padStart(2, "0")}`;
 	}
 </script>
+
+<h1 style="color:var(--error)">ALPHA- still working on some features and testing functionality</h1>
 
 <main>
 	<section class="tall">
@@ -155,13 +199,15 @@
 		<div class="table-container">
 			<table>
 				<colgroup>
-					<col style="width:60%" />
-					<col style="width:40%" />
+					<col style="width:50%" />
+					<col style="width:30%" />
+					<col style="width:20%" />
 				</colgroup>
 				<thead>
 					<tr>
 						<th>Name</th>
 						<th>Date</th>
+						<th>Players</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -182,7 +228,8 @@
 									selectedTournament = index;
 								}}>
 								<td>{tournament.name}</td>
-								<td class:passed={tournament.passed}>{tournament.date.toDateString().split(" ").slice(1).join("-")}</td>
+								<td class:passed={tournament.passed}>{tournament.date.toUTCString().split(" ").slice(1, 4).join("-")}</td>
+								<td>{tournament.participants.length}</td>
 							</tr>
 						{/each}
 					{/if}
@@ -216,7 +263,7 @@
 									selectedParticipant = index;
 								}}>
 								<td>{participant.name}</td>
-								<td></td>
+								<td>{participant.listCode?.valid ? "✅" : "❌"}</td>
 								<td></td>
 							</tr>
 						{/each}
@@ -238,7 +285,7 @@
 			<p>Tournament Name:</p>
 			<p>{`${tournamentList[selectedTournament]?.name ?? ""}`}</p>
 			<p>Tournament Date:</p>
-			<p>{`${tournamentList[selectedTournament]?.date.toDateString().split(" ").slice(1).join("-") ?? ""}`}</p>
+			<p>{`${tournamentList[selectedTournament]?.date.toUTCString().split(" ").slice(1, 4).join("-") ?? ""}`}</p>
 			<p>Tournament Era:</p>
 			<p>{`${eras.get(tournamentList[selectedTournament]?.era) ?? ""}`}</p>
 			<p>Organizer Name:</p>
@@ -254,9 +301,52 @@
 		</div>
 	</section>
 	<section class="details">
-		<p>Player details</p>
-		<div class="player-details">
-			<p>Player Name:</p>
+		<div class="column">
+			<div class="split">
+				<div class="column">
+					<p>Player Name:</p>
+					<p style="color:var(--primary)">
+						{selectedTournament != -1 && selectedParticipant != -1 ? tournamentList[selectedTournament].participants[selectedParticipant].name : "-"}
+					</p>
+				</div>
+				<div class="column">
+					<p>Email (if provided):</p>
+					<p style="color:var(--primary)">
+						{selectedTournament != -1 && selectedParticipant != -1 ? tournamentList[selectedTournament].participants[selectedParticipant].email : "-"}
+					</p>
+				</div>
+				<div class="column">
+					<p>Era:</p>
+					<p style="color:var(--primary)">
+						{selectedTournament != -1 && selectedParticipant != -1
+								? eras.get(tournamentList[selectedTournament].participants[selectedParticipant].listCode?.era!)
+								: "-"}
+					</p>
+				</div>
+				<div class="column">
+					<p>Faction:</p>
+					<p style="color:var(--primary)">
+						{selectedTournament != -1 && selectedParticipant != -1
+								? factions.get(tournamentList[selectedTournament].participants[selectedParticipant].listCode?.faction!)
+								: "-"}
+					</p>
+				</div>
+			</div>
+			<p>Issues:</p>
+			<p style="color:var(--error)">
+				{selectedTournament != -1 && selectedParticipant != -1 ? tournamentList[selectedTournament].participants[selectedParticipant].listCode?.issues : "-"}
+			</p>
+			<p>Message:</p>
+			<p style="color:var(--primary)">
+				{selectedTournament != -1 && selectedParticipant != -1 ? tournamentList[selectedTournament].participants[selectedParticipant].listCode?.message : "-"}
+			</p>
+			<p>Units:</p>
+
+			<div class="split">
+				{#each selectedUnitList as unit}
+					<p style="color:var(--primary)">{unit.name}</p>
+				{/each}
+			</div>
 		</div>
 	</section>
 </main>
@@ -349,6 +439,11 @@
 	.details {
 		display: flex;
 		flex-direction: column;
+		gap: 8px;
+	}
+	.split {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
 		gap: 8px;
 	}
 </style>

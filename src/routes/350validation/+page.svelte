@@ -1,7 +1,7 @@
 <script lang="ts">
 	import eraList from "$lib/data/erasFactionsList.json";
 	import { eras, factions } from "$lib/data/erasFactionLookup";
-	import { enhance } from "$app/forms";
+	import { enhance, deserialize } from "$app/forms";
 
 	interface UnitPreview {
 		id: string;
@@ -23,15 +23,30 @@
 	let { data } = $props();
 	let tournamentList = $state<{ id: number; name: string; organizer: string; era: number; date: Date }[]>([]);
 	for (const tournament of data.tournamentList) {
-		tournamentList.push({ id: Number(tournament.id), name: tournament.name, organizer: tournament.organizer, era: Number(tournament.era), date: new Date(tournament.date) });
+		tournamentList.push({
+			id: Number(tournament.id),
+			name: tournament.name,
+			organizer: tournament.organizer,
+			era: Number(tournament.era),
+			date: new Date(tournament.tournament_date)
+		});
 	}
 	let selectedTournament = $state<number>(-1);
 	let selectedEra = $state<number>(-1);
 	let selectedFaction = $state<number>(-1);
 	let uploadType = $state<"mul" | "terminal" | "jeff">("mul");
 	let unitList = $state<UnitPreview[]>([]);
+	let selectedUnit = $state(-1);
+	let selectedReplacement = $state(-1);
+	let filterValue = $state("");
+	let unitData = $state<{ name: string; mulId: number }[]>([]);
 	let status = $state<"waiting" | "loading" | "loaded">("waiting");
 	let issueList = $state<Issue[]>([]);
+	let fixUnitDialog: HTMLDialogElement;
+	let loadListDialog: HTMLDialogElement;
+	let savedLists = $state<{ name: string; era: number; faction: number; units: string; sublists: string }[]>([]);
+	let selectedList = $state(-1);
+	let listCode = $state("");
 
 	$effect(() => {
 		if (selectedTournament != -1) {
@@ -103,6 +118,62 @@
 		formData.append("id", tournamentList[selectedTournament].id.toString());
 		formData.append("unitList", JSON.stringify(unitList));
 		formData.append("issueList", JSON.stringify(issueList));
+		formData.append("era", selectedEra.toString());
+		formData.append("faction", selectedFaction.toString());
+	}
+	function fixUnit(index: number) {
+		selectedUnit = index;
+		fixUnitDialog.showModal();
+		if (!unitData.length) {
+			fetch("?/getUnits", { method: "POST", body: "" }).then((response) => {
+				response.text().then((value) => {
+					const result: any = deserialize(value);
+					unitData = JSON.parse(result.data.unitList);
+				});
+			});
+		}
+	}
+	function openListDialog() {
+		loadListDialog.showModal();
+		fetch("?/getUserLists", {
+			method: "POST",
+			body: ""
+		}).then((response) => {
+			response.text().then((value) => {
+				const result: any = deserialize(value);
+				if (result.status == 200) {
+					savedLists = result.data.lists;
+				} else {
+					alert(result.data.message);
+				}
+			});
+		});
+	}
+	function selectRow(index: number) {
+		selectedList = index;
+	}
+	function loadList() {
+		const formData = new FormData();
+		if (selectedEra != -1 && selectedFaction != -1) {
+			formData.append("era", selectedEra.toString());
+			formData.append("faction", selectedFaction.toString());
+			formData.append("uploadType", "terminalSaved");
+			formData.append("uploadData", savedLists[selectedList].units);
+
+			fetch("?/parseUnits", { method: "POST", body: formData }).then((response) => {
+				response.text().then((value) => {
+					const result: any = deserialize(value);
+					if (result.status == 200) {
+						unitList = JSON.parse(result.data.unitList);
+					} else {
+						alert(result.data.message);
+					}
+				});
+			});
+		} else {
+			alert("Must select era and faction");
+		}
+		loadListDialog.close();
 	}
 </script>
 
@@ -136,7 +207,7 @@
 					<p>Event Name:</p>
 					<p>{tournamentList[selectedTournament].name}</p>
 					<p>Date:</p>
-					<p>{tournamentList[selectedTournament].date.toDateString()}</p>
+					<p>{tournamentList[selectedTournament].date.toUTCString().split(" ").slice(0, 4).join(" ")}</p>
 					<p>Hosted by:</p>
 					<p>{tournamentList[selectedTournament].organizer}</p>
 					<p>Era:</p>
@@ -167,14 +238,25 @@
 						<input type="file" name="uploadData" id="uploadData" required />
 					{:else if uploadType == "terminal"}
 						<div class="inline">
-							<label for="uploadData">List Code:</label>
-							<input type="text" name="uploadData" id="uploadData" />
-							<button type="button">Paste</button>
+							<p>Load from saved Lists:</p>
+							<button
+								type="button"
+								on:click={() => {
+									openListDialog();
+								}}>Load</button>
 						</div>
+
 						<div class="center">-or-</div>
 						<div class="inline">
-							<p>Load from saved Lists: (not implemented yet)</p>
-							<button disabled type="button" on:click={() => {}}>Load</button>
+							<label for="uploadData">List Code:</label>
+							<input type="text" name="uploadData" id="uploadData" bind:value={listCode} />
+							<button
+								type="button"
+								on:click={() => {
+									navigator.clipboard.readText().then((text) => {
+										listCode = text;
+									});
+								}}>Paste</button>
 						</div>
 					{:else if uploadType == "jeff"}
 						<input type="file" name="uploadData" id="uploadData" />
@@ -215,7 +297,11 @@
 										{/if}
 										<td>{unitList[index].skill}</td>
 										<td>{unitList[index].pv}</td>
-										<td></td>
+										<td>
+											{#if !unitList[index].mulId}
+												<button on:click={() => fixUnit(index)}>Fix</button>
+											{/if}
+										</td>
 									</tr>
 								{:else}
 									<tr>
@@ -231,16 +317,18 @@
 				</div>
 				<div class="column">
 					<p>Unit names in green have been successfully found.</p>
-					<p>Unit names in red haven't been found in the era and faction selected.</p>
-					<p>Error fixing will be coming but will require some work on the backend, and I've let enough tangents delay putting out a version one of this page already.</p>
+					<p>Unit names in red haven't been successfully parsed from a pdf upload. You'll need to fix it before moving on to the next step, or it throws everything off.</p>
 					<p>
-						For now, please double check your list and the units faction/era availability, and if it should be valid but isn't, you will have a chance to attach a note when you
-						submit the list.
+						There shouldn't be many, but if you find any, can you please click the settings button and create a report so I can try and figure out why it's not reading correctly.
 					</p>
 				</div>
 			</div>
 			<form class="center" method="post" action="?/validate" use:enhance={handleValidationForm}>
-				<button disabled={unitList.length == 0}>Validate</button>
+				<button
+					disabled={unitList.length == 0 ||
+						unitList.findIndex((unit) => {
+							return unit.mulId == 0;
+						}) != -1}>Validate</button>
 			</form>
 		</div>
 	</section>
@@ -258,7 +346,7 @@
 					<img src="/loading.gif" alt="loading" style="height:50px" />
 				</div>
 			{:else if status == "loaded" && issueList.length == 0}
-				<p>No issues found</p>
+				<p>No issues found ✅</p>
 			{:else}
 				<table>
 					<colgroup>
@@ -289,10 +377,96 @@
 			<textarea name="message" id="message" rows="5" maxlength="500"></textarea>
 			<div class="center"><button disabled={status != "loaded"}>Submit</button></div>
 		</form>
+		<div class="card">
+			<a href="/tournament">Click here to create or manage your tournaments</a>
+		</div>
 	</section>
 </main>
 
+<dialog bind:this={loadListDialog}>
+	<div class="dialog-body">
+		<div class="space-between">
+			<h1>User Lists</h1>
+			<button
+				on:click={() => {
+					loadListDialog.close();
+				}}>Close</button>
+		</div>
+		<div class="table-container">
+			<table class="saved-lists">
+				<colgroup>
+					<col style="width:50%" />
+					<col style="width:20%" />
+					<col style="width:30%" />
+				</colgroup>
+				<tbody>
+					{#if savedLists.length}
+						{#each savedLists as savedList, index}
+							<tr class:selected={selectedList == index} on:click={() => selectRow(index)}>
+								<td>{savedList.name}</td>
+								<td>{eras.get(savedList.era)}</td>
+								<td>{factions.get(savedList.faction)}</td>
+							</tr>
+						{/each}
+					{/if}
+				</tbody>
+			</table>
+		</div>
+		<button
+			on:click={() => {
+				loadList();
+			}}>Load</button>
+	</div>
+</dialog>
+
+<dialog bind:this={fixUnitDialog}>
+	<div class="dialog-body">
+		<div class="space-between">
+			<p>Fix unidentified unit</p>
+			<button
+				on:click={() => {
+					fixUnitDialog.close();
+				}}>Close</button>
+		</div>
+		<p>Please select the correct unit from the below list for: <span style="color:var(--primary)">{selectedUnit != -1 ? unitList[selectedUnit].name : "Null"}</span></p>
+		<div class="space-between">
+			<div class="inline"><label for="filterUnit">Filter:</label><input type="text" name="filterUnit" id="filterUnit" bind:value={filterValue} /></div>
+			<button
+				on:click={() => {
+					if (selectedReplacement != -1) {
+						unitList[selectedUnit].mulId = selectedReplacement;
+						fixUnitDialog.close();
+					}
+				}}>Select</button>
+		</div>
+		<div class="fix-unit-table">
+			<table style="display:block">
+				<tbody>
+					{#if unitData.length}
+						{#each unitData as unit}
+							{#if unit.name.toLowerCase().includes(filterValue.toLowerCase())}
+								<tr
+									on:click={() => {
+										selectedReplacement = unit.mulId;
+									}}
+									class:selected={unit.mulId == selectedReplacement}><td>{unit.name}</td></tr>
+							{/if}
+						{/each}
+					{:else}
+						<tr><td>Loading...</td></tr>
+					{/if}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</dialog>
+
 <style>
+	.dialog-body {
+		* {
+			flex-shrink: 0;
+		}
+	}
 	.card {
 		flex-shrink: 0;
 	}
@@ -354,5 +528,18 @@
 		background-color: var(--popover);
 		color: var(--popover-foreground);
 		border: 1px solid var(--border);
+	}
+	.selected {
+		box-shadow: 5px 0px 5px var(--primary) inset;
+	}
+	.fix-unit-table {
+		height: 500px;
+		overflow: auto;
+	}
+	.table-container {
+		min-width: 100%;
+		height: 100%;
+		overflow-y: auto;
+		background-color: var(--card);
 	}
 </style>

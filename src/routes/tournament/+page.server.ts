@@ -9,9 +9,9 @@ export const actions: Actions = {
 
 		const { tournamentName, tournamentDate, organizerName, contactEmail, tournamentEra } = Object.fromEntries(await request.formData()) as Record<string, string>;
 
-		let date = new Date(tournamentDate);
+		let tournament_date = new Date(tournamentDate);
 		let passed = false;
-		if (date < new Date()) {
+		if (tournament_date < new Date()) {
 			passed = true;
 		}
 		try {
@@ -20,7 +20,7 @@ export const actions: Actions = {
 					userId: locals.user.id,
 					name: tournamentName,
 					era: Number(tournamentEra),
-					date,
+					tournament_date,
 					email: contactEmail,
 					organizer: organizerName != "" ? organizerName : locals.user.username,
 					passed
@@ -70,7 +70,7 @@ export const actions: Actions = {
 				data: {
 					name: tournamentName,
 					era: Number(tournamentEra),
-					date: new Date(tournamentDate),
+					tournament_date: new Date(tournamentDate),
 					email: contactEmail,
 					organizer: organizerName != "" ? organizerName : locals.user.username
 				}
@@ -97,5 +97,24 @@ export const actions: Actions = {
 			console.log(error);
 			return fail(400, { message: "Failed to delete tournament" });
 		}
+	},
+	getUnits: async ({ request }) => {
+		let unitList = JSON.parse((await request.formData()).get("unitList")?.toString()!);
+		const unitPromises = [];
+		for (const unit of unitList) {
+			unitPromises.push(
+				prisma.unit.findFirst({
+					where: {
+						mulId: Number(unit)
+					},
+					select: {
+						name: true,
+						pv: true
+					}
+				})
+			);
+		}
+		const resultList = await Promise.all(unitPromises);
+		return { unitList: resultList };
 	}
 };

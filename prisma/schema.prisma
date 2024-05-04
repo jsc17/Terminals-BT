@@ -48,7 +48,7 @@ model Tournament {
   organizer String
   email String
   era Int
-  date DateTime @db.Date 
+  tournament_date DateTime @db.Date 
   passed Boolean?
   participants TournamentParticipant[]
 }
@@ -79,7 +79,7 @@ model ListCode {
 
 model Unit {
   id Int @id @default(autoincrement())
-  mulID Int @unique
+  mulId Int @unique
   name String
   class String
   variant String?

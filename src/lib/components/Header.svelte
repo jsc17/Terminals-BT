@@ -64,11 +64,14 @@
 			{/if}
 		</button>
 		<div class="dropdown-content" class:dropdown-hidden={!showLinksDropdown} class:dropdown-shown={showLinksDropdown}>
+			<a href="/">Home</a>
+			<hr />
+			<a href="http://masterunitlist.info" target="_blank">Master Unit List</a>
 			<a href="/listbuilder">Alpha Strike Listbuilder</a>
+			<hr />
 			<a href="/as350">350 List Builder</a>
 			<a href="/350validation">350 List Validator</a>
 			<a href="/tournament">350 Tournament Dashboard</a>
-			<a href="http://masterunitlist.info" target="_blank">Master Unit List</a>
 			<a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">350 Rules</a>
 		</div>
 	</nav>

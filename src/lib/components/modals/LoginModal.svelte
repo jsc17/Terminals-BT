@@ -79,31 +79,27 @@
 		<div class="dialog-body">
 			<div class="space-between">
 				<h1>Login</h1>
-				<button
-					style:background-color="transparent"
-					style:color="var(--primary)"
-					on:click={() => {
-						loginDisplay = "register";
-					}}>Need an account? Click here to register</button>
+				<button on:click={() => loginDialog.close()}>Close</button>
 			</div>
 			<form method="post" action="/login/?/login" class="dialog-body" use:enhance={handleLogin}>
 				<label for="username">Username</label>
 				<input name="username" id="username" />
 				<label for="password">Password</label>
 				<input type="password" name="password" id="password" />
-				<div class="inline gap8 center"><button>Cancel</button><button>Continue</button></div>
+				<div class="inline gap8 center"><button>Continue</button></div>
+				<button
+					style:background-color="transparent"
+					style:color="var(--primary)"
+					on:click={() => {
+						loginDisplay = "register";
+					}}>Need an account? Click here to register</button>
 			</form>
 		</div>
 	{:else if loginDisplay == "register"}
 		<div class="dialog-body">
 			<div class="space-between">
 				<h1>Register</h1>
-				<button
-					style:background-color="transparent"
-					style:color="var(--primary)"
-					on:click={() => {
-						loginDisplay = "login";
-					}}>Already have an account? Click here to login</button>
+				<button on:click={() => loginDialog.close()}>Close</button>
 			</div>
 			<form method="post" action="/login/?/register" class="dialog-body" use:enhance={handleSignUp}>
 				<label for="username">Username</label>
@@ -114,7 +110,13 @@
 				<input type="password" name="verifyPassword" id="verifyPassword" />
 				<label for="email">Email Address</label>
 				<input type="email" name="email" id="email" />
-				<div class="inline gap8 center"><button>Cancel</button><button>Continue</button></div>
+				<div class="inline gap8 center"><button>Continue</button></div>
+				<button
+					style:background-color="transparent"
+					style:color="var(--primary)"
+					on:click={() => {
+						loginDisplay = "login";
+					}}>Already have an account? Click here to login</button>
 			</form>
 		</div>
 	{/if}

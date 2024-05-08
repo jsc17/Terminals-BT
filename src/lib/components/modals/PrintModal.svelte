@@ -53,7 +53,7 @@
 	}}
 	class:dialog-wide={appWindow.isNarrow}>
 	<div class="dialog-body">
-		<h1>Print</h1>
+		<h2>Print</h2>
 		<form action="/?/print" method="post" use:enhance={handleForm} class="print-form">
 			<label for="listname">List Name</label><input id="listname" bind:value={list.details.name} />
 			<label for="playername">Player Name (optional)</label><input id="playername" bind:value={playerName} />

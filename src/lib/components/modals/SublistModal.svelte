@@ -379,7 +379,7 @@
 	class="sublist-modal">
 	<div class="dialog-body">
 		<div class="space-between">
-			<h1>Sublists</h1>
+			<h2>Sublists</h2>
 			{#if layout != "mobile"}
 				<div class="center gap8">
 					<p>Display</p>

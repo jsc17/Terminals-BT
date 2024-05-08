@@ -179,7 +179,7 @@
 				</button>
 			</div>
 		</form>
-		<h1>Export Codes:</h1>
+		<h2>Export Codes:</h2>
 		<div class="export-bar">
 			<label for="list-code">List Code: </label><input type="text" name="list-code" id="list-code" disabled value={listCode} />
 			<button on:click={()=>{

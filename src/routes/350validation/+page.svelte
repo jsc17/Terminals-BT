@@ -185,7 +185,7 @@
 				<select name="tournamentSelect" id="tournamentSelect" bind:value={selectedTournament}>
 					<option value={-1}>None</option>
 					{#each tournamentList as tournament, index}
-						<option value={index} selected={tournament.id == Number(data.id)}>{tournament.name}</option>
+						<option value={index} selected={tournament.id == Number(data.id)}>{`${tournament.name} - ${tournament.date.toUTCString().split(" ").slice(1, 4).join(" ")}`}</option>
 					{/each}
 				</select>
 

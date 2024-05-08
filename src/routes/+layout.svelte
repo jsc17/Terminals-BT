@@ -1,13 +1,13 @@
 <script lang="ts">
 	import Header from "$lib/components/Header.svelte";
 	import { appWindow } from "$lib/utilities/responsive.svelte";
-	import { onMount, setContext } from "svelte";
+	import { setContext } from "svelte";
 
 	const { data } = $props();
 	let user = $state({ username: data.username });
 	setContext("user", user);
 
-	onMount(() => {
+	$effect.pre(() => {
 		appWindow.windowWidth = window.screen.availWidth;
 		window.onresize = () => {
 			appWindow.windowWidth = window.screen.availWidth;

@@ -283,5 +283,9 @@ export const actions = {
 			console.error(error);
 			return fail(400, { message: "Failed to delete list" });
 		}
+	},
+	getAllUnits: async () => {
+		const unitList = await prisma.unit.findMany();
+		return { unitList };
 	}
 };

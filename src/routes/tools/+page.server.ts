@@ -1,10 +1,9 @@
 import { prisma } from "$lib/server/prisma";
 import eraLists from "$lib/data/erasFactionsList.json";
-import fs from "fs/promises";
-import { calculateTMM } from "$lib/utilities/bt-utils.js";
+import { fail } from "@sveltejs/kit";
 
 export const actions = {
-	upload: async () => {
+	uploadFactions: async () => {
 		for (const era of eraLists) {
 			for (const factionList of era.factions) {
 				for (const faction of factionList[1] as number[]) {
@@ -19,59 +18,100 @@ export const actions = {
 			}
 		}
 	},
-	uploadUnits: async () => {
-		const fileList = await fs.readdir("./files/cached");
+	uploadUnits: async ({ request }) => {
+		const unitList = JSON.parse((await request.formData()).get("unitList")!.toString());
 		let index = 0;
-		for (const file of fileList) {
+
+		for (const unit of unitList) {
 			index++;
 			console.log(index);
-			const data = JSON.parse((await fs.readFile(`./files/cached/${file}`)).toString());
-			for (const unit of data.Units) {
-				try {
-					const formattedUnit = {
-						mulId: unit.Id,
-						name: unit.Name.trim(),
-						class: unit.Class,
-						variant: unit.Variant?.trim() == "" ? null : unit.Variant?.trim(),
-						tonnage: unit.FormatedTonnage,
-						technology: unit.Technology.Name,
-						rules: unit.Rules,
-						date_introduced: Number(unit.DateIntroduced),
-						image_url: unit.ImageUrl,
-						role: unit.Role.Name,
-						type: unit.BFType ?? "Unknown",
-						size: unit.BFSize,
-						move: unit.BFMove,
-						tmm: calculateTMM(Number(unit.BFMove.split('"')[0])),
-						armor: unit.BFArmor,
-						structure: unit.BFStructure,
-						threshold: unit.BFThreshold,
-						damage_s: unit.BFDamageShort,
-						damage_s_min: unit.BFDamageShortMin,
-						damage_m: unit.BFDamageMedium,
-						damage_m_min: unit.BFDamageMediumMin,
-						damage_l: unit.BFDamageLong,
-						damage_l_min: unit.BFDamageLongMin,
-						damage_e: unit.BFDamageExtreme,
-						damage_e_min: unit.BFDamageExtemeMin,
-						overheat: unit.BFOverheat,
-						pv: unit.BFPointValue,
-						abilites: unit.BFAbilities
-					};
-					const existing = await prisma.unit.findFirst({
-						where: {
-							mulId: formattedUnit.mulId
-						}
-					});
-					if (!existing) {
-						await prisma.unit.create({
-							data: formattedUnit
-						});
+			try {
+				await prisma.unit.upsert({
+					where: {
+						mulId: unit.mulId
+					},
+					update: {
+						mulId: unit.mulId,
+						name: unit.name,
+						class: unit.class,
+						variant: unit.variant,
+						tonnage: unit.tonnage,
+						technology: unit.technology,
+						rules: unit.rules,
+						date_introduced: unit.date_introduced,
+						image_url: unit.image_url,
+						role: unit.role,
+						type: unit.type,
+						subtype: unit.subtype,
+						size: unit.size,
+						move: unit.move,
+						tmm: unit.tmm,
+						armor: unit.armor,
+						structure: unit.structure,
+						threshold: unit.threshold,
+						damage_s: unit.damage_s,
+						damage_s_min: unit.damage_s_min,
+						damage_m: unit.damage_m,
+						damage_m_min: unit.damage_m_min,
+						damage_l: unit.damage_l,
+						damage_l_min: unit.damage_l_min,
+						damage_e: unit.damage_e,
+						damage_e_min: unit.damage_e_min,
+						overheat: unit.overheat,
+						pv: unit.pv,
+						abilities: unit.abilities
+					},
+					create: {
+						mulId: unit.mulId,
+						name: unit.name,
+						class: unit.class,
+						variant: unit.variant,
+						tonnage: unit.tonnage,
+						technology: unit.technology,
+						rules: unit.rules,
+						date_introduced: unit.date_introduced,
+						image_url: unit.image_url,
+						role: unit.role,
+						type: unit.type,
+						subtype: unit.subtype,
+						size: unit.size,
+						move: unit.move,
+						tmm: unit.tmm,
+						armor: unit.armor,
+						structure: unit.structure,
+						threshold: unit.threshold,
+						damage_s: unit.damage_s,
+						damage_s_min: unit.damage_s_min,
+						damage_m: unit.damage_m,
+						damage_m_min: unit.damage_m_min,
+						damage_l: unit.damage_l,
+						damage_l_min: unit.damage_l_min,
+						damage_e: unit.damage_e,
+						damage_e_min: unit.damage_e_min,
+						overheat: unit.overheat,
+						pv: unit.pv,
+						abilities: unit.abilities
 					}
-				} catch (error) {
-					console.log(error);
-				}
+				});
+			} catch (error) {
+				console.log(unit.name);
+				console.log(error);
+				return fail(400, { message: error });
 			}
+		}
+		return {};
+	},
+	testUnit: async ({ request }) => {
+		const mulId = (await request.formData()).get("mulId");
+		const existing = await prisma.unit.findFirst({
+			where: {
+				mulId: Number(mulId)
+			}
+		});
+		if (existing) {
+			return { exists: true };
+		} else {
+			return { exists: false };
 		}
 	}
 };

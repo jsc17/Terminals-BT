@@ -78,7 +78,7 @@
 	{#if loginDisplay == "login"}
 		<div class="dialog-body">
 			<div class="space-between">
-				<h1>Login</h1>
+				<h2>Login</h2>
 				<button on:click={() => loginDialog.close()}>Close</button>
 			</div>
 			<form method="post" action="/login/?/login" class="dialog-body" use:enhance={handleLogin}>
@@ -98,7 +98,7 @@
 	{:else if loginDisplay == "register"}
 		<div class="dialog-body">
 			<div class="space-between">
-				<h1>Register</h1>
+				<h2>Register</h2>
 				<button on:click={() => loginDialog.close()}>Close</button>
 			</div>
 			<form method="post" action="/login/?/register" class="dialog-body" use:enhance={handleSignUp}>

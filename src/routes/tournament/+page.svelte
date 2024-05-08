@@ -2,35 +2,8 @@
 	import { eras, factions } from "$lib/data/erasFactionLookup";
 	import { enhance, deserialize } from "$app/forms";
 	import { getContext } from "svelte";
-	import { dev } from "$app/environment";
 	import { getNewSkillCost } from "$lib/utilities/bt-utils";
-
-	interface Tournament {
-		id: number;
-		name: string;
-		era: number;
-		date: Date;
-		email: string;
-		organizer: string;
-		passed: boolean;
-		participants: Participant[];
-	}
-	interface Participant {
-		id: number;
-		name: string;
-		email?: string;
-		listCode?: ListCode;
-	}
-	interface ListCode {
-		id: number;
-		valid: boolean;
-		message: string;
-		dateSubmitted: Date;
-		issues: string;
-		units: { id: number; skill: number }[];
-		era: number;
-		faction: number;
-	}
+	import type { Tournament, Participant, ListCode } from "./types";
 
 	let user: { username: string | undefined } = getContext("user");
 
@@ -39,18 +12,6 @@
 	let selectedTournament = $state<number>(-1);
 	let selectedParticipant = $state<number>(-1);
 	let selectedUnitList = $state<{ name: string; skill: number; pv: number }[]>([]);
-
-	let tournamentLink = $derived.by(() => {
-		if (selectedTournament != -1) {
-			if (dev) {
-				return `https://localhost:5173/350validation?id=${tournamentList[selectedTournament].id}`;
-			} else {
-				return `https://bt.terminl.xyz/350validation?id=${tournamentList[selectedTournament].id}`;
-			}
-		} else {
-			return "";
-		}
-	});
 
 	$effect(() => {
 		let listCode = tournamentList[selectedTournament]?.participants[selectedParticipant]?.listCode;
@@ -101,7 +62,8 @@
 				email: tournament.email,
 				organizer: tournament.organizer,
 				passed: tournament.passed ?? false,
-				participants: []
+				participants: [],
+				tournamentLink: `https://bt.terminl.xyz/350validation?id=${tournament.id}`
 			};
 			for (const participant of tournament.participants) {
 				let latestList: any = participant.listCodes[0];
@@ -296,7 +258,7 @@
 		</div>
 		<p>Tournament Link</p>
 		<div class="space-between">
-			<p>{tournamentLink}</p>
+			<p>{tournamentList[selectedTournament]?.tournamentLink ?? ""}</p>
 			<button>Copy</button>
 		</div>
 	</section>

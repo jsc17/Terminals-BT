@@ -51,6 +51,9 @@ model Tournament {
   tournament_date DateTime @db.Date 
   passed Boolean?
   participants TournamentParticipant[]
+  private Boolean
+  display_email Boolean
+  allow_resubmission Boolean
 }
 
 model TournamentParticipant {
@@ -88,6 +91,7 @@ model Unit {
   date_introduced Int?
   role String?
   type String
+  subtype String
   size Int
   move String
   tmm Int
@@ -104,7 +108,7 @@ model Unit {
   damage_e_min Boolean
   overheat Int
   pv Int
-  abilites String?
+  abilities String?
   tonnage String?
   image_url String?
 

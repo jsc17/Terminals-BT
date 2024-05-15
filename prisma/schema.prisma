@@ -16,6 +16,7 @@ model User {
   lists List[]
   tournamentsOrganized Tournament[]
   tournamentsJoined TournamentParticipant[]
+  resetTokens ResetToken[]
   username String @unique
   email String @unique
   hashedPassword String
@@ -26,6 +27,14 @@ model Session {
   userId    String
   user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
   expiresAt DateTime
+}
+
+model ResetToken {
+  id String @id
+  userId String
+  user User @relation(references: [id], fields: [userId], onDelete: Cascade)
+  expiresAt DateTime
+  valid Boolean @default(true)
 }
 
 model List {
@@ -54,6 +63,7 @@ model Tournament {
   private Boolean
   display_email Boolean
   allow_resubmission Boolean
+  require_email Boolean
 }
 
 model TournamentParticipant {

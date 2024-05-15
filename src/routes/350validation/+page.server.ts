@@ -4,6 +4,7 @@ import { prisma } from "$lib/server/prisma.js";
 import { fail } from "@sveltejs/kit";
 import { parsePDF, parseTerminal } from "./parse.js";
 import fs from "fs/promises";
+import { sendListSubmissionEmail } from "$lib/emails/mailer.server.js";
 
 export const load = async () => {
 	let allTournaments = await prisma.tournament.findMany({
@@ -177,6 +178,7 @@ export const actions = {
 					faction: Number(faction)
 				}
 			});
+			sendListSubmissionEmail(email, Number(id), name, true);
 		} else {
 			await prisma.tournamentParticipant.create({
 				data: {
@@ -196,6 +198,7 @@ export const actions = {
 					}
 				}
 			});
+			sendListSubmissionEmail(email, Number(id), name, false);
 		}
 	}
 };
@@ -206,7 +209,7 @@ async function validateUnit(unit: any, counts: any) {
 			mulId: unit.mulId
 		}
 	});
-	switch (unitData?.type.toUpperCase()) {
+	switch (unitData?.subtype.toUpperCase()) {
 		case "BM":
 		case "IM":
 			counts.totalMechs++;

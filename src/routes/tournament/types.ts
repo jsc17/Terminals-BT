@@ -8,12 +8,16 @@ export interface Tournament {
 	passed: boolean;
 	participants: Participant[];
 	tournamentLink: string;
+	privateTournament: boolean;
+	displayEmail: boolean;
+	allowResubmission: boolean;
+	requireEmail: boolean;
 }
 export interface Participant {
 	id: number;
 	name: string;
 	email?: string;
-	listCode?: ListCode;
+	listCodes: ListCode[];
 }
 export interface ListCode {
 	id: number;

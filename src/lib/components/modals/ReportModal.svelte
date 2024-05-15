@@ -38,7 +38,7 @@
 		showReportModal = false;
 	}}
 	class:dialog-wide={appWindow.isNarrow}>
-	<form class="dialog-body" action="/?/createIssue" method="post" use:enhance={createIssueForm}>
+	<form class="dialog-body" action="/api/issues?/createIssue" method="post" use:enhance={createIssueForm}>
 		<p>
 			Obviously I'd like everything to work without issues, but if you're here maybe it didn't, or maybe you just have a suggestion. Please enter the details below and I'll see
 			what I can do.

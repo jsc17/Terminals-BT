@@ -83,7 +83,7 @@
 	{/if}
 	<div class="inline gap8">
 		{#if user.username}
-			<form method="post" action="/login/?/logout" use:enhance={handleLogout} class="inline">
+			<form method="post" action="/auth/?/logout" use:enhance={handleLogout} class="inline">
 				<p>{`Welcome, ${user.username[0].toUpperCase() + user.username.slice(1)}`}</p>
 				<button class="link-button">(log out)</button>
 			</form>

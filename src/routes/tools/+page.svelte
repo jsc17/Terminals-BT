@@ -121,6 +121,10 @@
 			console.log(`unit availability failed - ${result.data.message}`);
 		}
 	}
+
+	async function sendResetEmail() {
+		const result: any = deserialize(await (await fetch("?/sendResetEmail", { method: "POST", body: "" })).text());
+	}
 </script>
 
 <main>
@@ -159,6 +163,9 @@
 			on:click={() => {
 				loadUnits();
 			}}>Upload Units</button>
+	</div>
+	<div class="card">
+		<button on:click={sendResetEmail}>Send Reset</button>
 	</div>
 </main>
 

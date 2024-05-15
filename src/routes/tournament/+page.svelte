@@ -3,21 +3,24 @@
 	import { enhance, deserialize } from "$app/forms";
 	import { getContext } from "svelte";
 	import { getNewSkillCost } from "$lib/utilities/bt-utils";
-	import type { Tournament, Participant, ListCode } from "./types";
+	import { tournamentList } from "./tournamentList.svelte";
 
 	let user: { username: string | undefined } = getContext("user");
 
 	let tournamentDialog: HTMLDialogElement;
-	let tournamentList = $state<Tournament[]>([]);
-	let selectedTournament = $state<number>(-1);
-	let selectedParticipant = $state<number>(-1);
-	let selectedUnitList = $state<{ name: string; skill: number; pv: number }[]>([]);
+	let selectedSubmission = $state<number>(0);
 
 	$effect(() => {
-		let listCode = tournamentList[selectedTournament]?.participants[selectedParticipant]?.listCode;
+		if (tournamentList.selectedParticipant?.listCodes?.length) {
+			selectedSubmission = tournamentList.selectedParticipant?.listCodes?.length - 1;
+		}
+	});
+
+	$effect(() => {
+		let listCode = tournamentList.selectedParticipant?.listCodes?.at(selectedSubmission);
 		if (listCode) {
 			const formData = new FormData();
-			const unitList = listCode.units.map((unit) => {
+			const unitList = listCode.units.map((unit: any) => {
 				return unit.id;
 			});
 			formData.append("unitList", JSON.stringify(unitList));
@@ -27,11 +30,10 @@
 			}).then((response) => {
 				response.text().then((value) => {
 					const result: any = deserialize(value);
-					selectedUnitList = [];
+					tournamentList.clearUnitList();
 					listCode.units.forEach((unit, index) => {
-						selectedUnitList.push({ name: result.data.unitList[index].name, skill: unit.skill, pv: getNewSkillCost(unit.skill, result.data.unitList[index].pv) });
+						tournamentList.selectedUnitList.push({ name: result.data.unitList[index].name, skill: unit.skill, pv: getNewSkillCost(unit.skill, result.data.unitList[index].pv) });
 					});
-					console.log(selectedUnitList);
 				});
 			});
 		}
@@ -39,69 +41,11 @@
 
 	$effect(() => {
 		if (user.username) {
-			getTournaments();
+			tournamentList.getTournaments();
 		} else {
-			tournamentList = [];
+			tournamentList.clearTournamentList();
 		}
 	});
-
-	async function getTournaments() {
-		const response: any = deserialize(await (await fetch("?/getTournaments", { method: "POST", body: "" })).text());
-		if (response.status == 200) {
-			pushTournamentLists(JSON.parse(response.data!.tournamentList));
-		}
-	}
-	function pushTournamentLists(list: any[]) {
-		tournamentList = [];
-		for (const tournament of list) {
-			let formattedTournament: Tournament = {
-				id: tournament.id,
-				name: tournament.name,
-				era: tournament.era,
-				date: new Date(tournament.tournament_date),
-				email: tournament.email,
-				organizer: tournament.organizer,
-				passed: tournament.passed ?? false,
-				participants: [],
-				tournamentLink: `https://bt.terminl.xyz/350validation?id=${tournament.id}`
-			};
-			for (const participant of tournament.participants) {
-				let latestList: any = participant.listCodes[0];
-				for (const code of participant.listCodes!) {
-					if (code.id > latestList.id) {
-						latestList = code;
-					}
-				}
-				let tempUnits: { id: number; skill: number }[] = [];
-				for (const tempUnit of latestList.units.split(":")) {
-					const unitParts = tempUnit.split(",");
-					tempUnits.push({ id: unitParts[0], skill: unitParts[1] });
-				}
-				const formattedList: ListCode = {
-					id: latestList.id,
-					valid: latestList.valid,
-					message: latestList.message == "" ? "-" : latestList.message,
-					issues: latestList.issues == "" ? "-" : latestList.issues,
-					dateSubmitted: latestList.dateSubmitted,
-					era: latestList.era,
-					faction: latestList.faction,
-					units: tempUnits
-				};
-
-				let formattedParticipant: Participant = {
-					id: participant.id,
-					email: participant.email == "" ? "-" : participant.email,
-					name: participant.name,
-					listCode: formattedList
-				};
-				formattedTournament.participants.push(formattedParticipant);
-			}
-			tournamentList.push(formattedTournament);
-		}
-		tournamentList.sort((a: Tournament, b: Tournament) => {
-			return a.date.getTime() - b.date.getTime();
-		});
-	}
 
 	async function handleTournamentForm({ formData, cancel, submitter }: { formData: FormData; cancel: any; submitter: HTMLElement | null }) {
 		if (submitter?.innerText == "Close") {
@@ -109,13 +53,13 @@
 			tournamentDialog.close();
 		}
 
-		if (selectedTournament != -1) {
-			formData.append("id", tournamentList[selectedTournament].id.toString());
+		if (tournamentList.selectedTournament) {
+			formData.append("id", tournamentList.selectedTournament.id.toString());
 		}
 
 		return async ({ result, update }: any) => {
 			if (result.status == 200) {
-				getTournaments();
+				tournamentList.getTournaments();
 				tournamentDialog.close();
 				update();
 			} else {
@@ -125,21 +69,29 @@
 	}
 	async function handleDelete() {
 		let confirmDelete = confirm(
-			`Are you sure you want to delete the tournament ${tournamentList[selectedTournament].name} on ${tournamentList[selectedTournament].date.toDateString().split(" ").slice(1).join("-")}? This CANNOT be undone`
+			`Are you sure you want to delete the tournament ${tournamentList.selectedTournament!.name} on ${tournamentList.selectedTournament!.date.toDateString().split(" ").slice(1).join("-")}? This CANNOT be undone`
 		);
 		const formData = new FormData();
-		formData.append("tournamentId", tournamentList[selectedTournament].id.toString());
+		formData.append("tournamentId", tournamentList.selectedTournament!.id.toString());
 		if (confirmDelete) {
 			const response: any = deserialize(await (await fetch("?/deleteTournament", { method: "POST", body: formData })).text());
 			if (response.status == 200) {
-				getTournaments();
+				tournamentList.getTournaments();
 			} else {
 				alert("Could not delete tournament, please try again.");
 			}
 		}
 	}
 	function formatDateString(date: Date) {
-		return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getUTCDate().toString().padStart(2, "0")}`;
+		if (date) {
+			return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getUTCDate().toString().padStart(2, "0")}`;
+		}
+	}
+	function deleteParticipant(index: number) {
+		tournamentList.selectParticipant(index);
+		if (confirm(`Are you sure you want to delete ${tournamentList.selectedParticipant?.name}`)) {
+			tournamentList.deleteParticipant(index);
+		}
 	}
 </script>
 
@@ -153,7 +105,7 @@
 				<button on:click={handleDelete}>Delete</button>
 				<button
 					on:click={() => {
-						selectedTournament = -1;
+						tournamentList.selectTournament(-1);
 						tournamentDialog.showModal();
 					}}>Add</button>
 			</div>
@@ -177,17 +129,17 @@
 						<tr>
 							<td colspan="3">Login to view your tournaments</td>
 						</tr>
-					{:else if !tournamentList.length}
+					{:else if !tournamentList.tournaments.length}
 						<tr>
 							<td colspan="3">No Tournaments added</td>
 						</tr>
 					{:else}
-						{#each tournamentList as tournament, index}
+						{#each tournamentList.tournaments as tournament, index}
 							<tr
-								class:selected-row={selectedTournament == index}
+								class:selected-row={tournamentList.selectedTournamentIndex == index}
 								on:click={() => {
-									selectedParticipant = -1;
-									selectedTournament = index;
+									tournamentList.selectParticipant(-1);
+									tournamentList.selectTournament(index);
 								}}>
 								<td>{tournament.name}</td>
 								<td class:passed={tournament.passed}>{tournament.date.toUTCString().split(" ").slice(1, 4).join("-")}</td>
@@ -217,16 +169,21 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#if selectedTournament != -1}
-						{#each tournamentList[selectedTournament]?.participants as participant, index}
+					{#if tournamentList.selectedTournamentIndex != -1}
+						{#each tournamentList.selectedTournament?.participants! as participant, index}
 							<tr
-								class:selected-row={selectedParticipant == index}
+								class:selected-row={tournamentList.selectedParticipantIndex == index}
 								on:click={() => {
-									selectedParticipant = index;
+									tournamentList.selectParticipant(index);
 								}}>
 								<td>{participant.name}</td>
-								<td>{participant.listCode?.valid ? "✅" : "❌"}</td>
-								<td></td>
+								<td>{participant.listCodes?.at(-1)?.valid ? "✅" : "❌"}</td>
+								<td
+									><button
+										on:click={() => {
+											deleteParticipant(index);
+										}}>Del</button
+									></td>
 							</tr>
 						{/each}
 					{/if}
@@ -238,27 +195,27 @@
 		<div class="space-between">
 			<p>Tournament Details</p>
 			<button
-				disabled={selectedTournament == -1}
+				disabled={tournamentList.selectedTournamentIndex == -1}
 				on:click={() => {
 					tournamentDialog.showModal();
 				}}>Edit</button>
 		</div>
 		<div class="tournament-details">
 			<p>Tournament Name:</p>
-			<p>{`${tournamentList[selectedTournament]?.name ?? ""}`}</p>
+			<p>{`${tournamentList.selectedTournament?.name ?? ""}`}</p>
 			<p>Tournament Date:</p>
-			<p>{`${tournamentList[selectedTournament]?.date.toUTCString().split(" ").slice(1, 4).join("-") ?? ""}`}</p>
+			<p>{`${tournamentList.selectedTournament?.date.toUTCString().split(" ").slice(1, 4).join("-") ?? ""}`}</p>
 			<p>Tournament Era:</p>
-			<p>{`${eras.get(tournamentList[selectedTournament]?.era) ?? ""}`}</p>
+			<p>{`${eras.get(tournamentList.selectedTournament?.era!) ?? ""}`}</p>
 			<p>Organizer Name:</p>
-			<p>{`${tournamentList[selectedTournament]?.organizer ?? ""}`}</p>
+			<p>{`${tournamentList.selectedTournament?.organizer ?? ""}`}</p>
 			<p>Contact Email:</p>
-			<p>{`${tournamentList[selectedTournament]?.email ?? ""}`}</p>
+			<p>{`${tournamentList.selectedTournament?.email ?? ""}`}</p>
 			<p></p>
 		</div>
 		<p>Tournament Link</p>
 		<div class="space-between">
-			<p>{tournamentList[selectedTournament]?.tournamentLink ?? ""}</p>
+			<p>{tournamentList.selectedTournament?.tournamentLink ?? ""}</p>
 			<button>Copy</button>
 		</div>
 	</section>
@@ -268,45 +225,58 @@
 				<div class="column">
 					<p>Player Name:</p>
 					<p style="color:var(--primary)">
-						{selectedTournament != -1 && selectedParticipant != -1 ? tournamentList[selectedTournament].participants[selectedParticipant].name : "-"}
+						{tournamentList.selectedParticipant?.name ?? "-"}
 					</p>
 				</div>
 				<div class="column">
 					<p>Email (if provided):</p>
 					<p style="color:var(--primary)">
-						{selectedTournament != -1 && selectedParticipant != -1 ? tournamentList[selectedTournament].participants[selectedParticipant].email : "-"}
+						{tournamentList.selectedParticipant?.email ?? "-"}
 					</p>
 				</div>
+			</div>
+			<div class="inline">
+				<label for="submittedLists">Submitted Lists:</label>
+				<select style="flex-grow: 1;" id="submittedLists" name="submittedLists" bind:value={selectedSubmission}>
+					{#if tournamentList.selectedParticipant?.listCodes.length}
+						{#each tournamentList.selectedParticipant.listCodes as listCode, index}
+							{#if index == tournamentList.selectedParticipant.listCodes.length - 1}
+								<option selected value={index}>{listCode.dateSubmitted.toUTCString().split(" ").slice(1, 4).join("-")} (Latest)</option>
+							{:else}
+								<option value={index}>{listCode.dateSubmitted.toUTCString().split(" ").slice(1, 4).join("-")}</option>
+							{/if}
+						{/each}
+					{/if}
+				</select>
+			</div>
+			<div class="split">
 				<div class="column">
 					<p>Era:</p>
 					<p style="color:var(--primary)">
-						{selectedTournament != -1 && selectedParticipant != -1
-								? eras.get(tournamentList[selectedTournament].participants[selectedParticipant].listCode?.era!)
-								: "-"}
+						{tournamentList.selectedParticipant?.listCodes?.at(selectedSubmission) ? eras.get(tournamentList.selectedParticipant.listCodes.at(selectedSubmission)!.era) : "-"}
 					</p>
 				</div>
 				<div class="column">
 					<p>Faction:</p>
 					<p style="color:var(--primary)">
-						{selectedTournament != -1 && selectedParticipant != -1
-								? factions.get(tournamentList[selectedTournament].participants[selectedParticipant].listCode?.faction!)
-								: "-"}
+						{tournamentList.selectedParticipant?.listCodes?.at(selectedSubmission) ? factions.get(tournamentList.selectedParticipant.listCodes.at(selectedSubmission)!.faction) : "-"}
 					</p>
 				</div>
 			</div>
+
 			<p>Issues:</p>
 			<p style="color:var(--error)">
-				{selectedTournament != -1 && selectedParticipant != -1 ? tournamentList[selectedTournament].participants[selectedParticipant].listCode?.issues : "-"}
+				{tournamentList.selectedParticipant?.listCodes?.at(selectedSubmission) ? tournamentList.selectedParticipant.listCodes?.at(selectedSubmission)!.issues : "-"}
 			</p>
 			<p>Message:</p>
 			<p style="color:var(--primary)">
-				{selectedTournament != -1 && selectedParticipant != -1 ? tournamentList[selectedTournament].participants[selectedParticipant].listCode?.message : "-"}
+				{tournamentList.selectedParticipant?.listCodes?.at(selectedSubmission) ? tournamentList.selectedParticipant.listCodes?.at(selectedSubmission)!.message : "-"}
 			</p>
 			<p>Units:</p>
 
 			<div class="split">
-				{#each selectedUnitList as unit}
-					<p style="color:var(--primary)">{unit.name}</p>
+				{#each tournamentList.selectedUnitList as unit}
+					<p class="unit">{unit.name}</p>
 				{/each}
 			</div>
 		</div>
@@ -314,30 +284,53 @@
 </main>
 
 <dialog bind:this={tournamentDialog}>
-	<form class="dialog-body" method="post" action={selectedTournament == -1 ? "?/addTournament" : "?/updateTournament"} use:enhance={handleTournamentForm}>
+	<form class="dialog-body" method="post" action={tournamentList.selectedTournamentIndex == -1 ? "?/addTournament" : "?/updateTournament"} use:enhance={handleTournamentForm}>
 		<div class="space-between">
-			{#if selectedTournament == -1}
+			{#if tournamentList.selectedTournamentIndex == -1}
 				<h1>Add Tournament</h1>
 			{:else}
 				<h1>Edit Tournament</h1>
 			{/if}
 			<button>Close</button>
 		</div>
-		<label for="tournamentName">Tournament Name*</label>
-		<input type="text" name="tournamentName" id="tournamentName" value={tournamentList[selectedTournament]?.name ?? ""} />
-		<label for="tournamentDate">Tournament Date*</label>
-		<input type="date" name="tournamentDate" id="tournamentDate" value={selectedTournament != -1 ? formatDateString(tournamentList[selectedTournament].date) : ""} />
+		<div class="inline">
+			<label for="tournamentName">Tournament Name:</label>
+			<input type="text" name="tournamentName" id="tournamentName" value={tournamentList.selectedTournament?.name ?? ""} />
+		</div>
+		<div class="inline">
+			<label for="tournamentDate">Tournament Date:</label>
+			<input type="date" name="tournamentDate" id="tournamentDate" value={tournamentList.selectedTournament ? formatDateString(tournamentList.selectedTournament.date) : ""} />
+		</div>
+		<div class="inline">
+			<label for="tournamentEra">Tournament Era:</label>
+			<select name="tournamentEra" id="tournamentEra">
+				<option value="-1">Any</option>
+				{#each eras.entries() as [eraID, eraText]}
+					<option value={eraID} selected={tournamentList.selectedTournament?.era == eraID}>{eraText}</option>
+				{/each}
+			</select>
+		</div>
 		<label for="organizerName">Tournament Organizer (Will be shown to players who view your tournament. Leave blank to use your username)</label>
-		<input type="text" name="organizerName" id="organizerName" value={tournamentList[selectedTournament]?.organizer ?? ""} />
-		<label for="contactEmail">Organizer Email*</label>
-		<input type="text" name="contactEmail" id="contactEmail" value={tournamentList[selectedTournament]?.email ?? ""} />
-		<label for="tournamentEra">Tournament Era*</label>
-		<select name="tournamentEra" id="tournamentEra">
-			<option value="-1">Any</option>
-			{#each eras.entries() as [eraID, eraText]}
-				<option value={eraID} selected={tournamentList[selectedTournament]?.era == eraID}>{eraText}</option>
-			{/each}
-		</select>
+		<input type="text" name="organizerName" id="organizerName" value={tournamentList.selectedTournament?.organizer ?? ""} />
+		<label for="contactEmail">Organizer Email:</label>
+		<input type="text" name="contactEmail" id="contactEmail" value={tournamentList.selectedTournament?.email ?? ""} />
+		<div class="inline">
+			<input name="display" id="display" type="checkbox" value="true" checked={tournamentList.selectedTournament?.displayEmail ?? false} />
+			<label for="display">Display email address on validation page?</label>
+		</div>
+		<div class="inline">
+			<input name="require_email" id="require_email" type="checkbox" value="true" checked={tournamentList.selectedTournament?.requireEmail ?? false} />
+			<label for="require_email">Require user to submit their email address when submitting their list</label>
+		</div>
+		<div class="inline">
+			<input name="allow_resubmission" id="allow_resubmission" type="checkbox" value="true" checked={tournamentList.selectedTournament?.allowResubmission ?? true} />
+			<label for="allow_resubmission">Allow users to resubmit lists. (Will require TO to clear lists to allow resubmission before user can resubmit)</label>
+		</div>
+		<div class="inline">
+			<input name="privateTournament" id="privateTournament" type="checkbox" value="true" checked={tournamentList.selectedTournament?.privateTournament ?? true} />
+			<label for="privateTournament"
+				>Display tournament on validation page. (Participants will require the tournament link if this is uncheck, so please provide it to them.)</label>
+		</div>
 		<div class="center"><button>Submit</button></div>
 	</form>
 </dialog>
@@ -407,5 +400,15 @@
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: 8px;
+	}
+	input[type="checkbox"] {
+		width: 15px;
+		height: 15px;
+		flex-shrink: 0;
+	}
+	.unit {
+		color: var(--primary);
+		padding: 4px;
+		border: 1px solid var(--border);
 	}
 </style>

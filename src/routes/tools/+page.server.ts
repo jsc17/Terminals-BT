@@ -1,6 +1,7 @@
 import { prisma } from "$lib/server/prisma";
 import eraLists from "$lib/data/erasFactionsList.json";
 import { fail } from "@sveltejs/kit";
+import { sendResetEmail } from "$lib/emails/mailer.server.js";
 
 export const actions = {
 	uploadFactions: async () => {
@@ -113,5 +114,8 @@ export const actions = {
 		} else {
 			return { exists: false };
 		}
+	},
+	sendResetEmail: async ({}) => {
+		sendResetEmail("jonathan.cibge@innernwgaw.com", "ASFVA");
 	}
 };

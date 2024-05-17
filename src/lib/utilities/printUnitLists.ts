@@ -170,9 +170,19 @@ export function drawDetailedUnitLine(listSummary: PDFPage, lines: number, unit: 
 		});
 	});
 
+	let moveString;
+	if (unit.move) {
+		moveString = "";
+		for (const movement of unit.move!) {
+			if (moveString != "") {
+				moveString += `/`;
+			}
+			moveString += `${movement.speed}"${movement.type}`;
+		}
+	}
 	listSummary.drawText(unit.name, { x: 81, y: pageHeight - 108 - 12 * lines, size: 8 });
 	listSummary.drawText(unit.type, { x: 306, y: pageHeight - 108 - 12 * lines, size: 8 });
-	listSummary.drawText(unit.move ?? "-", { x: 336, y: pageHeight - 108 - 12 * lines, size: 8 });
+	listSummary.drawText(moveString ?? "-", { x: 336, y: pageHeight - 108 - 12 * lines, size: 8 });
 	let damage = "";
 	if (unit.damageS == undefined) {
 		damage += "-";

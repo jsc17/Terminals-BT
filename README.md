@@ -1,4 +1,4 @@
-https://bt.terminl.xyz
+https://terminal.tools
 
 Disclaimer - I am completely self-taught and have basically been throwing this together as I've learned. It's getting better but the code can still be a mess in places.
 

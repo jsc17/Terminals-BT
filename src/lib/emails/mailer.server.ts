@@ -1,3 +1,4 @@
+//@ts-nocheck
 import nodemailer from "nodemailer";
 import { render } from "svelty-email";
 import ResetPassword from "./ResetPassword.svelte";
@@ -6,14 +7,11 @@ import ListSubmission from "./ListSubmission.svelte";
 import { prisma } from "$lib/server/prisma";
 
 export const transporter = nodemailer.createTransport({
-	host: "smtp.ethereal.email",
-	// host: "smtp.porkbun.com",
+	host: process.env.EMAIL_HOST,
 	port: 587,
 	auth: {
-		user: "vilma.marquardt@ethereal.email",
-		pass: "TRudc23e22uAjJDyAB"
-		// user: EMAIL,
-		// pass: EMAIL_PASSWORD
+		user: process.env.EMAIL,
+		pass: process.env.EMAIL_PASSWORD
 	}
 });
 

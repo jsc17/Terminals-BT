@@ -100,7 +100,7 @@ export const actions = {
 				return fail(400, { message: error });
 			}
 		}
-		return {};
+		return { message: "Load Complete" };
 	},
 	testUnit: async ({ request }) => {
 		const mulId = (await request.formData()).get("mulId");

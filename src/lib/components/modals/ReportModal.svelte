@@ -15,7 +15,10 @@
 		}
 	});
 
-	async function createIssueForm({ formData, cancel, submitter }: any) {
+	async function createIssueForm({ formData, cancel, submitter }: { formData: FormData; cancel: any; submitter: any }) {
+		if (formData.get("issueDetails")?.toString().includes("domainsubmit.info")) {
+			cancel();
+		}
 		if (submitter.innerText == "Cancel") {
 			reportDialog.close();
 			cancel();

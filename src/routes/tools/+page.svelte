@@ -92,10 +92,9 @@
 					formattedList.push(formattedUnit);
 				}
 				const formData = new FormData();
-				console.log(JSON.stringify(formattedList).length);
 				formData.append("unitList", JSON.stringify(formattedList));
 				const result: any = deserialize(await (await fetch("?/uploadUnits", { method: "POST", body: formData })).text());
-				if (result.ok) {
+				if (result.status == 200) {
 					console.log(`${link.type} loaded`);
 				} else {
 					console.log(`${link.type} - ${result.data.message}`);

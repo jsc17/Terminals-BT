@@ -249,11 +249,11 @@ async function validateUnit(unit: any, counts: any) {
 	if (unitData.rules == "Experimental" || unitData.rules == "Unknown") {
 		counts.rulesLevel.push(unitData.name);
 	}
-	if (unitData?.abilites?.toLowerCase().includes("dro")) {
+	if (unitData?.abilities?.toLowerCase().includes("dro")) {
 		counts.dro.push(unitData.name);
 	}
-	if (unitData?.abilites?.toLowerCase().includes("jmps")) {
-		counts.jmpsTotal += Number(unitData.abilites.match(/JMPS[1-9]/g)[0].charAt(4));
+	if (unitData?.abilities?.toLowerCase().includes("jmps")) {
+		counts.jmpsTotal += Number(unitData.abilities.match(/JMPS[1-9]/g)[0].charAt(4));
 		counts.jmps.push(unitData.name);
 	}
 	if (unitData.abilities?.toLowerCase().includes("htc")) {

@@ -379,7 +379,7 @@
 	class="sublist-modal">
 	<div class="dialog-body">
 		<div class="space-between">
-			<h1>Sublists</h1>
+			<h2>Sublists</h2>
 			{#if layout != "mobile"}
 				<div class="center gap8">
 					<p>Display</p>
@@ -759,14 +759,6 @@
 		min-height: 10%;
 		width: 100%;
 		font-size: 0.75rem;
-	}
-	.sublist-units {
-		li {
-			font-size: 0.7rem;
-			border-bottom: 1px solid var(--muted);
-		}
-		line-height: 1.5rem;
-		height: 50%;
 	}
 	.sublist-units-horizontal {
 		display: flex;

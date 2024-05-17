@@ -142,7 +142,7 @@
 									</button>
 								{/if}
 							</td>
-							{#if list.invalidUnits.includes(unit.name) || list.invalidUnits.includes(unit.class)}
+							{#if list.invalidUnits?.includes(unit.name) || list.invalidUnits?.includes(unit.class)}
 								<td class="invalid-unit">{unit.name}</td>
 							{:else}
 								<td>{unit.name}</td>
@@ -206,7 +206,7 @@
 		position: sticky;
 		width: 100%;
 		height: 93dvh;
-		top: 43px;
+		top: 35px;
 		overflow-y: auto;
 		z-index: 1;
 	}

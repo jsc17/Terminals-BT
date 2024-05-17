@@ -160,6 +160,7 @@
 		</tbody>
 	{/if}
 </table>
+
 {#if status == "waiting"}
 	<p>Choose an Era and faction to display results</p>
 {:else if status == "loading"}
@@ -171,12 +172,16 @@
 <style>
 	table {
 		width: 100%;
+		max-height: 100%;
 		border-collapse: collapse;
 		background-color: var(--card);
-		overflow: hidden;
+		overflow: auto;
+		position: relative;
 	}
+
 	th {
 		border: 1px solid var(--border);
+		background-color: var(--card);
 		height: 100%;
 	}
 	.table-header {

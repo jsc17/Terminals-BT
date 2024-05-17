@@ -1,13 +1,13 @@
 <script lang="ts">
 	import Header from "$lib/components/Header.svelte";
 	import { appWindow } from "$lib/utilities/responsive.svelte";
-	import { onMount, setContext } from "svelte";
+	import { setContext } from "svelte";
 
 	const { data } = $props();
 	let user = $state({ username: data.username });
 	setContext("user", user);
 
-	onMount(() => {
+	$effect.pre(() => {
 		appWindow.windowWidth = window.screen.availWidth;
 		window.onresize = () => {
 			appWindow.windowWidth = window.screen.availWidth;
@@ -55,7 +55,7 @@
 		padding: 0;
 		padding-right: 15px;
 		width: 100dvw;
-		height: 100dvh;
+		min-height: 100dvh;
 		overflow-x: hidden;
 		background-color: var(--background);
 		font-family: Arial, Helvetica, sans-serif;
@@ -117,8 +117,9 @@
 		gap: 16px;
 		padding: 16px;
 		position: relative;
-		height: 100%;
+		height: max(100%, 400px);
 		width: 100%;
+		overflow: auto;
 	}
 	:global(dialog::backdrop) {
 		background: rgba(0, 0, 0, 0.7);
@@ -189,9 +190,15 @@
 	:global(.inline) {
 		display: flex;
 		align-items: center;
+		gap: 8px;
 	}
 	:global(.column) {
 		display: flex;
 		flex-direction: column;
+		gap: 8px;
+	}
+	:global(hr) {
+		width: 90%;
+		border-top: 1px solid var(--primary);
 	}
 </style>

@@ -15,7 +15,10 @@
 		}
 	});
 
-	async function createIssueForm({ formData, cancel, submitter }: any) {
+	async function createIssueForm({ formData, cancel, submitter }: { formData: FormData; cancel: any; submitter: any }) {
+		if (formData.get("issueDetails")?.toString().includes("domainsubmit.info")) {
+			cancel();
+		}
 		if (submitter.innerText == "Cancel") {
 			reportDialog.close();
 			cancel();
@@ -38,7 +41,7 @@
 		showReportModal = false;
 	}}
 	class:dialog-wide={appWindow.isNarrow}>
-	<form class="dialog-body" action="/?/createIssue" method="post" use:enhance={createIssueForm}>
+	<form class="dialog-body" action="/api/issues?/createIssue" method="post" use:enhance={createIssueForm}>
 		<p>
 			Obviously I'd like everything to work without issues, but if you're here maybe it didn't, or maybe you just have a suggestion. Please enter the details below and I'll see
 			what I can do.
@@ -70,7 +73,6 @@
 					<option value="Minor">Minor</option>
 					<option value="Major">Major</option>
 				</select>
-				<p></p>
 			</div>
 			<label for="issueDetails">Issue Details* (Please be as specific as possible.):</label><textarea name="issueDetails" id="issueDetails" cols="60" rows="10"></textarea>
 			<div class="inline gap8">

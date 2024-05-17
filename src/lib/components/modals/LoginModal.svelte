@@ -78,34 +78,37 @@
 	{#if loginDisplay == "login"}
 		<div class="dialog-body">
 			<div class="space-between">
-				<h1>Login</h1>
+				<h2>Login</h2>
+				<button on:click={() => loginDialog.close()}>Close</button>
+			</div>
+			<form method="post" action="/auth/?/login" class="dialog-body" use:enhance={handleLogin}>
+				<div class="space-between">
+					<label for="username">Username</label>
+					<!-- <a href="/auth/forgot-username" class="forgot-link">Forgot Username?</a> -->
+				</div>
+				<input name="username" id="username" />
+				<div class="space-between">
+					<label for="password">Password</label>
+					<a href="/auth/forgot-password" class="forgot-link">Forgot Password?</a>
+				</div>
+				<input type="password" name="password" id="password" />
+
+				<div><button>Login</button></div>
 				<button
 					style:background-color="transparent"
 					style:color="var(--primary)"
 					on:click={() => {
 						loginDisplay = "register";
 					}}>Need an account? Click here to register</button>
-			</div>
-			<form method="post" action="/login/?/login" class="dialog-body" use:enhance={handleLogin}>
-				<label for="username">Username</label>
-				<input name="username" id="username" />
-				<label for="password">Password</label>
-				<input type="password" name="password" id="password" />
-				<div class="inline gap8 center"><button>Cancel</button><button>Continue</button></div>
 			</form>
 		</div>
 	{:else if loginDisplay == "register"}
 		<div class="dialog-body">
 			<div class="space-between">
-				<h1>Register</h1>
-				<button
-					style:background-color="transparent"
-					style:color="var(--primary)"
-					on:click={() => {
-						loginDisplay = "login";
-					}}>Already have an account? Click here to login</button>
+				<h2>Register</h2>
+				<button on:click={() => loginDialog.close()}>Close</button>
 			</div>
-			<form method="post" action="/login/?/register" class="dialog-body" use:enhance={handleSignUp}>
+			<form method="post" action="/auth/?/register" class="dialog-body" use:enhance={handleSignUp}>
 				<label for="username">Username</label>
 				<input name="username" id="username" />
 				<label for="password">Password</label>
@@ -114,8 +117,21 @@
 				<input type="password" name="verifyPassword" id="verifyPassword" />
 				<label for="email">Email Address</label>
 				<input type="email" name="email" id="email" />
-				<div class="inline gap8 center"><button>Cancel</button><button>Continue</button></div>
+				<div class="inline gap8 center"><button>Continue</button></div>
+				<button
+					style:background-color="transparent"
+					style:color="var(--primary)"
+					on:click={() => {
+						loginDisplay = "login";
+					}}>Already have an account? Click here to login</button>
 			</form>
 		</div>
 	{/if}
 </dialog>
+
+<style>
+	.forgot-link {
+		font-size: 0.75rem;
+		color: var(--primary);
+	}
+</style>

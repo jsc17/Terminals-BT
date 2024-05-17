@@ -7,7 +7,6 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  // provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -15,6 +14,9 @@ model User {
   id       String    @id
   sessions Session[]
   lists List[]
+  tournamentsOrganized Tournament[]
+  tournamentsJoined TournamentParticipant[]
+  resetTokens ResetToken[]
   username String @unique
   email String @unique
   hashedPassword String
@@ -23,17 +25,122 @@ model User {
 model Session {
   id        String   @id
   userId    String
-  expiresAt DateTime
   user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+  expiresAt DateTime
+}
+
+model ResetToken {
+  id String @id
+  userId String
+  user User @relation(references: [id], fields: [userId], onDelete: Cascade)
+  expiresAt DateTime
+  valid Boolean @default(true)
 }
 
 model List {
   id Int @id @default(autoincrement())
   userId String
+  user User @relation(references: [id], fields: [userId], onDelete: Cascade)
   name String
   era Int
   faction Int
   units String
-  sublists String
+  sublists String?
+
+}
+
+model Tournament {
+  id Int @id @default(autoincrement())
+  userId String
   user User @relation(references: [id], fields: [userId], onDelete: Cascade)
+  name String
+  organizer String
+  email String
+  era Int
+  tournament_date DateTime @db.Date 
+  passed Boolean?
+  participants TournamentParticipant[]
+  private Boolean
+  display_email Boolean
+  allow_resubmission Boolean
+  require_email Boolean
+}
+
+model TournamentParticipant {
+  id Int @id @default(autoincrement())
+  tournamentId Int
+  tournament Tournament @relation(references: [id], fields: [tournamentId], onDelete: Cascade)
+  name String
+  userId String?
+  user User? @relation(references: [id], fields: [userId], onDelete: Cascade)
+  email String?
+  listCodes ListCode[]
+}
+
+model ListCode {
+  id Int @id @default(autoincrement())
+  participantId Int
+  participant TournamentParticipant @relation(references: [id], fields: [participantId], onDelete: Cascade)
+  valid Boolean
+  issues String?
+  units String
+  era Int
+  faction Int
+  message String? @db.VarChar(500)
+  dateSubmitted DateTime @default(now())
+}
+
+model Unit {
+  id Int @id @default(autoincrement())
+  mulId Int @unique
+  name String
+  class String
+  variant String?
+  technology String?
+  rules String?
+  date_introduced Int?
+  role String?
+  type String
+  subtype String
+  size Int
+  move String
+  tmm Int
+  armor Int
+  structure Int
+  threshold Int
+  damage_s Int
+  damage_s_min Boolean
+  damage_m Int
+  damage_m_min Boolean
+  damage_l Int
+  damage_l_min Boolean
+  damage_e Int
+  damage_e_min Boolean
+  overheat Int
+  pv Int
+  abilities String?
+  tonnage String?
+  image_url String?
+
+  unit_availability UnitAvailability[]
+}
+
+model Faction{
+  era Int
+  faction Int
+  general Int
+  updated DateTime @default(now())
+  unit_availability UnitAvailability[]
+  @@id([era, faction])
+}
+
+model UnitAvailability {
+  unitId Int
+  unit Unit @relation(fields: [unitId], references: [id])
+
+  factionId Int
+  eraId Int
+  faction Faction @relation(fields: [eraId, factionId], references: [era, faction])
+
+  @@id([unitId, factionId])
 }

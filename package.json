@@ -16,6 +16,7 @@
 		"@sveltejs/vite-plugin-svelte": "^3.0.2",
 		"@types/eslint": "8.56.0",
 		"@types/node": "^20.11.24",
+		"@types/nodemailer": "^6.4.15",
 		"@typescript-eslint/eslint-plugin": "^6.21.0",
 		"@typescript-eslint/parser": "^6.21.0",
 		"eslint": "^8.57.0",
@@ -35,11 +36,11 @@
 		"@prisma/client": "^5.12.1",
 		"@sveltejs/adapter-node": "^4.0.1",
 		"lucia": "^3.1.1",
-		"mysql2": "^3.9.2",
 		"nodemailer": "^6.9.11",
 		"oslo": "^1.2.0",
 		"pdf-lib": "^1.17.1",
 		"pdfjs-dist": "^4.0.379",
-		"prettier": "^3.2.5"
+		"prettier": "^3.2.5",
+		"svelty-email": "github:socketopp/svelty-email#feature/component-render"
 	}
 }

@@ -3,9 +3,10 @@ import { fail } from "@sveltejs/kit";
 import { generateId } from "lucia";
 import { Argon2id } from "oslo/password";
 import { prisma } from "$lib/server/prisma";
+import type { Cookies } from "@sveltejs/kit";
 
 export const actions = {
-	register: async ({ request, cookies }) => {
+	register: async ({ request, cookies }: { request: Request; cookies: Cookies }) => {
 		const { username, password, verifyPassword, email } = Object.fromEntries(await request.formData()) as Record<string, string>;
 
 		if (username.length < 3 || username.length > 31 || !/^[a-z0-9_-]+$/.test(username)) {
@@ -45,10 +46,9 @@ export const actions = {
 			path: ".",
 			...sessionCookie.attributes
 		});
-
 		return { message: "Account created successfully", username: username };
 	},
-	login: async ({ request, cookies }) => {
+	login: async ({ request, cookies }: { request: Request; cookies: Cookies }) => {
 		const { username, password } = Object.fromEntries(await request.formData()) as Record<string, string>;
 
 		const existingUser = await prisma.user.findUnique({ where: { username: username.toLowerCase() } });
@@ -67,13 +67,13 @@ export const actions = {
 		});
 		return { message: "Login successful", username: existingUser.username };
 	},
-	logout: async (event) => {
-		if (!event.locals.session) {
+	logout: async ({ locals, cookies }: { locals: any; cookies: Cookies }) => {
+		if (!locals.session) {
 			return fail(401);
 		}
-		await lucia.invalidateSession(event.locals.session.id);
+		await lucia.invalidateSession(locals.session.id);
 		const sessionCookie = lucia.createBlankSessionCookie();
-		event.cookies.set(sessionCookie.name, sessionCookie.value, {
+		cookies.set(sessionCookie.name, sessionCookie.value, {
 			path: ".",
 			...sessionCookie.attributes
 		});

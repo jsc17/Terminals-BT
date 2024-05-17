@@ -31,9 +31,7 @@
 			} else {
 				try {
 					listDialog.close();
-				} catch {
-					console.log(listDialog);
-				}
+				} catch (error) {}
 			}
 		}
 	});
@@ -78,7 +76,6 @@
 		margin: 0;
 		position: relative;
 		padding: 8px;
-		flex: 1;
 		width: 100%;
 	}
 	.main-wide {
@@ -90,22 +87,9 @@
 		position: relative;
 		display: flex;
 		flex-direction: column;
-		align-items: center;
 		gap: 8px;
 		width: 100%;
 		margin: 0;
-	}
-	footer {
-		position: fixed;
-		bottom: 0;
-		width: 100%;
-		height: 50px;
-		display: flex;
-		justify-content: flex-end;
-		gap: 16px;
-		padding: 4px;
-		padding-right: 16px;
-		overflow-x: hidden;
 	}
 	button {
 		height: min(30px, 90%);

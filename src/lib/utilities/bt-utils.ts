@@ -25,6 +25,24 @@ export function getNewSkillCost(newSkill: number, basePV: number) {
 	return newCost;
 }
 
+export function calculateTMM(speed: number) {
+	let tmm = 0;
+	if (speed <= 4) {
+		tmm = 0;
+	} else if (speed <= 8) {
+		tmm = 1;
+	} else if (speed <= 12) {
+		tmm = 2;
+	} else if (speed <= 18) {
+		tmm = 3;
+	} else if (speed <= 34) {
+		tmm = 4;
+	} else if (speed >= 35) {
+		tmm = 5;
+	}
+	return tmm;
+}
+
 export async function getMULResults(era?: number, faction?: number, general?: number) {
 	let cachedResponse: any;
 	if (era != undefined && faction != undefined) {

@@ -3,7 +3,7 @@
 	import { eras, factions } from "$lib/data/erasFactionLookup.js";
 	import { appWindow } from "$lib/utilities/responsive.svelte";
 	import { getContext } from "svelte";
-	import { resultList } from "$lib/utilities/resultList.svelte";
+	import { resultList } from "../resultList.svelte";
 
 	let list: any = getContext("list");
 

@@ -23,7 +23,7 @@ export type Unit = {
 	abilities: string;
 	skill?: number;
 	imageLink?: string;
-	rulesLevel?: string;
+	rulesLevel: string;
 	tonnage?: number;
 	date?: number;
 	role?: string;

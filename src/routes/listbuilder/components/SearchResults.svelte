@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { appWindow } from "$lib/utilities/responsive.svelte";
 	import { getContext } from "svelte";
-	import { resultList } from "$lib/utilities/resultList.svelte";
+	import { resultList } from "../resultList.svelte";
 
 	let list: any = getContext("list");
 
@@ -28,7 +28,7 @@
 
 <table>
 	<colgroup>
-		<col style="width:33%" />
+		<col />
 		<col style="width:7%" />
 		<col style="width:7%" />
 		{#if !appWindow.isMobile}
@@ -40,7 +40,9 @@
 			<col style="width:12%" />
 		{/if}
 		<col style="width:15%" />
-		<col style="width:2%" />
+		{#if list}
+			<col style="width:2%" />
+		{/if}
 	</colgroup>
 	<thead>
 		<tr>
@@ -109,7 +111,9 @@
 				</th>
 			{/each}
 			<th><div class="table-header">DMG S/M/L-OV</div></th>
-			<th></th>
+			{#if list}
+				<th></th>
+			{/if}
 		</tr>
 	</thead>
 	{#if status == "loaded"}
@@ -151,7 +155,9 @@
 							{unit.damageS}{unit.damageSMin ? "*" : ""}{"/" + unit.damageM}{unit.damageMMin ? "*" : ""}{"/" + unit.damageL}{unit.damageLMin ? "*" : ""}{" - " + unit.overheat}
 						{/if}
 					</td>
-					<td><button on:click={() => list.add(unit)}>+</button></td>
+					{#if list}
+						<td><button on:click={() => list.add(unit)}>+</button></td>
+					{/if}
 				</tr>
 				<tr class="abilities" class:mobile-cell={appWindow.isMobile}>
 					<td colspan="9">{unit.abilities}</td>
@@ -186,6 +192,8 @@
 	}
 	.table-header {
 		display: flex;
+		align-items: center;
+		justify-content: center;
 		font-size: 0.75rem;
 		height: 100%;
 		width: 100%;

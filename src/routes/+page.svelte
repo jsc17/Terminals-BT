@@ -18,7 +18,7 @@
 			<a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">Wolfnet 350 Tournament Rules</a>
 		</li>
 		<li>
-			<p><a href="/as350">AS350 List Builder</a>: List builder with built in restrictions for the wolfnet 350 rules</p>
+			<p><a href="/listbuilder?rules=wn350">AS350 List Builder</a>: List builder with built in restrictions for the wolfnet 350 rules</p>
 		</li>
 		<li>
 			<p><a href="/350validation">AS350 List Validator</a> (Alpha): List validator for wolfnet 350 rules</p>

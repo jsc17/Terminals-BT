@@ -36,9 +36,9 @@
 	let autoGenerationDialog: HTMLDialogElement;
 	let printDialog: HTMLDialogElement;
 
-	let autoMinPV = 240,
-		autoMaxPV = 250,
-		autoMinUnitCost = 0;
+	let autoMinPV = $state(240),
+		autoMaxPV = $state(250),
+		autoMinUnitCost = $state(0);
 
 	let loaded = false;
 

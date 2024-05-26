@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { appWindow } from "$lib/utilities/responsive.svelte";
 	import { getContext } from "svelte";
-	import { resultList } from "$lib/utilities/resultList.svelte";
+	import { resultList } from "../resultList.svelte";
 	import type { Unit } from "$lib/types/unit";
 	import { enhance } from "$app/forms";
 

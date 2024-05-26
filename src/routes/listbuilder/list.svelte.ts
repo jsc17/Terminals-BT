@@ -1,9 +1,11 @@
 import { getNewSkillCost } from "$lib/utilities/bt-utils";
 import type { Unit } from "$lib/types/unit.js";
+import { type Options, ruleSets } from "./options";
 
 function createList() {
 	let units = $state<Unit[]>([]);
 	let details = $state({ name: "", era: "", faction: "", general: "" });
+	let options = $state<Options>();
 	let sublist = false;
 	let validate = false;
 
@@ -14,6 +16,10 @@ function createList() {
 		});
 		return listPV;
 	});
+
+	function setOptions(newRules: string) {
+		options = ruleSets.find((rules) => rules.name == newRules) ?? ruleSets[0];
+	}
 
 	return {
 		get units() {
@@ -27,6 +33,9 @@ function createList() {
 		},
 		get validate() {
 			return validate;
+		},
+		get options() {
+			return options;
 		},
 		details,
 		add: (unit: Unit) => {
@@ -47,7 +56,8 @@ function createList() {
 				units[newIndex] = units[index];
 				units[index] = temp;
 			}
-		}
+		},
+		setOptions
 	};
 }
 

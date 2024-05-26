@@ -3,7 +3,7 @@
 	import { appWindow } from "$lib/utilities/responsive.svelte";
 	import { getContext } from "svelte";
 	import { deserialize } from "$app/forms";
-	import { resultList } from "$lib/utilities/resultList.svelte";
+	import { resultList } from "../resultList.svelte";
 
 	let list: any = getContext("list");
 	let user: any = getContext("user");

@@ -1,27 +1,37 @@
 <script lang="ts">
-	import { SearchParameters, SearchResults, SearchFilters, Listbuilder } from "$lib/components/index";
-	import { resultList } from "$lib/utilities/resultList.svelte";
+	import { resultList } from "./resultList.svelte";
 	import { appWindow } from "$lib/utilities/responsive.svelte";
 	import { list } from "./list.svelte";
 	import { setContext, onMount } from "svelte";
-	import { filters } from "./filters";
+	import { Listbuilder, SearchParameters, SearchResults, SearchFilters } from "./components/index";
+	import { ruleSets } from "./options";
 
 	let status = $state<"waiting" | "loading" | "loaded" | "error">("waiting");
+	let selectedRules = $state<string>("");
 	let listDialog: HTMLDialogElement;
 	let showListDialog = $state(false);
-	let recentChanges: string[] = ["Added authentication to sync lists between devices", "Added Export for Jeff's Battletech Tools"];
+	let recentChanges: string[] = [
+		"Combined generic and wolfnet 350 list builders into one, for easier maintainance and eventually customization of rules.",
+		"Choosing the correct ruleset from the dropdown above will limit the units offered in the results panel, but does not currently validate extra rules (such as 350's various rule of 2's)"
+	];
 	let description: string[] = [
 		"An Alpha Strike list builder I've created to help filter the data from the amazing work the Master Unit List team has done.",
 		"Feedback will always be welcome. If you found your way here, you probably know me on facebook or through the wolfnet discord, so feel free to ping me. (Discord - Jonathan 'Terminal' Colton)"
 	];
+	let { data } = $props();
 
 	setContext("list", list);
 
 	onMount(() => {
 		resultList.clear();
 		resultList.customCards = undefined;
-		resultList.restrictions = undefined;
-		resultList.filters = filters;
+		if (data.rules && ruleSets.find((value) => value.name == data.rules)) {
+			selectedRules = data.rules;
+		} else {
+			selectedRules = "noRes";
+		}
+		resultList.setOptions(selectedRules);
+		list.setOptions(selectedRules);
 	});
 
 	$effect(() => {
@@ -44,7 +54,7 @@
 		<SearchResults bind:status />
 	</div>
 	{#if !appWindow.isNarrow}
-		<Listbuilder bind:status {recentChanges} {description} />
+		<Listbuilder bind:status bind:selectedRules {recentChanges} {description} />
 	{:else}
 		<button
 			on:click={() => {
@@ -67,7 +77,7 @@
 					showListDialog = false;
 				}}>Close</button>
 		</div>
-		<Listbuilder bind:status {recentChanges} {description}></Listbuilder>
+		<Listbuilder bind:status bind:selectedRules {recentChanges} {description}></Listbuilder>
 	</dialog>
 {/if}
 

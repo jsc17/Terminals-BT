@@ -1,15 +1,13 @@
 <script lang="ts">
-	import { SearchFilters, SearchResults } from "$lib/components/index";
+	import { SearchFilters, SearchResults } from "./components/index";
 	import { onMount } from "svelte";
-	import { resultList } from "$lib/utilities/resultList.svelte";
-	import { filters } from "./filters";
+	import { resultList } from "./resultList.svelte";
 
 	let status = $state<"waiting" | "loading" | "loaded" | "error">("loading");
 	onMount(() => {
 		resultList.clear();
 		resultList.customCards = undefined;
 		resultList.restrictions = undefined;
-		resultList.filters = filters;
 		resultList.loadUnitsSql();
 		status = "loading";
 	});
@@ -22,6 +20,7 @@
 </script>
 
 <main>
+	<h2>Era and faction filtering coming soon. There might be a slight delay when applying the first filter as it's processing a lot of units.</h2>
 	<SearchFilters></SearchFilters>
 	<SearchResults bind:status></SearchResults>
 </main>

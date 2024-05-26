@@ -1,12 +1,16 @@
 <script lang="ts">
-	import PrintModal from "$lib/components/modals/PrintModal.svelte";
-	import SaveModal from "$lib/components/modals/SaveModal.svelte";
-	import LoadModal from "$lib/components/modals/LoadModal.svelte";
-	import { getContext } from "svelte";
-	import SublistModal from "./modals/SublistModal.svelte";
+	import { PrintModal, SaveModal, LoadModal, SublistModal } from "./index";
+	import { getContext, onMount } from "svelte";
+	import { ruleSets } from "../options";
+	import { resultList } from "../resultList.svelte";
 
 	let list: any = getContext("list");
-	let { status = $bindable(), recentChanges, description }: { status: any; recentChanges: string[]; description: string[] } = $props();
+	let {
+		status = $bindable(),
+		selectedRules = $bindable(),
+		recentChanges,
+		description
+	}: { status: any; recentChanges: string[]; description: string[]; selectedRules: string } = $props();
 	let errorDialog: HTMLDialogElement;
 	let showPrintModal = $state(false);
 	let showSaveModal = $state(false);
@@ -20,12 +24,44 @@
 			list.modifySkill(index, skill, basePV);
 		}
 	}
+	onMount(() => {
+		console.log(list.options?.name);
+		selectedRules = list.options?.name;
+	});
 </script>
 
 <div class="card listBuilder">
 	<div class="list-header gap8">
 		<div class="list-info">
 			<input id="listName" type="text" placeholder="List name" bind:value={list.details.name} />
+			<div class="inline">
+				<label for="rules">Rules:</label>
+				<select
+					bind:value={selectedRules}
+					on:change={() => {
+						list.setOptions(selectedRules);
+						resultList.setOptions(list.options.name);
+					}}>
+					{#each ruleSets as rules}
+						<option value={rules.name}>{rules.display}</option>
+					{/each}
+				</select>
+			</div>
+		</div>
+		<div class="list-info">
+			<div class="list-stats">
+				{#if list.options?.maxPv}
+					<p class:errors={list.pv > list.options.maxPv}>PV: {list.pv}/{list.options.maxPv}</p>
+				{:else}
+					<p>PV: {list.pv}</p>
+				{/if}
+
+				{#if list.options?.maxUnits}
+					<p class:errors={list.units.length > list.options.maxUnits}>Units: {list.units.length}/{list.options.maxUnits}</p>
+				{:else}
+					<p>Units: {list.units.length}</p>
+				{/if}
+			</div>
 			<div class="list-buttons">
 				<button
 					onclick={() => {
@@ -46,60 +82,14 @@
 					<img src="/icons/printer.svg" alt="print" class="button-icon" />
 				</button>
 			</div>
-		</div>
-		<div class="list-info">
-			{#if list.validate}
-				<div class="list-stats">
-					{#if list.valid.pv[0]}
-						<p>PV: {list.valid.pv[1]}/350</p>
-					{:else}
-						<p style="color: red">PV: {list.valid.pv[1]}/350</p>
-					{/if}
-					{#if list.valid.unitNumber[0]}
-						<p>Units: {list.valid.unitNumber[1]}/16</p>
-					{:else}
-						<p style="color: red">Units: {list.valid.unitNumber[1]}/16</p>
-					{/if}
-				</div>
-				<div class="errors">
-					{#if list.issue}
-						<img
-							class="error-icon button-icon"
-							src="/icons/alert-outline.svg"
-							alt="Error"
-							on:mouseenter={() => {
-								errorDialog.show();
-							}}
-							on:mouseleave={() => {
-								errorDialog.close();
-							}} />
-						<dialog class="error-dialog" bind:this={errorDialog}>
-							<ul>
-								{#each list.errorList as error}
-									<li>{error}</li>
-								{/each}
-							</ul>
-						</dialog>
-					{/if}
-				</div>
-			{:else}
-				<div class="list-stats">
-					<p>PV: {list.pv}</p>
-
-					<p>Units: {list.units.length}</p>
-				</div>
-			{/if}
-
-			{#if list.sublist}
-				<button
-					on:click={() => {
-						if (list.units.length) {
-							showSublistModal = true;
-						} else {
-							alert("Please add units to list before creating sublists");
-						}
-					}}>Generate Sub-lists</button>
-			{/if}
+			<button
+				on:click={() => {
+					if (list.units.length) {
+						showSublistModal = true;
+					} else {
+						alert("Please add units to list before creating sublists");
+					}
+				}}>Sub-lists</button>
 		</div>
 	</div>
 	<div class="list-units">
@@ -111,7 +101,6 @@
 						{#each recentChanges as change}
 							<li>{change}</li>
 						{/each}
-						<li>Check the changelog button at the top for a complete list of changes and bug fixes.</li>
 					</ul>
 					{#each description as line}
 						<p>{line}</p>
@@ -280,7 +269,7 @@
 		color: var(--error);
 	}
 	.errors {
-		width: 35px;
+		color: var(--error);
 	}
 	.error-icon {
 		filter: var(--error-filter);

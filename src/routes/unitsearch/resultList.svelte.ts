@@ -2,6 +2,7 @@ import type { Unit } from "$lib/types/unit.js";
 import { calculateTMM, getGeneralList, getMULResults } from "$lib/utilities/bt-utils";
 import type { filter } from "$lib/types/filter";
 import { deserialize } from "$app/forms";
+import { filters as filtersImport, additionalFilters as additionalFiltersImport } from "$lib/data/filters";
 
 export function createResultList() {
 	let results = $state<Unit[]>([]);
@@ -12,7 +13,9 @@ export function createResultList() {
 	let customCards: any;
 	let restrictions: any;
 
-	let filters = $state<filter[]>([]);
+	let filters = $state<filter[]>(filtersImport);
+	let additionalFilters = $state<filter[]>(additionalFiltersImport);
+
 	let sort = $state({ key: "", order: "asc" });
 	let filtered = $derived.by(() => {
 		let tempresultList = [...results];
@@ -20,62 +23,127 @@ export function createResultList() {
 			switch (filter.type) {
 				case "string":
 				case "select":
-					if (filter.value != "" && filter.value != "any") {
+					if (filter.value && filter.value != "any") {
 						tempresultList = tempresultList.filter((unit) => {
 							if (unit[filter.name] != null) {
-								return unit[filter.name].toLowerCase().includes(filter.value.toString().toLowerCase());
+								return unit[filter.name].toLowerCase().includes(filter.value!.toString().toLowerCase());
 							}
 						});
 					}
 					break;
-				case "min":
-					if (filter.value != 0 && filter.value != null) {
+				case "number":
+					if (filter.value) {
 						if (filter.name == "move") {
 							tempresultList = tempresultList.filter((unit) => {
 								if (unit.move != undefined) {
-									return unit.move[0].speed >= parseInt(filter.value.toString());
+									return unit.move[0].speed >= parseInt(filter.value!.toString());
 								}
 							});
 						} else {
 							tempresultList = tempresultList.filter((unit) => {
-								return unit[filter.name] >= filter.value;
+								return unit[filter.name] >= filter.value!;
 							});
 						}
 					}
-					break;
-				case "max":
-					if (filter.value != filter.default && filter.value != null) {
-						tempresultList = tempresultList.filter((unit) => {
-							return unit[filter.name] <= filter.value;
-						});
-					}
-					break;
-				case "minMax":
-					if (filter.value != 0 && filter.value != null) {
-						tempresultList = tempresultList.filter((unit) => {
-							return unit[filter.name] >= filter.value;
-						});
-					}
-					if (filter.maxValue != filter.maxDefault && filter.maxValue != null) {
+					if (filter.maxValue != null) {
 						tempresultList = tempresultList.filter((unit) => {
 							return unit[filter.name] <= filter.maxValue!;
 						});
 					}
 					break;
-				case "minGroup":
+				case "numberGroup":
 					filter.values!.forEach((value, index) => {
-						if (value != 0 && value != null) {
+						if (value.min) {
 							tempresultList = tempresultList.filter((unit) => {
-								return unit[filter.properties![index]] >= value;
+								console.log(filter.properties![index]);
+								console.log(unit);
+								return unit[filter.properties![index]] >= value.min!;
+							});
+						}
+						if (value.max) {
+							tempresultList = tempresultList.filter((unit) => {
+								return unit[filter.properties![index]] <= value.max!;
 							});
 						}
 					});
 
 					break;
 				case "abilities":
-					if (filter.value != "") {
+					if (filter.value) {
 						tempresultList = tempresultList.filter((unit) => {
-							let searchedAbilities = filter.value.toString().split(",");
+							let searchedAbilities = filter.value!.toString().split(",");
+							let allFound = true;
+							searchedAbilities.forEach((ability) => {
+								let stepFound = false;
+								let steps = ability.split("^");
+								steps.forEach((step) => {
+									if (unit[filter.name].toLowerCase().includes(step.trim().toLowerCase())) {
+										stepFound = true;
+									}
+								});
+								if (!stepFound) {
+									allFound = false;
+								}
+							});
+							return allFound;
+						});
+					}
+					break;
+			}
+		});
+		additionalFilters.forEach((filter) => {
+			switch (filter.type) {
+				case "string":
+				case "select":
+					if (filter.value && filter.value != "any") {
+						tempresultList = tempresultList.filter((unit) => {
+							if (unit[filter.name] != null) {
+								return unit[filter.name].toLowerCase().includes(filter.value!.toString().toLowerCase());
+							}
+						});
+					}
+					break;
+				case "number":
+					if (filter.value) {
+						if (filter.name == "move") {
+							tempresultList = tempresultList.filter((unit) => {
+								if (unit.move != undefined) {
+									return unit.move[0].speed >= parseInt(filter.value!.toString());
+								}
+							});
+						} else {
+							tempresultList = tempresultList.filter((unit) => {
+								return unit[filter.name] >= filter.value!;
+							});
+						}
+					}
+					if (filter.maxValue != null) {
+						tempresultList = tempresultList.filter((unit) => {
+							return unit[filter.name] <= filter.maxValue!;
+						});
+					}
+					break;
+				case "numberGroup":
+					filter.values!.forEach((value, index) => {
+						if (value.min) {
+							tempresultList = tempresultList.filter((unit) => {
+								console.log(filter.properties![index]);
+								console.log(unit);
+								return unit[filter.properties![index]] >= value.min!;
+							});
+						}
+						if (value.max) {
+							tempresultList = tempresultList.filter((unit) => {
+								return unit[filter.properties![index]] <= value.max!;
+							});
+						}
+					});
+
+					break;
+				case "abilities":
+					if (filter.value) {
+						tempresultList = tempresultList.filter((unit) => {
+							let searchedAbilities = filter.value!.toString().split(",");
 							let allFound = true;
 							searchedAbilities.forEach((ability) => {
 								let stepFound = false;
@@ -127,80 +195,6 @@ export function createResultList() {
 		return tempresultList;
 	});
 
-	async function loadUnits() {
-		let unitList: any[] = [];
-
-		[unitList, uniqueList] = await Promise.all([getMULResults(details.era, details.faction, general), getMULResults(details.era, 4)]);
-
-		if (customCards != undefined) {
-			if (unitList.length) {
-				customCards.units.forEach((unit: any) => {
-					results.push({
-						id: unit.id,
-						type: unit.type,
-						name: unit.name,
-						class: unit.class,
-						variant: unit.variant,
-						pv: unit.pv,
-						cost: unit.pv,
-						abilities: unit.abilities
-					});
-				});
-			}
-		}
-		unitList.forEach((unit: any) => {
-			let unique =
-				uniqueList.find((result) => {
-					return result.Id == unit.Id;
-				}) != undefined;
-
-			let tempMovement: { speed: number; type: string }[] = [];
-			unit.BFMove.split("/").forEach((movement: string) => {
-				let [moveSpeed, moveType] = movement.split('"');
-				tempMovement.push({ speed: parseInt(moveSpeed), type: moveType });
-			});
-			const tmm = calculateTMM(tempMovement[0].speed);
-			try {
-				let formattedUnit: Unit = {
-					id: unit.Id,
-					name: unit.Name,
-					class: unit.Class,
-					variant: unit.Variant,
-					type: unit.BFType.toUpperCase(),
-					pv: unit.BFPointValue,
-					cost: unit.BFPointValue,
-					skill: 4,
-					size: unit.BFSize,
-					move: tempMovement,
-					tmm: tmm,
-					health: unit.BFArmor + unit.BFStructure,
-					armor: unit.BFArmor,
-					structure: unit.BFStructure,
-					damageS: unit.BFDamageShort,
-					damageSMin: unit.BFDamageShortMin,
-					damageM: unit.BFDamageMedium,
-					damageMMin: unit.BFDamageMediumMin,
-					damageL: unit.BFDamageLong,
-					damageLMin: unit.BFDamageLongMin,
-					overheat: unit.BFOverheat,
-					abilities: (unit.BFAbilities ?? "-").replaceAll(",", ", "),
-					imageLink: unit.ImageUrl,
-					rulesLevel: unit.Rules,
-					tonnage: unit.Tonnage,
-					date: unit.DateIntroduced,
-					role: unit.Role.Name
-				};
-				if (restrictions == undefined) {
-					results.push(formattedUnit);
-				} else if (restrictions(formattedUnit, unique)) {
-					results.push(formattedUnit);
-				}
-			} catch (error) {
-				console.log(error);
-				console.log(`${unit.Name} could not be added to result list`);
-			}
-		});
-	}
 	async function loadUnitsSql() {
 		const response: any = deserialize(await (await fetch("/?/getAllUnits", { method: "POST", body: "" })).text());
 		const unitList = response.data.unitList;
@@ -250,6 +244,36 @@ export function createResultList() {
 			}
 		});
 	}
+	async function resetFilters() {
+		filters.forEach((filter) => {
+			if (filter.type == "number") {
+				filter.value = undefined;
+				filter.maxValue = undefined;
+			} else if (filter.type == "numberGroup") {
+				filter.values!.forEach((value, index, values) => {
+					values[index] = {};
+				});
+			} else if (filter.type == "select") {
+				filter.value = "any";
+			} else {
+				filter.value = undefined;
+			}
+		});
+		additionalFilters.forEach((filter) => {
+			if (filter.type == "number") {
+				filter.value = undefined;
+				filter.maxValue = undefined;
+			} else if (filter.type == "numberGroup") {
+				filter.values!.forEach((value, index, values) => {
+					values[index] = {};
+				});
+			} else if (filter.type == "select") {
+				filter.value = "any";
+			} else {
+				filter.value = undefined;
+			}
+		});
+	}
 
 	return {
 		get results() {
@@ -271,18 +295,18 @@ export function createResultList() {
 		get filters() {
 			return filters;
 		},
-		set filters(filterList: filter[]) {
-			filters = filterList;
+		get additionalFilters() {
+			return additionalFilters;
 		},
 		sort,
-		loadUnits,
 		loadUnitsSql,
 		add: (unit: Unit) => {
 			results.push(JSON.parse(JSON.stringify(unit)));
 		},
 		clear: () => {
 			results = [];
-		}
+		},
+		resetFilters
 	};
 }
 

@@ -90,7 +90,7 @@
 		background-color: var(--card);
 		color: var(--card-foreground);
 		border: 1px solid var(--border);
-		padding: 16px;
+		padding: 8px;
 		border-radius: var(--radius);
 		width: 100%;
 		box-shadow: 2px 2px rgb(0 0 0 / 0.1);

@@ -7,6 +7,7 @@ export interface Options {
 	allowedRules?: string[];
 	disallowUnique?: boolean;
 	disallowedAbilities?: string[];
+	customCardPacks?: string[];
 }
 
 export const ruleSets: Options[] = [
@@ -22,6 +23,7 @@ export const ruleSets: Options[] = [
 		allowedTypes: ["BA", "BM", "CV", "CI", "IM", "IM", "PM"],
 		allowedRules: ["Introductory", "Advanced", "Standard"],
 		disallowUnique: true,
-		disallowedAbilities: ["DRO"]
+		disallowedAbilities: ["DRO"],
+		customCardPacks: ["wn350"]
 	}
 ];

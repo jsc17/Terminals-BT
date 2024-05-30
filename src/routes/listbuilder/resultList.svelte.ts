@@ -5,6 +5,7 @@ import { deserialize } from "$app/forms";
 import { filters as filtersImport, additionalFilters as additionalFiltersImport } from "$lib/data/filters";
 import type { Options } from "./options";
 import { ruleSets } from "./options";
+import customCards from "./customCards.json";
 
 export function createResultList() {
 	let details = $state({ era: -1, faction: -1 });
@@ -12,7 +13,6 @@ export function createResultList() {
 
 	let resultList = $state<Unit[]>([]);
 	let uniqueList: any[] = [];
-	let customCards: any;
 
 	let options = $state<Options>();
 	let availableList = $derived.by(applyOptions);
@@ -27,29 +27,7 @@ export function createResultList() {
 
 		[unitList, uniqueList] = await Promise.all([getMULResults(details.era, details.faction, general), getMULResults(details.era, 4)]);
 
-		if (customCards != undefined) {
-			if (unitList.length) {
-				customCards.units.forEach((unit: any) => {
-					resultList.push({
-						id: unit.id,
-						type: unit.type,
-						name: unit.name,
-						class: unit.class,
-						variant: unit.variant,
-						pv: unit.pv,
-						cost: unit.pv,
-						abilities: unit.abilities,
-						rulesLevel: "standard"
-					});
-				});
-			}
-		}
 		unitList.forEach((unit: any) => {
-			let unique =
-				uniqueList.find((result) => {
-					return result.Id == unit.Id;
-				}) != undefined;
-
 			let tempMovement: { speed: number; type: string }[] = [];
 			unit.BFMove.split("/").forEach((movement: string) => {
 				let [moveSpeed, moveType] = movement.split('"');
@@ -148,6 +126,23 @@ export function createResultList() {
 	function applyOptions() {
 		let tempAvailableList: Unit[] = [];
 		if (options) {
+			for (const cardPack of customCards.cardpacks) {
+				if (options.customCardPacks?.includes(cardPack.name)) {
+					for (const unit of cardPack.units) {
+						tempAvailableList.push({
+							id: unit.id,
+							type: unit.type,
+							name: unit.name,
+							class: unit.class,
+							variant: unit.variant,
+							pv: unit.pv,
+							cost: unit.pv,
+							abilities: unit.abilities,
+							rulesLevel: "standard"
+						});
+					}
+				}
+			}
 			for (const unit of resultList) {
 				if (options.allowedTypes && !options.allowedTypes?.includes(unit.type)) {
 					continue;
@@ -398,9 +393,6 @@ export function createResultList() {
 		},
 		setOptions,
 		details,
-		set customCards(cards: any) {
-			customCards = cards;
-		},
 		get filtered() {
 			return filteredList;
 		},

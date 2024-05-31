@@ -395,7 +395,10 @@ export function createResultList() {
 		},
 		setOptions,
 		details,
-		get filtered() {
+		get availableList() {
+			return availableList;
+		},
+		get filteredList() {
 			return filteredList;
 		},
 		get filters() {

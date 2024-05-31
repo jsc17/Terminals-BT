@@ -24,7 +24,6 @@
 
 	onMount(() => {
 		resultList.clear();
-		resultList.customCards = undefined;
 		if (data.rules && ruleSets.find((value) => value.name == data.rules)) {
 			selectedRules = data.rules;
 		} else {

@@ -126,20 +126,22 @@ export function createResultList() {
 	function applyOptions() {
 		let tempAvailableList: Unit[] = [];
 		if (options) {
-			for (const cardPack of customCards.cardpacks) {
-				if (options.customCardPacks?.includes(cardPack.name)) {
-					for (const unit of cardPack.units) {
-						tempAvailableList.push({
-							id: unit.id,
-							type: unit.type,
-							name: unit.name,
-							class: unit.class,
-							variant: unit.variant,
-							pv: unit.pv,
-							cost: unit.pv,
-							abilities: unit.abilities,
-							rulesLevel: "standard"
-						});
+			if (resultList.length) {
+				for (const cardPack of customCards.cardpacks) {
+					if (options.customCardPacks?.includes(cardPack.name)) {
+						for (const unit of cardPack.units) {
+							tempAvailableList.push({
+								id: unit.id,
+								type: unit.type,
+								name: unit.name,
+								class: unit.class,
+								variant: unit.variant,
+								pv: unit.pv,
+								cost: unit.pv,
+								abilities: unit.abilities,
+								rulesLevel: "standard"
+							});
+						}
 					}
 				}
 			}

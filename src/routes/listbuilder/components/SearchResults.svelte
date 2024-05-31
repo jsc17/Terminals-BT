@@ -50,7 +50,7 @@
 				<div class="table-header">
 					{#if !appWindow.isMobile}
 						<button class="sort-header-button" data-sort="name" on:click={sort}>
-							Name - <em>{resultList.filtered.length}/{resultList.results.length} results shown</em>
+							Name - <em>{resultList.filteredList.length}/{resultList.availableList.length} results shown</em>
 							{#if resultList.sort.key == "name"}
 								{#if resultList.sort.order == "asc"}
 									<img class="sort-selected button-icon" src="/icons/sort-ascending.svg" alt="sort" />
@@ -118,7 +118,7 @@
 	</thead>
 	{#if status == "loaded"}
 		<tbody>
-			{#each resultList.filtered as unit}
+			{#each resultList.filteredList as unit}
 				<tr class="stats" class:mobile-cell={appWindow.isMobile}>
 					<td><a href="http://masterunitlist.info/Unit/Details/{unit.id}" target="_blank">{unit.name}</a></td>
 					<td class="align-center">{unit.type}</td>

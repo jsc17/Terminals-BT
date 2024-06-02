@@ -177,8 +177,8 @@ export const actions = {
 		if (!locals.user) {
 			return fail(401, { message: "User not logged in" });
 		}
-		const { name, era, faction, units, sublists } = Object.fromEntries(await request.formData()) as Record<string, string>;
-		const data = { userId: locals.user.id, name, era: Number(era), faction: Number(faction), units, sublists };
+		const { name, era, faction, units, sublists, rules } = Object.fromEntries(await request.formData()) as Record<string, string>;
+		const data = { userId: locals.user.id, name, era: Number(era), faction: Number(faction), units, sublists, rules };
 		try {
 			const existingList = await prisma.list.findFirst({
 				where: {

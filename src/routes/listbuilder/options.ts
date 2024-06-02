@@ -27,3 +27,7 @@ export const ruleSets: Options[] = [
 		customCardPacks: ["wn350"]
 	}
 ];
+
+export function getRules(name: string) {
+	return ruleSets.find((rules) => rules.name == name);
+}

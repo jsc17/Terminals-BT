@@ -52,6 +52,7 @@
 			formData.append("name", list.details.name);
 			formData.append("era", resultList.details.era);
 			formData.append("faction", resultList.details.faction);
+			formData.append("rules", resultList.options?.name);
 			let units: string[] = [];
 			for (const unit of list.units) {
 				units.push(`${unit.id},${unit.skill}`);
@@ -79,6 +80,9 @@
 			cancel();
 			showSaveModal = false;
 		}
+		return async () => {
+			console.log("list saved");
+		};
 	}
 
 	function exportToJeff() {

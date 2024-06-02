@@ -4,14 +4,15 @@
 	import { getContext } from "svelte";
 	import { deserialize } from "$app/forms";
 	import { resultList } from "../resultList.svelte";
+	import { ruleSets, getRules, type Options } from "../options";
 
 	let list: any = getContext("list");
 	let user: any = getContext("user");
 
-	let { showLoadModal = $bindable(), status = $bindable() } = $props();
+	let { showLoadModal = $bindable(), status = $bindable(), selectedRules = $bindable() } = $props();
 	let loadDialog: HTMLDialogElement;
 	let importCode = $state("");
-	let savedLists = $state<{ name: string; era: number; faction: number; units: string; sublists: string; local: boolean }[]>([]);
+	let savedLists = $state<{ name: string; era: number; faction: number; units: string; sublists: string; local: boolean; rules: Options }[]>([]);
 	let selectedList = $state(-1);
 	let localListsExist = $state(false);
 
@@ -32,7 +33,16 @@
 		if (response.status == 200) {
 			const responseLists = JSON.parse(response.data.lists);
 			for (const tempList of responseLists) {
-				savedLists.push({ name: tempList.name, era: Number(tempList.era), faction: Number(tempList.faction), units: tempList.units, sublists: tempList.sublists, local: false });
+				let rules = getRules(tempList.rules) ?? ruleSets[0];
+				savedLists.push({
+					name: tempList.name,
+					era: Number(tempList.era),
+					faction: Number(tempList.faction),
+					units: tempList.units,
+					sublists: tempList.sublists,
+					local: false,
+					rules
+				});
 			}
 		} else {
 			console.log(response.data.message);
@@ -50,7 +60,7 @@
 				}
 				let [localEra, localFaction, ...localUnits] = listDetails.split(":");
 				const unitString = localUnits.join(":");
-				savedLists.push({ name: localListName, era: Number(localEra), faction: Number(localFaction), units: unitString, sublists: localSublists, local: true });
+				savedLists.push({ name: localListName, era: Number(localEra), faction: Number(localFaction), units: unitString, sublists: localSublists, local: true, rules: ruleSets[0] });
 			}
 		}
 	}
@@ -77,7 +87,11 @@
 	}
 
 	async function loadList() {
-		const { era, faction, name, units, sublists } = savedLists[selectedList];
+		const { era, faction, name, units, sublists, rules } = savedLists[selectedList];
+
+		list.setOptions(rules.name);
+		resultList.setOptions(rules.name);
+		selectedRules = rules.name;
 
 		resultList.details.era = era;
 		resultList.details.faction = faction;
@@ -99,7 +113,6 @@
 		} else {
 			list.sublists = [];
 		}
-
 		while (list.units.length) {
 			list.remove(0);
 		}
@@ -149,17 +162,28 @@
 		<div class="table-container">
 			<table class="saved-lists">
 				<colgroup>
-					<col style="width:45%" />
+					<col />
+					<col style="width:15%" />
+					<col style="width:15%" />
 					<col style="width:20%" />
-					<col style="width:30%" />
-					<col style="width:5%" />
+					<col style="width:20px" />
 				</colgroup>
+				<thead>
+					<tr>
+						<th>List name</th>
+						<th>Era</th>
+						<th>Faction</th>
+						<th>Rules</th>
+						<th></th>
+					</tr>
+				</thead>
 				<tbody>
 					{#each savedLists as savedList, index}
 						<tr id={index.toString()} class:selected={selectedList == index} on:click={() => selectRow(index)} on:dblclick={loadList}>
 							<td class:local={savedList.local}>{savedList.name}</td>
-							<td>{eras.get(savedList.era)}</td>
-							<td>{factions.get(savedList.faction)}</td>
+							<td style="text-align:center">{eras.get(savedList.era)}</td>
+							<td style="text-align:center">{factions.get(savedList.faction)}</td>
+							<td style="text-align:center">{savedList.rules.display}</td>
 							<td><button on:click={() => deleteList(index)}>-</button></td>
 						</tr>
 					{/each}
@@ -181,6 +205,9 @@
 </dialog>
 
 <style>
+	dialog {
+		width: 70%;
+	}
 	input[type="text"] {
 		width: 75%;
 	}
@@ -199,6 +226,14 @@
 	table,
 	tbody {
 		width: 100%;
+		border-collapse: separate;
+		border-spacing: 0 4px;
+	}
+	tbody tr:nth-child(2) {
+		background-color: var(--muted);
+	}
+	th {
+		border-bottom: 1px solid var(--border);
 	}
 	.selected {
 		box-shadow: 5px 0px 5px var(--primary) inset;

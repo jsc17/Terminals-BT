@@ -25,7 +25,6 @@
 		}
 	}
 	onMount(() => {
-		console.log(list.options?.name);
 		selectedRules = list.options?.name;
 	});
 </script>
@@ -187,7 +186,7 @@
 
 <PrintModal bind:showPrintModal></PrintModal>
 <SaveModal bind:showSaveModal></SaveModal>
-<LoadModal bind:showLoadModal bind:status></LoadModal>
+<LoadModal bind:showLoadModal bind:status bind:selectedRules></LoadModal>
 <SublistModal bind:showSublistModal></SublistModal>
 
 <style>

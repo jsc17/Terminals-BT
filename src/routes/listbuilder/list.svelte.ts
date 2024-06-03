@@ -6,7 +6,7 @@ function createList() {
 	let units = $state<Unit[]>([]);
 	let details = $state({ name: "", era: "", faction: "", general: "" });
 	let options = $state<Options>();
-	let sublist = false;
+	let sublists = $state<string[]>([]);
 	let validate = false;
 
 	let pv = $derived.by(() => {
@@ -28,8 +28,11 @@ function createList() {
 		get pv() {
 			return pv;
 		},
-		get sublist() {
-			return sublist;
+		get sublists() {
+			return sublists;
+		},
+		set sublists(newSublists) {
+			sublists = newSublists;
 		},
 		get validate() {
 			return validate;

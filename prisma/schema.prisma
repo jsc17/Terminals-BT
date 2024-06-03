@@ -42,11 +42,11 @@ model List {
   userId String
   user User @relation(references: [id], fields: [userId], onDelete: Cascade)
   name String
-  era Int
-  faction Int
+  era Int?
+  faction Int?
   units String
   sublists String?
-
+  rules String?
 }
 
 model Tournament {

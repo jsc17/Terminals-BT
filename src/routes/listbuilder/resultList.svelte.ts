@@ -24,6 +24,7 @@ export function createResultList() {
 
 	async function loadUnits() {
 		let unitList: any[] = [];
+		resultList = [];
 
 		[unitList, uniqueList] = await Promise.all([getMULResults(details.era, details.faction, general), getMULResults(details.era, 4)]);
 
@@ -406,6 +407,9 @@ export function createResultList() {
 		},
 		get additionalFilters() {
 			return additionalFilters;
+		},
+		get options() {
+			return options;
 		},
 		sort,
 		loadUnits,

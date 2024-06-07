@@ -7,7 +7,7 @@ import type { Options } from "./options";
 import { ruleSets } from "./options";
 import customCards from "./customCards.json";
 
-export function createResultList() {
+function createResultList() {
 	let details = $state({ era: -1, faction: -1 });
 	let general = $derived(getGeneralList(details.era, details.faction));
 

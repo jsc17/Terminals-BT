@@ -229,7 +229,7 @@
 		border-collapse: separate;
 		border-spacing: 0 4px;
 	}
-	tbody tr:nth-child(2) {
+	tbody tr:nth-child(even) {
 		background-color: var(--muted);
 	}
 	th {

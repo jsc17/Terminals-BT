@@ -2,7 +2,6 @@
 	import { getContext, onMount } from "svelte";
 	import { page } from "$app/stores";
 
-	import Changelog from "./Changelog.svelte";
 	import ReportModal from "./modals/ReportModal.svelte";
 	import { appWindow } from "$lib/utilities/responsive.svelte";
 	import LoginModal from "./modals/LoginModal.svelte";
@@ -10,7 +9,6 @@
 
 	let theme = $state("dark");
 	let root: HTMLHtmlElement;
-	let showChangelog = $state(false);
 	let showReportModal = $state(false);
 	let showLinksDropdown = $state(false);
 	let showSettingsDropdown = $state(false);

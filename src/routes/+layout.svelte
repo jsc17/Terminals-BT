@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Header from "$lib/components/Header.svelte";
+	import Toast from "$lib/components/Toast.svelte";
 	import { appWindow } from "$lib/utilities/responsive.svelte";
 	import { setContext } from "svelte";
 
@@ -16,6 +17,7 @@
 </script>
 
 <Header></Header>
+<Toast></Toast>
 <slot />
 
 <style>

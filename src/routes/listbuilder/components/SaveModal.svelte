@@ -4,6 +4,8 @@
 	import { resultList } from "../resultList.svelte";
 	import type { Unit } from "$lib/types/unit";
 	import { enhance } from "$app/forms";
+	import { toastController } from "$lib/stores/toastController.svelte";
+	import type { ActionResult } from "@sveltejs/kit";
 
 	let user: any = getContext("user");
 	let list: any = getContext("list");
@@ -80,8 +82,12 @@
 			cancel();
 			showSaveModal = false;
 		}
-		return async () => {
-			console.log("list saved");
+		return async ({ result }: { result: ActionResult }) => {
+			if (result.status == 200) {
+				toastController.addToast(`${list.details.name} saved successfully`);
+			} else {
+				toastController.addToast(`${list.details.name} failed to save. Please try again.`);
+			}
 		};
 	}
 

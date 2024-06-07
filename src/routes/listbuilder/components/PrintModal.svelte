@@ -2,6 +2,7 @@
 	import { appWindow } from "$lib/utilities/responsive.svelte";
 	import { enhance } from "$app/forms";
 	import { getContext } from "svelte";
+	import { toastController } from "$lib/stores/toastController.svelte";
 
 	let list: any = getContext("list");
 	let { showPrintModal = $bindable() } = $props();
@@ -35,6 +36,8 @@
 		});
 
 		formData.append("body", body);
+
+		toastController.addToast("Generating PDF. Your download should start momentarily");
 
 		return async ({ result }: any) => {
 			const blob = new Blob([new Uint8Array(Object.values(JSON.parse(result.data.pdf)))], { type: "application/pdf" });

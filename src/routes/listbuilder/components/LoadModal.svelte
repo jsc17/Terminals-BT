@@ -5,6 +5,7 @@
 	import { deserialize } from "$app/forms";
 	import { resultList } from "../resultList.svelte";
 	import { ruleSets, getRules, type Options } from "../options";
+	import { toastController } from "$lib/stores/toastController.svelte";
 
 	let list: any = getContext("list");
 	let user: any = getContext("user");
@@ -45,6 +46,7 @@
 				});
 			}
 		} else {
+			toastController.addToast("Failed to load list, please try again");
 			console.log(response.data.message);
 		}
 
@@ -229,7 +231,7 @@
 		border-collapse: separate;
 		border-spacing: 0 4px;
 	}
-	tbody tr:nth-child(2) {
+	tbody tr:nth-child(even) {
 		background-color: var(--muted);
 	}
 	th {

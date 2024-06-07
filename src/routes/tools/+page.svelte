@@ -4,6 +4,7 @@
 	import { getGeneralList } from "$lib/utilities/bt-utils";
 	import { enhance, deserialize } from "$app/forms";
 	import { calculateTMM } from "$lib/utilities/bt-utils";
+	import { toastController } from "$lib/stores/toastController.svelte";
 
 	let searchButton: HTMLButtonElement;
 	let selectedEra = $state(-1);
@@ -55,7 +56,6 @@
 			let response = await fetch(link.link);
 			if (response.ok) {
 				const unitList = (await response.json()).Units;
-				console.log(`${link.type} - ${unitList.length}`);
 				const formattedList: any[] = [];
 				for (const unit of unitList) {
 					const formattedUnit = {
@@ -96,8 +96,10 @@
 				const result: any = deserialize(await (await fetch("?/uploadUnits", { method: "POST", body: formData })).text());
 				if (result.status == 200) {
 					console.log(`${link.type} loaded`);
+					toastController.addToast(`${link.type} loaded`);
 				} else {
 					console.log(`${link.type} - ${result.data.message}`);
+					toastController.addToast(`${link.type} - ${result.data.message}`);
 				}
 			}
 		}

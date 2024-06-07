@@ -1,5 +1,5 @@
 import type { Unit } from "$lib/types/unit.js";
-import { calculateTMM, getGeneralList, getMULResults } from "$lib/utilities/bt-utils";
+import { getGeneralList } from "$lib/utilities/bt-utils";
 import type { filter } from "$lib/types/filter";
 import { deserialize } from "$app/forms";
 import { filters as filtersImport, additionalFilters as additionalFiltersImport } from "$lib/data/filters";
@@ -9,8 +9,6 @@ export function createResultList() {
 	let details = $state({ era: -1, faction: -1 });
 
 	let general = $derived(getGeneralList(details.era, details.faction));
-	let uniqueList: any[] = [];
-	let customCards: any;
 	let restrictions: any;
 
 	let filters = $state<filter[]>(filtersImport);
@@ -55,8 +53,6 @@ export function createResultList() {
 					filter.values!.forEach((value, index) => {
 						if (value.min) {
 							tempresultList = tempresultList.filter((unit) => {
-								console.log(filter.properties![index]);
-								console.log(unit);
 								return unit[filter.properties![index]] >= value.min!;
 							});
 						}
@@ -127,8 +123,6 @@ export function createResultList() {
 					filter.values!.forEach((value, index) => {
 						if (value.min) {
 							tempresultList = tempresultList.filter((unit) => {
-								console.log(filter.properties![index]);
-								console.log(unit);
 								return unit[filter.properties![index]] >= value.min!;
 							});
 						}
@@ -286,9 +280,6 @@ export function createResultList() {
 			restrictions = newRestriction;
 		},
 		details,
-		set customCards(cards: any) {
-			customCards = cards;
-		},
 		get filtered() {
 			return filtered;
 		},

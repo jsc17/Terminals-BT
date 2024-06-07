@@ -1,6 +1,7 @@
 import { getNewSkillCost } from "$lib/utilities/bt-utils";
 import type { Unit } from "$lib/types/unit.js";
 import { type Options, ruleSets } from "./options";
+import { toastController } from "$lib/stores/toastController.svelte";
 
 function createList() {
 	let units = $state<Unit[]>([]);
@@ -46,6 +47,7 @@ function createList() {
 		},
 		remove: (index: number) => {
 			const removed = units.splice(index, 1)[0];
+			toastController.addToast(`${removed.name} removed from list`);
 		},
 		modifySkill: (index: number, newSkill: number, basePV: number) => {
 			let newCost = getNewSkillCost(newSkill, basePV);

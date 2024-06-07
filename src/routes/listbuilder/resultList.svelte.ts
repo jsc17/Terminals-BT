@@ -7,7 +7,7 @@ import type { Options } from "./options";
 import { ruleSets } from "./options";
 import customCards from "./customCards.json";
 
-export function createResultList() {
+function createResultList() {
 	let details = $state({ era: -1, faction: -1 });
 	let general = $derived(getGeneralList(details.era, details.faction));
 
@@ -217,8 +217,6 @@ export function createResultList() {
 					filter.values!.forEach((value, index) => {
 						if (value.min) {
 							tempResultList = tempResultList.filter((unit) => {
-								console.log(filter.properties![index]);
-								console.log(unit);
 								return unit[filter.properties![index]] >= value.min!;
 							});
 						}
@@ -289,8 +287,6 @@ export function createResultList() {
 					filter.values!.forEach((value, index) => {
 						if (value.min) {
 							tempResultList = tempResultList.filter((unit) => {
-								console.log(filter.properties![index]);
-								console.log(unit);
 								return unit[filter.properties![index]] >= value.min!;
 							});
 						}

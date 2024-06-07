@@ -217,8 +217,6 @@ function createResultList() {
 					filter.values!.forEach((value, index) => {
 						if (value.min) {
 							tempResultList = tempResultList.filter((unit) => {
-								console.log(filter.properties![index]);
-								console.log(unit);
 								return unit[filter.properties![index]] >= value.min!;
 							});
 						}
@@ -289,8 +287,6 @@ function createResultList() {
 					filter.values!.forEach((value, index) => {
 						if (value.min) {
 							tempResultList = tempResultList.filter((unit) => {
-								console.log(filter.properties![index]);
-								console.log(unit);
 								return unit[filter.properties![index]] >= value.min!;
 							});
 						}

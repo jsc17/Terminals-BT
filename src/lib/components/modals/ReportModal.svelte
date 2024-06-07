@@ -2,6 +2,7 @@
 	import { enhance } from "$app/forms";
 	import { page } from "$app/stores";
 	import { appWindow } from "$lib/utilities/responsive.svelte";
+	import { toastController } from "$lib/stores/toastController.svelte";
 
 	let { showReportModal = $bindable() } = $props();
 	let reportDialog: HTMLDialogElement;
@@ -25,11 +26,10 @@
 		}
 		reportDialog.close();
 		return async ({ result }: any) => {
-			console.log(result);
 			if (result.data.status == 201) {
 				window.open(result.data.url, "_blank");
 			} else {
-				alert("Failed to create issue, please try again.");
+				toastController.addToast("Failed to create issue, please try again.");
 			}
 		};
 	}

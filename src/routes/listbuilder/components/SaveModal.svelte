@@ -194,6 +194,8 @@
 			<label for="list-code">List Code: </label><input type="text" name="list-code" id="list-code" disabled value={listCode} />
 			<button on:click={()=>{
 					navigator.clipboard.writeText(listCode!);
+					toastController.addToast("code copied to clipboard", 1500);
+					showSaveModal = false;
 				}}>
 				<img src="/icons/content-copy.svg" alt="copy to clipboard" class="button-icon" />
 			</button>
@@ -202,6 +204,8 @@
 			<label for="tts-code">TTS Code: </label><input type="text" name="tts-code" id="tts-code" disabled value={ttsCode} />
 			<button on:click={()=>{
 					navigator.clipboard.writeText(ttsCode!);
+					toastController.addToast("code copied to clipboard", 1500);
+					showSaveModal = false;
 				}}>
 				<img src="/icons/content-copy.svg" alt="copy to clipboard" class="button-icon" />
 			</button>

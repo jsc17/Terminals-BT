@@ -1,4 +1,5 @@
 import { fail } from "@sveltejs/kit";
+import { prisma } from "$lib/server/prisma.js";
 
 export const actions = {
 	getListNames: async ({ locals }) => {

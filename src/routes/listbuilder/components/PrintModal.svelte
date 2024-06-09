@@ -8,7 +8,7 @@
 	let { showPrintModal = $bindable() } = $props();
 	let printDialog: HTMLDialogElement;
 	let playerName = $state("");
-	let style = $state("mul");
+	let style = $state("detailed");
 
 	$effect(() => {
 		if (showPrintModal == true) {
@@ -22,23 +22,22 @@
 		showPrintModal = false;
 		if (submitter.innerText == "Cancel") {
 			cancel();
+		} else {
+			let body = JSON.stringify({
+				units: list.units,
+				playername: playerName,
+				listname: list.details.name,
+				era: list.details.era,
+				faction: list.details.faction,
+				general: list.details.general,
+				style: style,
+				condense: false
+			});
+
+			formData.append("body", body);
+
+			toastController.addToast("Generating PDF. Your download should start momentarily");
 		}
-
-		let body = JSON.stringify({
-			units: list.units,
-			playername: playerName,
-			listname: list.details.name,
-			era: list.details.era,
-			faction: list.details.faction,
-			general: list.details.general,
-			style: style,
-			condense: false
-		});
-
-		formData.append("body", body);
-
-		toastController.addToast("Generating PDF. Your download should start momentarily");
-
 		return async ({ result }: any) => {
 			const blob = new Blob([new Uint8Array(Object.values(JSON.parse(result.data.pdf)))], { type: "application/pdf" });
 			const downloadElement = document.createElement("a");

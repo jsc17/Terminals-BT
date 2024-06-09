@@ -6,11 +6,13 @@
 	import { enhance } from "$app/forms";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import type { ActionResult } from "@sveltejs/kit";
+	import { deserialize } from "$app/forms";
 
 	let user: any = getContext("user");
 	let list: any = getContext("list");
 	let { showSaveModal = $bindable() } = $props();
 	let saveDialog: HTMLDialogElement;
+	let existingListNames: string[] = [];
 
 	let { listCode, ttsCode } = $derived.by(() => {
 		let listCode = "";
@@ -39,10 +41,22 @@
 	$effect(() => {
 		if (showSaveModal == true) {
 			saveDialog.showModal();
+			getListNames();
 		} else {
 			saveDialog.close();
 		}
 	});
+
+	async function getListNames() {
+		existingListNames = [];
+		const response: any = deserialize(await (await fetch("?/getListNames", { method: "POST", body: "" })).text());
+		if (response.status == 200) {
+			const responseNames = JSON.parse(response.data.listNames);
+			for (const listName of responseNames) {
+				existingListNames.push(listName.name.toLowerCase());
+			}
+		}
+	}
 
 	function handleSaveList({ formData, cancel }: any) {
 		const saveLocation = formData.get("saveLocation");
@@ -51,30 +65,38 @@
 			alert("list must have a name");
 			cancel();
 		} else if (user.username && saveLocation == "accountSave") {
-			formData.append("name", list.details.name);
-			formData.append("era", resultList.details.era);
-			formData.append("faction", resultList.details.faction);
-			formData.append("rules", resultList.options?.name);
-			let units: string[] = [];
-			for (const unit of list.units) {
-				units.push(`${unit.id},${unit.skill}`);
+			const listNameExists = existingListNames.includes(list.details.name.toLowerCase());
+			let overwrite = false;
+			if (listNameExists) {
+				overwrite = confirm("A list with that name already exists. Overwrite it?");
 			}
-			formData.append("units", units.join(":"));
-			let sublistString = "";
-			if (list.sublists.length) {
-				sublistString = list.sublists.join(":");
+			if (!listNameExists || overwrite) {
+				formData.append("name", list.details.name);
+				formData.append("era", resultList.details.era);
+				formData.append("faction", resultList.details.faction);
+				formData.append("rules", resultList.options?.name);
+				let units: string[] = [];
+				for (const unit of list.units) {
+					units.push(`${unit.id},${unit.skill}`);
+				}
+				formData.append("units", units.join(":"));
+				let sublistString = "";
+				if (list.sublists.length) {
+					sublistString = list.sublists.join(":");
+				}
+				formData.append("sublists", sublistString);
+				showSaveModal = false;
+			} else {
+				cancel();
 			}
-			formData.append("sublists", sublistString);
-			showSaveModal = false;
 		} else {
 			let listNames = JSON.parse(localStorage.getItem("lists") ?? "[]");
-			let index = listNames.indexOf(list.details.name.toLowerCase());
-			if (index != -1) {
-				let accept = confirm("List with that name already exists in local storage. Overwrite it?");
-				if (!accept) {
-					return;
-				}
-			} else {
+			const listNameExists = listNames.includes(list.details.name.toLowerCase());
+			let overwrite = false;
+			if (listNameExists) {
+				overwrite = confirm("List with that name already exists in local storage. Overwrite it?");
+			}
+			if (!listNameExists || overwrite) {
 				listNames.push(list.details.name.toLowerCase());
 				localStorage.setItem("lists", JSON.stringify(listNames));
 			}

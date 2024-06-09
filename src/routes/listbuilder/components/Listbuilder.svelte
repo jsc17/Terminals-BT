@@ -3,6 +3,7 @@
 	import { getContext, onMount } from "svelte";
 	import { ruleSets } from "../options";
 	import { resultList } from "../resultList.svelte";
+	import { toastController } from "$lib/stores/toastController.svelte";
 
 	let list: any = getContext("list");
 	let {
@@ -11,11 +12,11 @@
 		recentChanges,
 		description
 	}: { status: any; recentChanges: string[]; description: string[]; selectedRules: string } = $props();
-	let errorDialog: HTMLDialogElement;
 	let showPrintModal = $state(false);
 	let showSaveModal = $state(false);
 	let showLoadModal = $state(false);
 	let showSublistModal = $state(false);
+	let showListMenuDropdown = $state(false);
 
 	function modifySkill(event: Event, index: number, basePV: number) {
 		const target = event.target as HTMLInputElement;
@@ -61,34 +62,51 @@
 					<p>Units: {list.units.length}</p>
 				{/if}
 			</div>
-			<div class="list-buttons">
+
+			<menu
+				class="dropdown"
+				on:mouseleave={() => {
+					showListMenuDropdown = false;
+				}}>
 				<button
-					onclick={() => {
-						showLoadModal = true;
+					class="link-button"
+					id="nav-links"
+					on:click={() => {
+						showListMenuDropdown = !showListMenuDropdown;
 					}}>
-					<img src="/icons/folder-open-outline.svg" alt="load button" class="button-icon" />
+					<img src="/icons/menu.svg" alt="menu" />
 				</button>
-				<button
-					onclick={() => {
-						showSaveModal = true;
-					}}>
-					<img src="/icons/content-save-outline.svg" alt="save button" class="button-icon" />
-				</button>
-				<button
-					onclick={() => {
-						showPrintModal = true;
-					}}>
-					<img src="/icons/printer.svg" alt="print" class="button-icon" />
-				</button>
-			</div>
-			<button
-				on:click={() => {
-					if (list.units.length) {
-						showSublistModal = true;
-					} else {
-						alert("Please add units to list before creating sublists");
-					}
-				}}>Sub-lists</button>
+				<div class="dropdown-content dropdown-right" class:dropdown-hidden={!showListMenuDropdown} class:dropdown-shown={showListMenuDropdown}>
+					<button
+						class="menu-button"
+						on:click={() => {
+							showLoadModal = true;
+						}}>
+						Load List
+					</button>
+					<button
+						class="menu-button"
+						on:click={() => {
+							showSaveModal = true;
+						}}>
+						Save/Export List
+					</button>
+					<button
+						class="menu-button"
+						on:click={() => {
+							showPrintModal = true;
+						}}>
+						Print List
+					</button>
+					<button
+						class="menu-button"
+						on:click={() => {
+							showSublistModal = true;
+						}}>
+						Generate Sublists
+					</button>
+				</div>
+			</menu>
 		</div>
 	</div>
 	<div class="list-units">
@@ -145,7 +163,13 @@
 								{/if}
 							</td>
 							<td class="align-center">PV - {unit.cost}</td>
-							<td class="align-center"> <button on:click={() => list.remove(index)}>-</button></td>
+							<td class="align-center">
+								<button
+									on:click={() => {
+										list.remove(index);
+										toastController.addToast(`${unit.name} removed from list`);
+									}}>-</button
+								></td>
 						</tr>
 						<tr class="stat-row">
 							<td>
@@ -209,10 +233,6 @@
 		justify-content: space-between;
 		align-items: center;
 	}
-	.list-buttons {
-		display: flex;
-		gap: 8px;
-	}
 	.list-stats {
 		display: flex;
 		gap: 16px;
@@ -270,12 +290,21 @@
 	.errors {
 		color: var(--error);
 	}
-	.error-icon {
-		filter: var(--error-filter);
+	.link-button {
+		img {
+			height: 20px;
+			width: 20px;
+			/* filter: var(--primary-filter); */
+		}
+		background-color: var(--primary);
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		color: var(--primary);
+		font-size: 16px;
 	}
-	.error-dialog {
-		color: var(--error);
-		position: fixed;
-		border: 1px solid var(--error);
+	.menu-button {
+		background-color: transparent;
+		color: var(--primary);
 	}
 </style>

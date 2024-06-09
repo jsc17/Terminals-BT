@@ -45,6 +45,7 @@
 		}}>
 		<button
 			class="link-button"
+			id="nav-links"
 			on:click={() => {
 				showLinksDropdown = !showLinksDropdown;
 			}}>
@@ -97,6 +98,7 @@
 			}}>
 			<button
 				class="link-button"
+				id="settings-links"
 				on:click={() => {
 					showSettingsDropdown = !showSettingsDropdown;
 				}}>

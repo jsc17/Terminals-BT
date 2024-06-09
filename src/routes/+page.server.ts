@@ -113,6 +113,7 @@ export const actions = {
 			});
 		});
 		drawReferences(listSummary, abilityReferences);
+		listSummary.drawText("https://terminal.tools/listbuilder", { x: 25, y: 25, size: 6 });
 		let pages: PDFPage[] = [];
 		let pageSlots = condense ? 10 : 8;
 		for (let p = 0; p < Math.ceil(units.length / pageSlots); p++) {

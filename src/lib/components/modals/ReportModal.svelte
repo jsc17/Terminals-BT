@@ -37,7 +37,7 @@
 
 <dialog
 	bind:this={reportDialog}
-	on:close={() => {
+	onclose={() => {
 		showReportModal = false;
 	}}
 	class:dialog-wide={appWindow.isNarrow}>

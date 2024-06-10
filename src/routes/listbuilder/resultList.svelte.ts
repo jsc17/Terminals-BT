@@ -37,7 +37,7 @@ function createResultList() {
 			const tmm = calculateTMM(tempMovement[0].speed);
 			try {
 				let formattedUnit: Unit = {
-					id: unit.Id,
+					mulId: unit.Id,
 					name: unit.Name,
 					class: unit.Class,
 					variant: unit.Variant,
@@ -84,7 +84,7 @@ function createResultList() {
 			});
 			try {
 				let formattedUnit: Unit = {
-					id: unit.mulId,
+					mulId: unit.mulId,
 					name: unit.name,
 					class: unit.class,
 					variant: unit.variant,
@@ -132,7 +132,7 @@ function createResultList() {
 					if (options.customCardPacks?.includes(cardPack.name)) {
 						for (const unit of cardPack.units) {
 							tempAvailableList.push({
-								id: unit.id,
+								mulId: unit.id,
 								type: unit.type,
 								name: unit.name,
 								class: unit.class,

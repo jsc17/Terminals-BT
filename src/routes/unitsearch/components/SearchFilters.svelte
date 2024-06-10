@@ -35,10 +35,10 @@
 					<div class="dropdown">
 						<input
 							id={filter.name}
-							on:mouseenter={() => {
+							onmouseenter={() => {
 								showAbilitiesDropdown = true;
 							}}
-							on:mouseleave={() => {
+							onmouseleave={() => {
 								showAbilitiesDropdown = false;
 							}}
 							type="text"
@@ -76,7 +76,7 @@
 	<button
 		class="accordian"
 		class:hidden={!appWindow.isMobile}
-		on:click={() => {
+		onclick={() => {
 			showFilters = !showFilters;
 		}}>
 		<div class="space-between">
@@ -96,7 +96,7 @@
 		<div class="space-between filter-buttons">
 			<button
 				class="backgroundless-button"
-				on:click={() => {
+				onclick={() => {
 					showAdditionalFilters = !showAdditionalFilters;
 				}}>
 				Additional Filters
@@ -106,7 +106,7 @@
 					+
 				{/if}
 			</button>
-			<button class="clear" on:click={resultList.resetFilters}>Clear Filters</button>
+			<button class="clear" onclick={resultList.resetFilters}>Clear Filters</button>
 		</div>
 		{#if showAdditionalFilters}
 			{@render filters(resultList.additionalFilters)}

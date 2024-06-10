@@ -1,4 +1,4 @@
-export interface Tournament {
+export type Tournament = {
 	id: number;
 	name: string;
 	era: number;
@@ -12,14 +12,14 @@ export interface Tournament {
 	displayEmail: boolean;
 	allowResubmission: boolean;
 	requireEmail: boolean;
-}
-export interface Participant {
+};
+export type Participant = {
 	id: number;
 	name: string;
 	email?: string;
 	listCodes: ListCode[];
-}
-export interface ListCode {
+};
+export type ListCode = {
 	id: number;
 	valid: boolean;
 	message: string;
@@ -28,4 +28,4 @@ export interface ListCode {
 	units: { id: number; skill: number }[];
 	era: number;
 	faction: number;
-}
+};

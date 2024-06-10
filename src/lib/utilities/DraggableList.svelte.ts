@@ -1,14 +1,14 @@
 export class DraggableList<T> {
 	items = $state<T[]>([]);
-	#dragStartIndex = $state(-1);
-	#dragEnterIndex = $state(-1);
+	dragStartIndex = $state(-1);
+	dragEnterIndex = $state(-1);
 	dropIndex = $state(-1);
 
 	handleDrop() {
-		if (this.#dragStartIndex == this.#dragEnterIndex) return;
-		const draggedItem = this.items[this.#dragStartIndex];
+		if (this.dragStartIndex == this.dragEnterIndex) return;
+		const draggedItem = this.items[this.dragStartIndex];
 		const newList = [...this.items];
-		newList.splice(this.#dragStartIndex, 1);
+		newList.splice(this.dragStartIndex, 1);
 		newList.splice(this.dropIndex, 0, draggedItem);
 		this.items = newList;
 		this.dropIndex = -1;
@@ -20,19 +20,18 @@ export class DraggableList<T> {
 		const yLoc = e.clientY - targetTop;
 		if (yLoc < targetHeight / 2) {
 			// top half - replace item at index
-			this.dropIndex = this.#dragEnterIndex;
+			this.dropIndex = this.dragEnterIndex;
 		} else {
 			// bottom half - place after item
-			this.dropIndex = this.#dragEnterIndex + 1;
+			this.dropIndex = this.dragEnterIndex + 1;
 		}
-		console.log(this.dropIndex);
 	}
 
 	handleDragStart(index: number) {
-		this.#dragStartIndex = index;
+		this.dragStartIndex = index;
 	}
 
 	handleDragEnter(index: number) {
-		this.#dragEnterIndex = index;
+		this.dragEnterIndex = index;
 	}
 }

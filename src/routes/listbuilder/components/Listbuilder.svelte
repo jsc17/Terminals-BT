@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { PrintModal, SaveModal, LoadModal, SublistModal, UnitCard } from "./index";
-	import { getContext, onMount } from "svelte";
+	import { onMount } from "svelte";
 	import { ruleSets } from "../options";
 	import { resultList } from "../resultList.svelte";
 	import { flip } from "svelte/animate";
+	import { list } from "../list.svelte";
+	import { dndzone, type DndEvent } from "svelte-dnd-action";
+	import type { Unit } from "$lib/types/unit";
 
-	let list: any = getContext("list");
 	let {
 		status = $bindable(),
 		selectedRules = $bindable(),
@@ -19,8 +21,13 @@
 	let showListMenuDropdown = $state(false);
 
 	onMount(() => {
-		selectedRules = list.options?.name;
+		selectedRules = list.options?.name ?? "noRes";
 	});
+
+	let dropTargetStyle = { outline: "none" };
+	function handleSort(e: CustomEvent<DndEvent<Unit>>) {
+		list.units = e.detail.items;
+	}
 </script>
 
 <div class="card listBuilder">
@@ -31,9 +38,9 @@
 				<label for="rules">Rules:</label>
 				<select
 					bind:value={selectedRules}
-					on:change={() => {
+					onchange={() => {
 						list.setOptions(selectedRules);
-						resultList.setOptions(list.options.name);
+						resultList.setOptions(list.options?.name ?? "noRes");
 					}}>
 					{#each ruleSets as rules}
 						<option value={rules.name}>{rules.display}</option>
@@ -50,21 +57,21 @@
 				{/if}
 
 				{#if list.options?.maxUnits}
-					<p class:errors={list.units.items.length > list.options.maxUnits}>Units: {list.units.items.length}/{list.options.maxUnits}</p>
+					<p class:errors={list.units.length > list.options.maxUnits}>Units: {list.units.length}/{list.options.maxUnits}</p>
 				{:else}
-					<p>Units: {list.units.items.length}</p>
+					<p>Units: {list.units.length}</p>
 				{/if}
 			</div>
 
 			<menu
 				class="dropdown"
-				on:mouseleave={() => {
+				onmouseleave={() => {
 					showListMenuDropdown = false;
 				}}>
 				<button
 					class="link-button"
 					id="nav-links"
-					on:click={() => {
+					onclick={() => {
 						showListMenuDropdown = !showListMenuDropdown;
 					}}>
 					<img src="/icons/menu.svg" alt="menu" />
@@ -72,28 +79,28 @@
 				<div class="dropdown-content dropdown-right" class:dropdown-hidden={!showListMenuDropdown} class:dropdown-shown={showListMenuDropdown}>
 					<button
 						class="menu-button"
-						on:click={() => {
+						onclick={() => {
 							showLoadModal = true;
 						}}>
 						Load List
 					</button>
 					<button
 						class="menu-button"
-						on:click={() => {
+						onclick={() => {
 							showSaveModal = true;
 						}}>
 						Save/Export List
 					</button>
 					<button
 						class="menu-button"
-						on:click={() => {
+						onclick={() => {
 							showPrintModal = true;
 						}}>
 						Print List
 					</button>
 					<button
 						class="menu-button"
-						on:click={() => {
+						onclick={() => {
 							showSublistModal = true;
 						}}>
 						Generate Sublists
@@ -103,7 +110,7 @@
 		</div>
 	</div>
 	<div class="list-units">
-		{#if list.units.items.length == 0}
+		{#if list.units.length == 0}
 			<div class="info">
 				<div>
 					<h1 style:color="var(--primary)">Latest:</h1>
@@ -120,17 +127,9 @@
 				<p>Mechwarrior, BattleMech, 'Mech and Aerotech are registered trademarks of The Topps Company, Inc. All Rights Reserved.</p>
 			</div>
 		{:else}
-			<div
-				class="unit-cards"
-				role="list"
-				on:drop={() => {
-					list.units.handleDrop();
-				}}
-				on:dragover|preventDefault={(e) => {
-					list.units.handleDragOver(e);
-				}}>
-				{#each list.units.items as unit, index (unit.listId)}
-					<div animate:flip={{ duration: 300 }}>
+			<div class="unit-cards" use:dndzone={{ items: list.units, dropTargetStyle }} onconsider={handleSort} onfinalize={handleSort}>
+				{#each list.units as unit, index (unit.id)}
+					<div class="unitcard" animate:flip={{ duration: 100 }}>
 						<UnitCard {unit} {index}></UnitCard>
 					</div>
 				{/each}
@@ -185,6 +184,7 @@
 		display: flex;
 		flex-direction: column;
 		min-height: 100%;
+		gap: 4px;
 	}
 	input[type="text"] {
 		width: 250px;

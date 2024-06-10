@@ -7,9 +7,9 @@
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import type { ActionResult } from "@sveltejs/kit";
 	import { deserialize } from "$app/forms";
+	import { list } from "../list.svelte";
 
 	let user: any = getContext("user");
-	let list: any = getContext("list");
 	let { showSaveModal = $bindable() } = $props();
 	let saveDialog: HTMLDialogElement;
 	let existingListNames: string[] = [];
@@ -19,8 +19,8 @@
 		let ttsCode = "";
 
 		listCode += resultList.details.era + ":" + resultList.details.faction;
-		list.units.items.forEach((unit: Unit) => {
-			listCode += `:${unit.id},${unit.skill}`;
+		list.units.forEach((unit: Unit) => {
+			listCode += `:${unit.mulId},${unit.skill}`;
 		});
 		listCode += "-";
 		if (list.sublists) {
@@ -30,8 +30,8 @@
 			listCode = listCode.substring(0, listCode.length - 1);
 		}
 		ttsCode = "{";
-		list.units.items.forEach((unit: Unit) => {
-			ttsCode += `{${unit.id},${unit.skill}},`;
+		list.units.forEach((unit: Unit) => {
+			ttsCode += `{${unit.mulId},${unit.skill}},`;
 		});
 		ttsCode = ttsCode.replace(/.$/, "}");
 
@@ -76,8 +76,8 @@
 				formData.append("faction", resultList.details.faction);
 				formData.append("rules", resultList.options?.name);
 				let units: string[] = [];
-				for (const unit of list.units.items) {
-					units.push(`${unit.id},${unit.skill}`);
+				for (const unit of list.units) {
+					units.push(`${unit.mulId},${unit.skill}`);
 				}
 				formData.append("units", units.join(":"));
 				let sublistString = "";
@@ -115,16 +115,17 @@
 
 	function exportToJeff() {
 		const jeffList: any = { name: list.details.name, members: [], uuid: crypto.randomUUID(), lastUpdated: new Date().toISOString(), formationBonus: "none", groupLabel: "Lance" };
-		for (const unit of list.units.items) {
+		for (const unit of list.units) {
 			let jumpSpeed = 0;
-			for (const move of unit.move) {
-				if (move.type == "j") {
-					jumpSpeed = move.speed;
+			if (unit.move) {
+				for (const move of unit.move) {
+					if (move.type == "j") {
+						jumpSpeed = move.speed;
+					}
 				}
 			}
-
 			const member: any = {
-				mulID: unit.id,
+				mulID: unit.mulId,
 				damage: {
 					short: unit.damageS,
 					shortMinimal: unit.damageSMin,
@@ -172,7 +173,7 @@
 
 <dialog
 	bind:this={saveDialog}
-	on:close={() => {
+	onclose={() => {
 		showSaveModal = false;
 	}}
 	class:dialog-wide={appWindow.isNarrow}>
@@ -185,7 +186,7 @@
 			{/if}
 			<button
 				class="close-button"
-				on:click={() => {
+				onclick={() => {
 					showSaveModal = false;
 				}}>X</button>
 		</div>
@@ -214,7 +215,7 @@
 		<h2>Export Codes:</h2>
 		<div class="export-bar">
 			<label for="list-code">List Code: </label><input type="text" name="list-code" id="list-code" disabled value={listCode} />
-			<button on:click={()=>{
+			<button onclick={()=>{
 					navigator.clipboard.writeText(listCode!);
 					toastController.addToast("code copied to clipboard", 1500);
 					showSaveModal = false;
@@ -224,7 +225,7 @@
 		</div>
 		<div class="export-bar">
 			<label for="tts-code">TTS Code: </label><input type="text" name="tts-code" id="tts-code" disabled value={ttsCode} />
-			<button on:click={()=>{
+			<button onclick={()=>{
 					navigator.clipboard.writeText(ttsCode!);
 					toastController.addToast("code copied to clipboard", 1500);
 					showSaveModal = false;
@@ -235,7 +236,7 @@
 		<div class="export-bar">
 			<label for="jeffs-tools">Jeff's Tools: </label><input type="text" name="jeff-tools" id="jeff's tools" bind:value={list.details.name} />
 			<button
-				on:click={() => {
+				onclick={() => {
 					exportToJeff();
 				}}>
 				<img src="/icons/download.svg" alt="download to Jeff's Tools" class="button-icon" />

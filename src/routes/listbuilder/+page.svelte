@@ -56,10 +56,10 @@
 		<Listbuilder bind:status bind:selectedRules {recentChanges} {description} />
 	{:else}
 		<button
-			on:click={() => {
+			onclick={() => {
 				showListDialog = !showListDialog;
 			}}
-			class="list-button">List - {list.units.items.length} Units - {list.pv} PV</button>
+			class="list-button">List - {list.units.length} Units - {list.pv} PV</button>
 	{/if}
 </main>
 
@@ -67,12 +67,12 @@
 	<dialog
 		bind:this={listDialog}
 		class:dialog-wide={appWindow.isNarrow}
-		on:close={() => {
+		onclose={() => {
 			showListDialog = false;
 		}}>
 		<div class="dialog-button">
 			<button
-				on:click={() => {
+				onclick={() => {
 					showListDialog = false;
 				}}>Close</button>
 		</div>

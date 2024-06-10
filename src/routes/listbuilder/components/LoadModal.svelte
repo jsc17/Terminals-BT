@@ -6,8 +6,8 @@
 	import { resultList } from "../resultList.svelte";
 	import { ruleSets, getRules, type Options } from "../options";
 	import { toastController } from "$lib/stores/toastController.svelte";
+	import { list } from "../list.svelte";
 
-	let list: any = getContext("list");
 	let user: any = getContext("user");
 
 	let { showLoadModal = $bindable(), status = $bindable(), selectedRules = $bindable() } = $props();
@@ -107,15 +107,15 @@
 		}
 
 		list.details.name = name;
-		list.details.era = eras.get(era);
-		list.details.faction = factions.get(faction);
-		list.details.general = factions.get(resultList.general);
+		list.details.era = eras.get(era)!;
+		list.details.faction = factions.get(faction)!;
+		list.details.general = factions.get(resultList.general)!;
 		if (sublists.length) {
 			list.sublists = sublists.split(":");
 		} else {
 			list.sublists = [];
 		}
-		while (list.units.items.length) {
+		while (list.units.length) {
 			list.remove(0);
 		}
 
@@ -124,13 +124,13 @@
 		unitArray.forEach((unit) => {
 			let [id, skill] = unit.split(",");
 			let unitToAdd = resultList.results.find((result: any) => {
-				return result.id == parseInt(id);
+				return result.mulId == parseInt(id);
 			});
 			if (unitToAdd != null) {
 				list.add(unitToAdd);
 			}
 			if (skill != "undefined") {
-				list.modifySkill(list.units.items.length - 1, parseInt(skill), list.units.items.at(-1)!.pv);
+				list.modifySkill(list.units.length - 1, parseInt(skill), list.units.at(-1)!.pv);
 			}
 		});
 
@@ -145,7 +145,7 @@
 
 <dialog
 	bind:this={loadDialog}
-	on:close={() => {
+	onclose={() => {
 		showLoadModal = false;
 	}}
 	class:dialog-wide={appWindow.isNarrow}>
@@ -157,7 +157,7 @@
 				<p>Login to load lists saved to account</p>
 			{/if}
 			<button
-				on:click={() => {
+				onclick={() => {
 					showLoadModal = false;
 				}}>Close</button>
 		</div>
@@ -181,12 +181,12 @@
 				</thead>
 				<tbody>
 					{#each savedLists as savedList, index}
-						<tr id={index.toString()} class:selected={selectedList == index} on:click={() => selectRow(index)} on:dblclick={loadList}>
+						<tr id={index.toString()} class:selected={selectedList == index} onclick={() => selectRow(index)} ondblclick={loadList}>
 							<td class:local={savedList.local}>{savedList.name}</td>
 							<td style="text-align:center">{eras.get(savedList.era)}</td>
 							<td style="text-align:center">{factions.get(savedList.faction)}</td>
 							<td style="text-align:center">{savedList.rules.display}</td>
-							<td><button on:click={() => deleteList(index)}>-</button></td>
+							<td><button onclick={() => deleteList(index)}>-</button></td>
 						</tr>
 					{/each}
 				</tbody>
@@ -198,8 +198,8 @@
 		<p>Select a list above or paste a list code into the box below.</p>
 		<div class="load-bar">
 			<label for="importCode">List Code: </label><input type="text" name="importCode" id="importCode" bind:value={importCode} />
-			<button on:click={loadList}>Load</button>
-			<button on:click={()=>{
+			<button onclick={loadList}>Load</button>
+			<button onclick={()=>{
 					navigator.clipboard.writeText(importCode!);
 				}}> Copy </button>
 		</div>

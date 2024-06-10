@@ -1,11 +1,9 @@
 <script lang="ts">
 	import type { Unit } from "$lib/types/unit";
 	import { toastController } from "$lib/stores/toastController.svelte";
-	import { getContext } from "svelte";
+	import { list } from "../list.svelte";
 
 	const { unit, index }: { unit: Unit; index: number } = $props();
-
-	const list = getContext("list");
 
 	function modifySkill(event: Event, index: number, basePV: number) {
 		const target = event.target as HTMLInputElement;
@@ -16,7 +14,7 @@
 	}
 </script>
 
-<main draggable="true" on:dragstart={() => list.units.handleDragStart(index)} on:dragenter={() => list.units.handleDragEnter(index)}>
+<main>
 	<div class="unit-row">
 		<p>{unit.name}</p>
 		<p>{unit.type}</p>
@@ -24,12 +22,12 @@
 			{#if unit.skill == undefined}
 				-
 			{:else}
-				Skill - <input on:change={(e) => modifySkill(e, index, unit.pv)} id={index.toString()} type="number" min="2" max="6" value={unit.skill} />
+				Skill - <input onchange={(e) => modifySkill(e, index, unit.pv)} id={index.toString()} type="number" min="2" max="6" value={unit.skill} />
 			{/if}
 		</p>
 		<p>PV - {unit.cost}</p>
 		<button
-			on:click={() => {
+			onclick={() => {
 				list.remove(index);
 				toastController.addToast(`${unit.name} removed from list`);
 			}}>-</button>
@@ -55,7 +53,6 @@
 
 <style>
 	main {
-		padding: 2px 0px;
 		width: 100%;
 		border-bottom: 1px solid var(--border);
 	}
@@ -87,5 +84,9 @@
 	button {
 		height: 20px;
 		width: 20px;
+	}
+	:global(.dragging) {
+		background-color: var(--primary);
+		color: var(--primary-foreground);
 	}
 </style>

@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { appWindow } from "$lib/utilities/responsive.svelte";
 	import { enhance } from "$app/forms";
-	import { getContext } from "svelte";
 	import { toastController } from "$lib/stores/toastController.svelte";
+	import { list } from "../list.svelte";
 
-	let list: any = getContext("list");
 	let { showPrintModal = $bindable() } = $props();
 	let printDialog: HTMLDialogElement;
 	let playerName = $state("");
@@ -24,7 +23,7 @@
 			cancel();
 		} else {
 			let body = JSON.stringify({
-				units: list.units.items,
+				units: list.units,
 				playername: playerName,
 				listname: list.details.name,
 				era: list.details.era,
@@ -50,7 +49,7 @@
 
 <dialog
 	bind:this={printDialog}
-	on:close={() => {
+	onclose={() => {
 		showPrintModal = false;
 	}}
 	class:dialog-wide={appWindow.isNarrow}>

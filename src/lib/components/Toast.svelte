@@ -9,7 +9,7 @@
 			{toast.message}
 			{#if toast.dismissable}
 				<button
-					on:click={() => {
+					onclick={() => {
 						toastController.dismissToast(id);
 					}}>X</button>
 			{/if}

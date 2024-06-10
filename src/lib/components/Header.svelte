@@ -40,13 +40,13 @@
 <header>
 	<nav
 		class="dropdown"
-		on:mouseleave={() => {
+		onmouseleave={() => {
 			showLinksDropdown = false;
 		}}>
 		<button
 			class="link-button"
 			id="nav-links"
-			on:click={() => {
+			onclick={() => {
 				showLinksDropdown = !showLinksDropdown;
 			}}>
 			<img src="/icons/menu.svg" alt="menu" />
@@ -87,31 +87,31 @@
 		{:else}
 			<button
 				class="link-button"
-				on:click={() => {
+				onclick={() => {
 					showLoginModal = true;
 				}}>Login/Register</button>
 		{/if}
 		<nav
 			class="dropdown"
-			on:mouseleave={() => {
+			onmouseleave={() => {
 				showSettingsDropdown = false;
 			}}>
 			<button
 				class="link-button"
 				id="settings-links"
-				on:click={() => {
+				onclick={() => {
 					showSettingsDropdown = !showSettingsDropdown;
 				}}>
 				<img src="/icons/cog.svg" alt="settings menu" /></button>
 			<div class="dropdown-content dropdown-right" class:dropdown-hidden={!showSettingsDropdown} class:dropdown-shown={showSettingsDropdown}>
 				<!-- <button
 					class="link-button"
-					on:click={() => {
+					onclick={() => {
 						showChangelog = true;
 					}}>Changelog</button> -->
 				<button
 					class="link-button"
-					on:click={() => {
+					onclick={() => {
 						showReportModal = true;
 					}}>Report Issue</button>
 				<p>Page Source Code: <a href="https://github.com/jsc17/BT-Tools" target="_blank">Github</a></p>

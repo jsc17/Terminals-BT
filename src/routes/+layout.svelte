@@ -4,7 +4,7 @@
 	import { appWindow } from "$lib/utilities/responsive.svelte";
 	import { setContext } from "svelte";
 
-	const { data } = $props();
+	const { data, children } = $props();
 	let user = $state({ username: data.username });
 	setContext("user", user);
 
@@ -18,7 +18,7 @@
 
 <Header></Header>
 <Toast></Toast>
-<slot />
+{@render children()}
 
 <style>
 	:global(*) {

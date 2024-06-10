@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { getContext, onMount } from "svelte";
 	import type { Unit } from "$lib/types/unit";
 	import { deserialize, enhance } from "$app/forms";
 	import { appWindow } from "$lib/utilities/responsive.svelte";
-	import { DraggableList } from "$lib/utilities/DraggableList.svelte";
+	import { list } from "../list.svelte";
+	import { dndzone, type DndEvent } from "svelte-dnd-action";
 
 	type Sublist = {
+		id: number;
 		index: number;
 		unitList: [Unit, boolean][];
 		scenario: string;
@@ -19,10 +20,10 @@
 		string?: string;
 		unitIndices: number[];
 	};
+	let sublistId = 0;
 
 	let count = 0;
-	let list: any = getContext("list");
-	let sublists = new DraggableList<Sublist>();
+	let sublists = $state<Sublist[]>([]);
 	let autosublists = $state<any[]>([]);
 	let scenarioFilter = $state<string>("All");
 	let showMinUnitInfoDropdown = $state<boolean>(false);
@@ -60,6 +61,7 @@
 	});
 
 	let tempSublist = $state<Sublist>({
+		id: -1,
 		index: -1,
 		unitList: [],
 		scenario: "-",
@@ -74,9 +76,15 @@
 	});
 	let selectedSublist = -1;
 
+	let dropTargetStyle = { outline: "none" };
+	function handleSort(e: CustomEvent<DndEvent<Sublist>>) {
+		sublists = e.detail.items;
+	}
+
 	//sublist creation and editting functions
 	function addSublist() {
 		let newList: Sublist = {
+			id: sublistId,
 			index: count,
 			unitList: [],
 			scenario: "-",
@@ -89,23 +97,23 @@
 			size: 0,
 			unitIndices: []
 		};
+		sublistId++;
 
-		for (const unit of list.units.items) {
+		for (const unit of list.units) {
 			newList.unitList.push([unit, false]);
 		}
-		sublists.items.push(JSON.parse(JSON.stringify(newList)));
+		sublists.push(JSON.parse(JSON.stringify(newList)));
 		count++;
 
-		editSublist(sublists.items.length - 1);
+		editSublist(sublists.length - 1);
 	}
 	function editSublist(index: number) {
-		tempSublist.unitList = JSON.parse(JSON.stringify(sublists.items[index].unitList));
-		tempSublist.pv = sublists.items[index].pv;
-		tempSublist.checked = sublists.items[index].checked;
+		tempSublist.unitList = JSON.parse(JSON.stringify(sublists[index].unitList));
+		tempSublist.pv = sublists[index].pv;
+		tempSublist.checked = sublists[index].checked;
 		selectedSublist = index;
 		editSublistDialog.showModal();
 	}
-
 	function handleCheck(unit: Unit, index: number) {
 		if (tempSublist.unitList[index][1]) {
 			tempSublist.pv += unit.cost;
@@ -115,26 +123,25 @@
 			tempSublist.checked -= 1;
 		}
 	}
-
 	function handleEditSave() {
-		sublists.items[selectedSublist].unitList = JSON.parse(JSON.stringify(tempSublist.unitList));
-		sublists.items[selectedSublist].pv = tempSublist.pv;
-		sublists.items[selectedSublist].checked = tempSublist.checked;
+		sublists[selectedSublist].unitList = JSON.parse(JSON.stringify(tempSublist.unitList));
+		sublists[selectedSublist].pv = tempSublist.pv;
+		sublists[selectedSublist].checked = tempSublist.checked;
 		let tempSize = 0;
-		sublists.items[selectedSublist].health = 0;
-		sublists.items[selectedSublist].short = 0;
-		sublists.items[selectedSublist].medium = 0;
-		sublists.items[selectedSublist].long = 0;
-		for (const [unit, checked] of sublists.items[selectedSublist].unitList) {
+		sublists[selectedSublist].health = 0;
+		sublists[selectedSublist].short = 0;
+		sublists[selectedSublist].medium = 0;
+		sublists[selectedSublist].long = 0;
+		for (const [unit, checked] of sublists[selectedSublist].unitList) {
 			if (checked) {
-				sublists.items[selectedSublist].health += unit.health ?? 0;
-				sublists.items[selectedSublist].short += unit.damageS ?? 0;
-				sublists.items[selectedSublist].medium += unit.damageM ?? 0;
-				sublists.items[selectedSublist].long += unit.damageL ?? 0;
+				sublists[selectedSublist].health += unit.health ?? 0;
+				sublists[selectedSublist].short += unit.damageS ?? 0;
+				sublists[selectedSublist].medium += unit.damageM ?? 0;
+				sublists[selectedSublist].long += unit.damageL ?? 0;
 				tempSize += unit.size ?? 0;
 			}
 		}
-		sublists.items[selectedSublist].size = parseFloat((tempSize / sublists.items[selectedSublist].checked).toFixed(1));
+		sublists[selectedSublist].size = parseFloat((tempSize / sublists[selectedSublist].checked).toFixed(1));
 		tempSublist.unitIndices = [];
 		for (let i = 0; i < tempSublist.unitList.length; i++) {
 			if (tempSublist.unitList[i][1]) {
@@ -142,7 +149,7 @@
 			}
 		}
 		const removeIndex = list.sublists.findIndex((sublist: string) => {
-			return sublist == sublists.items[selectedSublist].unitIndices.toString();
+			return sublist == sublists[selectedSublist].unitIndices.toString();
 		});
 		if (removeIndex != -1) {
 			list.sublists.splice(removeIndex, 1);
@@ -158,26 +165,23 @@
 		selectedSublist = -1;
 		editSublistDialog.close();
 	}
-
 	function copySublist(index: number) {
-		sublists.items.push(JSON.parse(JSON.stringify(sublists.items[index])));
+		sublists.push(JSON.parse(JSON.stringify(sublists[index])));
 	}
-
 	function deleteSublist(index: number) {
-		let removeString = sublists.items[index].unitIndices.toString();
+		let removeString = sublists[index].unitIndices.toString();
 		let removeIndex = list.sublists.findIndex((sublist: string) => {
 			return sublist == removeString;
 		});
 		if (removeIndex != -1) {
 			list.sublists.splice(removeIndex, 1);
 		}
-		sublists.items.splice(index, 1);
+		sublists.splice(index, 1);
 	}
-
 	function generatesublists() {
 		autosublists = [];
 		let index = 0;
-		const possibleUnits = JSON.parse(JSON.stringify(list.units.items)).filter((unit: Unit) => {
+		const possibleUnits = JSON.parse(JSON.stringify(list.units)).filter((unit: Unit) => {
 			unit.index = index;
 			index++;
 			return unit.cost >= autoMinUnitCost;
@@ -205,6 +209,7 @@
 
 				if (checked <= 10 && pv <= autoMaxPV && pv >= autoMinPV) {
 					let newList = $state<Sublist>({
+						id: sublistId,
 						index: -1,
 						unitList: [],
 						scenario: "-",
@@ -218,6 +223,7 @@
 						string: tempString.slice(0, tempString.length - 2),
 						unitIndices: indices!
 					});
+					sublistId++;
 					let exists = autosublists.findIndex((list) => {
 						return list.string! == newList.string!;
 					});
@@ -234,7 +240,7 @@
 		count++;
 		let tempSize = 0,
 			unitIndex = 0;
-		list.units.items.forEach((unit: Unit) => {
+		list.units.forEach((unit: Unit) => {
 			const unitChecked = newList.unitIndices!.includes(unitIndex);
 			unitIndex++;
 			if (unitChecked) {
@@ -247,7 +253,7 @@
 			newList.unitList.push([unit, unitChecked]);
 		});
 		newList.size = parseFloat((tempSize / newList.checked).toFixed(1));
-		sublists.items.push(newList);
+		sublists.push(newList);
 		list.sublists.push(
 			newList
 				.unitIndices!.sort((a, b) => {
@@ -257,7 +263,7 @@
 		);
 	}
 	function loadsublists() {
-		sublists.items = [];
+		sublists = [];
 		loaded = true;
 
 		list.sublists.forEach((sublist: string) => {
@@ -265,6 +271,7 @@
 				return parseInt(index);
 			});
 			let newList: Sublist = {
+				id: sublistId,
 				index: count,
 				unitList: [],
 				scenario: "-",
@@ -277,10 +284,11 @@
 				size: 0,
 				unitIndices: formattedSublist
 			};
+			sublistId++;
 			count++;
 			let tempSize = 0,
 				unitIndex = 0;
-			list.units.items.forEach((unit: Unit) => {
+			list.units.forEach((unit: Unit) => {
 				const unitChecked = newList.unitIndices!.includes(unitIndex);
 				unitIndex++;
 				if (unitChecked) {
@@ -295,19 +303,18 @@
 				newList.unitList.push([unit, unitChecked]);
 			});
 			newList.size = parseFloat((tempSize / newList.checked).toFixed(1));
-			sublists.items.push(newList);
+			sublists.push(newList);
 		});
 	}
-
 	async function printSubList(index: number) {
 		let form = new FormData();
 
 		let sublistUnits: Unit[] = [];
 		let condense = false;
-		if (sublists.items[index].checked == 9 || sublists.items[index].checked == 10) {
+		if (sublists[index].checked == 9 || sublists[index].checked == 10) {
 			condense = true;
 		}
-		sublists.items[index].unitList.forEach((unit) => {
+		sublists[index].unitList.forEach((unit) => {
 			if (unit[1]) {
 				sublistUnits.push(unit[0]);
 			}
@@ -331,15 +338,13 @@
 		downloadElement.href = URL.createObjectURL(blob);
 		downloadElement.click();
 	}
-
 	function printAllsublists() {
 		printDialog.showModal();
 	}
-
 	function handlePrintForm({ formData, cancel, submitter }: any) {
 		printDialog.close();
 
-		formData.append("sublists.items", JSON.stringify(sublists.items));
+		formData.append("sublists", JSON.stringify(sublists));
 
 		if (submitter.innerText == "Cancel") {
 			cancel();
@@ -347,12 +352,11 @@
 		return async ({ result }: any) => {
 			const blob = new Blob([new Uint8Array(Object.values(JSON.parse(result.data.pdf)))], { type: "application/pdf" });
 			const downloadElement = document.createElement("a");
-			downloadElement.download = `${list.details.name} sublists.items`;
+			downloadElement.download = `${list.details.name} sublists`;
 			downloadElement.href = URL.createObjectURL(blob);
 			downloadElement.click();
 		};
 	}
-
 	function createString(sublist: Sublist) {
 		let tempString = "";
 		for (const [unit, checked] of sublist.unitList) {
@@ -367,28 +371,28 @@
 <!-- main sublist dialog -->
 <dialog
 	bind:this={sublistDialog}
-	on:close={() => {
+	onclose={() => {
 		showSublistModal = false;
 	}}
 	class="sublist-modal">
 	<div class="dialog-body">
 		<div class="space-between">
-			<h2>sublists.items</h2>
+			<h2>sublists</h2>
 			{#if layout != "mobile"}
 				<div class="center gap8">
 					<p>Display</p>
 					<button
-						on:click={() => {
+						onclick={() => {
 							layout = "vertical";
 						}}>Vertical</button>
 					<button
-						on:click={() => {
+						onclick={() => {
 							layout = "horizontal";
 						}}>Horizontal</button>
 				</div>
 			{/if}
 			<button
-				on:click={() => {
+				onclick={() => {
 					showSublistModal = false;
 				}}>Close</button>
 		</div>
@@ -403,34 +407,31 @@
 					</select>
 				</div>
 				<div class="center gap8">
-					<button on:click={addSublist}>Add</button>
+					<button onclick={addSublist}>Add</button>
 					<button
-						on:click={() => {
+						onclick={() => {
 							autoGenerationDialog.showModal();
-						}}>Generate sublists.items</button>
-					<button on:click={printAllsublists}>Print all sublists.items</button>
+						}}>Generate sublists</button>
+					<button onclick={printAllsublists}>Print all sublists</button>
 				</div>
 			</div>
 			<ul
 				class="sublist-container"
-				class:sublist-container-horizontal={layout == "horizontal" || layout == "mobile"}
-				on:drop={() => {
-					sublists.handleDrop();
-				}}
-				on:dragover|preventDefault={(e) => {
-					sublists.handleDragOver(e);
-				}}>
-				{#each sublists.items as sublist, index}
+				use:dndzone={{ items: sublists, dropTargetStyle }}
+				onconsider={handleSort}
+				onfinalize={handleSort}
+				class:sublist-container-horizontal={layout == "horizontal" || layout == "mobile"}>
+				{#each sublists as sublist, index (sublist.id)}
 					{#if scenarioFilter == "All" || scenarioFilter == sublist.scenario}
 						{#if layout == "vertical"}
-							<li class="sublist-vertical" draggable="true" on:dragstart={() => sublists.handleDragStart(index)} on:dragenter={() => sublists.handleDragEnter(index)}>
+							<li class="sublist-vertical" draggable="true">
 								<div class="space-between">
 									<select id={`scenario${sublist.index}`} bind:value={sublist.scenario}>
 										{#each ["-", "Bunkers", "Capture the Flag", "Domination", "Headhunter", "Hold the Line", "King of the Hill", "Overrun", "Stand Up Fight"] as scenario}
 											<option value={scenario}>{scenario}</option>
 										{/each}
 									</select>
-									<button on:click={() => editSublist(index)}>Edit</button>
+									<button onclick={() => editSublist(index)}>Edit</button>
 								</div>
 								<ul class="sublist-units-vertical">
 									{#each sublist.unitList as [unit, checked]}
@@ -453,15 +454,15 @@
 								</ul>
 								<div class="space-between">
 									<button
-										on:click={() => {
+										onclick={() => {
 											printSubList(index);
 										}}>Print Sublist</button>
-									<button on:click={() => copySublist(index)}>Copy</button>
-									<button on:click={() => deleteSublist(index)}>Delete</button>
+									<button onclick={() => copySublist(index)}>Copy</button>
+									<button onclick={() => deleteSublist(index)}>Delete</button>
 								</div>
 							</li>
 						{:else if layout == "horizontal"}
-							<li class="sublist-horizontal column" draggable="true" on:dragstart={() => sublists.handleDragStart(index)} on:dragenter={() => sublists.handleDragEnter(index)}>
+							<li class="sublist-horizontal column">
 								<div class="space-between">
 									<div class="center gap8">
 										<select id={`scenario${sublist.index}`} bind:value={sublist.scenario}>
@@ -469,15 +470,15 @@
 												<option value={scenario}>{scenario}</option>
 											{/each}
 										</select>
-										<button on:click={() => copySublist(index)}>Copy</button>
-										<button on:click={() => editSublist(index)}>Edit</button>
+										<button onclick={() => copySublist(index)}>Copy</button>
+										<button onclick={() => editSublist(index)}>Edit</button>
 									</div>
 									<div class="center gap8">
 										<button
-											on:click={() => {
+											onclick={() => {
 												printSubList(index);
 											}}>Print Sublist</button>
-										<button on:click={() => deleteSublist(index)}>Delete</button>
+										<button onclick={() => deleteSublist(index)}>Delete</button>
 									</div>
 								</div>
 								<div class="sublist-units-horizontal gap8">
@@ -498,32 +499,32 @@
 								</div>
 							</li>
 						{:else if layout == "mobile"}
-							<li class="sublist-mobile column" draggable="true" on:dragstart={() => sublists.handleDragStart(index)} on:dragenter={() => sublists.handleDragEnter(index)}>
+							<li class="sublist-mobile column">
 								<div class="space-between">
 									<select id={`scenario${sublist.index}`} bind:value={sublist.scenario}>
 										{#each ["-", "Bunkers", "Capture the Flag", "Domination", "Headhunter", "Hold the Line", "King of the Hill", "Overrun", "Stand Up Fight"] as scenario}
 											<option value={scenario}>{scenario}</option>
 										{/each}
 									</select>
-									<button on:click={() => copySublist(index)}>Copy</button>
-									<button on:click={() => editSublist(index)}>Edit</button>
+									<button onclick={() => copySublist(index)}>Copy</button>
+									<button onclick={() => editSublist(index)}>Edit</button>
 								</div>
 								<div class="sublist-units-mobile">
 									<div>{createString(sublist)}</div>
 								</div>
 								<div class="center gap8">
 									<button
-										on:click={() => {
+										onclick={() => {
 											printSubList(index);
 										}}>Print Sublist</button>
-									<button on:click={() => deleteSublist(index)}>Delete</button>
+									<button onclick={() => deleteSublist(index)}>Delete</button>
 								</div>
 							</li>
 						{/if}
 					{/if}
 				{/each}
 				<li class:add-panel-vertical={layout == "vertical"} class:add-panel-horizontal={layout == "horizontal"} class:add-panel-mobile={layout == "mobile"}>
-					<button on:click={addSublist}>+</button>
+					<button onclick={addSublist}>+</button>
 				</li>
 			</ul>
 		</main>
@@ -533,7 +534,7 @@
 <!-- Edit sublist dialog -->
 <dialog
 	bind:this={editSublistDialog}
-	on:close={() => {
+	onclose={() => {
 		selectedSublist = -1;
 	}}
 	class:dialog-wide={appWindow.isNarrow}>
@@ -545,7 +546,7 @@
 			{#if tempSublist?.unitList.length}
 				{#each tempSublist.unitList as [unit, checked], index}
 					<div>
-						<input type="checkbox" id={`checkbox${index.toString()}`} bind:checked={tempSublist.unitList[index][1]} on:change={() => handleCheck(unit, index)} /><label
+						<input type="checkbox" id={`checkbox${index.toString()}`} bind:checked={tempSublist.unitList[index][1]} onchange={() => handleCheck(unit, index)} /><label
 							for={`checkbox${index.toString()}`}>{unit.name}</label>
 					</div>
 					<p>{unit.skill}</p>
@@ -559,10 +560,10 @@
 		</div>
 		<div class="dialog-buttons">
 			<button
-				on:click={() => {
+				onclick={() => {
 					editSublistDialog.close();
 				}}>Cancel</button>
-			<button on:click={handleEditSave}>Save</button>
+			<button onclick={handleEditSave}>Save</button>
 		</div>
 	</div>
 </dialog>
@@ -572,11 +573,11 @@
 	<div class="dialog-body">
 		<div class="space-between">
 			{#if !appWindow.isNarrow}
-				<h1>Auto-generated sublists.items</h1>
+				<h1>Auto-generated sublists</h1>
 			{/if}
 			<p>Total Lists - {autosublists.length}</p>
 			<button
-				on:click={() => {
+				onclick={() => {
 					autoGenerationDialog.close();
 				}}>Close</button>
 		</div>
@@ -584,7 +585,7 @@
 			<button
 				class="accordian"
 				class:hidden={!appWindow.isMobile}
-				on:click={() => {
+				onclick={() => {
 					showFilters = !showFilters;
 				}}>
 				<div class="space-between">
@@ -612,19 +613,19 @@
 							alt="Min Unit info"
 							class="button-icon"
 							style:filter="var(--muted-filter)"
-							on:mouseenter={() => {
+							onmouseenter={() => {
 								showMinUnitInfoDropdown = true;
 							}}
-							on:mouseleave={() => {
+							onmouseleave={() => {
 								showMinUnitInfoDropdown = false;
 							}} />
 						<div class="dropdown-content dropdown-bottom" class:dropdown-hidden={!showMinUnitInfoDropdown} class:dropdown-shown={showMinUnitInfoDropdown}>
-							This tool can generate hundreds or thousands of combinations if you have cheap units. Recommend using this filter to get some basic sublists.items with a few points
-							to spare, and then filling in cheaper units where you want them.
+							This tool can generate hundreds or thousands of combinations if you have cheap units. Recommend using this filter to get some basic sublists with a few points to
+							spare, and then filling in cheaper units where you want them.
 						</div>
 					</div>
 					<input id="autoMinUnitCost" type="number" bind:value={autoMinUnitCost} />
-					<button on:click={generatesublists}>Generate sublists.items</button>
+					<button onclick={generatesublists}>Generate sublists</button>
 					<p>Additional filters coming soon...</p>
 				</div>
 			</div>
@@ -639,7 +640,7 @@
 						<div>{sublist.string}</div>
 						<div class="center">{sublist.checked}</div>
 						<div class="center">{sublist.pv}</div>
-						<div class="center"><button style:padding="8px 16px" on:click={() => addAutoSublist(index)}>+</button></div>
+						<div class="center"><button style:padding="8px 16px" onclick={() => addAutoSublist(index)}>+</button></div>
 					</div>
 				{/each}
 			</div>
@@ -648,13 +649,13 @@
 </dialog>
 
 <dialog bind:this={printDialog} class:dialog-wide={appWindow.isNarrow}>
-	<form action="/?/printsublists.items" method="post" use:enhance={handlePrintForm} class="padding8">
+	<form action="/?/printsublists" method="post" use:enhance={handlePrintForm} class="padding8">
 		<div class="inline column gap8">
 			<div class="inline gap8"><input type="radio" name="sublistPrintLayout" id="vertical" value="vertical" checked /><label for="vertical">Vertical</label></div>
 			<div class="inline gap8"><input type="radio" name="sublistPrintLayout" id="horizontal" value="horizontal" /><label for="horizontal">Horizontal</label></div>
 
 			<div class="inline gap8">
-				<input type="checkbox" name="sublistPrintGrouping" id="sublistPrintGroup" /><label for="sublistPrintGroup">Group sublists.items by scenario</label>
+				<input type="checkbox" name="sublistPrintGrouping" id="sublistPrintGroup" /><label for="sublistPrintGroup">Group sublists by scenario</label>
 			</div>
 		</div>
 		<div class="center gap8">
@@ -735,7 +736,7 @@
 		gap: 8px;
 		height: 100%;
 		min-width: 15%;
-		width: 15%;
+		max-width: 15%;
 		background-color: var(--card);
 		color: var(--card-foreground);
 		flex-shrink: 0;

@@ -21,7 +21,7 @@
 		if (listCode) {
 			const formData = new FormData();
 			const unitList = listCode.units.map((unit: any) => {
-				return unit.id;
+				return unit.mulId;
 			});
 			formData.append("unitList", JSON.stringify(unitList));
 			fetch("?/getUnits", {
@@ -102,9 +102,9 @@
 		<div class="space-between">
 			<p>Your Tournaments</p>
 			<div class="inline">
-				<button on:click={handleDelete}>Delete</button>
+				<button onclick={handleDelete}>Delete</button>
 				<button
-					on:click={() => {
+					onclick={() => {
 						tournamentList.selectTournament(-1);
 						tournamentDialog.showModal();
 					}}>Add</button>
@@ -137,7 +137,7 @@
 						{#each tournamentList.tournaments as tournament, index}
 							<tr
 								class:selected-row={tournamentList.selectedTournamentIndex == index}
-								on:click={() => {
+								onclick={() => {
 									tournamentList.selectParticipant(-1);
 									tournamentList.selectTournament(index);
 								}}>
@@ -173,14 +173,14 @@
 						{#each tournamentList.selectedTournament?.participants! as participant, index}
 							<tr
 								class:selected-row={tournamentList.selectedParticipantIndex == index}
-								on:click={() => {
+								onclick={() => {
 									tournamentList.selectParticipant(index);
 								}}>
 								<td>{participant.name}</td>
 								<td>{participant.listCodes?.at(-1)?.valid ? "✅" : "❌"}</td>
 								<td
 									><button
-										on:click={() => {
+										onclick={() => {
 											deleteParticipant(index);
 										}}>Del</button
 									></td>
@@ -196,7 +196,7 @@
 			<p>Tournament Details</p>
 			<button
 				disabled={tournamentList.selectedTournamentIndex == -1}
-				on:click={() => {
+				onclick={() => {
 					tournamentDialog.showModal();
 				}}>Edit</button>
 		</div>

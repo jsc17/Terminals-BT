@@ -2,10 +2,8 @@
 	import eraLists from "$lib/data/erasFactionsList.json";
 	import { eras, factions } from "$lib/data/erasFactionLookup.js";
 	import { appWindow } from "$lib/utilities/responsive.svelte";
-	import { getContext } from "svelte";
 	import { resultList } from "../resultList.svelte";
-
-	let list: any = getContext("list");
+	import { list } from "../list.svelte";
 
 	let { status = $bindable() } = $props();
 	let showParameters = $state(false);
@@ -57,7 +55,7 @@
 	<button
 		class="accordian"
 		class:hidden={!appWindow.isMobile}
-		on:click={() => {
+		onclick={() => {
 			showParameters = !showParameters;
 		}}>
 		<div class="space-between">

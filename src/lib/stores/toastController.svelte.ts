@@ -1,10 +1,10 @@
 import { Map } from "svelte/reactivity";
 
-interface toastOptions {
+type toastOptions = {
 	message: string;
 	timeout: number;
 	dismissable: boolean;
-}
+};
 
 class ToastController {
 	toasts = new Map<string, toastOptions>();

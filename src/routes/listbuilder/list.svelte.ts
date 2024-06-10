@@ -1,19 +1,22 @@
 import { getNewSkillCost } from "$lib/utilities/bt-utils";
 import type { Unit } from "$lib/types/unit.js";
 import { type Options, ruleSets } from "./options";
+import { DraggableList } from "$lib/utilities/DraggableList.svelte";
 
 function createList() {
-	let units = $state<Unit[]>([]);
+	let units = new DraggableList<Unit>();
 	let details = $state({ name: "", era: "", faction: "", general: "" });
 	let options = $state<Options>();
 	let sublists = $state<string[]>([]);
 	let validate = false;
+	let id = 0;
 
 	let pv = $derived.by(() => {
 		let listPV = 0;
-		units.forEach((unit) => {
+
+		for (const unit of units.items) {
 			listPV += unit.cost;
-		});
+		}
 		return listPV;
 	});
 
@@ -42,22 +45,24 @@ function createList() {
 		},
 		details,
 		add: (unit: Unit) => {
-			units.push(JSON.parse(JSON.stringify(unit)));
+			units.items.push(JSON.parse(JSON.stringify(unit)));
+			units.items.at(-1)!.listId = id.toString();
+			id++;
 		},
 		remove: (index: number) => {
-			const removed = units.splice(index, 1)[0];
+			const removed = units.items.splice(index, 1)[0];
 		},
 		modifySkill: (index: number, newSkill: number, basePV: number) => {
 			let newCost = getNewSkillCost(newSkill, basePV);
 
-			units[index].skill = newSkill;
-			units[index].cost = newCost;
+			units.items[index].skill = newSkill;
+			units.items[index].cost = newCost;
 		},
 		moveUnit: (index: number, newIndex: number) => {
-			if (newIndex >= 0 && newIndex < units.length) {
-				let temp = units[newIndex];
-				units[newIndex] = units[index];
-				units[index] = temp;
+			if (newIndex >= 0 && newIndex < units.items.length) {
+				let temp = units.items[newIndex];
+				units.items[newIndex] = units.items[index];
+				units.items[index] = temp;
 			}
 		},
 		setOptions

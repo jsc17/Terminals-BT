@@ -29,4 +29,5 @@ export type Unit = {
 	role?: string;
 	technology?: string;
 	subIndex?: number;
+	listId?: string;
 };

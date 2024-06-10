@@ -3,7 +3,7 @@
 	import type { Unit } from "$lib/types/unit";
 	import { deserialize, enhance } from "$app/forms";
 	import { appWindow } from "$lib/utilities/responsive.svelte";
-	import { createDraggableList } from "$lib/utilities/draggable";
+	import { DraggableList } from "$lib/utilities/DraggableList.svelte";
 
 	type Sublist = {
 		index: number;
@@ -22,13 +22,12 @@
 
 	let count = 0;
 	let list: any = getContext("list");
-	let sublists = $state<Sublist[]>([]);
-	let autoSublists = $state<any[]>([]);
+	let sublists = new DraggableList<Sublist>();
+	let autosublists = $state<any[]>([]);
 	let scenarioFilter = $state<string>("All");
 	let showMinUnitInfoDropdown = $state<boolean>(false);
 	let layout = $state<"vertical" | "horizontal" | "mobile">("vertical");
 	let showFilters = $state<boolean>(false);
-	let draggable = createDraggableList();
 
 	let { showSublistModal = $bindable() } = $props();
 	let sublistDialog: HTMLDialogElement;
@@ -45,7 +44,7 @@
 	$effect(() => {
 		if (showSublistModal) {
 			if (!loaded) {
-				loadSublists();
+				loadsublists();
 			}
 			if (appWindow.isMobile) {
 				layout = "mobile";
@@ -91,18 +90,18 @@
 			unitIndices: []
 		};
 
-		for (const unit of list.units) {
+		for (const unit of list.units.items) {
 			newList.unitList.push([unit, false]);
 		}
-		sublists.push(JSON.parse(JSON.stringify(newList)));
+		sublists.items.push(JSON.parse(JSON.stringify(newList)));
 		count++;
 
-		editSublist(sublists.length - 1);
+		editSublist(sublists.items.length - 1);
 	}
 	function editSublist(index: number) {
-		tempSublist.unitList = JSON.parse(JSON.stringify(sublists[index].unitList));
-		tempSublist.pv = sublists[index].pv;
-		tempSublist.checked = sublists[index].checked;
+		tempSublist.unitList = JSON.parse(JSON.stringify(sublists.items[index].unitList));
+		tempSublist.pv = sublists.items[index].pv;
+		tempSublist.checked = sublists.items[index].checked;
 		selectedSublist = index;
 		editSublistDialog.showModal();
 	}
@@ -118,25 +117,24 @@
 	}
 
 	function handleEditSave() {
-		sublists[selectedSublist].unitList = JSON.parse(JSON.stringify(tempSublist.unitList));
-		sublists[selectedSublist].pv = tempSublist.pv;
-		sublists[selectedSublist].checked = tempSublist.checked;
+		sublists.items[selectedSublist].unitList = JSON.parse(JSON.stringify(tempSublist.unitList));
+		sublists.items[selectedSublist].pv = tempSublist.pv;
+		sublists.items[selectedSublist].checked = tempSublist.checked;
 		let tempSize = 0;
-		sublists[selectedSublist].health = 0;
-		sublists[selectedSublist].short = 0;
-		sublists[selectedSublist].medium = 0;
-		sublists[selectedSublist].long = 0;
-		// sublists[selectedSublist].unitIndices = JSON.parse(JSON.stringify(tempSublist.unitIndices));
-		for (const [unit, checked] of sublists[selectedSublist].unitList) {
+		sublists.items[selectedSublist].health = 0;
+		sublists.items[selectedSublist].short = 0;
+		sublists.items[selectedSublist].medium = 0;
+		sublists.items[selectedSublist].long = 0;
+		for (const [unit, checked] of sublists.items[selectedSublist].unitList) {
 			if (checked) {
-				sublists[selectedSublist].health += unit.health ?? 0;
-				sublists[selectedSublist].short += unit.damageS ?? 0;
-				sublists[selectedSublist].medium += unit.damageM ?? 0;
-				sublists[selectedSublist].long += unit.damageL ?? 0;
+				sublists.items[selectedSublist].health += unit.health ?? 0;
+				sublists.items[selectedSublist].short += unit.damageS ?? 0;
+				sublists.items[selectedSublist].medium += unit.damageM ?? 0;
+				sublists.items[selectedSublist].long += unit.damageL ?? 0;
 				tempSize += unit.size ?? 0;
 			}
 		}
-		sublists[selectedSublist].size = parseFloat((tempSize / sublists[selectedSublist].checked).toFixed(1));
+		sublists.items[selectedSublist].size = parseFloat((tempSize / sublists.items[selectedSublist].checked).toFixed(1));
 		tempSublist.unitIndices = [];
 		for (let i = 0; i < tempSublist.unitList.length; i++) {
 			if (tempSublist.unitList[i][1]) {
@@ -144,7 +142,7 @@
 			}
 		}
 		const removeIndex = list.sublists.findIndex((sublist: string) => {
-			return sublist == sublists[selectedSublist].unitIndices.toString();
+			return sublist == sublists.items[selectedSublist].unitIndices.toString();
 		});
 		if (removeIndex != -1) {
 			list.sublists.splice(removeIndex, 1);
@@ -162,24 +160,24 @@
 	}
 
 	function copySublist(index: number) {
-		sublists.push(JSON.parse(JSON.stringify(sublists[index])));
+		sublists.items.push(JSON.parse(JSON.stringify(sublists.items[index])));
 	}
 
 	function deleteSublist(index: number) {
-		let removeString = sublists[index].unitIndices.toString();
+		let removeString = sublists.items[index].unitIndices.toString();
 		let removeIndex = list.sublists.findIndex((sublist: string) => {
 			return sublist == removeString;
 		});
 		if (removeIndex != -1) {
 			list.sublists.splice(removeIndex, 1);
 		}
-		sublists.splice(index, 1);
+		sublists.items.splice(index, 1);
 	}
 
-	function generateSublists() {
-		autoSublists = [];
+	function generatesublists() {
+		autosublists = [];
 		let index = 0;
-		const possibleUnits = JSON.parse(JSON.stringify(list.units)).filter((unit: Unit) => {
+		const possibleUnits = JSON.parse(JSON.stringify(list.units.items)).filter((unit: Unit) => {
 			unit.index = index;
 			index++;
 			return unit.cost >= autoMinUnitCost;
@@ -220,23 +218,23 @@
 						string: tempString.slice(0, tempString.length - 2),
 						unitIndices: indices!
 					});
-					let exists = autoSublists.findIndex((list) => {
+					let exists = autosublists.findIndex((list) => {
 						return list.string! == newList.string!;
 					});
 					if (exists == -1) {
-						autoSublists.push(newList);
+						autosublists.push(newList);
 					}
 				}
 			}
 		});
 	}
 	function addAutoSublist(index: number) {
-		let newList: Sublist = JSON.parse(JSON.stringify(autoSublists[index]));
+		let newList: Sublist = JSON.parse(JSON.stringify(autosublists[index]));
 		newList.index = count;
 		count++;
 		let tempSize = 0,
 			unitIndex = 0;
-		list.units.forEach((unit: Unit) => {
+		list.units.items.forEach((unit: Unit) => {
 			const unitChecked = newList.unitIndices!.includes(unitIndex);
 			unitIndex++;
 			if (unitChecked) {
@@ -249,7 +247,7 @@
 			newList.unitList.push([unit, unitChecked]);
 		});
 		newList.size = parseFloat((tempSize / newList.checked).toFixed(1));
-		sublists.push(newList);
+		sublists.items.push(newList);
 		list.sublists.push(
 			newList
 				.unitIndices!.sort((a, b) => {
@@ -258,8 +256,8 @@
 				.toString()
 		);
 	}
-	function loadSublists() {
-		sublists = [];
+	function loadsublists() {
+		sublists.items = [];
 		loaded = true;
 
 		list.sublists.forEach((sublist: string) => {
@@ -282,7 +280,7 @@
 			count++;
 			let tempSize = 0,
 				unitIndex = 0;
-			list.units.forEach((unit: Unit) => {
+			list.units.items.forEach((unit: Unit) => {
 				const unitChecked = newList.unitIndices!.includes(unitIndex);
 				unitIndex++;
 				if (unitChecked) {
@@ -297,7 +295,7 @@
 				newList.unitList.push([unit, unitChecked]);
 			});
 			newList.size = parseFloat((tempSize / newList.checked).toFixed(1));
-			sublists.push(newList);
+			sublists.items.push(newList);
 		});
 	}
 
@@ -306,10 +304,10 @@
 
 		let sublistUnits: Unit[] = [];
 		let condense = false;
-		if (sublists[index].checked == 9 || sublists[index].checked == 10) {
+		if (sublists.items[index].checked == 9 || sublists.items[index].checked == 10) {
 			condense = true;
 		}
-		sublists[index].unitList.forEach((unit) => {
+		sublists.items[index].unitList.forEach((unit) => {
 			if (unit[1]) {
 				sublistUnits.push(unit[0]);
 			}
@@ -334,14 +332,14 @@
 		downloadElement.click();
 	}
 
-	function printAllSublists() {
+	function printAllsublists() {
 		printDialog.showModal();
 	}
 
 	function handlePrintForm({ formData, cancel, submitter }: any) {
 		printDialog.close();
 
-		formData.append("sublists", JSON.stringify(sublists));
+		formData.append("sublists.items", JSON.stringify(sublists.items));
 
 		if (submitter.innerText == "Cancel") {
 			cancel();
@@ -349,7 +347,7 @@
 		return async ({ result }: any) => {
 			const blob = new Blob([new Uint8Array(Object.values(JSON.parse(result.data.pdf)))], { type: "application/pdf" });
 			const downloadElement = document.createElement("a");
-			downloadElement.download = `${list.details.name} sublists`;
+			downloadElement.download = `${list.details.name} sublists.items`;
 			downloadElement.href = URL.createObjectURL(blob);
 			downloadElement.click();
 		};
@@ -364,10 +362,6 @@
 		}
 		return tempString;
 	}
-
-	function handleDrop() {
-		sublists = draggable.handleDrop($state.snapshot(sublists))!;
-	}
 </script>
 
 <!-- main sublist dialog -->
@@ -379,7 +373,7 @@
 	class="sublist-modal">
 	<div class="dialog-body">
 		<div class="space-between">
-			<h2>Sublists</h2>
+			<h2>sublists.items</h2>
 			{#if layout != "mobile"}
 				<div class="center gap8">
 					<p>Display</p>
@@ -413,19 +407,23 @@
 					<button
 						on:click={() => {
 							autoGenerationDialog.showModal();
-						}}>Generate sublists</button>
-					<button on:click={printAllSublists}>Print all sublists</button>
+						}}>Generate sublists.items</button>
+					<button on:click={printAllsublists}>Print all sublists.items</button>
 				</div>
 			</div>
 			<ul
 				class="sublist-container"
 				class:sublist-container-horizontal={layout == "horizontal" || layout == "mobile"}
-				on:drop={handleDrop}
-				on:dragover|preventDefault={draggable.handleDragOver}>
-				{#each sublists as sublist, index}
+				on:drop={() => {
+					sublists.handleDrop();
+				}}
+				on:dragover|preventDefault={(e) => {
+					sublists.handleDragOver(e);
+				}}>
+				{#each sublists.items as sublist, index}
 					{#if scenarioFilter == "All" || scenarioFilter == sublist.scenario}
 						{#if layout == "vertical"}
-							<li class="sublist-vertical" draggable="true" on:dragstart={() => draggable.handleDragStart(index)} on:dragenter={() => draggable.handleDragEnter(index)}>
+							<li class="sublist-vertical" draggable="true" on:dragstart={() => sublists.handleDragStart(index)} on:dragenter={() => sublists.handleDragEnter(index)}>
 								<div class="space-between">
 									<select id={`scenario${sublist.index}`} bind:value={sublist.scenario}>
 										{#each ["-", "Bunkers", "Capture the Flag", "Domination", "Headhunter", "Hold the Line", "King of the Hill", "Overrun", "Stand Up Fight"] as scenario}
@@ -463,7 +461,7 @@
 								</div>
 							</li>
 						{:else if layout == "horizontal"}
-							<li class="sublist-horizontal column" draggable="true" on:dragstart={() => draggable.handleDragStart(index)} on:dragenter={() => draggable.handleDragEnter(index)}>
+							<li class="sublist-horizontal column" draggable="true" on:dragstart={() => sublists.handleDragStart(index)} on:dragenter={() => sublists.handleDragEnter(index)}>
 								<div class="space-between">
 									<div class="center gap8">
 										<select id={`scenario${sublist.index}`} bind:value={sublist.scenario}>
@@ -500,7 +498,7 @@
 								</div>
 							</li>
 						{:else if layout == "mobile"}
-							<li class="sublist-mobile column" draggable="true" on:dragstart={() => draggable.handleDragStart(index)} on:dragenter={() => draggable.handleDragEnter(index)}>
+							<li class="sublist-mobile column" draggable="true" on:dragstart={() => sublists.handleDragStart(index)} on:dragenter={() => sublists.handleDragEnter(index)}>
 								<div class="space-between">
 									<select id={`scenario${sublist.index}`} bind:value={sublist.scenario}>
 										{#each ["-", "Bunkers", "Capture the Flag", "Domination", "Headhunter", "Hold the Line", "King of the Hill", "Overrun", "Stand Up Fight"] as scenario}
@@ -574,9 +572,9 @@
 	<div class="dialog-body">
 		<div class="space-between">
 			{#if !appWindow.isNarrow}
-				<h1>Auto-generated sublists</h1>
+				<h1>Auto-generated sublists.items</h1>
 			{/if}
-			<p>Total Lists - {autoSublists.length}</p>
+			<p>Total Lists - {autosublists.length}</p>
 			<button
 				on:click={() => {
 					autoGenerationDialog.close();
@@ -621,12 +619,12 @@
 								showMinUnitInfoDropdown = false;
 							}} />
 						<div class="dropdown-content dropdown-bottom" class:dropdown-hidden={!showMinUnitInfoDropdown} class:dropdown-shown={showMinUnitInfoDropdown}>
-							This tool can generate hundreds or thousands of combinations if you have cheap units. Recommend using this filter to get some basic sublists with a few points to
-							spare, and then filling in cheaper units where you want them.
+							This tool can generate hundreds or thousands of combinations if you have cheap units. Recommend using this filter to get some basic sublists.items with a few points
+							to spare, and then filling in cheaper units where you want them.
 						</div>
 					</div>
 					<input id="autoMinUnitCost" type="number" bind:value={autoMinUnitCost} />
-					<button on:click={generateSublists}>Generate Sublists</button>
+					<button on:click={generatesublists}>Generate sublists.items</button>
 					<p>Additional filters coming soon...</p>
 				</div>
 			</div>
@@ -636,7 +634,7 @@
 					<div class="center">Unit Count</div>
 					<div class="center">PV</div>
 				</div>
-				{#each autoSublists as sublist, index}
+				{#each autosublists as sublist, index}
 					<div class="auto-list">
 						<div>{sublist.string}</div>
 						<div class="center">{sublist.checked}</div>
@@ -650,13 +648,13 @@
 </dialog>
 
 <dialog bind:this={printDialog} class:dialog-wide={appWindow.isNarrow}>
-	<form action="/?/printSublists" method="post" use:enhance={handlePrintForm} class="padding8">
+	<form action="/?/printsublists.items" method="post" use:enhance={handlePrintForm} class="padding8">
 		<div class="inline column gap8">
 			<div class="inline gap8"><input type="radio" name="sublistPrintLayout" id="vertical" value="vertical" checked /><label for="vertical">Vertical</label></div>
 			<div class="inline gap8"><input type="radio" name="sublistPrintLayout" id="horizontal" value="horizontal" /><label for="horizontal">Horizontal</label></div>
 
 			<div class="inline gap8">
-				<input type="checkbox" name="sublistPrintGrouping" id="sublistPrintGroup" /><label for="sublistPrintGroup">Group sublists by scenario</label>
+				<input type="checkbox" name="sublistPrintGrouping" id="sublistPrintGroup" /><label for="sublistPrintGroup">Group sublists.items by scenario</label>
 			</div>
 		</div>
 		<div class="center gap8">

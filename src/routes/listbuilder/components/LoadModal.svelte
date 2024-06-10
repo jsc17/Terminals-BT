@@ -115,7 +115,7 @@
 		} else {
 			list.sublists = [];
 		}
-		while (list.units.length) {
+		while (list.units.items.length) {
 			list.remove(0);
 		}
 
@@ -130,7 +130,7 @@
 				list.add(unitToAdd);
 			}
 			if (skill != "undefined") {
-				list.modifySkill(list.units.length - 1, parseInt(skill), list.units.at(-1)!.pv);
+				list.modifySkill(list.units.items.length - 1, parseInt(skill), list.units.items.at(-1)!.pv);
 			}
 		});
 

@@ -19,7 +19,7 @@
 		let ttsCode = "";
 
 		listCode += resultList.details.era + ":" + resultList.details.faction;
-		list.units.forEach((unit: Unit) => {
+		list.units.items.forEach((unit: Unit) => {
 			listCode += `:${unit.id},${unit.skill}`;
 		});
 		listCode += "-";
@@ -30,7 +30,7 @@
 			listCode = listCode.substring(0, listCode.length - 1);
 		}
 		ttsCode = "{";
-		list.units.forEach((unit: Unit) => {
+		list.units.items.forEach((unit: Unit) => {
 			ttsCode += `{${unit.id},${unit.skill}},`;
 		});
 		ttsCode = ttsCode.replace(/.$/, "}");
@@ -76,7 +76,7 @@
 				formData.append("faction", resultList.details.faction);
 				formData.append("rules", resultList.options?.name);
 				let units: string[] = [];
-				for (const unit of list.units) {
+				for (const unit of list.units.items) {
 					units.push(`${unit.id},${unit.skill}`);
 				}
 				formData.append("units", units.join(":"));
@@ -115,7 +115,7 @@
 
 	function exportToJeff() {
 		const jeffList: any = { name: list.details.name, members: [], uuid: crypto.randomUUID(), lastUpdated: new Date().toISOString(), formationBonus: "none", groupLabel: "Lance" };
-		for (const unit of list.units) {
+		for (const unit of list.units.items) {
 			let jumpSpeed = 0;
 			for (const move of unit.move) {
 				if (move.type == "j") {

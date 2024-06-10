@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { PrintModal, SaveModal, LoadModal, SublistModal } from "./index";
+	import { PrintModal, SaveModal, LoadModal, SublistModal, UnitCard } from "./index";
 	import { getContext, onMount } from "svelte";
 	import { ruleSets } from "../options";
 	import { resultList } from "../resultList.svelte";
-	import { toastController } from "$lib/stores/toastController.svelte";
+	import { flip } from "svelte/animate";
 
 	let list: any = getContext("list");
 	let {
@@ -18,13 +18,6 @@
 	let showSublistModal = $state(false);
 	let showListMenuDropdown = $state(false);
 
-	function modifySkill(event: Event, index: number, basePV: number) {
-		const target = event.target as HTMLInputElement;
-		if (target) {
-			let skill = parseInt(target.value);
-			list.modifySkill(index, skill, basePV);
-		}
-	}
 	onMount(() => {
 		selectedRules = list.options?.name;
 	});
@@ -57,9 +50,9 @@
 				{/if}
 
 				{#if list.options?.maxUnits}
-					<p class:errors={list.units.length > list.options.maxUnits}>Units: {list.units.length}/{list.options.maxUnits}</p>
+					<p class:errors={list.units.items.length > list.options.maxUnits}>Units: {list.units.items.length}/{list.options.maxUnits}</p>
 				{:else}
-					<p>Units: {list.units.length}</p>
+					<p>Units: {list.units.items.length}</p>
 				{/if}
 			</div>
 
@@ -110,7 +103,7 @@
 		</div>
 	</div>
 	<div class="list-units">
-		{#if list.units.length == 0}
+		{#if list.units.items.length == 0}
 			<div class="info">
 				<div>
 					<h1 style:color="var(--primary)">Latest:</h1>
@@ -127,83 +120,21 @@
 				<p>Mechwarrior, BattleMech, 'Mech and Aerotech are registered trademarks of The Topps Company, Inc. All Rights Reserved.</p>
 			</div>
 		{:else}
-			<table class="unit-list">
-				<colgroup>
-					<col />
-					<col style="width:40%" />
-					<col style="width:15%" />
-					<col style="width:20%" />
-					<col style="width:15%" />
-					<col style="width:10%" />
-				</colgroup>
-				<tbody>
-					{#each list.units as unit, index}
-						<tr class="unit-row">
-							<td>
-								{#if index == 0}
-									<button class="move-button" on:click={(e) => list.moveUnit(index, index - 1)}><img src="/icons/chevron-up.svg" width="15px" alt="move up" /> </button>
-								{:else}
-									<button class="move-button" on:click={(e) => list.moveUnit(index, index - 1)}
-										><img class="move-arrow" src="/icons/chevron-up.svg" width="15px" alt="move up" />
-									</button>
-								{/if}
-							</td>
-							{#if list.invalidUnits?.includes(unit.name) || list.invalidUnits?.includes(unit.class)}
-								<td class="invalid-unit">{unit.name}</td>
-							{:else}
-								<td>{unit.name}</td>
-							{/if}
-
-							<td class="align-center">{unit.type}</td>
-							<td class="align-center">
-								{#if unit.skill == undefined}
-									-
-								{:else}
-									Skill - <input on:change={(e) => modifySkill(e, index, unit.pv)} id={index.toString()} type="number" min="2" max="6" value={unit.skill} />
-								{/if}
-							</td>
-							<td class="align-center">PV - {unit.cost}</td>
-							<td class="align-center">
-								<button
-									on:click={() => {
-										list.remove(index);
-										toastController.addToast(`${unit.name} removed from list`);
-									}}>-</button
-								></td>
-						</tr>
-						<tr class="stat-row">
-							<td>
-								{#if index == list.units.length - 1}
-									<button class="move-button" on:click={(e) => list.moveUnit(index, index + 1)}>
-										<img src="/icons/chevron-down.svg" width="15px" alt="move down" />
-									</button>
-								{:else}
-									<button class="move-button" on:click={(e) => list.moveUnit(index, index + 1)}>
-										<img class="move-arrow" src="/icons/chevron-down.svg" width="15px" alt="move down" />
-									</button>
-								{/if}
-							</td>
-							<td class="abilities border-bottom">{unit.abilities}</td>
-							{#if unit.type != "BS"}
-								<td class="align-center border-bottom">
-									{#each unit.move! as movement, index}
-										{#if index != 0}
-											{"/ "}
-										{/if}
-										{`${movement.speed}"${movement.type ?? ""}`}
-									{/each}
-									- TMM {unit.tmm}</td>
-								<td class="align-center border-bottom"
-									>{unit.damageS}{unit.damageSMin ? "*" : ""}{"/" + unit.damageM}{unit.damageMMin ? "*" : ""}{"/" + unit.damageL}{unit.damageLMin ? "*" : ""}{" - " +
-										unit.overheat}</td>
-								<td class="align-center border-bottom">{unit.health + " (" + unit.armor + "+" + unit.structure + ")"}</td>
-								<td class="align-center border-bottom">Size - {unit.size}</td>
-							{/if}
-						</tr>
-						<tr class="spacer"></tr>
-					{/each}
-				</tbody>
-			</table>
+			<div
+				class="unit-cards"
+				role="list"
+				on:drop={() => {
+					list.units.handleDrop();
+				}}
+				on:dragover|preventDefault={(e) => {
+					list.units.handleDragOver(e);
+				}}>
+				{#each list.units.items as unit, index (unit.listId)}
+					<div animate:flip={{ duration: 300 }}>
+						<UnitCard {unit} {index}></UnitCard>
+					</div>
+				{/each}
+			</div>
 		{/if}
 	</div>
 </div>
@@ -221,6 +152,8 @@
 		top: 35px;
 		overflow-y: auto;
 		z-index: 1;
+		display: flex;
+		flex-direction: column;
 	}
 	.list-header {
 		display: flex;
@@ -237,6 +170,9 @@
 		display: flex;
 		gap: 16px;
 	}
+	.list-units {
+		flex: 1;
+	}
 	.info {
 		padding: 16px;
 		display: flex;
@@ -245,47 +181,13 @@
 		height: 100%;
 		gap: 48px;
 	}
-	table {
-		width: 100%;
-		border-spacing: 8px;
-		border-collapse: collapse;
-		gap: 4px;
-	}
-	.align-center {
-		text-align: center;
-	}
-	.unit-row {
-		font-size: 0.95em;
-	}
-	.stat-row {
-		font-size: 0.7em;
-	}
-	.spacer {
-		height: 5px;
-	}
-	.border-bottom {
-		border-bottom: 1px solid var(--border);
-	}
-	.abilities {
-		padding-left: 15px;
-	}
-	td {
-		padding: 3px;
+	.unit-cards {
+		display: flex;
+		flex-direction: column;
+		min-height: 100%;
 	}
 	input[type="text"] {
 		width: 250px;
-	}
-	input[type="number"] {
-		width: 40px;
-	}
-	.move-button {
-		background-color: transparent;
-	}
-	.move-arrow {
-		filter: var(--primary-filter);
-	}
-	.invalid-unit {
-		color: var(--error);
 	}
 	.errors {
 		color: var(--error);

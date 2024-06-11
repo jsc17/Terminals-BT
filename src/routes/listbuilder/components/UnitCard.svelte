@@ -14,7 +14,7 @@
 	}
 </script>
 
-<main>
+<main class="unit-card">
 	<div class="unit-row">
 		<p>{unit.name}</p>
 		<p>{unit.type}</p>
@@ -57,7 +57,6 @@
 		border-bottom: 1px solid var(--border);
 	}
 	main:hover {
-		box-shadow: 3px 0px 3px var(--primary) inset;
 		cursor: row-resize;
 	}
 	.unit-row,
@@ -86,7 +85,6 @@
 		width: 20px;
 	}
 	:global(.dragging) {
-		background-color: var(--primary);
-		color: var(--primary-foreground);
+		box-shadow: 3px 0px 3px var(--primary) inset;
 	}
 </style>

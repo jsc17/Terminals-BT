@@ -5,8 +5,9 @@
 	import { resultList } from "../resultList.svelte";
 	import { flip } from "svelte/animate";
 	import { list } from "../list.svelte";
-	import { dndzone, type DndEvent } from "svelte-dnd-action";
+	import { dndzone, type DndEvent, dragHandle, dragHandleZone } from "svelte-dnd-action";
 	import type { Unit } from "$lib/types/unit";
+	import { appWindow } from "$lib/utilities/responsive.svelte";
 
 	let {
 		status = $bindable(),
@@ -25,6 +26,8 @@
 	});
 
 	let dropTargetStyle = { outline: "none" };
+	let flipDurationMs = 100;
+
 	function handleSort(e: CustomEvent<DndEvent<Unit>>) {
 		list.units = e.detail.items;
 	}
@@ -126,10 +129,22 @@
 				</div>
 				<p>Mechwarrior, BattleMech, 'Mech and Aerotech are registered trademarks of The Topps Company, Inc. All Rights Reserved.</p>
 			</div>
-		{:else}
-			<div class="unit-cards" use:dndzone={{ items: list.units, dropTargetStyle }} onconsider={handleSort} onfinalize={handleSort}>
+		{:else if appWindow.isMobile}
+			<div class="unit-cards" use:dragHandleZone={{ items: list.units, dropTargetStyle, flipDurationMs }} onconsider={handleSort} onfinalize={handleSort}>
 				{#each list.units as unit, index (unit.id)}
-					<div class="unitcard" animate:flip={{ duration: 100 }}>
+					<div animate:flip={{ duration: flipDurationMs }} class="mobile-card">
+						<div use:dragHandle aria-label="drag handle for {unit.name}" class="handle">
+							<img class="move-arrow" src="/icons/chevron-up.svg" width="15px" alt="move up" />
+							<img class="move-arrow" src="/icons/chevron-down.svg" width="15px" alt="move down" />
+						</div>
+						<UnitCard {unit} {index}></UnitCard>
+					</div>
+				{/each}
+			</div>
+		{:else}
+			<div class="unit-cards" use:dndzone={{ items: list.units, dropTargetStyle, flipDurationMs }} onconsider={handleSort} onfinalize={handleSort}>
+				{#each list.units as unit, index (unit.id)}
+					<div animate:flip={{ duration: flipDurationMs }}>
 						<UnitCard {unit} {index}></UnitCard>
 					</div>
 				{/each}
@@ -208,5 +223,19 @@
 	.menu-button {
 		background-color: transparent;
 		color: var(--primary);
+	}
+	.mobile-card {
+		display: flex;
+		height: 100%;
+	}
+	.handle {
+		width: 25px;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 4px;
+	}
+	.move-arrow {
+		filter: var(--primary-filter);
 	}
 </style>

@@ -3,22 +3,22 @@
 	import { eras, factions } from "$lib/data/erasFactionLookup";
 	import { enhance, deserialize } from "$app/forms";
 
-	interface UnitPreview {
+	type UnitPreview = {
 		id: string;
 		name: string;
 		mulId: number;
 		skill: number;
 		pv: number;
 		link: string;
-	}
+	};
 
-	interface Issue {
+	type Issue = {
 		id: string;
 		title: string;
 		description: string;
 		number: string;
 		violatingUnits: string[];
-	}
+	};
 
 	let { data } = $props();
 	let tournamentList = $state<{ id: number; name: string; organizer: string; era: number; date: Date }[]>([]);
@@ -241,7 +241,7 @@
 							<p>Load from saved Lists:</p>
 							<button
 								type="button"
-								on:click={() => {
+								onclick={() => {
 									openListDialog();
 								}}>Load</button>
 						</div>
@@ -252,7 +252,7 @@
 							<input type="text" name="uploadData" id="uploadData" bind:value={listCode} />
 							<button
 								type="button"
-								on:click={() => {
+								onclick={() => {
 									navigator.clipboard.readText().then((text) => {
 										listCode = text;
 									});
@@ -299,7 +299,7 @@
 										<td>{unitList[index].pv}</td>
 										<td>
 											{#if !unitList[index].mulId}
-												<button on:click={() => fixUnit(index)}>Fix</button>
+												<button onclick={() => fixUnit(index)}>Fix</button>
 											{/if}
 										</td>
 									</tr>
@@ -388,7 +388,7 @@
 		<div class="space-between">
 			<h1>User Lists</h1>
 			<button
-				on:click={() => {
+				onclick={() => {
 					loadListDialog.close();
 				}}>Close</button>
 		</div>
@@ -402,7 +402,7 @@
 				<tbody>
 					{#if savedLists.length}
 						{#each savedLists as savedList, index}
-							<tr class:selected={selectedList == index} on:click={() => selectRow(index)}>
+							<tr class:selected={selectedList == index} onclick={() => selectRow(index)}>
 								<td>{savedList.name}</td>
 								<td>{eras.get(savedList.era)}</td>
 								<td>{factions.get(savedList.faction)}</td>
@@ -413,7 +413,7 @@
 			</table>
 		</div>
 		<button
-			on:click={() => {
+			onclick={() => {
 				loadList();
 			}}>Load</button>
 	</div>
@@ -424,7 +424,7 @@
 		<div class="space-between">
 			<p>Fix unidentified unit</p>
 			<button
-				on:click={() => {
+				onclick={() => {
 					fixUnitDialog.close();
 				}}>Close</button>
 		</div>
@@ -432,7 +432,7 @@
 		<div class="space-between">
 			<div class="inline"><label for="filterUnit">Filter:</label><input type="text" name="filterUnit" id="filterUnit" bind:value={filterValue} /></div>
 			<button
-				on:click={() => {
+				onclick={() => {
 					if (selectedReplacement != -1) {
 						unitList[selectedUnit].mulId = selectedReplacement;
 						fixUnitDialog.close();
@@ -446,7 +446,7 @@
 						{#each unitData as unit}
 							{#if unit.name.toLowerCase().includes(filterValue.toLowerCase())}
 								<tr
-									on:click={() => {
+									onclick={() => {
 										selectedReplacement = unit.mulId;
 									}}
 									class:selected={unit.mulId == selectedReplacement}><td>{unit.name}</td></tr>

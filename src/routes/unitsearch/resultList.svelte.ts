@@ -201,7 +201,7 @@ export function createResultList() {
 			});
 			try {
 				let formattedUnit: Unit = {
-					id: unit.mulId,
+					mulId: unit.mulId,
 					name: unit.name,
 					class: unit.class,
 					variant: unit.variant,

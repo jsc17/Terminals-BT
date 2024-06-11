@@ -1,11 +1,14 @@
 <script lang="ts">
-	import { PrintModal, SaveModal, LoadModal, SublistModal } from "./index";
-	import { getContext, onMount } from "svelte";
+	import { PrintModal, SaveModal, LoadModal, SublistModal, UnitCard } from "./index";
+	import { onMount } from "svelte";
 	import { ruleSets } from "../options";
 	import { resultList } from "../resultList.svelte";
-	import { toastController } from "$lib/stores/toastController.svelte";
+	import { flip } from "svelte/animate";
+	import { list } from "../list.svelte";
+	import { dndzone, type DndEvent, dragHandle, dragHandleZone } from "svelte-dnd-action";
+	import type { Unit } from "$lib/types/unit";
+	import { appWindow } from "$lib/utilities/responsive.svelte";
 
-	let list: any = getContext("list");
 	let {
 		status = $bindable(),
 		selectedRules = $bindable(),
@@ -18,16 +21,16 @@
 	let showSublistModal = $state(false);
 	let showListMenuDropdown = $state(false);
 
-	function modifySkill(event: Event, index: number, basePV: number) {
-		const target = event.target as HTMLInputElement;
-		if (target) {
-			let skill = parseInt(target.value);
-			list.modifySkill(index, skill, basePV);
-		}
-	}
 	onMount(() => {
-		selectedRules = list.options?.name;
+		selectedRules = list.options?.name ?? "noRes";
 	});
+
+	let dropTargetStyle = { outline: "none" };
+	let flipDurationMs = 100;
+
+	function handleSort(e: CustomEvent<DndEvent<Unit>>) {
+		list.units = e.detail.items;
+	}
 </script>
 
 <div class="card listBuilder">
@@ -38,9 +41,9 @@
 				<label for="rules">Rules:</label>
 				<select
 					bind:value={selectedRules}
-					on:change={() => {
+					onchange={() => {
 						list.setOptions(selectedRules);
-						resultList.setOptions(list.options.name);
+						resultList.setOptions(list.options?.name ?? "noRes");
 					}}>
 					{#each ruleSets as rules}
 						<option value={rules.name}>{rules.display}</option>
@@ -65,13 +68,13 @@
 
 			<menu
 				class="dropdown"
-				on:mouseleave={() => {
+				onmouseleave={() => {
 					showListMenuDropdown = false;
 				}}>
 				<button
 					class="link-button"
 					id="nav-links"
-					on:click={() => {
+					onclick={() => {
 						showListMenuDropdown = !showListMenuDropdown;
 					}}>
 					<img src="/icons/menu.svg" alt="menu" />
@@ -79,28 +82,28 @@
 				<div class="dropdown-content dropdown-right" class:dropdown-hidden={!showListMenuDropdown} class:dropdown-shown={showListMenuDropdown}>
 					<button
 						class="menu-button"
-						on:click={() => {
+						onclick={() => {
 							showLoadModal = true;
 						}}>
 						Load List
 					</button>
 					<button
 						class="menu-button"
-						on:click={() => {
+						onclick={() => {
 							showSaveModal = true;
 						}}>
 						Save/Export List
 					</button>
 					<button
 						class="menu-button"
-						on:click={() => {
+						onclick={() => {
 							showPrintModal = true;
 						}}>
 						Print List
 					</button>
 					<button
 						class="menu-button"
-						on:click={() => {
+						onclick={() => {
 							showSublistModal = true;
 						}}>
 						Generate Sublists
@@ -126,84 +129,26 @@
 				</div>
 				<p>Mechwarrior, BattleMech, 'Mech and Aerotech are registered trademarks of The Topps Company, Inc. All Rights Reserved.</p>
 			</div>
+		{:else if appWindow.isMobile}
+			<div class="unit-cards" use:dragHandleZone={{ items: list.units, dropTargetStyle, flipDurationMs }} onconsider={handleSort} onfinalize={handleSort}>
+				{#each list.units as unit, index (unit.id)}
+					<div animate:flip={{ duration: flipDurationMs }} class="mobile-card">
+						<div use:dragHandle aria-label="drag handle for {unit.name}" class="handle">
+							<img class="move-arrow" src="/icons/chevron-up.svg" width="15px" alt="move up" />
+							<img class="move-arrow" src="/icons/chevron-down.svg" width="15px" alt="move down" />
+						</div>
+						<UnitCard {unit} {index}></UnitCard>
+					</div>
+				{/each}
+			</div>
 		{:else}
-			<table class="unit-list">
-				<colgroup>
-					<col />
-					<col style="width:40%" />
-					<col style="width:15%" />
-					<col style="width:20%" />
-					<col style="width:15%" />
-					<col style="width:10%" />
-				</colgroup>
-				<tbody>
-					{#each list.units as unit, index}
-						<tr class="unit-row">
-							<td>
-								{#if index == 0}
-									<button class="move-button" on:click={(e) => list.moveUnit(index, index - 1)}><img src="/icons/chevron-up.svg" width="15px" alt="move up" /> </button>
-								{:else}
-									<button class="move-button" on:click={(e) => list.moveUnit(index, index - 1)}
-										><img class="move-arrow" src="/icons/chevron-up.svg" width="15px" alt="move up" />
-									</button>
-								{/if}
-							</td>
-							{#if list.invalidUnits?.includes(unit.name) || list.invalidUnits?.includes(unit.class)}
-								<td class="invalid-unit">{unit.name}</td>
-							{:else}
-								<td>{unit.name}</td>
-							{/if}
-
-							<td class="align-center">{unit.type}</td>
-							<td class="align-center">
-								{#if unit.skill == undefined}
-									-
-								{:else}
-									Skill - <input on:change={(e) => modifySkill(e, index, unit.pv)} id={index.toString()} type="number" min="2" max="6" value={unit.skill} />
-								{/if}
-							</td>
-							<td class="align-center">PV - {unit.cost}</td>
-							<td class="align-center">
-								<button
-									on:click={() => {
-										list.remove(index);
-										toastController.addToast(`${unit.name} removed from list`);
-									}}>-</button
-								></td>
-						</tr>
-						<tr class="stat-row">
-							<td>
-								{#if index == list.units.length - 1}
-									<button class="move-button" on:click={(e) => list.moveUnit(index, index + 1)}>
-										<img src="/icons/chevron-down.svg" width="15px" alt="move down" />
-									</button>
-								{:else}
-									<button class="move-button" on:click={(e) => list.moveUnit(index, index + 1)}>
-										<img class="move-arrow" src="/icons/chevron-down.svg" width="15px" alt="move down" />
-									</button>
-								{/if}
-							</td>
-							<td class="abilities border-bottom">{unit.abilities}</td>
-							{#if unit.type != "BS"}
-								<td class="align-center border-bottom">
-									{#each unit.move! as movement, index}
-										{#if index != 0}
-											{"/ "}
-										{/if}
-										{`${movement.speed}"${movement.type ?? ""}`}
-									{/each}
-									- TMM {unit.tmm}</td>
-								<td class="align-center border-bottom"
-									>{unit.damageS}{unit.damageSMin ? "*" : ""}{"/" + unit.damageM}{unit.damageMMin ? "*" : ""}{"/" + unit.damageL}{unit.damageLMin ? "*" : ""}{" - " +
-										unit.overheat}</td>
-								<td class="align-center border-bottom">{unit.health + " (" + unit.armor + "+" + unit.structure + ")"}</td>
-								<td class="align-center border-bottom">Size - {unit.size}</td>
-							{/if}
-						</tr>
-						<tr class="spacer"></tr>
-					{/each}
-				</tbody>
-			</table>
+			<div class="unit-cards" use:dndzone={{ items: list.units, dropTargetStyle, flipDurationMs }} onconsider={handleSort} onfinalize={handleSort}>
+				{#each list.units as unit, index (unit.id)}
+					<div animate:flip={{ duration: flipDurationMs }}>
+						<UnitCard {unit} {index}></UnitCard>
+					</div>
+				{/each}
+			</div>
 		{/if}
 	</div>
 </div>
@@ -221,6 +166,8 @@
 		top: 35px;
 		overflow-y: auto;
 		z-index: 1;
+		display: flex;
+		flex-direction: column;
 	}
 	.list-header {
 		display: flex;
@@ -237,6 +184,9 @@
 		display: flex;
 		gap: 16px;
 	}
+	.list-units {
+		flex: 1;
+	}
 	.info {
 		padding: 16px;
 		display: flex;
@@ -245,47 +195,14 @@
 		height: 100%;
 		gap: 48px;
 	}
-	table {
-		width: 100%;
-		border-spacing: 8px;
-		border-collapse: collapse;
+	.unit-cards {
+		display: flex;
+		flex-direction: column;
+		min-height: 100%;
 		gap: 4px;
-	}
-	.align-center {
-		text-align: center;
-	}
-	.unit-row {
-		font-size: 0.95em;
-	}
-	.stat-row {
-		font-size: 0.7em;
-	}
-	.spacer {
-		height: 5px;
-	}
-	.border-bottom {
-		border-bottom: 1px solid var(--border);
-	}
-	.abilities {
-		padding-left: 15px;
-	}
-	td {
-		padding: 3px;
 	}
 	input[type="text"] {
 		width: 250px;
-	}
-	input[type="number"] {
-		width: 40px;
-	}
-	.move-button {
-		background-color: transparent;
-	}
-	.move-arrow {
-		filter: var(--primary-filter);
-	}
-	.invalid-unit {
-		color: var(--error);
 	}
 	.errors {
 		color: var(--error);
@@ -306,5 +223,19 @@
 	.menu-button {
 		background-color: transparent;
 		color: var(--primary);
+	}
+	.mobile-card {
+		display: flex;
+		height: 100%;
+	}
+	.handle {
+		width: 25px;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 4px;
+	}
+	.move-arrow {
+		filter: var(--primary-filter);
 	}
 </style>

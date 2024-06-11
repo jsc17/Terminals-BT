@@ -1,4 +1,4 @@
-export interface Options {
+export type Options = {
 	name: string;
 	display: string;
 	maxPv?: number;
@@ -8,7 +8,7 @@ export interface Options {
 	disallowUnique?: boolean;
 	disallowedAbilities?: string[];
 	customCardPacks?: string[];
-}
+};
 
 export const ruleSets: Options[] = [
 	{

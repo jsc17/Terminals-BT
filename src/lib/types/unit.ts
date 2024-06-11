@@ -1,6 +1,6 @@
 export type Unit = {
 	[key: string]: any;
-	id: number;
+	mulId: number;
 	name: string;
 	class: string;
 	variant: string;
@@ -29,4 +29,5 @@ export type Unit = {
 	role?: string;
 	technology?: string;
 	subIndex?: number;
+	id?: number;
 };

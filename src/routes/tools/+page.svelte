@@ -157,16 +157,16 @@
 	</div>
 	<div class="card">
 		<button
-			on:click={() => {
+			onclick={() => {
 				loadFactions();
 			}}>Upload Factions</button>
 		<button
-			on:click={() => {
+			onclick={() => {
 				loadUnits();
 			}}>Upload Units</button>
 	</div>
 	<div class="card">
-		<button on:click={sendResetEmail}>Send Reset</button>
+		<button onclick={sendResetEmail}>Send Reset</button>
 	</div>
 </main>
 

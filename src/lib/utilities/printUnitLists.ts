@@ -218,10 +218,10 @@ export async function drawUnitCard(pdf: PDFDocument, page: PDFPage, unit: Unit, 
 	let image: PDFImage;
 	let arrayBuffer = new ArrayBuffer(1);
 
-	if (unit.id < 0) {
-		arrayBuffer = await fs.readFile(`./files/customCardImages/${unit.id}.png`);
+	if (unit.mulId < 0) {
+		arrayBuffer = await fs.readFile(`./files/customCardImages/${unit.mulId}.png`);
 	} else {
-		const url = `https://masterunitlist.azurewebsites.net/Unit/Card/${unit.id}?skill=${unit.skill}`;
+		const url = `https://masterunitlist.azurewebsites.net/Unit/Card/${unit.mulId}?skill=${unit.skill}`;
 		arrayBuffer = await fetch(url).then((res) => res.arrayBuffer());
 	}
 	image = await pdf.embedPng(arrayBuffer);
@@ -233,10 +233,10 @@ export async function drawCondensedUnitCard(pdf: PDFDocument, page: PDFPage, uni
 	let image: PDFImage;
 	let arrayBuffer = new ArrayBuffer(1);
 
-	if (unit.id < 0) {
-		arrayBuffer = await fs.readFile(`./files/customCardImages/${unit.id}.png`);
+	if (unit.mulId < 0) {
+		arrayBuffer = await fs.readFile(`./files/customCardImages/${unit.mulId}.png`);
 	} else {
-		const url = `https://masterunitlist.azurewebsites.net/Unit/Card/${unit.id}?skill=${unit.skill}`;
+		const url = `https://masterunitlist.azurewebsites.net/Unit/Card/${unit.mulId}?skill=${unit.skill}`;
 		arrayBuffer = await fetch(url).then((res) => res.arrayBuffer());
 	}
 	image = await pdf.embedPng(arrayBuffer);

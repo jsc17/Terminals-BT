@@ -1,67 +1,51 @@
 import { getNewSkillCost } from "$lib/utilities/bt-utils";
 import type { Unit } from "$lib/types/unit.js";
 import { type Options, ruleSets } from "./options";
+import { DraggableList } from "$lib/utilities/DraggableList.svelte";
 
-function createList() {
-	let units = $state<Unit[]>([]);
-	let details = $state({ name: "", era: "", faction: "", general: "" });
-	let options = $state<Options>();
-	let sublists = $state<string[]>([]);
-	let validate = false;
+class UnitList {
+	units = $state<Unit[]>([]);
+	// units = new DraggableList<Unit>();
+	details = $state({ name: "", era: "", faction: "", general: "" });
+	options = $state<Options>();
+	sublists = $state<string[]>([]);
+	validate = false;
+	id = 0;
 
-	let pv = $derived.by(() => {
+	pv = $derived.by(() => {
 		let listPV = 0;
-		units.forEach((unit) => {
+
+		for (const unit of this.units) {
 			listPV += unit.cost;
-		});
+		}
 		return listPV;
 	});
 
-	function setOptions(newRules: string) {
-		options = ruleSets.find((rules) => rules.name == newRules) ?? ruleSets[0];
+	setOptions(newRules: string) {
+		this.options = ruleSets.find((rules) => rules.name == newRules) ?? ruleSets[0];
 	}
 
-	return {
-		get units() {
-			return units;
-		},
-		get pv() {
-			return pv;
-		},
-		get sublists() {
-			return sublists;
-		},
-		set sublists(newSublists) {
-			sublists = newSublists;
-		},
-		get validate() {
-			return validate;
-		},
-		get options() {
-			return options;
-		},
-		details,
-		add: (unit: Unit) => {
-			units.push(JSON.parse(JSON.stringify(unit)));
-		},
-		remove: (index: number) => {
-			const removed = units.splice(index, 1)[0];
-		},
-		modifySkill: (index: number, newSkill: number, basePV: number) => {
-			let newCost = getNewSkillCost(newSkill, basePV);
+	add(unit: Unit) {
+		this.units.push(JSON.parse(JSON.stringify(unit)));
+		this.units.at(-1)!.id = this.id;
+		this.id++;
+	}
+	remove(index: number) {
+		const removed = this.units.splice(index, 1)[0];
+	}
+	modifySkill(index: number, newSkill: number, basePV: number) {
+		let newCost = getNewSkillCost(newSkill, basePV);
 
-			units[index].skill = newSkill;
-			units[index].cost = newCost;
-		},
-		moveUnit: (index: number, newIndex: number) => {
-			if (newIndex >= 0 && newIndex < units.length) {
-				let temp = units[newIndex];
-				units[newIndex] = units[index];
-				units[index] = temp;
-			}
-		},
-		setOptions
-	};
+		this.units[index].skill = newSkill;
+		this.units[index].cost = newCost;
+	}
+	moveUnit(index: number, newIndex: number) {
+		if (newIndex >= 0 && newIndex < this.units.length) {
+			let temp = this.units[newIndex];
+			this.units[newIndex] = this.units[index];
+			this.units[index] = temp;
+		}
+	}
 }
 
-export const list = createList();
+export const list = new UnitList();

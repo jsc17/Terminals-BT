@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { appWindow } from "$lib/utilities/responsive.svelte";
-	import { getContext } from "svelte";
 	import { resultList } from "../resultList.svelte";
-
-	let list: any = getContext("list");
+	import { list } from "../list.svelte";
 
 	let { status = $bindable() } = $props();
 	let headers = $derived(appWindow.isMobile ? ["Type", "PV", "Move", "Health"] : ["Type", "PV", "Size", "Move", "TMM", "Health (A+S)"]);
@@ -49,7 +47,7 @@
 			<th>
 				<div class="table-header">
 					{#if !appWindow.isMobile}
-						<button class="sort-header-button" data-sort="name" on:click={sort}>
+						<button class="sort-header-button" data-sort="name" onclick={sort}>
 							Name - <em>{resultList.filteredList.length}/{resultList.availableList.length} results shown</em>
 							{#if resultList.sort.key == "name"}
 								{#if resultList.sort.order == "asc"}
@@ -62,7 +60,7 @@
 							{/if}
 						</button>
 					{:else}
-						<button class="sort-header-button-mobile" data-sort="name" on:click={sort}>
+						<button class="sort-header-button-mobile" data-sort="name" onclick={sort}>
 							<p>Name</p>
 							{#if resultList.sort.key == "name"}
 								{#if resultList.sort.order == "asc"}
@@ -81,7 +79,7 @@
 				<th>
 					<div class="table-header">
 						{#if !appWindow.isMobile}
-							<button class="sort-header-button" data-sort={header.toLowerCase()} on:click={sort}>
+							<button class="sort-header-button" data-sort={header.toLowerCase()} onclick={sort}>
 								{header}
 								{#if resultList.sort.key == header.toLowerCase()}
 									{#if resultList.sort.order == "asc"}
@@ -94,7 +92,7 @@
 								{/if}
 							</button>
 						{:else}
-							<button class="sort-header-button-mobile" data-sort={header.toLowerCase()} on:click={sort}>
+							<button class="sort-header-button-mobile" data-sort={header.toLowerCase()} onclick={sort}>
 								{header}
 								{#if resultList.sort.key == header.toLowerCase()}
 									{#if resultList.sort.order == "asc"}
@@ -120,7 +118,7 @@
 		<tbody>
 			{#each resultList.filteredList as unit}
 				<tr class="stats" class:mobile-cell={appWindow.isMobile}>
-					<td><a href="http://masterunitlist.info/Unit/Details/{unit.id}" target="_blank">{unit.name}</a></td>
+					<td><a href="http://masterunitlist.info/Unit/Details/{unit.mulId}" target="_blank">{unit.name}</a></td>
 					<td class="align-center">{unit.type}</td>
 					<td class="align-center">{unit.pv}</td>
 					{#if !appWindow.isMobile}
@@ -156,7 +154,7 @@
 						{/if}
 					</td>
 					{#if list}
-						<td><button on:click={() => list.add(unit)}>+</button></td>
+						<td><button onclick={() => list.add(unit)}>+</button></td>
 					{/if}
 				</tr>
 				<tr class="abilities" class:mobile-cell={appWindow.isMobile}>

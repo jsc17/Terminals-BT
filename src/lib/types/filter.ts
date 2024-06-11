@@ -1,4 +1,4 @@
-export interface filter {
+export type filter = {
 	name: string;
 	label: string;
 	type: "number" | "numberGroup" | "string" | "select" | "abilities";
@@ -9,5 +9,5 @@ export interface filter {
 	labels?: string[];
 	values?: { min?: number; max?: number }[];
 	defaults?: number[];
-}
+};
 // { name: "name", type: "string", values: [{ label: "", value: "", default: "" }] },

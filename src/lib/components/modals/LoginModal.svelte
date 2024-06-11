@@ -71,7 +71,7 @@
 
 <dialog
 	bind:this={loginDialog}
-	on:close={() => {
+	onclose={() => {
 		showLoginModal = false;
 	}}
 	class:dialog-wide={appWindow.isNarrow}>
@@ -79,7 +79,7 @@
 		<div class="dialog-body">
 			<div class="space-between">
 				<h2>Login</h2>
-				<button on:click={() => loginDialog.close()}>Close</button>
+				<button onclick={() => loginDialog.close()}>Close</button>
 			</div>
 			<form method="post" action="/auth/?/login" class="dialog-body" use:enhance={handleLogin}>
 				<div class="space-between">
@@ -97,7 +97,7 @@
 				<button
 					style:background-color="transparent"
 					style:color="var(--primary)"
-					on:click={() => {
+					onclick={() => {
 						loginDisplay = "register";
 					}}>Need an account? Click here to register</button>
 			</form>
@@ -106,7 +106,7 @@
 		<div class="dialog-body">
 			<div class="space-between">
 				<h2>Register</h2>
-				<button on:click={() => loginDialog.close()}>Close</button>
+				<button onclick={() => loginDialog.close()}>Close</button>
 			</div>
 			<form method="post" action="/auth/?/register" class="dialog-body" use:enhance={handleSignUp}>
 				<label for="username">Username</label>
@@ -121,7 +121,7 @@
 				<button
 					style:background-color="transparent"
 					style:color="var(--primary)"
-					on:click={() => {
+					onclick={() => {
 						loginDisplay = "login";
 					}}>Already have an account? Click here to login</button>
 			</form>

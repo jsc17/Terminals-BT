@@ -15,7 +15,7 @@
 
 <dialog
 	bind:this={changeDialog}
-	on:close={() => {
+	onclose={() => {
 		showChangelog = false;
 	}}
 	class="changelog"
@@ -23,7 +23,7 @@
 	<div class="dialog-body">
 		<button
 			class="close"
-			on:click={() => {
+			onclick={() => {
 				showChangelog = false;
 			}}>Close</button>
 		<div class="section">

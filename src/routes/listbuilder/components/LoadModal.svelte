@@ -7,6 +7,7 @@
 	import { ruleSets, getRules, type Options } from "../options";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { list } from "../list.svelte";
+	import { isUnit } from "$lib/types/unit";
 
 	let user: any = getContext("user");
 
@@ -115,7 +116,7 @@
 		} else {
 			list.sublists = [];
 		}
-		while (list.units.length) {
+		while (list.unitCount) {
 			list.remove(0);
 		}
 
@@ -127,10 +128,10 @@
 				return result.mulId == parseInt(id);
 			});
 			if (unitToAdd != null) {
-				list.add(unitToAdd);
-			}
-			if (skill != "undefined") {
-				list.modifySkill(list.units.length - 1, parseInt(skill), list.units.at(-1)!.pv);
+				list.addUnit(unitToAdd);
+				if (skill != "undefined") {
+					list.modifySkill(list.unitCount - 1, parseInt(skill), unitToAdd.pv);
+				}
 			}
 		});
 

@@ -31,3 +31,15 @@ export type Unit = {
 	subIndex?: number;
 	id?: number;
 };
+export type Formation = {
+	id: number;
+	name: string;
+	type: string;
+	units: Unit[];
+};
+
+export const formationTypes = ["Battle", "Assault", "Striker/Cavalry", "Fire", "Recon", "Pursuit", "Command", "Support"];
+
+export function isUnit(item: Unit | Formation): item is Unit {
+	return "mulId" in item;
+}

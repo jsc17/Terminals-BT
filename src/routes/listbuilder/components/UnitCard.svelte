@@ -57,6 +57,7 @@
 		border-bottom: 1px solid var(--border);
 	}
 	main:hover {
+		box-shadow: 3px 0px 3px var(--primary) inset;
 		cursor: row-resize;
 	}
 	.unit-row,
@@ -83,8 +84,5 @@
 	button {
 		height: 20px;
 		width: 20px;
-	}
-	:global(.dragging) {
-		box-shadow: 3px 0px 3px var(--primary) inset;
 	}
 </style>

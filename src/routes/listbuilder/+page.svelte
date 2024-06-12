@@ -59,7 +59,7 @@
 			onclick={() => {
 				showListDialog = !showListDialog;
 			}}
-			class="list-button">List - {list.units.length} Units - {list.pv} PV</button>
+			class="list-button">List - {list.unitCount} Units - {list.pv} PV</button>
 	{/if}
 </main>
 

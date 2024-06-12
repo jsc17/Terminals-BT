@@ -154,7 +154,7 @@
 						{/if}
 					</td>
 					{#if list}
-						<td><button onclick={() => list.add(unit)}>+</button></td>
+						<td><button onclick={() => list.addUnit(unit)}>+</button></td>
 					{/if}
 				</tr>
 				<tr class="abilities" class:mobile-cell={appWindow.isMobile}>

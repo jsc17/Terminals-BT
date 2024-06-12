@@ -6,8 +6,9 @@
 	import { flip } from "svelte/animate";
 	import { list } from "../list.svelte";
 	import { dndzone, type DndEvent, dragHandle, dragHandleZone } from "svelte-dnd-action";
-	import type { Unit } from "$lib/types/unit";
+	import { isUnit, type Formation, type Unit } from "$lib/types/unit";
 	import { appWindow } from "$lib/utilities/responsive.svelte";
+	import FormationCard from "./FormationCard.svelte";
 
 	let {
 		status = $bindable(),
@@ -26,9 +27,10 @@
 	});
 
 	let dropTargetStyle = { outline: "none" };
+
 	let flipDurationMs = 100;
 
-	function handleSort(e: CustomEvent<DndEvent<Unit>>) {
+	function handleSort(e: CustomEvent<DndEvent<Unit | Formation>>) {
 		list.units = e.detail.items;
 	}
 </script>
@@ -60,12 +62,15 @@
 				{/if}
 
 				{#if list.options?.maxUnits}
-					<p class:errors={list.units.length > list.options.maxUnits}>Units: {list.units.length}/{list.options.maxUnits}</p>
+					<p class:errors={list.unitCount > list.options.maxUnits}>Units: {list.unitCount}/{list.options.maxUnits}</p>
 				{:else}
-					<p>Units: {list.units.length}</p>
+					<p>Units: {list.unitCount}</p>
 				{/if}
 			</div>
-
+			<button
+				onclick={() => {
+					list.addFormation();
+				}}>Add Form.</button>
 			<menu
 				class="dropdown"
 				onmouseleave={() => {
@@ -113,7 +118,7 @@
 		</div>
 	</div>
 	<div class="list-units">
-		{#if list.units.length == 0}
+		{#if list.unitCount == 0}
 			<div class="info">
 				<div>
 					<h1 style:color="var(--primary)">Latest:</h1>
@@ -133,11 +138,15 @@
 			<div class="unit-cards" use:dragHandleZone={{ items: list.units, dropTargetStyle, flipDurationMs }} onconsider={handleSort} onfinalize={handleSort}>
 				{#each list.units as unit, index (unit.id)}
 					<div animate:flip={{ duration: flipDurationMs }} class="mobile-card">
-						<div use:dragHandle aria-label="drag handle for {unit.name}" class="handle">
-							<img class="move-arrow" src="/icons/chevron-up.svg" width="15px" alt="move up" />
-							<img class="move-arrow" src="/icons/chevron-down.svg" width="15px" alt="move down" />
-						</div>
-						<UnitCard {unit} {index}></UnitCard>
+						{#if isUnit(unit)}
+							<div use:dragHandle aria-label="drag handle for {unit.name}" class="handle">
+								<img class="move-arrow" src="/icons/chevron-up.svg" width="15px" alt="move up" />
+								<img class="move-arrow" src="/icons/chevron-down.svg" width="15px" alt="move down" />
+							</div>
+							<UnitCard {unit} {index}></UnitCard>
+						{:else}
+							<FormationCard {unit}></FormationCard>
+						{/if}
 					</div>
 				{/each}
 			</div>
@@ -145,7 +154,11 @@
 			<div class="unit-cards" use:dndzone={{ items: list.units, dropTargetStyle, flipDurationMs }} onconsider={handleSort} onfinalize={handleSort}>
 				{#each list.units as unit, index (unit.id)}
 					<div animate:flip={{ duration: flipDurationMs }}>
-						<UnitCard {unit} {index}></UnitCard>
+						{#if isUnit(unit)}
+							<UnitCard {unit} {index}></UnitCard>
+						{:else}
+							<FormationCard {unit}></FormationCard>
+						{/if}
 					</div>
 				{/each}
 			</div>

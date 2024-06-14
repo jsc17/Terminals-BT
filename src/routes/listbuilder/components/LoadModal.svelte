@@ -9,20 +9,32 @@
 	import { list } from "../list.svelte";
 	import { getNewSkillCost } from "$lib/utilities/bt-utils";
 	import { type Unit } from "../unit";
-	import { numberToString } from "pdf-lib";
+	import { parseConnectionUrl } from "nodemailer/lib/shared";
 
 	let user: any = getContext("user");
+
+	type ImportList = {
+		name: string;
+		era: number;
+		faction: number;
+		units: string[];
+		sublists: string[];
+		local?: boolean;
+		rules: Options;
+	};
 
 	let { showLoadModal = $bindable(), status = $bindable(), selectedRules = $bindable() } = $props();
 	let loadDialog: HTMLDialogElement;
 	let importCode = $state("");
-	let savedLists = $state<{ name: string; era: number; faction: number; units: string[]; sublists: string[]; local: boolean; rules: Options }[]>([]);
-	let selectedList = $state(-1);
+	let savedLists = $state<ImportList[]>([]);
+	let selectedListIndex = $state(-1);
 	let localListsExist = $state(false);
 
 	$effect(() => {
 		if (showLoadModal == true) {
 			getLists();
+			importCode = "";
+			selectedListIndex = -1;
 			loadDialog.showModal();
 		} else {
 			loadDialog.close();
@@ -37,7 +49,6 @@
 		if (response.status == 200) {
 			const responseLists = JSON.parse(response.data.lists);
 			for (const tempList of responseLists) {
-				console.log(tempList);
 				savedLists.push({
 					name: tempList.name,
 					era: Number(tempList.era),
@@ -59,7 +70,6 @@
 			localListsExist = true;
 			for (const localListName of localLists) {
 				const localData = localStorage.getItem(localListName)!;
-				console.log(localData);
 				if (localData.charAt(0) == "{") {
 					const localList = JSON.parse(localData);
 					savedLists.push({
@@ -112,8 +122,34 @@
 		}
 	}
 
-	async function loadList() {
-		const { era, faction, name, units, sublists, rules } = savedLists[selectedList];
+	async function importList() {
+		let parsedCode: ImportList;
+		if (importCode.charAt(0) == "{") {
+			parsedCode = JSON.parse(importCode);
+		} else {
+			//Legacy non-json code import. Will likely never be used, but it only adds one extra check. Should have just used a json to start instead of fancy string splitting.
+			const [body, sublists] = importCode.split("-");
+			const [era, faction, ...units] = body.split(":");
+			parsedCode = {
+				name: "Imported List",
+				era: Number(era),
+				faction: Number(faction),
+				rules: ruleSets[0],
+				units,
+				sublists: sublists.split(":")
+			};
+		}
+		loadList(parsedCode);
+	}
+
+	async function loadList(parsedCode?: ImportList) {
+		let data: ImportList;
+		if (parsedCode) {
+			data = parsedCode;
+		} else {
+			data = savedLists[selectedListIndex];
+		}
+		const { era, faction, name, units, sublists, rules } = data;
 
 		list.setOptions(rules.name);
 		resultList.setOptions(rules.name);
@@ -159,7 +195,6 @@
 				list.addFormation(tempFormation.name, tempFormation.type, tempFormation.units);
 			} else {
 				let [id, skill] = item.split(",");
-				console.log(id);
 				let unitToAdd = resultList.results.find((result: Unit) => {
 					return result.mulId == parseInt(id);
 				});
@@ -175,8 +210,9 @@
 	}
 
 	function selectRow(index: number) {
-		selectedList = index;
-		importCode = `${savedLists[selectedList].era}:${savedLists[selectedList].faction}:${savedLists[selectedList].units}-${savedLists[selectedList].sublists}`;
+		selectedListIndex = index;
+		const selectedList = savedLists[index];
+		importCode = JSON.stringify(selectedList);
 	}
 </script>
 
@@ -218,7 +254,13 @@
 				</thead>
 				<tbody>
 					{#each savedLists as savedList, index}
-						<tr id={index.toString()} class:selected={selectedList == index} onclick={() => selectRow(index)} ondblclick={loadList}>
+						<tr
+							id={index.toString()}
+							class:selected={selectedListIndex == index}
+							onclick={() => selectRow(index)}
+							ondblclick={() => {
+								loadList();
+							}}>
 							<td class:local={savedList.local}>{savedList.name}</td>
 							<td style="text-align:center">{eras.get(savedList.era)}</td>
 							<td style="text-align:center">{factions.get(savedList.faction)}</td>
@@ -229,16 +271,20 @@
 				</tbody>
 			</table>
 		</div>
-		{#if localListsExist}
-			<p>Lists with red names are saved to local device storage . Load them and save to server to sync between devices.</p>
-		{/if}
-		<p>Select a list above or paste a list code into the box below.</p>
+		<div class="space-between">
+			<button
+				onclick={() => {
+					loadList();
+				}}>Load</button>
+			{#if localListsExist}
+				<p>Lists with red names are saved to local device storage . Please consider creating an account to sync them between devices.</p>
+			{/if}
+		</div>
+		<br />
+		<p>Paste a list code into the box below to import a saved code:</p>
 		<div class="load-bar">
 			<label for="importCode">List Code: </label><input type="text" name="importCode" id="importCode" bind:value={importCode} />
-			<button onclick={loadList}>Load</button>
-			<button onclick={()=>{
-					navigator.clipboard.writeText(importCode!);
-				}}> Copy </button>
+			<button onclick={importList}> Import </button>
 		</div>
 	</div>
 </dialog>

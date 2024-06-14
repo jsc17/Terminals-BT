@@ -1,15 +1,27 @@
 <script lang="ts">
-	import { unitTypes } from "$lib/types/ValidationList";
-	import { type Formation, type Unit, formationTypes, isUnit } from "$lib/types/unit";
+	import { type Formation, formationTypes, formationDragStatus, isFormation } from "../formation.svelte";
+	import { type Unit } from "../unit";
 	import UnitCard from "./UnitCard.svelte";
 	import { dndzone, type DndEvent, dragHandleZone, dragHandle } from "svelte-dnd-action";
+	import { list } from "../list.svelte";
+	import { toastController } from "$lib/stores/toastController.svelte";
 
 	let { unit: formation }: { unit: Formation } = $props();
 
 	let dropTargetStyle = { outline: "1px solid var(--primary)" };
 	let flipDurationMs = 100;
+	let dropFromOthersDisabled = $derived(!formationDragStatus.enabled);
 
 	function handleConsider(e: CustomEvent<DndEvent<Unit>>) {
+		for (const item of list.units) {
+			if (e.detail.info.id == item.id?.toString()) {
+				if (isFormation(item)) {
+					formationDragStatus.enabled = false;
+				} else {
+					formationDragStatus.enabled = true;
+				}
+			}
+		}
 		formation.units = e.detail.items;
 	}
 
@@ -20,20 +32,31 @@
 
 <main>
 	<div class="formation-header">
-		<input type="text" name="formation-name" id="formation-id" value={formation.name} />
-		<select name="formation-type" value={formation.type}>
-			{#each formationTypes as formationType}
-				<option value={formationType}>{formationType}</option>
-			{/each}
-		</select>
+		<input type="text" name="formation-name" id="formation-id" bind:value={formation.name} />
+		<div>
+			<select name="formation-type" value={formation.type}>
+				{#each formationTypes as formationType}
+					<option value={formationType}>{formationType}</option>
+				{/each}
+			</select>
+			<button
+				onclick={() => {
+					let remove = true;
+					if (formation.units.length != 0) {
+						remove = confirm("Formation is not empty and removing it will remove all units it contains. Continue?");
+					}
+					if(remove){
+						list.remove(formation.id!);
+						toastController.addToast(`${formation.name} removed from list`);
+					}
+				}}
+				>-</button>
+		</div>
 	</div>
-	<div class="unit-cards" use:dndzone={{ items: formation.units, dropTargetStyle, flipDurationMs }} onconsider={handleConsider} onfinalize={handleFinalize}>
-		{#each formation.units as unit, index (unit.id)}
-			<UnitCard {unit} {index}></UnitCard>
+	<div class="unit-cards" use:dndzone={{ items: formation.units, dropTargetStyle, flipDurationMs, dropFromOthersDisabled }} onconsider={handleConsider} onfinalize={handleFinalize}>
+		{#each formation.units as unit (unit.id)}
+			<UnitCard {unit}></UnitCard>
 		{/each}
-		{#if formation.units.length == 0}
-			<p>Drag units here to add to formation</p>
-		{/if}
 	</div>
 </main>
 
@@ -54,7 +77,7 @@
 		border: 1px solid var(--border);
 	}
 	.unit-cards {
-		min-height: 30px;
+		min-height: 50px;
 		padding: 8px;
 	}
 	input {

@@ -1,5 +1,6 @@
 export const eras = new Map([
-	[-1, "Any"],
+	[-1, "None"],
+	[0, "Any"],
 	[10, "Star League"],
 	[11, "Early Succession War"],
 	[255, "Late Succession War"],
@@ -96,5 +97,6 @@ export const factions = new Map([
 	[55, "IS General"],
 	[56, "IS Clan"],
 	[85, "HW Clan"],
-	[57, "Periphery"]
+	[57, "Periphery"],
+	[0, "Any"]
 ]);

@@ -6,7 +6,8 @@
 	import { flip } from "svelte/animate";
 	import { list } from "../list.svelte";
 	import { dndzone, type DndEvent, dragHandle, dragHandleZone } from "svelte-dnd-action";
-	import { isUnit, type Formation, type Unit } from "$lib/types/unit";
+	import { type Unit, isUnit } from "../unit";
+	import { formationDragStatus, isFormation, type Formation } from "../formation.svelte";
 	import { appWindow } from "$lib/utilities/responsive.svelte";
 	import FormationCard from "./FormationCard.svelte";
 
@@ -30,7 +31,20 @@
 
 	let flipDurationMs = 100;
 
-	function handleSort(e: CustomEvent<DndEvent<Unit | Formation>>) {
+	function handleConsider(e: CustomEvent<DndEvent<Unit | Formation>>) {
+		for (const item of list.units) {
+			if (e.detail.info.id == item.id?.toString()) {
+				if (isFormation(item)) {
+					formationDragStatus.enabled = false;
+				} else {
+					formationDragStatus.enabled = true;
+				}
+			}
+		}
+		list.units = e.detail.items;
+	}
+
+	function handleFinalize(e: CustomEvent<DndEvent<Unit | Formation>>) {
 		list.units = e.detail.items;
 	}
 </script>
@@ -135,15 +149,15 @@
 				<p>Mechwarrior, BattleMech, 'Mech and Aerotech are registered trademarks of The Topps Company, Inc. All Rights Reserved.</p>
 			</div>
 		{:else if appWindow.isMobile}
-			<div class="unit-cards" use:dragHandleZone={{ items: list.units, dropTargetStyle, flipDurationMs }} onconsider={handleSort} onfinalize={handleSort}>
-				{#each list.units as unit, index (unit.id)}
+			<div class="unit-cards" use:dragHandleZone={{ items: list.units, dropTargetStyle, flipDurationMs }} onconsider={handleConsider} onfinalize={handleFinalize}>
+				{#each list.units as unit (unit.id)}
 					<div animate:flip={{ duration: flipDurationMs }} class="mobile-card">
 						{#if isUnit(unit)}
 							<div use:dragHandle aria-label="drag handle for {unit.name}" class="handle">
 								<img class="move-arrow" src="/icons/chevron-up.svg" width="15px" alt="move up" />
 								<img class="move-arrow" src="/icons/chevron-down.svg" width="15px" alt="move down" />
 							</div>
-							<UnitCard {unit} {index}></UnitCard>
+							<UnitCard {unit}></UnitCard>
 						{:else}
 							<FormationCard {unit}></FormationCard>
 						{/if}
@@ -151,11 +165,11 @@
 				{/each}
 			</div>
 		{:else}
-			<div class="unit-cards" use:dndzone={{ items: list.units, dropTargetStyle, flipDurationMs }} onconsider={handleSort} onfinalize={handleSort}>
-				{#each list.units as unit, index (unit.id)}
+			<div class="unit-cards" use:dndzone={{ items: list.units, dropTargetStyle, flipDurationMs }} onconsider={handleConsider} onfinalize={handleFinalize}>
+				{#each list.units as unit (unit.id)}
 					<div animate:flip={{ duration: flipDurationMs }}>
 						{#if isUnit(unit)}
-							<UnitCard {unit} {index}></UnitCard>
+							<UnitCard {unit}></UnitCard>
 						{:else}
 							<FormationCard {unit}></FormationCard>
 						{/if}

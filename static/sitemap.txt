@@ -1,6 +1,5 @@
-https://bt.terminl.xyz/
-https://bt.terminl.xyz/listbuilder
-https://bt.terminl.xyz/unitsearch
-https://bt.terminl.xyz/as350
-https://bt.terminl.xyz/350validator
-https://bt.terminl.xyz/tournament
+https://terminal.tools
+https://terminal.tools/listbuilder
+https://terminal.tools/unitsearch
+https://terminal.tools/350validation
+https://terminal.tools/tournament

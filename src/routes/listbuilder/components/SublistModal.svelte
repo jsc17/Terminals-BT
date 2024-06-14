@@ -4,6 +4,7 @@
 	import { appWindow } from "$lib/utilities/responsive.svelte";
 	import { list } from "../list.svelte";
 	import { dndzone, type DndEvent } from "svelte-dnd-action";
+	import { isUnit } from "../unit";
 
 	type Sublist = {
 		id: number;
@@ -45,7 +46,7 @@
 	$effect(() => {
 		if (showSublistModal) {
 			if (!loaded) {
-				loadsublists();
+				loadSublists();
 			}
 			if (appWindow.isMobile) {
 				layout = "mobile";
@@ -99,8 +100,14 @@
 		};
 		sublistId++;
 
-		for (const unit of list.units) {
-			newList.unitList.push([unit, false]);
+		for (const item of list.units) {
+			if (isUnit(item)) {
+				newList.unitList.push([item, false]);
+			} else {
+				for (const unit of item.units) {
+					newList.unitList.push([unit, false]);
+				}
+			}
 		}
 		sublists.push(JSON.parse(JSON.stringify(newList)));
 		count++;
@@ -234,35 +241,53 @@
 			}
 		});
 	}
+
 	function addAutoSublist(index: number) {
 		let newList: Sublist = JSON.parse(JSON.stringify(autosublists[index]));
 		newList.index = count;
 		count++;
 		let tempSize = 0,
 			unitIndex = 0;
-		list.units.forEach((unit: Unit) => {
-			const unitChecked = newList.unitIndices!.includes(unitIndex);
-			unitIndex++;
-			if (unitChecked) {
-				newList.health += unit.health ?? 0;
-				newList.short += unit.damageS ?? 0;
-				newList.medium += unit.damageM ?? 0;
-				newList.long += unit.damageL ?? 0;
-				tempSize += unit.size ?? 0;
+
+		for (const item of list.units) {
+			if (isUnit(item)) {
+				const unitChecked = newList.unitIndices!.includes(unitIndex);
+				unitIndex++;
+				if (unitChecked) {
+					newList.health += item.health ?? 0;
+					newList.short += item.damageS ?? 0;
+					newList.medium += item.damageM ?? 0;
+					newList.long += item.damageL ?? 0;
+					tempSize += item.size ?? 0;
+				}
+				newList.unitList.push([item, unitChecked]);
+			} else {
+				for (const unit of item.units) {
+					const unitChecked = newList.unitIndices!.includes(unitIndex);
+					unitIndex++;
+					if (unitChecked) {
+						newList.health += unit.health ?? 0;
+						newList.short += unit.damageS ?? 0;
+						newList.medium += unit.damageM ?? 0;
+						newList.long += unit.damageL ?? 0;
+						tempSize += unit.size ?? 0;
+					}
+					newList.unitList.push([unit, unitChecked]);
+				}
 			}
-			newList.unitList.push([unit, unitChecked]);
-		});
-		newList.size = parseFloat((tempSize / newList.checked).toFixed(1));
-		sublists.push(newList);
-		list.sublists.push(
-			newList
-				.unitIndices!.sort((a, b) => {
-					return a - b;
-				})
-				.toString()
-		);
+			newList.size = parseFloat((tempSize / newList.checked).toFixed(1));
+			sublists.push(newList);
+			list.sublists.push(
+				newList
+					.unitIndices!.sort((a, b) => {
+						return a - b;
+					})
+					.toString()
+			);
+		}
 	}
-	function loadsublists() {
+
+	function loadSublists() {
 		sublists = [];
 		loaded = true;
 
@@ -288,24 +313,42 @@
 			count++;
 			let tempSize = 0,
 				unitIndex = 0;
-			list.units.forEach((unit: Unit) => {
-				const unitChecked = newList.unitIndices!.includes(unitIndex);
-				unitIndex++;
-				if (unitChecked) {
-					newList.checked += 1;
-					newList.pv += unit.cost;
-					newList.health += unit.health ?? 0;
-					newList.short += unit.damageS ?? 0;
-					newList.medium += unit.damageM ?? 0;
-					newList.long += unit.damageL ?? 0;
-					tempSize += unit.size ?? 0;
+			for (const item of list.units) {
+				if (isUnit(item)) {
+					const unitChecked = newList.unitIndices!.includes(unitIndex);
+					unitIndex++;
+					if (unitChecked) {
+						newList.checked += 1;
+						newList.pv += item.cost;
+						newList.health += item.health ?? 0;
+						newList.short += item.damageS ?? 0;
+						newList.medium += item.damageM ?? 0;
+						newList.long += item.damageL ?? 0;
+						tempSize += item.size ?? 0;
+					}
+					newList.unitList.push([item, unitChecked]);
+				} else {
+					for (const unit of item.units) {
+						const unitChecked = newList.unitIndices!.includes(unitIndex);
+						unitIndex++;
+						if (unitChecked) {
+							newList.checked += 1;
+							newList.pv += unit.cost;
+							newList.health += unit.health ?? 0;
+							newList.short += unit.damageS ?? 0;
+							newList.medium += unit.damageM ?? 0;
+							newList.long += unit.damageL ?? 0;
+							tempSize += unit.size ?? 0;
+						}
+						newList.unitList.push([unit, unitChecked]);
+					}
+					newList.size = parseFloat((tempSize / newList.checked).toFixed(1));
+					sublists.push(newList);
 				}
-				newList.unitList.push([unit, unitChecked]);
-			});
-			newList.size = parseFloat((tempSize / newList.checked).toFixed(1));
-			sublists.push(newList);
+			}
 		});
 	}
+
 	async function printSubList(index: number) {
 		let form = new FormData();
 

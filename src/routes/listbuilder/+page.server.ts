@@ -11,7 +11,10 @@ export const actions = {
 				userId: locals.user.id
 			},
 			select: {
-				name: true
+				name: true,
+				era: true,
+				faction: true,
+				rules: true
 			}
 		});
 

@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { appWindow } from "$lib/utilities/responsive.svelte";
 	import { getContext } from "svelte";
-	import { resultList } from "../resultList.svelte";
-	import type { Unit } from "$lib/types/unit";
 	import { enhance } from "$app/forms";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import type { ActionResult } from "@sveltejs/kit";
@@ -14,34 +12,15 @@
 	let saveDialog: HTMLDialogElement;
 	let existingListNames: string[] = [];
 
-	let { listCode, ttsCode } = $derived.by(() => {
-		let listCode = "";
-		let ttsCode = "";
-
-		listCode += resultList.details.era + ":" + resultList.details.faction;
-		list.units.forEach((unit: Unit) => {
-			listCode += `:${unit.mulId},${unit.skill}`;
-		});
-		listCode += "-";
-		if (list.sublists) {
-			for (const sublist of list.sublists) {
-				listCode += `${sublist.toString()}:`;
-			}
-			listCode = listCode.substring(0, listCode.length - 1);
-		}
-		ttsCode = "{";
-		list.units.forEach((unit: Unit) => {
-			ttsCode += `{${unit.mulId},${unit.skill}},`;
-		});
-		ttsCode = ttsCode.replace(/.$/, "}");
-
-		return { listCode, ttsCode };
-	});
+	let ttsCode = $state("");
+	let listCode = $state("");
 
 	$effect(() => {
 		if (showSaveModal == true) {
 			saveDialog.showModal();
 			getListNames();
+			ttsCode = list.createTTSCode();
+			listCode = list.createListCode();
 		} else {
 			saveDialog.close();
 		}
@@ -71,20 +50,7 @@
 				overwrite = confirm("A list with that name already exists. Overwrite it?");
 			}
 			if (!listNameExists || overwrite) {
-				formData.append("name", list.details.name);
-				formData.append("era", resultList.details.era);
-				formData.append("faction", resultList.details.faction);
-				formData.append("rules", resultList.options?.name);
-				let units: string[] = [];
-				for (const unit of list.units) {
-					units.push(`${unit.mulId},${unit.skill}`);
-				}
-				formData.append("units", units.join(":"));
-				let sublistString = "";
-				if (list.sublists.length) {
-					sublistString = list.sublists.join(":");
-				}
-				formData.append("sublists", sublistString);
+				formData.append("body", listCode);
 				showSaveModal = false;
 			} else {
 				cancel();
@@ -92,16 +58,17 @@
 		} else {
 			let listNames = JSON.parse(localStorage.getItem("lists") ?? "[]");
 			const listNameExists = listNames.includes(list.details.name.toLowerCase());
-			let overwrite = false;
 			if (listNameExists) {
-				overwrite = confirm("List with that name already exists in local storage. Overwrite it?");
-			}
-			if (!listNameExists || overwrite) {
+				if (confirm("List with that name already exists in local storage. Overwrite it?")) {
+					localStorage.setItem(list.details.name.toLowerCase(), listCode!);
+				}
+			} else {
 				listNames.push(list.details.name.toLowerCase());
 				localStorage.setItem("lists", JSON.stringify(listNames));
+				localStorage.setItem(list.details.name.toLowerCase(), listCode);
 			}
-			localStorage.setItem(list.details.name.toLowerCase(), listCode!);
 			cancel();
+			toastController.addToast(`${list.details.name} saved successfully to this device. Consider creating an account to sync lists between devices.`);
 			showSaveModal = false;
 		}
 		return async ({ result }: { result: ActionResult }) => {
@@ -114,60 +81,58 @@
 	}
 
 	function exportToJeff() {
-		const jeffList: any = { name: list.details.name, members: [], uuid: crypto.randomUUID(), lastUpdated: new Date().toISOString(), formationBonus: "none", groupLabel: "Lance" };
-		for (const unit of list.units) {
-			let jumpSpeed = 0;
-			if (unit.move) {
-				for (const move of unit.move) {
-					if (move.type == "j") {
-						jumpSpeed = move.speed;
-					}
-				}
-			}
-			const member: any = {
-				mulID: unit.mulId,
-				damage: {
-					short: unit.damageS,
-					shortMinimal: unit.damageSMin,
-					medium: unit.damageM,
-					mediumMinimal: unit.damageMMin,
-					long: unit.damageL,
-					longMinimal: unit.damageLMin,
-					extreme: 0
-				},
-				variant: unit.variant,
-				dateIntroduced: unit.date,
-				name: unit.name,
-				tonnage: unit.tonnage,
-				role: unit.role,
-				imageURL: unit.imageLink,
-				structure: unit.structure,
-				armor: unit.armor,
-				type: unit.type,
-				size: unit.size,
-				abilities: unit.abilities.split(",").map((ability: string) => {
-					return ability.trim();
-				}),
-				overheat: unit.overheat,
-				basePoints: unit.pv,
-				currentSkill: unit.skill,
-
-				showDetails: false,
-				tmm: 0,
-				uuid: crypto.randomUUID(),
-
-				threshhold: 0,
-				move: unit.move,
-				jumpMove: jumpSpeed
-			};
-			jeffList.members.push(member);
-		}
-		const blob = new Blob([JSON.stringify(jeffList)], { type: "application/json" });
-		const downloadElement = document.createElement("a");
-		downloadElement.download = `${list.details.name}.json`;
-		downloadElement.href = URL.createObjectURL(blob);
-		downloadElement.click();
-		downloadElement.remove();
+		// const jeffList: any = { name: list.details.name, members: [], uuid: crypto.randomUUID(), lastUpdated: new Date().toISOString(), formationBonus: "none", groupLabel: "Lance" };
+		// for (const unit of list.units) {
+		// 	let jumpSpeed = 0;
+		// 	if (unit.move) {
+		// 		for (const move of unit.move) {
+		// 			if (move.type == "j") {
+		// 				jumpSpeed = move.speed;
+		// 			}
+		// 		}
+		// 	}
+		// 	const member: any = {
+		// 		mulID: unit.mulId,
+		// 		damage: {
+		// 			short: unit.damageS,
+		// 			shortMinimal: unit.damageSMin,
+		// 			medium: unit.damageM,
+		// 			mediumMinimal: unit.damageMMin,
+		// 			long: unit.damageL,
+		// 			longMinimal: unit.damageLMin,
+		// 			extreme: 0
+		// 		},
+		// 		variant: unit.variant,
+		// 		dateIntroduced: unit.date,
+		// 		name: unit.name,
+		// 		tonnage: unit.tonnage,
+		// 		role: unit.role,
+		// 		imageURL: unit.imageLink,
+		// 		structure: unit.structure,
+		// 		armor: unit.armor,
+		// 		type: unit.type,
+		// 		size: unit.size,
+		// 		abilities: unit.abilities.split(",").map((ability: string) => {
+		// 			return ability.trim();
+		// 		}),
+		// 		overheat: unit.overheat,
+		// 		basePoints: unit.pv,
+		// 		currentSkill: unit.skill,
+		// 		showDetails: false,
+		// 		tmm: 0,
+		// 		uuid: crypto.randomUUID(),
+		// 		threshhold: 0,
+		// 		move: unit.move,
+		// 		jumpMove: jumpSpeed
+		// 	};
+		// 	jeffList.members.push(member);
+		// }
+		// const blob = new Blob([JSON.stringify(jeffList)], { type: "application/json" });
+		// const downloadElement = document.createElement("a");
+		// downloadElement.download = `${list.details.name}.json`;
+		// downloadElement.href = URL.createObjectURL(blob);
+		// downloadElement.click();
+		// downloadElement.remove();
 	}
 </script>
 

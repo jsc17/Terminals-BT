@@ -117,5 +117,29 @@ export const actions = {
 	},
 	sendResetEmail: async ({}) => {
 		sendResetEmail("jonathan.cibge@innernwgaw.com", "ASFVA");
+	},
+	updateListUnits: async ({}) => {
+		let lists = await prisma.list.findMany({
+			select: {
+				id: true,
+				units: true,
+				sublists: true
+			}
+		});
+
+		for (const list of lists) {
+			if (list.units.charAt(0) == "[") {
+				continue;
+			}
+			await prisma.list.update({
+				where: {
+					id: list.id
+				},
+				data: {
+					units: JSON.stringify(list.units.split(":")),
+					sublists: JSON.stringify(list.sublists?.split(":"))
+				}
+			});
+		}
 	}
 };

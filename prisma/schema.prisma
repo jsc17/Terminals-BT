@@ -44,8 +44,8 @@ model List {
   name String
   era Int?
   faction Int?
-  units String
-  sublists String?
+  units String @db.Text
+  sublists String? @db.Text
   rules String?
 }
 

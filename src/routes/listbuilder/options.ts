@@ -8,6 +8,8 @@ export type Options = {
 	disallowUnique?: boolean;
 	disallowedAbilities?: string[];
 	customCardPacks?: string[];
+	maxSkill?: number;
+	minSkill?: number;
 };
 
 export const ruleSets: Options[] = [
@@ -24,7 +26,9 @@ export const ruleSets: Options[] = [
 		allowedRules: ["Introductory", "Advanced", "Standard"],
 		disallowUnique: true,
 		disallowedAbilities: ["DRO"],
-		customCardPacks: ["wn350"]
+		customCardPacks: ["wn350"],
+		maxSkill: 6,
+		minSkill: 2
 	}
 ];
 

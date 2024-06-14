@@ -178,13 +178,29 @@ export const actions = {
 		if (!locals.user) {
 			return fail(401, { message: "User not logged in" });
 		}
-		const { name, era, faction, units, sublists, rules } = Object.fromEntries(await request.formData()) as Record<string, string>;
-		const data = { userId: locals.user.id, name, era: Number(era), faction: Number(faction), units, sublists, rules };
+		const body = (await request.formData()).get("body");
+		if (!body) {
+			return fail(400, { message: "failed to save list. Data not transmitted" });
+		}
+
+		const parsedBody = JSON.parse(body.toString());
+
+		console.log(body);
+		const data = {
+			userId: locals.user.id,
+			name: parsedBody.name,
+			era: Number(parsedBody.era),
+			faction: Number(parsedBody.faction),
+			units: JSON.stringify(parsedBody.units),
+			sublists: JSON.stringify(parsedBody.sublists),
+			rules: parsedBody.rules
+		};
+
 		try {
 			const existingList = await prisma.list.findFirst({
 				where: {
 					userId: locals.user.id,
-					name
+					name: parsedBody.name
 				}
 			});
 			if (!existingList) {

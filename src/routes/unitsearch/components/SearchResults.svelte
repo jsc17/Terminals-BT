@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { appWindow } from "$lib/utilities/responsive.svelte";
 	import { resultList } from "../resultList.svelte";
-	import { list } from "../../listbuilder/list.svelte";
 
 	let { status = $bindable() } = $props();
 	let headers = $derived(appWindow.isMobile ? ["Type", "PV", "Move", "Health"] : ["Type", "PV", "Size", "Move", "TMM", "Health (A+S)"]);
@@ -38,9 +37,6 @@
 			<col style="width:12%" />
 		{/if}
 		<col style="width:15%" />
-		{#if list}
-			<col style="width:2%" />
-		{/if}
 	</colgroup>
 	<thead>
 		<tr>
@@ -109,9 +105,6 @@
 				</th>
 			{/each}
 			<th><div class="table-header">DMG S/M/L-OV</div></th>
-			{#if list}
-				<th></th>
-			{/if}
 		</tr>
 	</thead>
 	{#if status == "loaded"}
@@ -153,9 +146,6 @@
 							{unit.damageS}{unit.damageSMin ? "*" : ""}{"/" + unit.damageM}{unit.damageMMin ? "*" : ""}{"/" + unit.damageL}{unit.damageLMin ? "*" : ""}{" - " + unit.overheat}
 						{/if}
 					</td>
-					{#if list}
-						<td><button onclick={() => list.addUnit(unit)}>+</button></td>
-					{/if}
 				</tr>
 				<tr class="abilities" class:mobile-cell={appWindow.isMobile}>
 					<td colspan="9">{unit.abilities}</td>

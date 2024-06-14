@@ -1,10 +1,10 @@
-import { getNewSkillCost } from "$lib/utilities/bt-utils";
-import { isUnit, type Unit, type Formation } from "$lib/types/unit.js";
+import { isUnit, type Unit } from "./unit";
+import { type Formation } from "./formation.svelte";
 import { type Options, ruleSets } from "./options";
 
 class UnitList {
 	units = $state<(Unit | Formation)[]>([]);
-	details = $state({ name: "", era: "", faction: "", general: "" });
+	details = $state({ name: "", era: -1, faction: -1, general: -1 });
 	options = $state<Options>();
 	sublists = $state<string[]>([]);
 	validate = false;
@@ -15,6 +15,10 @@ class UnitList {
 		for (const item of this.units) {
 			if (isUnit(item)) {
 				tempCount++;
+			} else {
+				for (const unit of item.units) {
+					tempCount++;
+				}
 			}
 		}
 		return tempCount;
@@ -23,9 +27,13 @@ class UnitList {
 	pv = $derived.by(() => {
 		let listPV = 0;
 
-		for (const unit of this.units) {
-			if (isUnit(unit)) {
-				listPV += unit.cost;
+		for (const item of this.units) {
+			if (isUnit(item)) {
+				listPV += item.cost;
+			} else {
+				for (const unit of item.units) {
+					listPV += unit.cost;
+				}
 			}
 		}
 		return listPV;
@@ -36,32 +44,68 @@ class UnitList {
 	}
 
 	addUnit(unit: Unit) {
-		this.units.push(JSON.parse(JSON.stringify(unit)));
-		this.units.at(-1)!.id = this.id;
+		const tempUnit = JSON.parse(JSON.stringify(unit));
+		tempUnit.id = this.id;
+		this.id++;
+		this.units.push(tempUnit);
+	}
+	addFormation(name = `New Formation`, type = "Battle", units: Unit[] = []) {
+		for (const unit of units) {
+			unit.id = this.id;
+			this.id++;
+		}
+		this.units.push({ id: this.id, name, type, units } as Formation);
 		this.id++;
 	}
-	addFormation() {
-		this.units.push({ id: this.id, name: `New Formation`, type: "Battle", units: [] } as Formation);
-		this.id++;
+	remove(id: number) {
+		this.units.forEach((item, index) => {
+			if (item.id == id) {
+				this.units.splice(index, 1);
+			} else {
+				if (!isUnit(item)) {
+					item.units.forEach((unit, uIndex) => {
+						if (unit.id == id) {
+							item.units.splice(uIndex, 1);
+						}
+					});
+				}
+			}
+		});
 	}
-	remove(index: number) {
-		const removed = this.units.splice(index, 1)[0];
-	}
-	modifySkill(index: number, newSkill: number, basePV: number) {
-		let newCost = getNewSkillCost(newSkill, basePV);
-
-		const item = this.units[index];
-		if (isUnit(item)) {
-			item.skill = newSkill;
-			item.cost = newCost;
+	createListCode() {
+		const listCode = {
+			name: this.details.name,
+			era: this.details.era,
+			faction: this.details.faction,
+			rules: this.options?.name,
+			units: <string[]>[],
+			sublists: this.sublists
+		};
+		for (const item of this.units) {
+			if (isUnit(item)) {
+				listCode.units.push(`${item.mulId},${item.skill}`);
+			} else {
+				const tempFormation = { name: item.name, type: item.type, units: <string[]>[] };
+				for (const unit of item.units) {
+					tempFormation.units.push(`${unit.mulId},${unit.skill}`);
+				}
+				listCode.units.push(JSON.stringify(tempFormation));
+			}
 		}
+		return JSON.stringify(listCode);
 	}
-	moveUnit(index: number, newIndex: number) {
-		if (newIndex >= 0 && newIndex < this.units.length) {
-			let temp = this.units[newIndex];
-			this.units[newIndex] = this.units[index];
-			this.units[index] = temp;
+	createTTSCode() {
+		let tempUnitArray = [];
+		for (const item of this.units) {
+			if (isUnit(item)) {
+				tempUnitArray.push(`{${item.mulId},${item.skill}}`);
+			} else {
+				for (const unit of item.units) {
+					tempUnitArray.push(`{${unit.mulId},${unit.skill}}`);
+				}
+			}
 		}
+		return `{${tempUnitArray.join(",")}}`;
 	}
 }
 

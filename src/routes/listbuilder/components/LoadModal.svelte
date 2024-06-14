@@ -7,14 +7,16 @@
 	import { ruleSets, getRules, type Options } from "../options";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { list } from "../list.svelte";
-	import { isUnit } from "$lib/types/unit";
+	import { getNewSkillCost } from "$lib/utilities/bt-utils";
+	import { type Unit } from "../unit";
+	import { numberToString } from "pdf-lib";
 
 	let user: any = getContext("user");
 
 	let { showLoadModal = $bindable(), status = $bindable(), selectedRules = $bindable() } = $props();
 	let loadDialog: HTMLDialogElement;
 	let importCode = $state("");
-	let savedLists = $state<{ name: string; era: number; faction: number; units: string; sublists: string; local: boolean; rules: Options }[]>([]);
+	let savedLists = $state<{ name: string; era: number; faction: number; units: string[]; sublists: string[]; local: boolean; rules: Options }[]>([]);
 	let selectedList = $state(-1);
 	let localListsExist = $state(false);
 
@@ -35,19 +37,19 @@
 		if (response.status == 200) {
 			const responseLists = JSON.parse(response.data.lists);
 			for (const tempList of responseLists) {
-				let rules = getRules(tempList.rules) ?? ruleSets[0];
+				console.log(tempList);
 				savedLists.push({
 					name: tempList.name,
 					era: Number(tempList.era),
 					faction: Number(tempList.faction),
-					units: tempList.units,
-					sublists: tempList.sublists,
+					units: JSON.parse(tempList.units),
+					sublists: JSON.parse(tempList.sublists),
 					local: false,
-					rules
+					rules: getRules(tempList.rules) ?? ruleSets[0]
 				});
 			}
 		} else {
-			toastController.addToast("Failed to load list, please try again");
+			toastController.addToast("Failed to load lists from server, please try again");
 			console.log(response.data.message);
 		}
 
@@ -57,13 +59,34 @@
 			localListsExist = true;
 			for (const localListName of localLists) {
 				const localData = localStorage.getItem(localListName)!;
-				let [listDetails, localSublists] = localData.split("-");
-				if (!localSublists) {
-					localSublists = "";
+				console.log(localData);
+				if (localData.charAt(0) == "{") {
+					const localList = JSON.parse(localData);
+					savedLists.push({
+						name: localList.name,
+						era: Number(localList.era),
+						faction: Number(localList.faction),
+						rules: getRules(localList.rules.name ?? "noRes")!,
+						sublists: localList.sublists,
+						units: localList.units,
+						local: true
+					});
+				} else {
+					let [listDetails, localSublists] = localData.split("-");
+					if (!localSublists) {
+						localSublists = "";
+					}
+					let [localEra, localFaction, ...localUnits] = listDetails.split(":");
+					savedLists.push({
+						name: localListName,
+						era: Number(localEra),
+						faction: Number(localFaction),
+						units: localUnits,
+						sublists: localSublists.split(":"),
+						local: true,
+						rules: ruleSets[0]
+					});
 				}
-				let [localEra, localFaction, ...localUnits] = listDetails.split(":");
-				const unitString = localUnits.join(":");
-				savedLists.push({ name: localListName, era: Number(localEra), faction: Number(localFaction), units: unitString, sublists: localSublists, local: true, rules: ruleSets[0] });
 			}
 		}
 	}
@@ -102,39 +125,52 @@
 		status = "loading";
 		await resultList.loadUnits();
 
-		status = "loaded";
 		if (resultList.results.length == 0) {
 			status = "error";
+		} else {
+			status = "loaded";
 		}
 
 		list.details.name = name;
-		list.details.era = eras.get(era)!;
-		list.details.faction = factions.get(faction)!;
-		list.details.general = factions.get(resultList.general)!;
-		if (sublists.length) {
-			list.sublists = sublists.split(":");
-		} else {
-			list.sublists = [];
-		}
-		while (list.unitCount) {
-			list.remove(0);
-		}
+		list.details.era = era;
+		list.details.faction = faction;
+		list.details.general = resultList.general;
+		list.sublists = sublists;
 
-		let unitArray = units.split(":");
+		list.units = [];
+		let unitArray = units;
+		for (const item of unitArray) {
+			if (item.charAt(0) == "{") {
+				const formationData = JSON.parse(item);
+				const tempFormation = { name: formationData.name, type: formationData.type, units: <Unit[]>[] };
 
-		unitArray.forEach((unit) => {
-			let [id, skill] = unit.split(",");
-			let unitToAdd = resultList.results.find((result: any) => {
-				return result.mulId == parseInt(id);
-			});
-			if (unitToAdd != null) {
-				list.addUnit(unitToAdd);
-				if (skill != "undefined") {
-					list.modifySkill(list.unitCount - 1, parseInt(skill), unitToAdd.pv);
+				for (const unit of formationData.units) {
+					let [id, skill] = unit.split(",");
+					let unitToAdd = resultList.results.find((result: Unit) => {
+						return result.mulId == parseInt(id);
+					});
+					if (unitToAdd != null) {
+						if (skill != "undefined") {
+							unitToAdd.cost = getNewSkillCost(parseInt(skill), unitToAdd.pv);
+						}
+						tempFormation.units.push(unitToAdd);
+					}
+				}
+				list.addFormation(tempFormation.name, tempFormation.type, tempFormation.units);
+			} else {
+				let [id, skill] = item.split(",");
+				console.log(id);
+				let unitToAdd = resultList.results.find((result: Unit) => {
+					return result.mulId == parseInt(id);
+				});
+				if (unitToAdd != null) {
+					if (skill != "undefined") {
+						unitToAdd.cost = getNewSkillCost(parseInt(skill), unitToAdd.pv);
+					}
+					list.addUnit(unitToAdd);
 				}
 			}
-		});
-
+		}
 		showLoadModal = false;
 	}
 

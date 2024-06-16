@@ -32,7 +32,7 @@
 	let flipDurationMs = 100;
 
 	function handleConsider(e: CustomEvent<DndEvent<Unit | Formation>>) {
-		for (const item of list.units) {
+		for (const item of list.items) {
 			if (e.detail.info.id == item.id?.toString()) {
 				if (isFormation(item)) {
 					formationDragStatus.enabled = false;
@@ -41,11 +41,11 @@
 				}
 			}
 		}
-		list.units = e.detail.items;
+		list.items = e.detail.items;
 	}
 
 	function handleFinalize(e: CustomEvent<DndEvent<Unit | Formation>>) {
-		list.units = e.detail.items;
+		list.items = e.detail.items;
 	}
 </script>
 
@@ -149,8 +149,8 @@
 				<p>Mechwarrior, BattleMech, 'Mech and Aerotech are registered trademarks of The Topps Company, Inc. All Rights Reserved.</p>
 			</div>
 		{:else if appWindow.isMobile}
-			<div class="unit-cards" use:dragHandleZone={{ items: list.units, dropTargetStyle, flipDurationMs }} onconsider={handleConsider} onfinalize={handleFinalize}>
-				{#each list.units as unit (unit.id)}
+			<div class="unit-cards" use:dragHandleZone={{ items: list.items, dropTargetStyle, flipDurationMs }} onconsider={handleConsider} onfinalize={handleFinalize}>
+				{#each list.items as unit (unit.id)}
 					<div animate:flip={{ duration: flipDurationMs }} class="mobile-card">
 						{#if isUnit(unit)}
 							<div use:dragHandle aria-label="drag handle for {unit.name}" class="handle">
@@ -165,8 +165,8 @@
 				{/each}
 			</div>
 		{:else}
-			<div class="unit-cards" use:dndzone={{ items: list.units, dropTargetStyle, flipDurationMs }} onconsider={handleConsider} onfinalize={handleFinalize}>
-				{#each list.units as unit (unit.id)}
+			<div class="unit-cards" use:dndzone={{ items: list.items, dropTargetStyle, flipDurationMs }} onconsider={handleConsider} onfinalize={handleFinalize}>
+				{#each list.items as unit (unit.id)}
 					<div animate:flip={{ duration: flipDurationMs }}>
 						{#if isUnit(unit)}
 							<UnitCard {unit}></UnitCard>

@@ -12,7 +12,6 @@ import {
 import { PDFDocument, PageSizes, PDFPage, StandardFonts } from "pdf-lib";
 import type { Unit } from "$lib/types/unit.js";
 import references from "$lib/data/reference.json";
-import { drawListHorizontal, drawListVertical } from "$lib/utilities/printSublists.js";
 import { fail } from "@sveltejs/kit";
 import { prisma } from "$lib/server/prisma.js";
 
@@ -131,45 +130,6 @@ export const actions = {
 			}
 		}
 		await Promise.all(promises);
-
-		const bytes = await pdf.save();
-		return { pdf: JSON.stringify(bytes) };
-	},
-	printSublists: async ({ request }) => {
-		const formData = await request.formData();
-		const sublists = JSON.parse(formData.get("sublists")!.toString());
-		const layout = formData.get("sublistPrintLayout");
-		const grouped = formData.get("sublistPrintGrouping");
-		let orderedSublists = [];
-
-		if (grouped == "on") {
-			for (const scenario of ["Bunkers", "Capture the Flag", "Domination", "Headhunter", "Hold the Line", "King of the Hill", "Overrun", "Stand Up Fight", "-"]) {
-				for (const list of sublists) {
-					if (list.scenario == scenario) {
-						orderedSublists.push(list);
-					}
-				}
-			}
-		} else {
-			orderedSublists = sublists;
-		}
-
-		const pdf = await PDFDocument.create();
-		const [helvetica, helveticaBold] = await Promise.all([pdf.embedFont(StandardFonts.Helvetica), pdf.embedFont(StandardFonts.HelveticaBold)]);
-
-		const pages: PDFPage[] = [];
-		for (let p = 0; p < Math.ceil(orderedSublists.length / 12); p++) {
-			pages.push(pdf.addPage(PageSizes.Letter));
-		}
-		for (let index = 0; index < orderedSublists.length; index++) {
-			let page = pages[Math.floor(index / 12)];
-			let slot = index % 12;
-			if (layout == "vertical") {
-				drawListVertical(orderedSublists[index], page, slot, helvetica, helveticaBold);
-			} else {
-				drawListHorizontal(orderedSublists[index], page, slot, helvetica, helveticaBold);
-			}
-		}
 
 		const bytes = await pdf.save();
 		return { pdf: JSON.stringify(bytes) };

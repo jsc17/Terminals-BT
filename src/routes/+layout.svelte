@@ -26,6 +26,7 @@
 		color: var(--foreground);
 		min-width: 0;
 		min-height: 0;
+		scrollbar-gutter: stable;
 	}
 	:global(:root) {
 		--radius: 0.5rem;

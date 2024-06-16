@@ -3,16 +3,30 @@ import { type Formation } from "./formation.svelte";
 import { type Options, ruleSets } from "./options";
 
 class UnitList {
-	units = $state<(Unit | Formation)[]>([]);
+	items = $state<(Unit | Formation)[]>([]);
 	details = $state({ name: "", era: -1, faction: -1, general: -1 });
 	options = $state<Options>();
 	sublists = $state<string[]>([]);
 	validate = false;
 	id = 0;
 
+	units = $derived.by(() => {
+		const tempUnits: Unit[] = [];
+		for (const item of this.items) {
+			if (isUnit(item)) {
+				tempUnits.push(item);
+			} else {
+				for (const unit of item.units) {
+					tempUnits.push(unit);
+				}
+			}
+		}
+		return tempUnits;
+	});
+
 	unitCount = $derived.by(() => {
 		let tempCount = 0;
-		for (const item of this.units) {
+		for (const item of this.items) {
 			if (isUnit(item)) {
 				tempCount++;
 			} else {
@@ -27,7 +41,7 @@ class UnitList {
 	pv = $derived.by(() => {
 		let listPV = 0;
 
-		for (const item of this.units) {
+		for (const item of this.items) {
 			if (isUnit(item)) {
 				listPV += item.cost;
 			} else {
@@ -47,20 +61,20 @@ class UnitList {
 		const tempUnit = JSON.parse(JSON.stringify(unit));
 		tempUnit.id = this.id;
 		this.id++;
-		this.units.push(tempUnit);
+		this.items.push(tempUnit);
 	}
 	addFormation(name = `New Formation`, type = "Battle", units: Unit[] = []) {
 		for (const unit of units) {
 			unit.id = this.id;
 			this.id++;
 		}
-		this.units.push({ id: this.id, name, type, units } as Formation);
+		this.items.push({ id: this.id, name, type, units } as Formation);
 		this.id++;
 	}
 	remove(id: number) {
-		this.units.forEach((item, index) => {
+		this.items.forEach((item, index) => {
 			if (item.id == id) {
-				this.units.splice(index, 1);
+				this.items.splice(index, 1);
 			} else {
 				if (!isUnit(item)) {
 					item.units.forEach((unit, uIndex) => {
@@ -81,7 +95,7 @@ class UnitList {
 			units: <string[]>[],
 			sublists: this.sublists
 		};
-		for (const item of this.units) {
+		for (const item of this.items) {
 			if (isUnit(item)) {
 				listCode.units.push(`${item.mulId},${item.skill}`);
 			} else {
@@ -96,7 +110,7 @@ class UnitList {
 	}
 	createTTSCode() {
 		let tempUnitArray = [];
-		for (const item of this.units) {
+		for (const item of this.items) {
 			if (isUnit(item)) {
 				tempUnitArray.push(`{${item.mulId},${item.skill}}`);
 			} else {

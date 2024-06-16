@@ -9,7 +9,6 @@
 	import { list } from "../list.svelte";
 	import { getNewSkillCost } from "$lib/utilities/bt-utils";
 	import { type Unit } from "../unit";
-	import { parseConnectionUrl } from "nodemailer/lib/shared";
 
 	let user: any = getContext("user");
 
@@ -173,7 +172,7 @@
 		list.details.general = resultList.general;
 		list.sublists = sublists;
 
-		list.units = [];
+		list.items = [];
 		let unitArray = units;
 		for (const item of unitArray) {
 			if (item.charAt(0) == "{") {
@@ -200,6 +199,7 @@
 				});
 				if (unitToAdd != null) {
 					if (skill != "undefined") {
+						unitToAdd.skill = parseInt(skill);
 						unitToAdd.cost = getNewSkillCost(parseInt(skill), unitToAdd.pv);
 					}
 					list.addUnit(unitToAdd);
@@ -207,12 +207,6 @@
 			}
 		}
 		showLoadModal = false;
-	}
-
-	function selectRow(index: number) {
-		selectedListIndex = index;
-		const selectedList = savedLists[index];
-		importCode = JSON.stringify(selectedList);
 	}
 </script>
 
@@ -257,7 +251,9 @@
 						<tr
 							id={index.toString()}
 							class:selected={selectedListIndex == index}
-							onclick={() => selectRow(index)}
+							onclick={() => {
+								selectedListIndex = index;
+							}}
 							ondblclick={() => {
 								loadList();
 							}}>

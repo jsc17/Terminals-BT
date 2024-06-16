@@ -23,7 +23,7 @@
 			cancel();
 		} else {
 			let body = JSON.stringify({
-				units: list.units,
+				units: list.items,
 				playername: playerName,
 				listname: list.details.name,
 				era: list.details.era,

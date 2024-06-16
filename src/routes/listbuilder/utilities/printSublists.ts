@@ -14,21 +14,19 @@ export function drawListVertical(list: any, page: PDFPage, slot: number, helveti
 	let i = 0;
 	let offset = 0;
 	for (const unit of list.unitList) {
-		if (unit[1]) {
-			const unitLine = `(${unit[0].skill}) ${unit[0].name}`;
-			page.drawText(unitLine, {
-				x: 30 + (slot % 3) * 185,
-				y: height - 62 - 12 * (i + offset) - Math.floor(slot / 3) * 185,
-				lineHeight: 10,
-				size: 8,
-				maxWidth: 130
-			});
-			page.drawText(`${unit[0].cost} (${Math.round(unit[0].cost / 2)})`, { x: 160 + (slot % 3) * 185, y: height - 62 - 12 * (i + offset) - Math.floor(slot / 3) * 185, size: 8 });
-			if (unitLine.length >= 33) {
-				offset++;
-			}
-			i++;
+		const unitLine = `(${unit.skill}) ${unit.name}`;
+		page.drawText(unitLine, {
+			x: 30 + (slot % 3) * 185,
+			y: height - 62 - 12 * (i + offset) - Math.floor(slot / 3) * 185,
+			lineHeight: 10,
+			size: 8,
+			maxWidth: 125
+		});
+		page.drawText(`${unit.cost} (${Math.round(unit.cost / 2)})`, { x: 160 + (slot % 3) * 185, y: height - 62 - 12 * (i + offset) - Math.floor(slot / 3) * 185, size: 8 });
+		if (unitLine.length >= 33) {
+			offset++;
 		}
+		i++;
 	}
 }
 
@@ -44,9 +42,7 @@ export function drawListHorizontal(list: any, page: PDFPage, slot: number, helve
 	page.setFont(helvetica);
 	let unitLine = "";
 	for (const unit of list.unitList) {
-		if (unit[1]) {
-			unitLine += `(${unit[0].skill}) ${unit[0].name} - ${unit[0].cost}(${Math.round(unit[0].cost / 2)}), `;
-		}
+		unitLine += `(${unit.skill}) ${unit.name} - ${unit.cost}(${Math.round(unit.cost / 2)}), `;
 	}
 	page.drawText(unitLine, { x: 30, y: height - 62 - slot * 60, size: 10, lineHeight: 12, maxWidth: 552 });
 }

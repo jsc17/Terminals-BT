@@ -13,7 +13,7 @@
 	let dropFromOthersDisabled = $derived(!formationDragStatus.enabled);
 
 	function handleConsider(e: CustomEvent<DndEvent<Unit>>) {
-		for (const item of list.units) {
+		for (const item of list.items) {
 			if (e.detail.info.id == item.id?.toString()) {
 				if (isFormation(item)) {
 					formationDragStatus.enabled = false;

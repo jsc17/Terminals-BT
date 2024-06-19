@@ -30,3 +30,4 @@ Created using HTML, Svelte, plain CSS, mySQL, and the following packages:
 - [pdfjs-dist](https://github.com/mozilla/pdfjs-dist)
 - [Lucia](https://github.com/lucia-auth/lucia)
 - [Prisma](https://github.com/prisma/prisma)
+- [Svelte-DND-Action](https://github.com/isaacHagoel/svelte-dnd-action)

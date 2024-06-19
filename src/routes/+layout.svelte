@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Header from "$lib/components/Header.svelte";
 	import Toast from "$lib/components/Toast.svelte";
-	import { appWindow } from "$lib/utilities/responsive.svelte";
+	import { appWindow } from "$lib/stores/appWindow.svelte.js";
 	import { setContext } from "svelte";
 
 	const { data, children } = $props();
@@ -26,6 +26,9 @@
 		color: var(--foreground);
 		min-width: 0;
 		min-height: 0;
+		scrollbar-gutter: stable;
+		scrollbar-color: var(--primary-muted) black;
+		scrollbar-width: thin;
 	}
 	:global(:root) {
 		--radius: 0.5rem;
@@ -38,8 +41,10 @@
 		--muted-foreground: hsl(240 5% 64.9%);
 		--border: hsl(240, 3.7%, 15.9%);
 		--table-border: hsl(240, 4%, 28%);
-		--primary: hsl(142.1, 70.6%, 45.3%);
+		--primary: hsl(142, 70%, 48%);
 		--primary-foreground: hsl(144.9, 80.4%, 10%);
+		--primary-muted: hsl(142, 84%, 25%);
+		--primary-pale: hsl(142, 62%, 67%);
 		--secondary: hsl(198, 100%, 50%);
 		--secondary-foreground: hsla(198, 89%, 22%, 1);
 		--button: hsl(142.1, 70.6%, 45.3%);
@@ -192,6 +197,7 @@
 	:global(.inline) {
 		display: flex;
 		align-items: center;
+		flex-wrap: wrap;
 		gap: 8px;
 	}
 	:global(.column) {
@@ -201,6 +207,10 @@
 	}
 	:global(hr) {
 		width: 90%;
-		border-top: 1px solid var(--primary);
+		border: 1px solid var(--primary);
+	}
+	:global(menu) {
+		padding: 0;
+		margin: 10px 0px;
 	}
 </style>

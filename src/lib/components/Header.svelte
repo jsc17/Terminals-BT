@@ -2,9 +2,9 @@
 	import { getContext, onMount } from "svelte";
 	import { page } from "$app/stores";
 
-	import ReportModal from "./modals/ReportModal.svelte";
-	import { appWindow } from "$lib/utilities/responsive.svelte";
-	import LoginModal from "./modals/LoginModal.svelte";
+	import ReportModal from "./ReportModal.svelte";
+	import { appWindow } from "$lib/stores/appWindow.svelte";
+	import LoginModal from "./LoginModal.svelte";
 	import { enhance } from "$app/forms";
 
 	let theme = $state("dark");
@@ -60,6 +60,8 @@
 				Tournament Dashboard
 			{:else if $page.url.pathname == "/unitsearch"}
 				Unit Search
+			{:else if $page.url.pathname == "/changelog"}
+				Changelog
 			{/if}
 		</button>
 		<div class="dropdown-content" class:dropdown-hidden={!showLinksDropdown} class:dropdown-shown={showLinksDropdown}>
@@ -72,7 +74,10 @@
 			<a href="/tournament">350 Tournament Dashboard</a>
 			<hr />
 			<a href="http://masterunitlist.info" target="_blank">Master Unit List</a>
-			<a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">350 Rules</a>
+			<a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">Wolfnet 350 Rules</a>
+			<hr />
+			<a href="/changelog">Changelog</a>
+			<a href="https://github.com/jsc17/Terminals-BT" target="_blank">Page Source Code: Github</a>
 		</div>
 	</nav>
 	{#if !appWindow.isNarrow}
@@ -91,7 +96,7 @@
 					showLoginModal = true;
 				}}>Login/Register</button>
 		{/if}
-		<nav
+		<!-- <nav
 			class="dropdown"
 			onmouseleave={() => {
 				showSettingsDropdown = false;
@@ -104,19 +109,13 @@
 				}}>
 				<img src="/icons/cog.svg" alt="settings menu" /></button>
 			<div class="dropdown-content dropdown-right" class:dropdown-hidden={!showSettingsDropdown} class:dropdown-shown={showSettingsDropdown}>
-				<!-- <button
-					class="link-button"
-					onclick={() => {
-						showChangelog = true;
-					}}>Changelog</button> -->
 				<button
 					class="link-button"
 					onclick={() => {
 						showReportModal = true;
-					}}>Report Issue</button>
-				<p>Page Source Code: <a href="https://github.com/jsc17/BT-Tools" target="_blank">Github</a></p>
+					}}>Report Issue</button> 
 			</div>
-		</nav>
+		</nav> -->
 	</div>
 </header>
 

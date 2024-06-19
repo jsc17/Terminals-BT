@@ -1,18 +1,4 @@
 import fs from "fs/promises";
-import {
-	drawUnitCard,
-	drawCondensedUnitCard,
-	drawBasicHeader,
-	drawBasicUnitLine,
-	drawDetailedHeader,
-	drawDetailedUnitLine,
-	drawSummary,
-	drawReferences
-} from "$lib/utilities/printUnitLists.js";
-import { PDFDocument, PageSizes, PDFPage, StandardFonts } from "pdf-lib";
-import type { Unit } from "$lib/types/unit.js";
-import references from "$lib/data/reference.json";
-import { drawListHorizontal, drawListVertical } from "$lib/utilities/printSublists.js";
 import { fail } from "@sveltejs/kit";
 import { prisma } from "$lib/server/prisma.js";
 
@@ -73,118 +59,32 @@ export const actions = {
 
 		await fs.writeFile(`./files/cached/${filename}`, JSON.stringify(units));
 	},
-	print: async ({ request }) => {
-		const formData = await request.formData();
-		const { units, playername, listname, era, faction, general, style, condense } = JSON.parse(formData.get("body")!.toString());
-
-		const pdf = await PDFDocument.create();
-		const [helvetica, helveticaBold] = await Promise.all([pdf.embedFont(StandardFonts.Helvetica), pdf.embedFont(StandardFonts.HelveticaBold)]);
-		const listSummary = pdf.addPage(PageSizes.Letter);
-		listSummary.setFont(helvetica);
-		const { width, height } = listSummary.getSize();
-		let listPv = 0;
-		listSummary.drawText(listname, { x: 90, y: height - 54, size: 16 });
-		listSummary.drawText(playername, { x: width - 180, y: height - 54, size: 12 });
-		let description = era + " Era - " + faction + " with " + general + " general list";
-		listSummary.drawText(description, { x: 95, y: height - 72, size: 8 });
-
-		if (style == "mul") {
-			drawBasicHeader(listSummary);
-			units.forEach((unit: Unit, index: number) => {
-				drawBasicUnitLine(listSummary, index, unit);
-				listPv += unit.cost;
-			});
-		} else {
-			drawDetailedHeader(listSummary);
-			units.forEach((unit: Unit, index: number) => {
-				drawDetailedUnitLine(listSummary, index, unit);
-				listPv += unit.cost;
-			});
-		}
-		drawSummary(listSummary, units.length, listPv);
-		let abilityReferences: any[] = [];
-		units.forEach((unit: Unit) => {
-			references.forEach((reference) => {
-				if (unit.abilities.includes(reference.ability)) {
-					if (abilityReferences.find((ability) => ability.name == reference.name) == undefined) {
-						abilityReferences.push(reference);
-					}
-				}
-			});
-		});
-		drawReferences(listSummary, abilityReferences);
-		listSummary.drawText("https://terminal.tools/listbuilder", { x: 25, y: 25, size: 6 });
-		let pages: PDFPage[] = [];
-		let pageSlots = condense ? 10 : 8;
-		for (let p = 0; p < Math.ceil(units.length / pageSlots); p++) {
-			pages.push(pdf.addPage(PageSizes.Letter));
-		}
-
-		let promises = [];
-		for (let index = 0; index < units.length; index++) {
-			if (condense) {
-				let page = pages[Math.floor(index / 10)];
-				promises.push(drawCondensedUnitCard(pdf, page, units[index], index));
-			} else {
-				let page = pages[Math.floor(index / 8)];
-				promises.push(drawUnitCard(pdf, page, units[index], index));
-			}
-		}
-		await Promise.all(promises);
-
-		const bytes = await pdf.save();
-		return { pdf: JSON.stringify(bytes) };
-	},
-	printSublists: async ({ request }) => {
-		const formData = await request.formData();
-		const sublists = JSON.parse(formData.get("sublists")!.toString());
-		const layout = formData.get("sublistPrintLayout");
-		const grouped = formData.get("sublistPrintGrouping");
-		let orderedSublists = [];
-
-		if (grouped == "on") {
-			for (const scenario of ["Bunkers", "Capture the Flag", "Domination", "Headhunter", "Hold the Line", "King of the Hill", "Overrun", "Stand Up Fight", "-"]) {
-				for (const list of sublists) {
-					if (list.scenario == scenario) {
-						orderedSublists.push(list);
-					}
-				}
-			}
-		} else {
-			orderedSublists = sublists;
-		}
-
-		const pdf = await PDFDocument.create();
-		const [helvetica, helveticaBold] = await Promise.all([pdf.embedFont(StandardFonts.Helvetica), pdf.embedFont(StandardFonts.HelveticaBold)]);
-
-		const pages: PDFPage[] = [];
-		for (let p = 0; p < Math.ceil(orderedSublists.length / 12); p++) {
-			pages.push(pdf.addPage(PageSizes.Letter));
-		}
-		for (let index = 0; index < orderedSublists.length; index++) {
-			let page = pages[Math.floor(index / 12)];
-			let slot = index % 12;
-			if (layout == "vertical") {
-				drawListVertical(orderedSublists[index], page, slot, helvetica, helveticaBold);
-			} else {
-				drawListHorizontal(orderedSublists[index], page, slot, helvetica, helveticaBold);
-			}
-		}
-
-		const bytes = await pdf.save();
-		return { pdf: JSON.stringify(bytes) };
-	},
 	saveList: async ({ request, locals }) => {
 		if (!locals.user) {
 			return fail(401, { message: "User not logged in" });
 		}
-		const { name, era, faction, units, sublists, rules } = Object.fromEntries(await request.formData()) as Record<string, string>;
-		const data = { userId: locals.user.id, name, era: Number(era), faction: Number(faction), units, sublists, rules };
+		const body = (await request.formData()).get("body");
+		if (!body) {
+			return fail(400, { message: "failed to save list. Data not transmitted" });
+		}
+
+		const parsedBody = JSON.parse(body.toString());
+
+		const data = {
+			userId: locals.user.id,
+			name: parsedBody.name,
+			era: Number(parsedBody.era),
+			faction: Number(parsedBody.faction),
+			units: JSON.stringify(parsedBody.units),
+			sublists: JSON.stringify(parsedBody.sublists),
+			rules: parsedBody.rules
+		};
+
 		try {
 			const existingList = await prisma.list.findFirst({
 				where: {
 					userId: locals.user.id,
-					name
+					name: parsedBody.name
 				}
 			});
 			if (!existingList) {

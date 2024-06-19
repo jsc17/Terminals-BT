@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { resultList } from "./resultList.svelte";
-	import { appWindow } from "$lib/utilities/responsive.svelte";
+	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { list } from "./list.svelte";
 	import { setContext, onMount } from "svelte";
 	import { Listbuilder, SearchParameters, SearchResults, SearchFilters } from "./components/index";
@@ -59,7 +59,7 @@
 			onclick={() => {
 				showListDialog = !showListDialog;
 			}}
-			class="list-button">List - {list.units.length} Units - {list.pv} PV</button>
+			class="list-button">List - {list.unitCount} Units - {list.pv} PV</button>
 	{/if}
 </main>
 

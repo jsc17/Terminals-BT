@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { appWindow } from "$lib/utilities/responsive.svelte";
+	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { resultList } from "../resultList.svelte";
 	import { list } from "../list.svelte";
 
@@ -154,7 +154,7 @@
 						{/if}
 					</td>
 					{#if list}
-						<td><button onclick={() => list.add(unit)}>+</button></td>
+						<td><button onclick={() => list.addUnit(unit)}>+</button></td>
 					{/if}
 				</tr>
 				<tr class="abilities" class:mobile-cell={appWindow.isMobile}>

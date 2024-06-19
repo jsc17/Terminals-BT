@@ -1,0 +1,4 @@
+user-agent: *
+Disallow: /tools
+
+Sitemap: https://terminal.tools/sitemap.txt

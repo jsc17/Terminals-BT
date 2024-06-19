@@ -1,7 +1,14 @@
 import { prisma } from "$lib/server/prisma";
 import eraLists from "$lib/data/erasFactionsList.json";
-import { fail } from "@sveltejs/kit";
+import { fail, redirect } from "@sveltejs/kit";
 import { sendResetEmail } from "$lib/emails/mailer.server.js";
+import type { PageServerLoad } from "../$types.js";
+
+export const load: PageServerLoad = async ({ locals }) => {
+	if (!locals.user || locals.user.username != "terminal") {
+		redirect(302, "/");
+	}
+};
 
 export const actions = {
 	uploadFactions: async () => {
@@ -117,5 +124,29 @@ export const actions = {
 	},
 	sendResetEmail: async ({}) => {
 		sendResetEmail("jonathan.cibge@innernwgaw.com", "ASFVA");
+	},
+	updateListUnits: async ({}) => {
+		let lists = await prisma.list.findMany({
+			select: {
+				id: true,
+				units: true,
+				sublists: true
+			}
+		});
+
+		for (const list of lists) {
+			if (list.units.charAt(0) == "[") {
+				continue;
+			}
+			await prisma.list.update({
+				where: {
+					id: list.id
+				},
+				data: {
+					units: JSON.stringify(list.units.split(":")),
+					sublists: JSON.stringify(list.sublists?.split(":"))
+				}
+			});
+		}
 	}
 };

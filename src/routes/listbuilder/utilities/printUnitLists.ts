@@ -1,5 +1,6 @@
 import { PDFDocument, PDFPage, rgb, PDFImage, StandardFonts, PDFFont } from "pdf-lib";
-import type { Unit } from "../types/unit";
+import { type Unit } from "../unit";
+import { type Formation } from "../formation.svelte";
 import fs from "fs/promises";
 
 const positions = [
@@ -97,7 +98,7 @@ export function drawDetailedHeader(listSummary: PDFPage) {
 	listSummary.drawText("Skill", { x: 471, y: pageHeight - 96, size: 8 });
 	listSummary.drawText("PV", { x: 501, y: pageHeight - 96, size: 8 });
 }
-export function drawSummary(listSummary: PDFPage, lines: number, listPv: number) {
+export function drawSummary(listSummary: PDFPage, lines: number, unitCount: number, listPv: number) {
 	let pageHeight = listSummary.getHeight();
 	let pageWidth = listSummary.getWidth();
 	let rectangles: Rectangle[] = [
@@ -117,7 +118,7 @@ export function drawSummary(listSummary: PDFPage, lines: number, listPv: number)
 		});
 	});
 
-	listSummary.drawText(lines + " Units", { x: 81, y: pageHeight - 108 - 12 * lines, size: 8 });
+	listSummary.drawText(unitCount + " Units", { x: 81, y: pageHeight - 108 - 12 * lines, size: 8 });
 	listSummary.drawText(listPv.toString(), { x: 501, y: pageHeight - 108 - 12 * lines, size: 8 });
 }
 export function drawBasicUnitLine(listSummary: PDFPage, lines: number, unit: Unit) {
@@ -211,6 +212,22 @@ export function drawDetailedUnitLine(listSummary: PDFPage, lines: number, unit: 
 	listSummary.drawText(health, { x: 426, y: pageHeight - 108 - 12 * lines, size: 8 });
 	listSummary.drawText((unit.skill ?? "-").toString(), { x: 471, y: pageHeight - 108 - 12 * lines, size: 8 });
 	listSummary.drawText(`${unit.cost} (${Math.round(unit.cost / 2)})`, { x: 501, y: pageHeight - 108 - 12 * lines, size: 8 });
+}
+export function drawFormationLine(listSummary: PDFPage, lines: number, formation: Formation) {
+	let pageHeight = listSummary.getHeight();
+	let y = pageHeight - 111 - 12 * lines;
+
+	listSummary.drawRectangle({
+		x: 76,
+		y: y,
+		width: 455,
+		height: 12,
+		color: rgb(230 / 256, 230 / 256, 230 / 256),
+		borderWidth: 1,
+		borderColor: rgb(0, 0, 0)
+	});
+
+	listSummary.drawText(`${formation.name} - ${formation.type} formation`, { x: 81, y: pageHeight - 108 - 12 * lines, size: 8 });
 }
 export async function drawUnitCard(pdf: PDFDocument, page: PDFPage, unit: Unit, index: number) {
 	let pageHeight = page.getHeight();

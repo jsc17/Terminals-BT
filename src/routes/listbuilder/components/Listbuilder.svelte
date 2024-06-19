@@ -6,8 +6,11 @@
 	import { flip } from "svelte/animate";
 	import { list } from "../list.svelte";
 	import { dndzone, type DndEvent, dragHandle, dragHandleZone } from "svelte-dnd-action";
-	import type { Unit } from "$lib/types/unit";
-	import { appWindow } from "$lib/utilities/responsive.svelte";
+	import { type Unit, isUnit } from "../unit";
+	import { dragType, isFormation, type Formation } from "../formation.svelte";
+	import { appWindow } from "$lib/stores/appWindow.svelte";
+	import FormationCard from "./FormationCard.svelte";
+	import Menu from "$lib/components/Menu.svelte";
 
 	let {
 		status = $bindable(),
@@ -19,17 +22,29 @@
 	let showSaveModal = $state(false);
 	let showLoadModal = $state(false);
 	let showSublistModal = $state(false);
-	let showListMenuDropdown = $state(false);
 
 	onMount(() => {
 		selectedRules = list.options?.name ?? "noRes";
 	});
 
 	let dropTargetStyle = { outline: "none" };
+
 	let flipDurationMs = 100;
 
-	function handleSort(e: CustomEvent<DndEvent<Unit>>) {
-		list.units = e.detail.items;
+	function handleConsider(e: CustomEvent<DndEvent<Unit | Formation>>) {
+		for (const item of list.items) {
+			if (e.detail.info.id == item.id?.toString()) {
+				if (isFormation(item)) {
+					dragType.type = "unit";
+				}
+			}
+		}
+		list.items = e.detail.items;
+	}
+
+	function handleFinalize(e: CustomEvent<DndEvent<Unit | Formation>>) {
+		list.items = e.detail.items;
+		dragType.type = "all";
 	}
 </script>
 
@@ -60,26 +75,26 @@
 				{/if}
 
 				{#if list.options?.maxUnits}
-					<p class:errors={list.units.length > list.options.maxUnits}>Units: {list.units.length}/{list.options.maxUnits}</p>
+					<p class:errors={list.unitCount > list.options.maxUnits}>Units: {list.unitCount}/{list.options.maxUnits}</p>
 				{:else}
-					<p>Units: {list.units.length}</p>
+					<p>Units: {list.unitCount}</p>
 				{/if}
 			</div>
-
-			<menu
-				class="dropdown"
-				onmouseleave={() => {
-					showListMenuDropdown = false;
-				}}>
-				<button
-					class="link-button"
-					id="nav-links"
-					onclick={() => {
-						showListMenuDropdown = !showListMenuDropdown;
-					}}>
-					<img src="/icons/menu.svg" alt="menu" />
-				</button>
-				<div class="dropdown-content dropdown-right" class:dropdown-hidden={!showListMenuDropdown} class:dropdown-shown={showListMenuDropdown}>
+			<div class="list-buttons">
+				<Menu text={"+"}>
+					<button
+						class="menu-button"
+						onclick={() => {
+							list.addFormation("ground");
+						}}>Add Ground Formation</button>
+					<button
+						class="menu-button"
+						onclick={() => {
+							list.addFormation("air");
+						}}>Add Air Formation</button>
+					<hr />
+					<div>More features coming soon</div></Menu>
+				<Menu img={"/icons/menu.svg"}>
 					<button
 						class="menu-button"
 						onclick={() => {
@@ -108,12 +123,21 @@
 						}}>
 						Generate Sublists
 					</button>
-				</div>
-			</menu>
+					<button
+						class="menu-button"
+						onclick={() => {
+							if (confirm("Remove all units and formations from the list?")) {
+								list.items = [];
+							}
+						}}>
+						Clear List
+					</button>
+				</Menu>
+			</div>
 		</div>
 	</div>
 	<div class="list-units">
-		{#if list.units.length == 0}
+		{#if list.items.length == 0}
 			<div class="info">
 				<div>
 					<h1 style:color="var(--primary)">Latest:</h1>
@@ -121,6 +145,7 @@
 						{#each recentChanges as change}
 							<li>{change}</li>
 						{/each}
+						<li>Check the <a href="/changelog" target="_blank">changelog</a> for a complete list of recent changes</li>
 					</ul>
 					{#each description as line}
 						<p>{line}</p>
@@ -130,22 +155,34 @@
 				<p>Mechwarrior, BattleMech, 'Mech and Aerotech are registered trademarks of The Topps Company, Inc. All Rights Reserved.</p>
 			</div>
 		{:else if appWindow.isMobile}
-			<div class="unit-cards" use:dragHandleZone={{ items: list.units, dropTargetStyle, flipDurationMs }} onconsider={handleSort} onfinalize={handleSort}>
-				{#each list.units as unit, index (unit.id)}
+			<div class="unit-cards" use:dragHandleZone={{ items: list.items, dropTargetStyle, flipDurationMs, type: "all" }} onconsider={handleConsider} onfinalize={handleFinalize}>
+				{#each list.items as unit (unit.id)}
 					<div animate:flip={{ duration: flipDurationMs }} class="mobile-card">
-						<div use:dragHandle aria-label="drag handle for {unit.name}" class="handle">
-							<img class="move-arrow" src="/icons/chevron-up.svg" width="15px" alt="move up" />
-							<img class="move-arrow" src="/icons/chevron-down.svg" width="15px" alt="move down" />
-						</div>
-						<UnitCard {unit} {index}></UnitCard>
+						{#if isUnit(unit)}
+							<div use:dragHandle aria-label="drag handle for {unit.name}" class="handle">
+								<img class="move-arrow" src="/icons/chevron-up.svg" width="15px" alt="move up" />
+								<img class="move-arrow" src="/icons/chevron-down.svg" width="15px" alt="move down" />
+							</div>
+							<UnitCard {unit}></UnitCard>
+						{:else}
+							<FormationCard {unit}></FormationCard>
+						{/if}
 					</div>
 				{/each}
 			</div>
 		{:else}
-			<div class="unit-cards" use:dndzone={{ items: list.units, dropTargetStyle, flipDurationMs }} onconsider={handleSort} onfinalize={handleSort}>
-				{#each list.units as unit, index (unit.id)}
+			<div
+				class="unit-cards"
+				use:dndzone={{ items: list.items, dropTargetStyle, flipDurationMs, type: "all", centreDraggedOnCursor: true }}
+				onconsider={handleConsider}
+				onfinalize={handleFinalize}>
+				{#each list.items as unit (unit.id)}
 					<div animate:flip={{ duration: flipDurationMs }}>
-						<UnitCard {unit} {index}></UnitCard>
+						{#if isUnit(unit)}
+							<UnitCard {unit}></UnitCard>
+						{:else}
+							<FormationCard {unit}></FormationCard>
+						{/if}
 					</div>
 				{/each}
 			</div>
@@ -180,6 +217,11 @@
 		justify-content: space-between;
 		align-items: center;
 	}
+	.list-buttons {
+		display: flex;
+		gap: 8px;
+		align-items: center;
+	}
 	.list-stats {
 		display: flex;
 		gap: 16px;
@@ -206,19 +248,6 @@
 	}
 	.errors {
 		color: var(--error);
-	}
-	.link-button {
-		img {
-			height: 20px;
-			width: 20px;
-			/* filter: var(--primary-filter); */
-		}
-		background-color: var(--primary);
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		color: var(--primary);
-		font-size: 16px;
 	}
 	.menu-button {
 		background-color: transparent;

@@ -168,6 +168,10 @@
 	<div class="card">
 		<button onclick={sendResetEmail}>Send Reset</button>
 	</div>
+	<button
+		onclick={() => {
+			fetch("?/updateListUnits", { method: "POST", body: "" });
+		}}>Update sql list codes</button>
 </main>
 
 <style>

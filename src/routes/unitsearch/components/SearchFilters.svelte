@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { resultList } from "../resultList.svelte.js";
-	import { appWindow } from "$lib/utilities/responsive.svelte.js";
+	import { appWindow } from "$lib/stores/appWindow.svelte.js";
 
 	let showFilters = $state(false);
 	let showAdditionalFilters = $state(false);

@@ -1,0 +1,74 @@
+[
+	{
+		"date": "6-18-24",
+		"updates": {
+			"Listbuilder": ["Added Drag and drop functionality", "Added formations to unit list", "Changed shareable list code format"]
+		}
+	},
+	{
+		"date": "6-1-24",
+		"notice": "Kind of stopped keeping this list up to date. These are the major changes implemented over the last month and a half.",
+		"updates": {
+			"Listbuilder": ["Combined generic and 350 list builders into one with a rules selector."],
+			"Unit Search": ["Added a unit lookup separate from the list builder"],
+			"Tournament Dashboard": ["Created tournament dashboard and list validator"]
+		}
+	},
+	{
+		"date": "4-21-24",
+		"updates": { "Site-wide": ["Added authentication to allow for list saving and loading between devices."] }
+	},
+	{
+		"date": "4-17-24",
+		"updates": { "List Builder": [" Added export for Jeff's Battletech Tools"] }
+	},
+	{
+		"date": "4-15-24",
+		"updates": { "List Builder": [" Added sublist management and printing"] }
+	},
+	{
+		"date": "3-26-24",
+		"updates": { "List Builder": [" Added ability page reference numbers to printed lists."] }
+	},
+	{
+		"date": "3-25-24",
+		"affects": "Alpha Strike List builder and 350 List Builder:",
+		"updates": { "Feature": [" Added additional filtering to abilities allowing for searching for multiple abilities, or optional abilities."] }
+	},
+	{
+		"date": "3-22-24",
+		"updates": {
+			"List Builder": [
+				" Added basic generic Alpha Strike List builder. Does not have the unit type, rules level, or ability restrictions the 350 list builder does. Also does no list validation."
+			]
+		}
+	},
+	{
+		"date": "3-20-24",
+		"updates": {
+			"List Builder": [
+				" Add caching for faction lists. Should reduce the number of times the MUL is hit when searching for same faction in a day and add ability for listbuilder to still function when MUL is down."
+			]
+		}
+	},
+	{
+		"date": "3-15-24",
+		"updates": { "List Builder Fix": [" Actually filter out unique mechs correctly", "List Builder Fix: Correct issue importing list from code"] }
+	},
+	{
+		"date": "3-14-24",
+		"updates": { "List Builder": [" Add Off-board Artillery", "Feature: Mobile support! Going to keep working on it, but at least it's usable now."] }
+	},
+	{
+		"date": "3-13-24",
+		"updates": { "List Builder": [" Sharing and saving of lists"] }
+	},
+	{
+		"date": "3-12-24",
+		"updates": { "List Builder Fix": ["List PV not updating on skill change"] }
+	},
+	{
+		"date": "3-12-24",
+		"updates": { "Notice from Comstar": [" Records prior to 3-12-24 unavailable. Assume everything not mentioned above was done before this point."] }
+	}
+]

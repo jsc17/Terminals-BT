@@ -2,14 +2,15 @@
 	import type { Unit } from "$lib/types/unit";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { list } from "../list.svelte";
+	import { getNewSkillCost } from "$lib/utilities/bt-utils";
 
-	const { unit, index }: { unit: Unit; index: number } = $props();
+	const { unit }: { unit: Unit } = $props();
 
-	function modifySkill(event: Event, index: number, basePV: number) {
+	function modifySkill(event: Event, unit: Unit) {
 		const target = event.target as HTMLInputElement;
 		if (target) {
 			let skill = parseInt(target.value);
-			list.modifySkill(index, skill, basePV);
+			unit.cost = getNewSkillCost(skill, unit.pv);
 		}
 	}
 </script>
@@ -22,13 +23,12 @@
 			{#if unit.skill == undefined}
 				-
 			{:else}
-				Skill - <input onchange={(e) => modifySkill(e, index, unit.pv)} id={index.toString()} type="number" min="2" max="6" value={unit.skill} />
+				Skill - <input onchange={(e) => modifySkill(e, unit)} type="number" min={list.options?.minSkill ?? 0} max={list.options?.maxSkill ?? 7} value={unit.skill} />
 			{/if}
 		</p>
 		<p>PV - {unit.cost}</p>
-		<button
-			onclick={() => {
-				list.remove(index);
+		<button onclick={() => {
+				list.remove(unit.id!);
 				toastController.addToast(`${unit.name} removed from list`);
 			}}>-</button>
 	</div>
@@ -57,6 +57,7 @@
 		border-bottom: 1px solid var(--border);
 	}
 	main:hover {
+		box-shadow: 3px 0px 3px var(--primary) inset;
 		cursor: row-resize;
 	}
 	.unit-row,
@@ -83,8 +84,5 @@
 	button {
 		height: 20px;
 		width: 20px;
-	}
-	:global(.dragging) {
-		box-shadow: 3px 0px 3px var(--primary) inset;
 	}
 </style>

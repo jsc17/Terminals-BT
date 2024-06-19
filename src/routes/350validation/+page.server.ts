@@ -5,6 +5,7 @@ import { fail } from "@sveltejs/kit";
 import { parsePDF, parseTerminal } from "./parse.js";
 import fs from "fs/promises";
 import { sendListSubmissionEmail } from "$lib/emails/mailer.server.js";
+import { isUnit } from "../listbuilder/unit.js";
 
 export const load = async () => {
 	let allTournaments = await prisma.tournament.findMany({
@@ -44,10 +45,36 @@ export const actions = {
 				return fail(400, { message: "Failed to create pdf object" });
 			}
 		} else if (uploadType == "terminal") {
-			unitList = await parseTerminal(uploadData.toString().split("-")[0].split(":").slice(2).join(":"));
+			let unitData: string[] = [];
+			if (uploadData.charAt(0) == "{") {
+				let parsedData = JSON.parse(uploadData);
+				for (const item of parsedData.units) {
+					if (item.charAt(0) == "{") {
+						for (const unit of JSON.parse(item).units) {
+							unitData.push(unit);
+						}
+					} else {
+						unitData.push(item);
+					}
+				}
+			} else {
+				unitData = uploadData.toString().split("-")[0].split(":").slice(2);
+			}
+			unitList = await parseTerminal(unitData);
 		} else if (uploadType == "terminalSaved") {
-			unitList = await parseTerminal(uploadData.toString());
-		} else if (uploadType == "jeff") {
+			let unitData: string[] = [];
+			let parsedData = JSON.parse(uploadData);
+			for (const item of parsedData) {
+				if (item.charAt(0) == "{") {
+					for (const unit of JSON.parse(item).units) {
+						unitData.push(unit);
+					}
+				} else {
+					unitData.push(item);
+				}
+			}
+
+			unitList = await parseTerminal(unitData);
 		} else {
 			return fail(400, { message: "Invalid format type" });
 		}

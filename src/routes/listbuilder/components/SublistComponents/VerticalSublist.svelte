@@ -1,7 +1,5 @@
 <script lang="ts">
 	import type { Sublist } from "./Sublist.svelte";
-	import { list } from "../../list.svelte";
-	import { deserialize } from "$app/forms";
 
 	type componentProps = {
 		sublist: Sublist;
@@ -12,33 +10,7 @@
 
 	const { sublist = $bindable(), editSublist, deleteSublist, copySublist }: componentProps = $props();
 
-	async function printSubList(id: number) {
-		let form = new FormData();
-
-		let condense = false;
-		if (sublist.checked.length == 9 || sublist.checked.length == 10) {
-			condense = true;
-		}
-
-		let body = JSON.stringify({
-			units: sublist.unitList,
-			playername: "",
-			listname: list.details.name,
-			era: list.details.era,
-			faction: list.details.faction,
-			general: list.details.general,
-			style: "detailed",
-			condense: condense
-		});
-		form.append("body", body);
-		let response = deserialize(await (await fetch("/?/print", { method: "POST", body: form })).text());
-		//@ts-ignore
-		const blob = new Blob([new Uint8Array(Object.values(JSON.parse(response.data.pdf)))], { type: "application/pdf" });
-		const downloadElement = document.createElement("a");
-		downloadElement.download = list.details.name;
-		downloadElement.href = URL.createObjectURL(blob);
-		downloadElement.click();
-	}
+	async function printSubList(id: number) {}
 </script>
 
 <main>
@@ -81,7 +53,7 @@
 	<div class="space-between">
 		<button
 			onclick={() => {
-				printSubList(sublist.id);
+				sublist.print();
 			}}>Print Sublist</button>
 		<button onclick={() => copySublist(sublist.id)}>Copy</button>
 		<button onclick={() => deleteSublist(sublist.id)}>Delete</button>

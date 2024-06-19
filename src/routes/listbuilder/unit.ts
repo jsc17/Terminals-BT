@@ -2,6 +2,7 @@ import { type Formation } from "./formation.svelte";
 
 export type Unit = {
 	[key: string]: any;
+	id?: number;
 	mulId: number;
 	name: string;
 	class: string;
@@ -31,7 +32,6 @@ export type Unit = {
 	role?: string;
 	technology?: string;
 	subIndex?: number;
-	id?: number;
 };
 
 export function isUnit(item: Unit | Formation): item is Unit {

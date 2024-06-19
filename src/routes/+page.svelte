@@ -11,20 +11,30 @@
 			<p><a href="/listbuilder">Alpha Strike List Builder</a>: General Alpha Strike List builder</p>
 		</li>
 		<li>
-			<p><a href="/unitsearch">Alpha Strike Unit Lookup</a>: Detailed unit search. (coming soon)</p>
+			<p><a href="/unitsearch">Alpha Strike Unit Lookup</a>: Detailed unit search.</p>
 		</li>
 		<h2>Wolfnet 350</h2>
 		<li>
 			<a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">Wolfnet 350 Tournament Rules</a>
 		</li>
 		<li>
-			<p><a href="/listbuilder?rules=wn350">AS350 List Builder</a>: List builder with built in restrictions for the wolfnet 350 rules</p>
+			<p>
+				<a href="/listbuilder?rules=wn350">AS350 List Builder</a>: List builder with built in restrictions for the wolfnet 350 rules. (6-1-24: Combined with the regular Alpha
+				strike list)
+			</p>
 		</li>
 		<li>
 			<p><a href="/350validation">AS350 List Validator</a> (Alpha): List validator for wolfnet 350 rules</p>
 		</li>
 		<li>
 			<p><a href="/tournament">AS350 Tournament Dashboard</a> (Alpha): 350 Tournament manager to handle player list validation</p>
+		</li>
+		<h2>Other Stuff:</h2>
+		<li>
+			<p><a href="/changelog">Changelog</a>: List of the latest changes / roadmap of planned features</p>
+		</li>
+		<li>
+			<p><a href="https://github.com/jsc17/Terminals-BT" target="_blank">Github</a>: Applications source code and issue tracker</p>
 		</li>
 	</ul>
 </main>
@@ -38,6 +48,9 @@
 		padding: 32px;
 	}
 	ul {
-		line-height: 1.5rem;
+		line-height: 2rem;
+	}
+	p {
+		color: var(--muted-foreground);
 	}
 </style>

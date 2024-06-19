@@ -5,16 +5,19 @@ export type Formation = {
 	name: string;
 	type: string;
 	units: Unit[];
+	style: "ground" | "air";
 };
 
-export const formationTypes = ["Battle", "Assault", "Striker/Cavalry", "Fire", "Recon", "Pursuit", "Command", "Support"];
+export const groundFormationTypes = ["Battle", "Assault", "Striker/Cavalry", "Fire", "Recon", "Pursuit", "Command", "Support", "Transport and Infantry", "Air Lance"];
+export const airFormationTypes = ["Interceptor", "Aerospace Superiority", "Fire Support", "Strike", "Electronic Warfare", "Transport"];
 
 export function isFormation(item: Unit | Formation): item is Formation {
 	return "units" in item;
 }
 
 class FormationDrag {
-	enabled = $state(true);
+	disabled = $state(false);
+	type = $state("all");
 }
 
-export let formationDragStatus = new FormationDrag();
+export let dragType = new FormationDrag();

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { appWindow } from "$lib/utilities/responsive.svelte";
+	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { resultList } from "../resultList.svelte";
 	import { list } from "../list.svelte";
 

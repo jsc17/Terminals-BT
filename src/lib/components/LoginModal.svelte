@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
 	import { getContext } from "svelte";
-	import { appWindow } from "$lib/utilities/responsive.svelte";
+	import { appWindow } from "$lib/stores/appWindow.svelte";
 
 	let { showLoginModal = $bindable() } = $props();
 	let loginDialog: HTMLDialogElement;

@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { appWindow } from "$lib/utilities/responsive.svelte";
+	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { enhance } from "$app/forms";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { list } from "../list.svelte";
+	import { eras, factions } from "$lib/data/erasFactionLookup";
 
 	let { showPrintModal = $bindable() } = $props();
 	let printDialog: HTMLDialogElement;
@@ -55,16 +56,22 @@
 	class:dialog-wide={appWindow.isNarrow}>
 	<div class="dialog-body">
 		<h2>Print</h2>
-		<form action="/?/print" method="post" use:enhance={handleForm} class="print-form">
-			<label for="listname">List Name</label><input id="listname" bind:value={list.details.name} />
-			<label for="playername">Player Name (optional)</label><input id="playername" bind:value={playerName} />
-			<label for="era">Era</label><input id="era" bind:value={list.details.era} disabled />
-			<label for="faction">Faction</label><input id="faction" bind:value={list.details.faction} disabled />
-			<label for="general">General List</label><input id="general" bind:value={list.details.general} disabled />
-			<label for="list-style-mul"><input type="radio" name="list-style-mul" id="list-style-mul" value="mul" bind:group={style} />MUL style</label>
-			<p>Generates a list with a summary page similar to the master unit list. Unit name, type, skill, and PV.</p>
-			<label for="list-style-detailed"><input type="radio" name="list-style-detailed" id="list-style-detailed" value="detailed" bind:group={style} />Detailed</label>
-			<p>Generates a list with a summary page with more detail for quick reference. Includes damage, health, movement, etc.</p>
+		<form action="?/printList" method="post" use:enhance={handleForm} class="print-form">
+			<div><label for="listname">List Name</label><input id="listname" bind:value={list.details.name} /></div>
+			<div><label for="playername">Player Name (optional)</label><input id="playername" bind:value={playerName} /></div>
+			<div>{`${eras.get(list.details.era)} - ${factions.get(list.details.faction)} with ${factions.get(list.details.general)} general list `}</div>
+			<h3>Style</h3>
+			<div>
+				<label for="list-style-mul"
+					><input type="radio" name="list-style-mul" id="list-style-mul" value="mul" bind:group={style} />MUL style - Generates a summary page similar to the MUL printout.</label>
+			</div>
+			<div>
+				<label for="list-style-detailed"
+					><input type="radio" name="list-style-detailed" id="list-style-detailed" value="detailed" bind:group={style} />Detailed - Generates a summary page with more details for
+					quick reference.</label>
+			</div>
+			<div><input type="checkbox" name="drawFormations" id="formations" checked /><label for="formations">Print formations?</label></div>
+
 			<div class="print-buttons">
 				<button>Submit</button>
 				<button>Cancel</button>
@@ -75,19 +82,29 @@
 
 <style>
 	.print-form {
+		div {
+			padding-left: 8px;
+		}
 		display: flex;
 		flex-direction: column;
-		justify-content: space-between;
-		gap: 8px;
-	}
-	h1 {
-		margin: 16px;
+		gap: 12px;
 	}
 	label,
 	input {
 		height: 1.25em;
 	}
-	p {
-		padding-left: 32px;
+	label {
+		margin: 0px 4px;
+	}
+	.print-buttons {
+		margin-top: 32px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 24px;
+	}
+	h2,
+	h3 {
+		margin: 8px;
 	}
 </style>

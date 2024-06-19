@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { appWindow } from "$lib/utilities/responsive.svelte";
+	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { list } from "../../list.svelte";
 	import { dndzone, type DndEvent } from "svelte-dnd-action";
 	import { isUnit } from "../../unit";
@@ -155,7 +155,7 @@
 	class="sublist-modal">
 	<div class="dialog-body">
 		<div class="space-between">
-			<h2>sublists {appWindow.isMobile}</h2>
+			<h2>Sublists</h2>
 			{#if !appWindow.isMobile}
 				<div class="center gap8">
 					<p>Display</p>
@@ -217,6 +217,7 @@
 					use:dndzone={{ items: sublists, dropTargetStyle, flipDurationMs }}
 					onconsider={handleSort}
 					onfinalize={handleSort}
+					class:sublist-container-vertical={layout == "vertical"}
 					class:sublist-container-horizontal={layout == "horizontal"}>
 					{#each filteredSublists as sublist (sublist.id)}
 						<div animate:flip={{ duration: flipDurationMs }} class:panel-vertical={layout == "vertical"} class:panel-horizontal={layout == "horizontal"}>
@@ -311,6 +312,10 @@
 	}
 	.sublist-container-horizontal {
 		flex-direction: column;
+	}
+
+	.sublist-container-vertical {
+		scrollbar-width: auto;
 	}
 
 	.add-panel {

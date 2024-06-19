@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { appWindow } from "$lib/utilities/responsive.svelte";
+	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { getContext } from "svelte";
 	import { enhance } from "$app/forms";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import type { ActionResult } from "@sveltejs/kit";
 	import { deserialize } from "$app/forms";
 	import { list } from "../list.svelte";
+	import { exportToJeff } from "../utilities/export.svelte";
 
 	let user: any = getContext("user");
 	let { showSaveModal = $bindable() } = $props();
@@ -78,61 +79,6 @@
 				toastController.addToast(`${list.details.name} failed to save. Please try again.`);
 			}
 		};
-	}
-
-	function exportToJeff() {
-		// const jeffList: any = { name: list.details.name, members: [], uuid: crypto.randomUUID(), lastUpdated: new Date().toISOString(), formationBonus: "none", groupLabel: "Lance" };
-		// for (const unit of list.units) {
-		// 	let jumpSpeed = 0;
-		// 	if (unit.move) {
-		// 		for (const move of unit.move) {
-		// 			if (move.type == "j") {
-		// 				jumpSpeed = move.speed;
-		// 			}
-		// 		}
-		// 	}
-		// 	const member: any = {
-		// 		mulID: unit.mulId,
-		// 		damage: {
-		// 			short: unit.damageS,
-		// 			shortMinimal: unit.damageSMin,
-		// 			medium: unit.damageM,
-		// 			mediumMinimal: unit.damageMMin,
-		// 			long: unit.damageL,
-		// 			longMinimal: unit.damageLMin,
-		// 			extreme: 0
-		// 		},
-		// 		variant: unit.variant,
-		// 		dateIntroduced: unit.date,
-		// 		name: unit.name,
-		// 		tonnage: unit.tonnage,
-		// 		role: unit.role,
-		// 		imageURL: unit.imageLink,
-		// 		structure: unit.structure,
-		// 		armor: unit.armor,
-		// 		type: unit.type,
-		// 		size: unit.size,
-		// 		abilities: unit.abilities.split(",").map((ability: string) => {
-		// 			return ability.trim();
-		// 		}),
-		// 		overheat: unit.overheat,
-		// 		basePoints: unit.pv,
-		// 		currentSkill: unit.skill,
-		// 		showDetails: false,
-		// 		tmm: 0,
-		// 		uuid: crypto.randomUUID(),
-		// 		threshhold: 0,
-		// 		move: unit.move,
-		// 		jumpMove: jumpSpeed
-		// 	};
-		// 	jeffList.members.push(member);
-		// }
-		// const blob = new Blob([JSON.stringify(jeffList)], { type: "application/json" });
-		// const downloadElement = document.createElement("a");
-		// downloadElement.download = `${list.details.name}.json`;
-		// downloadElement.href = URL.createObjectURL(blob);
-		// downloadElement.click();
-		// downloadElement.remove();
 	}
 </script>
 

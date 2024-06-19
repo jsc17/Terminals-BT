@@ -63,12 +63,22 @@ class UnitList {
 		this.id++;
 		this.items.push(tempUnit);
 	}
-	addFormation(name = `New Formation`, type = "Battle", units: Unit[] = []) {
+	addFormation(style: "ground" | "air" = "ground", name = "", type = "", units: Unit[] = []) {
 		for (const unit of units) {
 			unit.id = this.id;
 			this.id++;
 		}
-		this.items.push({ id: this.id, name, type, units } as Formation);
+		if (name == "") {
+			name = `New ${style} formation`;
+		}
+		if (type == "") {
+			if (style == "ground") {
+				type = "Battle";
+			} else {
+				type = "Interceptor";
+			}
+		}
+		this.items.push({ id: this.id, name, type, units, style } as Formation);
 		this.id++;
 	}
 	remove(id: number) {

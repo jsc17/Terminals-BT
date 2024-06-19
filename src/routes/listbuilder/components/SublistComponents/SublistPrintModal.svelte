@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
-	import { appWindow } from "$lib/utilities/responsive.svelte";
+	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import type { Sublist } from "./Sublist.svelte";
 	import { list } from "../../list.svelte";
+	import { toastController } from "$lib/stores/toastController.svelte";
 
 	let { showPrintModal = $bindable(), sublists }: { showPrintModal: boolean; sublists: Sublist[] } = $props();
 
@@ -27,7 +28,7 @@
 			sublistData.push({ scenario: sublist.scenario, pv: sublist.stats.pv, unitList: $state.snapshot(sublist.unitList) });
 		}
 		formData.append("sublists", JSON.stringify(sublistData));
-
+		toastController.addToast("Generating sublist printout");
 		printDialog.close();
 
 		return async ({ result }: any) => {

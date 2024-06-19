@@ -1,7 +1,5 @@
 <script lang="ts">
 	import type { Sublist } from "./Sublist.svelte";
-	import { list } from "../../list.svelte";
-	import { deserialize } from "$app/forms";
 
 	type componentProps = {
 		sublist: Sublist;
@@ -21,34 +19,6 @@
 				.join(", ") ?? ""
 		);
 	});
-
-	async function printSubList(id: number) {
-		let form = new FormData();
-
-		let condense = false;
-		if (sublist.checked.length == 9 || sublist.checked.length == 10) {
-			condense = true;
-		}
-
-		let body = JSON.stringify({
-			units: sublist.unitList,
-			playername: "",
-			listname: list.details.name,
-			era: list.details.era,
-			faction: list.details.faction,
-			general: list.details.general,
-			style: "detailed",
-			condense: condense
-		});
-		form.append("body", body);
-		let response = deserialize(await (await fetch("/?/print", { method: "POST", body: form })).text());
-		//@ts-ignore
-		const blob = new Blob([new Uint8Array(Object.values(JSON.parse(response.data.pdf)))], { type: "application/pdf" });
-		const downloadElement = document.createElement("a");
-		downloadElement.download = list.details.name;
-		downloadElement.href = URL.createObjectURL(blob);
-		downloadElement.click();
-	}
 </script>
 
 <main>
@@ -67,7 +37,7 @@
 	<div class="center gap8">
 		<button
 			onclick={() => {
-				printSubList(sublist.id);
+				sublist.print();
 			}}>Print Sublist</button>
 		<button onclick={() => deleteSublist(sublist.id)}>Delete</button>
 	</div>

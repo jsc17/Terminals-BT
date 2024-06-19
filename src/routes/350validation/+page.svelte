@@ -230,7 +230,6 @@
 					<select id="uploadType" name="uploadType" bind:value={uploadType}>
 						<option value="mul">MUL PDF upload</option>
 						<option value="terminal">Terminal's List builder</option>
-						<option disabled value="jeff">Jeff's Battletech Tools json import</option>
 					</select>
 				</div>
 				<div class="column">

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { eras, factions } from "$lib/data/erasFactionLookup";
-	import { appWindow } from "$lib/utilities/responsive.svelte";
+	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { getContext } from "svelte";
 	import { deserialize } from "$app/forms";
 	import { resultList } from "../resultList.svelte";
@@ -177,26 +177,35 @@
 		for (const item of unitArray) {
 			if (item.charAt(0) == "{") {
 				const formationData = JSON.parse(item);
-				const tempFormation = { name: formationData.name, type: formationData.type, units: <Unit[]>[] };
+				const tempFormation = { style: formationData.style, name: formationData.name, type: formationData.type, units: <Unit[]>[] };
 
 				for (const unit of formationData.units) {
 					let [id, skill] = unit.split(",");
-					let unitToAdd = resultList.results.find((result: Unit) => {
-						return result.mulId == parseInt(id);
-					});
+					let unitToAdd = JSON.parse(
+						JSON.stringify(
+							resultList.results.find((result: Unit) => {
+								return result.mulId == parseInt(id);
+							})
+						)
+					);
 					if (unitToAdd != null) {
 						if (skill != "undefined") {
+							unitToAdd.skill = parseInt(skill);
 							unitToAdd.cost = getNewSkillCost(parseInt(skill), unitToAdd.pv);
 						}
 						tempFormation.units.push(unitToAdd);
 					}
 				}
-				list.addFormation(tempFormation.name, tempFormation.type, tempFormation.units);
+				list.addFormation(tempFormation.style, tempFormation.name, tempFormation.type, tempFormation.units);
 			} else {
 				let [id, skill] = item.split(",");
-				let unitToAdd = resultList.results.find((result: Unit) => {
-					return result.mulId == parseInt(id);
-				});
+				let unitToAdd = JSON.parse(
+					JSON.stringify(
+						resultList.results.find((result: Unit) => {
+							return result.mulId == parseInt(id);
+						})
+					)
+				);
 				if (unitToAdd != null) {
 					if (skill != "undefined") {
 						unitToAdd.skill = parseInt(skill);

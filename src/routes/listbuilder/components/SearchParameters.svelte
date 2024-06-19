@@ -1,7 +1,7 @@
 <script lang="ts">
 	import eraLists from "$lib/data/erasFactionsList.json";
 	import { eras, factions } from "$lib/data/erasFactionLookup.js";
-	import { appWindow } from "$lib/utilities/responsive.svelte";
+	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { resultList } from "../resultList.svelte";
 	import { list } from "../list.svelte";
 
@@ -34,13 +34,10 @@
 
 		await resultList.loadUnits();
 
-		list.details.era = eras.get(resultList.details.era)!;
-		list.details.faction = factions.get(resultList.details.faction)!;
-		if (resultList.general == -1) {
-			list.details.general = "Blank";
-		} else {
-			list.details.general = factions.get(resultList.general)!;
-		}
+		list.details.era = resultList.details.era;
+		list.details.faction = resultList.details.faction;
+		list.details.general = resultList.general;
+
 		if (list.details.name == "") {
 			list.details.name = list.details.era + " " + list.details.faction;
 		}

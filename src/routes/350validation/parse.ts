@@ -39,8 +39,8 @@ export async function parsePDF(pdf: PDFDocumentProxy, era: number, faction: numb
 	return unitList;
 }
 
-export async function parseTerminal(listCode: string) {
-	const tempUnits = listCode.split(":").map((unit) => {
+export async function parseTerminal(listCode: string[]) {
+	const tempUnits = listCode.map((unit) => {
 		const [mulId, skill] = unit.split(",");
 		return { mulId, skill };
 	});
@@ -64,7 +64,7 @@ async function parseUnit(mulId: number, skill: number) {
 			name: unitDetails.name,
 			skill: skill,
 			pv: getNewSkillCost(skill, unitDetails.pv),
-			mulId: mulId,
+			mulId,
 			link: `http://masterunitlist.info/Unit/Details/${mulId}`
 		};
 		return tempUnit;

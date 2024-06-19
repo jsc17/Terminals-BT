@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ListSubmission from "$lib/emails/ListSubmission.svelte";
-	import { appWindow } from "$lib/utilities/responsive.svelte";
+	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { list } from "../../list.svelte";
 	import { type Unit } from "../../unit";
 	import { Sublist } from "./Sublist.svelte";

@@ -43,7 +43,7 @@ export function createResultList() {
 							});
 						}
 					}
-					if (filter.maxValue != null) {
+					if (filter.maxValue !== undefined && filter.maxValue !== null) {
 						tempresultList = tempresultList.filter((unit) => {
 							return unit[filter.name] <= filter.maxValue!;
 						});
@@ -56,9 +56,9 @@ export function createResultList() {
 								return unit[filter.properties![index]] >= value.min!;
 							});
 						}
-						if (value.max) {
+						if (value.max !== undefined && value.max !== null) {
 							tempresultList = tempresultList.filter((unit) => {
-								return unit[filter.properties![index]] <= value.max!;
+								return unit[filter.properties![index]] <= 2; //value.max;
 							});
 						}
 					});
@@ -113,7 +113,7 @@ export function createResultList() {
 							});
 						}
 					}
-					if (filter.maxValue != null) {
+					if (filter.maxValue) {
 						tempresultList = tempresultList.filter((unit) => {
 							return unit[filter.name] <= filter.maxValue!;
 						});
@@ -126,7 +126,7 @@ export function createResultList() {
 								return unit[filter.properties![index]] >= value.min!;
 							});
 						}
-						if (value.max) {
+						if (value.max !== null) {
 							tempresultList = tempresultList.filter((unit) => {
 								return unit[filter.properties![index]] <= value.max!;
 							});

@@ -207,7 +207,7 @@ function createResultList() {
 							});
 						}
 					}
-					if (filter.maxValue != null) {
+					if (filter.maxValue !== undefined && filter.maxValue !== null) {
 						tempResultList = tempResultList.filter((unit) => {
 							return unit[filter.name] <= filter.maxValue!;
 						});
@@ -220,7 +220,7 @@ function createResultList() {
 								return unit[filter.properties![index]] >= value.min!;
 							});
 						}
-						if (value.max) {
+						if (value.max !== undefined && value.max !== null) {
 							tempResultList = tempResultList.filter((unit) => {
 								return unit[filter.properties![index]] <= value.max!;
 							});

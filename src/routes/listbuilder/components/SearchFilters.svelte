@@ -43,7 +43,8 @@
 							}}
 							type="text"
 							bind:value={filter.value}
-							placeholder={filter.label} />
+							placeholder={filter.label}
+						/>
 						<div class="dropdown-content" class:dropdown-hidden={!showAbilitiesDropdown} class:dropdown-shown={showAbilitiesDropdown}>
 							<ul>
 								<li>
@@ -78,7 +79,8 @@
 		class:hidden={!appWindow.isMobile}
 		onclick={() => {
 			showFilters = !showFilters;
-		}}>
+		}}
+	>
 		<div class="space-between">
 			<div></div>
 			<div>Filters</div>
@@ -89,7 +91,8 @@
 					+
 				{/if}
 			</div>
-		</div></button>
+		</div></button
+	>
 
 	<div class="card" class:hidden={appWindow.isMobile && !showFilters}>
 		{@render filters(resultList.filters)}
@@ -98,7 +101,8 @@
 				class="backgroundless-button"
 				onclick={() => {
 					showAdditionalFilters = !showAdditionalFilters;
-				}}>
+				}}
+			>
 				Additional Filters
 				{#if showAdditionalFilters}
 					-

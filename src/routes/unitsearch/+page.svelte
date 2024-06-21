@@ -6,7 +6,6 @@
 	let status = $state<"waiting" | "loading" | "loaded" | "error">("loading");
 	onMount(() => {
 		resultList.clear();
-		resultList.customCards = undefined;
 		resultList.restrictions = undefined;
 		resultList.loadUnitsSql();
 		status = "loading";

@@ -1,6 +1,6 @@
 import { isUnit, type Unit } from "./unit";
 import { type Formation } from "./formation.svelte";
-import { type Options, ruleSets } from "./options";
+import { type Options, ruleSets } from "../../lib/types/options";
 
 class UnitList {
 	items = $state<(Unit | Formation)[]>([]);

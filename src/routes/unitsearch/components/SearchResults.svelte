@@ -11,7 +11,7 @@
 	let iconSort = $derived(appWindow.isMobile ? "/icons/swap-vertical.svg" : "/icons/sort.svg");
 
 	let itemSize = 50;
-	let itemCount = $derived(resultList.filtered.length);
+	let itemCount = $derived(resultList.filteredList.length);
 	let listHeight = $state(500);
 
 	function sort(event: Event) {
@@ -35,7 +35,7 @@
 <div class="search-results">
 	<div class:result-list-header={!appWindow.isMobile} class:result-list-header-mobile={appWindow.isMobile}>
 		<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile} data-sort="name" onclick={sort}>
-			{appWindow.isMobile ? "Name" : `Name - ${resultList.filtered.length}/${resultList.results.length} results shown`}
+			{appWindow.isMobile ? "Name" : `Name - ${resultList.filteredList.length}/${resultList.availableList.length} results shown`}
 			{#if resultList.sort.key == "name"}
 				<img class="sort-selected button-icon" src={resultList.sort.order == "asc" ? iconAsc : iconDes} alt="sort" />
 			{:else}
@@ -56,8 +56,8 @@
 	</div>
 	<div class="virtual-list-container" bind:clientHeight={listHeight}>
 		<VirtualList height={listHeight} width="auto" {itemCount} {itemSize}>
-			{#snippet children({ style, index }: any)}
-				{@const unit = resultList.filtered[index]}
+			{#snippet children({ style, index })}
+				{@const unit = resultList.filteredList[index]}
 				{#if unit}
 					<div {style} class:virtual-list-row={!appWindow.isMobile} class:virtual-list-row-mobile={appWindow.isMobile}>
 						<a href="http://masterunitlist.info/Unit/Details/{unit.mulId}" target="_blank">{unit.name}</a>

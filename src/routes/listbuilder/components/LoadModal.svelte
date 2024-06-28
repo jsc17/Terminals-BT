@@ -4,7 +4,7 @@
 	import { getContext } from "svelte";
 	import { deserialize } from "$app/forms";
 	import { resultList } from "../resultList.svelte";
-	import { ruleSets, getRules, type Options } from "../options";
+	import { ruleSets, getRules, type Options } from "../../../lib/types/options";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { list } from "../list.svelte";
 	import { getNewSkillCost } from "$lib/utilities/bt-utils";

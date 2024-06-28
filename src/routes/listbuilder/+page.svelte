@@ -4,7 +4,7 @@
 	import { list } from "./list.svelte";
 	import { setContext, onMount } from "svelte";
 	import { Listbuilder, SearchParameters, SearchResults, SearchFilters } from "./components/index";
-	import { ruleSets } from "./options";
+	import { ruleSets } from "../../lib/types/options";
 
 	let status = $state<"waiting" | "loading" | "loaded" | "error">("waiting");
 	let selectedRules = $state<string>("");
@@ -23,7 +23,6 @@
 	setContext("list", list);
 
 	onMount(() => {
-		resultList.clear();
 		if (data.rules && ruleSets.find((value) => value.name == data.rules)) {
 			selectedRules = data.rules;
 		} else {

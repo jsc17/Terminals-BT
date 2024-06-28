@@ -1,10 +1,19 @@
 <script lang="ts">
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { resultList } from "../resultList.svelte";
-	import { list } from "../list.svelte";
+	import VirtualList from "$lib/VirtualList/VirtualList.svelte";
+	import { list } from "../list.svelte"
 
 	let { status = $bindable() } = $props();
 	let headers = $derived(appWindow.isMobile ? ["Type", "PV", "Move", "Health"] : ["Type", "PV", "Size", "Move", "TMM", "Health (A+S)"]);
+
+	let iconAsc = $derived(appWindow.isMobile ? "/icons/arrow-down-bold.svg" : "/icons/sort-ascending.svg");
+	let iconDes = $derived(appWindow.isMobile ? "/icons/arrow-up-bold.svg" : "/icons/sort-descending.svg");
+	let iconSort = $derived(appWindow.isMobile ? "/icons/swap-vertical.svg" : "/icons/sort.svg");
+
+	let itemSize = 50;
+	let itemCount = $derived(resultList.filteredList.length);
+	let listHeight = $state(500);
 
 	function sort(event: Event) {
 		if (event.target instanceof HTMLElement) {
@@ -24,181 +33,99 @@
 	}
 </script>
 
-<table>
-	<colgroup>
-		<col />
-		<col style="width:7%" />
-		<col style="width:7%" />
-		{#if !appWindow.isMobile}
-			<col style="width:7%" />
-		{/if}
-		<col style="width:7%" />
-		<col style="width:7%" />
-		{#if !appWindow.isMobile}
-			<col style="width:12%" />
-		{/if}
-		<col style="width:15%" />
-		{#if list}
-			<col style="width:2%" />
-		{/if}
-	</colgroup>
-	<thead>
-		<tr>
-			<th>
-				<div class="table-header">
-					{#if !appWindow.isMobile}
-						<button class="sort-header-button" data-sort="name" onclick={sort}>
-							Name - <em>{resultList.filteredList.length}/{resultList.availableList.length} results shown</em>
-							{#if resultList.sort.key == "name"}
-								{#if resultList.sort.order == "asc"}
-									<img class="sort-selected button-icon" src="/icons/sort-ascending.svg" alt="sort" />
-								{:else}
-									<img class="sort-selected button-icon" src="/icons/sort-descending.svg" alt="sort" />
-								{/if}
-							{:else}
-								<img class="sort button-icon" src="/icons/sort.svg" alt="sort" />
-							{/if}
-						</button>
-					{:else}
-						<button class="sort-header-button-mobile" data-sort="name" onclick={sort}>
-							<p>Name</p>
-							{#if resultList.sort.key == "name"}
-								{#if resultList.sort.order == "asc"}
-									<img class="sort-selected button-icon" src="/icons/arrow-down-bold.svg" alt="sort" />
-								{:else}
-									<img class="sort-selected button-icon" src="/icons/arrow-up-bold.svg" alt="sort" />
-								{/if}
-							{:else}
-								<img class="sort button-icon" src="/icons/swap-vertical.svg" alt="sort" />
-							{/if}
-						</button>
-					{/if}
-				</div>
-			</th>
-			{#each headers as header}
-				<th>
-					<div class="table-header">
-						{#if !appWindow.isMobile}
-							<button class="sort-header-button" data-sort={header.toLowerCase()} onclick={sort}>
-								{header}
-								{#if resultList.sort.key == header.toLowerCase()}
-									{#if resultList.sort.order == "asc"}
-										<img class="sort-selected button-icon" src="/icons/sort-ascending.svg" alt="sort" />
-									{:else}
-										<img class="sort-selected button-icon" src="/icons/sort-descending.svg" alt="sort" />
-									{/if}
-								{:else}
-									<img class="sort button-icon" src="/icons/sort.svg" alt="sort" />
-								{/if}
-							</button>
-						{:else}
-							<button class="sort-header-button-mobile" data-sort={header.toLowerCase()} onclick={sort}>
-								{header}
-								{#if resultList.sort.key == header.toLowerCase()}
-									{#if resultList.sort.order == "asc"}
-										<img class="sort-selected button-icon" src="/icons/arrow-down-bold.svg" alt="sort" />
-									{:else}
-										<img class="sort-selected button-icon" src="/icons/arrow-up-bold.svg" alt="sort" />
-									{/if}
-								{:else}
-									<img class="sort button-icon" src="/icons/swap-vertical.svg" alt="sort" />
-								{/if}
-							</button>
-						{/if}
-					</div>
-				</th>
-			{/each}
-			<th><div class="table-header">DMG S/M/L-OV</div></th>
-			{#if list}
-				<th></th>
+<div class="search-results">
+	<div class:result-list-header={!appWindow.isMobile} class:result-list-header-mobile={appWindow.isMobile}>
+		<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile} data-sort="name" onclick={sort}>
+			{appWindow.isMobile ? "Name" : `Name - ${resultList.filteredList.length}/${resultList.availableList.length} results shown`}
+			{#if resultList.sort.key == "name"}
+				<img class="sort-selected button-icon" src={resultList.sort.order == "asc" ? iconAsc : iconDes} alt="sort" />
+			{:else}
+				<img class="sort button-icon" src={iconSort} alt="sort" />
 			{/if}
-		</tr>
-	</thead>
-	{#if status == "loaded"}
-		<tbody>
-			{#each resultList.filteredList as unit}
-				<tr class="stats" class:mobile-cell={appWindow.isMobile}>
-					<td><a href="http://masterunitlist.info/Unit/Details/{unit.mulId}" target="_blank">{unit.name}</a></td>
-					<td class="align-center">{unit.type}</td>
-					<td class="align-center">{unit.pv}</td>
-					{#if !appWindow.isMobile}
-						<td class="align-center">{unit.size ?? "-"}</td>
-					{/if}
-					<td class="align-center">
-						{#if unit.move == undefined}
-							-
-						{:else}
-							{#each unit.move as movement, index}
-								{#if index != 0}
-									{"/ "}
-								{/if}
-								{`${movement.speed}"${movement.type ?? ""}`}
-							{/each}
+		</button>
+		{#each headers as header}
+			<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile} data-sort={header.toLowerCase()} onclick={sort}>
+				{header}
+				{#if resultList.sort.key == header.toLowerCase()}
+					<img class="sort-selected button-icon" src={resultList.sort.order == "asc" ? iconAsc : iconDes} alt="sort" />
+				{:else}
+					<img class="sort button-icon" src={iconSort} alt="sort" />
+				{/if}
+			</button>
+		{/each}
+		<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile}> DMG S/M/L-OV</button>
+	</div>
+	<div class="virtual-list-container" bind:clientHeight={listHeight}>
+		<VirtualList height={listHeight} width="auto" {itemCount} {itemSize}>
+			{#snippet children({ style, index })}
+				{@const unit = resultList.filteredList[index]}
+				{#if unit}
+					<div {style} class:virtual-list-row={!appWindow.isMobile} class:virtual-list-row-mobile={appWindow.isMobile}>
+						<a href="http://masterunitlist.info/Unit/Details/{unit.mulId}" target="_blank">{unit.name}</a>
+						<div class="align-center">{unit.subtype}</div>
+						<div class="align-center">{unit.pv}</div>
+						{#if !appWindow.isMobile}
+							<div class="align-center">{unit?.size ?? "-"}</div>
 						{/if}
-					</td>
-					{#if !appWindow.isMobile}
-						<td class="align-center">{unit.tmm ?? "-"}</td>
-					{/if}
-					<td class="align-center">
-						{#if unit.health == undefined}
-							-
-						{:else}
-							{unit.health + " (" + unit.armor + "+" + unit.structure + ")"}
+						<div class="align-center">
+							{#if unit?.move == undefined}
+								-
+							{:else}
+								{#each unit.move as movement, index}
+									{#if index != 0}
+										{"/ "}
+									{/if}
+									{`${movement.speed}"${movement.type ?? ""}`}
+								{/each}
+							{/if}
+						</div>
+						{#if !appWindow.isMobile}
+							<div class="align-center">{unit.tmm ?? "-"}</div>
 						{/if}
-					</td>
-					<td class="align-center">
-						{#if unit.damageS == undefined}
-							-
-						{:else}
-							{unit.damageS}{unit.damageSMin ? "*" : ""}{"/" + unit.damageM}{unit.damageMMin ? "*" : ""}{"/" + unit.damageL}{unit.damageLMin ? "*" : ""}{" - " + unit.overheat}
-						{/if}
-					</td>
-					{#if list}
-						<td><button onclick={() => list.addUnit(unit)}>+</button></td>
-					{/if}
-				</tr>
-				<tr class="abilities" class:mobile-cell={appWindow.isMobile}>
-					<td colspan="9">{unit.abilities}</td>
-				</tr>
-			{/each}
-		</tbody>
-	{/if}
-</table>
-
-{#if status == "waiting"}
-	<p>Choose an Era and faction to display results</p>
-{:else if status == "loading"}
-	<p>Loading results. Please wait.</p>
-{:else if status == "error"}
-	<p>No results. Possibly an invalid Era and Faction</p>
-{/if}
+						<div class="align-center">
+							{#if unit.health == undefined}
+								-
+							{:else}
+								{unit.health + " (" + unit.armor + "+" + unit.structure + ")"}
+							{/if}
+						</div>
+						<div class="align-center">
+							{#if unit.damageS == undefined}
+								-
+							{:else}
+								{unit.damageS}{unit.damageSMin ? "*" : ""}{"/" + unit.damageM}{unit.damageMMin ? "*" : ""}{"/" + unit.damageL}{unit.damageLMin ? "*" : ""}{" - " + unit.overheat}
+							{/if}
+						</div>
+						<div class="align-center"><button onclick={() => list.addUnit(unit)}>+</button></div>
+						<div class="abilities">{unit.abilities}</div>
+						<!-- <div class="align-center factions">Availability</div> -->
+					</div>
+				{/if}
+			{/snippet}
+		</VirtualList>
+	</div>
+</div>
 
 <style>
-	table {
-		width: 100%;
-		max-height: 100%;
-		border-collapse: collapse;
-		background-color: var(--card);
-		overflow: auto;
-		position: relative;
-	}
-
-	th {
-		border: 1px solid var(--border);
-		background-color: var(--card);
-		height: 100%;
-	}
-	.table-header {
+	.search-results {
 		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 0.75rem;
-		height: 100%;
-		width: 100%;
-		gap: 0px;
+		flex-direction: column;
+		flex: 1;
 	}
-	.sort-header-button {
-		background-color: transparent;
+	.result-list-header {
+		display: grid;
+		grid-template-columns: 1fr repeat(5, 7%) 12% 15% 2%;
+	}
+	.result-list-header-mobile {
+		display: grid;
+		grid-template-columns: 1fr repeat(4, 7%) 15% 2%;
+	}
+	.virtual-list-container {
+		flex: 1;
+	}
+	.sort-header-button,
+	.sort-header-button-mobile {
+		background-color: var(--card);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -206,41 +133,51 @@
 		height: 100%;
 		width: 100%;
 		gap: 4px;
+		border: 1px solid var(--border);
+		border-radius: 0%;
 	}
 	.sort-header-button-mobile {
 		img {
 			width: 10px;
 			height: 10px;
 		}
-		background-color: transparent;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		color: var(--foreground);
-		height: 100%;
-		width: 100%;
 		gap: 0px;
-	}
-	td {
-		padding: 5px;
-	}
-	.align-center {
-		text-align: center;
-	}
-	.abilities {
-		font-size: 0.75em;
-		border-bottom: 1px solid var(--border);
-	}
-	.abilities td {
-		padding-left: 15px;
-	}
-	.sort {
-		filter: var(--muted-filter);
-	}
-	.mobile-cell {
-		font-size: 0.75rem;
 	}
 	:global(.sort-selected) {
 		filter: var(--primary-filter);
+	}
+	.virtual-list-row {
+		padding: 8px;
+		background-color: var(--card);
+		height: 100%;
+		width: 100%;
+		display: grid;
+		grid-template-columns: 1fr repeat(5, 7%) 12% 15%;
+		row-gap: 12px;
+	}
+	.virtual-list-row-mobile {
+		display: grid;
+		grid-template-columns: 1fr repeat(4, 7%) 15%;
+	}
+	.virtual-list-row:not(:last-child),
+	.virtual-list-row-mobile:not(:last-child) {
+		border-bottom: 1px solid var(--border);
+	}
+	.align-center {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.abilities {
+		font-size: 0.75rem;
+		display: flex;
+		align-items: center;
+		grid-column-start: 1;
+		grid-column-end: -2;
+	}
+	.factions {
+		color: var(--primary);
+		display: flex;
+		align-items: center;
 	}
 </style>

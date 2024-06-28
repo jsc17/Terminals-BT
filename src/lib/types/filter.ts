@@ -1,4 +1,4 @@
-export type filter = {
+export type Filter = {
 	name: string;
 	label: string;
 	type: "number" | "numberGroup" | "string" | "select" | "abilities";

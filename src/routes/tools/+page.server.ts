@@ -3,6 +3,7 @@ import eraLists from "$lib/data/erasFactionsList.json";
 import { fail, redirect } from "@sveltejs/kit";
 import { sendResetEmail } from "$lib/emails/mailer.server.js";
 import type { PageServerLoad } from "../$types.js";
+import fs from "fs/promises";
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user || locals.user.username != "terminal") {
@@ -13,17 +14,27 @@ export const load: PageServerLoad = async ({ locals }) => {
 export const actions = {
 	uploadFactions: async () => {
 		for (const era of eraLists) {
-			for (const factionList of era.factions) {
-				for (const faction of factionList[1] as number[]) {
+			for (const [general, factionList] of era.factions) {
+				if (general != -1) {
 					await prisma.faction.create({
 						data: {
 							era: era.id,
-							faction: Number(faction),
-							general: Number(factionList[0])
+							faction: general as number,
+							general: -1
+						}
+					});
+				}
+				for (const faction of factionList as number[]) {
+					await prisma.faction.create({
+						data: {
+							era: era.id,
+							faction: faction,
+							general: general as number
 						}
 					});
 				}
 			}
+			return { message: "Completed" };
 		}
 	},
 	uploadUnits: async ({ request }) => {
@@ -125,28 +136,21 @@ export const actions = {
 	sendResetEmail: async ({}) => {
 		sendResetEmail("jonathan.cibge@innernwgaw.com", "ASFVA");
 	},
-	updateListUnits: async ({}) => {
-		let lists = await prisma.list.findMany({
-			select: {
-				id: true,
-				units: true,
-				sublists: true
-			}
-		});
-
-		for (const list of lists) {
-			if (list.units.charAt(0) == "[") {
-				continue;
-			}
-			await prisma.list.update({
-				where: {
-					id: list.id
-				},
-				data: {
-					units: JSON.stringify(list.units.split(":")),
-					sublists: JSON.stringify(list.sublists?.split(":"))
+	linkUnits: async ({}) => {
+		try {
+			let fileList = await fs.readdir("./files/avail-upload");
+			for (const filename of fileList) {
+				const file = (await fs.readFile(`./files/avail-upload/${filename}`)).toString();
+				const [era, faction, ...rest] = filename.split("-");
+				const unitList = [];
+				for (const unit of JSON.parse(file).Units) {
+					unitList.push(unit.Id);
 				}
-			});
+				console.log(era, faction, unitList);
+			}
+		} catch (error) {
+			return fail(400, { message: error });
 		}
+		return { message: "success" };
 	}
 };

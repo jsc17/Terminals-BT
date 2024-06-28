@@ -3,7 +3,8 @@ import type { filter } from "$lib/types/filter";
 //if types field doesn't exist, will check against value
 const typeValues = [
 	{ value: "any", display: "Any" },
-	{ value: "AF", display: "Aerospace Fighter", types: ["AF", "CF", "SC"] },
+	{ value: "AF", display: "Aerospace Fighter" },
+	{ value: "CF", display: "Conventional Fighter" },
 	{ value: "BA", display: "Battle Armor" },
 	{ value: "BS", display: "Battlefield Support" },
 	{ value: "BM", display: "Battlemech" },
@@ -49,7 +50,7 @@ const roles = [
 
 export const filters: filter[] = [
 	{ name: "name", label: "Name", type: "string" },
-	{ name: "type", label: "Type", type: "select", value: "any", possible: typeValues },
+	{ name: "subtype", label: "Type", type: "select", value: "any", possible: typeValues },
 	{ name: "pv", label: "PV", type: "number" },
 	{ name: "move", label: "Move", type: "number" },
 	{ name: "tmm", label: "TMM", type: "number" },
@@ -68,7 +69,7 @@ export const filters: filter[] = [
 ];
 
 export const additionalFilters: filter[] = [
-	{ name: "date", label: "Date", type: "number" },
+	{ name: "date", label: "Date Introduced", type: "number" },
 	{ name: "role", label: "Role", type: "select", value: "any", possible: roles },
 	{ name: "rulesLevel", label: "Rules", type: "select", value: "any", possible: rulesLevels },
 	{ name: "technology", label: "Technology", type: "select", value: "any", possible: technology },

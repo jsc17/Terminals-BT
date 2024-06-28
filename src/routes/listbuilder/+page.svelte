@@ -46,6 +46,14 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Terminal's Alpha Strike List Builder</title>
+	<meta
+		name="description"
+		content="Create, edit, and print lists for Battletech's Alpha Strike ruleset using advanced filtering and search features. Includes support for generic Alpha Strike lists and Wolfnet's 350 ruleset. Based on data from the Master Unit List"
+	/>
+</svelte:head>
+
 <main class:main-wide={!appWindow.isNarrow}>
 	<div class="search">
 		<SearchParameters bind:status />
@@ -59,7 +67,8 @@
 			onclick={() => {
 				showListDialog = !showListDialog;
 			}}
-			class="list-button">List - {list.unitCount} Units - {list.pv} PV</button>
+			class="list-button">List - {list.unitCount} Units - {list.pv} PV</button
+		>
 	{/if}
 </main>
 
@@ -69,12 +78,14 @@
 		class:dialog-wide={appWindow.isNarrow}
 		onclose={() => {
 			showListDialog = false;
-		}}>
+		}}
+	>
 		<div class="dialog-button">
 			<button
 				onclick={() => {
 					showListDialog = false;
-				}}>Close</button>
+				}}>Close</button
+			>
 		</div>
 		<Listbuilder bind:status bind:selectedRules {recentChanges} {description}></Listbuilder>
 	</dialog>

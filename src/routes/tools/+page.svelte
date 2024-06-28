@@ -2,7 +2,7 @@
 	import eraLists from "$lib/data/erasFactionsList.json";
 	import { eras, factions } from "$lib/data/erasFactionLookup.js";
 	import { getGeneralList } from "$lib/utilities/bt-utils";
-	import { enhance, deserialize } from "$app/forms";
+	import { deserialize } from "$app/forms";
 	import { calculateTMM } from "$lib/utilities/bt-utils";
 	import { toastController } from "$lib/stores/toastController.svelte";
 
@@ -159,22 +159,32 @@
 		<button
 			onclick={() => {
 				loadFactions();
-			}}>Upload Factions</button>
+			}}
+		>
+			Upload Factions
+		</button>
 		<button
 			onclick={() => {
 				loadUnits();
-			}}>Upload Units</button>
+			}}
+		>
+			Upload Units
+		</button>
+		<button onclick={linkUnits}>Link Units</button>
 	</div>
 	<div class="card">
 		<button onclick={sendResetEmail}>Send Reset</button>
 	</div>
-	<button
-		onclick={() => {
-			fetch("?/updateListUnits", { method: "POST", body: "" });
-		}}>Update sql list codes</button>
 </main>
 
 <style>
+	main {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		justify-content: flex-start;
+		align-items: start;
+	}
 	.parameter {
 		display: flex;
 		gap: 8px;

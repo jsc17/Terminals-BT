@@ -6,7 +6,6 @@
 	let status = $state<"waiting" | "loading" | "loaded" | "error">("loading");
 	onMount(() => {
 		resultList.clear();
-		resultList.customCards = undefined;
 		resultList.restrictions = undefined;
 		resultList.loadUnitsSql();
 		status = "loading";
@@ -20,7 +19,6 @@
 </script>
 
 <main>
-	<h2>Era and faction filtering coming soon. There might be a slight delay when applying the first filter as it's processing a lot of units.</h2>
 	<SearchFilters></SearchFilters>
 	<SearchResults bind:status></SearchResults>
 </main>
@@ -31,5 +29,11 @@
 		position: relative;
 		padding: 8px;
 		width: 100%;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		overflow: hidden;
+		gap: 4px;
 	}
 </style>

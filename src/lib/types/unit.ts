@@ -5,6 +5,7 @@ export type Unit = {
 	class: string;
 	variant: string;
 	type: string;
+	subtype: string;
 	pv: number;
 	cost: number;
 	size?: number;

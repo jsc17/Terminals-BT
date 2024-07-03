@@ -1,6 +1,6 @@
 import SearchFilters from "./SearchFilters.svelte";
 import SearchParameters from "./SearchParameters.svelte";
-import SearchResults from "./SearchResults old.svelte";
+import SearchResults from "./SearchResults.svelte";
 import Listbuilder from "./Listbuilder.svelte";
 import PrintModal from "./PrintModal.svelte";
 import LoadModal from "./LoadModal.svelte";

@@ -1,5 +1,8 @@
+import { type Formation } from "$lib/types/formation.svelte";
+
 export type Unit = {
 	[key: string]: any;
+	id?: number;
 	mulId: number;
 	name: string;
 	class: string;
@@ -30,5 +33,9 @@ export type Unit = {
 	role?: string;
 	technology?: string;
 	subIndex?: number;
-	id?: number;
+	availability?: { era: number; faction: number }[];
 };
+
+export function isUnit(item: Unit | Formation): item is Unit {
+	return "mulId" in item;
+}

@@ -2,7 +2,7 @@
 	import ListSubmission from "$lib/emails/ListSubmission.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { list } from "../../list.svelte";
-	import { type Unit } from "../../unit";
+	import { type Unit } from "$lib/types/unit";
 	import { Sublist } from "./Sublist.svelte";
 
 	type AutoSublist = {
@@ -101,7 +101,8 @@
 	class:dialog-wide={appWindow.isNarrow}
 	onclose={() => {
 		showAutoModal = false;
-	}}>
+	}}
+>
 	<div class="dialog-body">
 		<div class="space-between">
 			{#if !appWindow.isNarrow}
@@ -111,7 +112,8 @@
 			<button
 				onclick={() => {
 					autoGenerationDialog.close();
-				}}>Close</button>
+				}}>Close</button
+			>
 		</div>
 		<div class:auto-main={!appWindow.isMobile} class:auto-main-mobile={appWindow.isMobile}>
 			<button
@@ -119,7 +121,8 @@
 				class:hidden={!appWindow.isMobile}
 				onclick={() => {
 					showFilters = !showFilters;
-				}}>
+				}}
+			>
 				<div class="space-between">
 					<div></div>
 					<div>Filters</div>
@@ -150,7 +153,8 @@
 							}}
 							onmouseleave={() => {
 								showMinUnitInfoDropdown = false;
-							}} />
+							}}
+						/>
 						<div class="dropdown-content dropdown-bottom" class:dropdown-hidden={!showMinUnitInfoDropdown} class:dropdown-shown={showMinUnitInfoDropdown}>
 							This tool can generate hundreds or thousands of combinations if you have cheap units. Recommend using this filter to get some basic sublists with a few points to
 							spare, and then filling in cheaper units where you want them.

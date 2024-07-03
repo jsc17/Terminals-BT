@@ -2,7 +2,7 @@
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { list } from "../../list.svelte";
 	import { dndzone, type DndEvent } from "svelte-dnd-action";
-	import { isUnit } from "../../unit";
+	import { isUnit } from "$lib/types/unit";
 	import { Sublist } from "./Sublist.svelte";
 	import { untrack } from "svelte";
 	import { flip } from "svelte/animate";
@@ -152,7 +152,8 @@
 		updateList();
 		showSublistModal = false;
 	}}
-	class="sublist-modal">
+	class="sublist-modal"
+>
 	<div class="dialog-body">
 		<div class="space-between">
 			<h2>Sublists</h2>
@@ -162,17 +163,20 @@
 					<button
 						onclick={() => {
 							layout = "vertical";
-						}}>Vertical</button>
+						}}>Vertical</button
+					>
 					<button
 						onclick={() => {
 							layout = "horizontal";
-						}}>Horizontal</button>
+						}}>Horizontal</button
+					>
 				</div>
 			{/if}
 			<button
 				onclick={() => {
 					showSublistModal = false;
-				}}>Close</button>
+				}}>Close</button
+			>
 		</div>
 		<main>
 			<div class="space-between">
@@ -189,11 +193,13 @@
 					<button
 						onclick={() => {
 							showAutoModal = true;
-						}}>Generate sublists</button>
+						}}>Generate sublists</button
+					>
 					<button
 						onclick={() => {
 							showPrintModal = true;
-						}}>Print all sublists</button>
+						}}>Print all sublists</button
+					>
 				</div>
 			</div>
 			{#if appWindow.isMobile}
@@ -201,7 +207,8 @@
 					class="sublist-container sublist-container-horizontal"
 					use:dndzone={{ items: sublists, dropTargetStyle, flipDurationMs }}
 					onconsider={handleSort}
-					onfinalize={handleSort}>
+					onfinalize={handleSort}
+				>
 					{#each filteredSublists as sublist (sublist.id)}
 						<div animate:flip={{ duration: flipDurationMs }} class="panel-mobile">
 							<MobileSublist {sublist} {editSublist} {deleteSublist} {copySublist}></MobileSublist>
@@ -218,7 +225,8 @@
 					onconsider={handleSort}
 					onfinalize={handleSort}
 					class:sublist-container-vertical={layout == "vertical"}
-					class:sublist-container-horizontal={layout == "horizontal"}>
+					class:sublist-container-horizontal={layout == "horizontal"}
+				>
 					{#each filteredSublists as sublist (sublist.id)}
 						<div animate:flip={{ duration: flipDurationMs }} class:panel-vertical={layout == "vertical"} class:panel-horizontal={layout == "horizontal"}>
 							{#if layout == "vertical"}
@@ -261,8 +269,8 @@
 					{:else}
 						{#each item.units as unit}
 							<tr>
-								<td
-									><input type="checkbox" id={`checkbox${unit.id!.toString()}`} checked={tempSublist.checked?.includes(unit.id!)} onchange={(e)=>{handleCheck(e, unit.id!)}} /></td>
+								<td><input type="checkbox" id={`checkbox${unit.id!.toString()}`} checked={tempSublist.checked?.includes(unit.id!)} onchange={(e)=>{handleCheck(e, unit.id!)}} /></td
+								>
 								<td>{unit.name}</td>
 								<td>{unit.skill}</td>
 								<td>{unit.cost}</td>
@@ -280,7 +288,8 @@
 			<button
 				onclick={() => {
 					editSublistDialog.close();
-				}}>Cancel</button>
+				}}>Cancel</button
+			>
 			<button onclick={handleEditSave}>Save</button>
 		</div>
 	</div>

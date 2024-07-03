@@ -1,5 +1,5 @@
-import { isUnit, type Unit } from "./unit";
-import { type Formation } from "./formation.svelte";
+import { isUnit, type Unit } from "$lib/types/unit";
+import { type Formation } from "$lib/types/formation.svelte";
 import { type Options, ruleSets } from "../../lib/types/options";
 
 class UnitList {
@@ -122,10 +122,14 @@ class UnitList {
 		let tempUnitArray = [];
 		for (const item of this.items) {
 			if (isUnit(item)) {
-				tempUnitArray.push(`{${item.mulId},${item.skill}}`);
+				if (item.mulId > 0) {
+					tempUnitArray.push(`{${item.mulId},${item.skill}}`);
+				}
 			} else {
 				for (const unit of item.units) {
-					tempUnitArray.push(`{${unit.mulId},${unit.skill}}`);
+					if (unit.mulId > 0) {
+						tempUnitArray.push(`{${unit.mulId},${unit.skill}}`);
+					}
 				}
 			}
 		}

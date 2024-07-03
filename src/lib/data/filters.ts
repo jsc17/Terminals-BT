@@ -1,4 +1,4 @@
-import type { filter } from "$lib/types/filter";
+import type { Filter } from "$lib/types/filter";
 
 //if types field doesn't exist, will check against value
 const typeValues = [
@@ -48,7 +48,7 @@ const roles = [
 	{ value: "Transport", display: "Transport" }
 ];
 
-export const filters: filter[] = [
+export const filters: Filter[] = [
 	{ name: "name", label: "Name", type: "string" },
 	{ name: "subtype", label: "Type", type: "select", value: "any", possible: typeValues },
 	{ name: "pv", label: "PV", type: "number" },
@@ -68,10 +68,11 @@ export const filters: filter[] = [
 	{ name: "abilities", label: "Abilities", type: "abilities" }
 ];
 
-export const additionalFilters: filter[] = [
+export const additionalFilters: Filter[] = [
 	{ name: "date", label: "Date Introduced", type: "number" },
 	{ name: "role", label: "Role", type: "select", value: "any", possible: roles },
 	{ name: "rulesLevel", label: "Rules", type: "select", value: "any", possible: rulesLevels },
 	{ name: "technology", label: "Technology", type: "select", value: "any", possible: technology },
-	{ name: "tonnage", label: "Tonnage", type: "number" }
+	{ name: "tonnage", label: "Tonnage", type: "number" },
+	{ name: "unique", label: "Allow Uniques", type: "unique", checked: true }
 ];

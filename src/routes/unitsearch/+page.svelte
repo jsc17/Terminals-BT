@@ -1,26 +1,12 @@
 <script lang="ts">
-	import { SearchFilters, SearchResults } from "./components/index";
-	import { onMount } from "svelte";
+	import { SearchFilters, SearchResults, SearchParameters } from "./components/index";
 	import { resultList } from "./resultList.svelte";
-
-	let status = $state<"waiting" | "loading" | "loaded" | "error">("loading");
-	onMount(() => {
-		resultList.clear();
-		resultList.restrictions = undefined;
-		resultList.loadUnitsSql();
-		status = "loading";
-	});
-
-	$effect(() => {
-		if (resultList.results.length) {
-			status = "loaded";
-		}
-	});
 </script>
 
 <main>
+	<SearchParameters></SearchParameters>
 	<SearchFilters></SearchFilters>
-	<SearchResults bind:status></SearchResults>
+	<SearchResults></SearchResults>
 </main>
 
 <style>

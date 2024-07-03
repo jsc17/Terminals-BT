@@ -1,5 +1,16 @@
 [
 	{
+		"date": "6-30-24",
+		"updates": {
+			"List Builder": [
+				"Add filter to allow filtering out unique units from result list",
+				"Allow 'Any' as valid choice for Era and Faction",
+				"Change how results are rendered to improve performance"
+			],
+			"Unit Search": ["Add filter to allow filtering out unique units from result list", "Add Era/Faction filtering", "Change how results are rendered to improve performance"]
+		}
+	},
+	{
 		"date": "6-18-24",
 		"updates": {
 			"Listbuilder": ["Added Drag and drop functionality", "Added formations to unit list", "Changed shareable list code format"]

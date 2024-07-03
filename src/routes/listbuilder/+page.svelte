@@ -4,9 +4,8 @@
 	import { list } from "./list.svelte";
 	import { setContext, onMount } from "svelte";
 	import { Listbuilder, SearchParameters, SearchResults, SearchFilters } from "./components/index";
-	import { ruleSets } from "../../lib/types/options";
+	import { ruleSets } from "$lib/types/options";
 
-	let status = $state<"waiting" | "loading" | "loaded" | "error">("waiting");
 	let selectedRules = $state<string>("");
 	let listDialog: HTMLDialogElement;
 	let showListDialog = $state(false);
@@ -55,13 +54,29 @@
 
 <main class:main-wide={!appWindow.isNarrow}>
 	<div class="search">
-		<SearchParameters bind:status />
+		<SearchParameters />
 		<SearchFilters />
-		<SearchResults bind:status />
+		<SearchResults />
 	</div>
 	{#if !appWindow.isNarrow}
-		<Listbuilder bind:status bind:selectedRules {recentChanges} {description} />
+		<Listbuilder bind:selectedRules {recentChanges} {description} />
 	{:else}
+		<dialog
+			bind:this={listDialog}
+			class:dialog-wide={appWindow.isNarrow}
+			onclose={() => {
+				showListDialog = false;
+			}}
+		>
+			<div class="dialog-button">
+				<button
+					onclick={() => {
+						showListDialog = false;
+					}}>Close</button
+				>
+			</div>
+			<Listbuilder bind:selectedRules {recentChanges} {description}></Listbuilder>
+		</dialog>
 		<button
 			onclick={() => {
 				showListDialog = !showListDialog;
@@ -71,31 +86,16 @@
 	{/if}
 </main>
 
-{#if appWindow.isNarrow}
-	<dialog
-		bind:this={listDialog}
-		class:dialog-wide={appWindow.isNarrow}
-		onclose={() => {
-			showListDialog = false;
-		}}
-	>
-		<div class="dialog-button">
-			<button
-				onclick={() => {
-					showListDialog = false;
-				}}>Close</button
-			>
-		</div>
-		<Listbuilder bind:status bind:selectedRules {recentChanges} {description}></Listbuilder>
-	</dialog>
-{/if}
-
 <style>
 	main {
 		margin: 0;
 		position: relative;
 		padding: 8px;
+		height: 100%;
 		width: 100%;
+		display: flex;
+		flex-direction: column;
+		flex: 1;
 	}
 	.main-wide {
 		display: grid;
@@ -108,7 +108,9 @@
 		flex-direction: column;
 		gap: 8px;
 		width: 100%;
+		height: 100%;
 		margin: 0;
+		flex: 1;
 	}
 	button {
 		height: min(30px, 90%);

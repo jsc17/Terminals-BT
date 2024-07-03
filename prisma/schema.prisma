@@ -119,28 +119,16 @@ model Unit {
   overheat Int
   pv Int
   abilities String?
-  tonnage String?
+  tonnage Int? @default(0)
   image_url String?
-
-  unit_availability UnitAvailability[]
+  factions Faction[]
 }
 
 model Faction{
+  id String   @id
   era Int
   faction Int
   general Int
   updated DateTime @default(now())
-  unit_availability UnitAvailability[]
-  @@id([era, faction])
-}
-
-model UnitAvailability {
-  unitId Int
-  unit Unit @relation(fields: [unitId], references: [id])
-
-  factionId Int
-  eraId Int
-  faction Faction @relation(fields: [eraId, factionId], references: [era, faction])
-
-  @@id([unitId, factionId])
+  units Unit[]
 }

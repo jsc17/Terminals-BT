@@ -1,29 +1,36 @@
 import type { Unit } from "$lib/types/unit.js";
-import { getGeneralList } from "$lib/utilities/bt-utils";
-import  { type  Filter } from "$lib/types/filter";
+import { calculateTMM, getGeneralList, getMULResults } from "$lib/utilities/bt-utils";
+import type { Filter } from "$lib/types/filter";
 import { deserialize } from "$app/forms";
-import { filters, additionalFilters } from "$lib/data/filters";
-import { type Options, ruleSets } from "./options";
+import { filters as filtersImport, additionalFilters as additionalFiltersImport } from "$lib/data/filters";
+import type { Options } from "./options";
+import { ruleSets } from "./options";
 import customCards from "$lib/data/customCards.json";
 
-export class ResultList{
-    details = $state({ era: -1, faction: -1 });
-    general = $derived(getGeneralList(this.details.era, this.details.faction));
+export function createResultList() {
+	let status = $state<"waiting" | "loading" | "loaded">("waiting");
+	let details = $state({ era: 0, faction: 0 });
+	let general = $derived(getGeneralList(details.era, details.faction));
 
-    resultList = $state<Unit[]>([]);
-    uniqueList = $state<Unit[]>([]);
+	let resultList = $state<Unit[]>([]);
+	let uniqueList: any[] = [];
 
-	options = $state<Options>(ruleSets[0]);
-    availableList = $derived.by(this.applyOptions);
+	let options = $state<Options>();
+	let availableList = $derived.by(applyOptions);
 
-	filters = $state<Filter[]>(filters);
-	additionalFilters = $state<Filter[]>(additionalFilters);
-	sort = $state({ key: "", order: "asc" });
-	filteredList = $derived.by(this.filterList);
+	let filters = $state<Filter[]>(filtersImport);
+	let additionalFilters = $state<Filter[]>(additionalFiltersImport);
+	let sort = $state({ key: "", order: "asc" });
+	let filteredList = $derived.by(filterList);
 
-    async loadUnitsSql() {
-		const response: any = deserialize(await (await fetch("/?/getAllUnits", { method: "POST", body: "" })).text());
+	async function loadUnits() {
+		resultList = [];
+		status = "loading";
+		const response: any = deserialize(await (await fetch("/?/getUnits", { method: "POST", body: JSON.stringify({ era: details.era, faction: details.faction, general }) })).text());
 		const unitList = response.data.unitList;
+		uniqueList = response.data.uniqueList.map((unit: any) => {
+			return unit.mulId;
+		});
 
 		unitList.forEach((unit: any) => {
 			let tempMovement: { speed: number; type: string }[] = [];
@@ -60,30 +67,35 @@ export class ResultList{
 					rulesLevel: unit.rules,
 					tonnage: unit.tonnage,
 					date: unit.date_introduced,
-					role: unit.role
+					role: unit.role,
+					availability: unit.availability
 				};
-				this.resultList.push(formattedUnit);
-				
+				resultList.push(formattedUnit);
 			} catch (error) {
 				console.log(error);
 				console.log(`${unit.Name} could not be added to result list`);
 			}
 		});
+		if (resultList.length) {
+			status = "loaded";
+		}
 	}
-     setOptions(newRules: string) {
-		this.options = ruleSets.find((rules) => rules.name == newRules) ?? ruleSets[0];
+
+	function setOptions(newRules: string) {
+		options = ruleSets.find((rules) => rules.name == newRules) ?? ruleSets[0];
 	}
-     applyOptions() {
+
+	function applyOptions() {
 		let tempAvailableList: Unit[] = [];
-		if (this.options) {
-			if (this.resultList.length) {
-				for (const cardPack of customCards.cardpacks) {
-					if (this.options.customCardPacks?.includes(cardPack.name)) {
-						for (const unit of cardPack.units) {
+		if (options) {
+			if (resultList.length) {
+				for (const unitList of customCards.unitPacks) {
+					if (options.customUnitPacks?.includes(unitList.name)) {
+						for (const unit of unitList.units) {
 							tempAvailableList.push({
 								mulId: unit.id,
 								type: unit.type,
-                                subtype: unit.type.toUpperCase(),
+								subtype: unit.type,
 								name: unit.name,
 								class: unit.class,
 								variant: unit.variant,
@@ -96,24 +108,19 @@ export class ResultList{
 					}
 				}
 			}
-			for (const unit of this.resultList) {
-				if (this.options.allowedTypes && !this.options.allowedTypes?.includes(unit.type)) {
+			for (const unit of resultList) {
+				if (options.allowedTypes && !options.allowedTypes?.includes(unit.subtype)) {
 					continue;
 				}
-				if (this.options.allowedRules && !this.options.allowedRules?.includes(unit.rulesLevel)) {
+				if (options.allowedRules && !options.allowedRules?.includes(unit.rulesLevel)) {
 					continue;
 				}
-				if (
-					this.options.disallowUnique &&
-					this.uniqueList.find((tempUnique) => {
-						return tempUnique.Id == unit.id;
-					})
-				) {
+				if (options.disallowUnique && uniqueList.includes(unit.mulId)) {
 					continue;
 				}
-				if (this.options.disallowedAbilities) {
+				if (options.disallowedAbilities) {
 					let prohibited = false;
-					for (const ability of this.options.disallowedAbilities) {
+					for (const ability of options.disallowedAbilities) {
 						if (unit.abilities.includes(ability)) {
 							prohibited = true;
 						}
@@ -125,13 +132,13 @@ export class ResultList{
 				tempAvailableList.push(unit);
 			}
 		} else {
-			tempAvailableList = [...this.resultList];
+			tempAvailableList = [...resultList];
 		}
 		return tempAvailableList;
 	}
-     filterList() {
-		let tempResultList = [...this.availableList];
-		filters.forEach((filter) => {
+	function filterList() {
+		let tempResultList = [...availableList];
+		filters.concat(additionalFilters).forEach((filter) => {
 			switch (filter.type) {
 				case "string":
 				case "select":
@@ -157,20 +164,20 @@ export class ResultList{
 							});
 						}
 					}
-					if (filter.maxValue != null) {
+					if (filter.maxValue !== undefined && filter.maxValue !== null) {
 						tempResultList = tempResultList.filter((unit) => {
 							return unit[filter.name] <= filter.maxValue!;
 						});
 					}
 					break;
 				case "numberGroup":
-					filter.values!.forEach((value: any, index: number) => {
+					filter.values!.forEach((value, index) => {
 						if (value.min) {
 							tempResultList = tempResultList.filter((unit) => {
 								return unit[filter.properties![index]] >= value.min!;
 							});
 						}
-						if (value.max) {
+						if (value.max !== undefined && value.max !== null) {
 							tempResultList = tempResultList.filter((unit) => {
 								return unit[filter.properties![index]] <= value.max!;
 							});
@@ -183,7 +190,7 @@ export class ResultList{
 						tempResultList = tempResultList.filter((unit) => {
 							let searchedAbilities = filter.value!.toString().split(",");
 							let allFound = true;
-							searchedAbilities.forEach((ability:string) => {
+							searchedAbilities.forEach((ability) => {
 								let stepFound = false;
 								let steps = ability.split("^");
 								steps.forEach((step) => {
@@ -199,83 +206,19 @@ export class ResultList{
 						});
 					}
 					break;
+				case "unique":
+					if (filter.checked == false) {
+						tempResultList = tempResultList.filter((unit) => {
+							return !uniqueList.includes(unit.mulId);
+						});
+					}
 			}
 		});
-		additionalFilters.forEach((filter) => {
-			switch (filter.type) {
-				case "string":
-				case "select":
-					if (filter.value && filter.value != "any") {
-						tempResultList = tempResultList.filter((unit) => {
-							if (unit[filter.name] != null) {
-								return unit[filter.name].toLowerCase().includes(filter.value!.toString().toLowerCase());
-							}
-						});
-					}
-					break;
-				case "number":
-					if (filter.value) {
-						if (filter.name == "move") {
-							tempResultList = tempResultList.filter((unit) => {
-								if (unit.move != undefined) {
-									return unit.move[0].speed >= parseInt(filter.value!.toString());
-								}
-							});
-						} else {
-							tempResultList = tempResultList.filter((unit) => {
-								return unit[filter.name] >= filter.value!;
-							});
-						}
-					}
-					if (filter.maxValue != null) {
-						tempResultList = tempResultList.filter((unit) => {
-							return unit[filter.name] <= filter.maxValue!;
-						});
-					}
-					break;
-				case "numberGroup":
-					filter.values!.forEach((value: any, index: number) => {
-						if (value.min) {
-							tempResultList = tempResultList.filter((unit) => {
-								return unit[filter.properties![index]] >= value.min!;
-							});
-						}
-						if (value.max) {
-							tempResultList = tempResultList.filter((unit) => {
-								return unit[filter.properties![index]] <= value.max!;
-							});
-						}
-					});
-
-					break;
-				case "abilities":
-					if (filter.value) {
-						tempResultList = tempResultList.filter((unit) => {
-							let searchedAbilities = filter.value!.toString().split(",");
-							let allFound = true;
-							searchedAbilities.forEach((ability: string) => {
-								let stepFound = false;
-								let steps = ability.split("^");
-								steps.forEach((step) => {
-									if (unit[filter.name].toLowerCase().includes(step.trim().toLowerCase())) {
-										stepFound = true;
-									}
-								});
-								if (!stepFound) {
-									allFound = false;
-								}
-							});
-							return allFound;
-						});
-					}
-					break;
-			}
-		});
-		if (this.sort.key != "") {
+		if (sort.key != "") {
 			tempResultList = tempResultList.sort((a, b) => {
 				let first;
 				let second;
-				if (this.sort.key == "move") {
+				if (sort.key == "move") {
 					if (a.move == undefined) {
 						first = 0;
 					} else {
@@ -286,14 +229,14 @@ export class ResultList{
 					} else {
 						second = b.move[0].speed;
 					}
-				} else if (this.sort.key == "health (a+s)") {
+				} else if (sort.key == "health (a+s)") {
 					first = a.health;
 					second = b.health;
 				} else {
-					first = a[this.sort.key];
-					second = b[this.sort.key];
+					first = a[sort.key];
+					second = b[sort.key];
 				}
-				if (this.sort.order == "asc") {
+				if (sort.order == "asc") {
 					return first > second ? 1 : -1;
 				} else {
 					return first < second ? 1 : -1;
@@ -302,34 +245,58 @@ export class ResultList{
 		}
 		return tempResultList;
 	}
-	async resetFilters() {
-		filters.forEach((filter) => {
+	async function resetFilters() {
+		filters.concat(additionalFilters).forEach((filter) => {
 			if (filter.type == "number") {
 				filter.value = undefined;
 				filter.maxValue = undefined;
 			} else if (filter.type == "numberGroup") {
-				filter.values!.forEach((value: any, index: number, values: any) => {
+				filter.values!.forEach((value, index, values) => {
 					values[index] = {};
 				});
 			} else if (filter.type == "select") {
 				filter.value = "any";
-			} else {
-				filter.value = undefined;
-			}
-		});
-		additionalFilters.forEach((filter) => {
-			if (filter.type == "number") {
-				filter.value = undefined;
-				filter.maxValue = undefined;
-			} else if (filter.type == "numberGroup") {
-				filter.values!.forEach((value: any, index: number, values: any) => {
-					values[index] = {};
-				});
-			} else if (filter.type == "select") {
-				filter.value = "any";
-			} else {
+			} else if (filter.type != "unique") {
 				filter.value = undefined;
 			}
 		});
 	}
+
+	return {
+		get status() {
+			return status;
+		},
+		get resultList() {
+			return resultList;
+		},
+		get general() {
+			return general;
+		},
+		setOptions,
+		details,
+		get availableList() {
+			return availableList;
+		},
+		get filteredList() {
+			return filteredList;
+		},
+		get filters() {
+			return filters;
+		},
+		get additionalFilters() {
+			return additionalFilters;
+		},
+		get options() {
+			return options;
+		},
+		sort,
+		loadUnits,
+		add: (unit: Unit) => {
+			resultList.push(JSON.parse(JSON.stringify(unit)));
+		},
+		clear: () => {
+			resultList = [];
+		},
+		resetFilters
+	};
 }

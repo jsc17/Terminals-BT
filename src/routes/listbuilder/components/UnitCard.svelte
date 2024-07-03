@@ -17,8 +17,8 @@
 
 <main class="unit-card">
 	<div class="unit-row">
-		<p>{unit.name}</p>
-		<p>{unit.type}</p>
+		<p class="name">{unit.name}</p>
+		<p>{unit.subtype}</p>
 		<p>
 			{#if unit.skill == undefined}
 				-
@@ -84,5 +84,8 @@
 	button {
 		height: 20px;
 		width: 20px;
+	}
+	.name {
+		margin-right: 8px;
 	}
 </style>

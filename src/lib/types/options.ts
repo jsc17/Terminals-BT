@@ -7,7 +7,7 @@ export type Options = {
 	allowedRules?: string[];
 	disallowUnique?: boolean;
 	disallowedAbilities?: string[];
-	customCardPacks?: string[];
+	customUnitPacks?: string[];
 	maxSkill?: number;
 	minSkill?: number;
 };
@@ -26,7 +26,7 @@ export const ruleSets: Options[] = [
 		allowedRules: ["Introductory", "Advanced", "Standard"],
 		disallowUnique: true,
 		disallowedAbilities: ["DRO"],
-		customCardPacks: ["wn350"],
+		customUnitPacks: ["wn350"],
 		maxSkill: 6,
 		minSkill: 2
 	}

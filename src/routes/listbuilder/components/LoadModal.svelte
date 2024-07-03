@@ -8,7 +8,8 @@
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { list } from "../list.svelte";
 	import { getNewSkillCost } from "$lib/utilities/bt-utils";
-	import { type Unit } from "../unit";
+	import { type Unit } from "$lib/types/unit";
+	import customCards from "$lib/data/customCards.json";
 
 	let user: any = getContext("user");
 
@@ -124,7 +125,15 @@
 	async function importList() {
 		let parsedCode: ImportList;
 		if (importCode.charAt(0) == "{") {
-			parsedCode = JSON.parse(importCode);
+			const importData = JSON.parse(importCode);
+			parsedCode = {
+				name: importData.name ?? "Imported List",
+				era: importData.era ?? 0,
+				faction: importData.faction ?? 0,
+				rules: getRules(importData.rules) ?? ruleSets[0],
+				units: importData.units ?? [],
+				sublists: importData.sublists ?? []
+			};
 		} else {
 			//Legacy non-json code import. Will likely never be used, but it only adds one extra check. Should have just used a json to start instead of fancy string splitting.
 			const [body, sublists] = importCode.split("-");
@@ -149,7 +158,7 @@
 			data = savedLists[selectedListIndex];
 		}
 		const { era, faction, name, units, sublists, rules } = data;
-
+		console.log(rules);
 		list.setOptions(rules.name);
 		resultList.setOptions(rules.name);
 		selectedRules = rules.name;
@@ -160,7 +169,7 @@
 		status = "loading";
 		await resultList.loadUnits();
 
-		if (resultList.results.length == 0) {
+		if (resultList.resultList.length == 0) {
 			status = "error";
 		} else {
 			status = "loaded";
@@ -183,7 +192,7 @@
 					let [id, skill] = unit.split(",");
 					let unitToAdd = JSON.parse(
 						JSON.stringify(
-							resultList.results.find((result: Unit) => {
+							resultList.resultList.find((result: Unit) => {
 								return result.mulId == parseInt(id);
 							})
 						)
@@ -199,19 +208,40 @@
 				list.addFormation(tempFormation.style, tempFormation.name, tempFormation.type, tempFormation.units);
 			} else {
 				let [id, skill] = item.split(",");
-				let unitToAdd = JSON.parse(
-					JSON.stringify(
-						resultList.results.find((result: Unit) => {
-							return result.mulId == parseInt(id);
-						})
-					)
-				);
-				if (unitToAdd != null) {
-					if (skill != "undefined") {
-						unitToAdd.skill = parseInt(skill);
-						unitToAdd.cost = getNewSkillCost(parseInt(skill), unitToAdd.pv);
+				if (Number(id) < 0) {
+					for (const unitList of customCards.unitPacks) {
+						for (const unit of unitList.units) {
+							if (unit.id == Number(id)) {
+								list.addUnit({
+									mulId: unit.id,
+									type: unit.type,
+									subtype: unit.type,
+									name: unit.name,
+									class: unit.class,
+									variant: unit.variant,
+									pv: unit.pv,
+									cost: unit.pv,
+									abilities: unit.abilities,
+									rulesLevel: "standard"
+								});
+							}
+						}
 					}
-					list.addUnit(unitToAdd);
+				} else {
+					let unitToAdd = JSON.parse(
+						JSON.stringify(
+							resultList.resultList.find((result: Unit) => {
+								return result.mulId == parseInt(id);
+							})
+						)
+					);
+					if (unitToAdd != null) {
+						if (skill != "undefined") {
+							unitToAdd.skill = parseInt(skill);
+							unitToAdd.cost = getNewSkillCost(parseInt(skill), unitToAdd.pv);
+						}
+						list.addUnit(unitToAdd);
+					}
 				}
 			}
 		}
@@ -224,7 +254,8 @@
 	onclose={() => {
 		showLoadModal = false;
 	}}
-	class:dialog-wide={appWindow.isNarrow}>
+	class:dialog-wide={appWindow.isNarrow}
+>
 	<div class="dialog-body">
 		<div class="space-between">
 			{#if user.username}
@@ -235,7 +266,8 @@
 			<button
 				onclick={() => {
 					showLoadModal = false;
-				}}>Close</button>
+				}}>Close</button
+			>
 		</div>
 		<div class="table-container">
 			<table class="saved-lists">
@@ -265,7 +297,8 @@
 							}}
 							ondblclick={() => {
 								loadList();
-							}}>
+							}}
+						>
 							<td class:local={savedList.local}>{savedList.name}</td>
 							<td style="text-align:center">{eras.get(savedList.era)}</td>
 							<td style="text-align:center">{factions.get(savedList.faction)}</td>
@@ -280,7 +313,8 @@
 			<button
 				onclick={() => {
 					loadList();
-				}}>Load</button>
+				}}>Load</button
+			>
 			{#if localListsExist}
 				<p>Lists with red names are saved to local device storage . Please consider creating an account to sync them between devices.</p>
 			{/if}
@@ -295,9 +329,6 @@
 </dialog>
 
 <style>
-	dialog {
-		width: 70%;
-	}
 	input[type="text"] {
 		width: 75%;
 	}

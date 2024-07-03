@@ -2,16 +2,13 @@
 	import { getContext, onMount } from "svelte";
 	import { page } from "$app/stores";
 
-	import ReportModal from "./ReportModal.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import LoginModal from "./LoginModal.svelte";
 	import { enhance } from "$app/forms";
 
 	let theme = $state("dark");
 	let root: HTMLHtmlElement;
-	let showReportModal = $state(false);
 	let showLinksDropdown = $state(false);
-	let showSettingsDropdown = $state(false);
 	let showLoginModal = $state(false);
 
 	let user: { username: string | undefined } = getContext("user");
@@ -42,13 +39,15 @@
 		class="dropdown"
 		onmouseleave={() => {
 			showLinksDropdown = false;
-		}}>
+		}}
+	>
 		<button
 			class="link-button"
 			id="nav-links"
 			onclick={() => {
 				showLinksDropdown = !showLinksDropdown;
-			}}>
+			}}
+		>
 			<img src="/icons/menu.svg" alt="menu" />
 			{#if $page.url.pathname == "/"}
 				Home
@@ -86,7 +85,7 @@
 	<div class="inline gap8">
 		{#if user.username}
 			<form method="post" action="/auth/?/logout" use:enhance={handleLogout} class="inline">
-				<p>{`Welcome, ${user.username[0].toUpperCase() + user.username.slice(1)}`}</p>
+				<p>{appWindow.isMobile ? user.username : `Welcome, ${user.username}`}</p>
 				<button class="link-button">(log out)</button>
 			</form>
 		{:else}
@@ -94,33 +93,12 @@
 				class="link-button"
 				onclick={() => {
 					showLoginModal = true;
-				}}>Login/Register</button>
+				}}>Login/Register</button
+			>
 		{/if}
-		<!-- <nav
-			class="dropdown"
-			onmouseleave={() => {
-				showSettingsDropdown = false;
-			}}>
-			<button
-				class="link-button"
-				id="settings-links"
-				onclick={() => {
-					showSettingsDropdown = !showSettingsDropdown;
-				}}>
-				<img src="/icons/cog.svg" alt="settings menu" /></button>
-			<div class="dropdown-content dropdown-right" class:dropdown-hidden={!showSettingsDropdown} class:dropdown-shown={showSettingsDropdown}>
-				<button
-					class="link-button"
-					onclick={() => {
-						showReportModal = true;
-					}}>Report Issue</button> 
-			</div>
-		</nav> -->
 	</div>
 </header>
 
-<!-- <Changelog bind:showChangelog></Changelog> -->
-<ReportModal bind:showReportModal></ReportModal>
 <LoginModal bind:showLoginModal></LoginModal>
 
 <style>
@@ -129,7 +107,7 @@
 		height: 35px;
 		background-color: var(--background);
 		border-bottom: 1px solid var(--border);
-		padding: 8px 32px 8px;
+		padding: 8px;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;

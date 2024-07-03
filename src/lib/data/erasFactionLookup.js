@@ -95,8 +95,8 @@ export const factions = new Map([
 	[48, "Word of Blake"],
 	[-1, "None"],
 	[55, "IS General"],
-	[56, "IS Clan"],
-	[85, "HW Clan"],
-	[57, "Periphery"],
+	[56, "IS Clan General"],
+	[85, "HW Clan General"],
+	[57, "Periphery General"],
 	[0, "Any"]
 ]);

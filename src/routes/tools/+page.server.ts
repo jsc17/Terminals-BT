@@ -4,6 +4,7 @@ import { fail, redirect } from "@sveltejs/kit";
 import { sendResetEmail } from "$lib/emails/mailer.server.js";
 import type { PageServerLoad } from "../$types.js";
 import fs from "fs/promises";
+import { calculateTMM } from "$lib/utilities/bt-utils.js";
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user || locals.user.username != "terminal") {
@@ -14,36 +15,46 @@ export const load: PageServerLoad = async ({ locals }) => {
 export const actions = {
 	uploadFactions: async () => {
 		for (const era of eraLists) {
+			if (era.id == 0) {
+				continue;
+			}
 			for (const [general, factionList] of era.factions) {
 				if (general != -1) {
-					await prisma.faction.create({
-						data: {
-							era: era.id,
-							faction: general as number,
-							general: -1
-						}
-					});
+					try {
+						await prisma.faction.create({
+							data: {
+								id: `${era.id}-${general}`,
+								era: era.id,
+								faction: general as number,
+								general: -1
+							}
+						});
+					} catch (error) {
+						console.log(era.id, general);
+					}
 				}
 				for (const faction of factionList as number[]) {
-					await prisma.faction.create({
-						data: {
-							era: era.id,
-							faction: faction,
-							general: general as number
-						}
-					});
+					try {
+						await prisma.faction.create({
+							data: {
+								id: `${era.id}-${faction}`,
+								era: era.id,
+								faction: faction,
+								general: general as number
+							}
+						});
+					} catch (error) {
+						console.log(era.id, faction);
+					}
 				}
 			}
-			return { message: "Completed" };
 		}
+		return { message: "Completed" };
 	},
 	uploadUnits: async ({ request }) => {
 		const unitList = JSON.parse((await request.formData()).get("unitList")!.toString());
-		let index = 0;
 
 		for (const unit of unitList) {
-			index++;
-			console.log(index);
 			try {
 				await prisma.unit.upsert({
 					where: {
@@ -121,15 +132,25 @@ export const actions = {
 		return { message: "Load Complete" };
 	},
 	testUnit: async ({ request }) => {
-		const mulId = (await request.formData()).get("mulId");
-		const existing = await prisma.unit.findFirst({
+		const mulId = (await request.formData()).get("testId");
+		console.log(mulId);
+		const existing = await prisma.unit.findUnique({
 			where: {
 				mulId: Number(mulId)
+			},
+			include: {
+				factions: {
+					select: {
+						id: true
+					}
+				}
 			}
 		});
 		if (existing) {
-			return { exists: true };
+			console.log(existing);
+			return { exists: true, existing };
 		} else {
+			console.log("doesn't exist");
 			return { exists: false };
 		}
 	},
@@ -137,20 +158,72 @@ export const actions = {
 		sendResetEmail("jonathan.cibge@innernwgaw.com", "ASFVA");
 	},
 	linkUnits: async ({}) => {
-		try {
-			let fileList = await fs.readdir("./files/avail-upload");
-			for (const filename of fileList) {
-				const file = (await fs.readFile(`./files/avail-upload/${filename}`)).toString();
-				const [era, faction, ...rest] = filename.split("-");
-				const unitList = [];
-				for (const unit of JSON.parse(file).Units) {
-					unitList.push(unit.Id);
+		let count = 0;
+		let unitCount = 0;
+		let fileList = await fs.readdir("./files/avail-upload");
+		for (const filename of fileList) {
+			const file = (await fs.readFile(`./files/avail-upload/${filename}`)).toString();
+			const [era, faction, ...rest] = filename.split("-");
+			const unitList = [];
+			count++;
+			for (const unit of JSON.parse(file).Units) {
+				unitCount++;
+				if (unit.Id) {
+					unitList.push({
+						where: { mulId: unit.Id },
+						create: {
+							mulId: unit.Id,
+							name: unit.Name.trim(),
+							class: unit.Class,
+							variant: unit.Variant?.trim() == "" ? null : unit.Variant?.trim(),
+							tonnage: Number(unit.FormatedTonnage),
+							technology: unit.Technology.Name,
+							rules: unit.Rules,
+							date_introduced: Number(unit.DateIntroduced),
+							image_url: unit.ImageUrl,
+							role: unit.Role.Name,
+							type: unit.Type.Name,
+							subtype: unit.BFType?.toUpperCase() ?? "Unknown",
+							size: unit.BFSize,
+							move: unit.BFMove,
+							tmm: calculateTMM(Number(unit.BFMove.split('"')[0])),
+							armor: unit.BFArmor,
+							structure: unit.BFStructure,
+							threshold: unit.BFThreshold,
+							damage_s: unit.BFDamageShort,
+							damage_s_min: unit.BFDamageShortMin,
+							damage_m: unit.BFDamageMedium,
+							damage_m_min: unit.BFDamageMediumMin,
+							damage_l: unit.BFDamageLong,
+							damage_l_min: unit.BFDamageLongMin,
+							damage_e: unit.BFDamageExtreme,
+							damage_e_min: unit.BFDamageExtemeMin,
+							overheat: unit.BFOverheat,
+							pv: unit.BFPointValue,
+							abilities: unit.BFAbilities
+						}
+					});
 				}
-				console.log(era, faction, unitList);
 			}
-		} catch (error) {
-			return fail(400, { message: error });
+
+			try {
+				console.log(count, era, faction);
+				await prisma.faction.update({
+					where: {
+						id: `${era}-${faction}`
+					},
+					data: {
+						units: {
+							connectOrCreate: unitList
+						}
+					}
+				});
+			} catch (error) {
+				console.log("Failed - ", count, era, faction);
+				fs.appendFile(`./files/uploadFail.txt`, `${count} failed - ${error} \n`);
+			}
 		}
+		console.log(unitCount);
 		return { message: "success" };
 	}
 };

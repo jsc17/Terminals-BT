@@ -2,7 +2,7 @@
 	import eraLists from "$lib/data/erasFactionsList.json";
 	import { eras, factions } from "$lib/data/erasFactionLookup.js";
 	import { getGeneralList } from "$lib/utilities/bt-utils";
-	import { deserialize } from "$app/forms";
+	import { deserialize, enhance } from "$app/forms";
 	import { calculateTMM } from "$lib/utilities/bt-utils";
 	import { toastController } from "$lib/stores/toastController.svelte";
 
@@ -26,6 +26,7 @@
 	});
 	let general = $derived(getGeneralList(selectedEra, selectedFaction));
 	let link = $state("press search");
+
 	function createLink() {
 		link = `https://masterunitlist.azurewebsites.net/Unit/quicklist?&MinPV=1&MaxPV=100`;
 		if (general != undefined && general != -1) {
@@ -126,6 +127,7 @@
 	async function sendResetEmail() {
 		const result: any = deserialize(await (await fetch("?/sendResetEmail", { method: "POST", body: "" })).text());
 	}
+	async function testUnit() {}
 </script>
 
 <main>
@@ -171,6 +173,10 @@
 			Upload Units
 		</button>
 		<button onclick={linkUnits}>Link Units</button>
+		<form method="post" action="?/testUnit" use:enhance>
+			<input type="text" name="testId" id="testId" />
+			<button>Submit</button>
+		</form>
 	</div>
 	<div class="card">
 		<button onclick={sendResetEmail}>Send Reset</button>

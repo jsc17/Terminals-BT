@@ -1,3 +1,3 @@
-import { ResultList } from "$lib/types/resultList.svelte";
+import { createResultList } from "$lib/types/resultList.svelte";
 
-export const resultList = new ResultList();
+export const resultList = createResultList();

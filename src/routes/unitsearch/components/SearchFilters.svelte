@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { resultList } from "../resultList.svelte.js";
+	import { resultList } from "../resultList.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte.js";
 
 	let showFilters = $state(false);
@@ -67,6 +67,8 @@
 							<option value={option.value}>{option.display}</option>
 						{/each}
 					</select>
+				{:else if filter.type == "unique"}
+					<input type="checkbox" name={filter.name} id={filter.name} bind:checked={filter.checked} />
 				{/if}
 			</div>
 		{/each}

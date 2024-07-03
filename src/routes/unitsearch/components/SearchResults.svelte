@@ -3,14 +3,9 @@
 	import { resultList } from "../resultList.svelte";
 	import VirtualList from "$lib/VirtualList/VirtualList.svelte";
 
-	let { status = $bindable() } = $props();
 	let headers = $derived(appWindow.isMobile ? ["Type", "PV", "Move", "Health"] : ["Type", "PV", "Size", "Move", "TMM", "Health (A+S)"]);
 
-	let iconAsc = $derived(appWindow.isMobile ? "/icons/arrow-down-bold.svg" : "/icons/sort-ascending.svg");
-	let iconDes = $derived(appWindow.isMobile ? "/icons/arrow-up-bold.svg" : "/icons/sort-descending.svg");
-	let iconSort = $derived(appWindow.isMobile ? "/icons/swap-vertical.svg" : "/icons/sort.svg");
-
-	let itemSize = 50;
+	let itemSize = 75;
 	let itemCount = $derived(resultList.filteredList.length);
 	let listHeight = $state(500);
 
@@ -37,71 +32,77 @@
 		<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile} data-sort="name" onclick={sort}>
 			{appWindow.isMobile ? "Name" : `Name - ${resultList.filteredList.length}/${resultList.availableList.length} results shown`}
 			{#if resultList.sort.key == "name"}
-				<img class="sort-selected button-icon" src={resultList.sort.order == "asc" ? iconAsc : iconDes} alt="sort" />
+				<img class="sort-selected button-icon" src={resultList.sort.order == "asc" ? "/icons/sort-ascending.svg" : "/icons/sort-descending.svg"} alt="sort" />
 			{:else}
-				<img class="sort button-icon" src={iconSort} alt="sort" />
+				<img class="sort button-icon" src={"/icons/sort.svg"} alt="sort" />
 			{/if}
 		</button>
 		{#each headers as header}
 			<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile} data-sort={header.toLowerCase()} onclick={sort}>
 				{header}
 				{#if resultList.sort.key == header.toLowerCase()}
-					<img class="sort-selected button-icon" src={resultList.sort.order == "asc" ? iconAsc : iconDes} alt="sort" />
+					<img class="sort-selected button-icon" src={resultList.sort.order == "asc" ? "/icons/sort-ascending.svg" : "/icons/sort-descending.svg"} alt="sort" />
 				{:else}
-					<img class="sort button-icon" src={iconSort} alt="sort" />
+					<img class="sort button-icon" src={"/icons/sort.svg"} alt="sort" />
 				{/if}
 			</button>
 		{/each}
 		<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile}> DMG S/M/L-OV</button>
 	</div>
-	<div class="virtual-list-container" bind:clientHeight={listHeight}>
-		<VirtualList height={listHeight} width="auto" {itemCount} {itemSize}>
-			{#snippet children({ style, index })}
-				{@const unit = resultList.filteredList[index]}
-				{#if unit}
-					<div {style} class:virtual-list-row={!appWindow.isMobile} class:virtual-list-row-mobile={appWindow.isMobile}>
-						<a href="http://masterunitlist.info/Unit/Details/{unit.mulId}" target="_blank">{unit.name}</a>
-						<div class="align-center">{unit.subtype}</div>
-						<div class="align-center">{unit.pv}</div>
-						{#if !appWindow.isMobile}
-							<div class="align-center">{unit?.size ?? "-"}</div>
-						{/if}
-						<div class="align-center">
-							{#if unit?.move == undefined}
-								-
-							{:else}
-								{#each unit.move as movement, index}
-									{#if index != 0}
-										{"/ "}
-									{/if}
-									{`${movement.speed}"${movement.type ?? ""}`}
-								{/each}
+	{#if resultList.status == "waiting"}
+		<div class="loading-message">Choose an Era and Faction to display available units</div>
+	{:else if resultList.status == "loading"}
+		<div class="loading-message">Loading. Please wait ...</div>
+	{:else if resultList.status == "loaded"}
+		<div class="virtual-list-container" bind:clientHeight={listHeight}>
+			<VirtualList height={listHeight} width="auto" {itemCount} {itemSize}>
+				{#snippet children({ style, index })}
+					{@const unit = resultList.filteredList[index]}
+					{#if unit}
+						<div {style} class:virtual-list-row={!appWindow.isMobile} class:virtual-list-row-mobile={appWindow.isMobile}>
+							<a href="http://masterunitlist.info/Unit/Details/{unit.mulId}" target="_blank">{unit.name}</a>
+							<div class="align-center">{unit.subtype}</div>
+							<div class="align-center">{unit.pv}</div>
+							{#if !appWindow.isMobile}
+								<div class="align-center">{unit?.size ?? "-"}</div>
 							{/if}
-						</div>
-						{#if !appWindow.isMobile}
-							<div class="align-center">{unit.tmm ?? "-"}</div>
-						{/if}
-						<div class="align-center">
-							{#if unit.health == undefined}
-								-
-							{:else}
-								{unit.health + " (" + unit.armor + "+" + unit.structure + ")"}
+							<div class="align-center">
+								{#if unit?.move == undefined}
+									-
+								{:else}
+									{#each unit.move as movement, index}
+										{#if index != 0}
+											{"/ "}
+										{/if}
+										{`${movement.speed}"${movement.type ?? ""}`}
+									{/each}
+								{/if}
+							</div>
+							{#if !appWindow.isMobile}
+								<div class="align-center">{unit.tmm ?? "-"}</div>
 							{/if}
+							<div class="align-center">
+								{#if unit.health == undefined}
+									-
+								{:else}
+									{appWindow.isMobile ? unit.health : unit.health + " (" + unit.armor + "+" + unit.structure + ")"}
+								{/if}
+							</div>
+							<div class="align-center">
+								{#if unit.damageS == undefined}
+									-
+								{:else}
+									{unit.damageS}{unit.damageSMin ? "*" : ""}{"/" + unit.damageM}{unit.damageMMin ? "*" : ""}{"/" + unit.damageL}{unit.damageLMin ? "*" : ""}{" - " + unit.overheat}
+								{/if}
+							</div>
+							<div class="abilities">{unit.abilities}</div>
+							<!-- <div class="align-center factions">Availability</div> -->
 						</div>
-						<div class="align-center">
-							{#if unit.damageS == undefined}
-								-
-							{:else}
-								{unit.damageS}{unit.damageSMin ? "*" : ""}{"/" + unit.damageM}{unit.damageMMin ? "*" : ""}{"/" + unit.damageL}{unit.damageLMin ? "*" : ""}{" - " + unit.overheat}
-							{/if}
-						</div>
-						<div class="abilities">{unit.abilities}</div>
-						<!-- <div class="align-center factions">Availability</div> -->
-					</div>
-				{/if}
-			{/snippet}
-		</VirtualList>
-	</div>
+					{/if}
+				{/snippet}
+			</VirtualList>
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -113,14 +114,24 @@
 	.result-list-header {
 		display: grid;
 		grid-template-columns: 1fr repeat(5, 7%) 12% 15%;
+		height: 25px;
 	}
 	.result-list-header-mobile {
 		display: grid;
-		grid-template-columns: 1fr repeat(4, 7%) 15%;
+		grid-template-columns: 1fr repeat(4, 10%) 15%;
+		height: 30px;
 	}
 	.virtual-list-container {
 		flex: 1;
 	}
+	.loading-message {
+		padding-top: 24px;
+		padding-left: 24px;
+		width: 100%;
+		display: flex;
+		font-size: x-large;
+	}
+
 	.sort-header-button,
 	.sort-header-button-mobile {
 		background-color: var(--card);
@@ -135,11 +146,16 @@
 		border-radius: 0%;
 	}
 	.sort-header-button-mobile {
+		display: flex;
+		flex-direction: column;
 		img {
 			width: 10px;
 			height: 10px;
 		}
 		gap: 0px;
+	}
+	.sort {
+		filter: var(--muted-filter);
 	}
 	:global(.sort-selected) {
 		filter: var(--primary-filter);
@@ -155,7 +171,7 @@
 	}
 	.virtual-list-row-mobile {
 		display: grid;
-		grid-template-columns: 1fr repeat(4, 7%) 15%;
+		grid-template-columns: 1fr repeat(4, 10%) 15%;
 	}
 	.virtual-list-row:not(:last-child),
 	.virtual-list-row-mobile:not(:last-child) {

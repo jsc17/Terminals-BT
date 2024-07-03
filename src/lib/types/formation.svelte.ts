@@ -1,4 +1,4 @@
-import { type Unit } from "./unit";
+import { type Unit } from "$lib/types/unit";
 
 export type Formation = {
 	id: number;

@@ -1,5 +1,5 @@
 import { list } from "../../list.svelte";
-import { isUnit, type Unit } from "../../unit";
+import { isUnit, type Unit } from "$lib/types/unit";
 import { deserialize } from "$app/forms";
 import { toastController } from "$lib/stores/toastController.svelte";
 

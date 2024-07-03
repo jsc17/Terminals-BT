@@ -104,14 +104,19 @@
 	}
 	:global(dialog) {
 		padding: 0;
-		width: 40%;
+		width: fit-content;
 		background-color: var(--background);
 		color: var(--foreground);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
-		min-height: 40%;
-		max-height: 90%;
+		min-height: fit-content;
+		max-height: 99%;
 		overflow: auto;
+	}
+	@media (max-width: 500px) {
+		:global(dialog) {
+			width: 99dvw;
+		}
 	}
 	:global(.dialog-wide) {
 		width: 90%;

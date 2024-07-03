@@ -1,6 +1,6 @@
 import { PDFDocument, PDFPage, rgb, PDFImage, StandardFonts, PDFFont } from "pdf-lib";
-import { type Unit } from "../unit";
-import { type Formation } from "../formation.svelte";
+import { type Unit } from "$lib/types/unit";
+import { type Formation } from "$lib/types/formation.svelte";
 import fs from "fs/promises";
 
 const positions = [
@@ -143,7 +143,7 @@ export function drawBasicUnitLine(listSummary: PDFPage, lines: number, unit: Uni
 	});
 
 	listSummary.drawText(unit.name, { x: 81, y: pageHeight - 108 - 12 * lines, size: 8 });
-	listSummary.drawText(unit.type, { x: 315, y: pageHeight - 108 - 12 * lines, size: 8 });
+	listSummary.drawText(unit.subtype, { x: 315, y: pageHeight - 108 - 12 * lines, size: 8 });
 	listSummary.drawText((unit.skill ?? "-").toString(), { x: 423, y: pageHeight - 108 - 12 * lines, size: 8 });
 	listSummary.drawText(`${unit.cost} (${Math.round(unit.cost / 2)})`, { x: 477, y: pageHeight - 108 - 12 * lines, size: 8 });
 }
@@ -182,7 +182,7 @@ export function drawDetailedUnitLine(listSummary: PDFPage, lines: number, unit: 
 		}
 	}
 	listSummary.drawText(unit.name, { x: 81, y: pageHeight - 108 - 12 * lines, size: 8 });
-	listSummary.drawText(unit.type, { x: 306, y: pageHeight - 108 - 12 * lines, size: 8 });
+	listSummary.drawText(unit.subtype, { x: 306, y: pageHeight - 108 - 12 * lines, size: 8 });
 	listSummary.drawText(moveString ?? "-", { x: 336, y: pageHeight - 108 - 12 * lines, size: 8 });
 	let damage = "";
 	if (unit.damageS == undefined) {

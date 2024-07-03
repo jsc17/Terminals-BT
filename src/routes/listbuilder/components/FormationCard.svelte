@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { type Formation, groundFormationTypes, airFormationTypes, dragType } from "../formation.svelte";
-	import { type Unit } from "../unit";
+	import { type Formation, groundFormationTypes, airFormationTypes, dragType } from "$lib/types/formation.svelte";
+	import { type Unit } from "$lib/types/unit";
 	import UnitCard from "./UnitCard.svelte";
 	import { dndzone, type DndEvent, dragHandleZone, dragHandle } from "svelte-dnd-action";
 	import { list } from "../list.svelte";
@@ -48,7 +48,8 @@
 					}
 				}}
 				>Remove</button
-			></Menu>
+			></Menu
+		>
 	</div>
 	<div class="unit-cards" use:dndzone={{ items: formation.units, dropTargetStyle, flipDurationMs, type: dragType.type }} onconsider={handleConsider} onfinalize={handleFinalize}>
 		{#each formation.units as unit (unit.id)}

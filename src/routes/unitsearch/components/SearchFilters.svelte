@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { resultList } from "../resultList.svelte.js";
+	import { resultList } from "../resultList.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte.js";
 
 	let showFilters = $state(false);
@@ -43,7 +43,8 @@
 							}}
 							type="text"
 							bind:value={filter.value}
-							placeholder={filter.label} />
+							placeholder={filter.label}
+						/>
 						<div class="dropdown-content" class:dropdown-hidden={!showAbilitiesDropdown} class:dropdown-shown={showAbilitiesDropdown}>
 							<ul>
 								<li>
@@ -66,6 +67,8 @@
 							<option value={option.value}>{option.display}</option>
 						{/each}
 					</select>
+				{:else if filter.type == "unique"}
+					<input type="checkbox" name={filter.name} id={filter.name} bind:checked={filter.checked} />
 				{/if}
 			</div>
 		{/each}
@@ -78,7 +81,8 @@
 		class:hidden={!appWindow.isMobile}
 		onclick={() => {
 			showFilters = !showFilters;
-		}}>
+		}}
+	>
 		<div class="space-between">
 			<div></div>
 			<div>Filters</div>
@@ -89,7 +93,8 @@
 					+
 				{/if}
 			</div>
-		</div></button>
+		</div></button
+	>
 
 	<div class="card" class:hidden={appWindow.isMobile && !showFilters}>
 		{@render filters(resultList.filters)}
@@ -98,7 +103,8 @@
 				class="backgroundless-button"
 				onclick={() => {
 					showAdditionalFilters = !showAdditionalFilters;
-				}}>
+				}}
+			>
 				Additional Filters
 				{#if showAdditionalFilters}
 					-
@@ -117,8 +123,6 @@
 <style>
 	main {
 		width: 100%;
-		position: sticky;
-		top: 35px;
 		z-index: 2;
 	}
 	.filter-list {

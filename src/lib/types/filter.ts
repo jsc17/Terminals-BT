@@ -1,4 +1,4 @@
-export type filter = {
+type DefaultFilter = {
 	name: string;
 	label: string;
 	type: "number" | "numberGroup" | "string" | "select" | "abilities";
@@ -10,4 +10,21 @@ export type filter = {
 	values?: { min?: number; max?: number }[];
 	defaults?: number[];
 };
+
+type NumberFilter = {
+	name: string;
+	label: string;
+	type: "number";
+	valueMin: number;
+	valueMax: number;
+};
+
+type UniqueFilter = {
+	name: string;
+	label: string;
+	type: "unique";
+	checked: boolean;
+};
+
+export type Filter = DefaultFilter | UniqueFilter;
 // { name: "name", type: "string", values: [{ label: "", value: "", default: "" }] },

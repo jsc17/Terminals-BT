@@ -1,23 +1,18 @@
 <script lang="ts">
 	import { PrintModal, SaveModal, LoadModal, SublistModal, UnitCard } from "./index";
 	import { onMount } from "svelte";
-	import { ruleSets } from "../options";
+	import { ruleSets } from "$lib/types/options";
 	import { resultList } from "../resultList.svelte";
 	import { flip } from "svelte/animate";
 	import { list } from "../list.svelte";
 	import { dndzone, type DndEvent, dragHandle, dragHandleZone } from "svelte-dnd-action";
-	import { type Unit, isUnit } from "../unit";
-	import { dragType, isFormation, type Formation } from "../formation.svelte";
+	import { type Unit, isUnit } from "$lib/types/unit";
+	import { dragType, isFormation, type Formation } from "$lib/types/formation.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import FormationCard from "./FormationCard.svelte";
 	import Menu from "$lib/components/Menu.svelte";
 
-	let {
-		status = $bindable(),
-		selectedRules = $bindable(),
-		recentChanges,
-		description
-	}: { status: any; recentChanges: string[]; description: string[]; selectedRules: string } = $props();
+	let { selectedRules = $bindable(), recentChanges, description }: { recentChanges: string[]; description: string[]; selectedRules: string } = $props();
 	let showPrintModal = $state(false);
 	let showSaveModal = $state(false);
 	let showLoadModal = $state(false);
@@ -59,7 +54,8 @@
 					onchange={() => {
 						list.setOptions(selectedRules);
 						resultList.setOptions(list.options?.name ?? "noRes");
-					}}>
+					}}
+				>
 					{#each ruleSets as rules}
 						<option value={rules.name}>{rules.display}</option>
 					{/each}
@@ -86,41 +82,48 @@
 						class="menu-button"
 						onclick={() => {
 							list.addFormation("ground");
-						}}>Add Ground Formation</button>
+						}}>Add Ground Formation</button
+					>
 					<button
 						class="menu-button"
 						onclick={() => {
 							list.addFormation("air");
-						}}>Add Air Formation</button>
+						}}>Add Air Formation</button
+					>
 					<hr />
-					<div>More features coming soon</div></Menu>
+					<div>More features coming soon</div></Menu
+				>
 				<Menu img={"/icons/menu.svg"}>
 					<button
 						class="menu-button"
 						onclick={() => {
 							showLoadModal = true;
-						}}>
+						}}
+					>
 						Load List
 					</button>
 					<button
 						class="menu-button"
 						onclick={() => {
 							showSaveModal = true;
-						}}>
+						}}
+					>
 						Save/Export List
 					</button>
 					<button
 						class="menu-button"
 						onclick={() => {
 							showPrintModal = true;
-						}}>
+						}}
+					>
 						Print List
 					</button>
 					<button
 						class="menu-button"
 						onclick={() => {
 							showSublistModal = true;
-						}}>
+						}}
+					>
 						Generate Sublists
 					</button>
 					<button
@@ -129,7 +132,8 @@
 							if (confirm("Remove all units and formations from the list?")) {
 								list.items = [];
 							}
-						}}>
+						}}
+					>
 						Clear List
 					</button>
 				</Menu>
@@ -175,7 +179,8 @@
 				class="unit-cards"
 				use:dndzone={{ items: list.items, dropTargetStyle, flipDurationMs, type: "all", centreDraggedOnCursor: true }}
 				onconsider={handleConsider}
-				onfinalize={handleFinalize}>
+				onfinalize={handleFinalize}
+			>
 				{#each list.items as unit (unit.id)}
 					<div animate:flip={{ duration: flipDurationMs }}>
 						{#if isUnit(unit)}
@@ -192,7 +197,7 @@
 
 <PrintModal bind:showPrintModal></PrintModal>
 <SaveModal bind:showSaveModal></SaveModal>
-<LoadModal bind:showLoadModal bind:status bind:selectedRules></LoadModal>
+<LoadModal bind:showLoadModal bind:selectedRules></LoadModal>
 <SublistModal bind:showSublistModal></SublistModal>
 
 <style>

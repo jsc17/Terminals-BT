@@ -144,5 +144,57 @@ export const actions = {
 	getAllUnits: async () => {
 		const unitList = await prisma.unit.findMany();
 		return { unitList };
+	},
+	getUnits: async ({ request }) => {
+		let { era, faction, general } = await request.json();
+		let unitList;
+		let uniqueList;
+		if (era == 0 && faction == 0) {
+			unitList = await prisma.unit.findMany({});
+			uniqueList = await prisma.unit.findMany({
+				where: {
+					factions: {
+						some: {
+							faction: 4
+						}
+					}
+				}
+			});
+		} else {
+			const conditions: { [k: string]: any } = {};
+			const uniqueConditions: { [k: string]: any } = { faction: 4 };
+			if (era != 0) {
+				conditions.era = era;
+				uniqueConditions.era = era;
+			}
+			if (faction != 0) {
+				conditions.OR = [{ faction }, { faction: general }];
+			}
+			unitList = await prisma.unit.findMany({
+				where: {
+					factions: {
+						some: conditions
+					}
+				},
+				orderBy: {
+					tonnage: "asc"
+				}
+			});
+			uniqueList = await prisma.unit.findMany({
+				where: {
+					factions: {
+						some: uniqueConditions
+					}
+				},
+				select: {
+					mulId: true
+				}
+			});
+		}
+		if (unitList) {
+			return { unitList, uniqueList };
+		} else {
+			return fail(400, { message: "Unit request failed" });
+		}
 	}
 };

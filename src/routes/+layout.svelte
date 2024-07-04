@@ -126,7 +126,7 @@
 	:global(.dialog-body) {
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
+		gap: 8px;
 		padding: 16px;
 		position: relative;
 		height: max(100%, 400px);

@@ -31,8 +31,6 @@
 		} else if (!username) {
 			alert("Username is required");
 			cancel();
-		} else {
-			formData.set("username", username.toLowerCase());
 		}
 		return async ({ result, update }: any) => {
 			if (result.status != 200) {
@@ -74,16 +72,17 @@
 	onclose={() => {
 		showLoginModal = false;
 	}}
-	class:dialog-wide={appWindow.isNarrow}>
+	class:dialog-wide={appWindow.isNarrow}
+>
 	{#if loginDisplay == "login"}
 		<div class="dialog-body">
 			<div class="space-between">
 				<h2>Login</h2>
 				<button onclick={() => loginDialog.close()}>Close</button>
 			</div>
-			<form method="post" action="/auth/?/login" class="dialog-body" use:enhance={handleLogin}>
+			<form method="post" action="/auth/?/login" class="login-form" use:enhance={handleLogin}>
 				<div class="space-between">
-					<label for="username">Username</label>
+					<label for="username">Username <span class="muted">or</span> Email address</label>
 					<!-- <a href="/auth/forgot-username" class="forgot-link">Forgot Username?</a> -->
 				</div>
 				<input name="username" id="username" />
@@ -93,14 +92,57 @@
 				</div>
 				<input type="password" name="password" id="password" />
 
-				<div><button>Login</button></div>
-				<button
-					style:background-color="transparent"
-					style:color="var(--primary)"
-					onclick={() => {
-						loginDisplay = "register";
-					}}>Need an account? Click here to register</button>
+				<button class="login-button">Login</button>
 			</form>
+			<div class="separator muted">Or</div>
+			<button
+				onclick={() => {
+					window.location.href = "/auth/oauth/discord";
+				}}
+				class="gsi-material-button"
+			>
+				<div class="gsi-material-button-state"></div>
+				<div class="gsi-material-button-content-wrapper">
+					<div class="gsi-material-button-icon">
+						<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
+							<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+							></path>
+							<path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+							<path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+							<path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+							></path>
+							<path fill="none" d="M0 0h48v48H0z"></path>
+						</svg>
+					</div>
+					<span class="gsi-material-button-contents">Sign in with Google</span>
+					<span style="display: none;">Sign in with Google</span>
+				</div>
+			</button>
+
+			<button
+				onclick={() => {
+					window.location.href = "/auth/oauth/discord";
+				}}
+				class="gsi-material-button"
+			>
+				<div class="gsi-material-button-state"></div>
+				<div class="gsi-material-button-content-wrapper">
+					<div class="gsi-material-button-icon">
+						<img class="login-icon" src="/discord.png" alt="discord" />
+					</div>
+					<span class="gsi-material-button-contents">Sign in with Discord</span>
+					<span style="display: none;">Sign in with Discord</span>
+				</div>
+			</button>
+			<div class="separator muted">Other options</div>
+
+			<button
+				style:background-color="transparent"
+				style:color="var(--primary)"
+				onclick={() => {
+					loginDisplay = "register";
+				}}>Need an account? Click here to register</button
+			>
 		</div>
 	{:else if loginDisplay == "register"}
 		<div class="dialog-body">
@@ -123,15 +165,55 @@
 					style:color="var(--primary)"
 					onclick={() => {
 						loginDisplay = "login";
-					}}>Already have an account? Click here to login</button>
+					}}>Already have an account? Click here to login</button
+				>
 			</form>
 		</div>
 	{/if}
 </dialog>
 
 <style>
+	@import "$lib/css/google.css";
+	h2 {
+		margin: 0;
+	}
+	.dialog-body {
+		gap: 16px;
+	}
 	.forgot-link {
 		font-size: 0.75rem;
 		color: var(--primary);
+	}
+	.muted {
+		font-size: 0.8rem;
+		color: var(--muted-foreground);
+	}
+	.login-form {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+	.login-button {
+		height: 2rem;
+		background-color: var(--primary-muted);
+		color: lightgray;
+		border-radius: 3px;
+		margin: 4px 16px 0px;
+	}
+	.login-icon {
+		height: 20px;
+		width: 20px;
+	}
+	.separator {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+	.separator::before,
+	.separator::after {
+		content: "";
+		flex: 1;
+		border-bottom: 1px solid var(--primary);
+		margin: 5px;
 	}
 </style>

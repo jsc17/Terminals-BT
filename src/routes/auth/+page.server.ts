@@ -9,7 +9,7 @@ export const actions = {
 	register: async ({ request, cookies }: { request: Request; cookies: Cookies }) => {
 		const { username, password, verifyPassword, email } = Object.fromEntries(await request.formData()) as Record<string, string>;
 
-		if (username.length < 3 || username.length > 31 || !/^[a-z0-9_-]+$/.test(username)) {
+		if (username.length < 3 || username.length > 31 || !/^[a-zA-Z0-9_-]+$/.test(username)) {
 			return fail(400, {
 				message: "Invalid username"
 			});
@@ -27,6 +27,14 @@ export const actions = {
 		const hashedPassword = await new Argon2id().hash(password);
 
 		try {
+			const existingUser = await prisma.user.findFirst({ where: { OR: [{ username }, { email }] }, select: { username: true, email: true } });
+			if (existingUser) {
+				if ((existingUser.username = username)) {
+					return fail(400, { message: "Username already in use" });
+				} else {
+					return fail(400, { message: "Email address already in use" });
+				}
+			}
 			await prisma.user.create({
 				data: {
 					username,
@@ -51,11 +59,11 @@ export const actions = {
 	login: async ({ request, cookies }: { request: Request; cookies: Cookies }) => {
 		const { username, password } = Object.fromEntries(await request.formData()) as Record<string, string>;
 
-		const existingUser = await prisma.user.findUnique({ where: { username: username.toLowerCase() } });
+		const existingUser = await prisma.user.findFirst({ where: { OR: [{ username: username }, { email: username }] } });
 		if (!existingUser) {
 			return fail(400, { message: "Incorrect username or password" });
 		}
-		const validPassword = await new Argon2id().verify(existingUser.hashedPassword, password);
+		const validPassword = await new Argon2id().verify(existingUser.hashedPassword ?? "", password);
 		if (!validPassword) {
 			return fail(400, { message: "Incorrect username or password" });
 		}

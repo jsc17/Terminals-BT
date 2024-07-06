@@ -19,7 +19,11 @@ model User {
   resetTokens ResetToken[]
   username String @unique
   email String @unique
-  hashedPassword String
+  hashedPassword String?
+  google_id String? @unique
+  discord_id String? @unique
+  account_created DateTime @default(now())
+  last_login DateTime?
 }
 
 model Session {

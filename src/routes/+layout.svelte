@@ -49,6 +49,8 @@
 		--secondary-foreground: hsla(198, 89%, 22%, 1);
 		--button: hsl(142.1, 70.6%, 45.3%);
 		--button-foreground: hsl(144.9, 80.4%, 10%);
+		--button-dark: hsl(142, 84%, 25%);
+		--button-dark-foreground: hsl(0, 0%, 83%);
 		--input: hsl(240, 3.7%, 15.9%);
 		--ring: hsl(142.4, 71.8%, 29.2%);
 		--muted-filter: invert(73%) sepia(9%) saturate(208%) hue-rotate(201deg) brightness(87%) contrast(89%);
@@ -126,7 +128,7 @@
 	:global(.dialog-body) {
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
+		gap: 8px;
 		padding: 16px;
 		position: relative;
 		height: max(100%, 400px);

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { PrintModal, SaveModal, LoadModal, SublistModal, UnitCard } from "./index";
-	import { onMount } from "svelte";
 	import { ruleSets } from "$lib/types/options";
 	import { resultList } from "../resultList.svelte";
 	import { flip } from "svelte/animate";
@@ -12,15 +11,11 @@
 	import FormationCard from "./FormationCard.svelte";
 	import Menu from "$lib/components/Menu.svelte";
 
-	let { selectedRules = $bindable(), recentChanges, description }: { recentChanges: string[]; description: string[]; selectedRules: string } = $props();
+	let { recentChanges, description }: { recentChanges: string[]; description: string[] } = $props();
 	let showPrintModal = $state(false);
 	let showSaveModal = $state(false);
 	let showLoadModal = $state(false);
 	let showSublistModal = $state(false);
-
-	onMount(() => {
-		selectedRules = list.options?.name ?? "noRes";
-	});
 
 	let dropTargetStyle = { outline: "none" };
 
@@ -50,9 +45,8 @@
 			<div class="inline">
 				<label for="rules">Rules:</label>
 				<select
-					bind:value={selectedRules}
+					bind:value={list.options.name}
 					onchange={() => {
-						list.setOptions(selectedRules);
 						resultList.setOptions(list.options?.name ?? "noRes");
 					}}
 				>
@@ -100,7 +94,7 @@
 							showLoadModal = true;
 						}}
 					>
-						Load List
+						Load / Import List
 					</button>
 					<button
 						class="menu-button"
@@ -108,7 +102,7 @@
 							showSaveModal = true;
 						}}
 					>
-						Save/Export List
+						Save / Export List
 					</button>
 					<button
 						class="menu-button"
@@ -197,7 +191,7 @@
 
 <PrintModal bind:showPrintModal></PrintModal>
 <SaveModal bind:showSaveModal></SaveModal>
-<LoadModal bind:showLoadModal bind:selectedRules></LoadModal>
+<LoadModal bind:showLoadModal></LoadModal>
 <SublistModal bind:showSublistModal></SublistModal>
 
 <style>

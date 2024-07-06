@@ -3,13 +3,9 @@
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { getContext } from "svelte";
 	import { deserialize } from "$app/forms";
-	import { resultList } from "../resultList.svelte";
 	import { ruleSets, getRules, type Options } from "../../../lib/types/options";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { list } from "../list.svelte";
-	import { getNewSkillCost } from "$lib/utilities/bt-utils";
-	import { type Unit } from "$lib/types/unit";
-	import customCards from "$lib/data/customCards.json";
 
 	let user: any = getContext("user");
 
@@ -23,7 +19,7 @@
 		rules: Options;
 	};
 
-	let { showLoadModal = $bindable(), status = $bindable(), selectedRules = $bindable() } = $props();
+	let { showLoadModal = $bindable() } = $props();
 	let loadDialog: HTMLDialogElement;
 	let importCode = $state("");
 	let savedLists = $state<ImportList[]>([]);
@@ -45,25 +41,26 @@
 		savedLists = [];
 		localListsExist = false;
 		//attempt to load saved lists from server
-		const response: any = deserialize(await (await fetch("/?/loadList", { method: "POST", body: "" })).text());
-		if (response.status == 200) {
-			const responseLists = JSON.parse(response.data.lists);
-			for (const tempList of responseLists) {
-				savedLists.push({
-					name: tempList.name,
-					era: Number(tempList.era),
-					faction: Number(tempList.faction),
-					units: JSON.parse(tempList.units),
-					sublists: JSON.parse(tempList.sublists),
-					local: false,
-					rules: getRules(tempList.rules) ?? ruleSets[0]
-				});
+		if (user.username) {
+			const response: any = deserialize(await (await fetch("/?/loadList", { method: "POST", body: "" })).text());
+			if (response.status == 200) {
+				const responseLists = JSON.parse(response.data.lists);
+				for (const tempList of responseLists) {
+					savedLists.push({
+						name: tempList.name,
+						era: Number(tempList.era),
+						faction: Number(tempList.faction),
+						units: JSON.parse(tempList.units),
+						sublists: JSON.parse(tempList.sublists),
+						local: false,
+						rules: getRules(tempList.rules) ?? ruleSets[0]
+					});
+				}
+			} else {
+				toastController.addToast("Failed to load lists from server, please try again");
+				console.log(response.data.message);
 			}
-		} else {
-			toastController.addToast("Failed to load lists from server, please try again");
-			console.log(response.data.message);
 		}
-
 		//load local storage saved sublists
 		const localLists = JSON.parse(localStorage.getItem("lists") ?? "[]");
 		if (localLists.length) {
@@ -157,94 +154,7 @@
 		} else {
 			data = savedLists[selectedListIndex];
 		}
-		const { era, faction, name, units, sublists, rules } = data;
-		console.log(rules);
-		list.setOptions(rules.name);
-		resultList.setOptions(rules.name);
-		selectedRules = rules.name;
-
-		resultList.details.era = era;
-		resultList.details.faction = faction;
-
-		status = "loading";
-		await resultList.loadUnits();
-
-		if (resultList.resultList.length == 0) {
-			status = "error";
-		} else {
-			status = "loaded";
-		}
-
-		list.details.name = name;
-		list.details.era = era;
-		list.details.faction = faction;
-		list.details.general = resultList.general;
-		list.sublists = sublists;
-
-		list.items = [];
-		let unitArray = units;
-		for (const item of unitArray) {
-			if (item.charAt(0) == "{") {
-				const formationData = JSON.parse(item);
-				const tempFormation = { style: formationData.style, name: formationData.name, type: formationData.type, units: <Unit[]>[] };
-
-				for (const unit of formationData.units) {
-					let [id, skill] = unit.split(",");
-					let unitToAdd = JSON.parse(
-						JSON.stringify(
-							resultList.resultList.find((result: Unit) => {
-								return result.mulId == parseInt(id);
-							})
-						)
-					);
-					if (unitToAdd != null) {
-						if (skill != "undefined") {
-							unitToAdd.skill = parseInt(skill);
-							unitToAdd.cost = getNewSkillCost(parseInt(skill), unitToAdd.pv);
-						}
-						tempFormation.units.push(unitToAdd);
-					}
-				}
-				list.addFormation(tempFormation.style, tempFormation.name, tempFormation.type, tempFormation.units);
-			} else {
-				let [id, skill] = item.split(",");
-				if (Number(id) < 0) {
-					for (const unitList of customCards.unitPacks) {
-						for (const unit of unitList.units) {
-							if (unit.id == Number(id)) {
-								list.addUnit({
-									mulId: unit.id,
-									type: unit.type,
-									subtype: unit.type,
-									name: unit.name,
-									class: unit.class,
-									variant: unit.variant,
-									pv: unit.pv,
-									cost: unit.pv,
-									abilities: unit.abilities,
-									rulesLevel: "standard"
-								});
-							}
-						}
-					}
-				} else {
-					let unitToAdd = JSON.parse(
-						JSON.stringify(
-							resultList.resultList.find((result: Unit) => {
-								return result.mulId == parseInt(id);
-							})
-						)
-					);
-					if (unitToAdd != null) {
-						if (skill != "undefined") {
-							unitToAdd.skill = parseInt(skill);
-							unitToAdd.cost = getNewSkillCost(parseInt(skill), unitToAdd.pv);
-						}
-						list.addUnit(unitToAdd);
-					}
-				}
-			}
-		}
+		await list.loadList(data);
 		showLoadModal = false;
 	}
 </script>

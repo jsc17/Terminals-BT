@@ -85,7 +85,7 @@
 	>
 		<div class="space-between">
 			<div></div>
-			<div>Filters</div>
+			<div>Filters - {resultList.filteredList.length}/{resultList.availableList.length}</div>
 			<div>
 				{#if showFilters}
 					-
@@ -123,8 +123,6 @@
 <style>
 	main {
 		width: 100%;
-		position: sticky;
-		top: 35px;
 		z-index: 2;
 	}
 	.filter-list {

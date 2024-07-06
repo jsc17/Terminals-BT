@@ -1,14 +1,18 @@
 <script lang="ts">
 	import { getContext, onMount } from "svelte";
 	import { page } from "$app/stores";
-
+	import { toastController } from "$lib/stores/toastController.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import LoginModal from "./LoginModal.svelte";
 	import { enhance } from "$app/forms";
+	import { type ActionResult } from "@sveltejs/kit";
+	import { goto } from "$app/navigation";
+	import { list } from "../../routes/listbuilder/list.svelte";
 
 	let theme = $state("dark");
 	let root: HTMLHtmlElement;
 	let showLinksDropdown = $state(false);
+	let showUserDropdown = $state(false);
 	let showLoginModal = $state(false);
 
 	let user: { username: string | undefined } = getContext("user");
@@ -30,7 +34,19 @@
 	});
 
 	function handleLogout() {
-		user.username = undefined;
+		return async ({ result }: { result: ActionResult }) => {
+			if (result.type == "success") {
+				user.username = undefined;
+				toastController.addToast("User logged out successfully", 2000);
+				localStorage.removeItem("last-list");
+				list.clear();
+				goto("/");
+			} else if (result.type == "failure") {
+				if (result.data) {
+					toastController.addToast(result.data.message);
+				}
+			}
+		};
 	}
 </script>
 
@@ -61,6 +77,8 @@
 				Unit Search
 			{:else if $page.url.pathname == "/changelog"}
 				Changelog
+			{:else if $page.url.pathname == "/settings"}
+				Settings
 			{/if}
 		</button>
 		<div class="dropdown-content" class:dropdown-hidden={!showLinksDropdown} class:dropdown-shown={showLinksDropdown}>
@@ -84,10 +102,29 @@
 	{/if}
 	<div class="inline gap8">
 		{#if user.username}
-			<form method="post" action="/auth/?/logout" use:enhance={handleLogout} class="inline">
-				<p>{appWindow.isMobile ? user.username : `Welcome, ${user.username}`}</p>
-				<button class="link-button">(log out)</button>
-			</form>
+			<nav
+				class="dropdown"
+				onmouseleave={() => {
+					showUserDropdown = false;
+				}}
+			>
+				<button
+					class="link-button"
+					id="nav-links"
+					onclick={() => {
+						showUserDropdown = !showUserDropdown;
+					}}
+				>
+					{user.username}
+					<img src="/icons/menu.svg" alt="menu" />
+				</button>
+				<div class="dropdown-content dropdown-right" class:dropdown-hidden={!showUserDropdown} class:dropdown-shown={showUserDropdown}>
+					<a href="/settings">User Settings</a>
+					<form method="post" action="/auth/?/logout" use:enhance={handleLogout} class="inline">
+						<button class="link-button">Log out</button>
+					</form>
+				</div>
+			</nav>
 		{:else}
 			<button
 				class="link-button"
@@ -131,5 +168,11 @@
 	}
 	button {
 		height: 25px;
+	}
+	.dropdown-right {
+		align-items: end;
+	}
+	a {
+		text-decoration: none;
 	}
 </style>

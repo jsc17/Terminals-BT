@@ -36,11 +36,13 @@
 		"@lucia-auth/adapter-prisma": "^4.0.1",
 		"@prisma/client": "^5.12.1",
 		"@sveltejs/adapter-node": "^4.0.1",
+		"arctic": "^1.9.1",
+		"dotenv": "^16.4.5",
 		"lucia": "^3.1.1",
 		"nodemailer": "^6.9.11",
 		"oslo": "^1.2.0",
 		"pdf-lib": "^1.17.1",
-		"pdfjs-dist": "^4.0.379",
+		"pdfjs-dist": "4.0.379",
 		"prettier": "^3.2.5",
 		"svelty-email": "github:socketopp/svelty-email#feature/component-render"
 	}

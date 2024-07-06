@@ -2,9 +2,9 @@
 	import { resultList } from "./resultList.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { list } from "./list.svelte";
-	import { setContext, onMount } from "svelte";
+	import { onMount } from "svelte";
 	import { Listbuilder, SearchParameters, SearchResults, SearchFilters } from "./components/index";
-	import { ruleSets } from "$lib/types/options";
+	import { getRules, ruleSets } from "$lib/types/options";
 
 	let selectedRules = $state<string>("");
 	let listDialog: HTMLDialogElement;
@@ -19,16 +19,31 @@
 	];
 	let { data } = $props();
 
-	setContext("list", list);
-
 	onMount(() => {
 		if (data.rules && ruleSets.find((value) => value.name == data.rules)) {
-			selectedRules = data.rules;
-		} else {
-			selectedRules = "noRes";
+			list.setOptions(data.rules);
+			resultList.setOptions(selectedRules);
 		}
-		resultList.setOptions(selectedRules);
-		list.setOptions(selectedRules);
+		const lastList = localStorage.getItem("last-list");
+		if (lastList) {
+			const importData = JSON.parse(lastList);
+			const parsedCode = {
+				name: importData.name ?? "Imported List",
+				era: importData.era ?? 0,
+				faction: importData.faction ?? 0,
+				rules: getRules(importData.rules) ?? ruleSets[0],
+				units: importData.units ?? [],
+				sublists: importData.sublists ?? []
+			};
+			list.loadList(parsedCode);
+			console.log("loaded previous list");
+		} else {
+			console.log("no previous list");
+		}
+	});
+	$effect(() => {
+		list.items;
+		localStorage.setItem("last-list", list.createListCode());
 	});
 
 	$effect(() => {
@@ -59,7 +74,7 @@
 		<SearchResults />
 	</div>
 	{#if !appWindow.isNarrow}
-		<Listbuilder bind:selectedRules {recentChanges} {description} />
+		<Listbuilder {recentChanges} {description} />
 	{:else}
 		<dialog
 			bind:this={listDialog}
@@ -75,7 +90,7 @@
 					}}>Close</button
 				>
 			</div>
-			<Listbuilder bind:selectedRules {recentChanges} {description}></Listbuilder>
+			<Listbuilder {recentChanges} {description}></Listbuilder>
 		</dialog>
 		<button
 			onclick={() => {

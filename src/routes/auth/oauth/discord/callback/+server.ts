@@ -29,44 +29,65 @@ export const GET: RequestHandler = async (event) => {
 			return new Response("Email address not verified", { status: 400 });
 		}
 
-		const existingUser = await prisma.user.findUnique({
-			where: {
-				email: discordUser.email
-			}
-		});
-		if (existingUser) {
-			console.log("user exists");
-			if (!existingUser.google_id) {
-				await prisma.user.update({
-					where: {
-						id: existingUser.id
-					},
-					data: {
-						discord_id: discordUser.id
-					}
-				});
-			}
-			const session = await lucia.createSession(existingUser.id, {});
+		//check if logging into existing user
+		const existingLinkedUser = await prisma.user.findUnique({ where: { discord_id: discordUser.id } });
+		if (existingLinkedUser) {
+			const session = await lucia.createSession(existingLinkedUser.id, {});
 			const sessionCookie = lucia.createSessionCookie(session.id);
 			event.cookies.set(sessionCookie.name, sessionCookie.value, {
 				path: ".",
 				...sessionCookie.attributes
 			});
 		} else {
-			const newUser = await prisma.user.create({
-				data: {
-					username: discordUser.username,
-					id: generateId(15),
-					email: discordUser.email,
-					discord_id: discordUser.id
+			//check if user is logged in and link account
+			if (event.locals.user) {
+				await prisma.user.update({ where: { id: event.locals.user.id }, data: { discord_id: discordUser.id } });
+			} else {
+				//check if discord email address exists on a user and link discord id
+				const existingUser = await prisma.user.findUnique({ where: { email: discordUser.email } });
+				if (existingUser) {
+					if (!existingUser.discord_id) {
+						await prisma.user.update({
+							where: {
+								id: existingUser.id
+							},
+							data: {
+								discord_id: discordUser.id
+							}
+						});
+					}
+					const session = await lucia.createSession(existingUser.id, {});
+					const sessionCookie = lucia.createSessionCookie(session.id);
+					event.cookies.set(sessionCookie.name, sessionCookie.value, {
+						path: ".",
+						...sessionCookie.attributes
+					});
+					//create user with discord email address, discord oauth id, random username, and no password
+				} else {
+					let username = "";
+					while (username == "") {
+						username = `user${Math.floor(Math.random() * 90000) + 10000}`;
+						const existingName = await prisma.user.findUnique({ where: { username } });
+						if (existingName) {
+							username = "";
+						}
+					}
+					const newUser = await prisma.user.create({
+						data: {
+							username,
+							id: generateId(15),
+							email: discordUser.email,
+							discord_id: discordUser.id
+						}
+					});
+					const session = await lucia.createSession(newUser.id, {});
+					const sessionCookie = lucia.createSessionCookie(session.id);
+					event.cookies.set(sessionCookie.name, sessionCookie.value, {
+						path: ".",
+						...sessionCookie.attributes
+					});
 				}
-			});
-			const session = await lucia.createSession(newUser.id, {});
-			const sessionCookie = lucia.createSessionCookie(session.id);
-			event.cookies.set(sessionCookie.name, sessionCookie.value, {
-				path: ".",
-				...sessionCookie.attributes
-			});
+			}
 		}
 		return new Response(null, {
 			status: 302,

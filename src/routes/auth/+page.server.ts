@@ -1,15 +1,14 @@
 import { lucia } from "$lib/server/lucia";
-import { fail } from "@sveltejs/kit";
+import { fail, type Cookies } from "@sveltejs/kit";
 import { generateId } from "lucia";
 import { Argon2id } from "oslo/password";
 import { prisma } from "$lib/server/prisma";
-import type { Cookies } from "@sveltejs/kit";
 
 export const actions = {
 	register: async ({ request, cookies }: { request: Request; cookies: Cookies }) => {
 		const { username, password, verifyPassword, email } = Object.fromEntries(await request.formData()) as Record<string, string>;
 
-		if (username.length < 3 || username.length > 31 || !/^[a-zA-Z0-9_-]+$/.test(username)) {
+		if (username.length < 3 || username.length > 30 || !/^[a-zA-Z0-9]+$/.test(username)) {
 			return fail(400, {
 				message: "Invalid username"
 			});
@@ -85,5 +84,6 @@ export const actions = {
 			path: ".",
 			...sessionCookie.attributes
 		});
+		return { message: "User logged out successfully" };
 	}
 };

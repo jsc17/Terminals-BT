@@ -18,8 +18,8 @@ export const lucia = new Lucia(new PrismaAdapter(prisma.session, prisma.user), {
 	}
 });
 
-export const googleOauth = new Google(process.env.GOOGLE_CLIENT_ID!, process.env.GOOGLE_CLIENT_SECRET!, "http://localhost:5173/auth/oauth/google/callback");
-export const discordOauth = new Discord(process.env.DISCORD_CLIENT_ID!, process.env.DISCORD_CLIENT_SECRET!, "http://localhost:5173/auth/oauth/discord/callback");
+export const googleOauth = new Google(process.env.GOOGLE_CLIENT_ID!, process.env.GOOGLE_CLIENT_SECRET!, process.env.GOOGLE_CALLBACK!);
+export const discordOauth = new Discord(process.env.DISCORD_CLIENT_ID!, process.env.DISCORD_CLIENT_SECRET!, process.env.DISCORD_CALLBACK!);
 
 declare module "lucia" {
 	interface Register {

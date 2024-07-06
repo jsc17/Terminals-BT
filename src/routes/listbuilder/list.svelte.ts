@@ -1,11 +1,14 @@
 import { isUnit, type Unit } from "$lib/types/unit";
 import { type Formation } from "$lib/types/formation.svelte";
 import { type Options, ruleSets } from "../../lib/types/options";
+import { getNewSkillCost } from "$lib/utilities/bt-utils";
+import customCards from "$lib/data/customCards.json";
+import { resultList } from "./resultList.svelte";
 
 class UnitList {
 	items = $state<(Unit | Formation)[]>([]);
 	details = $state({ name: "", era: -1, faction: -1, general: -1 });
-	options = $state<Options>();
+	options = $state<Options>(ruleSets[0]);
 	sublists = $state<string[]>([]);
 	validate = false;
 	id = 0;
@@ -96,6 +99,13 @@ class UnitList {
 			}
 		});
 	}
+	clear() {
+		this.items = [];
+		this.details = { name: "", era: 0, faction: 0, general: -1 };
+		this.options = ruleSets[0];
+		this.sublists = [];
+		this.validate = false;
+	}
 	createListCode() {
 		const listCode = {
 			name: this.details.name,
@@ -134,6 +144,87 @@ class UnitList {
 			}
 		}
 		return `{${tempUnitArray.join(",")}}`;
+	}
+	async loadList(data: any) {
+		const { era, faction, name, units, sublists, rules } = data;
+		this.setOptions(rules.name);
+		resultList.setOptions(rules.name);
+
+		resultList.details.era = era;
+		resultList.details.faction = faction;
+
+		await resultList.loadUnits();
+
+		this.details.name = name;
+		this.details.era = era;
+		this.details.faction = faction;
+		this.details.general = resultList.general;
+		this.sublists = sublists;
+
+		list.items = [];
+		let unitArray = units;
+		for (const item of unitArray) {
+			if (item.charAt(0) == "{") {
+				const formationData = JSON.parse(item);
+				const tempFormation = { style: formationData.style, name: formationData.name, type: formationData.type, units: <Unit[]>[] };
+
+				for (const unit of formationData.units) {
+					let [id, skill] = unit.split(",");
+					let unitToAdd = JSON.parse(
+						JSON.stringify(
+							resultList.resultList.find((result: Unit) => {
+								return result.mulId == parseInt(id);
+							})
+						)
+					);
+					if (unitToAdd != null) {
+						if (skill != "undefined") {
+							unitToAdd.skill = parseInt(skill);
+							unitToAdd.cost = getNewSkillCost(parseInt(skill), unitToAdd.pv);
+						}
+						tempFormation.units.push(unitToAdd);
+					}
+				}
+				this.addFormation(tempFormation.style, tempFormation.name, tempFormation.type, tempFormation.units);
+			} else {
+				let [id, skill] = item.split(",");
+				if (Number(id) < 0) {
+					for (const unitList of customCards.unitPacks) {
+						for (const unit of unitList.units) {
+							if (unit.id == Number(id)) {
+								this.addUnit({
+									mulId: unit.id,
+									type: unit.type,
+									subtype: unit.type,
+									name: unit.name,
+									class: unit.class,
+									variant: unit.variant,
+									pv: unit.pv,
+									cost: unit.pv,
+									abilities: unit.abilities,
+									rulesLevel: "standard"
+								});
+							}
+						}
+					}
+				} else {
+					let unitToAdd = JSON.parse(
+						JSON.stringify(
+							resultList.resultList.find((result: Unit) => {
+								return result.mulId == parseInt(id);
+							})
+						)
+					);
+					if (unitToAdd != null) {
+						if (skill != "undefined") {
+							unitToAdd.skill = parseInt(skill);
+							unitToAdd.cost = getNewSkillCost(parseInt(skill), unitToAdd.pv);
+						}
+						this.addUnit(unitToAdd);
+					}
+				}
+			}
+		}
 	}
 }
 

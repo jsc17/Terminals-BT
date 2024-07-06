@@ -29,54 +29,65 @@ export const GET: RequestHandler = async (event) => {
 		if (!googleUser.email_verified) {
 			return new Response("Email address not verified", { status: 400 });
 		}
-
-		const existingUser = await prisma.user.findUnique({
-			where: {
-				email: googleUser.email
-			}
-		});
-		if (existingUser) {
-			console.log("user exists");
-			if (!existingUser.google_id) {
-				await prisma.user.update({
-					where: {
-						id: existingUser.id
-					},
-					data: {
-						google_id: googleUser.sub
-					}
-				});
-			}
-			const session = await lucia.createSession(existingUser.id, {});
+		//check if logging into existing user
+		const existingLinkedUser = await prisma.user.findUnique({ where: { google_id: googleUser.sub } });
+		if (existingLinkedUser) {
+			const session = await lucia.createSession(existingLinkedUser.id, {});
 			const sessionCookie = lucia.createSessionCookie(session.id);
 			event.cookies.set(sessionCookie.name, sessionCookie.value, {
 				path: ".",
 				...sessionCookie.attributes
 			});
 		} else {
-			let username = "";
-			while (username == "") {
-				username == `user${Math.floor(Math.random() * 90000) + 10000}`;
-				const existingName = await prisma.user.findUnique({ where: { username } });
-				if (existingName) {
-					username = "";
+			//check if user is logged in and link account
+			if (event.locals.user) {
+				await prisma.user.update({ where: { id: event.locals.user.id }, data: { google_id: googleUser.sub } });
+			} else {
+				//check if google email address exists on a user and link google sub
+				const existingUser = await prisma.user.findUnique({ where: { email: googleUser.email } });
+				if (existingUser) {
+					if (!existingUser.google_id) {
+						await prisma.user.update({
+							where: {
+								id: existingUser.id
+							},
+							data: {
+								google_id: googleUser.sub
+							}
+						});
+					}
+					const session = await lucia.createSession(existingUser.id, {});
+					const sessionCookie = lucia.createSessionCookie(session.id);
+					event.cookies.set(sessionCookie.name, sessionCookie.value, {
+						path: ".",
+						...sessionCookie.attributes
+					});
+					//create user with google email address, google oauth sub, random username, and no password
+				} else {
+					let username = "";
+					while (username == "") {
+						username = `user${Math.floor(Math.random() * 90000) + 10000}`;
+						const existingName = await prisma.user.findUnique({ where: { username } });
+						if (existingName) {
+							username = "";
+						}
+					}
+					const newUser = await prisma.user.create({
+						data: {
+							username,
+							id: generateId(15),
+							email: googleUser.email,
+							google_id: googleUser.sub
+						}
+					});
+					const session = await lucia.createSession(newUser.id, {});
+					const sessionCookie = lucia.createSessionCookie(session.id);
+					event.cookies.set(sessionCookie.name, sessionCookie.value, {
+						path: ".",
+						...sessionCookie.attributes
+					});
 				}
 			}
-
-			const newUser = await prisma.user.create({
-				data: {
-					username,
-					id: generateId(15),
-					email: googleUser.email,
-					google_id: googleUser.sub
-				}
-			});
-			const session = await lucia.createSession(newUser.id, {});
-			const sessionCookie = lucia.createSessionCookie(session.id);
-			event.cookies.set(sessionCookie.name, sessionCookie.value, {
-				path: ".",
-				...sessionCookie.attributes
-			});
 		}
 		return new Response(null, {
 			status: 302,

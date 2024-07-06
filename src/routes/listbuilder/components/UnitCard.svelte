@@ -10,6 +10,7 @@
 		const target = event.target as HTMLInputElement;
 		if (target) {
 			let skill = parseInt(target.value);
+			unit.skill = skill;
 			unit.cost = getNewSkillCost(skill, unit.pv);
 		}
 	}
@@ -27,10 +28,12 @@
 			{/if}
 		</p>
 		<p>PV - {unit.cost}</p>
-		<button onclick={() => {
+		<button
+			onclick={() => {
 				list.remove(unit.id!);
 				toastController.addToast(`${unit.name} removed from list`);
-			}}>-</button>
+			}}>-</button
+		>
 	</div>
 	<div class="stat-row">
 		<p>{unit.abilities}</p>

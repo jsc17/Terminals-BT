@@ -1,5 +1,12 @@
 [
 	{
+		"date": "7-5-24",
+		"updates": {
+			"Site-wide": ["Add Google and Discord as login options", "Create settings page for account management"],
+			"List Builder": ["Now loads the previous list you had open when reopening the site"]
+		}
+	},
+	{
 		"date": "6-30-24",
 		"updates": {
 			"List Builder": [

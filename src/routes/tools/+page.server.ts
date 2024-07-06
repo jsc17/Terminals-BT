@@ -2,12 +2,11 @@ import { prisma } from "$lib/server/prisma";
 import eraLists from "$lib/data/erasFactionsList.json";
 import { fail, redirect } from "@sveltejs/kit";
 import { sendResetEmail } from "$lib/emails/mailer.server.js";
-import type { PageServerLoad } from "../$types.js";
 import fs from "fs/promises";
 import { calculateTMM } from "$lib/utilities/bt-utils.js";
 
-export const load: PageServerLoad = async ({ locals }) => {
-	if (!locals.user || locals.user.username != "terminal") {
+export const load = async ({ locals }) => {
+	if (!locals.user || locals.user.username.toLowerCase() != "terminal") {
 		redirect(302, "/");
 	}
 };

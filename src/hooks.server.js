@@ -1,4 +1,5 @@
 import { lucia } from "$lib/server/lucia";
+import { prisma } from "$lib/server/prisma";
 
 export const handle = async ({ event, resolve }) => {
 	const sessionId = event.cookies.get(lucia.sessionCookieName);
@@ -27,5 +28,6 @@ export const handle = async ({ event, resolve }) => {
 	}
 	event.locals.user = user;
 	event.locals.session = session;
+	await prisma.user.update({ where: { id: user?.id }, data: { last_login: new Date() } });
 	return resolve(event);
 };

@@ -2,8 +2,10 @@
 	import eraLists from "$lib/data/erasFactionsList.json";
 	import { eras, factions } from "$lib/data/erasFactionLookup.js";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import { resultList } from "../resultList.svelte";
-	import { list } from "../list.svelte";
+	import { ResultList } from "$lib/types/resultList.svelte";
+	import { getContext } from "svelte";
+
+	const resultList: ResultList = getContext("resultList");
 
 	let showParameters = $state(false);
 
@@ -21,25 +23,6 @@
 		});
 		return allowed;
 	});
-
-	async function getUnits() {
-		if (resultList.details.era == -1 || resultList.details.faction == -1) {
-			alert("Please check era and faction selections and try again");
-			return;
-		}
-
-		resultList.clear();
-
-		await resultList.loadUnits();
-
-		list.details.era = resultList.details.era;
-		list.details.faction = resultList.details.faction;
-		list.details.general = resultList.general;
-
-		if (list.details.name == "") {
-			list.details.name = list.details.era + " " + list.details.faction;
-		}
-	}
 </script>
 
 <main>
@@ -85,7 +68,15 @@
 				<p>General:</p>
 				<a href={`http://masterunitlist.info/Era/FactionEraDetails?FactionId=${resultList.details.faction}&EraId=${resultList.details.era}`}>{factions.get(resultList.general)}</a>
 			</div>
-			<div><button id="getData" onclick={getUnits} disabled={resultList.status == "loading"}>Search</button></div>
+			<div>
+				<button
+					id="getData"
+					onclick={() => {
+						resultList.loadUnits();
+					}}
+					disabled={resultList.status == "loading"}>Search</button
+				>
+			</div>
 		</form>
 	</div>
 </main>

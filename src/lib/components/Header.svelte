@@ -7,7 +7,7 @@
 	import { enhance } from "$app/forms";
 	import { type ActionResult } from "@sveltejs/kit";
 	import { goto } from "$app/navigation";
-	import { list } from "../../routes/listbuilder/list.svelte";
+	import type { UnitList } from "$lib/types/list.svelte";
 
 	let theme = $state("dark");
 	let root: HTMLHtmlElement;
@@ -16,6 +16,7 @@
 	let showLoginModal = $state(false);
 
 	let user: { username: string | undefined } = getContext("user");
+	const list: UnitList = getContext("list");
 
 	onMount(() => {
 		let defaultTheme = "dark";

@@ -54,7 +54,8 @@
 		<button
 			onclick={() => {
 				sublist.print();
-			}}>Print Sublist</button>
+			}}>Print Sublist</button
+		>
 		<button onclick={() => copySublist(sublist.id)}>Copy</button>
 		<button onclick={() => deleteSublist(sublist.id)}>Delete</button>
 	</div>

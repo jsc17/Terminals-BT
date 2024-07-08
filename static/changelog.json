@@ -1,5 +1,11 @@
 [
 	{
+		"date": "7-7-24",
+		"updates": {
+			"Unit Search / Listbuilder": ["Fixed spacing issues with longer unit names.", "Added unit availability button to see what eras/factions have access to a unit."]
+		}
+	},
+	{
 		"date": "7-5-24",
 		"updates": {
 			"Site-wide": ["Add Google and Discord as login options", "Create settings page for account management"],

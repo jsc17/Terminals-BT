@@ -44,6 +44,7 @@
 		"pdf-lib": "^1.17.1",
 		"pdfjs-dist": "4.0.379",
 		"prettier": "^3.2.5",
+		"runed": "^0.15.0",
 		"svelty-email": "github:socketopp/svelty-email#feature/component-render"
 	}
 }

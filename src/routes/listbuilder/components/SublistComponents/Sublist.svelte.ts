@@ -1,15 +1,16 @@
-import { list } from "../../list.svelte";
 import { isUnit, type Unit } from "$lib/types/unit";
 import { deserialize } from "$app/forms";
 import { toastController } from "$lib/stores/toastController.svelte";
+import type { UnitList } from "$lib/types/list.svelte";
 
 export class Sublist {
 	id: number;
 	checked = $state<number[]>([]);
 	scenario = $state<string>("-");
+	list: UnitList;
 	unitList = $derived.by(() => {
 		const tempUnitList: Unit[] = [];
-		for (const item of list.items) {
+		for (const item of this.list.items) {
 			if (isUnit(item)) {
 				if (this.checked.includes(item.id!)) {
 					tempUnitList.push(item);
@@ -46,8 +47,9 @@ export class Sublist {
 		return { pv, health, short, medium, long, size };
 	});
 
-	constructor(id: number) {
+	constructor(id: number, list: UnitList) {
 		this.id = id;
+		this.list = list;
 	}
 
 	async print() {
@@ -61,10 +63,10 @@ export class Sublist {
 		let body = JSON.stringify({
 			units: this.unitList,
 			playername: "",
-			listname: `${list.details.name} Sublist`,
-			era: list.details.era,
-			faction: list.details.faction,
-			general: list.details.general,
+			listname: `${this.list.details.name} Sublist`,
+			era: this.list.details.era,
+			faction: this.list.details.faction,
+			general: this.list.details.general,
 			style: "detailed",
 			condense: condense
 		});
@@ -74,7 +76,7 @@ export class Sublist {
 		//@ts-ignore
 		const blob = new Blob([new Uint8Array(Object.values(JSON.parse(response.data.pdf)))], { type: "application/pdf" });
 		const downloadElement = document.createElement("a");
-		downloadElement.download = list.details.name;
+		downloadElement.download = this.list.details.name;
 		downloadElement.href = URL.createObjectURL(blob);
 		downloadElement.click();
 	}

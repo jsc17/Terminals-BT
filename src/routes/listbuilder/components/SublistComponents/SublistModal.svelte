@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import { list } from "../../list.svelte";
 	import { dndzone, type DndEvent } from "svelte-dnd-action";
 	import { isUnit } from "$lib/types/unit";
 	import { Sublist } from "./Sublist.svelte";
@@ -11,11 +10,15 @@
 	import MobileSublist from "./MobileSublist.svelte";
 	import HorizontalSublist from "./HorizontalSublist.svelte";
 	import AutogenerationModal from "./AutogenerationModal.svelte";
+	import type { UnitList } from "$lib/types/list.svelte";
+	import { getContext } from "svelte";
+
+	let list: UnitList = getContext("list");
 
 	let { showSublistModal = $bindable() } = $props();
 
 	let sublistId = 1;
-	let tempSublist = $state<Sublist>(new Sublist(0));
+	let tempSublist = $state<Sublist>(new Sublist(0, list));
 	let sublists = $state<Sublist[]>([]);
 	let filteredSublists = $derived.by(() => {
 		let tempSublists: Sublist[] = [];
@@ -59,7 +62,7 @@
 		for (const data of list.sublists) {
 			if (data.charAt(0) == "{") {
 				const sublist = JSON.parse(data);
-				const newSublist = new Sublist(sublistId);
+				const newSublist = new Sublist(sublistId, list);
 				sublistId++;
 
 				newSublist.scenario = sublist.sc;
@@ -69,7 +72,7 @@
 
 				sublists.push(newSublist);
 			} else {
-				const newSublist = new Sublist(sublistId);
+				const newSublist = new Sublist(sublistId, list);
 				sublistId++;
 
 				newSublist.scenario = "-";
@@ -83,7 +86,7 @@
 	}
 
 	function addSublist() {
-		let newList: Sublist = new Sublist(sublistId);
+		let newList: Sublist = new Sublist(sublistId, list);
 		const createdId = sublistId;
 		sublistId++;
 
@@ -107,7 +110,7 @@
 	}
 
 	function copySublist(id: number) {
-		const createdSublist = new Sublist(sublistId);
+		const createdSublist = new Sublist(sublistId, list);
 		sublistId++;
 		createdSublist.checked = [
 			...(sublists.find((sublist) => {
@@ -261,7 +264,16 @@
 				{#each list.items as item}
 					{#if isUnit(item)}
 						<tr>
-							<td><input type="checkbox" id={`checkbox${item.id!.toString()}`} checked={tempSublist.checked?.includes(item.id!)} onchange={(e)=>{ handleCheck(e, item.id!)}} /></td>
+							<td
+								><input
+									type="checkbox"
+									id={`checkbox${item.id!.toString()}`}
+									checked={tempSublist.checked?.includes(item.id!)}
+									onchange={(e) => {
+										handleCheck(e, item.id!);
+									}}
+								/></td
+							>
 							<td><label for={`checkbox${item.id!.toString()}`}>{item.name}</label></td>
 							<td>{item.skill}</td>
 							<td>{item.cost}</td>
@@ -269,7 +281,15 @@
 					{:else}
 						{#each item.units as unit}
 							<tr>
-								<td><input type="checkbox" id={`checkbox${unit.id!.toString()}`} checked={tempSublist.checked?.includes(unit.id!)} onchange={(e)=>{handleCheck(e, unit.id!)}} /></td
+								<td
+									><input
+										type="checkbox"
+										id={`checkbox${unit.id!.toString()}`}
+										checked={tempSublist.checked?.includes(unit.id!)}
+										onchange={(e) => {
+											handleCheck(e, unit.id!);
+										}}
+									/></td
 								>
 								<td>{unit.name}</td>
 								<td>{unit.skill}</td>

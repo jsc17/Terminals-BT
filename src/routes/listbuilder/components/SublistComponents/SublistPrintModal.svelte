@@ -2,9 +2,11 @@
 	import { enhance } from "$app/forms";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import type { Sublist } from "./Sublist.svelte";
-	import { list } from "../../list.svelte";
 	import { toastController } from "$lib/stores/toastController.svelte";
+	import type { UnitList } from "$lib/types/list.svelte";
+	import { getContext } from "svelte";
 
+	let list: UnitList = getContext("list");
 	let { showPrintModal = $bindable(), sublists }: { showPrintModal: boolean; sublists: Sublist[] } = $props();
 
 	let printDialog: HTMLDialogElement;
@@ -46,7 +48,8 @@
 	class:dialog-wide={appWindow.isNarrow}
 	onclose={() => {
 		showPrintModal = false;
-	}}>
+	}}
+>
 	<form action="?/printSublists" method="post" use:enhance={handlePrintForm} class="padding8">
 		<div class="inline column gap8">
 			<div class="inline gap8"><input type="radio" name="sublistPrintLayout" id="vertical" value="vertical" checked /><label for="vertical">Vertical</label></div>

@@ -7,7 +7,6 @@
 	const { data, children } = $props();
 	let user = $state({ username: data.username });
 	setContext("user", user);
-
 	$effect.pre(() => {
 		appWindow.windowWidth = window.screen.availWidth;
 		window.onresize = () => {
@@ -29,6 +28,7 @@
 		scrollbar-gutter: stable;
 		scrollbar-color: var(--primary-muted) black;
 		scrollbar-width: thin;
+		overscroll-behavior: contain;
 	}
 	:global(:root) {
 		--radius: 0.5rem;
@@ -112,7 +112,7 @@
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		min-height: fit-content;
-		max-height: 99%;
+		max-height: 95dvh;
 		overflow: auto;
 	}
 	@media (max-width: 500px) {

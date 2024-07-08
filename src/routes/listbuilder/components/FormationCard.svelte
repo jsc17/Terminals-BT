@@ -3,10 +3,12 @@
 	import { type Unit } from "$lib/types/unit";
 	import UnitCard from "./UnitCard.svelte";
 	import { dndzone, type DndEvent, dragHandleZone, dragHandle } from "svelte-dnd-action";
-	import { list } from "../list.svelte";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import Menu from "$lib/components/Menu.svelte";
+	import type { UnitList } from "$lib/types/list.svelte";
+	import { getContext } from "svelte";
 
+	let list: UnitList = getContext("list");
 	let { unit: formation }: { unit: Formation } = $props();
 
 	let dropTargetStyle = { outline: "1px solid var(--primary)" };
@@ -42,12 +44,11 @@
 			<button
 				class="menu-button"
 				onclick={() => {
-					if(formation.units.length == 0 || confirm("Formation is not empty and removing it will remove all units it contains. Continue?")){
+					if (formation.units.length == 0 || confirm("Formation is not empty and removing it will remove all units it contains. Continue?")) {
 						list.remove(formation.id!);
 						toastController.addToast(`${formation.name} removed from list`);
 					}
-				}}
-				>Remove</button
+				}}>Remove</button
 			></Menu
 		>
 	</div>

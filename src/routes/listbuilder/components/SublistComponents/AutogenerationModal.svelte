@@ -1,9 +1,11 @@
 <script lang="ts">
-	import ListSubmission from "$lib/emails/ListSubmission.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import { list } from "../../list.svelte";
 	import { type Unit } from "$lib/types/unit";
 	import { Sublist } from "./Sublist.svelte";
+	import type { UnitList } from "$lib/types/list.svelte";
+	import { getContext } from "svelte";
+
+	let list: UnitList = getContext("list");
 
 	type AutoSublist = {
 		id: number;
@@ -83,7 +85,7 @@
 		}
 	}
 	function addAutoSublist(id: number) {
-		let newList = new Sublist(sublistId);
+		let newList = new Sublist(sublistId, list);
 		sublistId++;
 		let sublist = $state.snapshot(
 			autosublists.find((e) => {

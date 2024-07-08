@@ -10,7 +10,7 @@
 		height: string | number;
 		width: string | number;
 		itemCount: number;
-		itemSize: number;
+		itemSize: number | number[];
 		estimatedItemSize?: number;
 		stickyIndices?: number[];
 		getKey?: any;

@@ -1,6 +1,9 @@
 <script lang="ts">
-	import { resultList } from "../resultList.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte.js";
+	import { ResultList } from "$lib/types/resultList.svelte";
+	import { getContext } from "svelte";
+
+	const resultList: ResultList = getContext("resultList");
 
 	let showFilters = $state(false);
 	let showAdditionalFilters = $state(false);
@@ -85,7 +88,7 @@
 	>
 		<div class="space-between">
 			<div></div>
-			<div>Filters</div>
+			<div>Filters - {resultList.filteredList.length}/{resultList.availableList.length}</div>
 			<div>
 				{#if showFilters}
 					-
@@ -112,7 +115,7 @@
 					+
 				{/if}
 			</button>
-			<button class="clear" onclick={resultList.resetFilters}>Clear Filters</button>
+			<button class="clear" onclick={() => resultList.resetFilters()}>Clear Filters</button>
 		</div>
 		{#if showAdditionalFilters}
 			{@render filters(resultList.additionalFilters)}

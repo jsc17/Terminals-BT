@@ -5,10 +5,12 @@
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import type { ActionResult } from "@sveltejs/kit";
 	import { deserialize } from "$app/forms";
-	import { list } from "../list.svelte";
 	import { exportToJeff } from "../utilities/export.svelte";
+	import type { UnitList } from "$lib/types/list.svelte";
 
+	let list: UnitList = getContext("list");
 	let user: any = getContext("user");
+
 	let { showSaveModal = $bindable() } = $props();
 	let saveDialog: HTMLDialogElement;
 	let existingListNames: string[] = [];
@@ -87,7 +89,8 @@
 	onclose={() => {
 		showSaveModal = false;
 	}}
-	class:dialog-wide={appWindow.isNarrow}>
+	class:dialog-wide={appWindow.isNarrow}
+>
 	<div class="dialog-body">
 		<div class="space-between">
 			{#if user.username}
@@ -99,7 +102,8 @@
 				class="close-button"
 				onclick={() => {
 					showSaveModal = false;
-				}}>X</button>
+				}}>X</button
+			>
 		</div>
 
 		<form method="post" action="/?/saveList" use:enhance={handleSaveList}>
@@ -126,21 +130,25 @@
 		<h2>Export Codes:</h2>
 		<div class="export-bar">
 			<label for="list-code">List Code: </label><input type="text" name="list-code" id="list-code" disabled value={listCode} />
-			<button onclick={()=>{
+			<button
+				onclick={() => {
 					navigator.clipboard.writeText(listCode!);
 					toastController.addToast("code copied to clipboard", 1500);
 					showSaveModal = false;
-				}}>
+				}}
+			>
 				<img src="/icons/content-copy.svg" alt="copy to clipboard" class="button-icon" />
 			</button>
 		</div>
 		<div class="export-bar">
 			<label for="tts-code">TTS Code: </label><input type="text" name="tts-code" id="tts-code" disabled value={ttsCode} />
-			<button onclick={()=>{
+			<button
+				onclick={() => {
 					navigator.clipboard.writeText(ttsCode!);
 					toastController.addToast("code copied to clipboard", 1500);
 					showSaveModal = false;
-				}}>
+				}}
+			>
 				<img src="/icons/content-copy.svg" alt="copy to clipboard" class="button-icon" />
 			</button>
 		</div>
@@ -148,8 +156,9 @@
 			<label for="jeffs-tools">Jeff's Tools: </label><input type="text" name="jeff-tools" id="jeff's tools" bind:value={list.details.name} />
 			<button
 				onclick={() => {
-					exportToJeff();
-				}}>
+					exportToJeff(list);
+				}}
+			>
 				<img src="/icons/download.svg" alt="download to Jeff's Tools" class="button-icon" />
 			</button>
 		</div>

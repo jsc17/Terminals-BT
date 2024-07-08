@@ -1,6 +1,11 @@
 <script lang="ts">
-	import { SearchFilters, SearchResults, SearchParameters } from "./components/index";
-	import { resultList } from "./resultList.svelte";
+	import { setContext } from "svelte";
+	import { ResultList } from "$lib/types/resultList.svelte";
+	import { SearchFilters, SearchParameters, SearchResults } from "$lib/components/index";
+
+	export const resultList = new ResultList();
+
+	setContext("resultList", resultList);
 </script>
 
 <main>

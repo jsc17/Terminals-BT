@@ -1,8 +1,11 @@
 <script lang="ts">
 	import type { Unit } from "$lib/types/unit";
 	import { toastController } from "$lib/stores/toastController.svelte";
-	import { list } from "../list.svelte";
 	import { getNewSkillCost } from "$lib/utilities/bt-utils";
+	import type { UnitList } from "$lib/types/list.svelte";
+	import { getContext } from "svelte";
+
+	let list: UnitList = getContext("list");
 
 	const { unit }: { unit: Unit } = $props();
 

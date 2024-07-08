@@ -196,5 +196,38 @@ export const actions = {
 		} else {
 			return fail(400, { message: "Unit request failed" });
 		}
+	},
+	getUnitAvailability: async ({ request }) => {
+		let mulId = Number((await request.formData()).get("mulId"));
+
+		const availabilityResults = await prisma.unit.findUnique({
+			where: {
+				mulId
+			},
+			select: {
+				factions: {
+					select: {
+						era: true,
+						faction: true
+					}
+				}
+			}
+		});
+
+		const formattedAvailability = new Map<number, number[]>();
+		if (availabilityResults) {
+			for (const result of availabilityResults.factions) {
+				const factionList = formattedAvailability.get(result.era);
+				if (factionList) {
+					factionList.push(result.faction);
+				} else {
+					formattedAvailability.set(result.era, [result.faction]);
+				}
+			}
+		}
+		const unitAvailability = [...formattedAvailability].map((entry) => {
+			return { era: entry[0], factionList: entry[1] };
+		});
+		return { unitAvailability };
 	}
 };

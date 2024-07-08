@@ -127,7 +127,6 @@
 	async function sendResetEmail() {
 		const result: any = deserialize(await (await fetch("?/sendResetEmail", { method: "POST", body: "" })).text());
 	}
-	async function testUnit() {}
 </script>
 
 <main>
@@ -187,7 +186,7 @@
 	main {
 		display: flex;
 		flex-direction: column;
-		gap: 10px;
+		gap: 24px;
 		justify-content: flex-start;
 		align-items: start;
 	}

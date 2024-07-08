@@ -1,14 +1,20 @@
 <script lang="ts">
-	import { resultList } from "./resultList.svelte";
-	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import { list } from "./list.svelte";
-	import { onMount } from "svelte";
-	import { Listbuilder, SearchParameters, SearchResults, SearchFilters } from "./components/index";
+	import { UnitList } from "$lib/types/list.svelte";
+	import { onMount, setContext } from "svelte";
+	import { Listbuilder } from "./components/index";
 	import { getRules, ruleSets } from "$lib/types/options";
+	import { ResultList } from "$lib/types/resultList.svelte";
+	import { SearchFilters, SearchParameters, SearchResults } from "$lib/components/index";
+	import { slide } from "svelte/transition";
+
+	const resultList = new ResultList();
+	const list = new UnitList();
+	setContext("resultList", resultList);
+	setContext("list", list);
 
 	let selectedRules = $state<string>("");
-	let listDialog: HTMLDialogElement;
-	let showListDialog = $state(false);
+	let listDialog = $state<HTMLDialogElement>();
+	let showListbuilder = $state(false);
 	let recentChanges: string[] = [
 		"Combined generic and wolfnet 350 list builders into one, for easier maintainance and eventually customization of rules.",
 		"Choosing the correct ruleset from the dropdown above will limit the units offered in the results panel, but does not currently validate extra rules (such as 350's various rule of 2's)"
@@ -35,10 +41,7 @@
 				units: importData.units ?? [],
 				sublists: importData.sublists ?? []
 			};
-			list.loadList(parsedCode);
-			console.log("loaded previous list");
-		} else {
-			console.log("no previous list");
+			list.loadList(parsedCode, resultList);
 		}
 	});
 	$effect(() => {
@@ -48,7 +51,7 @@
 
 	$effect(() => {
 		if (listDialog != undefined) {
-			if (showListDialog) {
+			if (showListbuilder) {
 				listDialog.showModal();
 			} else {
 				try {
@@ -67,39 +70,29 @@
 	/>
 </svelte:head>
 
-<main class:main-wide={!appWindow.isNarrow}>
+<main>
 	<div class="search">
 		<SearchParameters />
 		<SearchFilters />
 		<SearchResults />
 	</div>
-	{#if !appWindow.isNarrow}
+	<div class="list-drawer-wrapper" class:show-listbuilder={showListbuilder} transition:slide>
 		<Listbuilder {recentChanges} {description} />
-	{:else}
-		<dialog
-			bind:this={listDialog}
-			class:dialog-wide={appWindow.isNarrow}
-			onclose={() => {
-				showListDialog = false;
-			}}
-		>
-			<div class="dialog-button">
-				<button
-					onclick={() => {
-						showListDialog = false;
-					}}>Close</button
-				>
-			</div>
-			<Listbuilder {recentChanges} {description}></Listbuilder>
-		</dialog>
-		<button
-			onclick={() => {
-				showListDialog = !showListDialog;
-			}}
-			class="list-button">List - {list.unitCount} Units - {list.pv} PV</button
-		>
-	{/if}
+	</div>
+	<button
+		onclick={() => {
+			showListbuilder = !showListbuilder;
+		}}
+		class="list-button"
+	>
+		{#if showListbuilder}
+			Close
+		{:else}
+			List - {list.unitCount} Units - {list.pv} PV
+		{/if}
+	</button>
 </main>
+<div class:backdrop={showListbuilder}></div>
 
 <style>
 	main {
@@ -112,10 +105,46 @@
 		flex-direction: column;
 		flex: 1;
 	}
-	.main-wide {
-		display: grid;
-		grid-template-columns: 7fr 3fr;
-		gap: 8px;
+
+	@media (width < 1000px) {
+		.list-drawer-wrapper {
+			visibility: hidden;
+			position: absolute;
+			bottom: 70px;
+			left: 0;
+			right: 0;
+			margin-left: auto;
+			margin-right: auto;
+			z-index: 4;
+			height: calc(100dvh - 80px);
+			width: min(max-content, 95dvw);
+		}
+		.show-listbuilder {
+			visibility: visible;
+		}
+		.list-button {
+			z-index: 5;
+		}
+		.backdrop {
+			height: 100dvh;
+			width: 100dvw;
+			background-color: black;
+			opacity: 0.9;
+			z-index: 3;
+			position: absolute;
+			top: 0;
+			right: 0;
+		}
+	}
+	@media (min-width: 1000px) {
+		main {
+			display: grid;
+			grid-template-columns: 7fr 3fr;
+			gap: 8px;
+		}
+		.list-button {
+			display: none;
+		}
 	}
 	.search {
 		position: relative;
@@ -138,14 +167,5 @@
 		right: 25px;
 		height: 50px;
 		font-size: 1.25rem;
-	}
-	.dialog-button {
-		display: flex;
-		justify-content: end;
-		height: 25px;
-	}
-	.dialog-button > button {
-		background-color: var(--secondary);
-		color: var(--secondary-foreground);
 	}
 </style>

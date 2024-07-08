@@ -8,13 +8,15 @@
 	class="dropdown"
 	onmouseleave={() => {
 		showMenuBar = false;
-	}}>
+	}}
+>
 	<button
 		class="link-button"
 		id="nav-links"
 		onclick={() => {
 			showMenuBar = !showMenuBar;
-		}}>
+		}}
+	>
 		{#if text}
 			{text}
 		{:else if img}

@@ -5,9 +5,12 @@
 	import { deserialize } from "$app/forms";
 	import { ruleSets, getRules, type Options } from "../../../lib/types/options";
 	import { toastController } from "$lib/stores/toastController.svelte";
-	import { list } from "../list.svelte";
+	import type { ResultList } from "$lib/types/resultList.svelte";
+	import type { UnitList } from "$lib/types/list.svelte";
 
 	let user: any = getContext("user");
+	let resultList: ResultList = getContext("resultList");
+	let list: UnitList = getContext("list");
 
 	type ImportList = {
 		name: string;
@@ -154,7 +157,7 @@
 		} else {
 			data = savedLists[selectedListIndex];
 		}
-		await list.loadList(data);
+		await list.loadList(data, resultList);
 		showLoadModal = false;
 	}
 </script>
@@ -250,7 +253,7 @@
 	}
 	.table-container {
 		min-width: 100%;
-		height: 200px;
+		min-height: 200px;
 		overflow-y: auto;
 		background-color: var(--card);
 	}

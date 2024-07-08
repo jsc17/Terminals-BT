@@ -2,8 +2,11 @@
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { enhance } from "$app/forms";
 	import { toastController } from "$lib/stores/toastController.svelte";
-	import { list } from "../list.svelte";
 	import { eras, factions } from "$lib/data/erasFactionLookup";
+	import type { UnitList } from "$lib/types/list.svelte";
+	import { getContext } from "svelte";
+
+	let list: UnitList = getContext("list");
 
 	let { showPrintModal = $bindable() } = $props();
 	let printDialog: HTMLDialogElement;
@@ -53,7 +56,8 @@
 	onclose={() => {
 		showPrintModal = false;
 	}}
-	class:dialog-wide={appWindow.isNarrow}>
+	class:dialog-wide={appWindow.isNarrow}
+>
 	<div class="dialog-body">
 		<h2>Print</h2>
 		<form action="?/printList" method="post" use:enhance={handleForm} class="print-form">
@@ -63,12 +67,14 @@
 			<h3>Style</h3>
 			<div>
 				<label for="list-style-mul"
-					><input type="radio" name="list-style-mul" id="list-style-mul" value="mul" bind:group={style} />MUL style - Generates a summary page similar to the MUL printout.</label>
+					><input type="radio" name="list-style-mul" id="list-style-mul" value="mul" bind:group={style} />MUL style - Generates a summary page similar to the MUL printout.</label
+				>
 			</div>
 			<div>
 				<label for="list-style-detailed"
 					><input type="radio" name="list-style-detailed" id="list-style-detailed" value="detailed" bind:group={style} />Detailed - Generates a summary page with more details for
-					quick reference.</label>
+					quick reference.</label
+				>
 			</div>
 			<div><input type="checkbox" name="drawFormations" id="formations" checked /><label for="formations">Print formations?</label></div>
 

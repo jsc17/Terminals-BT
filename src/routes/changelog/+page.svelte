@@ -25,15 +25,16 @@
 	</div>
 	<div class="card roadmap">
 		<h2>Road Map:</h2>
-		<h3>Priority updates that will be added as fast I can work on them:</h3>
+		<h3>Priority updates: Things I really want to get done</h3>
 		<ul>
-			<li>Era and faction filtering in unit search</li>
+			<li><span class="complete">Era and faction filtering in unit search</span> (added 6-30-24)</li>
 			<li>Customizable rules in the list builder</li>
 			<li>Reimplement list builder validation</li>
 			<li>multiple era and faction selections</li>
 			<li>Improved list sharing capabilities</li>
+			<li>Expanded sublist generation options</li>
 		</ul>
-		<h3>Idea's I'd like to implement when I have time:</h3>
+		<h3>General updates: Idea's I'd like to implement when I have time</h3>
 		<ul>
 			<li>Finish tournament organization</li>
 			<li>Layout customization</li>
@@ -42,7 +43,7 @@
 			<li>Battlefield Support Cards</li>
 			<li>Formation validation</li>
 		</ul>
-		<h3>Someday, possibly:</h3>
+		<h3>Low priority updates: Someday, possibly</h3>
 		<ul>
 			<li>Public player list sharing</li>
 			<li>Play feature (might not be worth the effort when other tools already exist)</li>
@@ -85,5 +86,9 @@
 	.notice,
 	.update {
 		margin-left: 24px;
+	}
+	.complete {
+		text-decoration: line-through;
+		color: var(--primary);
 	}
 </style>

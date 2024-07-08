@@ -1,5 +1,5 @@
 import type { Unit } from "$lib/types/unit.js";
-import { calculateTMM, getGeneralList, getMULResults } from "$lib/utilities/bt-utils";
+import { getGeneralList } from "$lib/utilities/bt-utils";
 import type { Filter } from "$lib/types/filter";
 import { deserialize } from "$app/forms";
 import { filters as filtersImport, additionalFilters as additionalFiltersImport } from "$lib/data/filters";
@@ -7,28 +7,30 @@ import type { Options } from "./options";
 import { ruleSets } from "./options";
 import customCards from "$lib/data/customCards.json";
 
-export function createResultList() {
-	let status = $state<"waiting" | "loading" | "loaded">("waiting");
-	let details = $state({ era: 0, faction: 0 });
-	let general = $derived(getGeneralList(details.era, details.faction));
+export class ResultList {
+	status = $state<"waiting" | "loading" | "loaded">("waiting");
+	details = $state({ era: 0, faction: 0 });
+	general = $derived(getGeneralList(this.details.era, this.details.faction));
 
-	let resultList = $state<Unit[]>([]);
-	let uniqueList: any[] = [];
+	resultList = $state<Unit[]>([]);
+	uniqueList: any[] = [];
 
-	let options = $state<Options>();
-	let availableList = $derived.by(applyOptions);
+	options = $state<Options>();
+	availableList = $derived.by(() => this.applyOptions());
 
-	let filters = $state<Filter[]>(filtersImport);
-	let additionalFilters = $state<Filter[]>(additionalFiltersImport);
-	let sort = $state({ key: "", order: "asc" });
-	let filteredList = $derived.by(filterList);
+	filters = $state<Filter[]>(filtersImport);
+	additionalFilters = $state<Filter[]>(additionalFiltersImport);
+	sort = $state({ key: "", order: "asc" });
+	filteredList = $derived.by(() => this.filterList());
 
-	async function loadUnits() {
-		resultList = [];
-		status = "loading";
-		const response: any = deserialize(await (await fetch("/?/getUnits", { method: "POST", body: JSON.stringify({ era: details.era, faction: details.faction, general }) })).text());
+	async loadUnits() {
+		this.resultList = [];
+		this.status = "loading";
+		const response: any = deserialize(
+			await (await fetch("/?/getUnits", { method: "POST", body: JSON.stringify({ era: this.details.era, faction: this.details.faction, general: this.general }) })).text()
+		);
 		const unitList = response.data.unitList;
-		uniqueList = response.data.uniqueList.map((unit: any) => {
+		this.uniqueList = response.data.uniqueList.map((unit: any) => {
 			return unit.mulId;
 		});
 
@@ -70,27 +72,27 @@ export function createResultList() {
 					role: unit.role,
 					availability: unit.availability
 				};
-				resultList.push(formattedUnit);
+				this.resultList.push(formattedUnit);
 			} catch (error) {
 				console.log(error);
 				console.log(`${unit.Name} could not be added to result list`);
 			}
 		});
-		if (resultList.length) {
-			status = "loaded";
+		if (this.resultList.length) {
+			this.status = "loaded";
 		}
 	}
 
-	function setOptions(newRules: string) {
-		options = ruleSets.find((rules) => rules.name == newRules) ?? ruleSets[0];
+	setOptions(newRules: string) {
+		this.options = ruleSets.find((rules) => rules.name == newRules) ?? ruleSets[0];
 	}
 
-	function applyOptions() {
+	applyOptions() {
 		let tempAvailableList: Unit[] = [];
-		if (options) {
-			if (resultList.length) {
+		if (this.options) {
+			if (this.resultList.length) {
 				for (const unitList of customCards.unitPacks) {
-					if (options.customUnitPacks?.includes(unitList.name)) {
+					if (this.options.customUnitPacks?.includes(unitList.name)) {
 						for (const unit of unitList.units) {
 							tempAvailableList.push({
 								mulId: unit.id,
@@ -108,19 +110,19 @@ export function createResultList() {
 					}
 				}
 			}
-			for (const unit of resultList) {
-				if (options.allowedTypes && !options.allowedTypes?.includes(unit.subtype)) {
+			for (const unit of this.resultList) {
+				if (this.options.allowedTypes && !this.options.allowedTypes?.includes(unit.subtype)) {
 					continue;
 				}
-				if (options.allowedRules && !options.allowedRules?.includes(unit.rulesLevel)) {
+				if (this.options.allowedRules && !this.options.allowedRules?.includes(unit.rulesLevel)) {
 					continue;
 				}
-				if (options.disallowUnique && uniqueList.includes(unit.mulId)) {
+				if (this.options.disallowUnique && this.uniqueList.includes(unit.mulId)) {
 					continue;
 				}
-				if (options.disallowedAbilities) {
+				if (this.options.disallowedAbilities) {
 					let prohibited = false;
-					for (const ability of options.disallowedAbilities) {
+					for (const ability of this.options.disallowedAbilities) {
 						if (unit.abilities.includes(ability)) {
 							prohibited = true;
 						}
@@ -132,13 +134,13 @@ export function createResultList() {
 				tempAvailableList.push(unit);
 			}
 		} else {
-			tempAvailableList = [...resultList];
+			tempAvailableList = [...this.resultList];
 		}
 		return tempAvailableList;
 	}
-	function filterList() {
-		let tempResultList = [...availableList];
-		filters.concat(additionalFilters).forEach((filter) => {
+	filterList() {
+		let tempResultList = [...this.availableList];
+		this.filters.concat(this.additionalFilters).forEach((filter) => {
 			switch (filter.type) {
 				case "string":
 				case "select":
@@ -209,16 +211,16 @@ export function createResultList() {
 				case "unique":
 					if (filter.checked == false) {
 						tempResultList = tempResultList.filter((unit) => {
-							return !uniqueList.includes(unit.mulId);
+							return !this.uniqueList.includes(unit.mulId);
 						});
 					}
 			}
 		});
-		if (sort.key != "") {
+		if (this.sort.key != "") {
 			tempResultList = tempResultList.sort((a, b) => {
 				let first;
 				let second;
-				if (sort.key == "move") {
+				if (this.sort.key == "move") {
 					if (a.move == undefined) {
 						first = 0;
 					} else {
@@ -229,14 +231,14 @@ export function createResultList() {
 					} else {
 						second = b.move[0].speed;
 					}
-				} else if (sort.key == "health (a+s)") {
+				} else if (this.sort.key == "health (a+s)") {
 					first = a.health;
 					second = b.health;
 				} else {
-					first = a[sort.key];
-					second = b[sort.key];
+					first = a[this.sort.key];
+					second = b[this.sort.key];
 				}
-				if (sort.order == "asc") {
+				if (this.sort.order == "asc") {
 					return first > second ? 1 : -1;
 				} else {
 					return first < second ? 1 : -1;
@@ -245,8 +247,9 @@ export function createResultList() {
 		}
 		return tempResultList;
 	}
-	async function resetFilters() {
-		filters.concat(additionalFilters).forEach((filter) => {
+
+	async resetFilters() {
+		this.filters.concat(this.additionalFilters).forEach((filter) => {
 			if (filter.type == "number") {
 				filter.value = undefined;
 				filter.maxValue = undefined;
@@ -261,42 +264,10 @@ export function createResultList() {
 			}
 		});
 	}
-
-	return {
-		get status() {
-			return status;
-		},
-		get resultList() {
-			return resultList;
-		},
-		get general() {
-			return general;
-		},
-		setOptions,
-		details,
-		get availableList() {
-			return availableList;
-		},
-		get filteredList() {
-			return filteredList;
-		},
-		get filters() {
-			return filters;
-		},
-		get additionalFilters() {
-			return additionalFilters;
-		},
-		get options() {
-			return options;
-		},
-		sort,
-		loadUnits,
-		add: (unit: Unit) => {
-			resultList.push(JSON.parse(JSON.stringify(unit)));
-		},
-		clear: () => {
-			resultList = [];
-		},
-		resetFilters
-	};
+	add(unit: Unit) {
+		this.resultList.push(JSON.parse(JSON.stringify(unit)));
+	}
+	clear() {
+		this.resultList = [];
+	}
 }

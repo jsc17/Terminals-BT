@@ -3,9 +3,9 @@ import { type Formation } from "$lib/types/formation.svelte";
 import { type Options, ruleSets } from "../../lib/types/options";
 import { getNewSkillCost } from "$lib/utilities/bt-utils";
 import customCards from "$lib/data/customCards.json";
-import { resultList } from "./resultList.svelte";
+import type { ResultList } from "$lib/types/resultList.svelte";
 
-class UnitList {
+export class UnitList {
 	items = $state<(Unit | Formation)[]>([]);
 	details = $state({ name: "", era: -1, faction: -1, general: -1 });
 	options = $state<Options>(ruleSets[0]);
@@ -145,7 +145,7 @@ class UnitList {
 		}
 		return `{${tempUnitArray.join(",")}}`;
 	}
-	async loadList(data: any) {
+	async loadList(data: any, resultList: ResultList) {
 		const { era, faction, name, units, sublists, rules } = data;
 		this.setOptions(rules.name);
 		resultList.setOptions(rules.name);
@@ -161,7 +161,7 @@ class UnitList {
 		this.details.general = resultList.general;
 		this.sublists = sublists;
 
-		list.items = [];
+		this.items = [];
 		let unitArray = units;
 		for (const item of unitArray) {
 			if (item.charAt(0) == "{") {
@@ -227,5 +227,3 @@ class UnitList {
 		}
 	}
 }
-
-export const list = new UnitList();

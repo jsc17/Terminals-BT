@@ -238,8 +238,13 @@ export async function drawUnitCard(pdf: PDFDocument, page: PDFPage, unit: Unit, 
 	if (unit.mulId < 0) {
 		arrayBuffer = await fs.readFile(`./files/customCardImages/${unit.mulId}.png`);
 	} else {
-		const url = `https://masterunitlist.azurewebsites.net/Unit/Card/${unit.mulId}?skill=${unit.skill}`;
-		arrayBuffer = await fetch(url).then((res) => res.arrayBuffer());
+		try {
+			arrayBuffer = await fs.readFile(`./files/cached-cards/${unit.mulId}-${unit.skill}.png`);
+		} catch (error) {
+			const url = `https://masterunitlist.azurewebsites.net/Unit/Card/${unit.mulId}?skill=${unit.skill}`;
+			arrayBuffer = await fetch(url).then((res) => res.arrayBuffer());
+			await fs.writeFile(`./files/cached-cards/${unit.mulId}-${unit.skill}.png`, new Uint8Array(arrayBuffer));
+		}
 	}
 	image = await pdf.embedPng(arrayBuffer);
 	page.drawImage(image, { x: positions[slot].x, y: pageHeight - positions[slot].y, height: 174, width: 247 });
@@ -253,8 +258,13 @@ export async function drawCondensedUnitCard(pdf: PDFDocument, page: PDFPage, uni
 	if (unit.mulId < 0) {
 		arrayBuffer = await fs.readFile(`./files/customCardImages/${unit.mulId}.png`);
 	} else {
-		const url = `https://masterunitlist.azurewebsites.net/Unit/Card/${unit.mulId}?skill=${unit.skill}`;
-		arrayBuffer = await fetch(url).then((res) => res.arrayBuffer());
+		try {
+			arrayBuffer = await fs.readFile(`./files/cached-cards/${unit.mulId}-${unit.skill}.png`);
+		} catch (error) {
+			const url = `https://masterunitlist.azurewebsites.net/Unit/Card/${unit.mulId}?skill=${unit.skill}`;
+			arrayBuffer = await fetch(url).then((res) => res.arrayBuffer());
+			await fs.writeFile(`./files/cached-cards/${unit.mulId}-${unit.skill}.png`, new Uint8Array(arrayBuffer));
+		}
 	}
 	image = await pdf.embedPng(arrayBuffer);
 	page.drawImage(image, { x: condensedPositions[slot].x, y: pageHeight - condensedPositions[slot].y, height: 150, width: 213 });

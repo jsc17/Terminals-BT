@@ -1,5 +1,5 @@
 import SearchFilters from "./SearchFilters.svelte";
-import SearchResults from "./SearchResults.svelte";
 import SearchParameters from "./SearchParameters.svelte";
+import SearchResults from "./SearchResults.svelte";
 
-export { SearchFilters, SearchResults, SearchParameters };
+export { SearchFilters, SearchParameters, SearchResults };

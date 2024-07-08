@@ -1,15 +1,20 @@
 <script lang="ts">
 	import { PrintModal, SaveModal, LoadModal, SublistModal, UnitCard } from "./index";
 	import { ruleSets } from "$lib/types/options";
-	import { resultList } from "../resultList.svelte";
 	import { flip } from "svelte/animate";
-	import { list } from "../list.svelte";
 	import { dndzone, type DndEvent, dragHandle, dragHandleZone } from "svelte-dnd-action";
 	import { type Unit, isUnit } from "$lib/types/unit";
 	import { dragType, isFormation, type Formation } from "$lib/types/formation.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import FormationCard from "./FormationCard.svelte";
 	import Menu from "$lib/components/Menu.svelte";
+	import { getContext } from "svelte";
+	import type { ResultList } from "$lib/types/resultList.svelte";
+	import type { UnitList } from "$lib/types/list.svelte";
+
+	const resultList: ResultList = getContext("resultList ");
+
+	let list: UnitList = getContext("list");
 
 	let { recentChanges, description }: { recentChanges: string[]; description: string[] } = $props();
 	let showPrintModal = $state(false);
@@ -38,8 +43,8 @@
 	}
 </script>
 
-<div class="card listBuilder">
-	<div class="list-header gap8">
+<div class="card listbuilder">
+	<div class="list-header">
 		<div class="list-info">
 			<input id="listName" type="text" placeholder="List name" bind:value={list.details.name} />
 			<div class="inline">
@@ -195,10 +200,10 @@
 <SublistModal bind:showSublistModal></SublistModal>
 
 <style>
-	.listBuilder {
+	.listbuilder {
 		position: sticky;
 		width: 100%;
-		height: 93dvh;
+		max-height: 98dvh;
 		top: 35px;
 		overflow-y: auto;
 		z-index: 1;
@@ -210,11 +215,13 @@
 		flex-direction: column;
 		border-bottom: 1px solid var(--border);
 		padding-bottom: 4px;
+		gap: 8px;
 	}
 	.list-info {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+		height: max-content;
 	}
 	.list-buttons {
 		display: flex;
@@ -243,7 +250,7 @@
 		gap: 4px;
 	}
 	input[type="text"] {
-		width: 250px;
+		width: min(250px, 50%);
 	}
 	.errors {
 		color: var(--error);

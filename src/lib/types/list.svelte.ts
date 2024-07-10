@@ -150,6 +150,53 @@ export class UnitList {
 			}
 		}
 
+		if (this.options.chassisLimits) {
+			for (const limit of this.options.chassisLimits) {
+				let filteredUnits = this.units.filter((unit) => { return limit.types.includes("All") || limit.types.includes(unit.subtype) })
+				let chassisList = Object.groupBy(filteredUnits, ({ chassis }) => chassis);
+				for (const [chassisKey, chassisValue] of Object.entries(chassisList)) {
+					if (chassisValue?.length && limit.max && (chassisValue.length > limit.max)) {
+						if (issueList.has("Maximum chassis")) {
+							issueList.get("Maximum chassis")?.add(chassisKey);
+						} else {
+							issueList.set("Maximum chassis", new Set([chassisKey]));
+						}
+					}
+				}
+			}
+		}
+
+		if (this.options.variantLimits) {
+			for (const limit of this.options.variantLimits) {
+				let filteredUnits = this.units.filter((unit) => { return limit.types.includes("All") || limit.types.includes(unit.subtype) })
+				let chassisList = Object.groupBy(filteredUnits, ({ chassis }) => chassis);
+				for (const [chassisKey, chassisValue] of Object.entries(chassisList)) {
+					let variantList = Object.groupBy(chassisValue!, ({ variant }) => variant);
+					for (const [variantKey, variantValue] of Object.entries(variantList)) {
+						if (variantValue?.length && limit.max && (variantValue.length > limit.max)) {
+							if (issueList.has("Maximum variants")) {
+								issueList.get("Maximum variants")?.add(variantKey);
+							} else {
+								issueList.set("Maximum variants", new Set([variantKey]));
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (this.options.skillLimits) {
+			for (const limit of this.options.skillLimits) {
+				let groupedUnits = this.units.filter((unit)=>{return limit.types.includes(unit.skill?.toString() ?? "4")})
+				if (limit.max && groupedUnits.length > limit.max) {
+					if (issueList.has("Maximum skill limits")) {
+						issueList.get("Maximum skill limits")?.add(limit.types.toString());
+					} else {
+						issueList.set("Maximum skill limits", new Set([limit.types.toString()]));
+					}
+				}
+			}
+		}
 		return { issueList, issueUnits };
 	});
 

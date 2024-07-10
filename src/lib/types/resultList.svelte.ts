@@ -104,7 +104,7 @@ export class ResultList {
 								pv: unit.pv,
 								cost: unit.pv,
 								abilities: unit.abilities,
-								rulesLevel: "standard"
+								rulesLevel: "Standard"
 							});
 						}
 					}

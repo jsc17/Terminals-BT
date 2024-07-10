@@ -12,7 +12,7 @@
 	import type { ResultList } from "$lib/types/resultList.svelte";
 	import type { UnitList } from "$lib/types/list.svelte";
 
-	const resultList: ResultList = getContext("resultList ");
+	const resultList: ResultList = getContext("resultList");
 
 	let list: UnitList = getContext("list");
 
@@ -21,6 +21,13 @@
 	let showSaveModal = $state(false);
 	let showLoadModal = $state(false);
 	let showSublistModal = $state(false);
+	let selectedRules = $state("noRes");
+
+	$effect(() => {
+		selectedRules = list.options.name;
+	});
+
+	let errorDialog = $state<HTMLDialogElement>();
 
 	let dropTargetStyle = { outline: "none" };
 
@@ -50,9 +57,10 @@
 			<div class="inline">
 				<label for="rules">Rules:</label>
 				<select
-					bind:value={list.options.name}
+					bind:value={selectedRules}
 					onchange={() => {
-						resultList.setOptions(list.options?.name ?? "noRes");
+						resultList.setOptions(selectedRules ?? "noRes");
+						list.setOptions(selectedRules ?? "noRes");
 					}}
 				>
 					{#each ruleSets as rules}
@@ -75,6 +83,25 @@
 					<p>Units: {list.unitCount}</p>
 				{/if}
 			</div>
+			{#if list.issues.issueList.size}
+				<button class="error-button" onclick={() => errorDialog?.showModal()}><img src="/icons/alert-outline.svg" alt="Error" class="error-icon" /> Show issues</button>
+				<dialog bind:this={errorDialog} class="error-dialog">
+					<div class="error-dialog-header">
+						<p>{list.options.name} rules issues</p>
+						<button
+							onclick={() => {
+								errorDialog?.close();
+							}}>Close</button
+						>
+					</div>
+					<div class="error-dialog-body">
+						{#each list.issues.issueList as [issue, units]}
+							<div class="errors align-right">{issue}:</div>
+							<div>{Array.from(units).join(", ")}</div>
+						{/each}
+					</div>
+				</dialog>
+			{/if}
 			<div class="list-buttons">
 				<Menu text={"+"}>
 					<button
@@ -272,5 +299,34 @@
 	}
 	.move-arrow {
 		filter: var(--primary-filter);
+	}
+	.error-icon {
+		width: 20px;
+		height: 20px;
+		filter: var(--error-filter);
+	}
+	.error-dialog {
+		padding: 16px;
+	}
+	.error-dialog-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 24px;
+	}
+	.error-dialog-body {
+		padding: 20px;
+		display: grid;
+		grid-template-columns: max-content auto;
+		padding: 16px;
+		color: var(--error);
+		gap: 8px;
+	}
+	.error-button {
+		display: flex;
+		align-items: center;
+		background-color: transparent;
+		color: var(--primary);
+		gap: 4px;
 	}
 </style>

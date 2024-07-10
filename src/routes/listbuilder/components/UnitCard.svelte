@@ -21,7 +21,7 @@
 
 <main class="unit-card">
 	<div class="unit-row">
-		<p class="name">{unit.name}</p>
+		<p class="name" class:invalid-unit={list.issues.issueUnits.has(unit.mulId)}>{unit.name}</p>
 		<p>{unit.subtype}</p>
 		<p>
 			{#if unit.skill == undefined}

@@ -1,10 +1,11 @@
 <script lang="ts">
-	import eraLists from "$lib/data/erasFactionsList.json";
+	import eraFactionData from "$lib/data/erasFactionsList.json";
 	import { eras, factions } from "$lib/data/erasFactionLookup.js";
 	import { getGeneralList } from "$lib/utilities/bt-utils";
 	import { deserialize, enhance } from "$app/forms";
 	import { calculateTMM } from "$lib/utilities/bt-utils";
 	import { toastController } from "$lib/stores/toastController.svelte";
+	import { Combobox } from "bits-ui";
 
 	let searchButton: HTMLButtonElement;
 	let selectedEra = $state(-1);
@@ -12,7 +13,7 @@
 
 	let allowedFactions = $derived.by(() => {
 		let allowed: number[] = [];
-		eraLists.forEach((era) => {
+		eraFactionData.forEach((era) => {
 			if (era.id == selectedEra) {
 				era.factions.forEach((faction) => {
 					allowed = allowed.concat(faction[1]);
@@ -127,6 +128,18 @@
 	async function sendResetEmail() {
 		const result: any = deserialize(await (await fetch("?/sendResetEmail", { method: "POST", body: "" })).text());
 	}
+
+	//Combobox stuff
+	const eraList = eraFactionData.map((era) => {
+		return { value: era.id, label: eras.get(era.id)! };
+	});
+
+	let inputValue = $state("");
+	let touchedInput = $state(false);
+
+	let filteredFruits = $derived.by(() => {
+		return inputValue && touchedInput ? eraList.filter((era) => era.label.toLowerCase().includes(inputValue.toLowerCase())) : eraList;
+	});
 </script>
 
 <main>
@@ -134,7 +147,7 @@
 		<form class="parameters">
 			<label for="eraParameter">Era:</label>
 			<select bind:value={selectedEra} id="eraParameter">
-				{#each eraLists as era}
+				{#each eraFactionData as era}
 					<option value={era.id}>{eras.get(era.id)}</option>
 				{/each}
 			</select>
@@ -180,6 +193,22 @@
 	<div class="card">
 		<button onclick={sendResetEmail}>Send Reset</button>
 	</div>
+	<Combobox.Root items={filteredFruits} bind:inputValue bind:touchedInput multiple={true}>
+		<Combobox.Input />
+		<Combobox.Label />
+		<Combobox.Content>
+			{#each filteredFruits as fruit (fruit.value)}
+				<Combobox.Item value={fruit.value} label={fruit.label} class="inline">
+					<Combobox.ItemIndicator>X</Combobox.ItemIndicator>
+					{fruit.label}
+				</Combobox.Item>
+			{:else}
+				No results found
+			{/each}
+		</Combobox.Content>
+		<Combobox.Arrow />
+		<Combobox.HiddenInput />
+	</Combobox.Root>
 </main>
 
 <style>

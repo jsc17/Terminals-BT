@@ -4,14 +4,19 @@ import { type Options, ruleSets } from "../../lib/types/options";
 import { getNewSkillCost } from "$lib/utilities/bt-utils";
 import customCards from "$lib/data/customCards.json";
 import type { ResultList } from "$lib/types/resultList.svelte";
+import { Set } from "svelte/reactivity";
 
 export class UnitList {
 	items = $state<(Unit | Formation)[]>([]);
 	details = $state({ name: "", era: -1, faction: -1, general: -1 });
 	options = $state<Options>(ruleSets[0]);
 	sublists = $state<string[]>([]);
-	validate = false;
 	id = 0;
+	resultList: ResultList;
+
+	constructor(resultList: ResultList) {
+		this.resultList = resultList;
+	}
 
 	units = $derived.by(() => {
 		const tempUnits: Unit[] = [];
@@ -54,6 +59,98 @@ export class UnitList {
 			}
 		}
 		return listPV;
+	});
+
+	issues = $derived.by(() => {
+		const issueList = new Map<string, Set<string>>();
+		const issueUnits = new Set<number>();
+		if (this.options.maxPv && this.pv > this.options.maxPv) {
+			issueList.set("Max PV", new Set([`${this.pv}/${this.options.maxPv}`]));
+		}
+		if (this.options.maxUnits && this.unitCount > this.options.maxUnits) {
+			issueList.set("Max Units", new Set([`${this.unitCount}/${this.options.maxUnits}`]));
+		}
+		for (const unit of this.units) {
+			if (this.options.eraFactionRestriction && (this.details.era == 0 || this.details.faction == 0)) {
+				issueList.set("Era/Faction", new Set(["Must select era and faction"]));
+				console.log("era/faction invalid");
+			}
+			if (this.options.allowedTypes && !this.options.allowedTypes.includes(unit.subtype)) {
+				if (issueList.has("Invalid Type")) {
+					issueList.get("Invalid Type")?.add(unit.name);
+				} else {
+					issueList.set("Invalid Type", new Set([unit.name]));
+				}
+				issueUnits.add(unit.mulId);
+			}
+			if (this.options.allowedRules && !this.options.allowedRules.includes(unit.rulesLevel)) {
+				if (issueList.has("Invalid Rules")) {
+					issueList.get("Invalid Rules")?.add(unit.name);
+				} else {
+					issueList.set("Invalid Rules", new Set([unit.name]));
+				}
+				issueUnits.add(unit.mulId);
+			}
+			if (this.options.disallowUnique && this.resultList.uniqueList.includes(unit.mulId)) {
+				if (issueList.has("Unique units")) {
+					issueList.get("Unique units")?.add(unit.name);
+				} else {
+					issueList.set("Unique units", new Set([unit.name]));
+				}
+				issueUnits.add(unit.mulId);
+			}
+			if (this.options.disallowedAbilities) {
+				let prohibittedAbility = false;
+				for (const ability of unit.abilities.replaceAll(" ", "").split(",")) {
+					if (this.options.disallowedAbilities.includes(ability)) {
+						prohibittedAbility = true;
+					}
+				}
+				if (prohibittedAbility) {
+					if (issueList.has("Invalid ability")) {
+						issueList.get("Invalid ability")?.add(unit.name);
+					} else {
+						issueList.set("Invalid ability", new Set([unit.name]));
+					}
+					issueUnits.add(unit.mulId);
+				}
+			}
+			if (this.options.minSkill && unit.skill && this.options.minSkill > unit.skill) {
+				if (issueList.has("Minimum skill")) {
+					issueList.get("Minimum skill")?.add(unit.name);
+				} else {
+					issueList.set("Minimum skill", new Set([unit.name]));
+				}
+				issueUnits.add(unit.mulId);
+			}
+			if (this.options.maxSkill && unit.skill && this.options.maxSkill < unit.skill) {
+				if (issueList.has("Maximum skill")) {
+					issueList.get("Maximum skill")?.add(unit.name);
+				} else {
+					issueList.set("Maximum skill", new Set([unit.name]));
+				}
+				issueUnits.add(unit.mulId);
+			}
+		}
+		if (this.options.unitLimits) {
+			let groupedUnits = Object.groupBy(this.units, ({ subtype }) => subtype);
+			for (const limit of this.options.unitLimits) {
+				let count = 0;
+				for (const type of limit.types) {
+					count += groupedUnits[type]?.length ?? 0;
+				}
+				if (limit.max && count > limit.max) {
+					issueList.set(`Maximum ${limit.types.join("/")}`, new Set([`${count}/${limit.max}`]));
+					for (const unit of this.units) {
+						if (limit.types.includes(unit.subtype)) {
+							issueUnits.add(unit.mulId);
+						}
+					}
+				}
+			}
+		}
+
+		return { issueList, issueUnits };
 	});
 
 	setOptions(newRules: string) {
@@ -104,7 +201,6 @@ export class UnitList {
 		this.details = { name: "", era: 0, faction: 0, general: -1 };
 		this.options = ruleSets[0];
 		this.sublists = [];
-		this.validate = false;
 	}
 	createListCode() {
 		const listCode = {
@@ -145,20 +241,20 @@ export class UnitList {
 		}
 		return `{${tempUnitArray.join(",")}}`;
 	}
-	async loadList(data: any, resultList: ResultList) {
+	async loadList(data: any) {
 		const { era, faction, name, units, sublists, rules } = data;
 		this.setOptions(rules.name);
-		resultList.setOptions(rules.name);
+		this.resultList.setOptions(rules.name);
 
-		resultList.details.era = era;
-		resultList.details.faction = faction;
+		this.resultList.details.era = era;
+		this.resultList.details.faction = faction;
 
-		await resultList.loadUnits();
+		await this.resultList.loadUnits();
 
 		this.details.name = name;
 		this.details.era = era;
 		this.details.faction = faction;
-		this.details.general = resultList.general;
+		this.details.general = this.resultList.general;
 		this.sublists = sublists;
 
 		this.items = [];
@@ -172,7 +268,7 @@ export class UnitList {
 					let [id, skill] = unit.split(",");
 					let unitToAdd = JSON.parse(
 						JSON.stringify(
-							resultList.resultList.find((result: Unit) => {
+							this.resultList.resultList.find((result: Unit) => {
 								return result.mulId == parseInt(id);
 							})
 						)
@@ -202,7 +298,7 @@ export class UnitList {
 									pv: unit.pv,
 									cost: unit.pv,
 									abilities: unit.abilities,
-									rulesLevel: "standard"
+									rulesLevel: "Standard"
 								});
 							}
 						}
@@ -210,7 +306,7 @@ export class UnitList {
 				} else {
 					let unitToAdd = JSON.parse(
 						JSON.stringify(
-							resultList.resultList.find((result: Unit) => {
+							this.resultList.resultList.find((result: Unit) => {
 								return result.mulId == parseInt(id);
 							})
 						)

@@ -195,6 +195,11 @@
 		align-items: center;
 		justify-content: center;
 	}
+	:global(.align-right) {
+		display: flex;
+		align-items: center;
+		justify-content: end;
+	}
 	:global(.gap8) {
 		gap: 8px;
 	}

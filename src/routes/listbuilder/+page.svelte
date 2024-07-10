@@ -8,7 +8,7 @@
 	import { slide } from "svelte/transition";
 
 	const resultList = new ResultList();
-	const list = new UnitList();
+	const list = new UnitList(resultList);
 	setContext("resultList", resultList);
 	setContext("list", list);
 
@@ -41,7 +41,7 @@
 				units: importData.units ?? [],
 				sublists: importData.sublists ?? []
 			};
-			list.loadList(parsedCode, resultList);
+			list.loadList(parsedCode);
 		}
 	});
 	$effect(() => {

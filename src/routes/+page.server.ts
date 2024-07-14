@@ -229,5 +229,14 @@ export const actions = {
 			return { era: entry[0], factionList: entry[1] };
 		});
 		return { unitAvailability };
+	},
+	getUnit: async ({ request }) => {
+		let { mulId } = await request.json();
+		const unit = await prisma.unit.findUnique({
+			where: {
+				mulId: Number(mulId)
+			}
+		});
+		return { unit };
 	}
 };

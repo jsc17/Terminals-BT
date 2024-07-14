@@ -4,8 +4,10 @@
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { getContext } from "svelte";
+	import type { UnitList } from "$lib/types/list.svelte";
 
 	const resultList: ResultList = getContext("resultList");
+	const list: UnitList = getContext("list");
 
 	let showParameters = $state(false);
 
@@ -73,6 +75,9 @@
 					id="getData"
 					onclick={() => {
 						resultList.loadUnits();
+						list.details.era = resultList.details.era;
+						list.details.faction = resultList.details.faction;
+						list.details.general = resultList.general;
 					}}
 					disabled={resultList.status == "loading"}>Search</button
 				>

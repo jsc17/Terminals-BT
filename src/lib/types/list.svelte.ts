@@ -1,10 +1,11 @@
 import { isUnit, type Unit } from "$lib/types/unit";
-import { type Formation } from "$lib/types/formation.svelte";
+import { groundFormationTypes, type Formation } from "$lib/types/formation.svelte";
 import { type Options, ruleSets } from "../../lib/types/options";
 import { getNewSkillCost } from "$lib/utilities/bt-utils";
 import customCards from "$lib/data/customCards.json";
 import type { ResultList } from "$lib/types/resultList.svelte";
 import { Set } from "svelte/reactivity";
+import { deserialize } from "$app/forms";
 
 export class UnitList {
 	items = $state<(Unit | Formation)[]>([]);
@@ -70,10 +71,22 @@ export class UnitList {
 		if (this.options.maxUnits && this.unitCount > this.options.maxUnits) {
 			issueList.set("Max Units", new Set([`${this.unitCount}/${this.options.maxUnits}`]));
 		}
+		if (this.options.eraFactionRestriction && (this.details.era == 0 || this.details.faction == 0)) {
+			issueList.set("Era/Faction", new Set(["Must select era and faction"]));
+		}
 		for (const unit of this.units) {
-			if (this.options.eraFactionRestriction && (this.details.era == 0 || this.details.faction == 0)) {
-				issueList.set("Era/Faction", new Set(["Must select era and faction"]));
-				console.log("era/faction invalid");
+			if (
+				this.options.eraFactionRestriction &&
+				!this.resultList.availableList.find((result) => {
+					return result.mulId == unit.mulId;
+				})
+			) {
+				if (issueList.has("Unavailable Unit")) {
+					issueList.get("Unavailable Unit")?.add(unit.name);
+				} else {
+					issueList.set("Unavailable Unit", new Set([unit.name]));
+				}
+				issueUnits.add(unit.id!);
 			}
 			if (this.options.allowedTypes && !this.options.allowedTypes.includes(unit.subtype)) {
 				if (issueList.has("Invalid Type")) {
@@ -81,15 +94,15 @@ export class UnitList {
 				} else {
 					issueList.set("Invalid Type", new Set([unit.name]));
 				}
-				issueUnits.add(unit.mulId);
+				issueUnits.add(unit.id!);
 			}
 			if (this.options.allowedRules && !this.options.allowedRules.includes(unit.rulesLevel)) {
-				if (issueList.has("Invalid Rules")) {
-					issueList.get("Invalid Rules")?.add(unit.name);
+				if (issueList.has("Invalid Rules Level")) {
+					issueList.get("Invalid Rules Level")?.add(unit.name);
 				} else {
-					issueList.set("Invalid Rules", new Set([unit.name]));
+					issueList.set("Invalid Rules Level", new Set([unit.name]));
 				}
-				issueUnits.add(unit.mulId);
+				issueUnits.add(unit.id!);
 			}
 			if (this.options.disallowUnique && this.resultList.uniqueList.includes(unit.mulId)) {
 				if (issueList.has("Unique units")) {
@@ -97,7 +110,7 @@ export class UnitList {
 				} else {
 					issueList.set("Unique units", new Set([unit.name]));
 				}
-				issueUnits.add(unit.mulId);
+				issueUnits.add(unit.id!);
 			}
 			if (this.options.disallowedAbilities) {
 				let prohibittedAbility = false;
@@ -112,16 +125,16 @@ export class UnitList {
 					} else {
 						issueList.set("Invalid ability", new Set([unit.name]));
 					}
-					issueUnits.add(unit.mulId);
+					issueUnits.add(unit.id!);
 				}
 			}
-			if (this.options.minSkill && unit.skill && this.options.minSkill > unit.skill) {
+			if (this.options.minSkill && unit.skill !== undefined && this.options.minSkill > unit.skill) {
 				if (issueList.has("Minimum skill")) {
 					issueList.get("Minimum skill")?.add(unit.name);
 				} else {
 					issueList.set("Minimum skill", new Set([unit.name]));
 				}
-				issueUnits.add(unit.mulId);
+				issueUnits.add(unit.id!);
 			}
 			if (this.options.maxSkill && unit.skill && this.options.maxSkill < unit.skill) {
 				if (issueList.has("Maximum skill")) {
@@ -129,7 +142,7 @@ export class UnitList {
 				} else {
 					issueList.set("Maximum skill", new Set([unit.name]));
 				}
-				issueUnits.add(unit.mulId);
+				issueUnits.add(unit.id!);
 			}
 		}
 		if (this.options.unitLimits) {
@@ -140,10 +153,18 @@ export class UnitList {
 					count += groupedUnits[type]?.length ?? 0;
 				}
 				if (limit.max && count > limit.max) {
-					issueList.set(`Maximum ${limit.types.join("/")}`, new Set([`${count}/${limit.max}`]));
+					issueList.set(`Maximum ${limit.types.join("/")}`, new Set(`${count}/${limit.max}`));
 					for (const unit of this.units) {
 						if (limit.types.includes(unit.subtype)) {
-							issueUnits.add(unit.mulId);
+							issueUnits.add(unit.id!);
+						}
+					}
+				}
+				if (limit.equal && !limit.equal.includes(count)) {
+					issueList.set(`${limit.types.join("/")}`, new Set([`Exactly ${limit.equal.join(" or ")}: Currently ${count}`]));
+					for (const unit of this.units) {
+						if (limit.types.includes(unit.subtype)) {
+							issueUnits.add(unit.id!);
 						}
 					}
 				}
@@ -152,14 +173,21 @@ export class UnitList {
 
 		if (this.options.chassisLimits) {
 			for (const limit of this.options.chassisLimits) {
-				let filteredUnits = this.units.filter((unit) => { return limit.types.includes("All") || limit.types.includes(unit.subtype) })
-				let chassisList = Object.groupBy(filteredUnits, ({ chassis }) => chassis);
+				let filteredUnits = this.units.filter((unit) => {
+					return limit.types.includes("All") || limit.types.includes(unit.subtype);
+				});
+				let chassisList = Object.groupBy(filteredUnits, (unit) => unit.class);
 				for (const [chassisKey, chassisValue] of Object.entries(chassisList)) {
-					if (chassisValue?.length && limit.max && (chassisValue.length > limit.max)) {
+					if (chassisValue?.length && limit.max && chassisValue.length > limit.max) {
 						if (issueList.has("Maximum chassis")) {
 							issueList.get("Maximum chassis")?.add(chassisKey);
 						} else {
 							issueList.set("Maximum chassis", new Set([chassisKey]));
+						}
+						for (const unit of this.units) {
+							if (unit.class == chassisKey) {
+								issueUnits.add(unit.id!);
+							}
 						}
 					}
 				}
@@ -168,16 +196,23 @@ export class UnitList {
 
 		if (this.options.variantLimits) {
 			for (const limit of this.options.variantLimits) {
-				let filteredUnits = this.units.filter((unit) => { return limit.types.includes("All") || limit.types.includes(unit.subtype) })
-				let chassisList = Object.groupBy(filteredUnits, ({ chassis }) => chassis);
+				let filteredUnits = this.units.filter((unit) => {
+					return limit.types.includes("All") || limit.types.includes(unit.subtype);
+				});
+				let chassisList = Object.groupBy(filteredUnits, (unit) => unit.class);
 				for (const [chassisKey, chassisValue] of Object.entries(chassisList)) {
 					let variantList = Object.groupBy(chassisValue!, ({ variant }) => variant);
 					for (const [variantKey, variantValue] of Object.entries(variantList)) {
-						if (variantValue?.length && limit.max && (variantValue.length > limit.max)) {
+						if (variantValue?.length && limit.max && variantValue.length > limit.max) {
 							if (issueList.has("Maximum variants")) {
-								issueList.get("Maximum variants")?.add(variantKey);
+								issueList.get("Maximum variants")?.add(chassisKey);
 							} else {
-								issueList.set("Maximum variants", new Set([variantKey]));
+								issueList.set("Maximum variants", new Set([chassisKey]));
+							}
+							for (const unit of this.units) {
+								if (unit.class == chassisKey) {
+									issueUnits.add(unit.id!);
+								}
 							}
 						}
 					}
@@ -187,12 +222,68 @@ export class UnitList {
 
 		if (this.options.skillLimits) {
 			for (const limit of this.options.skillLimits) {
-				let groupedUnits = this.units.filter((unit)=>{return limit.types.includes(unit.skill?.toString() ?? "4")})
+				let groupedUnits = this.units.filter((unit) => {
+					return limit.types.includes(unit.skill?.toString() ?? "4");
+				});
 				if (limit.max && groupedUnits.length > limit.max) {
-					if (issueList.has("Maximum skill limits")) {
-						issueList.get("Maximum skill limits")?.add(limit.types.toString());
+					if (issueList.has(`Maximum skill limits`)) {
+						issueList.get(`Maximum skill limits`)?.add(`Skills ${limit.types.join("+")} - ${groupedUnits.length}/${limit.max}`);
 					} else {
-						issueList.set("Maximum skill limits", new Set([limit.types.toString()]));
+						issueList.set(`Maximum skill limits`, new Set([`Skills ${limit.types.join("+")} - ${groupedUnits.length}/${limit.max}`]));
+					}
+					for (const unit of this.units) {
+						if (limit.types.includes(unit.skill?.toString() ?? "4")) {
+							issueUnits.add(unit.id!);
+						}
+					}
+				}
+			}
+		}
+
+		if (this.options.requireHitch) {
+			const htcUnits = this.units.filter((unit) => {
+				return unit.abilities.includes("HTC");
+			});
+			let trailers = htcUnits.filter((unit) => {
+				if (unit.move) {
+					return !unit.move[0].speed;
+				}
+			});
+			let hitches = htcUnits.filter((unit) => {
+				if (unit.move) {
+					return unit.move[0].speed;
+				}
+			});
+			if (trailers.length > hitches.length) {
+				issueList.set("Trailers without HTC ", new Set([`${trailers.length} Trailers / ${hitches.length} Transports`]));
+				for (const trailer of trailers) {
+					issueUnits.add(trailer.id!);
+				}
+			}
+		}
+
+		if (this.options.abilityLimits) {
+			for (const limit of this.options.abilityLimits) {
+				const abilityExp = new RegExp(`${limit.types}[0-9]`, "g");
+				const limitedUnits = this.units.filter((unit) => {
+					return unit.abilities.match(abilityExp);
+				});
+				const abilityCounts = limitedUnits.map((unit) => unit.abilities.match(abilityExp)?.toString());
+
+				let count = abilityCounts.reduce((accumulator, value) => {
+					return accumulator + Number(value?.at(-1));
+				}, 0);
+				if (limit.max && count > limit.max) {
+					issueList.set(
+						`${limit.types} limit exceeded`,
+						new Set(
+							limitedUnits.map((unit) => {
+								return unit.name;
+							})
+						)
+					);
+					for (const unit of limitedUnits) {
+						issueUnits.add(unit.id!);
 					}
 				}
 			}
@@ -313,20 +404,59 @@ export class UnitList {
 
 				for (const unit of formationData.units) {
 					let [id, skill] = unit.split(",");
-					let unitToAdd = JSON.parse(
-						JSON.stringify(
-							this.resultList.resultList.find((result: Unit) => {
-								return result.mulId == parseInt(id);
-							})
-						)
-					);
-					if (unitToAdd != null) {
-						if (skill != "undefined") {
-							unitToAdd.skill = parseInt(skill);
-							unitToAdd.cost = getNewSkillCost(parseInt(skill), unitToAdd.pv);
-						}
-						tempFormation.units.push(unitToAdd);
+					let unitResult = this.resultList.resultList.find((result: Unit) => {
+						return result.mulId == parseInt(id);
+					});
+					let unitToAdd: Unit;
+
+					if (unitResult) {
+						unitToAdd = $state.snapshot($state.snapshot(unitResult));
+					} else {
+						let response: any = deserialize(await (await fetch("/?/getUnit", { method: "POST", body: JSON.stringify({ mulId: id }) })).text());
+						let tempMovement: { speed: number; type: string }[] = [];
+						response.data!.unit.move.split("/").forEach((movement: string) => {
+							let [moveSpeed, moveType] = movement.split('"');
+							tempMovement.push({ speed: parseInt(moveSpeed), type: moveType });
+						});
+						const unitData = response.data!.unit;
+						unitToAdd = {
+							mulId: unitData.mulId,
+							name: unitData.name,
+							class: unitData.class,
+							variant: unitData.variant,
+							type: unitData.type,
+							subtype: unitData.subtype.toUpperCase(),
+							pv: unitData.pv,
+							cost: unitData.pv,
+							skill: 4,
+							size: unitData.size,
+							move: tempMovement,
+							tmm: unitData.tmm,
+							health: unitData.armor + unitData.structure,
+							armor: unitData.armor,
+							structure: unitData.structure,
+							damageS: unitData.damage_s,
+							damageSMin: unitData.damage_s_min,
+							damageM: unitData.damage_m,
+							damageMMin: unitData.damage_m_min,
+							damageL: unitData.damage_l,
+							damageLMin: unitData.damage_l_min,
+							overheat: unitData.overheat,
+							abilities: (unitData.abilities ?? "-").replaceAll(",", ", "),
+							imageLink: unitData.image_url,
+							rulesLevel: unitData.rules,
+							tonnage: unitData.tonnage,
+							date: unitData.date_introduced,
+							role: unitData.role,
+							availability: unitData.availability
+						};
 					}
+
+					if (skill != "undefined") {
+						unitToAdd.skill = parseInt(skill);
+						unitToAdd.cost = getNewSkillCost(parseInt(skill), unitToAdd.pv);
+					}
+					tempFormation.units.push(unitToAdd);
 				}
 				this.addFormation(tempFormation.style, tempFormation.name, tempFormation.type, tempFormation.units);
 			} else {
@@ -351,20 +481,58 @@ export class UnitList {
 						}
 					}
 				} else {
-					let unitToAdd = JSON.parse(
-						JSON.stringify(
-							this.resultList.resultList.find((result: Unit) => {
-								return result.mulId == parseInt(id);
-							})
-						)
-					);
-					if (unitToAdd != null) {
-						if (skill != "undefined") {
-							unitToAdd.skill = parseInt(skill);
-							unitToAdd.cost = getNewSkillCost(parseInt(skill), unitToAdd.pv);
-						}
-						this.addUnit(unitToAdd);
+					let unitResult = this.resultList.resultList.find((result: Unit) => {
+						return result.mulId == parseInt(id);
+					});
+					let unitToAdd: Unit;
+
+					if (unitResult) {
+						unitToAdd = structuredClone($state.snapshot(unitResult));
+					} else {
+						let response: any = deserialize(await (await fetch("/?/getUnit", { method: "POST", body: JSON.stringify({ mulId: id }) })).text());
+						let tempMovement: { speed: number; type: string }[] = [];
+						response.data!.unit.move.split("/").forEach((movement: string) => {
+							let [moveSpeed, moveType] = movement.split('"');
+							tempMovement.push({ speed: parseInt(moveSpeed), type: moveType });
+						});
+						const unitData = response.data!.unit;
+						unitToAdd = {
+							mulId: unitData.mulId,
+							name: unitData.name,
+							class: unitData.class,
+							variant: unitData.variant,
+							type: unitData.type,
+							subtype: unitData.subtype.toUpperCase(),
+							pv: unitData.pv,
+							cost: unitData.pv,
+							skill: 4,
+							size: unitData.size,
+							move: tempMovement,
+							tmm: unitData.tmm,
+							health: unitData.armor + unitData.structure,
+							armor: unitData.armor,
+							structure: unitData.structure,
+							damageS: unitData.damage_s,
+							damageSMin: unitData.damage_s_min,
+							damageM: unitData.damage_m,
+							damageMMin: unitData.damage_m_min,
+							damageL: unitData.damage_l,
+							damageLMin: unitData.damage_l_min,
+							overheat: unitData.overheat,
+							abilities: (unitData.abilities ?? "-").replaceAll(",", ", "),
+							imageLink: unitData.image_url,
+							rulesLevel: unitData.rules,
+							tonnage: unitData.tonnage,
+							date: unitData.date_introduced,
+							role: unitData.role,
+							availability: unitData.availability
+						};
 					}
+					if (skill != "undefined") {
+						unitToAdd.skill = parseInt(skill);
+						unitToAdd.cost = getNewSkillCost(parseInt(skill), unitToAdd.pv);
+					}
+					this.addUnit(unitToAdd);
 				}
 			}
 		}

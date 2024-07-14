@@ -54,7 +54,7 @@ export const ruleSets: Options[] = [
 		variantLimits: [{ types: ["BM", "IM"], max: 1 }],
 		skillLimits: [{ types: ["2", "6"], max: 2 }],
 		requireHitch: true,
-		abilityLimits: [{ types: ["jmps"], max: 2 }]
+		abilityLimits: [{ types: ["JMPS"], max: 2 }]
 	}
 ];
 

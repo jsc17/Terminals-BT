@@ -157,7 +157,7 @@
 		} else {
 			data = savedLists[selectedListIndex];
 		}
-		await list.loadList(data, resultList);
+		await list.loadList(data);
 		showLoadModal = false;
 	}
 </script>

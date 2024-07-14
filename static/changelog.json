@@ -1,5 +1,11 @@
 [
 	{
+		"date": "7-13-24",
+		"updates": {
+			"List Builder": ["Reimplemented realtime list validation according to selected rules"]
+		}
+	},
+	{
 		"date": "7-7-24",
 		"updates": {
 			"Unit Search / Listbuilder": ["Fixed spacing issues with longer unit names.", "Added unit availability button to see what eras/factions have access to a unit."]

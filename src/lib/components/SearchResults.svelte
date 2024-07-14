@@ -19,14 +19,6 @@
 	let listHeight = $state(500);
 	let listWidth = $state(0);
 
-	// let itemSize = $derived.by(() => {
-	// 	return resultList.filteredList.map((unit: Unit) => {
-	// 		const width = getTextWidth(unit.name);
-	// 		const lines = 23 * Math.ceil(width / (listWidth - 30)) + 30;
-	// 		return lines;
-	// 	});
-	// });
-
 	let itemSize = $derived.by(() => {
 		return resultList.filteredList.map((unit: Unit) => {
 			let lines = 1;

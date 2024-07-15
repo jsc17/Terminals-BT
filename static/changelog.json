@@ -1,5 +1,15 @@
 [
 	{
+		"date": "7-14-24",
+		"updates": {
+			"List Builder": [
+				"Fix: Should now correctly load saved sublists. May break existing sublist but will be consistent going forward.",
+				"Changed printed sublist page from 9 sublists to 6 to prevent longer unit names overlapping"
+			]
+		}
+	},
+
+	{
 		"date": "7-13-24",
 		"updates": {
 			"List Builder": ["Reimplemented realtime list validation according to selected rules"]

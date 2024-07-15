@@ -156,7 +156,7 @@
 						class="menu-button"
 						onclick={() => {
 							if (confirm("Remove all units and formations from the list?")) {
-								list.items = [];
+								list.clear();
 							}
 						}}
 					>

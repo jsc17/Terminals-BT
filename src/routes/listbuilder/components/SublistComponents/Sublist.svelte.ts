@@ -10,17 +10,9 @@ export class Sublist {
 	list: UnitList;
 	unitList = $derived.by(() => {
 		const tempUnitList: Unit[] = [];
-		for (const item of this.list.items) {
-			if (isUnit(item)) {
-				if (this.checked.includes(item.id!)) {
-					tempUnitList.push(item);
-				}
-			} else {
-				for (const unit of item.units) {
-					if (this.checked.includes(unit.id!)) {
-						tempUnitList.push(unit);
-					}
-				}
+		for (const unit of this.list.units) {
+			if (this.checked.includes(unit.id!)) {
+				tempUnitList.push(unit);
 			}
 		}
 		return tempUnitList;

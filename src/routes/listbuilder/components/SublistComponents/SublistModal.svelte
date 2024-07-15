@@ -17,7 +17,7 @@
 
 	let { showSublistModal = $bindable() } = $props();
 
-	let sublistId = 1;
+	let sublistId = $state(1);
 	let tempSublist = $state<Sublist>(new Sublist(0, list));
 	let sublists = $state<Sublist[]>([]);
 	let filteredSublists = $derived.by(() => {
@@ -69,7 +69,6 @@
 				newSublist.checked = sublist.un.map((id: string) => {
 					return Number(id);
 				});
-
 				sublists.push(newSublist);
 			} else {
 				const newSublist = new Sublist(sublistId, list);
@@ -361,7 +360,7 @@
 	}
 	.panel-vertical {
 		height: 100%;
-		width: 15%;
+		width: 220px;
 		flex-shrink: 0;
 	}
 	.panel-horizontal {

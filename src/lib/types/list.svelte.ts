@@ -1,5 +1,5 @@
 import { isUnit, type Unit } from "$lib/types/unit";
-import { groundFormationTypes, type Formation } from "$lib/types/formation.svelte";
+import { type Formation } from "$lib/types/formation.svelte";
 import { type Options, ruleSets } from "../../lib/types/options";
 import { getNewSkillCost } from "$lib/utilities/bt-utils";
 import customCards from "$lib/data/customCards.json";
@@ -347,7 +347,7 @@ export class UnitList {
 			faction: this.details.faction,
 			rules: this.options?.name,
 			units: <string[]>[],
-			sublists: this.sublists
+			sublists: <string[]>[]
 		};
 		for (const item of this.items) {
 			if (isUnit(item)) {
@@ -359,6 +359,16 @@ export class UnitList {
 				}
 				listCode.units.push(JSON.stringify(tempFormation));
 			}
+		}
+		for (const sublist of this.sublists) {
+			const { sc, un } = JSON.parse(sublist);
+			const tempSublist = { sc, un: <number[]>[] };
+			this.units.forEach((unit, index) => {
+				if (un.includes(unit.id)) {
+					tempSublist.un.push(index);
+				}
+			});
+			listCode.sublists.push(JSON.stringify(tempSublist));
 		}
 		return JSON.stringify(listCode);
 	}
@@ -380,6 +390,7 @@ export class UnitList {
 		return `{${tempUnitArray.join(",")}}`;
 	}
 	async loadList(data: any) {
+		this.id = 0;
 		const { era, faction, name, units, sublists, rules } = data;
 		this.setOptions(rules.name);
 		this.resultList.setOptions(rules.name);
@@ -393,7 +404,7 @@ export class UnitList {
 		this.details.era = era;
 		this.details.faction = faction;
 		this.details.general = this.resultList.general;
-		this.sublists = sublists;
+		this.sublists = structuredClone($state.snapshot(sublists));
 
 		this.items = [];
 		let unitArray = units;

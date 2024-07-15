@@ -5,7 +5,7 @@ export function drawListVertical(list: any, page: PDFPage, slot: number, helveti
 	page.setFont(helveticaBold);
 	page.drawText(`${list.scenario} - ${list.pv} PV`, {
 		x: 30 + (slot % 3) * 185,
-		y: height - 50 - Math.floor(slot / 3) * 185,
+		y: height - 50 - Math.floor(slot / 3) * 350,
 		size: 10,
 		lineHeight: 12,
 		maxWidth: 175
@@ -17,12 +17,12 @@ export function drawListVertical(list: any, page: PDFPage, slot: number, helveti
 		const unitLine = `(${unit.skill}) ${unit.name}`;
 		page.drawText(unitLine, {
 			x: 30 + (slot % 3) * 185,
-			y: height - 62 - 12 * (i + offset) - Math.floor(slot / 3) * 185,
+			y: height - 62 - 12 * i - 10 * offset - Math.floor(slot / 3) * 350,
 			lineHeight: 10,
 			size: 8,
 			maxWidth: 125
 		});
-		page.drawText(`${unit.cost} (${Math.round(unit.cost / 2)})`, { x: 160 + (slot % 3) * 185, y: height - 62 - 12 * (i + offset) - Math.floor(slot / 3) * 185, size: 8 });
+		page.drawText(`${unit.cost} (${Math.round(unit.cost / 2)})`, { x: 160 + (slot % 3) * 185, y: height - 62 - 12 * i - 10 * offset - Math.floor(slot / 3) * 350, size: 8 });
 		if (unitLine.length >= 33) {
 			offset++;
 		}

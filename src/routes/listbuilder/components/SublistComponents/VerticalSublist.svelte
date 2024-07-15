@@ -9,8 +9,6 @@
 	};
 
 	const { sublist = $bindable(), editSublist, deleteSublist, copySublist }: componentProps = $props();
-
-	async function printSubList(id: number) {}
 </script>
 
 <main>
@@ -23,16 +21,12 @@
 		<button onclick={() => editSublist(sublist.id)}>Edit</button>
 	</div>
 	<div class="sublist-body">
-		<table>
-			<tbody>
-				{#each sublist.unitList as unit}
-					<tr>
-						<td>{unit.name}</td>
-						<td>{unit.skill}</td>
-					</tr>
-				{/each}
-			</tbody>
-		</table>
+		<div class="unit-container">
+			{#each sublist.unitList as unit}
+				<div>{unit.name}</div>
+				<div>{unit.skill}</div>
+			{/each}
+		</div>
 	</div>
 	<div class="sublist-stats">
 		<p>PV:</p>
@@ -75,6 +69,17 @@
 	}
 	.sublist-body {
 		flex: 1;
+	}
+	.unit-container {
+		div {
+			border-bottom: 1px solid var(--border);
+			padding: 4px 0px;
+		}
+		padding: 0px 0px;
+		display: grid;
+		grid-template-columns: auto max-content;
+		row-gap: 4px;
+		overflow: auto;
 	}
 	.sublist-stats {
 		display: grid;

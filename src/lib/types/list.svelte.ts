@@ -6,6 +6,7 @@ import customCards from "$lib/data/customCards.json";
 import type { ResultList } from "$lib/types/resultList.svelte";
 import { Set } from "svelte/reactivity";
 import { deserialize } from "$app/forms";
+import { Sublist } from "./Sublist.svelte";
 
 export class UnitList {
 	items = $state<(Unit | Formation)[]>([]);
@@ -333,6 +334,15 @@ export class UnitList {
 				}
 			}
 		});
+		const tempSublists: string[] = [];
+		for (const sublistString of this.sublists) {
+			const sublist = JSON.parse(sublistString) as { sc: string; un: number[] };
+			sublist.un = sublist.un.filter((unitId) => {
+				return unitId != id;
+			});
+			tempSublists.push(JSON.stringify(sublist));
+		}
+		this.sublists = tempSublists;
 	}
 	clear() {
 		this.items = [];

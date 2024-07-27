@@ -166,6 +166,7 @@
 		border-radius: var(--radius);
 		padding: 16px;
 		width: max-content;
+		max-width: 90dvw;
 		position: absolute;
 	}
 	:global(.dropdown-top) {

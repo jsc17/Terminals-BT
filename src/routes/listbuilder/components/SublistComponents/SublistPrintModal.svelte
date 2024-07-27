@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import type { Sublist } from "./Sublist.svelte";
+	import type { Sublist } from "$lib/types/Sublist.svelte";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import type { UnitList } from "$lib/types/list.svelte";
 	import { getContext } from "svelte";
@@ -22,6 +22,7 @@
 	function handlePrintForm({ formData, cancel, submitter }: any) {
 		if (submitter.innerText == "Cancel") {
 			cancel();
+			printDialog.close();
 			return;
 		}
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Sublist } from "./Sublist.svelte";
+	import type { Sublist } from "$lib/types/Sublist.svelte";
 
 	type componentProps = {
 		sublist: Sublist;
@@ -38,7 +38,8 @@
 		<button
 			onclick={() => {
 				sublist.print();
-			}}>Print Sublist</button>
+			}}>Print Sublist</button
+		>
 		<button onclick={() => deleteSublist(sublist.id)}>Delete</button>
 	</div>
 </main>

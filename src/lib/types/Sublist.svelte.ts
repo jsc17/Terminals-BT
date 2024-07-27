@@ -23,19 +23,18 @@ export class Sublist {
 			health = 0,
 			short = 0,
 			medium = 0,
-			long = 0;
-		let tempTotalSize = 0;
+			long = 0,
+			size = 0;
 		for (const unit of this.unitList) {
 			if (this.checked.includes(unit.id!)) {
-				pv += unit.cost;
+				pv += unit.cost ?? 0;
 				health += unit.health ?? 0;
 				short += unit.damageS ?? 0;
 				medium += unit.damageM ?? 0;
 				long += unit.damageL ?? 0;
-				tempTotalSize += unit.size ?? 0;
+				size += unit.size ?? 0;
 			}
 		}
-		let size = (tempTotalSize / this.checked.length).toFixed(1);
 		return { pv, health, short, medium, long, size };
 	});
 

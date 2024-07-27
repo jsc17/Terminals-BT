@@ -1,5 +1,15 @@
 [
 	{
+		"date": "7-18-24",
+		"updates": {
+			"List Builder": [
+				"Reverted vertical printed sublists to 9 slots per page, with lists wrapping to the next slot if too long",
+				"Added Health/Size/Damage summary to printed sublists",
+				"Fix: Deleting a unit from a list now correctly removes it from existing sublists"
+			]
+		}
+	},
+	{
 		"date": "7-14-24",
 		"updates": {
 			"List Builder": [

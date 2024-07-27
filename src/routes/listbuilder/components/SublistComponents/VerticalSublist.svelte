@@ -1,14 +1,16 @@
 <script lang="ts">
-	import type { Sublist } from "./Sublist.svelte";
+	import type { Sublist } from "$lib/types/Sublist.svelte";
 
 	type componentProps = {
 		sublist: Sublist;
 		editSublist: any;
 		deleteSublist: any;
 		copySublist: any;
+		sublistMaxPv?: number;
+		sublistMaxUnits?: number;
 	};
 
-	const { sublist = $bindable(), editSublist, deleteSublist, copySublist }: componentProps = $props();
+	const { sublist = $bindable(), editSublist, deleteSublist, copySublist, sublistMaxPv, sublistMaxUnits }: componentProps = $props();
 </script>
 
 <main>
@@ -30,9 +32,9 @@
 	</div>
 	<div class="sublist-stats">
 		<p>PV:</p>
-		<p>{`${sublist.stats?.pv ?? 0}/250`}</p>
+		<p class:error={sublistMaxPv && sublist.stats?.pv > sublistMaxPv}>{`${sublist.stats?.pv ?? 0}`}{sublistMaxPv ? `/${sublistMaxPv}` : ``}</p>
 		<p>Units:</p>
-		<p>{`${sublist.checked?.length ?? 0}/10`}</p>
+		<p class:error={sublistMaxUnits && sublist.checked?.length > sublistMaxUnits}>{`${sublist.checked?.length ?? 0}`}{sublistMaxUnits ? `/${sublistMaxUnits}` : ``}</p>
 		<p>Total Health:</p>
 		<p>{sublist.stats?.health ?? 0}</p>
 		<p>Total Short:</p>
@@ -41,7 +43,7 @@
 		<p>{sublist.stats?.medium ?? 0}</p>
 		<p>Total Long:</p>
 		<p>{sublist.stats?.long ?? 0}</p>
-		<p>Avg. Size:</p>
+		<p>Total Size:</p>
 		<p>{sublist.stats?.size ?? 0}</p>
 	</div>
 	<div class="space-between">
@@ -69,6 +71,7 @@
 	}
 	.sublist-body {
 		flex: 1;
+		overflow: auto;
 	}
 	.unit-container {
 		div {
@@ -79,7 +82,6 @@
 		display: grid;
 		grid-template-columns: auto max-content;
 		row-gap: 4px;
-		overflow: auto;
 	}
 	.sublist-stats {
 		display: grid;
@@ -91,5 +93,8 @@
 	}
 	.sublist-stats > p:nth-child(odd) {
 		text-align: end;
+	}
+	.error {
+		color: var(--error);
 	}
 </style>

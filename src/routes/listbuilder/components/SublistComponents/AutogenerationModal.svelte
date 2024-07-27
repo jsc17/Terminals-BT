@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { type Unit } from "$lib/types/unit";
-	import { Sublist } from "./Sublist.svelte";
+	import { Sublist } from "$lib/types/Sublist.svelte";
 	import type { UnitList } from "$lib/types/list.svelte";
 	import { getContext } from "svelte";
 
@@ -143,43 +143,22 @@
 					<input id="autoMinPv" type="number" bind:value={autoMinPV} />
 					<label for="autoMaxPv">Max PV:</label>
 					<input id="autoMaxPv" type="number" bind:value={autoMaxPV} />
-					<div style:position="relative">
-						<label for="autoMinUnitCost">Min unit PV:</label>
-						<img
-							src="/icons/information-outline.svg"
-							alt="Min Unit info"
-							class="button-icon"
-							style:filter="var(--muted-filter)"
-							onmouseenter={() => {
-								showMinUnitInfoDropdown = true;
-							}}
-							onmouseleave={() => {
-								showMinUnitInfoDropdown = false;
-							}}
-						/>
-						<div class="dropdown-content dropdown-bottom" class:dropdown-hidden={!showMinUnitInfoDropdown} class:dropdown-shown={showMinUnitInfoDropdown}>
-							This tool can generate hundreds or thousands of combinations if you have cheap units. Recommend using this filter to get some basic sublists with a few points to
-							spare, and then filling in cheaper units where you want them.
-						</div>
-					</div>
+					<label for="autoMinUnitCost">Min unit PV:</label>
 					<input id="autoMinUnitCost" type="number" bind:value={autoMinUnitCost} />
 					<button onclick={generatesublists}>Generate sublists</button>
 					<p>Additional filters coming soon...</p>
 				</div>
 			</div>
 			<div class="auto-list-container">
-				<div class="auto-list">
-					<div>Units</div>
-					<div class="center">Unit Count</div>
-					<div class="center">PV</div>
-				</div>
+				<div>Units</div>
+				<div class="center">Unit Count</div>
+				<div class="center">PV</div>
+				<div></div>
 				{#each autosublists as sublist}
-					<div class="auto-list">
-						<div>{sublist.unitString}</div>
-						<div class="center">{sublist.count}</div>
-						<div class="center">{sublist.pv}</div>
-						<div class="center"><button style:padding="8px 16px" onclick={() => addAutoSublist(sublist.id)}>+</button></div>
-					</div>
+					<div>{sublist.unitString}</div>
+					<div class="center">{sublist.count}</div>
+					<div class="center">{sublist.pv}</div>
+					<div class="center"><button style:padding="8px 16px" onclick={() => addAutoSublist(sublist.id)}>+</button></div>
 				{/each}
 			</div>
 		</div>
@@ -215,19 +194,17 @@
 		gap: 8px;
 	}
 	.auto-list-container {
+		div {
+			padding: 8px 16px;
+			border-bottom: 1px solid var(--border);
+		}
 		padding: 8px;
-		display: flex;
-		flex-direction: column;
-		gap: 24px;
-		width: 100%;
-		height: 100%;
-		overflow: auto;
-	}
-	.auto-list {
 		display: grid;
-		grid-template-columns: 10fr 1fr 1fr 1fr;
-		gap: 16px;
-		flex-shrink: 0;
+		width: 100%;
+		height: fit-content;
+		max-height: 100%;
+		overflow: auto;
+		grid-template-columns: auto max-content max-content 25px;
 	}
 	.accordian {
 		width: 100%;
@@ -236,5 +213,9 @@
 		border-radius: var(--radius);
 		color: var(--card-foreground);
 		padding: 8px;
+	}
+	.center {
+		display: flex;
+		justify-content: center;
 	}
 </style>

@@ -24,6 +24,8 @@ export type Options = {
 	skillLimits?: Limit[];
 	requireHitch?: boolean;
 	abilityLimits?: Limit[];
+	sublistMaxUnits?: number;
+	sublistMaxPv?: number;
 };
 
 export const ruleSets: Options[] = [
@@ -54,7 +56,9 @@ export const ruleSets: Options[] = [
 		variantLimits: [{ types: ["BM", "IM"], max: 1 }],
 		skillLimits: [{ types: ["2", "6"], max: 2 }],
 		requireHitch: true,
-		abilityLimits: [{ types: ["JMPS"], max: 2 }]
+		abilityLimits: [{ types: ["JMPS"], max: 2 }],
+		sublistMaxUnits: 10,
+		sublistMaxPv: 250
 	}
 ];
 

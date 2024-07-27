@@ -2,7 +2,7 @@
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { dndzone, type DndEvent } from "svelte-dnd-action";
 	import { isUnit } from "$lib/types/unit";
-	import { Sublist } from "./Sublist.svelte";
+	import { Sublist } from "$lib/types/Sublist.svelte";
 	import { untrack } from "svelte";
 	import { flip } from "svelte/animate";
 	import VerticalSublist from "./VerticalSublist.svelte";
@@ -232,7 +232,14 @@
 					{#each filteredSublists as sublist (sublist.id)}
 						<div animate:flip={{ duration: flipDurationMs }} class:panel-vertical={layout == "vertical"} class:panel-horizontal={layout == "horizontal"}>
 							{#if layout == "vertical"}
-								<VerticalSublist {sublist} {editSublist} {deleteSublist} {copySublist}></VerticalSublist>
+								<VerticalSublist
+									{sublist}
+									{editSublist}
+									{deleteSublist}
+									{copySublist}
+									sublistMaxPv={list.options.sublistMaxPv ?? 0}
+									sublistMaxUnits={list.options.sublistMaxUnits ?? 0}
+								></VerticalSublist>
 							{:else if layout == "horizontal"}
 								<HorizontalSublist {sublist} {editSublist} {deleteSublist} {copySublist}></HorizontalSublist>
 							{/if}

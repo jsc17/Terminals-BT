@@ -188,18 +188,19 @@ export const actions = {
 		const [helvetica, helveticaBold] = await Promise.all([pdf.embedFont(StandardFonts.Helvetica), pdf.embedFont(StandardFonts.HelveticaBold)]);
 
 		const pages: PDFPage[] = [];
-		const slotsCount = layout == "vertical" ? 6 : 12;
-		for (let p = 0; p < Math.ceil(orderedSublists.length / slotsCount); p++) {
-			pages.push(pdf.addPage(PageSizes.Letter));
-		}
+		let slot = 0;
+		let slotCount = layout == "vertical" ? 9 : 11;
 		for (let index = 0; index < orderedSublists.length; index++) {
-			let page = pages[Math.floor(index / slotsCount)];
-			let slot = index % slotsCount;
-			if (layout == "vertical") {
-				drawListVertical(orderedSublists[index], page, slot, helvetica, helveticaBold);
-			} else {
-				drawListHorizontal(orderedSublists[index], page, slot, helvetica, helveticaBold);
+			let pageCount = Math.floor(slot / slotCount);
+			if (pageCount >= pages.length) {
+				pages.push(pdf.addPage(PageSizes.Letter));
 			}
+			if (layout == "vertical") {
+				slot = drawListVertical(pdf, orderedSublists[index], pages, slot, helvetica, helveticaBold);
+			} else {
+				slot = drawListHorizontal(pdf, orderedSublists[index], pages, slot, helvetica, helveticaBold);
+			}
+			slot++;
 		}
 
 		const bytes = await pdf.save();

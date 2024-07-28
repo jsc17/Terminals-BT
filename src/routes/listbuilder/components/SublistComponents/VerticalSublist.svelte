@@ -20,6 +20,7 @@
 				<option value={scenario}>{scenario}</option>
 			{/each}
 		</select>
+		<p>{sublist.id}</p>
 		<button onclick={() => editSublist(sublist.id)}>Edit</button>
 	</div>
 	<div class="sublist-body">

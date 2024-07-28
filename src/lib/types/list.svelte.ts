@@ -12,7 +12,7 @@ export class UnitList {
 	items = $state<(Unit | Formation)[]>([]);
 	details = $state({ name: "", era: -1, faction: -1, general: -1 });
 	options = $state<Options>(ruleSets[0]);
-	sublists = $state<string[]>([]);
+	sublists = $state<Sublist[]>([]);
 	id = 0;
 	resultList: ResultList;
 
@@ -334,15 +334,11 @@ export class UnitList {
 				}
 			}
 		});
-		const tempSublists: string[] = [];
-		for (const sublistString of this.sublists) {
-			const sublist = JSON.parse(sublistString) as { sc: string; un: number[] };
-			sublist.un = sublist.un.filter((unitId) => {
+		for (const sublist of this.sublists) {
+			sublist.checked = sublist.checked.filter((unitId) => {
 				return unitId != id;
 			});
-			tempSublists.push(JSON.stringify(sublist));
 		}
-		this.sublists = tempSublists;
 	}
 	clear() {
 		this.items = [];
@@ -371,14 +367,15 @@ export class UnitList {
 			}
 		}
 		for (const sublist of this.sublists) {
-			const { sc, un } = JSON.parse(sublist);
-			const tempSublist = { sc, un: <number[]>[] };
-			this.units.forEach((unit, index) => {
-				if (un.includes(unit.id)) {
-					tempSublist.un.push(index);
-				}
+			const sublistString = { sc: sublist.scenario, un: <number[]>[] };
+			sublist.unitList.forEach((subUnit) => {
+				sublistString.un.push(
+					this.units.findIndex((unit) => {
+						return subUnit.id == unit.id;
+					})
+				);
 			});
-			listCode.sublists.push(JSON.stringify(tempSublist));
+			listCode.sublists.push(JSON.stringify(sublistString));
 		}
 		return JSON.stringify(listCode);
 	}
@@ -414,7 +411,6 @@ export class UnitList {
 		this.details.era = era;
 		this.details.faction = faction;
 		this.details.general = this.resultList.general;
-		this.sublists = structuredClone($state.snapshot(sublists));
 
 		this.items = [];
 		let unitArray = units;
@@ -557,5 +553,22 @@ export class UnitList {
 				}
 			}
 		}
+
+		this.sublists = [];
+		for (const sublistString of sublists) {
+			const sublist = JSON.parse(sublistString);
+			this.sublists.push(
+				new Sublist(
+					this.id,
+					this,
+					sublist.sc,
+					sublist.un.map((id: string) => {
+						return Number(id);
+					})
+				)
+			);
+			this.id++;
+		}
+		console.log($state.snapshot(this.sublists).length);
 	}
 }

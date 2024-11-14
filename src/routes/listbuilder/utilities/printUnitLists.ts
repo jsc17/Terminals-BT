@@ -243,7 +243,9 @@ export async function drawUnitCard(pdf: PDFDocument, page: PDFPage, unit: Unit, 
 		} catch (error) {
 			const url = `https://masterunitlist.azurewebsites.net/Unit/Card/${unit.mulId}?skill=${unit.skill}`;
 			arrayBuffer = await fetch(url).then((res) => res.arrayBuffer());
-			await fs.writeFile(`./files/cached-cards/${unit.mulId}-${unit.skill}.png`, new Uint8Array(arrayBuffer));
+			console.log(import.meta.dirname);
+
+			// await fs.writeFile(`./files/cached-cards/${unit.mulId}-${unit.skill}.png`, new Uint8Array(arrayBuffer));
 		}
 	}
 	image = await pdf.embedPng(arrayBuffer);
@@ -263,7 +265,7 @@ export async function drawCondensedUnitCard(pdf: PDFDocument, page: PDFPage, uni
 		} catch (error) {
 			const url = `https://masterunitlist.azurewebsites.net/Unit/Card/${unit.mulId}?skill=${unit.skill}`;
 			arrayBuffer = await fetch(url).then((res) => res.arrayBuffer());
-			await fs.writeFile(`./files/cached-cards/${unit.mulId}-${unit.skill}.png`, new Uint8Array(arrayBuffer));
+			// await fs.writeFile(`./files/cached-cards/${unit.mulId}-${unit.skill}.png`, new Uint8Array(arrayBuffer));
 		}
 	}
 	image = await pdf.embedPng(arrayBuffer);

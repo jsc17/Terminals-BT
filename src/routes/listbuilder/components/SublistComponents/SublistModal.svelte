@@ -262,6 +262,9 @@
 		<div class="dialog-buttons">
 			<button
 				onclick={() => {
+					if (selectedSublist.checked.length == 0) {
+						deleteSublist(selectedSublist.id);
+					}
 					editSublistDialog.close();
 				}}>Cancel</button
 			>

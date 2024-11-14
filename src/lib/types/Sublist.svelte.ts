@@ -38,9 +38,11 @@ export class Sublist {
 		return { pv, health, short, medium, long, size };
 	});
 
-	constructor(id: number, list: UnitList) {
+	constructor(id: number, list: UnitList, scenario: string = "-", checked: number[] = []) {
 		this.id = id;
 		this.list = list;
+		this.scenario = scenario;
+		this.checked = checked;
 	}
 
 	async print() {

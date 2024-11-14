@@ -70,7 +70,8 @@ export class ResultList {
 					tonnage: unit.tonnage,
 					date: unit.date_introduced,
 					role: unit.role,
-					availability: unit.availability
+					availability: unit.availability,
+					technology: unit.technology
 				};
 				this.resultList.push(formattedUnit);
 			} catch (error) {

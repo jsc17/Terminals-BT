@@ -15,11 +15,10 @@
 		pv: number;
 	};
 
-	let { showAutoModal = $bindable(), sublistId = $bindable(), sublists = $bindable() }: { showAutoModal: boolean; sublistId: number; sublists: Sublist[] } = $props();
+	let { showAutoModal = $bindable() }: { showAutoModal: boolean } = $props();
 
 	let autosublists = $state<any[]>([]);
 	let autoSublistId = 0;
-	let showMinUnitInfoDropdown = $state<boolean>(false);
 	let showFilters = $state<boolean>(false);
 	let autoGenerationDialog: HTMLDialogElement;
 
@@ -85,15 +84,15 @@
 		}
 	}
 	function addAutoSublist(id: number) {
-		let newList = new Sublist(sublistId, list);
-		sublistId++;
+		let newList = new Sublist(list.id, list);
+		list.id++;
 		let sublist = $state.snapshot(
 			autosublists.find((e) => {
 				return e.id == id;
 			})
 		);
 		newList.checked = structuredClone(sublist.units);
-		sublists.push(newList);
+		list.sublists.push(newList);
 	}
 </script>
 

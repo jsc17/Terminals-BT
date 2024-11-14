@@ -3,7 +3,6 @@
 	import { dndzone, type DndEvent } from "svelte-dnd-action";
 	import { isUnit } from "$lib/types/unit";
 	import { Sublist } from "$lib/types/Sublist.svelte";
-	import { untrack } from "svelte";
 	import { flip } from "svelte/animate";
 	import VerticalSublist from "./VerticalSublist.svelte";
 	import SublistPrintModal from "./SublistPrintModal.svelte";
@@ -17,12 +16,10 @@
 
 	let { showSublistModal = $bindable() } = $props();
 
-	let sublistId = $state(1);
 	let tempSublist = $state<Sublist>(new Sublist(0, list));
-	let sublists = $state<Sublist[]>([]);
 	let filteredSublists = $derived.by(() => {
 		let tempSublists: Sublist[] = [];
-		for (const sublist of sublists) {
+		for (const sublist of list.sublists) {
 			if (scenarioFilter == "All" || scenarioFilter == sublist.scenario) {
 				tempSublists.push(sublist);
 			}
@@ -40,9 +37,6 @@
 
 	$effect(() => {
 		if (showSublistModal) {
-			untrack(() => {
-				loadSublists();
-			});
 			sublistDialog.showModal();
 		} else {
 			sublistDialog.close();
@@ -53,85 +47,41 @@
 
 	let dropTargetStyle = { outline: "none" };
 	function handleSort(e: CustomEvent<DndEvent<Sublist>>) {
-		sublists = e.detail.items;
-	}
-
-	//sublist creation and editting functions
-	function loadSublists() {
-		sublists = [];
-		for (const data of list.sublists) {
-			if (data.charAt(0) == "{") {
-				const sublist = JSON.parse(data);
-				const newSublist = new Sublist(sublistId, list);
-				sublistId++;
-
-				newSublist.scenario = sublist.sc;
-				newSublist.checked = sublist.un.map((id: string) => {
-					return Number(id);
-				});
-				sublists.push(newSublist);
-			} else {
-				const newSublist = new Sublist(sublistId, list);
-				sublistId++;
-
-				newSublist.scenario = "-";
-				newSublist.checked = data.split(",").map((id: string) => {
-					return Number(id);
-				});
-
-				sublists.push(newSublist);
-			}
-		}
+		list.sublists = e.detail.items;
 	}
 
 	function addSublist() {
-		let newList: Sublist = new Sublist(sublistId, list);
-		const createdId = sublistId;
-		sublistId++;
-
-		sublists.push(newList);
-
-		editSublist(createdId);
+		let newList: Sublist = new Sublist(list.id, list);
+		list.id++;
+		list.sublists.push(newList);
+		editSublist(newList.id);
 	}
 	function editSublist(id: number) {
-		selectedSublist = sublists.find((sublist) => {
+		selectedSublist = list.sublists.find((sublist) => {
 			return sublist.id == id;
 		})!;
 		tempSublist.checked = [...selectedSublist.checked];
-
 		editSublistDialog.showModal();
 	}
 
 	function handleEditSave() {
-		selectedSublist.checked = [...tempSublist.checked];
+		selectedSublist.checked = structuredClone($state.snapshot(tempSublist.checked));
 		editSublistDialog.close();
-		updateList();
 	}
 
 	function copySublist(id: number) {
-		const createdSublist = new Sublist(sublistId, list);
-		sublistId++;
-		createdSublist.checked = [
-			...(sublists.find((sublist) => {
-				return sublist.id == id;
-			})?.checked ?? [])
-		];
-		sublists.push(createdSublist);
-		updateList();
-	}
-	function deleteSublist(id: number) {
-		let index = sublists.findIndex((sublist) => {
+		const existingSublist = list.sublists.find((sublist) => {
 			return sublist.id == id;
 		});
-		sublists.splice(index, 1);
-		updateList();
+		const newSublist = new Sublist(list.id, list, existingSublist?.scenario, existingSublist?.checked);
+		list.id++;
+		list.sublists.push(newSublist);
 	}
-
-	function updateList() {
-		list.sublists = [];
-		for (const sublist of sublists) {
-			list.sublists.push(JSON.stringify({ sc: sublist.scenario, un: sublist.checked }));
-		}
+	function deleteSublist(id: number) {
+		let index = list.sublists.findIndex((sublist) => {
+			return sublist.id == id;
+		});
+		list.sublists.splice(index, 1);
 	}
 
 	function handleCheck(e: Event, id: number) {
@@ -151,7 +101,6 @@
 <dialog
 	bind:this={sublistDialog}
 	onclose={() => {
-		updateList();
 		showSublistModal = false;
 	}}
 	class="sublist-modal"
@@ -207,7 +156,7 @@
 			{#if appWindow.isMobile}
 				<div
 					class="sublist-container sublist-container-horizontal"
-					use:dndzone={{ items: sublists, dropTargetStyle, flipDurationMs }}
+					use:dndzone={{ items: list.sublists, dropTargetStyle, flipDurationMs }}
 					onconsider={handleSort}
 					onfinalize={handleSort}
 				>
@@ -223,7 +172,7 @@
 			{:else}
 				<div
 					class="sublist-container"
-					use:dndzone={{ items: sublists, dropTargetStyle, flipDurationMs }}
+					use:dndzone={{ items: list.sublists, dropTargetStyle, flipDurationMs }}
 					onconsider={handleSort}
 					onfinalize={handleSort}
 					class:sublist-container-vertical={layout == "vertical"}
@@ -313,6 +262,9 @@
 		<div class="dialog-buttons">
 			<button
 				onclick={() => {
+					if (selectedSublist.checked.length == 0) {
+						deleteSublist(selectedSublist.id);
+					}
 					editSublistDialog.close();
 				}}>Cancel</button
 			>
@@ -321,8 +273,9 @@
 	</div>
 </dialog>
 
-<SublistPrintModal bind:showPrintModal {sublists}></SublistPrintModal>
-<AutogenerationModal bind:showAutoModal bind:sublistId bind:sublists></AutogenerationModal>
+<SublistPrintModal bind:showPrintModal></SublistPrintModal>
+
+<AutogenerationModal bind:showAutoModal></AutogenerationModal>
 
 <style>
 	.sublist-modal {

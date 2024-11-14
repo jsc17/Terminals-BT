@@ -7,7 +7,7 @@
 	import { getContext } from "svelte";
 
 	let list: UnitList = getContext("list");
-	let { showPrintModal = $bindable(), sublists }: { showPrintModal: boolean; sublists: Sublist[] } = $props();
+	let { showPrintModal = $bindable() }: { showPrintModal: boolean } = $props();
 
 	let printDialog: HTMLDialogElement;
 
@@ -27,7 +27,7 @@
 		}
 
 		let sublistData = [];
-		for (const sublist of sublists) {
+		for (const sublist of list.sublists) {
 			sublistData.push({ scenario: sublist.scenario, pv: sublist.stats.pv, unitList: $state.snapshot(sublist.unitList) });
 		}
 		formData.append("sublists", JSON.stringify(sublistData));

@@ -24,10 +24,10 @@ const rulesLevels = [
 ];
 const technology = [
 	{ value: "any", display: "Any" },
-	{ value: "is", display: "Inner Sphere" },
+	{ value: "inner sphere", display: "Inner Sphere" },
 	{ value: "clan", display: "Clan" },
 	{ value: "mixed", display: "Mixed" },
-	{ value: "prim", display: "Primitive" }
+	{ value: "primative", display: "Primitive" }
 ];
 
 const roles = [

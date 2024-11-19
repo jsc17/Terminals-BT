@@ -168,6 +168,7 @@
 		width: max-content;
 		max-width: 90dvw;
 		position: absolute;
+		z-index: 15;
 	}
 	:global(.dropdown-top) {
 		top: 30px;

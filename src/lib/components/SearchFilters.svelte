@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { appWindow } from "$lib/stores/appWindow.svelte.js";
+	import { type Filter } from "$lib/types/filter";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { getContext } from "svelte";
 
@@ -10,7 +11,7 @@
 	let showAbilitiesDropdown = $state(false);
 </script>
 
-{#snippet filters(filterList)}
+{#snippet filters(filterList: Filter[])}
 	<div class="filter-list">
 		{#each filterList as filter}
 			<div class="filter">
@@ -67,6 +68,17 @@
 				{:else if filter.type == "select"}
 					<select id={filter.name} bind:value={filter.value}>
 						{#each filter.possible! as option}
+							<option value={option.value}>{option.display}</option>
+						{/each}
+					</select>
+				{:else if filter.type == "movement"}
+					<div class="filter-number">
+						<input id={filter.name} type="number" min="0" bind:value={filter.speedMinValue} placeholder="min" />
+						-
+						<input id={filter.name + "max"} type="number" min="0" bind:value={filter.speedMaxValue} placeholder="max" />
+					</div>
+					<select id={filter.name} bind:value={filter.typeValue}>
+						{#each filter.possibleTypeValues! as option}
 							<option value={option.value}>{option.display}</option>
 						{/each}
 					</select>

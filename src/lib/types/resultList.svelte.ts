@@ -41,6 +41,8 @@ export class ResultList {
 				tempMovement.push({ speed: parseInt(moveSpeed), type: moveType });
 			});
 			try {
+				//{"speed": 6,"type": "t" }
+
 				let formattedUnit: Unit = {
 					mulId: unit.mulId,
 					name: unit.name,
@@ -155,17 +157,10 @@ export class ResultList {
 					break;
 				case "number":
 					if (filter.value) {
-						if (filter.name == "move") {
-							tempResultList = tempResultList.filter((unit) => {
-								if (unit.move != undefined) {
-									return unit.move[0].speed >= parseInt(filter.value!.toString());
-								}
-							});
-						} else {
-							tempResultList = tempResultList.filter((unit) => {
-								return unit[filter.name] >= filter.value!;
-							});
-						}
+						tempResultList = tempResultList.filter((unit) => {
+							return unit[filter.name] >= filter.value!;
+						});
+
 					}
 					if (filter.maxValue !== undefined && filter.maxValue !== null) {
 						tempResultList = tempResultList.filter((unit) => {
@@ -187,6 +182,31 @@ export class ResultList {
 						}
 					});
 
+					break;
+				case "movement":
+					if (filter.speedMaxValue || filter.speedMinValue || filter.typeValue != "any") {
+						tempResultList = tempResultList.filter((unit) => {
+							if (unit.move === undefined) {
+								return false;
+							}
+
+							let meetsType = false, meetsMinSpeed = false, meetsMaxSpeed = false;
+							for (const move of unit.move) {
+								if (filter.typeValue == move.type || filter.typeValue == "any") {
+									meetsType = true;
+									if (!filter.speedMinValue || move.speed >= filter.speedMinValue) {
+										meetsMinSpeed = true;
+									}
+									if (!filter.speedMaxValue || move.speed <= filter.speedMaxValue) {
+										meetsMaxSpeed = true;
+									}
+								}
+							}
+
+							return meetsType && meetsMinSpeed && meetsMaxSpeed;
+
+						});
+					}
 					break;
 				case "abilities":
 					if (filter.value) {
@@ -260,6 +280,10 @@ export class ResultList {
 				});
 			} else if (filter.type == "select") {
 				filter.value = "any";
+			} else if (filter.type == "movement") {
+				filter.speedMaxValue = undefined;
+				filter.speedMinValue = undefined;
+				filter.typeValue = "any";
 			} else if (filter.type != "unique") {
 				filter.value = undefined;
 			}

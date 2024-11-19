@@ -4,26 +4,29 @@ import { type Formation } from "$lib/types/formation.svelte";
 import fs from "fs/promises";
 
 const positions = [
-	{ x: 27, y: 210 },
-	{ x: 27, y: 390 },
-	{ x: 27, y: 570 },
-	{ x: 27, y: 750 },
-	{ x: 279, y: 210 },
-	{ x: 279, y: 390 },
-	{ x: 279, y: 570 },
-	{ x: 279, y: 750 }
+	{ x: 40, y: 207 },
+	{ x: 40, y: 395 },
+	{ x: 40, y: 583 },
+	{ x: 40, y: 771 },
+	{ x: 312, y: 207 },
+	{ x: 312, y: 395 },
+	{ x: 312, y: 583 },
+	{ x: 312, y: 771 }
 ];
+
+
+//need to redo these when I get around to actually making this an option
 const condensedPositions = [
-	{ x: 27, y: 171 },
-	{ x: 27, y: 321 },
-	{ x: 27, y: 471 },
-	{ x: 27, y: 621 },
-	{ x: 27, y: 771 },
-	{ x: 279, y: 171 },
-	{ x: 279, y: 321 },
-	{ x: 279, y: 471 },
-	{ x: 279, y: 621 },
-	{ x: 279, y: 771 }
+	{ x: 40, y: 171 },
+	{ x: 40, y: 321 },
+	{ x: 40, y: 471 },
+	{ x: 40, y: 621 },
+	{ x: 40, y: 771 },
+	{ x: 315, y: 171 },
+	{ x: 315, y: 321 },
+	{ x: 315, y: 471 },
+	{ x: 315, y: 621 },
+	{ x: 315, y: 771 }
 ];
 
 type Rectangle = {
@@ -249,7 +252,8 @@ export async function drawUnitCard(pdf: PDFDocument, page: PDFPage, unit: Unit, 
 		}
 	}
 	image = await pdf.embedPng(arrayBuffer);
-	page.drawImage(image, { x: positions[slot].x, y: pageHeight - positions[slot].y, height: 174, width: 247 });
+	page.drawImage(image, { x: positions[slot].x, y: pageHeight - positions[slot].y, height: 187, width: 260 });
+
 }
 export async function drawCondensedUnitCard(pdf: PDFDocument, page: PDFPage, unit: Unit, index: number) {
 	let pageHeight = page.getHeight();

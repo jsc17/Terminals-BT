@@ -1,5 +1,14 @@
 [
 	{
+		"date": "11-19-24",
+		"updates": {
+			"Unit Search / Listbuilder": ["Added filter for movement type", "Fixed bug where max movement filter didn't work"],
+			"List Builder": [
+				"Bumped up card sizes on printed list to match standard sleeve size. (previously it generated at the correct size on the pdf, but would scale down on most printers due to margins)"
+			]
+		}
+	},
+	{
 		"date": "7-18-24",
 		"updates": {
 			"List Builder": [

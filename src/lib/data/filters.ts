@@ -48,11 +48,25 @@ const roles = [
 	{ value: "Transport", display: "Transport" }
 ];
 
+const movementTypes = [
+	{ value: "any", display: "Any" },
+	{ value: "j", display: "Jump" },
+	{ value: "h", display: "Hover" },
+	{ value: "t", display: "Tracked" },
+	{ value: "v", display: "VTOL" },
+	{ value: "w", display: "Wheeled" },
+	{ value: "g", display: "WiGE" },
+	{ value: "f", display: "Foot" },
+	{ value: "m", display: "Motorized" },
+	{ value: "s", display: "Submersible" },
+
+]
+
 export const filters: Filter[] = [
 	{ name: "name", label: "Name", type: "string" },
 	{ name: "subtype", label: "Type", type: "select", value: "any", possible: typeValues },
 	{ name: "pv", label: "PV", type: "number" },
-	{ name: "move", label: "Move", type: "number" },
+	{ name: "move", label: "Move", type: "movement", typeValue: "any", possibleTypeValues: movementTypes },
 	{ name: "tmm", label: "TMM", type: "number" },
 	{ name: "health", label: "Health", type: "number" },
 	{

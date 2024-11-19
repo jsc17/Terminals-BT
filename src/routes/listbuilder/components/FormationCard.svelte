@@ -21,10 +21,6 @@
 	function handleFinalize(e: CustomEvent<DndEvent<Unit>>) {
 		formation.units = e.detail.items;
 	}
-
-	$effect(() => {
-		console.log(formation.type);
-	});
 </script>
 
 <main>

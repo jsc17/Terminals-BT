@@ -9,7 +9,6 @@ export async function printVerticalSublists(pdf: PDFDocument, orderedSublists: a
 		if (Math.floor(slot / 9) >= pages.length) {
 			pages.push(pdf.addPage(PageSizes.Letter));
 		}
-		console.log(pages.length);
 		let page = pages.at(-1)!;
 		let tempSlot = slot % 9;
 		const { height } = page.getSize();
@@ -56,10 +55,8 @@ export async function printVerticalSublists(pdf: PDFDocument, orderedSublists: a
 			}
 		}
 		page.setFont(helveticaBold);
-		console.log("test");
 		page.drawText(
 			`Health: ${sublist.unitList.reduce((total: number, unit: any) => {
-				console.log(unit.health);
 				return (total += unit.health ?? 0);
 			}, 0)}  Size: ${sublist.unitList.reduce((total: number, unit: any) => {
 				return (total += unit.size ?? 0);

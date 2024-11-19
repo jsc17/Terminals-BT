@@ -14,10 +14,8 @@ export async function printHorizontalSublists(pdf: PDFDocument, orderedSublists:
 		let offset = 0;
 		const { width, height } = page.getSize();
 		page.setFont(helveticaBold);
-		console.log("test");
 		page.drawText(
 			`${sublist.scenario} - ${sublist.pv} PV - ${sublist.unitList.length} Units - Health: ${sublist.unitList.reduce((total: number, unit: any) => {
-				console.log(unit.health);
 				return (total += unit.health ?? 0);
 			}, 0)}  Size: ${sublist.unitList.reduce((total: number, unit: any) => {
 				return (total += unit.size ?? 0);

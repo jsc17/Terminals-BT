@@ -569,6 +569,5 @@ export class UnitList {
 			);
 			this.id++;
 		}
-		console.log($state.snapshot(this.sublists).length);
 	}
 }

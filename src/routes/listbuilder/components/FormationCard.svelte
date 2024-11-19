@@ -21,6 +21,10 @@
 	function handleFinalize(e: CustomEvent<DndEvent<Unit>>) {
 		formation.units = e.detail.items;
 	}
+
+	$effect(() => {
+		console.log(formation.type);
+	});
 </script>
 
 <main>
@@ -28,7 +32,7 @@
 		<input type="text" name="formation-name" id="formation-id" bind:value={formation.name} />
 		<div class="inline">
 			<label for="formation-type">{formation.style.charAt(0).toUpperCase()}</label>
-			<select name="formation-type" value={formation.type}>
+			<select name="formation-type" bind:value={formation.type}>
 				{#if formation.style == "ground"}
 					{#each groundFormationTypes as formationType}
 						<option value={formationType}>{formationType}</option>

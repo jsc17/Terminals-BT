@@ -1,5 +1,11 @@
 [
 	{
+		"date": "11-20-24",
+		"updates": {
+			"Unit Search / Listbuilder": ["Fixed dropdown overlay issues", "Fixed formation types not saving when changed"]
+		}
+	},
+	{
 		"date": "11-19-24",
 		"updates": {
 			"Unit Search / Listbuilder": ["Added filter for movement type", "Fixed bug where max movement filter didn't work"],

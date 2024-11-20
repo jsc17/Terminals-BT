@@ -1,23 +1,35 @@
-type DefaultFilter = {
-	name: string;
-	label: string;
-	type: "number" | "numberGroup" | "string" | "select" | "abilities";
-	value?: string | number;
-	maxValue?: number;
-	possible?: { value: string; display: string }[];
-	properties?: string[];
-	labels?: string[];
-	values?: { min?: number; max?: number }[];
-	defaults?: number[];
-};
-
 type NumberFilter = {
 	name: string;
 	label: string;
 	type: "number";
-	valueMin: number;
-	valueMax: number;
+	valueMin?: number;
+	valueMax?: number;
 };
+
+type NumberGroupFilter = {
+	name: string;
+	label: string;
+	type: "numberGroup";
+	properties?: string[];
+	labels?: string[];
+	values?: { min?: number; max?: number }[];
+	defaults?: number[];
+}
+
+type StringFilter = {
+	name: string;
+	label: string;
+	type: "string";
+	value: string;
+}
+
+type SelectFilter = {
+	name: string;
+	label: string;
+	type: "select";
+	value: string;
+	possibleValues: { value: string; display: string }[];
+}
 
 type UniqueFilter = {
 	name: string;
@@ -36,5 +48,12 @@ type MovementFilter = {
 	possibleTypeValues: { value: string; display: string }[];
 }
 
-export type Filter = DefaultFilter | UniqueFilter | MovementFilter;
+type AbilityFilter = {
+	name: string;
+	label: string;
+	type: "abilities";
+	value: string;
+}
+
+export type Filter = AbilityFilter | UniqueFilter | MovementFilter | StringFilter | NumberFilter | SelectFilter | NumberGroupFilter;
 // { name: "name", type: "string", values: [{ label: "", value: "", default: "" }] },

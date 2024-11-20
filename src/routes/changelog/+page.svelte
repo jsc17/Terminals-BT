@@ -5,23 +5,25 @@
 <main>
 	<div class="card">
 		<h2>Change log:</h2>
-		{#each data.changelogData as entry}
-			<section>
-				<h3 class="date">{entry.date}</h3>
-				{#if entry.notice}
-					<div class="notice">{entry.notice}</div>
-				{/if}
-				{#each Object.keys(entry.updates) as key}
-					<h3 class="system">{key}</h3>
-					<ul>
-						{#each entry.updates[key] as update}
-							<li class="update">{update}</li>
-						{/each}
-					</ul>
-				{/each}
-				<hr />
-			</section>
-		{/each}
+		{#if data}
+			{#each data.changelogData as entry}
+				<section>
+					<h3 class="date">{entry.date}</h3>
+					{#if entry.notice}
+						<div class="notice">{entry.notice}</div>
+					{/if}
+					{#each Object.keys(entry.updates) as key}
+						<h3 class="system">{key}</h3>
+						<ul>
+							{#each entry.updates[key] as update}
+								<li class="update">{update}</li>
+							{/each}
+						</ul>
+					{/each}
+					<hr />
+				</section>
+			{/each}
+		{/if}
 	</div>
 	<div class="card roadmap">
 		<h2>Road Map:</h2>

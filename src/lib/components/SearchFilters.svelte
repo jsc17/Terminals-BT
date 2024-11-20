@@ -20,9 +20,9 @@
 					<input id={filter.name} type="text" bind:value={filter.value} placeholder={filter.label} />
 				{:else if filter.type == "number"}
 					<div class="filter-number">
-						<input id={filter.name} type="number" min="0" bind:value={filter.value} placeholder="min" />
+						<input id={filter.name} type="number" min="0" bind:value={filter.valueMin} placeholder="min" />
 						-
-						<input id={filter.name + "max"} type="number" min="0" bind:value={filter.maxValue} placeholder="max" />
+						<input id={filter.name + "max"} type="number" min="0" bind:value={filter.valueMax} placeholder="max" />
 					</div>
 				{:else if filter.type == "numberGroup"}
 					<div class="inline">
@@ -67,7 +67,7 @@
 					</div>
 				{:else if filter.type == "select"}
 					<select id={filter.name} bind:value={filter.value}>
-						{#each filter.possible! as option}
+						{#each filter.possibleValues as option}
 							<option value={option.value}>{option.display}</option>
 						{/each}
 					</select>

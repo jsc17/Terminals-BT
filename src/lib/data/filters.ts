@@ -63,8 +63,8 @@ const movementTypes = [
 ]
 
 export const filters: Filter[] = [
-	{ name: "name", label: "Name", type: "string" },
-	{ name: "subtype", label: "Type", type: "select", value: "any", possible: typeValues },
+	{ name: "name", label: "Name", type: "string", value: "" },
+	{ name: "subtype", label: "Type", type: "select", value: "any", possibleValues: typeValues },
 	{ name: "pv", label: "PV", type: "number" },
 	{ name: "move", label: "Move", type: "movement", typeValue: "any", possibleTypeValues: movementTypes },
 	{ name: "tmm", label: "TMM", type: "number" },
@@ -79,14 +79,14 @@ export const filters: Filter[] = [
 		defaults: [0, 0, 0]
 	},
 	{ name: "size", label: "Size", type: "number" },
-	{ name: "abilities", label: "Abilities", type: "abilities" }
+	{ name: "abilities", label: "Abilities", type: "abilities", value: "" }
 ];
 
 export const additionalFilters: Filter[] = [
 	{ name: "date", label: "Date Introduced", type: "number" },
-	{ name: "role", label: "Role", type: "select", value: "any", possible: roles },
-	{ name: "rulesLevel", label: "Rules", type: "select", value: "any", possible: rulesLevels },
-	{ name: "technology", label: "Technology", type: "select", value: "any", possible: technology },
+	{ name: "role", label: "Role", type: "select", value: "any", possibleValues: roles },
+	{ name: "rulesLevel", label: "Rules", type: "select", value: "any", possibleValues: rulesLevels },
+	{ name: "technology", label: "Technology", type: "select", value: "any", possibleValues: technology },
 	{ name: "tonnage", label: "Tonnage", type: "number" },
 	{ name: "unique", label: "Allow Uniques", type: "unique", checked: true }
 ];

@@ -156,15 +156,15 @@ export class ResultList {
 					}
 					break;
 				case "number":
-					if (filter.value) {
+					if (filter.valueMin) {
 						tempResultList = tempResultList.filter((unit) => {
-							return unit[filter.name] >= filter.value!;
+							return unit[filter.name] >= filter.valueMin!;
 						});
 
 					}
-					if (filter.maxValue !== undefined && filter.maxValue !== null) {
+					if (filter.valueMax !== undefined && filter.valueMax !== null) {
 						tempResultList = tempResultList.filter((unit) => {
-							return unit[filter.name] <= filter.maxValue!;
+							return unit[filter.name] <= filter.valueMax!;
 						});
 					}
 					break;
@@ -272,8 +272,8 @@ export class ResultList {
 	async resetFilters() {
 		this.filters.concat(this.additionalFilters).forEach((filter) => {
 			if (filter.type == "number") {
-				filter.value = undefined;
-				filter.maxValue = undefined;
+				filter.valueMin = undefined;
+				filter.valueMax = undefined;
 			} else if (filter.type == "numberGroup") {
 				filter.values!.forEach((value, index, values) => {
 					values[index] = {};
@@ -285,7 +285,7 @@ export class ResultList {
 				filter.speedMinValue = undefined;
 				filter.typeValue = "any";
 			} else if (filter.type != "unique") {
-				filter.value = undefined;
+				filter.value = "";
 			}
 		});
 	}

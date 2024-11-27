@@ -1,11 +1,9 @@
 <script lang="ts">
 	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import VirtualList from "$lib/VirtualList/VirtualList.svelte";
 	import { enhance } from "$app/forms";
+	import { VirtualList } from "svelte-virtuallists";
 	import { type ActionResult } from "@sveltejs/kit";
 	import { eras, factions } from "$lib/data/erasFactionLookup";
-	import { getTextWidth } from "$lib/VirtualList/utils/utilities";
-	import type { Unit } from "$lib/types/unit";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import type { UnitList } from "$lib/types/list.svelte";
 	import { getContext } from "svelte";
@@ -18,25 +16,6 @@
 	let itemCount = $derived(resultList.filteredList.length);
 	let listHeight = $state(500);
 	let listWidth = $state(0);
-
-	let itemSize = $derived.by(() => {
-		return resultList.filteredList.map((unit: Unit) => {
-			let lines = 1;
-			let words = unit.name.split(" ");
-			let currentWidth = 0;
-			for (const word of words) {
-				const width = getTextWidth(word);
-				if (currentWidth + width > listWidth - 20) {
-					lines++;
-					currentWidth = width;
-				} else {
-					currentWidth += width;
-				}
-			}
-			const height = 23 * lines + 30;
-			return height;
-		});
-	});
 
 	let availabilityDialog = $state<HTMLDialogElement>();
 	let availabilityResults = $state<any[]>([]);
@@ -94,7 +73,7 @@
 			</button>
 		{/each}
 		<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile}> {appWindow.isMobile ? `DMG` : `DMG S/M/L-OV`}</button>
-		<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile}></button>
+		<div class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile}></div>
 	</div>
 	{#if resultList.status == "waiting"}
 		<div class="loading-message">Choose an Era and Faction to display available units</div>
@@ -102,58 +81,55 @@
 		<div class="loading-message">Loading. Please wait ...</div>
 	{:else if resultList.status == "loaded"}
 		<div class="virtual-list-container" bind:clientHeight={listHeight}>
-			<VirtualList height={listHeight} width="auto" {itemCount} {itemSize}>
-				{#snippet children({ style, index }: { style: string; index: number })}
-					{@const unit = resultList.filteredList[index]}
-					{#if unit}
-						<div {style} class:virtual-list-row={!appWindow.isMobile} class:virtual-list-row-mobile={appWindow.isMobile}>
-							<a href="http://masterunitlist.info/Unit/Details/{unit.mulId}" target="_blank">{unit.name}</a>
-							<div class="align-center">{unit.subtype}</div>
-							<div class="align-center">{unit.pv}</div>
-							{#if !appWindow.isMobile}
-								<div class="align-center">{unit?.size ?? "-"}</div>
-							{/if}
-							<div class="align-center">
-								{#if unit?.move == undefined}
-									-
-								{:else}
-									{#each unit.move as movement, index}
-										{#if index != 0}
-											{"/ "}
-										{/if}
-										{`${movement.speed}"${movement.type ?? ""}`}
-									{/each}
-								{/if}
-							</div>
-							{#if !appWindow.isMobile}
-								<div class="align-center">{unit.tmm ?? "-"}</div>
-							{/if}
-							<div class="align-center">
-								{#if unit.health == undefined}
-									-
-								{:else}
-									{appWindow.isMobile ? unit.health : unit.health + " (" + unit.armor + "+" + unit.structure + ")"}
-								{/if}
-							</div>
-							<div class="align-center">
-								{#if unit.damageS == undefined}
-									-
-								{:else}
-									{unit.damageS}{unit.damageSMin ? "*" : ""}{"/" + unit.damageM}{unit.damageMMin ? "*" : ""}{"/" + unit.damageL}{unit.damageLMin ? "*" : ""}{" - " + unit.overheat}
-								{/if}
-							</div>
-							{#if list}
-								<div class="align-center"><button onclick={() => list.addUnit(unit)}>+</button></div>
+			<VirtualList items={resultList.filteredList} style="height:{listHeight}px;width:100%">
+				{#snippet vl_slot({ index, item })}
+					<div class:virtual-list-row={!appWindow.isMobile} class:virtual-list-row-mobile={appWindow.isMobile}>
+						<a href="http://masterunitlist.info/Unit/Details/{item.mulId}" target="_blank">{item.name}</a>
+						<div class="align-center">{item.subtype}</div>
+						<div class="align-center">{item.pv}</div>
+						{#if !appWindow.isMobile}
+							<div class="align-center">{item?.size ?? "-"}</div>
+						{/if}
+						<div class="align-center">
+							{#if item?.move == undefined}
+								-
 							{:else}
-								<div></div>
+								{#each item.move as movement, index}
+									{#if index != 0}
+										{"/ "}
+									{/if}
+									{`${movement.speed}"${movement.type ?? ""}`}
+								{/each}
 							{/if}
-							<div class="abilities">{unit.abilities}</div>
-							<form method="post" action="/?/getUnitAvailability" use:enhance={showAvailability} class="align-center">
-								<input type="hidden" name="mulId" value={unit.mulId} />
-								<button class="availability-button">Availability</button>
-							</form>
 						</div>
-					{/if}
+						{#if !appWindow.isMobile}
+							<div class="align-center">{item.tmm ?? "-"}</div>
+						{/if}
+						<div class="align-center">
+							{#if item.health == undefined}
+								-
+							{:else}
+								{appWindow.isMobile ? item.health : item.health + " (" + item.armor + "+" + item.structure + ")"}
+							{/if}
+						</div>
+						<div class="align-center">
+							{#if item.damageS == undefined}
+								-
+							{:else}
+								{item.damageS}{item.damageSMin ? "*" : ""}{"/" + item.damageM}{item.damageMMin ? "*" : ""}{"/" + item.damageL}{item.damageLMin ? "*" : ""}{" - " + item.overheat}
+							{/if}
+						</div>
+						{#if list}
+							<div class="align-center"><button onclick={() => list.addUnit(item)}>+</button></div>
+						{:else}
+							<div></div>
+						{/if}
+						<div class="abilities">{item.abilities}</div>
+						<form method="post" action="/?/getUnitAvailability" use:enhance={showAvailability} class="align-center">
+							<input type="hidden" name="mulId" value={item.mulId} />
+							<button class="availability-button">Availability</button>
+						</form>
+					</div>
 				{/snippet}
 			</VirtualList>
 		</div>
@@ -204,6 +180,8 @@
 		height: 30px;
 	}
 	.virtual-list-container {
+		display: flex;
+		position: relative;
 		flex: 1;
 	}
 	.loading-message {

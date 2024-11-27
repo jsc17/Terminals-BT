@@ -5,15 +5,17 @@
 		Unit List.
 	</p>
 
+	<h2>Generic Alpha Strike</h2>
 	<ul>
-		<h2>Generic Alpha Strike</h2>
 		<li>
 			<p><a href="/listbuilder">Alpha Strike List Builder</a>: General Alpha Strike List builder</p>
 		</li>
 		<li>
 			<p><a href="/unitsearch">Alpha Strike Unit Lookup</a>: Detailed unit search.</p>
 		</li>
-		<h2>Wolfnet 350</h2>
+	</ul>
+	<h2>Wolfnet 350</h2>
+	<ul>
 		<li>
 			<a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">Wolfnet 350 Tournament Rules</a>
 		</li>
@@ -29,7 +31,9 @@
 		<li>
 			<p><a href="/tournament">AS350 Tournament Dashboard</a> (Alpha): 350 Tournament manager to handle player list validation</p>
 		</li>
-		<h2>Other Stuff:</h2>
+	</ul>
+	<h2>Other Stuff:</h2>
+	<ul>
 		<li>
 			<p><a href="/changelog">Changelog</a>: List of the latest changes / roadmap of planned features</p>
 		</li>
@@ -41,16 +45,17 @@
 
 <style>
 	main {
-		width: 100dvw;
-		height: 100dvh;
+		width: 100%;
 		display: flex;
 		flex-direction: column;
+		gap: 4px;
 		padding: 32px;
 	}
 	ul {
 		line-height: 2rem;
 	}
 	p {
+		margin-bottom: 10px;
 		color: var(--muted-foreground);
 	}
 </style>

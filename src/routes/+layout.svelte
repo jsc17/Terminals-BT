@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Footer from "$lib/components/Footer.svelte";
 	import Header from "$lib/components/Header.svelte";
 	import Toast from "$lib/components/Toast.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte.js";
@@ -15,17 +16,27 @@
 	});
 </script>
 
-<Header></Header>
+<main>
+	<Header></Header>
+	{@render children()}
+	<Footer></Footer>
+</main>
+
 <Toast></Toast>
-{@render children()}
 
 <style>
+	main {
+		position: relative;
+		display: grid;
+		grid-template-rows: 35px 1fr 30px;
+		height: 100dvh;
+		gap: 4px;
+	}
 	:global(*) {
 		box-sizing: border-box;
 		color: var(--foreground);
 		min-width: 0;
 		min-height: 0;
-		scrollbar-gutter: stable;
 		scrollbar-color: var(--primary-muted) black;
 		scrollbar-width: thin;
 		overscroll-behavior: contain;

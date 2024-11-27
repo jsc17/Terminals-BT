@@ -5,7 +5,6 @@
 	import { deserialize, enhance } from "$app/forms";
 	import { calculateTMM } from "$lib/utilities/bt-utils";
 	import { toastController } from "$lib/stores/toastController.svelte";
-	import { Combobox } from "bits-ui";
 
 	let searchButton: HTMLButtonElement;
 	let selectedEra = $state(-1);
@@ -193,22 +192,6 @@
 	<div class="card">
 		<button onclick={sendResetEmail}>Send Reset</button>
 	</div>
-	<Combobox.Root items={filteredFruits} bind:inputValue bind:touchedInput multiple={true}>
-		<Combobox.Input />
-		<Combobox.Label />
-		<Combobox.Content>
-			{#each filteredFruits as fruit (fruit.value)}
-				<Combobox.Item value={fruit.value} label={fruit.label} class="inline">
-					<Combobox.ItemIndicator>X</Combobox.ItemIndicator>
-					{fruit.label}
-				</Combobox.Item>
-			{:else}
-				No results found
-			{/each}
-		</Combobox.Content>
-		<Combobox.Arrow />
-		<Combobox.HiddenInput />
-	</Combobox.Root>
 </main>
 
 <style>

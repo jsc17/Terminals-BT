@@ -166,9 +166,6 @@
 </dialog>
 
 <style>
-	h1 {
-		font-size: 1.25rem;
-	}
 	.export-bar {
 		display: flex;
 		gap: 8px;

@@ -3,27 +3,29 @@
 </script>
 
 <main>
-	<div class="card">
+	<div class="card changelog">
 		<h2>Change log:</h2>
-		{#if data}
-			{#each data.changelogData as entry}
-				<section>
-					<h3 class="date">{entry.date}</h3>
-					{#if entry.notice}
-						<div class="notice">{entry.notice}</div>
-					{/if}
-					{#each Object.keys(entry.updates) as key}
-						<h3 class="system">{key}</h3>
-						<ul>
-							{#each entry.updates[key] as update}
-								<li class="update">{update}</li>
-							{/each}
-						</ul>
-					{/each}
-					<hr />
-				</section>
-			{/each}
-		{/if}
+		<ul>
+			{#if data}
+				{#each data.changelogData as entry}
+					<section>
+						<h3 class="date">{entry.date}</h3>
+						{#if entry.notice}
+							<div class="notice">{entry.notice}</div>
+						{/if}
+						{#each Object.keys(entry.updates) as key}
+							<h3 class="system">{key}</h3>
+							<ul>
+								{#each entry.updates[key] as update}
+									<li class="update">{update}</li>
+								{/each}
+							</ul>
+						{/each}
+						<hr />
+					</section>
+				{/each}
+			{/if}
+		</ul>
 	</div>
 	<div class="card roadmap">
 		<h2>Road Map:</h2>
@@ -59,6 +61,8 @@
 		grid-template-columns: 1fr 1fr;
 		gap: 16px;
 		padding: 16px;
+		height: 100%;
+		position: relative;
 	}
 	section {
 		display: flex;
@@ -73,6 +77,13 @@
 	}
 	ul {
 		margin: 0;
+	}
+	.changelog {
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		overflow: auto;
+		gap: 8px;
 	}
 	.roadmap {
 		display: flex;

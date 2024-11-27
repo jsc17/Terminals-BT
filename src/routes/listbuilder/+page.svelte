@@ -91,19 +91,16 @@
 			List - {list.unitCount} Units - {list.pv} PV
 		{/if}
 	</button>
+	<div class:backdrop={showListbuilder}></div>
 </main>
-<div class:backdrop={showListbuilder}></div>
 
 <style>
 	main {
 		margin: 0;
 		position: relative;
-		padding: 8px;
-		height: 100%;
 		width: 100%;
 		display: flex;
 		flex-direction: column;
-		flex: 1;
 	}
 
 	@media (width < 1000px) {
@@ -116,7 +113,7 @@
 			margin-left: auto;
 			margin-right: auto;
 			z-index: 4;
-			height: calc(100dvh - 80px);
+			height: 100%;
 			width: min(max-content, 95dvw);
 		}
 		.show-listbuilder {
@@ -152,9 +149,11 @@
 		flex-direction: column;
 		gap: 8px;
 		width: 100%;
-		height: 100%;
-		margin: 0;
 		flex: 1;
+	}
+	.list-drawer-wrapper {
+		height: 100%;
+		width: 100%;
 	}
 	button {
 		height: min(30px, 90%);

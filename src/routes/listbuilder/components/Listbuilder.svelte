@@ -166,59 +166,57 @@
 			</div>
 		</div>
 	</div>
-	<div class="list-units">
-		{#if list.items.length == 0}
-			<div class="info">
-				<div>
-					<h1 style:color="var(--primary)">Latest:</h1>
-					<ul>
-						{#each recentChanges as change}
-							<li>{change}</li>
-						{/each}
-						<li>Check the <a href="/changelog" target="_blank">changelog</a> for a complete list of recent changes</li>
-					</ul>
-					{#each description as line}
-						<p>{line}</p>
-						<br />
+	{#if list.items.length == 0}
+		<div class="info">
+			<div>
+				<h1 style:color="var(--primary)">Latest:</h1>
+				<ul>
+					{#each recentChanges as change}
+						<li>{change}</li>
 					{/each}
+					<li>Check the <a href="/changelog" target="_blank">changelog</a> for a complete list of recent changes</li>
+				</ul>
+				{#each description as line}
+					<p>{line}</p>
+					<br />
+				{/each}
+			</div>
+			<p>Mechwarrior, BattleMech, 'Mech and Aerotech are registered trademarks of The Topps Company, Inc. All Rights Reserved.</p>
+		</div>
+	{:else if appWindow.isMobile}
+		<div class="unit-cards" use:dragHandleZone={{ items: list.items, dropTargetStyle, flipDurationMs, type: "all" }} onconsider={handleConsider} onfinalize={handleFinalize}>
+			{#each list.items as unit (unit.id)}
+				<div animate:flip={{ duration: flipDurationMs }} class="mobile-card">
+					{#if isUnit(unit)}
+						<div use:dragHandle aria-label="drag handle for {unit.name}" class="handle">
+							<img class="move-arrow" src="/icons/chevron-up.svg" width="15px" alt="move up" />
+							<img class="move-arrow" src="/icons/chevron-down.svg" width="15px" alt="move down" />
+						</div>
+						<UnitCard {unit}></UnitCard>
+					{:else}
+						<FormationCard {unit}></FormationCard>
+					{/if}
 				</div>
-				<p>Mechwarrior, BattleMech, 'Mech and Aerotech are registered trademarks of The Topps Company, Inc. All Rights Reserved.</p>
-			</div>
-		{:else if appWindow.isMobile}
-			<div class="unit-cards" use:dragHandleZone={{ items: list.items, dropTargetStyle, flipDurationMs, type: "all" }} onconsider={handleConsider} onfinalize={handleFinalize}>
-				{#each list.items as unit (unit.id)}
-					<div animate:flip={{ duration: flipDurationMs }} class="mobile-card">
-						{#if isUnit(unit)}
-							<div use:dragHandle aria-label="drag handle for {unit.name}" class="handle">
-								<img class="move-arrow" src="/icons/chevron-up.svg" width="15px" alt="move up" />
-								<img class="move-arrow" src="/icons/chevron-down.svg" width="15px" alt="move down" />
-							</div>
-							<UnitCard {unit}></UnitCard>
-						{:else}
-							<FormationCard {unit}></FormationCard>
-						{/if}
-					</div>
-				{/each}
-			</div>
-		{:else}
-			<div
-				class="unit-cards"
-				use:dndzone={{ items: list.items, dropTargetStyle, flipDurationMs, type: "all", centreDraggedOnCursor: true }}
-				onconsider={handleConsider}
-				onfinalize={handleFinalize}
-			>
-				{#each list.items as unit (unit.id)}
-					<div animate:flip={{ duration: flipDurationMs }}>
-						{#if isUnit(unit)}
-							<UnitCard {unit}></UnitCard>
-						{:else}
-							<FormationCard {unit}></FormationCard>
-						{/if}
-					</div>
-				{/each}
-			</div>
-		{/if}
-	</div>
+			{/each}
+		</div>
+	{:else}
+		<div
+			class="unit-cards"
+			use:dndzone={{ items: list.items, dropTargetStyle, flipDurationMs, type: "all", centreDraggedOnCursor: true }}
+			onconsider={handleConsider}
+			onfinalize={handleFinalize}
+		>
+			{#each list.items as unit (unit.id)}
+				<div animate:flip={{ duration: flipDurationMs }}>
+					{#if isUnit(unit)}
+						<UnitCard {unit}></UnitCard>
+					{:else}
+						<FormationCard {unit}></FormationCard>
+					{/if}
+				</div>
+			{/each}
+		</div>
+	{/if}
 </div>
 
 <PrintModal bind:showPrintModal></PrintModal>
@@ -228,14 +226,11 @@
 
 <style>
 	.listbuilder {
-		position: sticky;
+		position: relative;
 		width: 100%;
-		max-height: 98dvh;
-		top: 35px;
-		overflow-y: auto;
+		max-height: 100%;
+		overflow: auto;
 		z-index: 1;
-		display: flex;
-		flex-direction: column;
 	}
 	.list-header {
 		display: flex;
@@ -259,9 +254,6 @@
 		display: flex;
 		gap: 16px;
 	}
-	.list-units {
-		flex: 1;
-	}
 	.info {
 		padding: 16px;
 		display: flex;
@@ -273,8 +265,9 @@
 	.unit-cards {
 		display: flex;
 		flex-direction: column;
-		min-height: 100%;
 		gap: 4px;
+		overflow: auto;
+		padding: 4px 0px;
 	}
 	input[type="text"] {
 		width: min(250px, 50%);

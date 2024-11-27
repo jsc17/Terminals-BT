@@ -1,4 +1,4 @@
-import { Map } from "svelte/reactivity";
+import { SvelteMap } from "svelte/reactivity";
 
 type toastOptions = {
 	message: string;
@@ -32,7 +32,7 @@ class Toast {
 }
 
 class ToastController {
-	toasts = new Map<string, Toast>();
+	toasts = new SvelteMap<string, Toast>();
 
 	addToast(message: string, timeout: number = 3000, dismissable: boolean = true) {
 		const toast = new Toast(message, timeout, dismissable);

@@ -13,7 +13,6 @@
 
 	let headers = $derived(appWindow.isMobile ? ["Type", "PV", "Move", "Health"] : ["Type", "PV", "Size", "Move", "TMM", "Health (A+S)"]);
 
-	let itemCount = $derived(resultList.filteredList.length);
 	let listHeight = $state(500);
 	let listWidth = $state(0);
 
@@ -54,6 +53,7 @@
 
 <div class="search-results">
 	<div class:result-list-header={!appWindow.isMobile} class:result-list-header-mobile={appWindow.isMobile}>
+		<div class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile}></div>
 		<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile} data-sort="name" onclick={sort} bind:clientWidth={listWidth}>
 			{appWindow.isMobile ? `Name` : `Name - ${resultList.filteredList.length}/${resultList.availableList.length} results shown`}
 			{#if resultList.sort.key == "name"}
@@ -73,7 +73,6 @@
 			</button>
 		{/each}
 		<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile}> {appWindow.isMobile ? `DMG` : `DMG S/M/L-OV`}</button>
-		<div class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile}></div>
 	</div>
 	{#if resultList.status == "waiting"}
 		<div class="loading-message">Choose an Era and Faction to display available units</div>
@@ -84,7 +83,12 @@
 			<VirtualList items={resultList.filteredList} style="height:{listHeight}px;width:100%">
 				{#snippet vl_slot({ index, item })}
 					<div class:virtual-list-row={!appWindow.isMobile} class:virtual-list-row-mobile={appWindow.isMobile}>
-						<a href="http://masterunitlist.info/Unit/Details/{item.mulId}" target="_blank">{item.name}</a>
+						{#if list}
+							<div class="align-center add-button"><button onclick={() => list.addUnit(item)}>+</button></div>
+						{:else}
+							<div></div>
+						{/if}
+						<a class="unit-name" href="http://masterunitlist.info/Unit/Details/{item.mulId}" target="_blank">{item.name}</a>
 						<div class="align-center">{item.subtype}</div>
 						<div class="align-center">{item.pv}</div>
 						{#if !appWindow.isMobile}
@@ -119,12 +123,7 @@
 								{item.damageS}{item.damageSMin ? "*" : ""}{"/" + item.damageM}{item.damageMMin ? "*" : ""}{"/" + item.damageL}{item.damageLMin ? "*" : ""}{" - " + item.overheat}
 							{/if}
 						</div>
-						{#if list}
-							<div class="align-center"><button onclick={() => list.addUnit(item)}>+</button></div>
-						{:else}
-							<div></div>
-						{/if}
-						<div class="abilities">{item.abilities}</div>
+						<div class:abilities={!appWindow.isMobile} class:abilities-mobile={appWindow.isMobile}>{item.abilities}</div>
 						<form method="post" action="/?/getUnitAvailability" use:enhance={showAvailability} class="align-center">
 							<input type="hidden" name="mulId" value={item.mulId} />
 							<button class="availability-button">Availability</button>
@@ -171,15 +170,18 @@
 	}
 	.result-list-header {
 		display: grid;
-		grid-template-columns: 1fr repeat(5, 7%) 12% 15% 5%;
+		grid-template-columns: 3% 1fr repeat(5, 7%) 12% 15%;
 		height: 25px;
+		overflow: auto;
+		scrollbar-gutter: stable;
 	}
 	.result-list-header-mobile {
 		display: grid;
-		grid-template-columns: 1fr repeat(4, 10%) 15% 5%;
+		grid-template-columns: 25px 1fr repeat(4, 10%) 15%;
 		height: 30px;
 	}
 	.virtual-list-container {
+		width: 100%;
 		display: flex;
 		position: relative;
 		flex: 1;
@@ -220,22 +222,21 @@
 		filter: var(--primary-filter);
 	}
 	.virtual-list-row {
-		padding: 8px;
-		background-color: var(--card);
+		display: grid;
 		height: 100%;
 		width: 100%;
-		display: grid;
-		grid-template-columns: 1fr repeat(5, 7%) 12% 15% 3%;
-		row-gap: 12px;
+		background-color: var(--card);
+		grid-template-columns: 3% 1fr repeat(5, 7%) 12% 15%;
+		grid-template-rows: 1fr 1fr;
+		overflow-x: hidden;
+		padding-top: 4px;
 	}
 	.virtual-list-row-mobile {
-		padding: 8px;
 		background-color: var(--card);
 		height: 100%;
 		width: 100%;
-		row-gap: 12px;
 		display: grid;
-		grid-template-columns: 1fr repeat(4, 10%) 15% 5%;
+		grid-template-columns: 25px 1fr repeat(4, 10%) 15%;
 	}
 	.virtual-list-row:not(:last-child),
 	.virtual-list-row-mobile:not(:last-child) {
@@ -246,11 +247,27 @@
 		align-items: center;
 		justify-content: center;
 	}
+	.add-button {
+		grid-row-start: 1;
+		grid-row-end: 3;
+	}
+	.unit-name {
+		padding-left: 8px;
+	}
 	.abilities {
+		padding-left: 16px;
 		font-size: 0.75rem;
 		display: flex;
 		align-items: center;
-		grid-column-start: 1;
+		grid-column-start: 2;
+		grid-column-end: -2;
+	}
+	.abilities-mobile {
+		padding-left: 16px;
+		font-size: 0.75rem;
+		display: flex;
+		align-items: center;
+		grid-column-start: 2;
 		grid-column-end: -3;
 	}
 	.availability-button {

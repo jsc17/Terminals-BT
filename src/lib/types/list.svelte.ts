@@ -1,10 +1,9 @@
 import { isUnit, type Unit } from "$lib/types/unit";
 import { type Formation } from "$lib/types/formation.svelte";
-import { type Options, ruleSets } from "../../lib/types/options";
+import { type Options, ruleSets } from "./options";
 import { getNewSkillCost } from "$lib/utilities/bt-utils";
 import customCards from "$lib/data/customCards.json";
 import type { ResultList } from "$lib/types/resultList.svelte";
-import { SvelteSet } from "svelte/reactivity";
 import { deserialize } from "$app/forms";
 import { Sublist } from "./Sublist.svelte";
 
@@ -64,16 +63,16 @@ export class UnitList {
 	});
 
 	issues = $derived.by(() => {
-		const issueList = new Map<string, SvelteSet<string>>();
-		const issueUnits = new SvelteSet<number>();
+		const issueList = new Map<string, Set<string>>();
+		const issueUnits = new Set<number>();
 		if (this.options.maxPv && this.pv > this.options.maxPv) {
-			issueList.set("Max PV", new SvelteSet([`${this.pv}/${this.options.maxPv}`]));
+			issueList.set("Max PV", new Set([`${this.pv}/${this.options.maxPv}`]));
 		}
 		if (this.options.maxUnits && this.unitCount > this.options.maxUnits) {
-			issueList.set("Max Units", new SvelteSet([`${this.unitCount}/${this.options.maxUnits}`]));
+			issueList.set("Max Units", new Set([`${this.unitCount}/${this.options.maxUnits}`]));
 		}
 		if (this.options.eraFactionRestriction && (this.details.era == 0 || this.details.faction == 0)) {
-			issueList.set("Era/Faction", new SvelteSet(["Must select era and faction"]));
+			issueList.set("Era/Faction", new Set(["Must select era and faction"]));
 		}
 		for (const unit of this.units) {
 			if (
@@ -85,7 +84,7 @@ export class UnitList {
 				if (issueList.has("Unavailable Unit")) {
 					issueList.get("Unavailable Unit")?.add(unit.name);
 				} else {
-					issueList.set("Unavailable Unit", new SvelteSet([unit.name]));
+					issueList.set("Unavailable Unit", new Set([unit.name]));
 				}
 				issueUnits.add(unit.id!);
 			}
@@ -93,7 +92,7 @@ export class UnitList {
 				if (issueList.has("Invalid Type")) {
 					issueList.get("Invalid Type")?.add(unit.name);
 				} else {
-					issueList.set("Invalid Type", new SvelteSet([unit.name]));
+					issueList.set("Invalid Type", new Set([unit.name]));
 				}
 				issueUnits.add(unit.id!);
 			}
@@ -101,7 +100,7 @@ export class UnitList {
 				if (issueList.has("Invalid Rules Level")) {
 					issueList.get("Invalid Rules Level")?.add(unit.name);
 				} else {
-					issueList.set("Invalid Rules Level", new SvelteSet([unit.name]));
+					issueList.set("Invalid Rules Level", new Set([unit.name]));
 				}
 				issueUnits.add(unit.id!);
 			}
@@ -109,7 +108,7 @@ export class UnitList {
 				if (issueList.has("Unique units")) {
 					issueList.get("Unique units")?.add(unit.name);
 				} else {
-					issueList.set("Unique units", new SvelteSet([unit.name]));
+					issueList.set("Unique units", new Set([unit.name]));
 				}
 				issueUnits.add(unit.id!);
 			}
@@ -124,7 +123,7 @@ export class UnitList {
 					if (issueList.has("Invalid ability")) {
 						issueList.get("Invalid ability")?.add(unit.name);
 					} else {
-						issueList.set("Invalid ability", new SvelteSet([unit.name]));
+						issueList.set("Invalid ability", new Set([unit.name]));
 					}
 					issueUnits.add(unit.id!);
 				}
@@ -133,7 +132,7 @@ export class UnitList {
 				if (issueList.has("Minimum skill")) {
 					issueList.get("Minimum skill")?.add(unit.name);
 				} else {
-					issueList.set("Minimum skill", new SvelteSet([unit.name]));
+					issueList.set("Minimum skill", new Set([unit.name]));
 				}
 				issueUnits.add(unit.id!);
 			}
@@ -141,7 +140,7 @@ export class UnitList {
 				if (issueList.has("Maximum skill")) {
 					issueList.get("Maximum skill")?.add(unit.name);
 				} else {
-					issueList.set("Maximum skill", new SvelteSet([unit.name]));
+					issueList.set("Maximum skill", new Set([unit.name]));
 				}
 				issueUnits.add(unit.id!);
 			}
@@ -154,7 +153,7 @@ export class UnitList {
 					count += groupedUnits[type]?.length ?? 0;
 				}
 				if (limit.max && count > limit.max) {
-					issueList.set(`Maximum ${limit.types.join("/")}`, new SvelteSet(`${count}/${limit.max}`));
+					issueList.set(`Maximum ${limit.types.join("/")}`, new Set(`${count}/${limit.max}`));
 					for (const unit of this.units) {
 						if (limit.types.includes(unit.subtype)) {
 							issueUnits.add(unit.id!);
@@ -162,7 +161,7 @@ export class UnitList {
 					}
 				}
 				if (limit.equal && !limit.equal.includes(count)) {
-					issueList.set(`${limit.types.join("/")}`, new SvelteSet([`Exactly ${limit.equal.join(" or ")}: Currently ${count}`]));
+					issueList.set(`${limit.types.join("/")}`, new Set([`Exactly ${limit.equal.join(" or ")}: Currently ${count}`]));
 					for (const unit of this.units) {
 						if (limit.types.includes(unit.subtype)) {
 							issueUnits.add(unit.id!);
@@ -183,7 +182,7 @@ export class UnitList {
 						if (issueList.has("Maximum chassis")) {
 							issueList.get("Maximum chassis")?.add(chassisKey);
 						} else {
-							issueList.set("Maximum chassis", new SvelteSet([chassisKey]));
+							issueList.set("Maximum chassis", new Set([chassisKey]));
 						}
 						for (const unit of this.units) {
 							if (unit.class == chassisKey) {
@@ -208,7 +207,7 @@ export class UnitList {
 							if (issueList.has("Maximum variants")) {
 								issueList.get("Maximum variants")?.add(chassisKey);
 							} else {
-								issueList.set("Maximum variants", new SvelteSet([chassisKey]));
+								issueList.set("Maximum variants", new Set([chassisKey]));
 							}
 							for (const unit of this.units) {
 								if (unit.class == chassisKey) {
@@ -230,7 +229,7 @@ export class UnitList {
 					if (issueList.has(`Maximum skill limits`)) {
 						issueList.get(`Maximum skill limits`)?.add(`Skills ${limit.types.join("+")} - ${groupedUnits.length}/${limit.max}`);
 					} else {
-						issueList.set(`Maximum skill limits`, new SvelteSet([`Skills ${limit.types.join("+")} - ${groupedUnits.length}/${limit.max}`]));
+						issueList.set(`Maximum skill limits`, new Set([`Skills ${limit.types.join("+")} - ${groupedUnits.length}/${limit.max}`]));
 					}
 					for (const unit of this.units) {
 						if (limit.types.includes(unit.skill?.toString() ?? "4")) {
@@ -256,7 +255,7 @@ export class UnitList {
 				}
 			});
 			if (trailers.length > hitches.length) {
-				issueList.set("Trailers without HTC ", new SvelteSet([`${trailers.length} Trailers / ${hitches.length} Transports`]));
+				issueList.set("Trailers without HTC ", new Set([`${trailers.length} Trailers / ${hitches.length} Transports`]));
 				for (const trailer of trailers) {
 					issueUnits.add(trailer.id!);
 				}
@@ -277,7 +276,7 @@ export class UnitList {
 				if (limit.max && count > limit.max) {
 					issueList.set(
 						`${limit.types} limit exceeded`,
-						new SvelteSet(
+						new Set(
 							limitedUnits.map((unit) => {
 								return unit.name;
 							})

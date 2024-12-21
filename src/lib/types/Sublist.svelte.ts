@@ -1,7 +1,7 @@
 import { isUnit, type Unit } from "$lib/types/unit";
 import { deserialize } from "$app/forms";
 import { toastController } from "$lib/stores/toastController.svelte";
-import type { UnitList } from "$lib/types/list.svelte";
+import type { UnitList } from "./list.svelte";
 
 export class Sublist {
 	id: number;

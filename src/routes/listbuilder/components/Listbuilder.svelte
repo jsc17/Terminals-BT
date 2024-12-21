@@ -184,7 +184,7 @@
 			<p>Mechwarrior, BattleMech, 'Mech and Aerotech are registered trademarks of The Topps Company, Inc. All Rights Reserved.</p>
 		</div>
 	{:else if appWindow.isMobile}
-		<div class="unit-cards" use:dragHandleZone={{ items: list.items, dropTargetStyle, flipDurationMs, type: "all" }} onconsider={handleConsider} onfinalize={handleFinalize}>
+		<div class="list-units" use:dragHandleZone={{ items: list.items, dropTargetStyle, flipDurationMs, type: "all" }} onconsider={handleConsider} onfinalize={handleFinalize}>
 			{#each list.items as unit (unit.id)}
 				<div animate:flip={{ duration: flipDurationMs }} class="mobile-card">
 					{#if isUnit(unit)}
@@ -201,7 +201,7 @@
 		</div>
 	{:else}
 		<div
-			class="unit-cards"
+			class="list-units"
 			use:dndzone={{ items: list.items, dropTargetStyle, flipDurationMs, type: "all", centreDraggedOnCursor: true }}
 			onconsider={handleConsider}
 			onfinalize={handleFinalize}
@@ -228,9 +228,10 @@
 	.listbuilder {
 		position: relative;
 		width: 100%;
-		max-height: 100%;
+		height: 100%;
 		overflow: auto;
 		z-index: 1;
+		scrollbar-gutter: stable;
 	}
 	.list-header {
 		display: flex;
@@ -238,6 +239,12 @@
 		border-bottom: 1px solid var(--border);
 		padding-bottom: 4px;
 		gap: 8px;
+	}
+	.list-units {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		padding: 4px 0px 16px 0px;
 	}
 	.list-info {
 		display: flex;
@@ -262,13 +269,7 @@
 		height: 100%;
 		gap: 48px;
 	}
-	.unit-cards {
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-		overflow: auto;
-		padding: 4px 0px;
-	}
+
 	input[type="text"] {
 		width: min(250px, 50%);
 	}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { UnitList } from "$lib/types/list.svelte";
+	import { UnitList } from "../../lib/types/list.svelte";
 	import { onMount, setContext } from "svelte";
 	import { Listbuilder } from "./components/index";
 	import { getRules, ruleSets } from "$lib/types/options";

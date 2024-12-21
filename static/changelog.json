@@ -1,5 +1,13 @@
 [
 	{
+		"date": "12-20-24",
+		"updates": {
+			"Listbuilder": [
+				"Rebuilt PDF generation since it was originally put together without formations and ability references in mind. Previous version would cause units to start stacking on top of each other instead of creating a new page if too many units were added. New pdf generation should scale up without issues."
+			]
+		}
+	},
+	{
 		"date": "11-20-24",
 		"updates": {
 			"Unit Search / Listbuilder": ["Fixed dropdown overlay issues", "Fixed formation types not saving when changed"]

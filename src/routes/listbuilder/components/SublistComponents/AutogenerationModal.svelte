@@ -2,7 +2,7 @@
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { type Unit } from "$lib/types/unit";
 	import { Sublist } from "$lib/types/Sublist.svelte";
-	import type { UnitList } from "$lib/types/list.svelte";
+	import type { UnitList } from "../../../../lib/types/list.svelte";
 	import { getContext } from "svelte";
 
 	let list: UnitList = getContext("list");

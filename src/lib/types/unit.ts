@@ -34,6 +34,8 @@ export type Unit = {
 	technology?: string;
 	subIndex?: number;
 	availability?: { era: number; faction: number }[];
+	spa?: string[];
+	ammo?: string[];
 };
 
 export function isUnit(item: Unit | Formation): item is Unit {

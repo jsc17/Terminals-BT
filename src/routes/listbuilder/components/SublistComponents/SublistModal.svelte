@@ -9,7 +9,7 @@
 	import MobileSublist from "./MobileSublist.svelte";
 	import HorizontalSublist from "./HorizontalSublist.svelte";
 	import AutogenerationModal from "./AutogenerationModal.svelte";
-	import type { UnitList } from "$lib/types/list.svelte";
+	import type { UnitList } from "../../../../lib/types/list.svelte";
 	import { getContext } from "svelte";
 
 	let list: UnitList = getContext("list");

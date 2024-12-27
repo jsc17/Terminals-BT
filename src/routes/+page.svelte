@@ -50,12 +50,15 @@
 		flex-direction: column;
 		gap: 4px;
 		padding: 32px;
+		height: fit-content;
 	}
 	ul {
 		line-height: 2rem;
 	}
 	p {
-		margin-bottom: 10px;
 		color: var(--muted-foreground);
+	}
+	h2 {
+		margin-bottom: 0px;
 	}
 </style>

@@ -1,4 +1,4 @@
-import type { Unit } from "$lib/types/unit.js";
+import type { MulUnit } from "$lib/types/unit.js";
 import { getGeneralList } from "$lib/utilities/bt-utils";
 import type { Filter } from "$lib/types/filter";
 import { deserialize } from "$app/forms";
@@ -12,7 +12,7 @@ export class ResultList {
 	details = $state({ era: 0, faction: 0 });
 	general = $derived(getGeneralList(this.details.era, this.details.faction));
 
-	resultList = $state<Unit[]>([]);
+	resultList = $state<MulUnit[]>([]);
 	uniqueList: any[] = [];
 
 	options = $state<Options>();
@@ -43,7 +43,7 @@ export class ResultList {
 			try {
 				//{"speed": 6,"type": "t" }
 
-				let formattedUnit: Unit = {
+				let formattedUnit: MulUnit = {
 					mulId: unit.mulId,
 					name: unit.name,
 					class: unit.class,
@@ -91,7 +91,7 @@ export class ResultList {
 	}
 
 	applyOptions() {
-		let tempAvailableList: Unit[] = [];
+		let tempAvailableList: MulUnit[] = [];
 		if (this.options) {
 			if (this.resultList.length) {
 				for (const unitList of customCards.unitPacks) {
@@ -289,9 +289,9 @@ export class ResultList {
 			}
 		});
 	}
-	add(unit: Unit) {
-		this.resultList.push(JSON.parse(JSON.stringify(unit)));
-	}
+	// add(unit: Unit) {
+	// 	this.resultList.push(JSON.parse(JSON.stringify(unit)));
+	// }
 	clear() {
 		this.resultList = [];
 	}

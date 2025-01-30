@@ -7,7 +7,7 @@
 	import { enhance } from "$app/forms";
 	import { type ActionResult } from "@sveltejs/kit";
 	import { goto } from "$app/navigation";
-	import type { UnitList } from "$lib/types/list.svelte";
+	import type { UnitList } from "$lib/types/listold.svelte";
 
 	let theme = $state("dark");
 	let root: HTMLHtmlElement;

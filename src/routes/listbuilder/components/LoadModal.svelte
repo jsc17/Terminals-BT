@@ -6,7 +6,7 @@
 	import { ruleSets, getRules, type Options } from "../../../lib/types/options";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import type { ResultList } from "$lib/types/resultList.svelte";
-	import type { UnitList } from "$lib/types/list.svelte";
+	import type { UnitList } from "$lib/types/listold.svelte";
 
 	let user: any = getContext("user");
 	let resultList: ResultList = getContext("resultList");

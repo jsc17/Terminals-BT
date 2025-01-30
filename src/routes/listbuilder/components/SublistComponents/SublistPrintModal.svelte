@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import type { Sublist } from "$lib/types/Sublist.svelte";
+	import type { Sublist } from "$lib/types/Sublistold.svelte";
 	import { toastController } from "$lib/stores/toastController.svelte";
-	import type { UnitList } from "../../../../lib/types/list.svelte";
+	import type { UnitList } from "../../../../lib/types/listold.svelte";
 	import { getContext } from "svelte";
 
 	let list: UnitList = getContext("list");

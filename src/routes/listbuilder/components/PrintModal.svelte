@@ -3,7 +3,7 @@
 	import { enhance } from "$app/forms";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { eras, factions } from "$lib/data/erasFactionLookup";
-	import type { UnitList } from "$lib/types/list.svelte";
+	import type { UnitList } from "$lib/types/listold.svelte";
 	import { getContext } from "svelte";
 
 	let list: UnitList = getContext("list");

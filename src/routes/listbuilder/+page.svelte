@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { UnitList } from "../../lib/types/list.svelte";
 	import { onMount, setContext } from "svelte";
 	import { Listbuilder } from "./components/index";
 	import { getRules, ruleSets } from "$lib/types/options";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { SearchFilters, SearchParameters, SearchResults } from "$lib/components/index";
 	import { slide } from "svelte/transition";
+	import { List } from "$lib/types/list.svelte";
 
 	const resultList = new ResultList();
-	const list = new UnitList(resultList);
+	const list = new List();
 	setContext("resultList", resultList);
 	setContext("list", list);
 
@@ -34,18 +34,24 @@
 		if (lastList) {
 			const importData = JSON.parse(lastList);
 			const parsedCode = {
+				id: importData.id ?? crypto.randomUUID(),
 				name: importData.name ?? "Imported List",
 				era: importData.era ?? 0,
 				faction: importData.faction ?? 0,
 				rules: getRules(importData.rules) ?? ruleSets[0],
 				units: importData.units ?? [],
-				sublists: importData.sublists ?? []
+				sublists: importData.sublists ?? [],
+				lcVersion: importData.lcVersion ?? 0,
+				formations: importData.formations ?? []
 			};
-			list.loadList(parsedCode);
+			list.loadList(parsedCode, resultList);
 		}
 	});
+
 	$effect(() => {
-		list.items;
+		list.units;
+		list.formations;
+		list.sublists;
 		localStorage.setItem("last-list", list.createListCode());
 	});
 

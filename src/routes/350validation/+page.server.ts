@@ -5,7 +5,7 @@ import { fail } from "@sveltejs/kit";
 import { parsePDF, parseTerminal } from "./parse.js";
 import fs from "fs/promises";
 import { sendListSubmissionEmail } from "$lib/emails/mailer.server.js";
-import { isUnit } from "$lib/types/unit";
+import { isUnit } from "$lib/types/unitold.js";
 
 export const load = async () => {
 	let allTournaments = await prisma.tournament.findMany({

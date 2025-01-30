@@ -1,4 +1,4 @@
-import type { UnitList } from "$lib/types/list.svelte";
+import type { UnitList } from "$lib/types/listold.svelte";
 
 export function exportToJeff(list: UnitList) {
 	const jeffList: any = { name: list.details.name, members: [], uuid: crypto.randomUUID(), lastUpdated: new Date().toISOString(), formationBonus: "none", groupLabel: "Lance" };

@@ -1,9 +1,9 @@
 import type { TFontDictionary, TDocumentDefinitions, TableCell } from "pdfmake/interfaces";
 import PdfPrinter from "pdfmake";
 import BlobStream, { type IBlobStream } from "blob-stream";
-import { isUnit, type Unit } from "$lib/types/unit"
+import { isUnit, type Unit } from "$lib/types/unitold"
 import { eras, factions } from "$lib/data/erasFactionLookup";
-import type { Formation } from "$lib/types/formation.svelte";
+import type { Formation } from "$lib/types/formation-old.svelte";
 import references from "$lib/data/reference.json"
 import { existsSync } from "fs";
 import fs from "fs/promises"

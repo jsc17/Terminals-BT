@@ -2,19 +2,17 @@
 	import { PrintModal, SaveModal, LoadModal, SublistModal, UnitCard } from "./index";
 	import { ruleSets } from "$lib/types/options";
 	import { flip } from "svelte/animate";
-	import { dndzone, type DndEvent, dragHandle, dragHandleZone } from "svelte-dnd-action";
-	import { type Unit, isUnit } from "$lib/types/unit";
-	import { dragType, isFormation, type Formation } from "$lib/types/formation.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import FormationCard from "./FormationCard.svelte";
 	import Menu from "$lib/components/Menu.svelte";
 	import { getContext } from "svelte";
 	import type { ResultList } from "$lib/types/resultList.svelte";
-	import type { UnitList } from "$lib/types/list.svelte";
+	import type { List } from "$lib/types/list.svelte";
+	import type { FormationV2 } from "$lib/types/formation";
+	import { dndzone, type DndEvent } from "svelte-dnd-action";
 
 	const resultList: ResultList = getContext("resultList");
-
-	let list: UnitList = getContext("list");
+	let list: List = getContext("list");
 
 	let { recentChanges, description }: { recentChanges: string[]; description: string[] } = $props();
 	let showPrintModal = $state(false);
@@ -24,29 +22,21 @@
 	let selectedRules = $state("noRes");
 
 	$effect(() => {
-		selectedRules = list.options.name;
+		selectedRules = list.rules;
 	});
 
 	let errorDialog = $state<HTMLDialogElement>();
 
-	let dropTargetStyle = { outline: "none" };
+	let dropTargetStyle = { outline: "solid var(--primary)" };
 
 	let flipDurationMs = 100;
 
-	function handleConsider(e: CustomEvent<DndEvent<Unit | Formation>>) {
-		for (const item of list.items) {
-			if (e.detail.info.id == item.id?.toString()) {
-				if (isFormation(item)) {
-					dragType.type = "unit";
-				}
-			}
-		}
+	function handleConsider(e: CustomEvent<DndEvent<FormationV2>>) {
 		list.items = e.detail.items;
 	}
 
-	function handleFinalize(e: CustomEvent<DndEvent<Unit | Formation>>) {
+	function handleFinalize(e: CustomEvent<DndEvent<FormationV2>>) {
 		list.items = e.detail.items;
-		dragType.type = "all";
 	}
 </script>
 
@@ -71,19 +61,19 @@
 		</div>
 		<div class="list-info">
 			<div class="list-stats">
-				{#if list.options?.maxPv}
+				<!-- {#if list.rules?.maxPv}
 					<p class:errors={list.pv > list.options.maxPv}>PV: {list.pv}/{list.options.maxPv}</p>
-				{:else}
-					<p>PV: {list.pv}</p>
-				{/if}
+				{:else} -->
+				<p>PV: {list.pv}</p>
+				<!-- {/if} -->
 
-				{#if list.options?.maxUnits}
+				<!-- {#if list.options?.maxUnits}
 					<p class:errors={list.unitCount > list.options.maxUnits}>Units: {list.unitCount}/{list.options.maxUnits}</p>
-				{:else}
-					<p>Units: {list.unitCount}</p>
-				{/if}
+				{:else} -->
+				<p>Units: {list.unitCount}</p>
+				<!-- {/if} -->
 			</div>
-			{#if list.issues.issueList.size}
+			<!-- {#if list.issues.issueList.size}
 				<button class="error-button" onclick={() => errorDialog?.showModal()}><img src="/icons/alert-outline.svg" alt="Error" class="error-icon" /> Show issues</button>
 				<dialog bind:this={errorDialog} class="error-dialog">
 					<div class="error-dialog-header">
@@ -101,19 +91,19 @@
 						{/each}
 					</div>
 				</dialog>
-			{/if}
+			{/if} -->
 			<div class="list-buttons">
 				<Menu text={"+"}>
 					<button
 						class="menu-button"
 						onclick={() => {
-							list.addFormation("ground");
+							list.newFormation("ground");
 						}}>Add Ground Formation</button
 					>
 					<button
 						class="menu-button"
 						onclick={() => {
-							list.addFormation("air");
+							list.newFormation("air");
 						}}>Add Air Formation</button
 					>
 					<hr />
@@ -166,7 +156,7 @@
 			</div>
 		</div>
 	</div>
-	{#if list.items.length == 0}
+	{#if list.unitCount == 0 && list.formations.length == 1}
 		<div class="info">
 			<div>
 				<h1 style:color="var(--primary)">Latest:</h1>
@@ -183,46 +173,38 @@
 			</div>
 			<p>Mechwarrior, BattleMech, 'Mech and Aerotech are registered trademarks of The Topps Company, Inc. All Rights Reserved.</p>
 		</div>
-	{:else if appWindow.isMobile}
-		<div class="list-units" use:dragHandleZone={{ items: list.items, dropTargetStyle, flipDurationMs, type: "all" }} onconsider={handleConsider} onfinalize={handleFinalize}>
-			{#each list.items as unit (unit.id)}
-				<div animate:flip={{ duration: flipDurationMs }} class="mobile-card">
-					{#if isUnit(unit)}
-						<div use:dragHandle aria-label="drag handle for {unit.name}" class="handle">
-							<img class="move-arrow" src="/icons/chevron-up.svg" width="15px" alt="move up" />
-							<img class="move-arrow" src="/icons/chevron-down.svg" width="15px" alt="move down" />
-						</div>
-						<UnitCard {unit}></UnitCard>
-					{:else}
-						<FormationCard {unit}></FormationCard>
-					{/if}
-				</div>
-			{/each}
-		</div>
 	{:else}
-		<div
-			class="list-units"
-			use:dndzone={{ items: list.items, dropTargetStyle, flipDurationMs, type: "all", centreDraggedOnCursor: true }}
+		<div class="list-units">
+			{#each list.formations as formation (formation.id)}
+				<FormationCard {formation}></FormationCard>
+			{/each}
+			<!-- 			use:dndzone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations", centreDraggedOnCursor: !appWindow.isMobile }}
 			onconsider={handleConsider}
-			onfinalize={handleFinalize}
-		>
-			{#each list.items as unit (unit.id)}
-				<div animate:flip={{ duration: flipDurationMs }}>
+			onfinalize={handleFinalize} -->
+
+			<!-- {#each list.items as unit (unit.id)}
+				<div class={{ mobileCard: appWindow.isMobile }} animate:flip={{ duration: flipDurationMs }}>
 					{#if isUnit(unit)}
+						{#if appWindow.isMobile}
+							<div use:dragHandle aria-label="drag handle for {unit.name}" class="handle">
+								<img class="move-arrow" src="/icons/chevron-up.svg" width="15px" alt="move up" />
+								<img class="move-arrow" src="/icons/chevron-down.svg" width="15px" alt="move down" />
+							</div>
+						{/if}
 						<UnitCard {unit}></UnitCard>
 					{:else}
 						<FormationCard {unit}></FormationCard>
 					{/if}
 				</div>
-			{/each}
+			{/each} -->
 		</div>
 	{/if}
 </div>
 
-<PrintModal bind:showPrintModal></PrintModal>
-<SaveModal bind:showSaveModal></SaveModal>
-<LoadModal bind:showLoadModal></LoadModal>
-<SublistModal bind:showSublistModal></SublistModal>
+<!-- <PrintModal bind:showPrintModal></PrintModal> -->
+<!-- <SaveModal bind:showSaveModal></SaveModal -->
+<!-- <LoadModal bind:showLoadModal></LoadModal> -->
+<!-- <SublistModal bind:showSublistModal></SublistModal> -->
 
 <style>
 	.listbuilder {
@@ -280,7 +262,7 @@
 		background-color: transparent;
 		color: var(--primary);
 	}
-	.mobile-card {
+	.mobileCard {
 		display: flex;
 		height: 100%;
 	}
@@ -322,5 +304,8 @@
 		background-color: transparent;
 		color: var(--primary);
 		gap: 4px;
+	}
+	:global(.drop-target-zone) {
+		outline: solid green;
 	}
 </style>

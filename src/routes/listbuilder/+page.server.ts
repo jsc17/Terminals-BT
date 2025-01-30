@@ -15,8 +15,8 @@ import {
 import { PDFDocument, PageSizes, PDFPage, StandardFonts } from "pdf-lib";
 import references from "$lib/data/reference.json";
 import { eras, factions } from "$lib/data/erasFactionLookup.js";
-import { isUnit } from "$lib/types/unit.js";
-import type { Formation } from "$lib/types/formation.svelte.js";
+import { isUnit } from "$lib/types/unitold.js";
+import type { Formation } from "$lib/types/formation-old.svelte.js";
 import { makePDF } from "./utilities/printList.js";
 
 export const actions = {

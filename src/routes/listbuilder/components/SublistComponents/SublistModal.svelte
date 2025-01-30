@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { dndzone, type DndEvent } from "svelte-dnd-action";
-	import { isUnit } from "$lib/types/unit";
-	import { Sublist } from "$lib/types/Sublist.svelte";
+	import { isUnit } from "$lib/types/unitold";
+	import { Sublist } from "$lib/types/Sublistold.svelte";
 	import { flip } from "svelte/animate";
 	import VerticalSublist from "./VerticalSublist.svelte";
 	import SublistPrintModal from "./SublistPrintModal.svelte";
 	import MobileSublist from "./MobileSublist.svelte";
 	import HorizontalSublist from "./HorizontalSublist.svelte";
 	import AutogenerationModal from "./AutogenerationModal.svelte";
-	import type { UnitList } from "../../../../lib/types/list.svelte";
+	import type { UnitList } from "../../../../lib/types/listold.svelte";
 	import { getContext } from "svelte";
 
 	let list: UnitList = getContext("list");

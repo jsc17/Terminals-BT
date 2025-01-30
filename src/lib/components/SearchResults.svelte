@@ -5,10 +5,10 @@
 	import { type ActionResult } from "@sveltejs/kit";
 	import { eras, factions } from "$lib/data/erasFactionLookup";
 	import { ResultList } from "$lib/types/resultList.svelte";
-	import type { UnitList } from "$lib/types/list.svelte";
 	import { getContext } from "svelte";
+	import type { List } from "$lib/types/list.svelte";
 
-	let list: UnitList = getContext("list");
+	let list: List = getContext("list");
 	const resultList: ResultList = getContext("resultList");
 
 	let headers = $derived(appWindow.isMobile ? ["Type", "PV", "Move", "Health"] : ["Type", "PV", "Size", "Move", "TMM", "Health (A+S)"]);
@@ -84,7 +84,7 @@
 				{#snippet vl_slot({ index, item })}
 					<div class:virtual-list-row={!appWindow.isMobile} class:virtual-list-row-mobile={appWindow.isMobile}>
 						{#if list}
-							<div class="align-center add-button"><button onclick={() => list.addUnit(item)}>+</button></div>
+							<div class="align-center add-button"><button onclick={() => list.newUnit(item)}>+</button></div>
 						{:else}
 							<div></div>
 						{/if}

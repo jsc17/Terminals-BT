@@ -6,7 +6,7 @@
 	import type { ActionResult } from "@sveltejs/kit";
 	import { deserialize } from "$app/forms";
 	import { exportToJeff } from "../utilities/export.svelte";
-	import type { UnitList } from "$lib/types/list.svelte";
+	import type { UnitList } from "$lib/types/listold.svelte";
 
 	let list: UnitList = getContext("list");
 	let user: any = getContext("user");

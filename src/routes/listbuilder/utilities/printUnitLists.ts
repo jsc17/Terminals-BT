@@ -1,6 +1,6 @@
 import { PDFDocument, PDFPage, rgb, PDFImage, StandardFonts, PDFFont } from "pdf-lib";
-import { type Unit } from "$lib/types/unit";
-import { type Formation } from "$lib/types/formation.svelte";
+import { type Unit } from "$lib/types/unitold";
+import { type Formation } from "$lib/types/formation-old.svelte";
 import fs from "fs/promises";
 
 const positions = [

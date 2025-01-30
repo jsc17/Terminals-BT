@@ -1,62 +1,73 @@
 <script lang="ts">
-	import { type Formation, groundFormationTypes, airFormationTypes, dragType } from "$lib/types/formation.svelte";
-	import { type Unit } from "$lib/types/unit";
 	import UnitCard from "./UnitCard.svelte";
-	import { dndzone, type DndEvent, dragHandleZone, dragHandle } from "svelte-dnd-action";
+	import { dndzone, type DndEvent } from "svelte-dnd-action";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import Menu from "$lib/components/Menu.svelte";
-	import type { UnitList } from "$lib/types/list.svelte";
 	import { getContext } from "svelte";
+	import type { List } from "$lib/types/list.svelte";
+	import { type FormationV2, airFormationTypes, groundFormationTypes } from "$lib/types/formation";
 
-	let list: UnitList = getContext("list");
-	let { unit: formation }: { unit: Formation } = $props();
+	let list: List = getContext("list");
+	let { formation }: { formation: FormationV2 } = $props();
 
 	let dropTargetStyle = { outline: "1px solid var(--primary)" };
 	let flipDurationMs = 100;
 
-	function handleConsider(e: CustomEvent<DndEvent<Unit>>) {
+	function handleConsider(e: CustomEvent<DndEvent<{ id: string }>>) {
 		formation.units = e.detail.items;
 	}
 
-	function handleFinalize(e: CustomEvent<DndEvent<Unit>>) {
+	function handleFinalize(e: CustomEvent<DndEvent<{ id: string }>>) {
 		formation.units = e.detail.items;
 	}
 </script>
 
 <main>
-	<div class="formation-header">
-		<input type="text" name="formation-name" id="formation-id" bind:value={formation.name} />
-		<div class="inline">
-			<label for="formation-type">{formation.style.charAt(0).toUpperCase()}</label>
-			<select name="formation-type" bind:value={formation.type}>
-				{#if formation.style == "ground"}
-					{#each groundFormationTypes as formationType}
-						<option value={formationType}>{formationType}</option>
-					{/each}
-				{:else}
-					{#each airFormationTypes as formationType}
-						<option value={formationType}>{formationType}</option>
-					{/each}
-				{/if}
-			</select>
+	{#if formation.id == "unassigned"}
+		{#if list.formations.length != 1}
+			<p class="unassigned">Unassigned units</p>
+		{/if}
+	{:else}
+		<div class="formation-header">
+			<input type="text" name="formation-name" id="formation-id" bind:value={formation.name} />
+			<div class="inline">
+				<label for="formation-type">{formation.style.charAt(0).toUpperCase()}</label>
+				<select name="formation-type" bind:value={formation.type}>
+					{#if formation.style == "ground"}
+						{#each groundFormationTypes as formationType}
+							<option value={formationType}>{formationType}</option>
+						{/each}
+					{:else}
+						{#each airFormationTypes as formationType}
+							<option value={formationType}>{formationType}</option>
+						{/each}
+					{/if}
+				</select>
+			</div>
+			<Menu img={"/icons/menu.svg"}>
+				<button
+					class="menu-button"
+					onclick={() => {
+						if (formation.units.length == 0 || confirm("Formation is not empty and removing it will remove all units it contains. Continue?")) {
+							list.removeFormation(formation.id);
+							toastController.addToast(`${formation.name} removed from list`);
+						}
+					}}>Remove</button
+				></Menu
+			>
 		</div>
-		<Menu img={"/icons/menu.svg"}>
-			<button
-				class="menu-button"
-				onclick={() => {
-					if (formation.units.length == 0 || confirm("Formation is not empty and removing it will remove all units it contains. Continue?")) {
-						list.remove(formation.id!);
-						toastController.addToast(`${formation.name} removed from list`);
-					}
-				}}>Remove</button
-			></Menu
-		>
+	{/if}
+	<div class="unit-cards" use:dndzone={{ items: formation.units, dropTargetStyle, flipDurationMs, type: "units" }} onconsider={handleConsider} onfinalize={handleFinalize}>
+		{#if formation.units.length}
+			{#each formation.units as unit (unit.id)}
+				<UnitCard unitId={unit.id}></UnitCard>
+				<!-- <p>{unit.id}</p> -->
+			{/each}
+		{/if}
 	</div>
-	<div class="unit-cards" use:dndzone={{ items: formation.units, dropTargetStyle, flipDurationMs, type: dragType.type }} onconsider={handleConsider} onfinalize={handleFinalize}>
-		{#each formation.units as unit (unit.id)}
-			<UnitCard {unit}></UnitCard>
-		{/each}
-	</div>
+	{#if !formation.units.length}
+		<div class="center">Drop units here to add them to the formation</div>
+	{/if}
 </main>
 
 <style>
@@ -83,11 +94,22 @@
 	.unit-cards {
 		min-height: 50px;
 		padding: 8px;
+		/* background-color: var(--muted); */
 	}
 	input {
 		background-color: var(--muted);
 	}
 	input:hover {
 		border: 1px solid var(--primary);
+	}
+	.center {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 100%;
+	}
+	.unassigned {
+		border-bottom: 1px solid var(--muted);
+		padding-bottom: 4px;
 	}
 </style>

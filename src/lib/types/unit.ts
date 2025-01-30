@@ -1,43 +1,45 @@
-import { type Formation } from "$lib/types/formation.svelte";
+export type MulUnit = {
+    [key: string]: any;
+    mulId: number;
+    name: string;
+    class: string;
+    variant: string;
+    type: string;
+    subtype: string;
+    pv: number;
+    size?: number;
+    move?: { speed: number; type: string }[];
+    tmm?: number;
+    health?: number;
+    armor?: number;
+    structure?: number;
+    damageS?: number;
+    damageSMin?: boolean;
+    damageM?: number;
+    damageMMin?: boolean;
+    damageL?: number;
+    damageLMin?: boolean;
+    overheat?: number;
+    abilities: string;
+    imageLink?: string;
+    rulesLevel: string;
+    tonnage?: number;
+    date?: number;
+    role?: string;
+    technology?: string;
+    availability?: { era: number; faction: number }[];
+}
 
-export type Unit = {
-	[key: string]: any;
-	id?: number;
-	mulId: number;
-	name: string;
-	class: string;
-	variant: string;
-	type: string;
-	subtype: string;
-	pv: number;
-	cost: number;
-	size?: number;
-	move?: { speed: number; type: string }[];
-	tmm?: number;
-	health?: number;
-	armor?: number;
-	structure?: number;
-	damageS?: number;
-	damageSMin?: boolean;
-	damageM?: number;
-	damageMMin?: boolean;
-	damageL?: number;
-	damageLMin?: boolean;
-	overheat?: number;
-	abilities: string;
-	skill?: number;
-	imageLink?: string;
-	rulesLevel: string;
-	tonnage?: number;
-	date?: number;
-	role?: string;
-	technology?: string;
-	subIndex?: number;
-	availability?: { era: number; faction: number }[];
-	spa?: string[];
-	ammo?: string[];
-};
+export type UnitCustomization = {
+    spa?: string[];
+    ammo?: string[];
+    //eventually I might add the ability to customize stats on units
+    custom?: string[];
+}
 
-export function isUnit(item: Unit | Formation): item is Unit {
-	return "mulId" in item;
+export type UnitV2 = {
+    baseUnit: MulUnit;
+    skill: number;
+    cost: number;
+    customization: UnitCustomization;
 }

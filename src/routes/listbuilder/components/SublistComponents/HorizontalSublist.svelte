@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Sublist } from "$lib/types/Sublist.svelte";
+	import type { Sublist } from "$lib/types/Sublistold.svelte";
 
 	type componentProps = {
 		sublist: Sublist;

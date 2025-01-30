@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import { type Unit } from "$lib/types/unit";
-	import { Sublist } from "$lib/types/Sublist.svelte";
-	import type { UnitList } from "../../../../lib/types/list.svelte";
+	import { type Unit } from "$lib/types/unitold";
+	import { Sublist } from "$lib/types/Sublistold.svelte";
+	import type { UnitList } from "../../../../lib/types/listold.svelte";
 	import { getContext } from "svelte";
 
 	let list: UnitList = getContext("list");

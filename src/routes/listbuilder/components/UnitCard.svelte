@@ -1,62 +1,65 @@
 <script lang="ts">
-	import type { Unit } from "$lib/types/unit";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { getNewSkillCost } from "$lib/utilities/bt-utils";
-	import type { UnitList } from "$lib/types/list.svelte";
 	import { getContext } from "svelte";
-	import Menu from "$lib/components/Menu.svelte";
+	import type { List } from "$lib/types/list.svelte";
+	import type { UnitV2 } from "$lib/types/unit";
 
-	let list: UnitList = getContext("list");
+	const { unitId }: { unitId: string } = $props();
 
-	const { unit }: { unit: Unit } = $props();
+	let list: List = getContext("list");
+	const unit = list.units.get(unitId);
 
-	function modifySkill(event: Event, unit: Unit) {
+	function modifySkill(event: Event, unit: UnitV2) {
 		const target = event.target as HTMLInputElement;
 		if (target) {
 			let skill = parseInt(target.value);
 			unit.skill = skill;
-			unit.cost = getNewSkillCost(skill, unit.pv);
+			unit.cost = getNewSkillCost(skill, unit?.baseUnit.pv);
 		}
 	}
 </script>
 
 <main class="unit-card">
 	<div class="unit-row">
-		<p class="name" class:invalid-unit={list.issues.issueUnits.has(unit.id ?? 0)}>{unit.name}</p>
-		<p class="center">{unit.subtype}</p>
+		<p class="name">{unit?.baseUnit.name}</p>
+		<p class="center">{unit?.baseUnit.subtype}</p>
 		<p class="center">
-			{#if unit.skill == undefined}
+			{#if unit?.skill == undefined}
 				-
 			{:else}
-				Skill - <input onchange={(e) => modifySkill(e, unit)} type="number" min={list.options?.minSkill ?? 0} max={list.options?.maxSkill ?? 7} value={unit.skill} />
+				Skill - <input onchange={(e) => modifySkill(e, unit)} type="number" value={unit.skill} />
 			{/if}
 		</p>
-		<p class="center">PV - {unit.cost}</p>
+		<p class="center">PV - {unit?.cost}</p>
 		<button
 			class="remove-button center"
 			onclick={() => {
-				list.remove(unit.id!);
-				toastController.addToast(`${unit.name} removed from list`);
+				list.removeUnit(unitId);
+				toastController.addToast(`${unit?.baseUnit.name} removed from list`);
 			}}>-</button
 		>
 	</div>
 	<div class="stat-row">
-		<p>{unit.abilities}</p>
-		{#if unit.type != "BS"}
+		<p>{unit?.baseUnit.abilities}</p>
+		{#if unit?.baseUnit.type != "BS"}
 			<p class="center">
-				{#each unit.move! as movement, index}
+				{#each unit?.baseUnit.move! as movement, index}
 					{#if index != 0}
 						{"/ "}
 					{/if}
 					{`${movement.speed}"${movement.type ?? ""}`}
 				{/each}
-				- TMM {unit.tmm}
+				- TMM {unit?.baseUnit.tmm}
 			</p>
 			<p class="center">
-				{unit.damageS}{unit.damageSMin ? "*" : ""}{"/" + unit.damageM}{unit.damageMMin ? "*" : ""}{"/" + unit.damageL}{unit.damageLMin ? "*" : ""}{" - " + unit.overheat}
+				{unit?.baseUnit.damageS}{unit?.baseUnit.damageSMin ? "*" : ""}{"/" + unit?.baseUnit.damageM}{unit?.baseUnit.damageMMin ? "*" : ""}{"/" + unit?.baseUnit.damageL}{unit
+					?.baseUnit.damageLMin
+					? "*"
+					: ""}{" - " + unit?.baseUnit.overheat}
 			</p>
-			<p class="center">{unit.health + " (" + unit.armor + "+" + unit.structure + ")"}</p>
-			<p class="center">Size - {unit.size}</p>
+			<p class="center">{unit?.baseUnit.health + " (" + unit?.baseUnit.armor + "+" + unit?.baseUnit.structure + ")"}</p>
+			<p class="center">Size - {unit?.baseUnit.size}</p>
 			<!-- <Menu img={"/icons/dots-horizontal.svg"}>
 				<button
 					class="menu-button"

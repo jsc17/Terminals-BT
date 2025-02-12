@@ -1,24 +1,47 @@
 <script lang="ts">
-	import type { Sublist } from "$lib/types/Sublistold.svelte";
+	import type { List } from "../../types/list.svelte";
+	import type { SublistV2 } from "../../types/sublist";
+	import { getRules } from "$lib/types/options";
+	import EditSublistModal from "./EditSublistModal.svelte";
 
 	type componentProps = {
-		sublist: Sublist;
-		editSublist: any;
-		deleteSublist: any;
-		copySublist: any;
+		sublist: SublistV2;
+		list: List;
 	};
 
-	const { sublist = $bindable(), editSublist, deleteSublist, copySublist }: componentProps = $props();
+	const { sublist = $bindable(), list }: componentProps = $props();
 
 	let unitString = $derived.by(() => {
-		return (
-			sublist.unitList
-				?.map((unit) => {
-					return `${unit.name} (${unit.skill})`;
-				})
-				.join(", ") ?? ""
-		);
+		return sublist.checked
+			.map((unitId) => {
+				return `${list.getUnit(unitId)?.baseUnit.name} (${list.getUnit(unitId)?.skill})`;
+			})
+			.join(", ");
 	});
+
+	let stats = $derived.by(() => {
+		let pv = 0,
+			health = 0,
+			short = 0,
+			medium = 0,
+			long = 0,
+			size = 0;
+		for (const unitId of sublist.checked) {
+			const unit = list.getUnit(unitId);
+			pv += unit?.cost ?? 0;
+			health += unit?.baseUnit.health ?? 0;
+			medium += unit?.baseUnit.damageM ?? 0;
+			short += unit?.baseUnit.damageS ?? 0;
+			long += unit?.baseUnit.damageL ?? 0;
+			size += unit?.baseUnit.size ?? 0;
+		}
+		return { pv, health, short, medium, long, size };
+	});
+
+	let sublistMaxPv = $derived(getRules(list.rules)?.sublistMaxPv);
+	let sublistMaxUnits = $derived(getRules(list.rules)?.sublistMaxUnits);
+
+	let showEditSublistModal = $state(false);
 </script>
 
 <main>
@@ -28,8 +51,8 @@
 				<option value={scenario}>{scenario}</option>
 			{/each}
 		</select>
-		<button onclick={() => copySublist(sublist.id)}>Copy</button>
-		<button onclick={() => editSublist(sublist.id)}>Edit</button>
+		<button onclick={() => list.copySublist(sublist.id)}>Copy</button>
+		<button onclick={() => (showEditSublistModal = true)}>Edit</button>
 	</div>
 	<div class="sublist-units-mobile">
 		<div>{unitString ?? ""}</div>
@@ -37,12 +60,14 @@
 	<div class="center gap8">
 		<button
 			onclick={() => {
-				sublist.print();
+				// sublist.print();
 			}}>Print Sublist</button
 		>
-		<button onclick={() => deleteSublist(sublist.id)}>Delete</button>
+		<button onclick={() => list.deleteSublist(sublist.id)}>Delete</button>
 	</div>
 </main>
+
+<EditSublistModal bind:showEditSublistModal {sublist} {list} pv={stats.pv}></EditSublistModal>
 
 <style>
 	main {

@@ -4,6 +4,7 @@ import { fail, redirect } from "@sveltejs/kit";
 import { sendResetEmail } from "$lib/emails/mailer.server.js";
 import fs from "fs/promises";
 import { calculateTMM } from "$lib/utilities/bt-utils.js";
+import { convertLists } from "./utilities/convertLists.js";
 
 export const load = async ({ locals }) => {
 	if (!locals.user || locals.user.username.toLowerCase() != "terminal") {
@@ -153,10 +154,10 @@ export const actions = {
 			return { exists: false };
 		}
 	},
-	sendResetEmail: async ({}) => {
+	sendResetEmail: async ({ }) => {
 		sendResetEmail("jonathan.cibge@innernwgaw.com", "ASFVA");
 	},
-	linkUnits: async ({}) => {
+	linkUnits: async ({ }) => {
 		let count = 0;
 		let unitCount = 0;
 		let fileList = await fs.readdir("./files/avail-upload");
@@ -224,5 +225,8 @@ export const actions = {
 		}
 		console.log(unitCount);
 		return { message: "success" };
+	},
+	convertLists: async ({ }) => {
+		convertLists();
 	}
 };

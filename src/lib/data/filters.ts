@@ -1,7 +1,7 @@
 import type { Filter } from "$lib/types/filter";
 
 //if types field doesn't exist, will check against value
-const typeValues = [
+export const typeValues = [
 	{ value: "any", display: "Any" },
 	{ value: "AF", display: "Aerospace Fighter" },
 	{ value: "CF", display: "Conventional Fighter" },

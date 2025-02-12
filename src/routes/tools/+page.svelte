@@ -192,6 +192,9 @@
 	<div class="card">
 		<button onclick={sendResetEmail}>Send Reset</button>
 	</div>
+	<div class="card">
+		<form method="post" action="?/convertLists"><button>Convert lists</button></form>
+	</div>
 </main>
 
 <style>

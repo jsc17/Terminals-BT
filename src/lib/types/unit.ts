@@ -19,6 +19,8 @@ export type MulUnit = {
     damageMMin?: boolean;
     damageL?: number;
     damageLMin?: boolean;
+    damageE?: number;
+    damageEMin?: boolean;
     overheat?: number;
     abilities: string;
     imageLink?: string;
@@ -38,6 +40,7 @@ export type UnitCustomization = {
 }
 
 export type UnitV2 = {
+    id: string;
     baseUnit: MulUnit;
     skill: number;
     cost: number;

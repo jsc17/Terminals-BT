@@ -25,12 +25,12 @@
 				strike list)
 			</p>
 		</li>
-		<li>
+		<!-- <li>
 			<p><a href="/350validation">AS350 List Validator</a> (Alpha): List validator for wolfnet 350 rules</p>
 		</li>
 		<li>
 			<p><a href="/tournament">AS350 Tournament Dashboard</a> (Alpha): 350 Tournament manager to handle player list validation</p>
-		</li>
+		</li> -->
 	</ul>
 	<h2>Other Stuff:</h2>
 	<ul>

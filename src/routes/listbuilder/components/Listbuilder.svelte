@@ -1,13 +1,11 @@
 <script lang="ts">
-	import { PrintModal, SaveModal, LoadModal, SublistModal, UnitCard } from "./index";
-	import { ruleSets } from "$lib/types/options";
-	import { flip } from "svelte/animate";
-	import { appWindow } from "$lib/stores/appWindow.svelte";
+	import { PrintModal, SaveModal, LoadModal, SublistModal } from "./index";
+	import { getRules, ruleSets } from "$lib/types/options";
 	import FormationCard from "./FormationCard.svelte";
 	import Menu from "$lib/components/Menu.svelte";
 	import { getContext } from "svelte";
 	import type { ResultList } from "$lib/types/resultList.svelte";
-	import type { List } from "$lib/types/list.svelte";
+	import type { List } from "../types/list.svelte";
 	import type { FormationV2 } from "$lib/types/formation";
 	import { dndzone, type DndEvent } from "svelte-dnd-action";
 
@@ -15,10 +13,10 @@
 	let list: List = getContext("list");
 
 	let { recentChanges, description }: { recentChanges: string[]; description: string[] } = $props();
-	let showPrintModal = $state(false);
-	let showSaveModal = $state(false);
-	let showLoadModal = $state(false);
-	let showSublistModal = $state(false);
+	let printModal: PrintModal | undefined = $state();
+	let saveModal: SaveModal | undefined = $state();
+	let loadModal: LoadModal | undefined = $state();
+	let sublistModal: SublistModal | undefined = $state();
 	let selectedRules = $state("noRes");
 
 	$effect(() => {
@@ -31,12 +29,8 @@
 
 	let flipDurationMs = 100;
 
-	function handleConsider(e: CustomEvent<DndEvent<FormationV2>>) {
-		list.items = e.detail.items;
-	}
-
-	function handleFinalize(e: CustomEvent<DndEvent<FormationV2>>) {
-		list.items = e.detail.items;
+	function handleSort(e: CustomEvent<DndEvent<FormationV2>>) {
+		list.formations = e.detail.items;
 	}
 </script>
 
@@ -61,23 +55,23 @@
 		</div>
 		<div class="list-info">
 			<div class="list-stats">
-				<!-- {#if list.rules?.maxPv}
+				{#if list.options?.maxPv}
 					<p class:errors={list.pv > list.options.maxPv}>PV: {list.pv}/{list.options.maxPv}</p>
-				{:else} -->
-				<p>PV: {list.pv}</p>
-				<!-- {/if} -->
+				{:else}
+					<p>PV: {list.pv}</p>
+				{/if}
 
-				<!-- {#if list.options?.maxUnits}
+				{#if list.options?.maxUnits}
 					<p class:errors={list.unitCount > list.options.maxUnits}>Units: {list.unitCount}/{list.options.maxUnits}</p>
-				{:else} -->
-				<p>Units: {list.unitCount}</p>
-				<!-- {/if} -->
+				{:else}
+					<p>Units: {list.unitCount}</p>
+				{/if}
 			</div>
-			<!-- {#if list.issues.issueList.size}
+			{#if list.issues?.issueList.size}
 				<button class="error-button" onclick={() => errorDialog?.showModal()}><img src="/icons/alert-outline.svg" alt="Error" class="error-icon" /> Show issues</button>
 				<dialog bind:this={errorDialog} class="error-dialog">
 					<div class="error-dialog-header">
-						<p>{list.options.name} rules issues</p>
+						<p>{list.options?.name} rules issues</p>
 						<button
 							onclick={() => {
 								errorDialog?.close();
@@ -91,7 +85,7 @@
 						{/each}
 					</div>
 				</dialog>
-			{/if} -->
+			{/if}
 			<div class="list-buttons">
 				<Menu text={"+"}>
 					<button
@@ -113,7 +107,7 @@
 					<button
 						class="menu-button"
 						onclick={() => {
-							showLoadModal = true;
+							loadModal?.show();
 						}}
 					>
 						Load / Import List
@@ -121,7 +115,7 @@
 					<button
 						class="menu-button"
 						onclick={() => {
-							showSaveModal = true;
+							saveModal?.show();
 						}}
 					>
 						Save / Export List
@@ -129,7 +123,7 @@
 					<button
 						class="menu-button"
 						onclick={() => {
-							showPrintModal = true;
+							printModal?.show();
 						}}
 					>
 						Print List
@@ -137,7 +131,7 @@
 					<button
 						class="menu-button"
 						onclick={() => {
-							showSublistModal = true;
+							sublistModal?.show();
 						}}
 					>
 						Generate Sublists
@@ -174,37 +168,18 @@
 			<p>Mechwarrior, BattleMech, 'Mech and Aerotech are registered trademarks of The Topps Company, Inc. All Rights Reserved.</p>
 		</div>
 	{:else}
-		<div class="list-units">
+		<div class="list-units" use:dndzone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations" }} onconsider={handleSort} onfinalize={handleSort}>
 			{#each list.formations as formation (formation.id)}
 				<FormationCard {formation}></FormationCard>
 			{/each}
-			<!-- 			use:dndzone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations", centreDraggedOnCursor: !appWindow.isMobile }}
-			onconsider={handleConsider}
-			onfinalize={handleFinalize} -->
-
-			<!-- {#each list.items as unit (unit.id)}
-				<div class={{ mobileCard: appWindow.isMobile }} animate:flip={{ duration: flipDurationMs }}>
-					{#if isUnit(unit)}
-						{#if appWindow.isMobile}
-							<div use:dragHandle aria-label="drag handle for {unit.name}" class="handle">
-								<img class="move-arrow" src="/icons/chevron-up.svg" width="15px" alt="move up" />
-								<img class="move-arrow" src="/icons/chevron-down.svg" width="15px" alt="move down" />
-							</div>
-						{/if}
-						<UnitCard {unit}></UnitCard>
-					{:else}
-						<FormationCard {unit}></FormationCard>
-					{/if}
-				</div>
-			{/each} -->
 		</div>
 	{/if}
 </div>
 
-<!-- <PrintModal bind:showPrintModal></PrintModal> -->
-<!-- <SaveModal bind:showSaveModal></SaveModal -->
-<!-- <LoadModal bind:showLoadModal></LoadModal> -->
-<!-- <SublistModal bind:showSublistModal></SublistModal> -->
+<PrintModal bind:this={printModal}></PrintModal>
+<SaveModal bind:this={saveModal}></SaveModal>
+<LoadModal bind:this={loadModal}></LoadModal>
+<SublistModal bind:this={sublistModal}></SublistModal>
 
 <style>
 	.listbuilder {
@@ -225,7 +200,7 @@
 	.list-units {
 		display: flex;
 		flex-direction: column;
-		gap: 4px;
+		gap: 8px;
 		padding: 4px 0px 16px 0px;
 	}
 	.list-info {

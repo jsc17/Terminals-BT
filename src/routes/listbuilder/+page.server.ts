@@ -1,30 +1,16 @@
 import { fail } from "@sveltejs/kit";
 import { prisma } from "$lib/server/prisma.js";
 import { drawListHorizontal, drawListVertical } from "./utilities/printSublists.js";
-import {
-	drawUnitCard,
-	drawCondensedUnitCard,
-	drawBasicHeader,
-	drawBasicUnitLine,
-	drawDetailedHeader,
-	drawDetailedUnitLine,
-	drawFormationLine,
-	drawSummary,
-	drawReferences
-} from "./utilities/printUnitLists.js";
 import { PDFDocument, PageSizes, PDFPage, StandardFonts } from "pdf-lib";
-import references from "$lib/data/reference.json";
-import { eras, factions } from "$lib/data/erasFactionLookup.js";
-import { isUnit } from "$lib/types/unitold.js";
-import type { Formation } from "$lib/types/formation-old.svelte.js";
 import { makePDF } from "./utilities/printList.js";
+import { type ListCode } from "./types/listCode.js";
 
 export const actions = {
 	getListNames: async ({ locals }) => {
 		if (!locals.user) {
 			return fail(401, { message: "User not logged in" });
 		}
-		const lists = await prisma.list.findMany({
+		const lists = await prisma.listV2.findMany({
 			where: {
 				userId: locals.user.id
 			},
@@ -37,6 +23,90 @@ export const actions = {
 		});
 
 		return { listNames: JSON.stringify(lists) };
+	},
+	saveList: async ({ request, locals }) => {
+		if (!locals.user) {
+			return fail(401, { message: "User not logged in" });
+		}
+		const body = (await request.formData()).get("body");
+		if (!body) {
+			return fail(400, { message: "failed to save list. Data not transmitted" });
+		}
+
+		const parsedBody: ListCode = JSON.parse(body.toString());
+
+		const data = {
+			userId: locals.user.id,
+			id: parsedBody.id,
+			name: parsedBody.name,
+			era: Number(parsedBody.era),
+			faction: Number(parsedBody.faction),
+			units: JSON.stringify(parsedBody.units),
+			formations: JSON.stringify(parsedBody.formations),
+			sublists: JSON.stringify(parsedBody.sublists),
+			rules: parsedBody.rules,
+			lcVersion: 1
+		};
+		try {
+			const existingList = await prisma.listV2.findFirst({
+				where: {
+					userId: locals.user.id,
+					name: parsedBody.name
+				}
+			});
+			if (!existingList) {
+				await prisma.listV2.create({
+					data
+				});
+				return { message: "List created successfully" };
+			} else {
+				await prisma.listV2.update({
+					where: {
+						id: existingList.id
+					},
+					data
+				});
+				return { message: "List updated successfully" };
+			}
+		} catch (err) {
+			console.error(err);
+			return fail(400, { message: "Failed to create list in database" });
+		}
+	},
+	loadList: async ({ locals }) => {
+		if (!locals.user) {
+			return fail(401, { message: "User not logged in" });
+		}
+		const lists = await prisma.listV2.findMany({
+			where: {
+				userId: locals.user.id
+			}
+		});
+
+		if (!lists) {
+			return fail(400, { message: "Failed to retrieve lists" });
+		}
+
+		return { lists: JSON.stringify(lists) };
+	},
+	deleteList: async ({ request, locals }) => {
+		if (!locals.user) {
+			return fail(401, { message: "User not logged in" });
+		}
+		const { name } = (await request.json()) as Record<string, string>;
+
+		try {
+			await prisma.list.deleteMany({
+				where: {
+					userId: locals.user.id,
+					name
+				}
+			});
+			return { message: "List deleted successfully" };
+		} catch (error) {
+			console.error(error);
+			return fail(400, { message: "Failed to delete list" });
+		}
 	},
 	printList: async ({ request }) => {
 		const formData = await request.formData();

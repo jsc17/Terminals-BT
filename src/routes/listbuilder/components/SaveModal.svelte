@@ -6,28 +6,23 @@
 	import type { ActionResult } from "@sveltejs/kit";
 	import { deserialize } from "$app/forms";
 	import { exportToJeff } from "../utilities/export.svelte";
-	import type { UnitList } from "$lib/types/listold.svelte";
+	import type { List } from "../types/list.svelte";
 
-	let list: UnitList = getContext("list");
+	let list: List = getContext("list");
 	let user: any = getContext("user");
 
-	let { showSaveModal = $bindable() } = $props();
 	let saveDialog: HTMLDialogElement;
 	let existingListNames: string[] = [];
 
 	let ttsCode = $state("");
 	let listCode = $state("");
 
-	$effect(() => {
-		if (showSaveModal == true) {
-			saveDialog.showModal();
-			getListNames();
-			ttsCode = list.createTTSCode();
-			listCode = list.createListCode();
-		} else {
-			saveDialog.close();
-		}
-	});
+	export function show() {
+		saveDialog.showModal();
+		getListNames();
+		ttsCode = list.createTTSCode();
+		listCode = list.listCode;
+	}
 
 	async function getListNames() {
 		existingListNames = [];
@@ -54,7 +49,7 @@
 			}
 			if (!listNameExists || overwrite) {
 				formData.append("body", listCode);
-				showSaveModal = false;
+				saveDialog.close();
 			} else {
 				cancel();
 			}
@@ -72,7 +67,7 @@
 			}
 			cancel();
 			toastController.addToast(`${list.details.name} saved successfully to this device. Consider creating an account to sync lists between devices.`);
-			showSaveModal = false;
+			saveDialog.close();
 		}
 		return async ({ result }: { result: ActionResult }) => {
 			if (result.status == 200) {
@@ -87,7 +82,7 @@
 <dialog
 	bind:this={saveDialog}
 	onclose={() => {
-		showSaveModal = false;
+		saveDialog.close();
 	}}
 	class:dialog-wide={appWindow.isNarrow}
 >
@@ -101,12 +96,12 @@
 			<button
 				class="close-button"
 				onclick={() => {
-					showSaveModal = false;
+					saveDialog.close();
 				}}>X</button
 			>
 		</div>
 
-		<form method="post" action="/?/saveList" use:enhance={handleSaveList}>
+		<form method="post" action="?/saveList" use:enhance={handleSaveList}>
 			<div class="inline gap8">
 				{#if user.username}
 					<input type="radio" name="saveLocation" id="accountSave" value="accountSave" checked />
@@ -134,7 +129,7 @@
 				onclick={() => {
 					navigator.clipboard.writeText(listCode!);
 					toastController.addToast("code copied to clipboard", 1500);
-					showSaveModal = false;
+					saveDialog.close();
 				}}
 			>
 				<img src="/icons/content-copy.svg" alt="copy to clipboard" class="button-icon" />
@@ -146,7 +141,7 @@
 				onclick={() => {
 					navigator.clipboard.writeText(ttsCode!);
 					toastController.addToast("code copied to clipboard", 1500);
-					showSaveModal = false;
+					saveDialog.close();
 				}}
 			>
 				<img src="/icons/content-copy.svg" alt="copy to clipboard" class="button-icon" />

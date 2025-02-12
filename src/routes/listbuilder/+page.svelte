@@ -1,19 +1,18 @@
 <script lang="ts">
 	import { onMount, setContext } from "svelte";
 	import { Listbuilder } from "./components/index";
-	import { getRules, ruleSets } from "$lib/types/options";
+	import { ruleSets } from "$lib/types/options";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { SearchFilters, SearchParameters, SearchResults } from "$lib/components/index";
 	import { slide } from "svelte/transition";
-	import { List } from "$lib/types/list.svelte";
+	import { List } from "./types/list.svelte";
 
 	const resultList = new ResultList();
-	const list = new List();
+	const list = new List(resultList);
 	setContext("resultList", resultList);
 	setContext("list", list);
 
 	let selectedRules = $state<string>("");
-	let listDialog = $state<HTMLDialogElement>();
 	let showListbuilder = $state(false);
 	let recentChanges: string[] = [
 		"Combined generic and wolfnet 350 list builders into one, for easier maintainance and eventually customization of rules.",
@@ -38,7 +37,7 @@
 				name: importData.name ?? "Imported List",
 				era: importData.era ?? 0,
 				faction: importData.faction ?? 0,
-				rules: getRules(importData.rules) ?? ruleSets[0],
+				rules: importData.rules ?? "noRes",
 				units: importData.units ?? [],
 				sublists: importData.sublists ?? [],
 				lcVersion: importData.lcVersion ?? 0,
@@ -49,22 +48,8 @@
 	});
 
 	$effect(() => {
-		list.units;
-		list.formations;
-		list.sublists;
+		list.listCode;
 		localStorage.setItem("last-list", list.createListCode());
-	});
-
-	$effect(() => {
-		if (listDialog != undefined) {
-			if (showListbuilder) {
-				listDialog.showModal();
-			} else {
-				try {
-					listDialog.close();
-				} catch (error) {}
-			}
-		}
 	});
 </script>
 
@@ -80,6 +65,9 @@
 	<div class="search">
 		<SearchParameters />
 		<SearchFilters />
+		{#if list.rules != "noRes"}
+			<p class="rules-notice">Some units may be filtered out due to the selected ruleset</p>
+		{/if}
 		<SearchResults />
 	</div>
 	<div class="list-drawer-wrapper" class:show-listbuilder={showListbuilder} transition:slide>
@@ -172,5 +160,8 @@
 		right: 25px;
 		height: 50px;
 		font-size: 1.25rem;
+	}
+	.rules-notice {
+		align-self: center;
 	}
 </style>

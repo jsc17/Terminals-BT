@@ -4,10 +4,10 @@
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { getContext } from "svelte";
-	import type { UnitList } from "$lib/types/listold.svelte";
+	import type { List } from "../../routes/listbuilder/types/list.svelte";
 
 	const resultList: ResultList = getContext("resultList");
-	const list: UnitList = getContext("list");
+	const list: List = getContext("list");
 
 	let showParameters = $state(false);
 
@@ -21,7 +21,7 @@
 			}
 		});
 		allowed.sort((a, b) => {
-			return factions.get(a)! > factions.get(b)! ? 1 : -1;
+			return factions.get(a)! > factions.get(b)! ? 1 : 0;
 		});
 		return allowed;
 	});
@@ -48,7 +48,7 @@
 		</div>
 	</button>
 	<div class="card" class:hidden={appWindow.isMobile && !showParameters}>
-		<form class:parameters={!appWindow.isMobile} class:parameters-mobile={appWindow.isMobile}>
+		<div class:parameters={!appWindow.isMobile} class:parameters-mobile={appWindow.isMobile}>
 			<div class="parameter">
 				<label for="eraParameter">Era:</label>
 				<select bind:value={resultList.details.era} id="eraParameter">
@@ -74,15 +74,14 @@
 				<button
 					id="getData"
 					onclick={() => {
-						resultList.loadUnits();
+						resultList.loadNewResults();
 						list.details.era = resultList.details.era;
 						list.details.faction = resultList.details.faction;
 						list.details.general = resultList.general;
-					}}
-					disabled={resultList.status == "loading"}>Search</button
+					}}>Search</button
 				>
 			</div>
-		</form>
+		</div>
 	</div>
 </main>
 

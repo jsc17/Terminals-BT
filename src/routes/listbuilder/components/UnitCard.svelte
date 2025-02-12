@@ -2,13 +2,13 @@
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { getNewSkillCost } from "$lib/utilities/bt-utils";
 	import { getContext } from "svelte";
-	import type { List } from "$lib/types/list.svelte";
+	import type { List } from "../types/list.svelte";
 	import type { UnitV2 } from "$lib/types/unit";
 
 	const { unitId }: { unitId: string } = $props();
 
 	let list: List = getContext("list");
-	const unit = list.units.get(unitId);
+	let unit = list.getUnit(unitId);
 
 	function modifySkill(event: Event, unit: UnitV2) {
 		const target = event.target as HTMLInputElement;
@@ -22,13 +22,23 @@
 
 <main class="unit-card">
 	<div class="unit-row">
-		<p class="name">{unit?.baseUnit.name}</p>
+		<p class="name" class:invalid-unit={list.issues.issueUnits.has(unit?.id ?? "0")}>{unit?.baseUnit.name}</p>
 		<p class="center">{unit?.baseUnit.subtype}</p>
 		<p class="center">
 			{#if unit?.skill == undefined}
 				-
 			{:else}
-				Skill - <input onchange={(e) => modifySkill(e, unit)} type="number" value={unit.skill} />
+				Skill - <input
+					class="skill-input"
+					onchange={(e) => {
+						console.log("changing skill");
+						modifySkill(e, unit);
+					}}
+					type="number"
+					value={unit.skill}
+					min={list.options?.minSkill ?? 0}
+					max={list.options?.maxSkill ?? 7}
+				/>
 			{/if}
 		</p>
 		<p class="center">PV - {unit?.cost}</p>
@@ -98,6 +108,7 @@
 		border-bottom: 1px solid var(--border);
 		flex: 1;
 		min-height: fit-content;
+		background-color: var(--card);
 	}
 	main:hover {
 		box-shadow: 3px 0px 3px var(--primary) inset;

@@ -4,7 +4,7 @@
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import Menu from "$lib/components/Menu.svelte";
 	import { getContext } from "svelte";
-	import type { List } from "$lib/types/list.svelte";
+	import type { List } from "../types/list.svelte";
 	import { type FormationV2, airFormationTypes, groundFormationTypes } from "$lib/types/formation";
 
 	let list: List = getContext("list");
@@ -13,11 +13,7 @@
 	let dropTargetStyle = { outline: "1px solid var(--primary)" };
 	let flipDurationMs = 100;
 
-	function handleConsider(e: CustomEvent<DndEvent<{ id: string }>>) {
-		formation.units = e.detail.items;
-	}
-
-	function handleFinalize(e: CustomEvent<DndEvent<{ id: string }>>) {
+	function handleSort(e: CustomEvent<DndEvent<{ id: string }>>) {
 		formation.units = e.detail.items;
 	}
 </script>
@@ -25,7 +21,7 @@
 <main>
 	{#if formation.id == "unassigned"}
 		{#if list.formations.length != 1}
-			<p class="unassigned">Unassigned units</p>
+			<div class="formation-header">Unassigned units</div>
 		{/if}
 	{:else}
 		<div class="formation-header">
@@ -57,16 +53,13 @@
 			>
 		</div>
 	{/if}
-	<div class="unit-cards" use:dndzone={{ items: formation.units, dropTargetStyle, flipDurationMs, type: "units" }} onconsider={handleConsider} onfinalize={handleFinalize}>
-		{#if formation.units.length}
-			{#each formation.units as unit (unit.id)}
-				<UnitCard unitId={unit.id}></UnitCard>
-				<!-- <p>{unit.id}</p> -->
-			{/each}
-		{/if}
+	<div class="unit-cards" use:dndzone={{ items: formation.units, dropTargetStyle, flipDurationMs, type: "units" }} onconsider={handleSort} onfinalize={handleSort}>
+		{#each formation.units as unit (unit.id)}
+			<UnitCard unitId={unit.id}></UnitCard>
+		{/each}
 	</div>
 	{#if !formation.units.length}
-		<div class="center">Drop units here to add them to the formation</div>
+		<div class="center overlay">Drop units here to add them to this formation</div>
 	{/if}
 </main>
 
@@ -76,8 +69,10 @@
 		color: var(--primary);
 	}
 	main {
+		position: relative;
+		/* border: 1px solid var(--border); */
 		width: 100%;
-		padding: 4px;
+		background-color: var(--card);
 	}
 	main:hover {
 		box-shadow: 3px 0px 3px var(--primary) inset;
@@ -93,23 +88,15 @@
 	}
 	.unit-cards {
 		min-height: 50px;
-		padding: 8px;
-		/* background-color: var(--muted); */
+		padding: 2px;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
 	}
 	input {
 		background-color: var(--muted);
 	}
 	input:hover {
 		border: 1px solid var(--primary);
-	}
-	.center {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		height: 100%;
-	}
-	.unassigned {
-		border-bottom: 1px solid var(--muted);
-		padding-bottom: 4px;
 	}
 </style>

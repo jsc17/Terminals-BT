@@ -1,5 +1,5 @@
 export type SublistV2 = {
-    id: string[]
+    id: string;
     checked: string[];
     scenario: string;
 }

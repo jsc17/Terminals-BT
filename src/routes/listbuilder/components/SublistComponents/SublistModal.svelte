@@ -1,110 +1,38 @@
 <script lang="ts">
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { dndzone, type DndEvent } from "svelte-dnd-action";
-	import { isUnit } from "$lib/types/unitold";
-	import { Sublist } from "$lib/types/Sublistold.svelte";
 	import { flip } from "svelte/animate";
 	import VerticalSublist from "./VerticalSublist.svelte";
 	import SublistPrintModal from "./SublistPrintModal.svelte";
 	import MobileSublist from "./MobileSublist.svelte";
 	import HorizontalSublist from "./HorizontalSublist.svelte";
-	import AutogenerationModal from "./AutogenerationModal.svelte";
-	import type { UnitList } from "../../../../lib/types/listold.svelte";
+	// import AutogenerationModal from "./AutogenerationModal.svelte";
 	import { getContext } from "svelte";
+	import type { List } from "../../types/list.svelte";
+	import type { SublistV2 } from "../../types/sublist";
 
-	let list: UnitList = getContext("list");
+	let list: List = getContext("list");
 
-	let { showSublistModal = $bindable() } = $props();
-
-	let tempSublist = $state<Sublist>(new Sublist(0, list));
-	let filteredSublists = $derived.by(() => {
-		let tempSublists: Sublist[] = [];
-		for (const sublist of list.sublists) {
-			if (scenarioFilter == "All" || scenarioFilter == sublist.scenario) {
-				tempSublists.push(sublist);
-			}
-		}
-		return tempSublists;
-	});
 	let scenarioFilter = $state<string>("All");
 	let layout = $state<"vertical" | "horizontal">("vertical");
 	let flipDurationMs = 300;
 
 	let sublistDialog: HTMLDialogElement;
-	let editSublistDialog: HTMLDialogElement;
 	let showPrintModal = $state(false);
 	let showAutoModal = $state(false);
 
-	$effect(() => {
-		if (showSublistModal) {
-			sublistDialog.showModal();
-		} else {
-			sublistDialog.close();
-		}
-	});
-
-	let selectedSublist: Sublist;
+	export function show() {
+		sublistDialog.showModal();
+	}
 
 	let dropTargetStyle = { outline: "none" };
-	function handleSort(e: CustomEvent<DndEvent<Sublist>>) {
+	function handleSort(e: CustomEvent<DndEvent<SublistV2>>) {
 		list.sublists = e.detail.items;
-	}
-
-	function addSublist() {
-		let newList: Sublist = new Sublist(list.id, list);
-		list.id++;
-		list.sublists.push(newList);
-		editSublist(newList.id);
-	}
-	function editSublist(id: number) {
-		selectedSublist = list.sublists.find((sublist) => {
-			return sublist.id == id;
-		})!;
-		tempSublist.checked = [...selectedSublist.checked];
-		editSublistDialog.showModal();
-	}
-
-	function handleEditSave() {
-		selectedSublist.checked = structuredClone($state.snapshot(tempSublist.checked));
-		editSublistDialog.close();
-	}
-
-	function copySublist(id: number) {
-		const existingSublist = list.sublists.find((sublist) => {
-			return sublist.id == id;
-		});
-		const newSublist = new Sublist(list.id, list, existingSublist?.scenario, existingSublist?.checked);
-		list.id++;
-		list.sublists.push(newSublist);
-	}
-	function deleteSublist(id: number) {
-		let index = list.sublists.findIndex((sublist) => {
-			return sublist.id == id;
-		});
-		list.sublists.splice(index, 1);
-	}
-
-	function handleCheck(e: Event, id: number) {
-		const element = e.target as HTMLInputElement;
-		if (element.checked) {
-			tempSublist.checked.push(id);
-		} else {
-			const index = tempSublist.checked.findIndex((ind) => {
-				return ind == id;
-			});
-			tempSublist.checked.splice(index, 1);
-		}
 	}
 </script>
 
 <!-- main sublist dialog -->
-<dialog
-	bind:this={sublistDialog}
-	onclose={() => {
-		showSublistModal = false;
-	}}
-	class="sublist-modal"
->
+<dialog bind:this={sublistDialog} class="sublist-modal">
 	<div class="dialog-body">
 		<div class="space-between">
 			<h2>Sublists</h2>
@@ -125,7 +53,7 @@
 			{/if}
 			<button
 				onclick={() => {
-					showSublistModal = false;
+					sublistDialog.close();
 				}}>Close</button
 			>
 		</div>
@@ -140,7 +68,11 @@
 					</select>
 				</div>
 				<div class="center gap8">
-					<button onclick={addSublist}>Add</button>
+					<button
+						onclick={() => {
+							list.addSublist();
+						}}>Add</button
+					>
 					<button
 						onclick={() => {
 							showAutoModal = true;
@@ -153,129 +85,57 @@
 					>
 				</div>
 			</div>
-			{#if appWindow.isMobile}
-				<div
-					class="sublist-container sublist-container-horizontal"
-					use:dndzone={{ items: list.sublists, dropTargetStyle, flipDurationMs }}
-					onconsider={handleSort}
-					onfinalize={handleSort}
-				>
-					{#each filteredSublists as sublist (sublist.id)}
+			<!-- {#if appWindow.isMobile}
+				<div class="sublist-container sublist-container-horizontal">
+					{#each list.sublists as sublist (sublist.id)}
 						<div animate:flip={{ duration: flipDurationMs }} class="panel-mobile">
-							<MobileSublist {sublist} {editSublist} {deleteSublist} {copySublist}></MobileSublist>
+							<MobileSublist {sublist} {list}></MobileSublist>
 						</div>
 					{/each}
 					<div class="add-panel panel-mobile">
-						<button onclick={addSublist}>+</button>
+						<button
+							onclick={() => {
+								list.addSublist();
+							}}>+</button
+						>
 					</div>
 				</div>
-			{:else}
-				<div
-					class="sublist-container"
-					use:dndzone={{ items: list.sublists, dropTargetStyle, flipDurationMs }}
-					onconsider={handleSort}
-					onfinalize={handleSort}
-					class:sublist-container-vertical={layout == "vertical"}
-					class:sublist-container-horizontal={layout == "horizontal"}
-				>
-					{#each filteredSublists as sublist (sublist.id)}
-						<div animate:flip={{ duration: flipDurationMs }} class:panel-vertical={layout == "vertical"} class:panel-horizontal={layout == "horizontal"}>
-							{#if layout == "vertical"}
-								<VerticalSublist
-									{sublist}
-									{editSublist}
-									{deleteSublist}
-									{copySublist}
-									sublistMaxPv={list.options.sublistMaxPv ?? 0}
-									sublistMaxUnits={list.options.sublistMaxUnits ?? 0}
-								></VerticalSublist>
-							{:else if layout == "horizontal"}
-								<HorizontalSublist {sublist} {editSublist} {deleteSublist} {copySublist}></HorizontalSublist>
+			{:else} -->
+			<div
+				class="sublist-container"
+				use:dndzone={{ items: list.sublists, dropTargetStyle, flipDurationMs, dragDisabled: scenarioFilter != "All" }}
+				onconsider={handleSort}
+				onfinalize={handleSort}
+				class:sublist-container-vertical={layout == "vertical"}
+				class:sublist-container-horizontal={layout == "horizontal"}
+			>
+				{#each list.sublists as sublist (sublist.id)}
+					{#if sublist.scenario == scenarioFilter || scenarioFilter == "All"}
+						<div class:panel-vertical={layout == "vertical"} class:panel-horizontal={layout == "horizontal"}>
+							{#if layout == "vertical" && !appWindow.isMobile}
+								<VerticalSublist {sublist} {list}></VerticalSublist>
+							{:else}
+								<HorizontalSublist {sublist} {list}></HorizontalSublist>
 							{/if}
 						</div>
-					{/each}
-					<div class="add-panel" class:panel-vertical={layout == "vertical"} class:panel-horizontal={layout == "horizontal"}>
-						<button onclick={addSublist}>+</button>
-					</div>
-				</div>
-			{/if}
-		</main>
-	</div>
-</dialog>
-
-<!-- Edit sublist dialog -->
-<dialog bind:this={editSublistDialog} class:dialog-wide={appWindow.isNarrow}>
-	<div class="dialog-body">
-		<table>
-			<thead>
-				<tr>
-					<th></th>
-					<th>Unit</th>
-					<th>Skill</th>
-					<th>PV</th>
-				</tr>
-			</thead>
-			<tbody>
-				{#each list.items as item}
-					{#if isUnit(item)}
-						<tr>
-							<td
-								><input
-									type="checkbox"
-									id={`checkbox${item.id!.toString()}`}
-									checked={tempSublist.checked?.includes(item.id!)}
-									onchange={(e) => {
-										handleCheck(e, item.id!);
-									}}
-								/></td
-							>
-							<td><label for={`checkbox${item.id!.toString()}`}>{item.name}</label></td>
-							<td>{item.skill}</td>
-							<td>{item.cost}</td>
-						</tr>
-					{:else}
-						{#each item.units as unit}
-							<tr>
-								<td
-									><input
-										type="checkbox"
-										id={`checkbox${unit.id!.toString()}`}
-										checked={tempSublist.checked?.includes(unit.id!)}
-										onchange={(e) => {
-											handleCheck(e, unit.id!);
-										}}
-									/></td
-								>
-								<td>{unit.name}</td>
-								<td>{unit.skill}</td>
-								<td>{unit.cost}</td>
-							</tr>
-						{/each}
 					{/if}
 				{/each}
-			</tbody>
-		</table>
-		<div style:display="flex" style:gap="16px">
-			<div>{`Units: ${tempSublist.checked.length}/10`}</div>
-			<div>{`PV: ${tempSublist.stats.pv}/250`}</div>
-		</div>
-		<div class="dialog-buttons">
-			<button
-				onclick={() => {
-					if (selectedSublist.checked.length == 0) {
-						deleteSublist(selectedSublist.id);
-					}
-					editSublistDialog.close();
-				}}>Cancel</button
-			>
-			<button onclick={handleEditSave}>Save</button>
-		</div>
+				<div class="add-panel" class:panel-vertical={layout == "vertical"} class:panel-horizontal={layout == "horizontal"}>
+					<button
+						onclick={() => {
+							list.addSublist();
+						}}>+</button
+					>
+				</div>
+			</div>
+			<!-- {/if} -->
+		</main>
 	</div>
 </dialog>
 
 <SublistPrintModal bind:showPrintModal></SublistPrintModal>
 
-<AutogenerationModal bind:showAutoModal></AutogenerationModal>
+<!-- <AutogenerationModal bind:showAutoModal></AutogenerationModal> -->
 
 <style>
 	.sublist-modal {

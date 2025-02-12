@@ -1,21 +1,23 @@
 import type { TFontDictionary, TDocumentDefinitions, TableCell } from "pdfmake/interfaces";
 import PdfPrinter from "pdfmake";
 import BlobStream, { type IBlobStream } from "blob-stream";
-import { isUnit, type Unit } from "$lib/types/unitold"
 import { eras, factions } from "$lib/data/erasFactionLookup";
-import type { Formation } from "$lib/types/formation-old.svelte";
 import references from "$lib/data/reference.json"
 import { existsSync } from "fs";
 import fs from "fs/promises"
+import type { UnitV2 } from "$lib/types/unit";
+import type { FormationV2 } from "$lib/types/formation";
 
 type PrintableList = {
-    units: Unit[];
+    units: UnitV2[];
+    formations: FormationV2[];
     playername: string;
     listname: string;
     era: number;
     faction: number;
     general: number;
-    style: "mul" | "detailed"
+    style: "mul" | "detailed";
+    condensed: boolean;
 }
 const fonts: TFontDictionary = {
     Helvetica: {
@@ -27,30 +29,30 @@ const fonts: TFontDictionary = {
 };
 const printer = new PdfPrinter(fonts);
 
-function createUnitLine(unit: Unit, listStyle: string, indent: boolean) {
+function createUnitLine(unit: UnitV2, listStyle: string, indent: boolean) {
     let unitLine: TableCell[] = []
     const style = indent ? "cellIndented" : "cell"
     if (listStyle == "mul") {
         unitLine = [
-            { text: unit.name, style: style },
-            { text: unit.subtype, style: "cellCentered" },
+            { text: unit.baseUnit.name, style: style },
+            { text: unit.baseUnit.subtype, style: "cellCentered" },
             { text: unit.skill?.toString() ?? "-", style: "cellCentered" },
             { text: `${unit.cost} (${Math.round(unit.cost / 2)})`, style: "cellCentered" }
         ]
     } else {
         let moveString = "-";
-        if (unit.move) {
+        if (unit.baseUnit.move) {
             moveString = "";
-            for (const movement of unit.move!) {
+            for (const movement of unit.baseUnit.move) {
                 moveString += `${movement.speed}"${movement.type}/`;
             }
             moveString = moveString.replace(/\/$/gm, "")
         }
-        let damageString = unit.damageS == undefined ? "-" : `${unit.damageS}${unit.damageSMin ? "*" : ""}/${unit.damageM}${unit.damageMMin ? "*" : ""}/${unit.damageL}${unit.damageLMin ? "*" : ""}`;
-        let healthString = unit.health == undefined ? "-" : `${unit.health} (${unit.armor}a+${unit.structure}s)`
+        let damageString = unit.baseUnit.damageS == undefined ? "-" : `${unit.baseUnit.damageS}${unit.baseUnit.damageSMin ? "*" : ""}/${unit.baseUnit.damageM}${unit.baseUnit.damageMMin ? "*" : ""}/${unit.baseUnit.damageL}${unit.baseUnit.damageLMin ? "*" : ""}`;
+        let healthString = unit.baseUnit.health == undefined ? "-" : `${unit.baseUnit.health} (${unit.baseUnit.armor}a+${unit.baseUnit.structure}s)`
         unitLine = [
-            { text: unit.name, style: style },
-            { text: unit.subtype, style: "cellCentered" },
+            { text: unit.baseUnit.name, style: style },
+            { text: unit.baseUnit.subtype, style: "cellCentered" },
             { text: moveString, style: "cellCentered" },
             { text: damageString, style: "cellCentered" },
             { text: healthString, style: "cellCentered" },
@@ -61,54 +63,40 @@ function createUnitLine(unit: Unit, listStyle: string, indent: boolean) {
     return unitLine;
 }
 
-function createUnitTable(listStyle: string, units: (Unit | Formation)[], drawFormations: boolean): TableCell[][] {
+function createUnitTable(listStyle: string, unitList: UnitV2[], formations: FormationV2[], drawFormations: boolean): TableCell[][] {
     let unitTable: TableCell[][] = []
     let unitCount = 0;
     let totalPV = 0;
     const headerLength = listStyle == "mul" ? 4 : 7;
-    for (const unit of units) {
-        if (isUnit(unit)) {
+
+    for (const formation of formations) {
+        let formationPV = 0;
+        const formationUnitLines = []
+        for (const unitId of formation.units) {
+            const unit = unitList.find((unit) => { return unit.id == unitId.id })!;
             unitCount++;
             totalPV += unit.cost;
-            unitTable.push(createUnitLine(unit, listStyle, false))
-        } else {
-            let indent = false;
-            if (drawFormations) {
-                indent = true;
-                let formationPV = 0;
-                const formationUnitLines = []
-                for (const item of unit.units) {
-                    formationPV += item.cost;
-                    formationUnitLines.push(createUnitLine(item, listStyle, true))
-                }
-                unitTable.push([{ text: `${unit.name} - ${unit.type} formation - ${unit.units.length} Units - ${formationPV} PV`, colSpan: headerLength, style: "formationHeader" }, ...Array(headerLength - 1).fill("")]);
-                unitTable = unitTable.concat(formationUnitLines);
-            }
+            formationPV += unit.cost;
+            formationUnitLines.push(createUnitLine(unit, listStyle, drawFormations));
         }
+        if (drawFormations && formation.id != "unassigned") {
+            unitTable.push([{ text: `${formation.name} - ${formation.type} formation - ${formation.units.length} Units - ${formationPV} PV`, colSpan: headerLength, style: "formationHeader" }, ...Array(headerLength - 1).fill("")]);
+        }
+        unitTable = unitTable.concat(formationUnitLines);
     }
     unitTable.push([{ text: `${unitCount} Units`, colSpan: headerLength - 1, style: "cellHeader" }, ...Array(headerLength - 2).fill(""), { text: totalPV, style: "cellHeaderCentered" }]);
     return unitTable
 }
 
-function createReferenceList(units: (Unit | Formation)[]) {
+function createReferenceList(units: UnitV2[]) {
     const includedReferences = new Set()
-    for (const item of units) {
-        if (isUnit(item)) {
-            references.forEach((reference) => {
-                if (item.abilities.includes(reference.ability)) {
-                    includedReferences.add(reference)
-                }
-            });
-        } else {
-            for (const unit of item.units) {
-                references.forEach((reference) => {
-                    if (unit.abilities.includes(reference.ability)) {
-                        includedReferences.add(reference)
-                    }
-                });
+    units.forEach((unit) => {
+        references.forEach((reference) => {
+            if (unit.baseUnit.abilities.includes(reference.ability)) {
+                includedReferences.add(reference)
             }
-        }
-    }
+        });
+    })
     const referenceLines = [...includedReferences].map((reference: any) => { return `${reference.ability} (${reference.name}, pg.${reference.page})` }).sort().map((reference: any) => { return { text: reference, style: "listItem" } })
 
     return referenceLines
@@ -137,15 +125,13 @@ async function loadUnitCard(mulId: number, skill?: number): Promise<string> {
 
 }
 
-async function loadUnitImages(units: (Unit | Formation)[]) {
+async function loadUnitImages(unitList: UnitV2[], formations: FormationV2[]) {
     const promises = []
-    for (const item of units) {
-        if (isUnit(item)) {
-            promises.push(loadUnitCard(item.mulId, item.skill))
-        } else {
-            for (const unit of item.units) {
-                promises.push(loadUnitCard(unit.mulId, unit.skill))
-            }
+
+    for (const formation of formations) {
+        for (const unitId of formation.units) {
+            const unit = unitList.find((unit) => { return unit.id == unitId.id })!;
+            promises.push(loadUnitCard(unit.baseUnit.mulId, unit.skill))
         }
     }
     const results = await Promise.all(promises);
@@ -162,9 +148,9 @@ export async function makePDF(list: PrintableList, drawFormations: boolean): Pro
         [{ text: "Unit", style: "cellHeader" }].concat(["Type", "Skill", "PV"].map((header) => { return { text: header, style: "cellHeaderCentered" } })) :
         [{ text: "Unit", style: "cellHeader" }].concat(["Type", "Move", "Damage", "Health", "Skill", "PV"].map((header) => { return { text: header, style: "cellHeaderCentered" } }));
     const tableWidths = list.style == "mul" ? ["*", "auto", "auto", "auto"] : ["*", "auto", "auto", "auto", "auto", "auto", "auto"];
-    const unitTable = createUnitTable(list.style, list.units, drawFormations);
+    const unitTable = createUnitTable(list.style, list.units, list.formations, drawFormations);
     const abilityReferences = createReferenceList(list.units);
-    const unitCards = await loadUnitImages(list.units);
+    const unitCards = await loadUnitImages(list.units, list.formations);
 
     const dd: TDocumentDefinitions = {
         pageSize: "LETTER",

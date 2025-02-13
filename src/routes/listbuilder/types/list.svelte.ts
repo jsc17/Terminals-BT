@@ -385,8 +385,10 @@ export class List {
 			let response: any = deserialize(await (await fetch("/?/getUnit", { method: "POST", body: JSON.stringify({ mulId }) })).text());
 			let tempMovement: { speed: number; type: string }[] = [];
 			response.data!.unit.move.split("/").forEach((movement: string) => {
-				let [moveSpeed, moveType] = movement.split('"');
-				tempMovement.push({ speed: parseInt(moveSpeed), type: moveType });
+				let moveSpeed = movement.replaceAll('"', '').match(/\d+/) ?? "0";
+				let moveType = movement.replaceAll('"', '').match(/\D+/) ?? "";
+				tempMovement.push({ speed: parseInt(moveSpeed[0]), type: moveType[0] });
+
 			});
 			const unitData = response.data!.unit;
 			unitToAdd = {

@@ -70,12 +70,12 @@ export class ResultList {
 			return unit.mulId;
 		});
 
-		console.table(unitList[0])
 		unitList.forEach((unit: any) => {
 			let tempMovement: { speed: number; type: string }[] = [];
 			unit.move.split("/").forEach((movement: string) => {
-				let [moveSpeed, moveType] = movement.split('"');
-				tempMovement.push({ speed: parseInt(moveSpeed), type: moveType });
+				let moveSpeed = movement.replaceAll('"', '').match(/\d+/) ?? "0";
+				let moveType = movement.replaceAll('"', '').match(/\D+/) ?? "";
+				tempMovement.push({ speed: parseInt(moveSpeed[0]), type: moveType[0] });
 			});
 			try {
 				//{"speed": 6,"type": "t" }

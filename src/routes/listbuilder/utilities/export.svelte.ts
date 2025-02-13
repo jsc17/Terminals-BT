@@ -12,7 +12,7 @@ export function exportToJeff(list: List) {
 					}
 				}
 			}
-			console.table($state.snapshot(unit.baseUnit));
+			console.table($state.snapshot(unit.baseUnit.move));
 			const member: any = {
 				mechCreatorUUID: "",
 				mulID: unit.baseUnit.mulId,
@@ -48,17 +48,6 @@ export function exportToJeff(list: List) {
 				threshhold: 0,
 				move: unit.baseUnit.move?.map((movement) => { return { move: movement.speed, currentMove: movement.speed, type: movement.type } }),
 				jumpMove: jumpSpeed,
-				classification: "",
-				costCR: 0,
-				currentHeat: 0,
-				tro: "",
-				pilot: {
-					name: "",
-					piloting: 5,
-					gunnery: 3,
-					wounds: 0,
-					alphaStrikeAbilities: [0, 0, 0]
-				},
 			};
 			jeffList.members.push(member);
 		}

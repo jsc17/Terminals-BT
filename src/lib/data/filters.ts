@@ -59,6 +59,9 @@ const movementTypes = [
 	{ value: "f", display: "Foot" },
 	{ value: "m", display: "Motorized" },
 	{ value: "s", display: "Submersible" },
+	{ value: "a", display: "Aerodyne" },
+	{ value: "i", display: "Airship" },
+	{ value: "p", display: "Spheriod" }
 
 ]
 

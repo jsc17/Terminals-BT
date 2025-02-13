@@ -44,7 +44,7 @@ function createUnitLine(unit: UnitV2, listStyle: string, indent: boolean) {
         if (unit.baseUnit.move) {
             moveString = "";
             for (const movement of unit.baseUnit.move) {
-                moveString += `${movement.speed}"${movement.type}/`;
+                moveString += `${movement.speed}"${movement.type ?? ""}/`;
             }
             moveString = moveString.replace(/\/$/gm, "")
         }

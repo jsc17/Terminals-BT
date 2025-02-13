@@ -15,9 +15,9 @@ export class List {
 
 	details = $state({ name: "New List", era: 0, faction: 0, general: -1 });
 	rules = $state<string>("noRes");
-	id: string = crypto.randomUUID();
+	id: string = $state(crypto.randomUUID());
 
-	unitCount = $derived(this.units.length)
+	unitCount = $derived(this.units.length);
 	pv = $derived(Array.from(this.units.values()).reduce((total, current) => { return total + current.cost }, 0));
 
 	resultList: ResultList;

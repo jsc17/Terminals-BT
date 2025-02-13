@@ -51,7 +51,7 @@ export const actions = {
 			const existingList = await prisma.listV2.findFirst({
 				where: {
 					userId: locals.user.id,
-					name: parsedBody.name
+					name: data.name
 				}
 			});
 			if (!existingList) {

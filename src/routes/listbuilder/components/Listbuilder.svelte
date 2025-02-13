@@ -37,7 +37,15 @@
 <div class="card listbuilder">
 	<div class="list-header">
 		<div class="list-info">
-			<input id="listName" type="text" placeholder="List name" bind:value={list.details.name} />
+			<input
+				id="listName"
+				type="text"
+				placeholder="List name"
+				bind:value={list.details.name}
+				onchange={() => {
+					list.id = crypto.randomUUID();
+				}}
+			/>
 			<div class="inline">
 				<label for="rules">Rules:</label>
 				<select

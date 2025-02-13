@@ -12,7 +12,6 @@ export function exportToJeff(list: List) {
 					}
 				}
 			}
-			console.table($state.snapshot(unit.baseUnit.move));
 			const member: any = {
 				mechCreatorUUID: "",
 				mulID: unit.baseUnit.mulId,

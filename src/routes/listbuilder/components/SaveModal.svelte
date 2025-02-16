@@ -21,7 +21,7 @@
 		saveDialog.showModal();
 		getListNames();
 		ttsCode = list.createTTSCode();
-		listCode = list.listCode;
+		listCode = list.getListCode();
 	}
 
 	async function getListNames() {
@@ -46,11 +46,10 @@
 			const listNameExists = existingListNames.find((existingList) => {
 				return existingList.name == list.details.name.toLowerCase();
 			});
-			let overwrite = false;
+
 			if (listNameExists) {
-				overwrite = confirm("A list with that name already exists. Overwrite it?");
-				if (overwrite) {
-					formData.append("body", listCode);
+				if (confirm("A list with that name already exists. Overwrite it?")) {
+					formData.append("body", list.getListCode());
 					saveDialog.close();
 				} else {
 					cancel();
@@ -65,12 +64,13 @@
 			const listNameExists = listNames.includes(list.details.name.toLowerCase());
 			if (listNameExists) {
 				if (confirm("List with that name already exists in local storage. Overwrite it?")) {
-					localStorage.setItem(list.details.name.toLowerCase(), listCode!);
+					localStorage.setItem(list.details.name.toLowerCase(), list.getListCode());
 				}
 			} else {
+				list.id = crypto.randomUUID();
 				listNames.push(list.details.name.toLowerCase());
 				localStorage.setItem("lists", JSON.stringify(listNames));
-				localStorage.setItem(list.details.name.toLowerCase(), listCode);
+				localStorage.setItem(list.details.name.toLowerCase(), list.getListCode());
 			}
 			cancel();
 			toastController.addToast(`${list.details.name} saved successfully to this device. Consider creating an account to sync lists between devices.`);
@@ -134,7 +134,7 @@
 			<label for="list-code">List Code: </label><input type="text" name="list-code" id="list-code" disabled value={listCode} />
 			<button
 				onclick={() => {
-					navigator.clipboard.writeText(listCode!);
+					navigator.clipboard.writeText(list.getListCode());
 					toastController.addToast("code copied to clipboard", 1500);
 					saveDialog.close();
 				}}

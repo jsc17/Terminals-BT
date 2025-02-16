@@ -7,18 +7,20 @@
 	import type { ResultList } from "$lib/types/resultList.svelte";
 	import type { List } from "../types/list.svelte";
 	import { getRules } from "$lib/types/options";
-	import type { ImportList } from "../types/ImportList";
-	import { convertOldFormations, type FormationV2 } from "$lib/types/formation";
+	import { convertOldFormations, type FormationV2 } from "../types/formation";
+	import type { ListCode, ListCodeUnit } from "../types/listCode";
+	import type { SublistV2 } from "../types/sublist";
 
 	let user: any = getContext("user");
 	let resultList: ResultList = getContext("resultList");
 	let list: List = getContext("list");
 
 	let importCode = $state("");
-	let savedLists = $state<ImportList[]>([]);
+	let savedLists = $state<ListCode[]>([]);
 	let selectedListIndex = $state(-1);
 	let localListsExist = $state(false);
 	let dialogElement: HTMLDialogElement;
+	let localLists: string[] = [];
 
 	export function show() {
 		dialogElement.showModal();
@@ -42,7 +44,6 @@
 						units: JSON.parse(tempList.units),
 						formations: JSON.parse(tempList.formations),
 						sublists: JSON.parse(tempList.sublists),
-						local: false,
 						rules: tempList.rules ?? "noRes",
 						lcVersion: tempList.lcVersion
 					});
@@ -53,13 +54,12 @@
 			}
 		}
 		// load local storage saved sublists
-		const localLists = JSON.parse(localStorage.getItem("lists") ?? "[]");
+		localLists = JSON.parse(localStorage.getItem("lists") ?? "[]");
 		if (localLists.length) {
 			localListsExist = true;
 			console.log("Loading Local Lists");
 			for (const localListName of localLists) {
 				const localData = localStorage.getItem(localListName)!;
-				console.log(localListName, "data loaded");
 				if (localData.charAt(0) == "{") {
 					const localList = JSON.parse(localData);
 					if (localList.lcVersion && localList.lcVersion == 1) {
@@ -71,65 +71,93 @@
 							units: localList.units,
 							formations: localList.formations,
 							sublists: localList.sublists,
-							local: true,
 							rules: localList.rules ?? "noRes",
 							lcVersion: localList.lcVersion
 						});
+					} else {
+						let importedUnits: ListCodeUnit[] = [];
+						let importedFormations: FormationV2[] = [];
+						let importedSublists: SublistV2[] = [];
+
+						importedFormations.push({ id: crypto.randomUUID(), name: "Unassigned units", type: "none", units: [] });
+
+						for (const item of localList.units) {
+							if (item.charAt(0) == "{") {
+								const formationData = JSON.parse(item);
+								const formationId: string = crypto.randomUUID();
+								let formationUnitList: { id: string }[] = [];
+
+								for (const unit of formationData.units) {
+									const unitId: string = crypto.randomUUID();
+									let [mulId, skill] = unit.split(",");
+
+									if (skill == "undefined") {
+										skill = 4;
+									}
+									importedUnits.push({ id: unitId, mulId, skill, customization: {} });
+									formationUnitList.push({ id: unitId });
+								}
+								importedFormations.push({ id: formationId, name: formationData.name, type: formationData.type, units: formationUnitList });
+							} else {
+								const unitId = crypto.randomUUID();
+								let [mulId, skill] = item.split(",");
+								if (skill == "undefined") {
+									skill = 4;
+								}
+								importedUnits.push({ id: unitId, mulId, skill, customization: {} });
+								importedFormations[0].units.push({ id: unitId });
+							}
+						}
+
+						for (const sublist of localList.sublists) {
+							const subListData = JSON.parse(sublist);
+							const sublistId: string = crypto.randomUUID();
+							const scenario: string = subListData.sc;
+							const checked = subListData.un.map((unitPos: number) => {
+								return importedUnits[unitPos].id;
+							});
+
+							importedSublists.push({ id: sublistId, scenario, checked });
+						}
+
+						const importedList: ListCode = {
+							id: crypto.randomUUID(),
+							name: localList.name,
+							era: Number(localList.era),
+							faction: Number(localList.faction),
+							rules: localList.rules.name ?? "noRes",
+							sublists: importedSublists,
+							units: importedUnits,
+							formations: importedFormations,
+							lcVersion: 1
+						};
+						savedLists.push(importedList);
+						localStorage.setItem(localList.name, JSON.stringify(importedList));
 					}
-					// else {
-					// 			const formations: FormationV2[] = [];
-
-					// 			convertOldFormations(localList.units);
-
-					// 			// savedLists.push({
-					// 			// 	id: crypto.randomUUID(),
-					// 			// 	name: localList.name,
-					// 			// 	era: Number(localList.era),
-					// 			// 	faction: Number(localList.faction),
-					// 			// 	rules: localList.rules.name ?? "noRes",
-					// 			// 	sublists: localList.sublists,
-					// 			// 	units: localList.units,
-					// 			// 	local: true,
-					// 			// 	lcVersion: 1
-					// 			// });
-					// 		}
-					// 	} else {
-					// 		// let [listDetails, localSublists] = localData.split("-");
-					// 		// if (!localSublists) {
-					// 		// 	localSublists = "";
-					// 		// }
-					// 		// let [localEra, localFaction, ...localUnits] = listDetails.split(":");
-					// 		// savedLists.push({
-					// 		// 	name: localListName,
-					// 		// 	era: Number(localEra),
-					// 		// 	faction: Number(localFaction),
-					// 		// 	units: localUnits,
-					// 		// 	sublists: localSublists.split(":"),
-					// 		// 	local: true,
-					// 		// 	rules: ruleSets[0]
-					// 		// });
-					// 	}
-					// }
 				}
 			}
 		}
 	}
 
-	async function deleteList(index: number) {
-		let listToRemove = savedLists[index];
-		if (listToRemove.local) {
+	async function deleteList(idToRemove: string) {
+		let listToRemove = savedLists.find((list) => {
+			return list.id == idToRemove;
+		})!;
+		if (localLists.includes(listToRemove.name)) {
 			localStorage.removeItem(listToRemove.name);
-			let localLists = JSON.parse(localStorage.getItem("lists")!);
-			let localIndex = localLists.findIndex((element: string) => {
-				return (element = listToRemove.name);
+			localLists = localLists.filter((listName) => {
+				return listName != listToRemove.name;
 			});
-			localLists.splice(localIndex, 1);
 			localStorage.setItem("lists", JSON.stringify(localLists));
-			savedLists.splice(index, 1);
+			savedLists = savedLists.filter((list) => {
+				return list.id != idToRemove;
+			});
 		} else {
-			const response: any = deserialize(await (await fetch("?/deleteList", { method: "POST", body: JSON.stringify({ name: listToRemove.name }) })).text());
+			const response: any = deserialize(await (await fetch("?/deleteList", { method: "POST", body: JSON.stringify({ id: idToRemove }) })).text());
 			if (response.status == 200) {
-				savedLists.splice(index, 1);
+				savedLists = savedLists.filter((list) => {
+					return list.id != idToRemove;
+				});
 			} else {
 				alert("List deletion failed. Please try again");
 			}
@@ -164,14 +192,8 @@
 	// 	loadList(parsedCode);
 	// }
 
-	async function loadList(parsedCode?: ImportList) {
-		let data: ImportList;
-		if (parsedCode) {
-			data = parsedCode;
-		} else {
-			data = savedLists[selectedListIndex];
-		}
-		await list.loadList(data, resultList);
+	async function loadList(parsedCode?: ListCode) {
+		await list.loadList(parsedCode ?? savedLists[selectedListIndex], resultList);
 		dialogElement?.close();
 	}
 </script>
@@ -220,113 +242,35 @@
 								loadList();
 							}}
 						>
-							<td class:local={savedList.local}>{savedList.name}</td>
+							<td class:local={localLists.includes(savedList.name)}>{savedList.name}</td>
 							<td style="text-align:center">{eras.get(savedList.era)}</td>
 							<td style="text-align:center">{factions.get(savedList.faction)}</td>
 							<td style="text-align:center">{getRules(savedList.rules)?.display}</td>
-							<td><button onclick={() => deleteList(index)}>-</button></td>
+							<td><button onclick={() => deleteList(savedList.id)}>-</button></td>
 						</tr>
 					{/each}
 				</tbody>
 			</table>
 		</div>
-		<div class="space-between">
-			<button
-				onclick={() => {
-					loadList();
-				}}>Load</button
-			>
-			{#if localListsExist}
-				<p>Lists with red names are saved to local device storage . Please consider creating an account to sync them between devices.</p>
-			{/if}
-		</div>
-		<br />
-		<p>Paste a list code into the box below to import a saved code:</p>
-		<div class="load-bar">
-			<label for="importCode">List Code: </label><input type="text" name="importCode" id="importCode" bind:value={importCode} />
-			<!-- <button onclick={importList}> Import </button> -->
-		</div>
-	</div>
-</dialog>
 
-<!-- <dialog
-	bind:this={dialogElement}
-	onclose={() => {
-		showLoadModal = false;
-	}}
-	class:dialog-wide={appWindow.isNarrow}
->
-	<div class="dialog-body">
-		<div class="space-between">
-			{#if user.username}
-				<div></div>
-			{:else}
-				<p>Login to load lists saved to account</p>
-			{/if}
-			<button
-				onclick={() => {
-					showLoadModal = false;
-				}}>Close</button
-			>
-		</div>
-		<div class="table-container">
-			<table class="saved-lists">
-				<colgroup>
-					<col />
-					<col style="width:15%" />
-					<col style="width:15%" />
-					<col style="width:20%" />
-					<col style="width:20px" />
-				</colgroup>
-				<thead>
-					<tr>
-						<th>List name</th>
-						<th>Era</th>
-						<th>Faction</th>
-						<th>Rules</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each savedLists as savedList, index}
-						<tr
-							id={index.toString()}
-							class:selected={selectedListIndex == index}
-							onclick={() => {
-								selectedListIndex = index;
-							}}
-							ondblclick={() => {
-								loadList();
-							}}
-						>
-							<td class:local={savedList.local}>{savedList.name}</td>
-							<td style="text-align:center">{eras.get(savedList.era)}</td>
-							<td style="text-align:center">{factions.get(savedList.faction)}</td>
-							<td style="text-align:center">{getRules(savedList.rules)?.display}</td>
-							<td><button onclick={() => deleteList(index)}>-</button></td>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
-		</div>
-		<div class="space-between">
-			<button
-				onclick={() => {
-					loadList();
-				}}>Load</button
-			>
-			{#if localListsExist}
-				<p>Lists with red names are saved to local device storage . Please consider creating an account to sync them between devices.</p>
-			{/if}
-		</div>
-		<br />
-		<p>Paste a list code into the box below to import a saved code:</p>
+		<button
+			class="load-button"
+			onclick={() => {
+				loadList();
+			}}>Load</button
+		>
+
+		{#if localListsExist}
+			<p>Lists with red names are saved to local device storage . Please consider creating an account to sync them between devices.</p>
+		{/if}
+		<!-- <br /> -->
+		<!-- <p>Paste a list code into the box below to import a saved code:</p>
 		<div class="load-bar">
 			<label for="importCode">List Code: </label><input type="text" name="importCode" id="importCode" bind:value={importCode} />
 			<button onclick={importList}> Import </button>
-		</div>
+		</div> -->
 	</div>
-</dialog> -->
+</dialog>
 
 <style>
 	input[type="text"] {
@@ -365,5 +309,8 @@
 	}
 	.local {
 		color: var(--error);
+	}
+	.load-button {
+		width: fit-content;
 	}
 </style>

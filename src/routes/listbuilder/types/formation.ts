@@ -1,4 +1,4 @@
-import type { UnitV2 } from "./unit";
+import type { UnitV2 } from "$lib/types/unit";
 
 export const formationTypes = [
 	"Battle",

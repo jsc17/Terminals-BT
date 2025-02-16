@@ -6,7 +6,7 @@
 	import { getContext } from "svelte";
 	import type { ResultList } from "$lib/types/resultList.svelte";
 	import type { List } from "../types/list.svelte";
-	import type { FormationV2 } from "$lib/types/formation";
+	import type { FormationV2 } from "../types/formation";
 	import { dndzone, type DndEvent } from "svelte-dnd-action";
 
 	const resultList: ResultList = getContext("resultList");

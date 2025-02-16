@@ -91,13 +91,13 @@ export const actions = {
 		if (!locals.user) {
 			return fail(401, { message: "User not logged in" });
 		}
-		const { name } = (await request.json()) as Record<string, string>;
+		const { id } = (await request.json()) as Record<string, string>;
 
 		try {
-			await prisma.list.deleteMany({
+			await prisma.listV2.deleteMany({
 				where: {
 					userId: locals.user.id,
-					name
+					id
 				}
 			});
 			return { message: "List deleted successfully" };

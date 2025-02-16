@@ -2,7 +2,7 @@ import type { UnitV2, MulUnit } from "$lib/types/unit";
 import { getNewSkillCost } from "$lib/utilities/bt-utils";
 import customCards from "$lib/data/customCards.json";
 import { deserialize } from "$app/forms";
-import type { FormationV2 } from "$lib/types/formation";
+import type { FormationV2 } from "./formation";
 import type { ListCode, ListCodeUnit } from "./listCode";
 import type { SublistV2 } from "./sublist";
 import type { ResultList } from "$lib/types/resultList.svelte";
@@ -500,7 +500,7 @@ export class List {
 				if (item.charAt(0) == "{") {
 					const formationData = JSON.parse(item);
 					const formationId: string = crypto.randomUUID();
-					let unitList: { id: string }[] = [];
+					let formationUnitList: { id: string }[] = [];
 
 					for (const unit of formationData.units) {
 						const unitId: string = crypto.randomUUID();
@@ -515,9 +515,26 @@ export class List {
 						}
 
 						this.units.push({ id: unitId, baseUnit: baseUnit, skill, cost: getNewSkillCost(skill, baseUnit.pv), customization: {} });
-						unitList.push({ id: unitId });
+						formationUnitList.push({ id: unitId });
 					}
-					this.formations.push({ id: formationId, name: formationData.name, type: formationData.type, units: unitList });
+					this.formations.push({ id: formationId, name: formationData.name, type: formationData.type, units: formationUnitList });
+				} else {
+					const unitId = crypto.randomUUID();
+					let [mulId, skill] = item.split(",");
+					let baseUnit: MulUnit =
+						resultList.resultList.find((result: MulUnit) => {
+							return result.mulId == Number(mulId);
+						}) ?? (await this.loadUnit(Number(mulId)));
+
+					if (skill == "undefined") {
+						skill = 4;
+					}
+					this.units.push({ id: unitId, baseUnit: baseUnit, skill, cost: getNewSkillCost(skill, baseUnit.pv), customization: {} });
+					this.formations
+						.find((formation) => {
+							return formation.id == "unassigned";
+						})
+						?.units.push({ id: unitId });
 				}
 			}
 		}

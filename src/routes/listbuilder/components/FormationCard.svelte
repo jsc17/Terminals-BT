@@ -5,7 +5,7 @@
 	import Menu from "$lib/components/Generic/Menu.svelte";
 	import { getContext } from "svelte";
 	import type { List } from "../types/list.svelte";
-	import { type FormationV2, formationTypes } from "$lib/types/formation";
+	import { type FormationV2, formationTypes } from "../types/formation";
 	import { exportToJeff } from "../utilities/export.svelte";
 
 	let list: List = getContext("list");

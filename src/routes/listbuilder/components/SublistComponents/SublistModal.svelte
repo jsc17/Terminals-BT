@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { dndzone, type DndEvent } from "svelte-dnd-action";
-	import { flip } from "svelte/animate";
 	import VerticalSublist from "./VerticalSublist.svelte";
 	import SublistPrintModal from "./SublistPrintModal.svelte";
-	import MobileSublist from "./MobileSublist.svelte";
 	import HorizontalSublist from "./HorizontalSublist.svelte";
-	// import AutogenerationModal from "./AutogenerationModal.svelte";
 	import { getContext } from "svelte";
 	import type { List } from "../../types/list.svelte";
 	import type { SublistV2 } from "../../types/sublist";
+	import EditSublistModal from "./EditSublistModal.svelte";
+	import ExportSublistModal from "./ExportSublistModal.svelte";
+	import MobileSublist from "./MobileSublist.svelte";
 
 	let list: List = getContext("list");
 
@@ -18,8 +18,9 @@
 	let flipDurationMs = 300;
 
 	let sublistDialog: HTMLDialogElement;
-	let showPrintModal = $state(false);
-	let showAutoModal = $state(false);
+	let printModal: SublistPrintModal;
+	let editSublistModal = $state<EditSublistModal>();
+	let exportSublistModal = $state<ExportSublistModal>();
 
 	export function show() {
 		sublistDialog.showModal();
@@ -70,17 +71,14 @@
 				<div class="center gap8">
 					<button
 						onclick={() => {
-							list.addSublist();
+							const idAdded = list.addSublist();
+							editSublistModal?.show(idAdded);
 						}}>Add</button
 					>
+					<button onclick={() => {}}>Generate sublists</button>
 					<button
 						onclick={() => {
-							showAutoModal = true;
-						}}>Generate sublists</button
-					>
-					<button
-						onclick={() => {
-							showPrintModal = true;
+							printModal.show();
 						}}>Print all sublists</button
 					>
 				</div>
@@ -106,24 +104,27 @@
 				use:dndzone={{ items: list.sublists, dropTargetStyle, flipDurationMs, dragDisabled: scenarioFilter != "All" }}
 				onconsider={handleSort}
 				onfinalize={handleSort}
-				class:sublist-container-vertical={layout == "vertical"}
-				class:sublist-container-horizontal={layout == "horizontal"}
+				class:sublist-container-vertical={layout == "vertical" && !appWindow.isMobile}
+				class:sublist-container-horizontal={layout == "horizontal" || appWindow.isMobile}
 			>
 				{#each list.sublists as sublist (sublist.id)}
 					{#if sublist.scenario == scenarioFilter || scenarioFilter == "All"}
-						<div class:panel-vertical={layout == "vertical"} class:panel-horizontal={layout == "horizontal"}>
-							{#if layout == "vertical" && !appWindow.isMobile}
-								<VerticalSublist {sublist} {list}></VerticalSublist>
+						<div class:panel-vertical={layout == "vertical" && !appWindow.isMobile} class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}>
+							{#if appWindow.isMobile}
+								<MobileSublist {sublist} {list} {editSublistModal} {exportSublistModal}></MobileSublist>
+							{:else if layout == "horizontal"}
+								<HorizontalSublist {sublist} {list} {editSublistModal} {exportSublistModal}></HorizontalSublist>
 							{:else}
-								<HorizontalSublist {sublist} {list}></HorizontalSublist>
+								<VerticalSublist {sublist} {list} {editSublistModal} {exportSublistModal}></VerticalSublist>
 							{/if}
 						</div>
 					{/if}
 				{/each}
-				<div class="add-panel" class:panel-vertical={layout == "vertical"} class:panel-horizontal={layout == "horizontal"}>
+				<div class="add-panel" class:panel-vertical={layout == "vertical" && !appWindow.isMobile} class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}>
 					<button
 						onclick={() => {
-							list.addSublist();
+							const idAdded = list.addSublist();
+							editSublistModal?.show(idAdded);
 						}}>+</button
 					>
 				</div>
@@ -133,7 +134,9 @@
 	</div>
 </dialog>
 
-<SublistPrintModal bind:showPrintModal></SublistPrintModal>
+<SublistPrintModal bind:this={printModal}></SublistPrintModal>
+<EditSublistModal bind:this={editSublistModal}></EditSublistModal>
+<ExportSublistModal bind:this={exportSublistModal}></ExportSublistModal>
 
 <!-- <AutogenerationModal bind:showAutoModal></AutogenerationModal> -->
 

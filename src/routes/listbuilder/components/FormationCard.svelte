@@ -2,10 +2,11 @@
 	import UnitCard from "./UnitCard.svelte";
 	import { dndzone, type DndEvent } from "svelte-dnd-action";
 	import { toastController } from "$lib/stores/toastController.svelte";
-	import Menu from "$lib/components/Menu.svelte";
+	import Menu from "$lib/components/Generic/Menu.svelte";
 	import { getContext } from "svelte";
 	import type { List } from "../types/list.svelte";
-	import { type FormationV2, airFormationTypes, groundFormationTypes } from "$lib/types/formation";
+	import { type FormationV2, formationTypes } from "$lib/types/formation";
+	import { exportToJeff } from "../utilities/export.svelte";
 
 	let list: List = getContext("list");
 	let { formation }: { formation: FormationV2 } = $props();
@@ -16,31 +17,43 @@
 	function handleSort(e: CustomEvent<DndEvent<{ id: string }>>) {
 		formation.units = e.detail.items;
 	}
+
+	function exportFormationToJeff() {
+		if (formation.units.length == 0) {
+			toastController.addToast("Formation is empty");
+		} else {
+			const units = formation.units.map((unitId) => list.getUnit(unitId.id)!);
+			exportToJeff(formation.name, units);
+		}
+	}
 </script>
+
+{#snippet jeffExportButton()}
+	<button class="menu-button" onclick={exportFormationToJeff}>Export Formation to Jeff's Tools </button>
+{/snippet}
 
 <main>
 	{#if formation.id == "unassigned"}
 		{#if list.formations.length != 1}
-			<div class="formation-header">Unassigned units</div>
+			<div class="formation-header">
+				Unassigned Units
+				<Menu img={"/icons/menu.svg"}>
+					{@render jeffExportButton()}
+				</Menu>
+			</div>
 		{/if}
 	{:else}
 		<div class="formation-header">
-			<input type="text" name="formation-name" id="formation-id" bind:value={formation.name} />
+			<input class="formation-name" type="text" name="formation-name" id="formation-id" bind:value={formation.name} />
 			<div class="inline">
-				<label for="formation-type">{formation.style.charAt(0).toUpperCase()}</label>
-				<select name="formation-type" bind:value={formation.type}>
-					{#if formation.style == "ground"}
-						{#each groundFormationTypes as formationType}
-							<option value={formationType}>{formationType}</option>
-						{/each}
-					{:else}
-						{#each airFormationTypes as formationType}
-							<option value={formationType}>{formationType}</option>
-						{/each}
-					{/if}
+				<select class="formation-type-select" name="formation-type" bind:value={formation.type}>
+					{#each formationTypes as formationType}
+						<option value={formationType}>{formationType}</option>
+					{/each}
 				</select>
 			</div>
 			<Menu img={"/icons/menu.svg"}>
+				{@render jeffExportButton()}
 				<button
 					class="menu-button"
 					onclick={() => {
@@ -49,8 +62,8 @@
 							toastController.addToast(`${formation.name} removed from list`);
 						}
 					}}>Remove</button
-				></Menu
-			>
+				>
+			</Menu>
 		</div>
 	{/if}
 	<div class="unit-cards" use:dndzone={{ items: formation.units, dropTargetStyle, flipDurationMs, type: "units" }} onconsider={handleSort} onfinalize={handleSort}>
@@ -98,5 +111,8 @@
 	}
 	input:hover {
 		border: 1px solid var(--primary);
+	}
+	.formation-type-select {
+		width: 90%;
 	}
 </style>

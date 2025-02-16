@@ -49,7 +49,7 @@
 
 	$effect(() => {
 		list.listCode;
-		localStorage.setItem("last-list", list.createListCode());
+		localStorage.setItem("last-list", list.getListCode());
 	});
 </script>
 

@@ -1,5 +1,4 @@
-import type { TFontDictionary, TDocumentDefinitions, TableCell } from "pdfmake/interfaces";
-import PdfPrinter from "pdfmake";
+import type { TDocumentDefinitions, TableCell } from "pdfmake/interfaces";
 import BlobStream, { type IBlobStream } from "blob-stream";
 import { eras, factions } from "$lib/data/erasFactionLookup";
 import references from "$lib/data/reference.json"
@@ -7,6 +6,7 @@ import { existsSync } from "fs";
 import fs from "fs/promises"
 import type { UnitV2 } from "$lib/types/unit";
 import type { FormationV2 } from "$lib/types/formation";
+import { printer } from "$lib/server/printer";
 
 type PrintableList = {
     units: UnitV2[];
@@ -19,15 +19,6 @@ type PrintableList = {
     style: "mul" | "detailed";
     condensed: boolean;
 }
-const fonts: TFontDictionary = {
-    Helvetica: {
-        normal: 'Helvetica',
-        bold: 'Helvetica-Bold',
-        italics: 'Helvetica-Oblique',
-        bolditalics: 'Helvetica-BoldOblique'
-    }
-};
-const printer = new PdfPrinter(fonts);
 
 function createUnitLine(unit: UnitV2, listStyle: string, indent: boolean) {
     let unitLine: TableCell[] = []
@@ -142,7 +133,7 @@ async function loadUnitImages(unitList: UnitV2[], formations: FormationV2[]) {
     return unitCards
 }
 
-export async function makePDF(list: PrintableList, drawFormations: boolean): Promise<Blob> {
+export async function printList(list: PrintableList, drawFormations: boolean): Promise<Blob> {
     const listDetails = eras.get(list.era) + " Era - " + factions.get(list.faction) + " with " + factions.get(list.general) + " general list";
     const tableheaders: TableCell[] = list.style == "mul" ?
         [{ text: "Unit", style: "cellHeader" }].concat(["Type", "Skill", "PV"].map((header) => { return { text: header, style: "cellHeaderCentered" } })) :

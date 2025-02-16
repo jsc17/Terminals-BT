@@ -1,8 +1,9 @@
-import type { List } from "../types/list.svelte";
+import { toastController } from "$lib/stores/toastController.svelte";
+import type { UnitV2 } from "$lib/types/unit";
 
-export function exportToJeff(list: List) {
-	const jeffList: any = { name: list.details.name, members: [], uuid: crypto.randomUUID(), lastUpdated: new Date().toISOString(), formationBonus: "none", groupLabel: "Lance" };
-	list.units.forEach((unit) => {
+export function exportToJeff(name: string, units: UnitV2[]) {
+	const jeffList: any = { name: name, members: [], uuid: crypto.randomUUID(), lastUpdated: new Date().toISOString(), formationBonus: "none", groupLabel: "Lance" };
+	units.forEach((unit) => {
 		if (unit.baseUnit.mulId > 0) {
 			let jumpSpeed = 0;
 			if (unit.baseUnit.move) {
@@ -53,8 +54,9 @@ export function exportToJeff(list: List) {
 	});
 	const blob = new Blob([JSON.stringify(jeffList)], { type: "application/json" });
 	const downloadElement = document.createElement("a");
-	downloadElement.download = `${list.details.name}.json`;
+	downloadElement.download = `${name}.json`;
 	downloadElement.href = URL.createObjectURL(blob);
 	downloadElement.click();
 	downloadElement.remove();
+	toastController.addToast("Generating JSON for import into Jeff's Battletech Tools");
 }

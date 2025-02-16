@@ -3,19 +3,14 @@
 	import { getContext } from "svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 
-	let { showLoginModal = $bindable() } = $props();
 	let loginDialog: HTMLDialogElement;
 	let usernameElement = $state<HTMLInputElement>();
 	let loginDisplay = $state<"login" | "register">("login");
 
-	$effect(() => {
-		if (showLoginModal) {
-			loginDialog.showModal();
-			if (usernameElement) usernameElement.focus();
-		} else {
-			loginDialog.close();
-		}
-	});
+	export function show() {
+		loginDialog.showModal();
+		usernameElement?.focus();
+	}
 
 	let user: { username: string | undefined } = getContext("user");
 
@@ -70,13 +65,7 @@
 </script>
 
 <!-- svelte-ignore non_reactive_update -->
-<dialog
-	bind:this={loginDialog}
-	onclose={() => {
-		showLoginModal = false;
-	}}
-	class:dialog-wide={appWindow.isNarrow}
->
+<dialog bind:this={loginDialog} class:dialog-wide={appWindow.isNarrow}>
 	{#if loginDisplay == "login"}
 		<div class="dialog-body">
 			<div class="space-between">

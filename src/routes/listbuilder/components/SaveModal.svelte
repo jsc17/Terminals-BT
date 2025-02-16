@@ -12,7 +12,7 @@
 	let user: any = getContext("user");
 
 	let saveDialog: HTMLDialogElement;
-	let existingListNames: string[] = [];
+	let existingListNames: { id: string; name: string }[] = [];
 
 	let ttsCode = $state("");
 	let listCode = $state("");
@@ -28,9 +28,10 @@
 		existingListNames = [];
 		const response: any = deserialize(await (await fetch("?/getListNames", { method: "POST", body: "" })).text());
 		if (response.status == 200) {
-			const responseNames = JSON.parse(response.data.listNames);
-			for (const listName of responseNames) {
-				existingListNames.push(listName.name.toLowerCase());
+			const lists = JSON.parse(response.data.listNames);
+			for (const savedList of lists) {
+				console.log(savedList);
+				existingListNames.push({ id: savedList.id, name: savedList.name.toLowerCase() });
 			}
 		}
 	}
@@ -42,16 +43,22 @@
 			alert("list must have a name");
 			cancel();
 		} else if (user.username && saveLocation == "accountSave") {
-			const listNameExists = existingListNames.includes(list.details.name.toLowerCase());
+			const listNameExists = existingListNames.find((existingList) => {
+				return existingList.name == list.details.name.toLowerCase();
+			});
 			let overwrite = false;
 			if (listNameExists) {
 				overwrite = confirm("A list with that name already exists. Overwrite it?");
-			}
-			if (!listNameExists || overwrite) {
-				formData.append("body", listCode);
-				saveDialog.close();
+				if (overwrite) {
+					formData.append("body", listCode);
+					saveDialog.close();
+				} else {
+					cancel();
+				}
 			} else {
-				cancel();
+				list.id = crypto.randomUUID();
+				formData.append("body", list.getListCode());
+				saveDialog.close();
 			}
 		} else {
 			let listNames = JSON.parse(localStorage.getItem("lists") ?? "[]");
@@ -151,12 +158,20 @@
 			<label for="jeffs-tools">Jeff's Tools: </label><input type="text" name="jeff-tools" id="jeff's tools" bind:value={list.details.name} />
 			<button
 				onclick={() => {
-					exportToJeff(list);
+					if (list.unitCount == 0) {
+						toastController.addToast("List is empty");
+					} else {
+						exportToJeff(list.details.name, list.units);
+					}
 				}}
 			>
 				<img src="/icons/download.svg" alt="download to Jeff's Tools" class="button-icon" />
 			</button>
 		</div>
+		<p>
+			Note: Everything seems to work from what I've tested, but I can't guarantee they won't change it on their end. I'll try to keep an eye on it, but please let me know if an
+			import fails.
+		</p>
 	</div>
 </dialog>
 

@@ -11,9 +11,11 @@
 	let printDialog: HTMLDialogElement;
 	let playerName = $state("");
 	let style = $state("detailed");
+	let printName = $state("");
 
 	export function show() {
 		printDialog.showModal();
+		printName = list.details.name;
 	}
 
 	async function handleForm({ formData, cancel, submitter }: any) {
@@ -25,7 +27,7 @@
 				units: [...list.units],
 				formations: list.formations,
 				playername: playerName,
-				listname: list.details.name,
+				listname: printName,
 				era: list.details.era,
 				faction: list.details.faction,
 				general: list.details.general,
@@ -51,7 +53,7 @@
 	<div class="dialog-body">
 		<h2>Print</h2>
 		<form action="?/printList" method="post" use:enhance={handleForm} class="print-form">
-			<div><label for="listname">List Name</label><input id="listname" bind:value={list.details.name} /></div>
+			<div><label for="listname">Print title</label><input id="listname" bind:value={printName} /></div>
 			<div><label for="playername">Player Name (optional)</label><input id="playername" bind:value={playerName} /></div>
 			<div>{`${eras.get(list.details.era)} - ${factions.get(list.details.faction)} with ${factions.get(list.details.general)} general list `}</div>
 			<h3>Style</h3>

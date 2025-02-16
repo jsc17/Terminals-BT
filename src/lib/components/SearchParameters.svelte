@@ -68,7 +68,12 @@
 			</div>
 			<div class="parameter">
 				<p>General:</p>
-				<a href={`http://masterunitlist.info/Era/FactionEraDetails?FactionId=${resultList.details.faction}&EraId=${resultList.details.era}`}>{factions.get(resultList.general)}</a>
+				{#if resultList.details.era != 0 && resultList.details.faction != 0}
+					<a href={`http://masterunitlist.info/Era/FactionEraDetails?FactionId=${resultList.details.faction}&EraId=${resultList.details.era}`}>{factions.get(resultList.general)}</a
+					>
+				{:else}
+					<p>Select an Era and Faction</p>
+				{/if}
 			</div>
 			<div>
 				<button

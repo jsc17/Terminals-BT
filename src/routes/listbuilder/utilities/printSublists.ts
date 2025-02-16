@@ -1,103 +1,157 @@
-import { PDFDocument, PageSizes, type PDFFont, type PDFPage } from "pdf-lib";
+import type { UnitV2 } from "$lib/types/unit";
+import { printer } from "$lib/server/printer";
+import type { Column, Content, ContentColumns, TDocumentDefinitions } from "pdfmake/interfaces";
+import BlobStream, { type IBlobStream } from "blob-stream";
 
-export function drawListVertical(pdf: PDFDocument, sublist: any, pages: PDFPage[], slot: number, helvetica: PDFFont, helveticaBold: PDFFont) {
-	let page = pages.at(-1)!;
-	let tempSlot = slot % 9;
-	const { width, height } = page.getSize();
-	page.setFont(helveticaBold);
-	page.drawText(`${sublist.scenario} - ${sublist.pv} PV - ${sublist.unitList.length} Units`, {
-		x: 30 + (tempSlot % 3) * 185,
-		y: height - 32 - Math.floor(tempSlot / 3) * 250,
-		size: 10,
-		lineHeight: 12,
-		maxWidth: 175
+type PrintableSublist = {
+	scenario: string;
+	pv: number;
+	unitList: UnitV2[];
+};
+
+const scenarios = ["Bunkers", "Capture the Flag", "Domination", "Headhunter", "Hold the Line", "King of the Hill", "Overrun", "Stand Up Fight", "-"];
+
+/**
+ * @param layout should be horizontal or vertical
+ * @param grouped on/off
+ */
+
+export function createSublistsPdf(sublists: PrintableSublist[], layout: string, grouped: boolean, name: string): Promise<Blob> {
+	const dd: TDocumentDefinitions = {
+		pageSize: "LETTER",
+		content: [{ text: `${name} sublists:`, style: "header" }, createSublistsBody(sublists, layout, grouped)],
+		footer: {
+			columns: [{ text: "https://Terminal.tools/listbuilder", fontSize: 8, margin: [25, 0, 0, 25] }]
+		},
+		defaultStyle: {
+			font: "Helvetica",
+			fontSize: 8
+		},
+		styles: {
+			header: {
+				fontSize: 16,
+				bold: true,
+				margin: [0, 0, 0, 16]
+			},
+			verticalRow: {
+				marginBottom: 16
+			},
+			columnHeader: {
+				margin: [0, 2, 0, 2],
+				bold: true
+			},
+			unitRow: {
+				margin: [0, 1, 0, 1]
+			},
+			horizontalHeader: {
+				margin: [0, 2, 0, 2],
+				bold: true,
+				fontSize: 10
+			},
+			horizontalRow: {
+				margin: [0, 2, 0, 8],
+				lineHeight: 1.25,
+				fontSize: 10
+			}
+		}
+	};
+	return new Promise((resolve, reject) => {
+		const pdfDoc = printer.createPdfKitDocument(dd);
+		pdfDoc
+			.pipe(BlobStream())
+			.on("finish", function (this: IBlobStream) {
+				resolve(this.toBlob("application/pdf"));
+			})
+			.on("error", (err) => {
+				console.error("err", err);
+				reject(err);
+			});
+		pdfDoc.end();
 	});
-	page.setFont(helvetica);
-	let i = 0;
-	let offset = 0;
-	for (const unit of sublist.unitList) {
-		const unitLine = `(${unit.skill}) ${unit.name}`;
-		page.drawText(unitLine, {
-			x: 30 + (tempSlot % 3) * 185,
-			y: height - 46 - 11 * i - 9 * offset - Math.floor(tempSlot / 3) * 250,
-			lineHeight: 10,
-			size: 8,
-			maxWidth: 125,
-			wordBreaks: [" "]
-		});
-		page.drawText(`${unit.cost} (${Math.round(unit.cost / 2)})`, { x: 160 + (tempSlot % 3) * 185, y: height - 46 - 11 * i - 9 * offset - Math.floor(tempSlot / 3) * 250, size: 8 });
-
-		offset += Math.floor(helvetica.widthOfTextAtSize(unitLine, 8) / 125);
-		i++;
-		if (offset * 9 + i * 11 > 200) {
-			tempSlot++;
-			i = 0;
-			offset = 0;
-			slot++;
-		}
-		if (tempSlot == 9) {
-			pages.push(pdf.addPage(PageSizes.Letter));
-			page = pages.at(-1)!;
-			tempSlot = 0;
-		}
-	}
-	page.setFont(helveticaBold);
-
-	page.drawText(
-		`Health: ${sublist.unitList.reduce((total: number, unit: any) => {
-			return (total += unit.health ?? 0);
-		}, 0)}  Size: ${sublist.unitList.reduce((total: number, unit: any) => {
-			return (total += unit.size ?? 0);
-		}, 0)}  Damage: ${sublist.unitList.reduce((total: number, unit: any) => {
-			return (total += unit.damageS ?? 0);
-		}, 0)}/${sublist.unitList.reduce((total: number, unit: any) => {
-			return (total += unit.damageM ?? 0);
-		}, 0)}/${sublist.unitList.reduce((total: number, unit: any) => {
-			return (total += unit.damageL ?? 0);
-		}, 0)}`,
-		{
-			x: 30 + (tempSlot % 3) * 185,
-			y: height - 50 - 11 * i - 9 * offset - Math.floor(tempSlot / 3) * 250,
-			size: 8
-		}
-	);
-	return slot;
 }
 
-export function drawListHorizontal(pdf: PDFDocument, sublist: any, pages: PDFPage[], slot: number, helvetica: PDFFont, helveticaBold: PDFFont) {
-	let tempSlot = slot % 11;
-	let page = pages.at(-1)!;
-	let offset = 0;
-	const { width, height } = page.getSize();
-	page.setFont(helveticaBold);
-	page.drawText(
-		`${sublist.scenario} - ${sublist.pv} PV - ${sublist.unitList.length} Units - Health: ${sublist.unitList.reduce((total: number, unit: any) => {
-			return (total += unit.health ?? 0);
-		}, 0)}  Size: ${sublist.unitList.reduce((total: number, unit: any) => {
-			return (total += unit.size ?? 0);
-		}, 0)}  Damage: ${sublist.unitList.reduce((total: number, unit: any) => {
-			return (total += unit.damageS ?? 0);
-		}, 0)}/${sublist.unitList.reduce((total: number, unit: any) => {
-			return (total += unit.damageM ?? 0);
-		}, 0)}/${sublist.unitList.reduce((total: number, unit: any) => {
-			return (total += unit.damageL ?? 0);
-		}, 0)}`,
-		{
-			x: 30,
-			y: height - 34 - tempSlot * 68,
-			size: 10,
-			lineHeight: 12
+function createSublistsBody(sublists: PrintableSublist[], layout: string, grouped: boolean): Content {
+	let content: Content[] = [];
+
+	if (grouped) {
+		const sortedSublists = sublists.sort((a, b) => {
+			return scenarios.indexOf(a.scenario) - scenarios.indexOf(b.scenario);
+		});
+		if (layout == "vertical") {
+			createVerticalBody(sortedSublists, content);
+		} else {
+			createHorizontalBody(sortedSublists, content);
 		}
-	);
-	page.setFont(helvetica);
-	let unitLine = "";
-	for (const unit of sublist.unitList) {
-		unitLine += `(${unit.skill}) ${unit.name} - ${unit.cost}(${Math.round(unit.cost / 2)}), `;
+	} else {
+		if (layout == "vertical") {
+			createVerticalBody(sublists, content);
+		} else {
+			createHorizontalBody(sublists, content);
+		}
 	}
-	page.drawText(unitLine, { x: 30, y: height - 48 - tempSlot * 68, size: 10, lineHeight: 12, maxWidth: 550, wordBreaks: [" "] });
-	if (helvetica.widthOfTextAtSize(unitLine, 8) / 552 > 4) {
-		tempSlot++;
-		slot++;
+
+	return content;
+}
+
+function createVerticalBody(sublists: PrintableSublist[], content: Content[]) {
+	while (sublists.length) {
+		let row: ContentColumns = { columns: [], style: "verticalRow", columnGap: 10 };
+		let rowSublists = sublists.splice(0, 3);
+		for (const sublist of rowSublists) {
+			let column: Column = { width: "33%", stack: [] };
+			column.stack.push({ text: `${sublist.scenario} -  ${sublist.pv} PV - ${sublist.unitList.length} Units`, style: "columnHeader" });
+			for (const unit of sublist.unitList) {
+				column.stack.push({
+					columns: [
+						{ width: "80%", text: `(${unit.skill}) ${unit.baseUnit.name}` },
+						{ width: "20%", text: `${unit.cost} (${Math.round(unit.cost / 2)})`, alignment: "center" }
+					],
+					style: "unitRow"
+				});
+			}
+			column.stack.push({
+				text: `Health: ${sublist.unitList.reduce((total: number, unit: UnitV2) => {
+					return (total += unit.baseUnit.health ?? 0);
+				}, 0)}  Size: ${sublist.unitList.reduce((total: number, unit: UnitV2) => {
+					return (total += unit.baseUnit.size ?? 0);
+				}, 0)}  Damage: ${sublist.unitList.reduce((total: number, unit: UnitV2) => {
+					return (total += unit.baseUnit.damageS ?? 0);
+				}, 0)}/${sublist.unitList.reduce((total: number, unit: UnitV2) => {
+					return (total += unit.baseUnit.damageM ?? 0);
+				}, 0)}/${sublist.unitList.reduce((total: number, unit: UnitV2) => {
+					return (total += unit.baseUnit.damageL ?? 0);
+				}, 0)}`,
+				style: "columnHeader"
+			});
+			row.columns.push(column);
+		}
+		content.push(row);
 	}
-	return slot;
+}
+
+function createHorizontalBody(sublists: PrintableSublist[], content: Content[]) {
+	for (const sublist of sublists) {
+		content.push({
+			text: `${sublist.scenario} - ${sublist.pv} PV - ${sublist.unitList.length} Units - Health: ${sublist.unitList.reduce((total: number, unit: any) => {
+				return (total += unit.health ?? 0);
+			}, 0)}  Size: ${sublist.unitList.reduce((total: number, unit: any) => {
+				return (total += unit.size ?? 0);
+			}, 0)}  Damage: ${sublist.unitList.reduce((total: number, unit: any) => {
+				return (total += unit.damageS ?? 0);
+			}, 0)}/${sublist.unitList.reduce((total: number, unit: any) => {
+				return (total += unit.damageM ?? 0);
+			}, 0)}/${sublist.unitList.reduce((total: number, unit: any) => {
+				return (total += unit.damageL ?? 0);
+			}, 0)}`,
+			style: "horizontalHeader"
+		});
+		content.push({
+			text: sublist.unitList
+				.map((unit) => {
+					return `(${unit.skill}) ${unit.baseUnit.name} - ${unit.cost} (${Math.round(unit.cost / 2)})`;
+				})
+				.join(", "),
+			style: "horizontalRow"
+		});
+	}
 }

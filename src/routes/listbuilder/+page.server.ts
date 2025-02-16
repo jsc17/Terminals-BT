@@ -1,9 +1,9 @@
 import { fail } from "@sveltejs/kit";
 import { prisma } from "$lib/server/prisma.js";
-import { drawListHorizontal, drawListVertical } from "./utilities/printSublists.js";
-import { PDFDocument, PageSizes, PDFPage, StandardFonts } from "pdf-lib";
-import { makePDF } from "./utilities/printList.js";
+import { printList } from "./utilities/printList.js";
 import { type ListCode } from "./types/listCode.js";
+import { createSublistsPdf } from "./utilities/printSublists.js";
+import { group } from "console";
 
 export const actions = {
 	getListNames: async ({ locals }) => {
@@ -15,10 +15,8 @@ export const actions = {
 				userId: locals.user.id
 			},
 			select: {
-				name: true,
-				era: true,
-				faction: true,
-				rules: true
+				id: true,
+				name: true
 			}
 		});
 
@@ -111,50 +109,19 @@ export const actions = {
 	printList: async ({ request }) => {
 		const formData = await request.formData();
 		const list = JSON.parse(formData.get("body")!.toString());
-		const printFormations = formData.get("drawFormations")?.toString() == "on"
-		const blob = await makePDF(list, printFormations);
+		const printFormations = formData.get("drawFormations")?.toString() == "on";
+		const blob = await printList(list, printFormations);
 		const bytes = await blob.bytes();
 		return { pdf: JSON.stringify(bytes) };
 	},
 	printSublists: async ({ request }) => {
 		const formData = await request.formData();
+		const name = formData.get("name")?.toString() ?? "Sublist";
 		const sublists = JSON.parse(formData.get("sublists")!.toString());
-		const layout = formData.get("sublistPrintLayout");
-		const grouped = formData.get("sublistPrintGrouping");
-		let orderedSublists = [];
-
-		if (grouped == "on") {
-			for (const scenario of ["Bunkers", "Capture the Flag", "Domination", "Headhunter", "Hold the Line", "King of the Hill", "Overrun", "Stand Up Fight", "-"]) {
-				for (const list of sublists) {
-					if (list.scenario == scenario) {
-						orderedSublists.push(list);
-					}
-				}
-			}
-		} else {
-			orderedSublists = sublists;
-		}
-
-		const pdf = await PDFDocument.create();
-		const [helvetica, helveticaBold] = await Promise.all([pdf.embedFont(StandardFonts.Helvetica), pdf.embedFont(StandardFonts.HelveticaBold)]);
-
-		const pages: PDFPage[] = [];
-		let slot = 0;
-		let slotCount = layout == "vertical" ? 9 : 11;
-		for (let index = 0; index < orderedSublists.length; index++) {
-			let pageCount = Math.floor(slot / slotCount);
-			if (pageCount >= pages.length) {
-				pages.push(pdf.addPage(PageSizes.Letter));
-			}
-			if (layout == "vertical") {
-				slot = drawListVertical(pdf, orderedSublists[index], pages, slot, helvetica, helveticaBold);
-			} else {
-				slot = drawListHorizontal(pdf, orderedSublists[index], pages, slot, helvetica, helveticaBold);
-			}
-			slot++;
-		}
-
-		const bytes = await pdf.save();
+		const layout = formData.get("sublistPrintLayout")?.toString() ?? "vertical";
+		const grouped = formData.get("sublistPrintGrouping") != undefined;
+		const blob = await createSublistsPdf(sublists, layout, grouped, name);
+		const bytes = await blob.bytes();
 		return { pdf: JSON.stringify(bytes) };
 	}
 };

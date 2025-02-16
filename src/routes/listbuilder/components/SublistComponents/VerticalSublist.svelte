@@ -3,13 +3,16 @@
 	import { getRules } from "$lib/types/options";
 	import type { SublistV2 } from "../../types/sublist";
 	import EditSublistModal from "./EditSublistModal.svelte";
+	import ExportSublistModal from "./ExportSublistModal.svelte";
 
 	type componentProps = {
 		sublist: SublistV2;
 		list: List;
+		editSublistModal: EditSublistModal | undefined;
+		exportSublistModal: ExportSublistModal | undefined;
 	};
 
-	const { sublist = $bindable(), list }: componentProps = $props();
+	const { sublist = $bindable(), list, editSublistModal, exportSublistModal }: componentProps = $props();
 
 	let stats = $derived.by(() => {
 		let pv = 0,
@@ -32,8 +35,6 @@
 
 	let sublistMaxPv = $derived(getRules(list.rules)?.sublistMaxPv);
 	let sublistMaxUnits = $derived(getRules(list.rules)?.sublistMaxUnits);
-
-	let showEditSublistModal = $state(false);
 </script>
 
 <main>
@@ -45,7 +46,7 @@
 		</select>
 		<button
 			onclick={() => {
-				showEditSublistModal = true;
+				editSublistModal?.show(sublist.id);
 			}}>Edit</button
 		>
 	</div>
@@ -76,15 +77,13 @@
 	<div class="space-between">
 		<button
 			onclick={() => {
-				// sublist.print();
-			}}>Print Sublist</button
+				exportSublistModal?.show(sublist.id);
+			}}>Print/Export</button
 		>
 		<button onclick={() => list.copySublist(sublist.id)}>Copy</button>
 		<button onclick={() => list.deleteSublist(sublist.id)}>Delete</button>
 	</div>
 </main>
-
-<EditSublistModal bind:showEditSublistModal {sublist} {list} pv={stats.pv}></EditSublistModal>
 
 <style>
 	main {

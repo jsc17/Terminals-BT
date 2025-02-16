@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { PrintModal, SaveModal, LoadModal, SublistModal } from "./index";
-	import { getRules, ruleSets } from "$lib/types/options";
+	import { ruleSets } from "$lib/types/options";
 	import FormationCard from "./FormationCard.svelte";
-	import Menu from "$lib/components/Menu.svelte";
+	import Menu from "$lib/components/Generic/Menu.svelte";
 	import { getContext } from "svelte";
 	import type { ResultList } from "$lib/types/resultList.svelte";
 	import type { List } from "../types/list.svelte";
@@ -17,18 +17,10 @@
 	let saveModal: SaveModal | undefined = $state();
 	let loadModal: LoadModal | undefined = $state();
 	let sublistModal: SublistModal | undefined = $state();
-	let selectedRules = $state("noRes");
-
-	$effect(() => {
-		selectedRules = list.rules;
-	});
-
 	let errorDialog = $state<HTMLDialogElement>();
 
 	let dropTargetStyle = { outline: "solid var(--primary)" };
-
 	let flipDurationMs = 100;
-
 	function handleSort(e: CustomEvent<DndEvent<FormationV2>>) {
 		list.formations = e.detail.items;
 	}
@@ -37,22 +29,13 @@
 <div class="card listbuilder">
 	<div class="list-header">
 		<div class="list-info">
-			<input
-				id="listName"
-				type="text"
-				placeholder="List name"
-				bind:value={list.details.name}
-				onchange={() => {
-					list.id = crypto.randomUUID();
-				}}
-			/>
+			<input id="listName" type="text" placeholder="List name" bind:value={list.details.name} />
 			<div class="inline">
 				<label for="rules">Rules:</label>
 				<select
-					bind:value={selectedRules}
+					bind:value={list.rules}
 					onchange={() => {
-						resultList.setOptions(selectedRules ?? "noRes");
-						list.setOptions(selectedRules ?? "noRes");
+						resultList.setOptions(list.rules ?? "noRes");
 					}}
 				>
 					{#each ruleSets as rules}
@@ -99,14 +82,8 @@
 					<button
 						class="menu-button"
 						onclick={() => {
-							list.newFormation("ground");
-						}}>Add Ground Formation</button
-					>
-					<button
-						class="menu-button"
-						onclick={() => {
-							list.newFormation("air");
-						}}>Add Air Formation</button
+							list.newFormation();
+						}}>Add Formation</button
 					>
 					<hr />
 					<div>More features coming soon</div></Menu

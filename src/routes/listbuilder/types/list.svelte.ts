@@ -2,7 +2,7 @@ import type { UnitV2, MulUnit } from "$lib/types/unit";
 import { getNewSkillCost } from "$lib/utilities/bt-utils";
 import customCards from "$lib/data/customCards.json";
 import { deserialize } from "$app/forms";
-import type { FormationStyles, FormationV2 } from "$lib/types/formation";
+import type { FormationV2 } from "$lib/types/formation";
 import type { ListCode, ListCodeUnit } from "./listCode";
 import type { SublistV2 } from "./sublist";
 import type { ResultList } from "$lib/types/resultList.svelte";
@@ -10,7 +10,7 @@ import { getRules } from "$lib/types/options";
 
 export class List {
 	units: UnitV2[] = $state([]);
-	formations: FormationV2[] = $state([{ id: "unassigned", name: "Unassigned units", type: "none", units: [], style: "unassigned" }]);
+	formations: FormationV2[] = $state([{ id: "unassigned", name: "Unassigned units", type: "none", units: [] }]);
 	sublists: SublistV2[] = $state([]);
 
 	details = $state({ name: "New List", era: 0, faction: 0, general: -1 });
@@ -18,7 +18,11 @@ export class List {
 	id: string = $state(crypto.randomUUID());
 
 	unitCount = $derived(this.units.length);
-	pv = $derived(Array.from(this.units.values()).reduce((total, current) => { return total + current.cost }, 0));
+	pv = $derived(
+		Array.from(this.units.values()).reduce((total, current) => {
+			return total + current.cost;
+		}, 0)
+	);
 
 	resultList: ResultList;
 
@@ -31,8 +35,8 @@ export class List {
 	listCode = $derived.by(() => {
 		let unitList: ListCodeUnit[] = [];
 		this.units.forEach((unit) => {
-			unitList.push({ id: unit.id, mulId: unit.baseUnit.mulId, skill: unit.skill, customization: unit.customization })
-		})
+			unitList.push({ id: unit.id, mulId: unit.baseUnit.mulId, skill: unit.skill, customization: unit.customization });
+		});
 
 		const listCode: ListCode = {
 			id: this.id,
@@ -44,11 +48,11 @@ export class List {
 			units: unitList,
 			formations: this.formations,
 			sublists: this.sublists
-		}
+		};
 		localStorage.setItem("last-list", JSON.stringify(listCode));
 
 		return JSON.stringify(listCode);
-	})
+	});
 
 	issues = $derived.by(() => {
 		const issueList = new Map<string, Set<string>>();
@@ -230,7 +234,6 @@ export class List {
 				}
 			}
 
-
 			if (this.options.requireHitch) {
 				const htcUnits = this.units.filter((unit) => {
 					return unit.baseUnit.abilities.includes("HTC");
@@ -288,53 +291,77 @@ export class List {
 	}
 
 	newUnit(baseUnit: MulUnit) {
-		const unitId: string = crypto.randomUUID()
+		const unitId: string = crypto.randomUUID();
 		this.units.push({ id: unitId, baseUnit, skill: 4, cost: baseUnit.pv, customization: {} });
-		this.formations.find((formation) => { return formation.id == "unassigned" })?.units.push({ id: unitId })
+		this.formations
+			.find((formation) => {
+				return formation.id == "unassigned";
+			})
+			?.units.push({ id: unitId });
 	}
 
 	getUnit(idToFind: string) {
-		return this.units.find((unit) => { return unit.id == idToFind })
+		return this.units.find((unit) => {
+			return unit.id == idToFind;
+		});
 	}
 
-	newFormation(style: FormationStyles = "ground") {
-		const id: string = crypto.randomUUID()
-		this.formations.push({ id, name: `New ${style} formation`, type: style == "ground" ? "battle" : "interceptor", units: [], style })
+	newFormation() {
+		const id: string = crypto.randomUUID();
+		this.formations.push({ id, name: `New formation`, type: "battle", units: [] });
 	}
 	removeUnit(idToRemove: string) {
-		this.units = this.units.filter((unit) => { return unit.id != idToRemove })
+		this.units = this.units.filter((unit) => {
+			return unit.id != idToRemove;
+		});
 		this.formations.forEach((formation) => {
 			formation.units = formation.units.filter((unit) => {
-				return unit.id != idToRemove
-			})
-		})
+				return unit.id != idToRemove;
+			});
+		});
 		this.sublists.forEach((sublist) => {
 			sublist.checked = sublist.checked.filter((unitId) => {
 				return unitId != idToRemove;
-			})
-		})
+			});
+		});
 	}
 	removeFormation(idToRemove: string) {
-		let formationToRemove = this.formations.find((formation) => { return formation.id == idToRemove });
+		let formationToRemove = this.formations.find((formation) => {
+			return formation.id == idToRemove;
+		});
 		if (formationToRemove) {
-			formationToRemove.units.forEach((unitId) => { this.units.filter((unit) => { return unit.id == unitId.id }) })
+			formationToRemove.units.forEach((unitId) => {
+				this.units.filter((unit) => {
+					return unit.id == unitId.id;
+				});
+			});
 		}
 		this.formations = this.formations.filter((formation) => {
 			return formation.id != idToRemove;
-		})
+		});
 	}
 	clear() {
 		this.units = [];
-		this.formations = [{ id: "unassigned", name: "Unassigned units", type: "none", units: [], style: "unassigned" }];
+		this.formations = [{ id: "unassigned", name: "Unassigned units", type: "none", units: [] }];
 		this.sublists = [];
 	}
 
-	addSublist() {
-		this.sublists.push({ id: crypto.randomUUID(), checked: [], scenario: "-" })
+	addSublist(): string {
+		const id = crypto.randomUUID();
+		this.sublists.push({ id, checked: [], scenario: "-" });
+		return id;
+	}
+
+	getSublist(idToFind: string) {
+		return this.sublists.find((sublist) => {
+			return sublist.id == idToFind;
+		});
 	}
 
 	copySublist(sublistId: String) {
-		const existingSublist = this.sublists.find((sublist) => { return sublist.id == sublistId });
+		const existingSublist = this.sublists.find((sublist) => {
+			return sublist.id == sublistId;
+		});
 		if (existingSublist) {
 			const newSublist = structuredClone($state.snapshot(existingSublist));
 			newSublist.id = crypto.randomUUID();
@@ -343,10 +370,12 @@ export class List {
 	}
 
 	deleteSublist(sublistId: String) {
-		this.sublists = this.sublists.filter((sublist) => { return sublist.id != sublistId })
+		this.sublists = this.sublists.filter((sublist) => {
+			return sublist.id != sublistId;
+		});
 	}
 
-	createListCode() {
+	getListCode() {
 		return this.listCode;
 	}
 	createTTSCode() {
@@ -355,8 +384,8 @@ export class List {
 			if (unit.baseUnit.mulId > 0) {
 				tempUnitArray.push(`{${unit.baseUnit.mulId},${unit.skill}}`);
 			}
-			tempUnitArray.push()
-		})
+			tempUnitArray.push();
+		});
 		return `{${tempUnitArray.join(",")}}`;
 	}
 	async loadUnit(mulId: number) {
@@ -385,10 +414,9 @@ export class List {
 			let response: any = deserialize(await (await fetch("/?/getUnit", { method: "POST", body: JSON.stringify({ mulId }) })).text());
 			let tempMovement: { speed: number; type: string }[] = [];
 			response.data!.unit.move.split("/").forEach((movement: string) => {
-				let moveSpeed = movement.replaceAll('"', '').match(/\d+/) ?? "0";
-				let moveType = movement.replaceAll('"', '').match(/\D+/) ?? "";
+				let moveSpeed = movement.replaceAll('"', "").match(/\d+/) ?? "0";
+				let moveType = movement.replaceAll('"', "").match(/\D+/) ?? "";
 				tempMovement.push({ speed: parseInt(moveSpeed[0]), type: moveType[0] });
-
 			});
 			const unitData = response.data!.unit;
 			unitToAdd = {
@@ -441,17 +469,17 @@ export class List {
 			resultList.details.faction = this.details.faction;
 			resultList.setOptions(this.rules);
 
-			this.details.general = resultList.general
+			this.details.general = resultList.general;
 			this.clear();
 			this.sublists = listCode.sublists;
 			for (const unit of listCode.units) {
-				let baseUnit: MulUnit = resultList.resultList.find((result: MulUnit) => {
-					return result.mulId == unit.mulId
-				}) ?? await this.loadUnit(unit.mulId);
-				this.units.push({ id: unit.id, baseUnit: baseUnit, skill: unit.skill, cost: getNewSkillCost(unit.skill, baseUnit.pv), customization: unit.customization })
+				let baseUnit: MulUnit =
+					resultList.resultList.find((result: MulUnit) => {
+						return result.mulId == unit.mulId;
+					}) ?? (await this.loadUnit(unit.mulId));
+				this.units.push({ id: unit.id, baseUnit: baseUnit, skill: unit.skill, cost: getNewSkillCost(unit.skill, baseUnit.pv), customization: unit.customization });
 			}
 			this.formations = listCode.formations;
-
 		} else {
 			const { era, faction, name, units, sublists, rules } = data;
 			this.setOptions(rules);
@@ -477,9 +505,10 @@ export class List {
 					for (const unit of formationData.units) {
 						const unitId: string = crypto.randomUUID();
 						let [mulId, skill] = unit.split(",");
-						let baseUnit: MulUnit = resultList.resultList.find((result: MulUnit) => {
-							return result.mulId == Number(mulId);
-						}) ?? await this.loadUnit(Number(mulId))
+						let baseUnit: MulUnit =
+							resultList.resultList.find((result: MulUnit) => {
+								return result.mulId == Number(mulId);
+							}) ?? (await this.loadUnit(Number(mulId)));
 
 						if (skill == "undefined") {
 							skill = 4;
@@ -488,11 +517,9 @@ export class List {
 						this.units.push({ id: unitId, baseUnit: baseUnit, skill, cost: getNewSkillCost(skill, baseUnit.pv), customization: {} });
 						unitList.push({ id: unitId });
 					}
-					this.formations.push({ id: formationId, style: formationData.style, name: formationData.name, type: formationData.type, units: unitList })
-
+					this.formations.push({ id: formationId, name: formationData.name, type: formationData.type, units: unitList });
 				}
 			}
 		}
-
 	}
 }

@@ -77,6 +77,9 @@ export const actions = {
 		const lists = await prisma.listV2.findMany({
 			where: {
 				userId: locals.user.id
+			},
+			orderBy: {
+				name: "asc"
 			}
 		});
 

@@ -2,18 +2,11 @@
 	import Footer from "$lib/components/Footer.svelte";
 	import Header from "$lib/components/Header.svelte";
 	import Toast from "$lib/components/Toast.svelte";
-	import { appWindow } from "$lib/stores/appWindow.svelte.js";
-	import { setContext } from "svelte";
+	import { onMount, setContext } from "svelte";
 
 	const { data, children } = $props();
 	let user = $state({ username: data.username });
 	setContext("user", user);
-	$effect.pre(() => {
-		appWindow.windowWidth = window.screen.availWidth;
-		window.onresize = () => {
-			appWindow.windowWidth = window.screen.availWidth;
-		};
-	});
 </script>
 
 <main>
@@ -117,7 +110,7 @@
 	}
 	:global(dialog) {
 		padding: 0;
-		width: fit-content;
+		width: 30%;
 		background-color: var(--background);
 		color: var(--foreground);
 		border: 1px solid var(--border);
@@ -125,6 +118,19 @@
 		min-height: fit-content;
 		max-height: 95dvh;
 		overflow: auto;
+		transition:
+			display 0.2s allow-discrete,
+			overlay 0.2s allow-discrete,
+			opacity 0.2s;
+		opacity: 0;
+
+		&[open] {
+			opacity: 1;
+
+			@starting-style {
+				opacity: 0;
+			}
+		}
 	}
 	@media (max-width: 500px) {
 		:global(dialog) {
@@ -179,7 +185,7 @@
 		width: max-content;
 		max-width: 90dvw;
 		position: absolute;
-		z-index: 15;
+		z-index: 8;
 	}
 	:global(.dropdown-top) {
 		top: 30px;
@@ -236,6 +242,6 @@
 	}
 	:global(menu) {
 		padding: 0;
-		margin: 10px 0px;
+		margin: 0;
 	}
 </style>

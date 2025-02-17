@@ -1,10 +1,13 @@
 import { deserialize } from "$app/forms";
 import data from "$lib/data/erasFactionsList.json";
 
-export function getNewSkillCost(newSkill: number, basePV: number) {
+export function getNewSkillCost(newSkill: number | undefined, basePV: number) {
 	let newCost = 0;
 	let step = 0;
 
+	if (!newSkill || Number.isNaN(newSkill)) {
+		return basePV;
+	}
 	if (newSkill == 4) {
 		newCost = basePV;
 	} else if (newSkill > 4) {

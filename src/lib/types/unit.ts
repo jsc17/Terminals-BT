@@ -1,8 +1,5 @@
-import { type Formation } from "$lib/types/formation.svelte";
-
-export type Unit = {
+export type MulUnit = {
 	[key: string]: any;
-	id?: number;
 	mulId: number;
 	name: string;
 	class: string;
@@ -10,7 +7,6 @@ export type Unit = {
 	type: string;
 	subtype: string;
 	pv: number;
-	cost: number;
 	size?: number;
 	move?: { speed: number; type: string }[];
 	tmm?: number;
@@ -23,21 +19,30 @@ export type Unit = {
 	damageMMin?: boolean;
 	damageL?: number;
 	damageLMin?: boolean;
+	damageE?: number;
+	damageEMin?: boolean;
 	overheat?: number;
 	abilities: string;
-	skill?: number;
 	imageLink?: string;
 	rulesLevel: string;
 	tonnage?: number;
 	date?: number;
 	role?: string;
 	technology?: string;
-	subIndex?: number;
 	availability?: { era: number; faction: number }[];
-	spa?: string[];
-	ammo?: string[];
 };
 
-export function isUnit(item: Unit | Formation): item is Unit {
-	return "mulId" in item;
-}
+export type UnitCustomization = {
+	spa?: string[];
+	ammo?: string[];
+	//eventually I might add the ability to customize stats on units
+	custom?: string[];
+};
+
+export type UnitV2 = {
+	id: string;
+	baseUnit: MulUnit;
+	skill?: number;
+	cost: number;
+	customization: UnitCustomization;
+};

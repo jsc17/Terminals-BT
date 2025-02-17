@@ -1,5 +1,17 @@
 [
 	{
+		"date": "2-16-25",
+		"notice": "New year, new stuff. Getting back to working on this site in my free time. Did a bunch of backend work to make further work easier and improve site performance. I have some big plans for the site this year, so stay tuned.",
+		"updates": {
+			"Site-wide": ["Added some visual effects to make the site feel nicer"],
+			"Listbuilder": [
+				"Fixed export functions for Jeff's tools, and added the ability to export specific formations and sublists.",
+				"Rebuilt how data is stored in the backend to prevent some errors that would occasionally crash the page.",
+				"Various tweaks/improvements that should hopefully improve the user experience."
+			]
+		}
+	},
+	{
 		"date": "12-20-24",
 		"updates": {
 			"Listbuilder": [

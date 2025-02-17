@@ -14,6 +14,7 @@ model User {
   id       String    @id
   sessions Session[]
   lists List[]
+  listsV2 ListV2[]
   tournamentsOrganized Tournament[]
   tournamentsJoined TournamentParticipant[]
   resetTokens ResetToken[]
@@ -49,6 +50,21 @@ model List {
   era Int?
   faction Int?
   units String @db.Text
+  sublists String? @db.Text
+  rules String?
+}
+
+model ListV2 {
+  id String @id
+  userId String
+  user User @relation(references: [id], fields: [userId], onDelete: Cascade)
+  lcVersion Int
+  name String
+  era Int?
+  faction Int?
+  general Int?
+  units String @db.MediumText
+  formations String @db.Text
   sublists String? @db.Text
   rules String?
 }

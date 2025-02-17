@@ -5,10 +5,10 @@
 	import { type ActionResult } from "@sveltejs/kit";
 	import { eras, factions } from "$lib/data/erasFactionLookup";
 	import { ResultList } from "$lib/types/resultList.svelte";
-	import type { UnitList } from "$lib/types/list.svelte";
 	import { getContext } from "svelte";
+	import type { List } from "../../routes/listbuilder/types/list.svelte";
 
-	let list: UnitList = getContext("list");
+	let list: List = getContext("list");
 	const resultList: ResultList = getContext("resultList");
 
 	let headers = $derived(appWindow.isMobile ? ["Type", "PV", "Move", "Health"] : ["Type", "PV", "Size", "Move", "TMM", "Health (A+S)"]);
@@ -74,17 +74,15 @@
 		{/each}
 		<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile}> {appWindow.isMobile ? `DMG` : `DMG S/M/L-OV`}</button>
 	</div>
-	{#if resultList.status == "waiting"}
-		<div class="loading-message">Choose an Era and Faction to display available units</div>
-	{:else if resultList.status == "loading"}
-		<div class="loading-message">Loading. Please wait ...</div>
-	{:else if resultList.status == "loaded"}
+	{#await resultList.status}
+		<div class="loading-message">Loading units. Please wait ...</div>
+	{:then result}
 		<div class="virtual-list-container" bind:clientHeight={listHeight}>
 			<VirtualList items={resultList.filteredList} style="height:{listHeight}px;width:100%">
 				{#snippet vl_slot({ index, item })}
 					<div class:virtual-list-row={!appWindow.isMobile} class:virtual-list-row-mobile={appWindow.isMobile}>
 						{#if list}
-							<div class="align-center add-button"><button onclick={() => list.addUnit(item)}>+</button></div>
+							<div class="align-center add-button"><button onclick={() => list.newUnit(item)}>+</button></div>
 						{:else}
 							<div></div>
 						{/if}
@@ -132,7 +130,16 @@
 				{/snippet}
 			</VirtualList>
 		</div>
-	{/if}
+	{:catch}
+		<div>
+			<p>Failed to load units. Please wait a moment, and try again</p>
+			<button
+				onclick={() => {
+					resultList.loadNewResults();
+				}}>Reload</button
+			>
+		</div>
+	{/await}
 </div>
 
 <dialog bind:this={availabilityDialog}>

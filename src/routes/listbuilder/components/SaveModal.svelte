@@ -6,36 +6,31 @@
 	import type { ActionResult } from "@sveltejs/kit";
 	import { deserialize } from "$app/forms";
 	import { exportToJeff } from "../utilities/export.svelte";
-	import type { UnitList } from "$lib/types/list.svelte";
+	import type { List } from "../types/list.svelte";
 
-	let list: UnitList = getContext("list");
+	let list: List = getContext("list");
 	let user: any = getContext("user");
 
-	let { showSaveModal = $bindable() } = $props();
 	let saveDialog: HTMLDialogElement;
-	let existingListNames: string[] = [];
+	let existingListNames: { id: string; name: string }[] = [];
 
 	let ttsCode = $state("");
 	let listCode = $state("");
 
-	$effect(() => {
-		if (showSaveModal == true) {
-			saveDialog.showModal();
-			getListNames();
-			ttsCode = list.createTTSCode();
-			listCode = list.createListCode();
-		} else {
-			saveDialog.close();
-		}
-	});
+	export function show() {
+		saveDialog.showModal();
+		getListNames();
+		ttsCode = list.createTTSCode();
+		listCode = list.getListCode();
+	}
 
 	async function getListNames() {
 		existingListNames = [];
 		const response: any = deserialize(await (await fetch("?/getListNames", { method: "POST", body: "" })).text());
 		if (response.status == 200) {
-			const responseNames = JSON.parse(response.data.listNames);
-			for (const listName of responseNames) {
-				existingListNames.push(listName.name.toLowerCase());
+			const lists = JSON.parse(response.data.listNames);
+			for (const savedList of lists) {
+				existingListNames.push({ id: savedList.id, name: savedList.name.toLowerCase() });
 			}
 		}
 	}
@@ -47,32 +42,38 @@
 			alert("list must have a name");
 			cancel();
 		} else if (user.username && saveLocation == "accountSave") {
-			const listNameExists = existingListNames.includes(list.details.name.toLowerCase());
-			let overwrite = false;
+			const listNameExists = existingListNames.find((existingList) => {
+				return existingList.name == list.details.name.toLowerCase();
+			});
+
 			if (listNameExists) {
-				overwrite = confirm("A list with that name already exists. Overwrite it?");
-			}
-			if (!listNameExists || overwrite) {
-				formData.append("body", listCode);
-				showSaveModal = false;
+				if (confirm("A list with that name already exists. Overwrite it?")) {
+					formData.append("body", list.getListCode());
+					saveDialog.close();
+				} else {
+					cancel();
+				}
 			} else {
-				cancel();
+				list.id = crypto.randomUUID();
+				formData.append("body", list.getListCode());
+				saveDialog.close();
 			}
 		} else {
 			let listNames = JSON.parse(localStorage.getItem("lists") ?? "[]");
 			const listNameExists = listNames.includes(list.details.name.toLowerCase());
 			if (listNameExists) {
 				if (confirm("List with that name already exists in local storage. Overwrite it?")) {
-					localStorage.setItem(list.details.name.toLowerCase(), listCode!);
+					localStorage.setItem(list.details.name.toLowerCase(), list.getListCode());
 				}
 			} else {
+				list.id = crypto.randomUUID();
 				listNames.push(list.details.name.toLowerCase());
 				localStorage.setItem("lists", JSON.stringify(listNames));
-				localStorage.setItem(list.details.name.toLowerCase(), listCode);
+				localStorage.setItem(list.details.name.toLowerCase(), list.getListCode());
 			}
 			cancel();
 			toastController.addToast(`${list.details.name} saved successfully to this device. Consider creating an account to sync lists between devices.`);
-			showSaveModal = false;
+			saveDialog.close();
 		}
 		return async ({ result }: { result: ActionResult }) => {
 			if (result.status == 200) {
@@ -87,7 +88,7 @@
 <dialog
 	bind:this={saveDialog}
 	onclose={() => {
-		showSaveModal = false;
+		saveDialog.close();
 	}}
 	class:dialog-wide={appWindow.isNarrow}
 >
@@ -101,12 +102,12 @@
 			<button
 				class="close-button"
 				onclick={() => {
-					showSaveModal = false;
+					saveDialog.close();
 				}}>X</button
 			>
 		</div>
 
-		<form method="post" action="/?/saveList" use:enhance={handleSaveList}>
+		<form method="post" action="?/saveList" use:enhance={handleSaveList}>
 			<div class="inline gap8">
 				{#if user.username}
 					<input type="radio" name="saveLocation" id="accountSave" value="accountSave" checked />
@@ -132,9 +133,9 @@
 			<label for="list-code">List Code: </label><input type="text" name="list-code" id="list-code" disabled value={listCode} />
 			<button
 				onclick={() => {
-					navigator.clipboard.writeText(listCode!);
+					navigator.clipboard.writeText(list.getListCode());
 					toastController.addToast("code copied to clipboard", 1500);
-					showSaveModal = false;
+					saveDialog.close();
 				}}
 			>
 				<img src="/icons/content-copy.svg" alt="copy to clipboard" class="button-icon" />
@@ -146,7 +147,7 @@
 				onclick={() => {
 					navigator.clipboard.writeText(ttsCode!);
 					toastController.addToast("code copied to clipboard", 1500);
-					showSaveModal = false;
+					saveDialog.close();
 				}}
 			>
 				<img src="/icons/content-copy.svg" alt="copy to clipboard" class="button-icon" />
@@ -156,12 +157,20 @@
 			<label for="jeffs-tools">Jeff's Tools: </label><input type="text" name="jeff-tools" id="jeff's tools" bind:value={list.details.name} />
 			<button
 				onclick={() => {
-					exportToJeff(list);
+					if (list.unitCount == 0) {
+						toastController.addToast("List is empty");
+					} else {
+						exportToJeff(list.details.name, list.units);
+					}
 				}}
 			>
 				<img src="/icons/download.svg" alt="download to Jeff's Tools" class="button-icon" />
 			</button>
 		</div>
+		<p>
+			Note: Everything seems to work from what I've tested, but I can't guarantee they won't change it on their end. I'll try to keep an eye on it, but please let me know if an
+			import fails.
+		</p>
 	</div>
 </dialog>
 

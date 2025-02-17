@@ -4,10 +4,11 @@
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { getContext } from "svelte";
-	import type { UnitList } from "$lib/types/list.svelte";
+	import type { List } from "../../routes/listbuilder/types/list.svelte";
+	import { getGeneralList } from "$lib/utilities/bt-utils";
 
 	const resultList: ResultList = getContext("resultList");
-	const list: UnitList = getContext("list");
+	const list: List = getContext("list");
 
 	let showParameters = $state(false);
 
@@ -21,7 +22,7 @@
 			}
 		});
 		allowed.sort((a, b) => {
-			return factions.get(a)! > factions.get(b)! ? 1 : -1;
+			return factions.get(a)! > factions.get(b)! ? 1 : 0;
 		});
 		return allowed;
 	});
@@ -48,10 +49,16 @@
 		</div>
 	</button>
 	<div class="card" class:hidden={appWindow.isMobile && !showParameters}>
-		<form class:parameters={!appWindow.isMobile} class:parameters-mobile={appWindow.isMobile}>
+		<div class:parameters={!appWindow.isMobile} class:parameters-mobile={appWindow.isMobile}>
 			<div class="parameter">
 				<label for="eraParameter">Era:</label>
-				<select bind:value={resultList.details.era} id="eraParameter">
+				<select
+					bind:value={resultList.details.era}
+					id="eraParameter"
+					onchange={() => {
+						resultList.details.general = getGeneralList(resultList.details.era, resultList.details.faction);
+					}}
+				>
 					{#each eraLists as era}
 						<option value={era.id}>{eras.get(era.id)}</option>
 					{/each}
@@ -59,7 +66,13 @@
 			</div>
 			<div class="parameter">
 				<label for="factionParameter">Faction:</label>
-				<select id="factionParameter" bind:value={resultList.details.faction}>
+				<select
+					id="factionParameter"
+					bind:value={resultList.details.faction}
+					onchange={() => {
+						resultList.details.general = getGeneralList(resultList.details.era, resultList.details.faction);
+					}}
+				>
 					<option value={0}>Any</option>
 					{#each allowedFactions as faction}
 						<option value={faction}>{factions.get(faction)}</option>
@@ -68,21 +81,26 @@
 			</div>
 			<div class="parameter">
 				<p>General:</p>
-				<a href={`http://masterunitlist.info/Era/FactionEraDetails?FactionId=${resultList.details.faction}&EraId=${resultList.details.era}`}>{factions.get(resultList.general)}</a>
+				{#if resultList.details.era != 0 && resultList.details.faction != 0}
+					<a href={`http://masterunitlist.info/Era/FactionEraDetails?FactionId=${resultList.details.faction}&EraId=${resultList.details.era}`}
+						>{factions.get(resultList.details.general)}</a
+					>
+				{:else}
+					<p>Select an Era and Faction</p>
+				{/if}
 			</div>
 			<div>
 				<button
 					id="getData"
 					onclick={() => {
-						resultList.loadUnits();
+						resultList.loadNewResults();
 						list.details.era = resultList.details.era;
 						list.details.faction = resultList.details.faction;
-						list.details.general = resultList.general;
-					}}
-					disabled={resultList.status == "loading"}>Search</button
+						list.details.general = resultList.details.general;
+					}}>Search</button
 				>
 			</div>
-		</form>
+		</div>
 	</div>
 </main>
 

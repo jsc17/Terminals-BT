@@ -4,12 +4,7 @@
 	let showMenuBar = $state(false);
 </script>
 
-<menu
-	class="dropdown"
-	onmouseleave={() => {
-		showMenuBar = false;
-	}}
->
+<menu class="dropdown">
 	<button
 		class="link-button"
 		id="nav-links"
@@ -25,9 +20,23 @@
 			menu
 		{/if}
 	</button>
-	<div class="dropdown-content dropdown-right" class:dropdown-hidden={!showMenuBar} class:dropdown-shown={showMenuBar}>
+	<div
+		class="dropdown-content dropdown-right"
+		class:dropdown-hidden={!showMenuBar}
+		class:dropdown-shown={showMenuBar}
+		onfocusout={() => {
+			showMenuBar = false;
+		}}
+	>
 		{@render children()}
 	</div>
+	<div
+		class="overlay"
+		onclick={() => {
+			showMenuBar = false;
+		}}
+		aria-hidden="true"
+	></div>
 </menu>
 
 <style>
@@ -45,5 +54,17 @@
 		min-width: 40px;
 		align-items: center;
 		justify-content: center;
+	}
+	.overlay {
+		display: none;
+		background: rgba(0, 0, 0, 0);
+		position: fixed;
+		inset: 0;
+		z-index: 7;
+		height: 100dvh;
+		width: 100dvw;
+	}
+	:global(.dropdown-shown ~ .overlay) {
+		display: block;
 	}
 </style>

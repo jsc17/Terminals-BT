@@ -1,4 +1,4 @@
-import type { Unit } from "$lib/types/unit.js";
+import type { MulUnit } from "$lib/types/unit.js";
 import { getGeneralList } from "$lib/utilities/bt-utils";
 import type { Filter } from "$lib/types/filter";
 import { deserialize } from "$app/forms";
@@ -8,11 +8,9 @@ import { ruleSets } from "./options";
 import customCards from "$lib/data/customCards.json";
 
 export class ResultList {
-	status = $state<"waiting" | "loading" | "loaded">("waiting");
-	details = $state({ era: 0, faction: 0 });
-	general = $derived(getGeneralList(this.details.era, this.details.faction));
+	details = $state({ era: 0, faction: 0, general: -1 });
 
-	resultList = $state<Unit[]>([]);
+	resultList = $state<MulUnit[]>([]);
 	uniqueList: any[] = [];
 
 	options = $state<Options>();
@@ -23,11 +21,49 @@ export class ResultList {
 	sort = $state({ key: "", order: "asc" });
 	filteredList = $derived.by(() => this.filterList());
 
+	status = $state(this.initialLoad());
+
+	initialLoad() {
+		return new Promise((resolve, reject) => {
+			const existingList = localStorage.getItem("last-list");
+			if (existingList) {
+				const existingData = JSON.parse(existingList);
+				this.details.era = existingData.era ?? 0;
+				this.details.faction = existingData.faction ?? 0;
+				this.details.general = existingData.general ?? getGeneralList(this.details.era, this.details.faction);
+			}
+			this.loadUnits().then(() => {
+				if (this.resultList.length) {
+					resolve("Units Loaded");
+				} else {
+					reject("Units failed to load");
+				}
+			});
+		});
+	}
+
+	loadNewResults() {
+		this.status = new Promise((resolve, reject) => {
+			this.loadUnits().then(() => {
+				if (this.resultList.length) {
+					resolve("Units Loaded");
+				} else {
+					reject("Units failed to load");
+				}
+			});
+		});
+	}
+
 	async loadUnits() {
+		if (this.details.era < 0 || undefined) {
+			this.details.era = 0;
+		}
+		if (this.details.faction < 0 || undefined) {
+			this.details.faction = 0;
+		}
 		this.resultList = [];
-		this.status = "loading";
 		const response: any = deserialize(
-			await (await fetch("/?/getUnits", { method: "POST", body: JSON.stringify({ era: this.details.era, faction: this.details.faction, general: this.general }) })).text()
+			await (await fetch("/?/getUnits", { method: "POST", body: JSON.stringify({ era: this.details.era, faction: this.details.faction, general: this.details.general }) })).text()
 		);
 		const unitList = response.data.unitList;
 		this.uniqueList = response.data.uniqueList.map((unit: any) => {
@@ -37,13 +73,14 @@ export class ResultList {
 		unitList.forEach((unit: any) => {
 			let tempMovement: { speed: number; type: string }[] = [];
 			unit.move.split("/").forEach((movement: string) => {
-				let [moveSpeed, moveType] = movement.split('"');
-				tempMovement.push({ speed: parseInt(moveSpeed), type: moveType });
+				let moveSpeed = movement.replaceAll('"', "").match(/\d+/) ?? "0";
+				let moveType = movement.replaceAll('"', "").match(/\D+/) ?? "";
+				tempMovement.push({ speed: parseInt(moveSpeed[0]), type: moveType[0] });
 			});
 			try {
 				//{"speed": 6,"type": "t" }
 
-				let formattedUnit: Unit = {
+				let formattedUnit: MulUnit = {
 					mulId: unit.mulId,
 					name: unit.name,
 					class: unit.class,
@@ -65,6 +102,8 @@ export class ResultList {
 					damageMMin: unit.damage_m_min,
 					damageL: unit.damage_l,
 					damageLMin: unit.damage_l_min,
+					damageE: unit.damage_e,
+					damageEMin: unit.damage_e_min,
 					overheat: unit.overheat,
 					abilities: (unit.abilities ?? "-").replaceAll(",", ", "),
 					imageLink: unit.image_url,
@@ -81,9 +120,6 @@ export class ResultList {
 				console.log(`${unit.Name} could not be added to result list`);
 			}
 		});
-		if (this.resultList.length) {
-			this.status = "loaded";
-		}
 	}
 
 	setOptions(newRules: string) {
@@ -91,7 +127,7 @@ export class ResultList {
 	}
 
 	applyOptions() {
-		let tempAvailableList: Unit[] = [];
+		let tempAvailableList: MulUnit[] = [];
 		if (this.options) {
 			if (this.resultList.length) {
 				for (const unitList of customCards.unitPacks) {
@@ -160,7 +196,6 @@ export class ResultList {
 						tempResultList = tempResultList.filter((unit) => {
 							return unit[filter.name] >= filter.valueMin!;
 						});
-
 					}
 					if (filter.valueMax !== undefined && filter.valueMax !== null) {
 						tempResultList = tempResultList.filter((unit) => {
@@ -190,7 +225,9 @@ export class ResultList {
 								return false;
 							}
 
-							let meetsType = false, meetsMinSpeed = false, meetsMaxSpeed = false;
+							let meetsType = false,
+								meetsMinSpeed = false,
+								meetsMaxSpeed = false;
 							for (const move of unit.move) {
 								if (filter.typeValue == move.type || filter.typeValue == "any") {
 									meetsType = true;
@@ -204,7 +241,6 @@ export class ResultList {
 							}
 
 							return meetsType && meetsMinSpeed && meetsMaxSpeed;
-
 						});
 					}
 					break;
@@ -289,9 +325,7 @@ export class ResultList {
 			}
 		});
 	}
-	add(unit: Unit) {
-		this.resultList.push(JSON.parse(JSON.stringify(unit)));
-	}
+
 	clear() {
 		this.resultList = [];
 	}

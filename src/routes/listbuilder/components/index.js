@@ -5,4 +5,4 @@ import SaveModal from "./SaveModal.svelte";
 import SublistModal from "./SublistComponents/SublistModal.svelte";
 import UnitCard from "./UnitCard.svelte";
 
-export { Listbuilder, PrintModal, SaveModal, LoadModal, SublistModal, UnitCard };
+export { Listbuilder, PrintModal, SaveModal, LoadModal, UnitCard, SublistModal };

@@ -3,33 +3,31 @@
 	import { enhance } from "$app/forms";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { eras, factions } from "$lib/data/erasFactionLookup";
-	import type { UnitList } from "$lib/types/list.svelte";
 	import { getContext } from "svelte";
+	import { type List } from "../types/list.svelte";
 
-	let list: UnitList = getContext("list");
+	let list: List = getContext("list");
 
-	let { showPrintModal = $bindable() } = $props();
 	let printDialog: HTMLDialogElement;
 	let playerName = $state("");
 	let style = $state("detailed");
+	let printName = $state("");
 
-	$effect(() => {
-		if (showPrintModal == true) {
-			printDialog.showModal();
-		} else {
-			printDialog.close();
-		}
-	});
+	export function show() {
+		printDialog.showModal();
+		printName = list.details.name;
+	}
 
 	async function handleForm({ formData, cancel, submitter }: any) {
-		showPrintModal = false;
+		printDialog.close();
 		if (submitter.innerText == "Cancel") {
 			cancel();
 		} else {
 			let body = JSON.stringify({
-				units: list.items,
+				units: list.units,
+				formations: list.formations,
 				playername: playerName,
-				listname: list.details.name,
+				listname: printName,
 				era: list.details.era,
 				faction: list.details.faction,
 				general: list.details.general,
@@ -51,17 +49,11 @@
 	}
 </script>
 
-<dialog
-	bind:this={printDialog}
-	onclose={() => {
-		showPrintModal = false;
-	}}
-	class:dialog-wide={appWindow.isNarrow}
->
+<dialog bind:this={printDialog} class:dialog-wide={appWindow.isNarrow}>
 	<div class="dialog-body">
 		<h2>Print</h2>
 		<form action="?/printList" method="post" use:enhance={handleForm} class="print-form">
-			<div><label for="listname">List Name</label><input id="listname" bind:value={list.details.name} /></div>
+			<div><label for="listname">Print title</label><input id="listname" bind:value={printName} /></div>
 			<div><label for="playername">Player Name (optional)</label><input id="playername" bind:value={playerName} /></div>
 			<div>{`${eras.get(list.details.era)} - ${factions.get(list.details.faction)} with ${factions.get(list.details.general)} general list `}</div>
 			<h3>Style</h3>

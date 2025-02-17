@@ -10,6 +10,7 @@
 	import EditSublistModal from "./EditSublistModal.svelte";
 	import ExportSublistModal from "./ExportSublistModal.svelte";
 	import MobileSublist from "./MobileSublist.svelte";
+	import AutogenerationModal from "./AutogenerationModal.svelte";
 
 	let list: List = getContext("list");
 
@@ -21,6 +22,7 @@
 	let printModal: SublistPrintModal;
 	let editSublistModal = $state<EditSublistModal>();
 	let exportSublistModal = $state<ExportSublistModal>();
+	let autoSublistModal: AutogenerationModal;
 
 	export function show() {
 		sublistDialog.showModal();
@@ -75,7 +77,11 @@
 							editSublistModal?.show(idAdded);
 						}}>Add</button
 					>
-					<button onclick={() => {}}>Generate sublists</button>
+					<button
+						onclick={() => {
+							autoSublistModal.show();
+						}}>Generate sublists</button
+					>
 					<button
 						onclick={() => {
 							printModal.show();
@@ -83,22 +89,6 @@
 					>
 				</div>
 			</div>
-			<!-- {#if appWindow.isMobile}
-				<div class="sublist-container sublist-container-horizontal">
-					{#each list.sublists as sublist (sublist.id)}
-						<div animate:flip={{ duration: flipDurationMs }} class="panel-mobile">
-							<MobileSublist {sublist} {list}></MobileSublist>
-						</div>
-					{/each}
-					<div class="add-panel panel-mobile">
-						<button
-							onclick={() => {
-								list.addSublist();
-							}}>+</button
-						>
-					</div>
-				</div>
-			{:else} -->
 			<div
 				class="sublist-container"
 				use:dndzone={{ items: list.sublists, dropTargetStyle, flipDurationMs, dragDisabled: scenarioFilter != "All" }}
@@ -137,8 +127,7 @@
 <SublistPrintModal bind:this={printModal}></SublistPrintModal>
 <EditSublistModal bind:this={editSublistModal}></EditSublistModal>
 <ExportSublistModal bind:this={exportSublistModal}></ExportSublistModal>
-
-<!-- <AutogenerationModal bind:showAutoModal></AutogenerationModal> -->
+<AutogenerationModal bind:this={autoSublistModal}></AutogenerationModal>
 
 <style>
 	.sublist-modal {

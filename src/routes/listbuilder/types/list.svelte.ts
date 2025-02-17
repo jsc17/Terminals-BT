@@ -347,9 +347,9 @@ export class List {
 		this.sublists = [];
 	}
 
-	addSublist(): string {
+	addSublist(sublistToAdd?: SublistV2): string {
 		const id = crypto.randomUUID();
-		this.sublists.push({ id, checked: [], scenario: "-" });
+		this.sublists.push(sublistToAdd ?? { id, checked: [], scenario: "-" });
 		return id;
 	}
 

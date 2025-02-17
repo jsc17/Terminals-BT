@@ -6,6 +6,8 @@
 	import { SearchFilters, SearchParameters, SearchResults } from "$lib/components/index";
 	import { slide } from "svelte/transition";
 	import { List } from "./types/list.svelte";
+	import { getGeneralList } from "$lib/utilities/bt-utils";
+	import { convertUnversionedJSONList } from "./utilities/convert";
 
 	const resultList = new ResultList();
 	const list = new List(resultList);
@@ -32,18 +34,24 @@
 		const lastList = localStorage.getItem("last-list");
 		if (lastList) {
 			const importData = JSON.parse(lastList);
-			const parsedCode = {
-				id: importData.id ?? crypto.randomUUID(),
-				name: importData.name ?? "Imported List",
-				era: importData.era ?? 0,
-				faction: importData.faction ?? 0,
-				rules: importData.rules ?? "noRes",
-				units: importData.units ?? [],
-				sublists: importData.sublists ?? [],
-				lcVersion: importData.lcVersion ?? 0,
-				formations: importData.formations ?? []
-			};
-			list.loadList(parsedCode, resultList);
+			if (importData.lcVersion) {
+				const parsedCode = {
+					id: importData.id ?? crypto.randomUUID(),
+					name: importData.name ?? "Imported List",
+					era: importData.era ?? 0,
+					faction: importData.faction ?? 0,
+					general: importData.general ?? getGeneralList(importData.era ?? 0, importData.faction ?? 0),
+					rules: importData.rules ?? "noRes",
+					units: importData.units ?? [],
+					sublists: importData.sublists ?? [],
+					lcVersion: importData.lcVersion ?? 0,
+					formations: importData.formations ?? []
+				};
+				list.loadList(parsedCode);
+			} else {
+				const updatedList = convertUnversionedJSONList(importData);
+				list.loadList(updatedList);
+			}
 		}
 	});
 

@@ -1,18 +1,15 @@
 <script lang="ts">
 	import { eras, factions } from "$lib/data/erasFactionLookup";
-	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { getContext } from "svelte";
 	import { deserialize } from "$app/forms";
 	import { toastController } from "$lib/stores/toastController.svelte";
-	import type { ResultList } from "$lib/types/resultList.svelte";
 	import type { List } from "../types/list.svelte";
 	import { getRules } from "$lib/types/options";
-	import { convertOldFormations, type FormationV2 } from "../types/formation";
-	import type { ListCode, ListCodeUnit } from "../types/listCode";
-	import type { SublistV2 } from "../types/sublist";
+	import type { ListCode } from "../types/listCode";
+	import { convertUnversionedJSONList } from "../utilities/convert";
+	import { getGeneralList } from "$lib/utilities/bt-utils";
 
 	let user: any = getContext("user");
-	let resultList: ResultList = getContext("resultList");
 	let list: List = getContext("list");
 
 	let importCode = $state("");
@@ -20,7 +17,7 @@
 	let selectedListIndex = $state(-1);
 	let localListsExist = $state(false);
 	let dialogElement: HTMLDialogElement;
-	let localLists: string[] = [];
+	let localLists = $state<string[]>([]);
 
 	export function show() {
 		dialogElement.showModal();
@@ -35,12 +32,14 @@
 			const response: any = deserialize(await (await fetch("?/loadList", { method: "POST", body: "" })).text());
 			if (response.status == 200) {
 				const responseLists = JSON.parse(response.data.lists);
+				console.log(`${responseLists.length} lists loaded`);
 				for (const tempList of responseLists) {
 					savedLists.push({
 						id: tempList.id,
 						name: tempList.name,
 						era: Number(tempList.era),
 						faction: Number(tempList.faction),
+						general: Number(tempList.general) ?? getGeneralList(Number(tempList.era), Number(tempList.faction)),
 						units: JSON.parse(tempList.units),
 						formations: JSON.parse(tempList.formations),
 						sublists: JSON.parse(tempList.sublists),
@@ -62,77 +61,12 @@
 				const localData = localStorage.getItem(localListName)!;
 				if (localData.charAt(0) == "{") {
 					const localList = JSON.parse(localData);
-					if (localList.lcVersion && localList.lcVersion == 1) {
-						savedLists.push({
-							id: localList.id,
-							name: localList.name,
-							era: Number(localList.era),
-							faction: Number(localList.faction),
-							units: localList.units,
-							formations: localList.formations,
-							sublists: localList.sublists,
-							rules: localList.rules ?? "noRes",
-							lcVersion: localList.lcVersion
-						});
+					if (localList.lcVersion) {
+						savedLists.push(localList);
 					} else {
-						let importedUnits: ListCodeUnit[] = [];
-						let importedFormations: FormationV2[] = [];
-						let importedSublists: SublistV2[] = [];
-
-						importedFormations.push({ id: crypto.randomUUID(), name: "Unassigned units", type: "none", units: [] });
-
-						for (const item of localList.units) {
-							if (item.charAt(0) == "{") {
-								const formationData = JSON.parse(item);
-								const formationId: string = crypto.randomUUID();
-								let formationUnitList: { id: string }[] = [];
-
-								for (const unit of formationData.units) {
-									const unitId: string = crypto.randomUUID();
-									let [mulId, skill] = unit.split(",");
-
-									if (skill == "undefined") {
-										skill = 4;
-									}
-									importedUnits.push({ id: unitId, mulId, skill, customization: {} });
-									formationUnitList.push({ id: unitId });
-								}
-								importedFormations.push({ id: formationId, name: formationData.name, type: formationData.type, units: formationUnitList });
-							} else {
-								const unitId = crypto.randomUUID();
-								let [mulId, skill] = item.split(",");
-								if (skill == "undefined") {
-									skill = 4;
-								}
-								importedUnits.push({ id: unitId, mulId, skill, customization: {} });
-								importedFormations[0].units.push({ id: unitId });
-							}
-						}
-
-						for (const sublist of localList.sublists) {
-							const subListData = JSON.parse(sublist);
-							const sublistId: string = crypto.randomUUID();
-							const scenario: string = subListData.sc;
-							const checked = subListData.un.map((unitPos: number) => {
-								return importedUnits[unitPos].id;
-							});
-
-							importedSublists.push({ id: sublistId, scenario, checked });
-						}
-
-						const importedList: ListCode = {
-							id: crypto.randomUUID(),
-							name: localList.name,
-							era: Number(localList.era),
-							faction: Number(localList.faction),
-							rules: localList.rules.name ?? "noRes",
-							sublists: importedSublists,
-							units: importedUnits,
-							formations: importedFormations,
-							lcVersion: 1
-						};
-						savedLists.push(importedList);
-						localStorage.setItem(localList.name, JSON.stringify(importedList));
+						const updatedList = convertUnversionedJSONList(localList);
+						savedLists.push(updatedList);
+						localStorage.setItem(localList.name, JSON.stringify(updatedList));
 					}
 				}
 			}
@@ -164,36 +98,36 @@
 		}
 	}
 
-	// async function importList() {
-	// 	let parsedCode: ImportList;
-	// 	if (importCode.charAt(0) == "{") {
-	// 		const importData = JSON.parse(importCode);
-	// 		parsedCode = {
-	// 			name: importData.name ?? "Imported List",
-	// 			era: importData.era ?? 0,
-	// 			faction: importData.faction ?? 0,
-	// 			rules: importData.rules ?? "noRes",
-	// 			units: importData.units ?? [],
-	// 			sublists: importData.sublists ?? []
-	// 		};
-	// 	} else {
-	// 		//Legacy non-json code import. Will likely never be used, but it only adds one extra check. Should have just used a json to start instead of fancy string splitting.
-	// 		const [body, sublists] = importCode.split("-");
-	// 		const [era, faction, ...units] = body.split(":");
-	// 		parsedCode = {
-	// 			name: "Imported List",
-	// 			era: Number(era),
-	// 			faction: Number(faction),
-	// 			rules: ruleSets[0],
-	// 			units,
-	// 			sublists: sublists.split(":")
-	// 		};
-	// 	}
-	// 	loadList(parsedCode);
-	// }
+	async function importList() {
+		if (importCode.charAt(0) == "{") {
+			const importData = JSON.parse(importCode);
+			if (importData.lcVersion) {
+				const parsedCode = {
+					id: importData.id ?? crypto.randomUUID(),
+					name: importData.name ?? "Imported List",
+					era: importData.era ?? 0,
+					faction: importData.faction ?? 0,
+					general: importData.general ?? getGeneralList(importData.era ?? 0, importData.faction ?? 0),
+					rules: importData.rules ?? "noRes",
+					units: importData.units ?? [],
+					sublists: importData.sublists ?? [],
+					lcVersion: importData.lcVersion ?? 0,
+					formations: importData.formations ?? []
+				};
+				list.loadList(parsedCode);
+			} else {
+				const updatedList = convertUnversionedJSONList(importData);
+				list.loadList(updatedList);
+			}
+			toastController.addToast("List imported");
+			dialogElement.close();
+		} else {
+			toastController.addToast("Invalid list code. Import failed.");
+		}
+	}
 
 	async function loadList(parsedCode?: ListCode) {
-		await list.loadList(parsedCode ?? savedLists[selectedListIndex], resultList);
+		await list.loadList(parsedCode ?? savedLists[selectedListIndex]);
 		dialogElement?.close();
 	}
 </script>
@@ -263,12 +197,12 @@
 		{#if localListsExist}
 			<p>Lists with red names are saved to local device storage . Please consider creating an account to sync them between devices.</p>
 		{/if}
-		<!-- <br /> -->
-		<!-- <p>Paste a list code into the box below to import a saved code:</p>
+		<br />
+		<p>Paste a list code into the box below to import a saved code:</p>
 		<div class="load-bar">
 			<label for="importCode">List Code: </label><input type="text" name="importCode" id="importCode" bind:value={importCode} />
 			<button onclick={importList}> Import </button>
-		</div> -->
+		</div>
 	</div>
 </dialog>
 
@@ -285,6 +219,7 @@
 	.table-container {
 		min-width: 100%;
 		min-height: 200px;
+		max-height: 30em;
 		overflow-y: auto;
 		background-color: var(--card);
 	}
@@ -294,6 +229,7 @@
 		border-collapse: separate;
 		border-spacing: 0 4px;
 	}
+
 	tbody tr:nth-child(even) {
 		background-color: var(--muted);
 	}

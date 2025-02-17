@@ -39,6 +39,7 @@ export const actions = {
 			name: parsedBody.name,
 			era: Number(parsedBody.era),
 			faction: Number(parsedBody.faction),
+			general: Number(parsedBody.general),
 			units: JSON.stringify(parsedBody.units),
 			formations: JSON.stringify(parsedBody.formations),
 			sublists: JSON.stringify(parsedBody.sublists),
@@ -53,9 +54,7 @@ export const actions = {
 				}
 			});
 			if (!existingList) {
-				await prisma.listV2.create({
-					data
-				});
+				await prisma.listV2.create({ data });
 				return { message: "List created successfully" };
 			} else {
 				await prisma.listV2.update({

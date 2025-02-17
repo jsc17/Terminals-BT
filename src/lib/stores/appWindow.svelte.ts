@@ -1,7 +1,20 @@
+import { innerWidth } from "svelte/reactivity/window";
+
 function createAppWindow() {
-	let windowWidth = $state(0);
-	let isMobile = $derived(windowWidth < 500);
-	let isNarrow = $derived(windowWidth < 875);
+	let isMobile = $derived.by(() => {
+		if (innerWidth.current) {
+			return innerWidth.current < 500;
+		} else {
+			return false;
+		}
+	});
+	let isNarrow = $derived.by(() => {
+		if (innerWidth.current) {
+			return innerWidth.current < 875;
+		} else {
+			return false;
+		}
+	});
 
 	return {
 		get isMobile() {
@@ -9,12 +22,6 @@ function createAppWindow() {
 		},
 		get isNarrow() {
 			return isNarrow;
-		},
-		set windowWidth(newWidth: number) {
-			windowWidth = newWidth;
-		},
-		get windowWidth() {
-			return windowWidth;
 		}
 	};
 }

@@ -3,8 +3,10 @@ import eraLists from "$lib/data/erasFactionsList.json";
 import { fail, redirect } from "@sveltejs/kit";
 import { sendResetEmail } from "$lib/emails/mailer.server.js";
 import fs from "fs/promises";
-import { calculateTMM } from "$lib/utilities/bt-utils.js";
-import { convertLists } from "./utilities/convertLists.js";
+import { calculateTMM, getGeneralList } from "$lib/utilities/bt-utils.js";
+import type { FormationV2 } from "../listbuilder/types/formation";
+import type { ListCodeUnit } from "../listbuilder/types/listCode";
+import type { SublistV2 } from "../listbuilder/types/sublist";
 
 export const load = async ({ locals }) => {
 	if (!locals.user || locals.user.username.toLowerCase() != "terminal") {
@@ -154,10 +156,10 @@ export const actions = {
 			return { exists: false };
 		}
 	},
-	sendResetEmail: async ({ }) => {
+	sendResetEmail: async ({}) => {
 		sendResetEmail("jonathan.cibge@innernwgaw.com", "ASFVA");
 	},
-	linkUnits: async ({ }) => {
+	linkUnits: async ({}) => {
 		let count = 0;
 		let unitCount = 0;
 		let fileList = await fs.readdir("./files/avail-upload");
@@ -226,7 +228,77 @@ export const actions = {
 		console.log(unitCount);
 		return { message: "success" };
 	},
-	convertLists: async ({ }) => {
-		convertLists();
+	convertLists: async ({}) => {
+		const lists = await prisma.list.findMany();
+		for (const list of lists) {
+			try {
+				console.log(`Processing list: ${list.name}`);
+				let newListUnits: ListCodeUnit[] = [];
+				let newListFormations: FormationV2[] = [];
+				let newListSublists: SublistV2[] = [];
+
+				newListFormations.push({ id: "unassigned", name: "Unassigned units", type: "none", units: [] });
+				//convert units and formations to lcv1 formatting
+				const itemArray = JSON.parse(list.units);
+				for (const item of itemArray) {
+					if (item.charAt(0) == "{") {
+						const formationData = JSON.parse(item);
+						const formationId: string = crypto.randomUUID();
+						let formationUnitList: { id: string }[] = [];
+
+						for (const unit of formationData.units) {
+							const unitId: string = crypto.randomUUID();
+							let [mulId, skill] = unit.split(",");
+
+							if (skill == "undefined") {
+								skill = 4;
+							}
+							newListUnits.push({ id: unitId, mulId, skill, customization: {} });
+							formationUnitList.push({ id: unitId });
+						}
+						newListFormations.push({ id: formationId, name: formationData.name, type: formationData.type, units: formationUnitList });
+					} else {
+						const unitId = crypto.randomUUID();
+						let [mulId, skill] = item.split(",");
+						newListUnits.push({ id: unitId, mulId: Number(mulId), skill: Number(skill), customization: {} });
+						newListFormations[0].units.push({ id: unitId });
+					}
+				}
+				if (list.sublists) {
+					try {
+						const sublistArray = JSON.parse(list.sublists);
+						for (const sublist of sublistArray) {
+							const subListData = JSON.parse(sublist);
+							const sublistId: string = crypto.randomUUID();
+							const scenario: string = subListData.sc;
+							const checked = subListData.un.map((unitPos: number) => {
+								return newListUnits[unitPos].id;
+							});
+
+							newListSublists.push({ id: sublistId, scenario, checked });
+						}
+					} catch (error) {
+						console.error("Invalid Sublist JSON");
+					}
+				}
+				const data = {
+					id: crypto.randomUUID(),
+					userId: list.userId,
+					name: list.name,
+					era: list.era,
+					faction: list.faction,
+					general: getGeneralList(list.era ?? 0, list.faction ?? 0),
+					units: JSON.stringify(newListUnits),
+					formations: JSON.stringify(newListFormations),
+					sublists: JSON.stringify(newListSublists),
+					rules: list.rules,
+					lcVersion: 1
+				};
+				await prisma.listV2.create({ data });
+			} catch (error) {
+				console.log(`${list.name} error`);
+				console.error(error);
+			}
+		}
 	}
 };

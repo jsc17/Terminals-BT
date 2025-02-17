@@ -8,8 +8,7 @@ import { ruleSets } from "./options";
 import customCards from "$lib/data/customCards.json";
 
 export class ResultList {
-	details = $state({ era: 0, faction: 0 });
-	general = $derived(getGeneralList(this.details.era, this.details.faction));
+	details = $state({ era: 0, faction: 0, general: -1 });
 
 	resultList = $state<MulUnit[]>([]);
 	uniqueList: any[] = [];
@@ -31,39 +30,40 @@ export class ResultList {
 				const existingData = JSON.parse(existingList);
 				this.details.era = existingData.era ?? 0;
 				this.details.faction = existingData.faction ?? 0;
+				this.details.general = existingData.general ?? getGeneralList(this.details.era, this.details.faction);
 			}
 			this.loadUnits().then(() => {
 				if (this.resultList.length) {
-					resolve("Units Loaded")
+					resolve("Units Loaded");
 				} else {
-					reject("Units failed to load")
+					reject("Units failed to load");
 				}
 			});
-		})
+		});
 	}
 
 	loadNewResults() {
 		this.status = new Promise((resolve, reject) => {
 			this.loadUnits().then(() => {
 				if (this.resultList.length) {
-					resolve("Units Loaded")
+					resolve("Units Loaded");
 				} else {
-					reject("Units failed to load")
+					reject("Units failed to load");
 				}
 			});
-		})
+		});
 	}
 
 	async loadUnits() {
-		if (this.details.era == -1) {
+		if (this.details.era < 0 || undefined) {
 			this.details.era = 0;
 		}
-		if (this.details.faction == -1) {
+		if (this.details.faction < 0 || undefined) {
 			this.details.faction = 0;
 		}
 		this.resultList = [];
 		const response: any = deserialize(
-			await (await fetch("/?/getUnits", { method: "POST", body: JSON.stringify({ era: this.details.era, faction: this.details.faction, general: this.general }) })).text()
+			await (await fetch("/?/getUnits", { method: "POST", body: JSON.stringify({ era: this.details.era, faction: this.details.faction, general: this.details.general }) })).text()
 		);
 		const unitList = response.data.unitList;
 		this.uniqueList = response.data.uniqueList.map((unit: any) => {
@@ -73,13 +73,12 @@ export class ResultList {
 		unitList.forEach((unit: any) => {
 			let tempMovement: { speed: number; type: string }[] = [];
 			unit.move.split("/").forEach((movement: string) => {
-				let moveSpeed = movement.replaceAll('"', '').match(/\d+/) ?? "0";
-				let moveType = movement.replaceAll('"', '').match(/\D+/) ?? "";
+				let moveSpeed = movement.replaceAll('"', "").match(/\d+/) ?? "0";
+				let moveType = movement.replaceAll('"', "").match(/\D+/) ?? "";
 				tempMovement.push({ speed: parseInt(moveSpeed[0]), type: moveType[0] });
 			});
 			try {
 				//{"speed": 6,"type": "t" }
-
 
 				let formattedUnit: MulUnit = {
 					mulId: unit.mulId,
@@ -197,7 +196,6 @@ export class ResultList {
 						tempResultList = tempResultList.filter((unit) => {
 							return unit[filter.name] >= filter.valueMin!;
 						});
-
 					}
 					if (filter.valueMax !== undefined && filter.valueMax !== null) {
 						tempResultList = tempResultList.filter((unit) => {
@@ -227,7 +225,9 @@ export class ResultList {
 								return false;
 							}
 
-							let meetsType = false, meetsMinSpeed = false, meetsMaxSpeed = false;
+							let meetsType = false,
+								meetsMinSpeed = false,
+								meetsMaxSpeed = false;
 							for (const move of unit.move) {
 								if (filter.typeValue == move.type || filter.typeValue == "any") {
 									meetsType = true;
@@ -241,7 +241,6 @@ export class ResultList {
 							}
 
 							return meetsType && meetsMinSpeed && meetsMaxSpeed;
-
 						});
 					}
 					break;
@@ -326,9 +325,7 @@ export class ResultList {
 			}
 		});
 	}
-	// add(unit: Unit) {
-	// 	this.resultList.push(JSON.parse(JSON.stringify(unit)));
-	// }
+
 	clear() {
 		this.resultList = [];
 	}

@@ -11,7 +11,7 @@
 	let list: List = getContext("list");
 	let { formation }: { formation: FormationV2 } = $props();
 
-	let dropTargetStyle = { outline: "1px solid var(--primary)" };
+	let dropTargetStyle = {};
 	let flipDurationMs = 100;
 
 	function handleSort(e: CustomEvent<DndEvent<{ id: string }>>) {
@@ -66,14 +66,19 @@
 			</Menu>
 		</div>
 	{/if}
-	<div class="unit-cards" use:dndzone={{ items: formation.units, dropTargetStyle, flipDurationMs, type: "units" }} onconsider={handleSort} onfinalize={handleSort}>
+	{#if !formation.units.length}
+		<div class="drop-message">Drop units here to add them to this formation</div>
+	{/if}
+	<div
+		class="unit-cards"
+		use:dndzone={{ items: formation.units, dropTargetStyle, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
+		onconsider={handleSort}
+		onfinalize={handleSort}
+	>
 		{#each formation.units as unit (unit.id)}
 			<UnitCard unitId={unit.id}></UnitCard>
 		{/each}
 	</div>
-	{#if !formation.units.length}
-		<div class="center overlay">Drop units here to add them to this formation</div>
-	{/if}
 </main>
 
 <style>
@@ -100,11 +105,14 @@
 		border: 1px solid var(--border);
 	}
 	.unit-cards {
-		min-height: 50px;
 		padding: 2px;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
+	}
+	:global(.droppable) {
+		outline: 1px solid var(--primary);
+		min-height: 2em;
 	}
 	input {
 		background-color: var(--muted);
@@ -114,5 +122,10 @@
 	}
 	.formation-type-select {
 		width: 90%;
+	}
+	.drop-message {
+		margin-top: 4px;
+		align-self: center;
+		justify-self: center;
 	}
 </style>

@@ -2,18 +2,11 @@
 	import Footer from "$lib/components/Footer.svelte";
 	import Header from "$lib/components/Header.svelte";
 	import Toast from "$lib/components/Toast.svelte";
-	import { appWindow } from "$lib/stores/appWindow.svelte.js";
-	import { setContext } from "svelte";
+	import { onMount, setContext } from "svelte";
 
 	const { data, children } = $props();
 	let user = $state({ username: data.username });
 	setContext("user", user);
-	$effect.pre(() => {
-		appWindow.windowWidth = window.screen.availWidth;
-		window.onresize = () => {
-			appWindow.windowWidth = window.screen.availWidth;
-		};
-	});
 </script>
 
 <main>
@@ -192,7 +185,7 @@
 		width: max-content;
 		max-width: 90dvw;
 		position: absolute;
-		z-index: 15;
+		z-index: 8;
 	}
 	:global(.dropdown-top) {
 		top: 30px;

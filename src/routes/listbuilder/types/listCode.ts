@@ -5,7 +5,7 @@ import type { SublistV2 } from "./sublist";
 export type ListCodeUnit = {
 	id: string;
 	mulId: number;
-	skill: number;
+	skill?: number;
 	customization: UnitCustomization;
 };
 
@@ -15,6 +15,7 @@ export type ListCode = {
 	name: string;
 	era: number;
 	faction: number;
+	general: number;
 	rules: string;
 	units: ListCodeUnit[];
 	formations: FormationV2[];

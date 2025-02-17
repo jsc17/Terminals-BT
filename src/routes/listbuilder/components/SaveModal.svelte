@@ -30,7 +30,6 @@
 		if (response.status == 200) {
 			const lists = JSON.parse(response.data.listNames);
 			for (const savedList of lists) {
-				console.log(savedList);
 				existingListNames.push({ id: savedList.id, name: savedList.name.toLowerCase() });
 			}
 		}

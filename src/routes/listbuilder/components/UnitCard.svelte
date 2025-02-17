@@ -25,9 +25,7 @@
 		<p class="name" class:invalid-unit={list.issues.issueUnits.has(unit?.id ?? "0")}>{unit?.baseUnit.name}</p>
 		<p class="center">{unit?.baseUnit.subtype}</p>
 		<p class="center">
-			{#if unit?.skill == undefined}
-				-
-			{:else}
+			{#if unit?.skill}
 				Skill - <input
 					class="skill-input"
 					onchange={(e) => {
@@ -39,6 +37,8 @@
 					min={list.options?.minSkill ?? 0}
 					max={list.options?.maxSkill ?? 7}
 				/>
+			{:else}
+				-
 			{/if}
 		</p>
 		<p class="center">PV - {unit?.cost}</p>

@@ -7,6 +7,7 @@
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { eras, factions } from "$lib/data/erasFactionLookup";
 	import { enhance } from "$app/forms";
+	import type { FormationV2 } from "../../types/formation";
 
 	let list: List = getContext("list");
 
@@ -29,13 +30,22 @@
 	async function handleForm({ formData }: any) {
 		exportDialog.close();
 		const units = sublist.checked.map((unitId) => {
-			return list.getUnit(unitId);
+			return $state.snapshot(list.getUnit(unitId)!);
 		});
+		const sublistFormation: FormationV2 = {
+			id: "temp",
+			name: "temp",
+			type: "none",
+			units: units.map((unit) => {
+				return { id: unit.id };
+			})
+		};
+		console.table(units);
 		let body = JSON.stringify({
 			units,
-			formations: list.formations,
+			formations: [sublistFormation],
 			playername: playerName,
-			listname: printName,
+			listname: `${list.details.name} ${sublist.scenario != "-" ? sublist.scenario : "sublist"}`,
 			era: list.details.era,
 			faction: list.details.faction,
 			general: list.details.general,

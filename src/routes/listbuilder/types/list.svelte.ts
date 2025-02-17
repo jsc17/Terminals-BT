@@ -44,6 +44,7 @@ export class List {
 			name: this.details.name,
 			era: this.details.era,
 			faction: this.details.faction,
+			general: this.details.general,
 			rules: this.rules,
 			units: unitList,
 			formations: this.formations,
@@ -122,7 +123,7 @@ export class List {
 						issueUnits.add(unit.id!);
 					}
 				}
-				if (this.options.minSkill && unit.skill !== undefined && this.options.minSkill > unit.skill) {
+				if (this.options.minSkill && unit.skill && this.options.minSkill > unit.skill) {
 					if (issueList.has("Minimum skill")) {
 						issueList.get("Minimum skill")?.add(unit.baseUnit.name);
 					} else {
@@ -455,88 +456,37 @@ export class List {
 		}
 		return unitToAdd;
 	}
-	async loadList(data: any, resultList: ResultList) {
-		console.log("Loading List");
+	async loadList(data: any) {
 		if (data.lcVersion == 1) {
 			const listCode: ListCode = data;
 			this.id = listCode.id;
 			this.details.name = listCode.name;
 			this.details.era = listCode.era;
 			this.details.faction = listCode.faction;
+			this.details.general = listCode.general;
 			this.rules = listCode.rules;
 
-			resultList.details.era = this.details.era;
-			resultList.details.faction = this.details.faction;
-			resultList.setOptions(this.rules);
+			this.resultList.details.era = this.details.era;
+			this.resultList.details.faction = this.details.faction;
+			this.resultList.details.general = this.details.general;
+			this.resultList.setOptions(this.rules);
+			this.resultList.loadNewResults();
 
-			this.details.general = resultList.general;
 			this.clear();
 			this.sublists = listCode.sublists;
 			for (const unit of listCode.units) {
 				let baseUnit: MulUnit =
-					resultList.resultList.find((result: MulUnit) => {
+					this.resultList.resultList.find((result: MulUnit) => {
 						return result.mulId == unit.mulId;
 					}) ?? (await this.loadUnit(unit.mulId));
-				this.units.push({ id: unit.id, baseUnit: baseUnit, skill: unit.skill, cost: getNewSkillCost(unit.skill, baseUnit.pv), customization: unit.customization });
+				//@ts-ignore
+				if (!unit.skill || unit.skill == "undefined") {
+					unit.skill = 4;
+				}
+				const tempUnit = { id: unit.id, baseUnit: baseUnit, skill: unit.skill, cost: getNewSkillCost(unit.skill, baseUnit.pv), customization: unit.customization };
+				this.units.push(tempUnit);
 			}
 			this.formations = listCode.formations;
-		} else {
-			const { era, faction, name, units, sublists, rules } = data;
-			this.setOptions(rules);
-			resultList.setOptions(rules);
-
-			resultList.details.era = era;
-			resultList.details.faction = faction;
-
-			await resultList.loadUnits();
-
-			this.details.name = name;
-			this.details.era = era;
-			this.details.faction = faction;
-			this.details.general = resultList.general;
-			this.clear();
-
-			for (const item of units) {
-				if (item.charAt(0) == "{") {
-					const formationData = JSON.parse(item);
-					const formationId: string = crypto.randomUUID();
-					let formationUnitList: { id: string }[] = [];
-
-					for (const unit of formationData.units) {
-						const unitId: string = crypto.randomUUID();
-						let [mulId, skill] = unit.split(",");
-						let baseUnit: MulUnit =
-							resultList.resultList.find((result: MulUnit) => {
-								return result.mulId == Number(mulId);
-							}) ?? (await this.loadUnit(Number(mulId)));
-
-						if (skill == "undefined") {
-							skill = 4;
-						}
-
-						this.units.push({ id: unitId, baseUnit: baseUnit, skill, cost: getNewSkillCost(skill, baseUnit.pv), customization: {} });
-						formationUnitList.push({ id: unitId });
-					}
-					this.formations.push({ id: formationId, name: formationData.name, type: formationData.type, units: formationUnitList });
-				} else {
-					const unitId = crypto.randomUUID();
-					let [mulId, skill] = item.split(",");
-					let baseUnit: MulUnit =
-						resultList.resultList.find((result: MulUnit) => {
-							return result.mulId == Number(mulId);
-						}) ?? (await this.loadUnit(Number(mulId)));
-
-					if (skill == "undefined") {
-						skill = 4;
-					}
-					this.units.push({ id: unitId, baseUnit: baseUnit, skill, cost: getNewSkillCost(skill, baseUnit.pv), customization: {} });
-					this.formations
-						.find((formation) => {
-							return formation.id == "unassigned";
-						})
-						?.units.push({ id: unitId });
-				}
-			}
 		}
 	}
 }

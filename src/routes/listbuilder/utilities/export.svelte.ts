@@ -46,8 +46,10 @@ export function exportToJeff(name: string, units: UnitV2[]) {
 				tmm: 0,
 				uuid: unit.id,
 				threshhold: 0,
-				move: unit.baseUnit.move?.map((movement) => { return { move: movement.speed, currentMove: movement.speed, type: movement.type } }),
-				jumpMove: jumpSpeed,
+				move: unit.baseUnit.move?.map((movement) => {
+					return { move: movement.speed, currentMove: movement.speed, type: movement.type ?? "" };
+				}),
+				jumpMove: jumpSpeed
 			};
 			jeffList.members.push(member);
 		}

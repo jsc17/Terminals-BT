@@ -130,7 +130,7 @@
 					disabled={resultList.selectedEras.length != 1 || resultList.selectedFactions.length != 1}
 				/>
 				<label for="include-general-list">Official General:</label>
-				{#if resultList.eras.length == 1 && resultList.factions.length == 1}
+				{#if resultList.selectedEras.length == 1 && resultList.selectedFactions.length == 1}
 					<a href={`http://masterunitlist.info/Era/FactionEraDetails?FactionId=${resultList.factions[0]}&EraId=${resultList.eras[0]}`}>{factions.get(resultList.general)}</a>
 				{:else}
 					<p class="general-notice">Select a single Era and Faction</p>

@@ -6,7 +6,6 @@ import { filters as filtersImport, additionalFilters as additionalFiltersImport 
 import type { Options } from "./options";
 import { ruleSets } from "./options";
 import customCards from "$lib/data/customCards.json";
-import { browser } from "$app/environment";
 
 export class ResultList {
 	#eras = $state<number[]>([]);
@@ -39,8 +38,8 @@ export class ResultList {
 	}
 
 	general = $derived.by(() => {
-		if (this.#eras.length == 1 && this.#factions.length == 1) {
-			return getGeneralList(Number(this.#eras[0]), Number(this.#factions[0]));
+		if (this.selectedEras.length == 1 && this.selectedFactions.length == 1) {
+			return getGeneralList(Number(this.selectedEras[0]), Number(this.selectedFactions[0]));
 		} else {
 			return -1;
 		}

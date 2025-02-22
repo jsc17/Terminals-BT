@@ -3,32 +3,55 @@
 	import { eras, factions } from "$lib/data/erasFactionLookup.js";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { ResultList } from "$lib/types/resultList.svelte";
-	import { getContext } from "svelte";
+	import { getContext, onMount } from "svelte";
+	import Combobox, { type ComboboxItem } from "./Generic/Combobox.svelte";
 	import type { List } from "../../routes/listbuilder/types/list.svelte";
-	import { getGeneralList } from "$lib/utilities/bt-utils";
 
 	const resultList: ResultList = getContext("resultList");
 	const list: List = getContext("list");
 
 	let showParameters = $state(false);
 
+	let allowedEras: ComboboxItem[] = eraLists
+		.filter((era) => {
+			return era.id != 0;
+		})
+		.map((era) => {
+			return { value: era.id.toString(), label: eras.get(era.id) ?? "Not Found" };
+		});
+
 	let allowedFactions = $derived.by(() => {
 		let allowed: number[] = [];
-		eraLists.forEach((era) => {
-			if (era.id == resultList.details.era) {
-				era.factions.forEach((faction) => {
-					allowed = allowed.concat(faction[1]);
+		if (!resultList.selectedEras.length) {
+			allowed = eraLists[0].lists[0].factions;
+		} else {
+			eraLists
+				.filter((era) => {
+					return resultList.selectedEras.includes(era.id.toString());
+				})
+				.forEach((era) => {
+					era.lists.forEach((list) => {
+						allowed = allowed.concat(list.factions);
+					});
 				});
-			}
-		});
+		}
+		allowed = [...new Set(allowed)];
 		allowed.sort((a, b) => {
-			return factions.get(a)! > factions.get(b)! ? 1 : 0;
+			return (factions.get(a)?.toString() ?? "Not found") < (factions.get(b)?.toString() ?? "Not Found") ? -1 : 1;
 		});
-		return allowed;
+		return allowed.map((faction) => {
+			return { value: faction.toString(), label: factions.get(faction)?.toString() ?? "Not found" };
+		});
+	});
+
+	onMount(() => {
+		if (!list || localStorage.getItem("last-list") === null) {
+			resultList.loadResults();
+		}
 	});
 </script>
 
-<main>
+<div class="parameter-container">
 	<button
 		class="accordian"
 		class:hidden={!appWindow.isMobile}
@@ -49,88 +72,115 @@
 		</div>
 	</button>
 	<div class="card" class:hidden={appWindow.isMobile && !showParameters}>
-		<div class:parameters={!appWindow.isMobile} class:parameters-mobile={appWindow.isMobile}>
+		<div class={appWindow.isMobile ? "parameters-mobile" : "parameters"}>
 			<div class="parameter">
-				<label for="eraParameter">Era:</label>
-				<select
-					bind:value={resultList.details.era}
-					id="eraParameter"
-					onchange={() => {
-						resultList.details.general = getGeneralList(resultList.details.era, resultList.details.faction);
-					}}
-				>
-					{#each eraLists as era}
-						<option value={era.id}>{eras.get(era.id)}</option>
-					{/each}
-				</select>
+				<p>Era:</p>
+				<Combobox items={allowedEras} bind:value={resultList.selectedEras} inputProps={{ clearOnDeselect: true, placeholder: "Any" }} type="multiple"></Combobox>
 			</div>
-			<div class="parameter">
-				<label for="factionParameter">Faction:</label>
-				<select
-					id="factionParameter"
-					bind:value={resultList.details.faction}
-					onchange={() => {
-						resultList.details.general = getGeneralList(resultList.details.era, resultList.details.faction);
-					}}
-				>
-					<option value={0}>Any</option>
-					{#each allowedFactions as faction}
-						<option value={faction}>{factions.get(faction)}</option>
-					{/each}
-				</select>
-			</div>
-			<div class="parameter">
-				<p>General:</p>
-				{#if resultList.details.era != 0 && resultList.details.faction != 0}
-					<a href={`http://masterunitlist.info/Era/FactionEraDetails?FactionId=${resultList.details.faction}&EraId=${resultList.details.era}`}
-						>{factions.get(resultList.details.general)}</a
+			<div class="selected-container">
+				{#each resultList.selectedEras.slice(0, 4) as selected}
+					<button
+						class="selected-block"
+						onclick={() => {
+							resultList.selectedEras = resultList.selectedEras.filter((text) => {
+								return text != selected;
+							});
+						}}
+						><img src="/icons/close.svg" alt="close" />
+						{eras.get(Number(selected)) ?? `${selected} not found`}</button
 					>
-				{:else}
-					<p>Select an Era and Faction</p>
+				{/each}
+				{#if resultList.selectedEras.length > 4}
+					<div class="selected-block">
+						+{resultList.selectedEras.length - 4} more selections
+					</div>
 				{/if}
 			</div>
-			<div>
-				<button
-					id="getData"
-					onclick={() => {
-						resultList.loadNewResults();
-						list.details.era = resultList.details.era;
-						list.details.faction = resultList.details.faction;
-						list.details.general = resultList.details.general;
-					}}>Search</button
-				>
+			<div class="parameter">
+				<p>Faction:</p>
+				<Combobox items={allowedFactions} bind:value={resultList.selectedFactions} inputProps={{ clearOnDeselect: true, placeholder: "Any" }} type="multiple"></Combobox>
 			</div>
+			<div class="selected-container">
+				{#each resultList.selectedFactions.slice(0, 4) as selected}
+					<button
+						class="selected-block"
+						onclick={() => {
+							resultList.selectedFactions = resultList.selectedFactions.filter((text) => {
+								return text != selected;
+							});
+						}}
+						><img src="/icons/close.svg" alt="close" />
+						{allowedFactions.find((faction) => {
+							return faction.value == selected;
+						})?.label}</button
+					>
+				{/each}
+				{#if resultList.selectedFactions.length > 4}
+					<div class="selected-block">
+						+{resultList.selectedFactions.length - 4} more selections
+					</div>
+				{/if}
+			</div>
+			<div class="inline">
+				<input
+					type="checkbox"
+					name="include-general-list"
+					id="include-general-list"
+					bind:checked={resultList.includeGeneral}
+					disabled={resultList.selectedEras.length != 1 || resultList.selectedFactions.length != 1}
+				/>
+				<label for="include-general-list">Official General:</label>
+				{#if resultList.eras.length == 1 && resultList.factions.length == 1}
+					<a href={`http://masterunitlist.info/Era/FactionEraDetails?FactionId=${resultList.factions[0]}&EraId=${resultList.eras[0]}`}>{factions.get(resultList.general)}</a>
+				{:else}
+					<p class="general-notice">Select a single Era and Faction</p>
+				{/if}
+			</div>
+			<div class="general-notice">You can select additional general lists from the faction dropdown</div>
+			<button
+				id="getData"
+				onclick={() => {
+					resultList.loadResults();
+					list.details.eras = resultList.eras;
+					list.details.factions = resultList.factions;
+					list.details.general = resultList.general;
+				}}>Search</button
+			>
 		</div>
+
+		{#if resultList.selectedEras.length != resultList.eras.length || !resultList.eras.every( (era) => resultList.selectedEras.includes(era.toString()) ) || resultList.selectedFactions.length != resultList.factions.length || !resultList.factions.every( (faction) => resultList.selectedFactions.includes(faction.toString()) )}
+			<div class="center">
+				<img class="warning-icon" src="/icons/alert-outline.svg" alt="close" />
+				<p class="general-notice">Faction or Era selection changed. Press search to get updated results</p>
+			</div>
+		{/if}
 	</div>
-</main>
+</div>
 
 <style>
-	main {
+	.parameter-container {
 		width: 100%;
 	}
 	.parameter {
 		display: flex;
 		gap: 8px;
+		align-items: center;
 	}
 	.parameters {
+		position: relative;
 		display: grid;
-		grid-template-columns: repeat(3, 3fr) 1fr;
-		gap: 16px;
+		grid-auto-flow: column;
+		grid-template-columns: 1fr 1fr 1fr max-content;
+		grid-template-rows: min-content min-content;
+		column-gap: 16px;
+		row-gap: 2px;
 		width: 100%;
+		align-items: start;
 	}
 	.parameters-mobile {
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
-	}
-	select {
-		width: min(100%, 240px);
-	}
-	select:not([disabled]) {
-		border-color: var(--ring);
-	}
-	button[disabled] {
-		background-color: gray;
 	}
 	a {
 		overflow: hidden;
@@ -146,5 +196,42 @@
 		border-radius: var(--radius);
 		color: var(--card-foreground);
 		padding: 8px;
+	}
+	.selected-container {
+		width: 100%;
+		display: flex;
+		flex-wrap: wrap;
+	}
+	.selected-block {
+		background-color: var(--muted);
+		color: var(--muted-foreground);
+		border-radius: 0;
+		display: flex;
+		gap: 4px;
+		align-items: center;
+		width: fit-content;
+		padding: 2px;
+		margin: 2px;
+		font-size: 0.75em;
+		height: 1.25em;
+
+		img {
+			height: 1em;
+			width: 1em;
+		}
+	}
+	.general-notice {
+		font-size: 0.75em;
+		color: var(--muted-foreground);
+	}
+	.card {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+	.warning-icon {
+		height: 1em;
+		width: 1em;
+		filter: var(--warning-filter);
 	}
 </style>

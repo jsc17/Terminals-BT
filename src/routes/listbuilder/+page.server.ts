@@ -3,14 +3,14 @@ import { prisma } from "$lib/server/prisma.js";
 import { printList } from "./utilities/printList.js";
 import { type ListCode } from "./types/listCode.js";
 import { createSublistsPdf } from "./utilities/printSublists.js";
-import { group } from "console";
+import type { eras } from "$lib/data/erasFactionLookup.js";
 
 export const actions = {
 	getListNames: async ({ locals }) => {
 		if (!locals.user) {
 			return fail(401, { message: "User not logged in" });
 		}
-		const lists = await prisma.listV2.findMany({
+		const lists = await prisma.listV3.findMany({
 			where: {
 				userId: locals.user.id
 			},
@@ -37,27 +37,26 @@ export const actions = {
 			userId: locals.user.id,
 			id: parsedBody.id,
 			name: parsedBody.name,
-			era: Number(parsedBody.era),
-			faction: Number(parsedBody.faction),
-			general: Number(parsedBody.general),
+			eras: JSON.stringify(parsedBody.eras),
+			factions: JSON.stringify(parsedBody.factions),
 			units: JSON.stringify(parsedBody.units),
 			formations: JSON.stringify(parsedBody.formations),
 			sublists: JSON.stringify(parsedBody.sublists),
 			rules: parsedBody.rules,
-			lcVersion: 1
+			lcVersion: parsedBody.lcVersion
 		};
 		try {
-			const existingList = await prisma.listV2.findFirst({
+			const existingList = await prisma.listV3.findFirst({
 				where: {
 					userId: locals.user.id,
 					name: data.name
 				}
 			});
 			if (!existingList) {
-				await prisma.listV2.create({ data });
+				await prisma.listV3.create({ data });
 				return { message: "List created successfully" };
 			} else {
-				await prisma.listV2.update({
+				await prisma.listV3.update({
 					where: {
 						id: existingList.id
 					},
@@ -74,7 +73,7 @@ export const actions = {
 		if (!locals.user) {
 			return fail(401, { message: "User not logged in" });
 		}
-		const lists = await prisma.listV2.findMany({
+		const lists = await prisma.listV3.findMany({
 			where: {
 				userId: locals.user.id
 			},
@@ -96,7 +95,7 @@ export const actions = {
 		const { id } = (await request.json()) as Record<string, string>;
 
 		try {
-			await prisma.listV2.deleteMany({
+			await prisma.listV3.deleteMany({
 				where: {
 					userId: locals.user.id,
 					id

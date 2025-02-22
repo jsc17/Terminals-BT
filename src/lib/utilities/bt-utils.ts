@@ -110,11 +110,9 @@ export function getGeneralList(selectedEra: number, selectedFaction: number) {
 	let result = -1;
 	data.forEach((era) => {
 		if (era.id == selectedEra) {
-			era.factions.forEach((faction) => {
-				// @ts-ignore
-				if (faction[1].includes(selectedFaction)) {
-					//@ts-ignore
-					result = faction[0];
+			era.lists.forEach((list) => {
+				if (list.factions.includes(selectedFaction)) {
+					result = list.general;
 				}
 			});
 		}

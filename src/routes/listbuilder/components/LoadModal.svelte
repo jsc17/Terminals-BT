@@ -1,13 +1,10 @@
 <script lang="ts">
-	import { eras, factions } from "$lib/data/erasFactionLookup";
 	import { getContext } from "svelte";
 	import { deserialize } from "$app/forms";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import type { List } from "../types/list.svelte";
-	import { getRules } from "$lib/types/options";
 	import type { ListCode } from "../types/listCode";
 	import { convertUnversionedJSONList } from "../utilities/convert";
-	import { getGeneralList } from "$lib/utilities/bt-utils";
 
 	let user: any = getContext("user");
 	let list: List = getContext("list");
@@ -21,6 +18,7 @@
 
 	export function show() {
 		dialogElement.showModal();
+		importCode = "";
 		getLists();
 	}
 
@@ -34,12 +32,12 @@
 				const responseLists = JSON.parse(response.data.lists);
 				console.log(`${responseLists.length} lists loaded`);
 				for (const tempList of responseLists) {
+					console.log(tempList);
 					savedLists.push({
 						id: tempList.id,
 						name: tempList.name,
-						era: Number(tempList.era),
-						faction: Number(tempList.faction),
-						general: Number(tempList.general) ?? getGeneralList(Number(tempList.era), Number(tempList.faction)),
+						eras: JSON.parse(tempList.eras),
+						factions: JSON.parse(tempList.factions),
 						units: JSON.parse(tempList.units),
 						formations: JSON.parse(tempList.formations),
 						sublists: JSON.parse(tempList.sublists),
@@ -62,6 +60,10 @@
 				if (localData.charAt(0) == "{") {
 					const localList = JSON.parse(localData);
 					if (localList.lcVersion) {
+						if (localList.lcVersion != 2) {
+							localList.eras = localList.era == 0 ? [] : [localList.era];
+							localList.factions = localList.faction == 0 ? [] : [localList.faction];
+						}
 						savedLists.push(localList);
 					} else {
 						const updatedList = convertUnversionedJSONList(localList);
@@ -102,19 +104,33 @@
 		if (importCode.charAt(0) == "{") {
 			const importData = JSON.parse(importCode);
 			if (importData.lcVersion) {
-				const parsedCode = {
-					id: importData.id ?? crypto.randomUUID(),
-					name: importData.name ?? "Imported List",
-					era: importData.era ?? 0,
-					faction: importData.faction ?? 0,
-					general: importData.general ?? getGeneralList(importData.era ?? 0, importData.faction ?? 0),
-					rules: importData.rules ?? "noRes",
-					units: importData.units ?? [],
-					sublists: importData.sublists ?? [],
-					lcVersion: importData.lcVersion ?? 0,
-					formations: importData.formations ?? []
-				};
-				list.loadList(parsedCode);
+				if (importData.lcVersion == 2) {
+					const parsedCode = {
+						id: importData.id ?? crypto.randomUUID(),
+						name: importData.name ?? "Imported List",
+						eras: importData.eras,
+						factions: importData.factions,
+						rules: importData.rules ?? "noRes",
+						units: importData.units ?? [],
+						sublists: importData.sublists ?? [],
+						lcVersion: importData.lcVersion ?? 0,
+						formations: importData.formations ?? []
+					};
+					list.loadList(parsedCode);
+				} else {
+					const parsedCode = {
+						id: importData.id ?? crypto.randomUUID(),
+						name: importData.name ?? "Imported List",
+						eras: importData.era == 0 ? [] : [importData.era],
+						factions: importData.faction == 0 ? [] : [importData.faction],
+						rules: importData.rules ?? "noRes",
+						units: importData.units ?? [],
+						sublists: importData.sublists ?? [],
+						lcVersion: importData.lcVersion ?? 0,
+						formations: importData.formations ?? []
+					};
+					list.loadList(parsedCode);
+				}
 			} else {
 				const updatedList = convertUnversionedJSONList(importData);
 				list.loadList(updatedList);
@@ -150,12 +166,12 @@
 			<table class="saved-lists">
 				<colgroup>
 					<col />
+					<!-- <col style="width:15%" />
 					<col style="width:15%" />
-					<col style="width:15%" />
-					<col style="width:20%" />
+					<col style="width:20%" /> -->
 					<col style="width:20px" />
 				</colgroup>
-				<thead>
+				<!-- <thead>
 					<tr>
 						<th>List name</th>
 						<th>Era</th>
@@ -163,7 +179,7 @@
 						<th>Rules</th>
 						<th></th>
 					</tr>
-				</thead>
+				</thead> -->
 				<tbody>
 					{#each savedLists as savedList, index}
 						<tr
@@ -177,9 +193,9 @@
 							}}
 						>
 							<td class:local={localLists.includes(savedList.name)}>{savedList.name}</td>
-							<td style="text-align:center">{eras.get(savedList.era)}</td>
-							<td style="text-align:center">{factions.get(savedList.faction)}</td>
-							<td style="text-align:center">{getRules(savedList.rules)?.display}</td>
+							<!-- <td style="text-align:center">{eras.get(savedList.eras[0])}</td>
+							<td style="text-align:center">{factions.get(savedList.factions[0])}</td>
+							<td style="text-align:center">{getRules(savedList.rules)?.display}</td> -->
 							<td><button onclick={() => deleteList(savedList.id)}>-</button></td>
 						</tr>
 					{/each}

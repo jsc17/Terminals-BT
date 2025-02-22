@@ -13,9 +13,8 @@ export type ListCode = {
 	id: string;
 	lcVersion: number;
 	name: string;
-	era: number;
-	faction: number;
-	general: number;
+	eras: number[];
+	factions: number[];
 	rules: string;
 	units: ListCodeUnit[];
 	formations: FormationV2[];

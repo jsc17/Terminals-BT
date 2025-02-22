@@ -8,7 +8,7 @@
 	import { getContext } from "svelte";
 	import type { List } from "../../routes/listbuilder/types/list.svelte";
 
-	let list: List = getContext("list");
+	const list: List = getContext("list");
 	const resultList: ResultList = getContext("resultList");
 
 	let headers = $derived(appWindow.isMobile ? ["Type", "PV", "Move", "Health"] : ["Type", "PV", "Size", "Move", "TMM", "Health (A+S)"]);
@@ -135,7 +135,7 @@
 			<p>Failed to load units. Please wait a moment, and try again</p>
 			<button
 				onclick={() => {
-					resultList.loadNewResults();
+					resultList.loadResults();
 				}}>Reload</button
 			>
 		</div>

@@ -174,6 +174,8 @@
 		overflow: auto;
 		z-index: 1;
 		scrollbar-gutter: stable;
+		display: flex;
+		flex-direction: column;
 	}
 	.list-header {
 		display: flex;
@@ -208,8 +210,7 @@
 		display: flex;
 		justify-content: space-between;
 		flex-direction: column;
-		height: 100%;
-		gap: 48px;
+		flex: 1;
 	}
 
 	input[type="text"] {

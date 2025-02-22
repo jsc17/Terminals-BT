@@ -28,8 +28,8 @@
 				formations: list.formations,
 				playername: playerName,
 				listname: printName,
-				era: list.details.era,
-				faction: list.details.faction,
+				eras: list.details.eras,
+				factions: list.details.factions,
 				general: list.details.general,
 				style: style,
 				condense: false
@@ -53,19 +53,19 @@
 	<div class="dialog-body">
 		<h2>Print</h2>
 		<form action="?/printList" method="post" use:enhance={handleForm} class="print-form">
-			<div><label for="listname">Print title</label><input id="listname" bind:value={printName} /></div>
-			<div><label for="playername">Player Name (optional)</label><input id="playername" bind:value={playerName} /></div>
-			<div>{`${eras.get(list.details.era)} - ${factions.get(list.details.faction)} with ${factions.get(list.details.general)} general list `}</div>
+			<div><label for="print-listname">Print title</label><input id="print-listname" bind:value={printName} /></div>
+			<div><label for="print-playername">Player Name (optional)</label><input id="print-playername" bind:value={playerName} /></div>
 			<h3>Style</h3>
 			<div>
-				<label for="list-style-mul"
-					><input type="radio" name="list-style-mul" id="list-style-mul" value="mul" bind:group={style} />MUL style - Generates a summary page similar to the MUL printout.</label
+				<label for="print-list-style-mul"
+					><input type="radio" name="print-list-style-mul" id="print-list-style-mul" value="mul" bind:group={style} />MUL style - Generates a summary page similar to the MUL
+					printout.</label
 				>
 			</div>
 			<div>
-				<label for="list-style-detailed"
-					><input type="radio" name="list-style-detailed" id="list-style-detailed" value="detailed" bind:group={style} />Detailed - Generates a summary page with more details for
-					quick reference.</label
+				<label for="print-list-style-detailed"
+					><input type="radio" name="print-list-style-detailed" id="print-list-style-detailed" value="detailed" bind:group={style} />Detailed - Generates a summary page with more
+					details for quick reference.</label
 				>
 			</div>
 			<div><input type="checkbox" name="drawFormations" id="formations" checked /><label for="formations">Print formations?</label></div>

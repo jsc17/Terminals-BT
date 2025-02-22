@@ -6,8 +6,8 @@
 	import { SearchFilters, SearchParameters, SearchResults } from "$lib/components/index";
 	import { slide } from "svelte/transition";
 	import { List } from "./types/list.svelte";
-	import { getGeneralList } from "$lib/utilities/bt-utils";
 	import { convertUnversionedJSONList } from "./utilities/convert";
+	import type { ListCode } from "./types/listCode";
 
 	const resultList = new ResultList();
 	const list = new List(resultList);
@@ -17,8 +17,8 @@
 	let selectedRules = $state<string>("");
 	let showListbuilder = $state(false);
 	let recentChanges: string[] = [
-		"Combined generic and wolfnet 350 list builders into one, for easier maintainance and eventually customization of rules.",
-		"Choosing the correct ruleset from the dropdown above will limit the units offered in the results panel, but does not currently validate extra rules (such as 350's various rule of 2's)"
+		"Multiple Era and faction selection!",
+		`You can also now turn off the automatic "Official" general list to only see units that are in the era/faction combination you selected.`
 	];
 	let description: string[] = [
 		"An Alpha Strike list builder I've created to help filter the data from the amazing work the Master Unit List team has done.",
@@ -32,15 +32,24 @@
 			resultList.setOptions(selectedRules);
 		}
 		const lastList = localStorage.getItem("last-list");
+		let importData;
 		if (lastList) {
-			const importData = JSON.parse(lastList);
+			importData = JSON.parse(lastList);
 			if (importData.lcVersion) {
-				const parsedCode = {
+				console.log(importData);
+				let eras, factions;
+				if (importData.lcVersion == 2) {
+					eras = importData.eras;
+					factions = importData.factions;
+				} else {
+					eras = importData.era == 0 ? [] : [importData.era];
+					factions = importData.faction == 0 ? [] : [importData.faction];
+				}
+				const parsedCode: ListCode = {
 					id: importData.id ?? crypto.randomUUID(),
 					name: importData.name ?? "Imported List",
-					era: importData.era ?? 0,
-					faction: importData.faction ?? 0,
-					general: importData.general ?? getGeneralList(importData.era ?? 0, importData.faction ?? 0),
+					eras,
+					factions,
 					rules: importData.rules ?? "noRes",
 					units: importData.units ?? [],
 					sublists: importData.sublists ?? [],

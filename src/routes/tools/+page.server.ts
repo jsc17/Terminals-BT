@@ -20,7 +20,7 @@ export const actions = {
 			if (era.id == 0) {
 				continue;
 			}
-			for (const [general, factionList] of era.factions) {
+			for (const { general, factions } of era.lists) {
 				if (general != -1) {
 					try {
 						await prisma.faction.create({
@@ -35,7 +35,7 @@ export const actions = {
 						console.log(era.id, general);
 					}
 				}
-				for (const faction of factionList as number[]) {
+				for (const faction of factions as number[]) {
 					try {
 						await prisma.faction.create({
 							data: {
@@ -229,72 +229,24 @@ export const actions = {
 		return { message: "success" };
 	},
 	convertLists: async ({}) => {
-		const lists = await prisma.list.findMany();
+		const lists = await prisma.listV2.findMany();
 		for (const list of lists) {
 			try {
 				console.log(`Processing list: ${list.name}`);
-				let newListUnits: ListCodeUnit[] = [];
-				let newListFormations: FormationV2[] = [];
-				let newListSublists: SublistV2[] = [];
 
-				newListFormations.push({ id: "unassigned", name: "Unassigned units", type: "none", units: [] });
-				//convert units and formations to lcv1 formatting
-				const itemArray = JSON.parse(list.units);
-				for (const item of itemArray) {
-					if (item.charAt(0) == "{") {
-						const formationData = JSON.parse(item);
-						const formationId: string = crypto.randomUUID();
-						let formationUnitList: { id: string }[] = [];
-
-						for (const unit of formationData.units) {
-							const unitId: string = crypto.randomUUID();
-							let [mulId, skill] = unit.split(",");
-
-							if (skill == "undefined") {
-								skill = 4;
-							}
-							newListUnits.push({ id: unitId, mulId, skill, customization: {} });
-							formationUnitList.push({ id: unitId });
-						}
-						newListFormations.push({ id: formationId, name: formationData.name, type: formationData.type, units: formationUnitList });
-					} else {
-						const unitId = crypto.randomUUID();
-						let [mulId, skill] = item.split(",");
-						newListUnits.push({ id: unitId, mulId: Number(mulId), skill: Number(skill), customization: {} });
-						newListFormations[0].units.push({ id: unitId });
-					}
-				}
-				if (list.sublists) {
-					try {
-						const sublistArray = JSON.parse(list.sublists);
-						for (const sublist of sublistArray) {
-							const subListData = JSON.parse(sublist);
-							const sublistId: string = crypto.randomUUID();
-							const scenario: string = subListData.sc;
-							const checked = subListData.un.map((unitPos: number) => {
-								return newListUnits[unitPos].id;
-							});
-
-							newListSublists.push({ id: sublistId, scenario, checked });
-						}
-					} catch (error) {
-						console.error("Invalid Sublist JSON");
-					}
-				}
 				const data = {
 					id: crypto.randomUUID(),
 					userId: list.userId,
 					name: list.name,
-					era: list.era,
-					faction: list.faction,
-					general: getGeneralList(list.era ?? 0, list.faction ?? 0),
-					units: JSON.stringify(newListUnits),
-					formations: JSON.stringify(newListFormations),
-					sublists: JSON.stringify(newListSublists),
+					eras: JSON.stringify(list.era == 0 ? [] : [list.era]),
+					factions: JSON.stringify(list.faction == 0 ? [] : [list.faction]),
+					units: list.units,
+					formations: list.formations,
+					sublists: list.sublists,
 					rules: list.rules,
-					lcVersion: 1
+					lcVersion: 2
 				};
-				await prisma.listV2.create({ data });
+				await prisma.listV3.create({ data });
 			} catch (error) {
 				console.log(`${list.name} error`);
 				console.error(error);

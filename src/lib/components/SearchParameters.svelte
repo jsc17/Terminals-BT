@@ -3,9 +3,9 @@
 	import { eras, factions } from "$lib/data/erasFactionLookup.js";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { ResultList } from "$lib/types/resultList.svelte";
-	import { getContext } from "svelte";
-	import type { List } from "../../routes/listbuilder/types/list.svelte";
+	import { getContext, onMount } from "svelte";
 	import Combobox, { type ComboboxItem } from "./Generic/Combobox.svelte";
+	import type { List } from "../../routes/listbuilder/types/list.svelte";
 
 	const resultList: ResultList = getContext("resultList");
 	const list: List = getContext("list");
@@ -22,12 +22,12 @@
 
 	let allowedFactions = $derived.by(() => {
 		let allowed: number[] = [];
-		if (!resultList.eras.length) {
+		if (!resultList.selectedEras.length) {
 			allowed = eraLists[0].lists[0].factions;
 		} else {
 			eraLists
 				.filter((era) => {
-					return resultList.eras.includes(era.id.toString());
+					return resultList.selectedEras.includes(era.id.toString());
 				})
 				.forEach((era) => {
 					era.lists.forEach((list) => {
@@ -42,6 +42,12 @@
 		return allowed.map((faction) => {
 			return { value: faction.toString(), label: factions.get(faction)?.toString() ?? "Not found" };
 		});
+	});
+
+	onMount(() => {
+		if (!list || localStorage.getItem("last-list") === null) {
+			resultList.loadResults();
+		}
 	});
 </script>
 
@@ -69,14 +75,14 @@
 		<div class={appWindow.isMobile ? "parameters-mobile" : "parameters"}>
 			<div class="parameter">
 				<p>Era:</p>
-				<Combobox items={allowedEras} bind:value={resultList.eras} inputProps={{ clearOnDeselect: true, placeholder: "Any" }} type="multiple"></Combobox>
+				<Combobox items={allowedEras} bind:value={resultList.selectedEras} inputProps={{ clearOnDeselect: true, placeholder: "Any" }} type="multiple"></Combobox>
 			</div>
 			<div class="selected-container">
-				{#each resultList.eras.slice(0, 4) as selected}
+				{#each resultList.selectedEras.slice(0, 4) as selected}
 					<button
 						class="selected-block"
 						onclick={() => {
-							resultList.eras = resultList.eras.filter((text) => {
+							resultList.selectedEras = resultList.selectedEras.filter((text) => {
 								return text != selected;
 							});
 						}}
@@ -84,34 +90,34 @@
 						{eras.get(Number(selected)) ?? `${selected} not found`}</button
 					>
 				{/each}
-				{#if resultList.eras.length > 4}
+				{#if resultList.selectedEras.length > 4}
 					<div class="selected-block">
-						+{resultList.eras.length - 4} more selections
+						+{resultList.selectedEras.length - 4} more selections
 					</div>
 				{/if}
 			</div>
 			<div class="parameter">
 				<p>Faction:</p>
-				<Combobox items={allowedFactions} bind:value={resultList.factions} inputProps={{ clearOnDeselect: true, placeholder: "Any" }} type="multiple"></Combobox>
+				<Combobox items={allowedFactions} bind:value={resultList.selectedFactions} inputProps={{ clearOnDeselect: true, placeholder: "Any" }} type="multiple"></Combobox>
 			</div>
 			<div class="selected-container">
-				{#each resultList.factions.slice(0, 4) as selected}
+				{#each resultList.selectedFactions.slice(0, 4) as selected}
 					<button
 						class="selected-block"
 						onclick={() => {
-							resultList.factions = resultList.factions.filter((text) => {
+							resultList.selectedFactions = resultList.selectedFactions.filter((text) => {
 								return text != selected;
 							});
 						}}
 						><img src="/icons/close.svg" alt="close" />
-						{allowedFactions.find((era) => {
-							return era.value == selected;
+						{allowedFactions.find((faction) => {
+							return faction.value == selected;
 						})?.label}</button
 					>
 				{/each}
-				{#if resultList.factions.length > 4}
+				{#if resultList.selectedFactions.length > 4}
 					<div class="selected-block">
-						+{resultList.factions.length - 4} more selections
+						+{resultList.selectedFactions.length - 4} more selections
 					</div>
 				{/if}
 			</div>
@@ -121,24 +127,33 @@
 					name="include-general-list"
 					id="include-general-list"
 					bind:checked={resultList.includeGeneral}
-					disabled={resultList.eras.length != 1 || resultList.factions.length != 1}
+					disabled={resultList.selectedEras.length != 1 || resultList.selectedFactions.length != 1}
 				/>
-				<label for="include-general-list">Include Official General:</label>
-				<a href={`http://masterunitlist.info/Era/FactionEraDetails?FactionId=${resultList.factions[0]}&EraId=${resultList.eras[0]}`}>{factions.get(resultList.general)}</a>
+				<label for="include-general-list">Official General:</label>
+				{#if resultList.eras.length == 1 && resultList.factions.length == 1}
+					<a href={`http://masterunitlist.info/Era/FactionEraDetails?FactionId=${resultList.factions[0]}&EraId=${resultList.eras[0]}`}>{factions.get(resultList.general)}</a>
+				{:else}
+					<p class="general-notice">Select a single Era and Faction</p>
+				{/if}
 			</div>
-			<div class="general-notice">You can selected additional general lists from the faction dropdown</div>
+			<div class="general-notice">You can select additional general lists from the faction dropdown</div>
 			<button
 				id="getData"
 				onclick={() => {
-					resultList.loadNewResults();
-					if (list) {
-						// list.details.era = resultList.eras;
-						// list.details.faction = resultList.factions;
-						// list.details.general = resultList.general;
-					}
+					resultList.loadResults();
+					list.details.eras = resultList.eras;
+					list.details.factions = resultList.factions;
+					list.details.general = resultList.general;
 				}}>Search</button
 			>
 		</div>
+
+		{#if resultList.selectedEras.length != resultList.eras.length || !resultList.eras.every( (era) => resultList.selectedEras.includes(era.toString()) ) || resultList.selectedFactions.length != resultList.factions.length || !resultList.factions.every( (faction) => resultList.selectedFactions.includes(faction.toString()) )}
+			<div class="center">
+				<img class="warning-icon" src="/icons/alert-outline.svg" alt="close" />
+				<p class="general-notice">Faction or Era selection changed. Press search to get updated results</p>
+			</div>
+		{/if}
 	</div>
 </div>
 
@@ -155,7 +170,7 @@
 		position: relative;
 		display: grid;
 		grid-auto-flow: column;
-		grid-template-columns: 3fr 3fr 2fr max-content;
+		grid-template-columns: 1fr 1fr 1fr max-content;
 		grid-template-rows: min-content min-content;
 		column-gap: 16px;
 		row-gap: 2px;
@@ -208,5 +223,15 @@
 	.general-notice {
 		font-size: 0.75em;
 		color: var(--muted-foreground);
+	}
+	.card {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+	.warning-icon {
+		height: 1em;
+		width: 1em;
+		filter: var(--warning-filter);
 	}
 </style>

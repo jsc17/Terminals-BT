@@ -70,7 +70,8 @@
 		width: 100%;
 	}
 	:global(.combobox-input-container) {
-		background-color: var(--background);
+		border-radius: var(--radius);
+		background-color: var(--input);
 		border: 1px solid var(--border);
 		display: flex;
 		align-items: center;

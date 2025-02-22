@@ -28,8 +28,8 @@
 				formations: list.formations,
 				playername: playerName,
 				listname: printName,
-				era: list.details.era,
-				faction: list.details.faction,
+				eras: list.details.eras,
+				factions: list.details.factions,
 				general: list.details.general,
 				style: style,
 				condense: false
@@ -55,7 +55,6 @@
 		<form action="?/printList" method="post" use:enhance={handleForm} class="print-form">
 			<div><label for="print-listname">Print title</label><input id="print-listname" bind:value={printName} /></div>
 			<div><label for="print-playername">Player Name (optional)</label><input id="print-playername" bind:value={playerName} /></div>
-			<div>{`${eras.get(list.details.era)} - ${factions.get(list.details.faction)} with ${factions.get(list.details.general)} general list `}</div>
 			<h3>Style</h3>
 			<div>
 				<label for="print-list-style-mul"

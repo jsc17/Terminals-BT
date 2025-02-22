@@ -63,8 +63,8 @@ model ListV3 {
   user User @relation(references: [id], fields: [userId], onDelete: Cascade)
   lcVersion Int
   name String
-  era String
-  faction String
+  eras String
+  factions String
   units String @db.MediumText
   formations String @db.Text
   sublists String? @db.Text

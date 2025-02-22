@@ -14,8 +14,8 @@
 		let allowed: number[] = [];
 		eraFactionData.forEach((era) => {
 			if (era.id == selectedEra) {
-				era.factions.forEach((faction) => {
-					allowed = allowed.concat(faction[1]);
+				era.lists.forEach((faction) => {
+					allowed = allowed.concat(faction.factions);
 				});
 			}
 		});

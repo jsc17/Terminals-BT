@@ -1,5 +1,9 @@
 [
 	{
+		"date": "2-22-25",
+		"updates": { "Unit Search / Listbuilder": ["Added ability to select multiple eras and factions", "Added checkbox to remove automatic general list from search results"] }
+	},
+	{
 		"date": "2-16-25",
 		"notice": "New year, new stuff. Getting back to working on this site in my free time. Did a bunch of backend work to make further work easier and improve site performance. I have some big plans for the site this year, so stay tuned.",
 		"updates": {

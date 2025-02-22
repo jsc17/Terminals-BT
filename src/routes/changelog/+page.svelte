@@ -34,7 +34,7 @@
 			<li><span class="complete">Era and faction filtering in unit search</span> (added 6-30-24)</li>
 			<li>Customizable rules in the list builder</li>
 			<li><span class="complete">Reimplement list builder validation</span> (7-13-24)</li>
-			<li>multiple era and faction selections</li>
+			<li><span class="complete">multiple era and faction selections</span> (2-22-25)</li>
 			<li>Improved list sharing capabilities</li>
 			<li>Expanded sublist generation options</li>
 		</ul>

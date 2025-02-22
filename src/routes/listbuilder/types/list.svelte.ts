@@ -7,13 +7,14 @@ import type { ListCode, ListCodeUnit } from "./listCode";
 import type { SublistV2 } from "./sublist";
 import type { ResultList } from "$lib/types/resultList.svelte";
 import { getRules } from "$lib/types/options";
+import { convertUnversionedJSONList } from "../utilities/convert";
 
 export class List {
 	units: UnitV2[] = $state([]);
 	formations: FormationV2[] = $state([{ id: "unassigned", name: "Unassigned units", type: "none", units: [] }]);
 	sublists: SublistV2[] = $state([]);
 
-	details = $state({ name: "New List", era: 0, faction: 0, general: -1 });
+	details: { name: string; eras: number[]; factions: number[]; general: number } = $state({ name: "New List", eras: [], factions: [], general: -1 });
 	rules = $state<string>("noRes");
 	id: string = $state(crypto.randomUUID());
 
@@ -38,21 +39,22 @@ export class List {
 			unitList.push({ id: unit.id, mulId: unit.baseUnit.mulId, skill: unit.skill, customization: unit.customization });
 		});
 
-		const listCode: ListCode = {
+		const newListCode: ListCode = {
 			id: this.id,
-			lcVersion: 1,
+			lcVersion: 2,
 			name: this.details.name,
-			era: this.details.era,
-			faction: this.details.faction,
-			general: this.details.general,
+			eras: this.details.eras,
+			factions: this.details.factions,
 			rules: this.rules,
 			units: unitList,
 			formations: this.formations,
 			sublists: this.sublists
 		};
-		localStorage.setItem("last-list", JSON.stringify(listCode));
+		if (this.unitCount != 0 || localStorage.getItem("last-list") === null) {
+			localStorage.setItem("last-list", JSON.stringify(newListCode));
+		}
 
-		return JSON.stringify(listCode);
+		return JSON.stringify(newListCode);
 	});
 
 	issues = $derived.by(() => {
@@ -66,8 +68,8 @@ export class List {
 			if (this.options.maxUnits && this.unitCount > this.options.maxUnits) {
 				issueList.set("Max Units", new Set([`${this.unitCount}/${this.options.maxUnits}`]));
 			}
-			if (this.options.eraFactionRestriction && (this.details.era == 0 || this.details.faction == 0)) {
-				issueList.set("Era/Faction", new Set(["Must select era and faction"]));
+			if (this.options.eraFactionRestriction && (this.details.eras.length != 1 || this.details.factions.length != 1)) {
+				issueList.set("Era/Faction", new Set(["Must select a single era and faction"]));
 			}
 			for (const unit of this.units) {
 				if (
@@ -457,36 +459,32 @@ export class List {
 		return unitToAdd;
 	}
 	async loadList(data: any) {
-		if (data.lcVersion == 1) {
-			const listCode: ListCode = data;
-			this.id = listCode.id;
-			this.details.name = listCode.name;
-			this.details.era = listCode.era;
-			this.details.faction = listCode.faction;
-			this.details.general = listCode.general;
-			this.rules = listCode.rules;
+		const listCode: ListCode = data;
+		this.id = listCode.id;
+		this.details.name = listCode.name;
+		this.details.eras = listCode.eras;
+		this.details.factions = listCode.factions;
+		this.rules = listCode.rules;
 
-			this.resultList.details.era = this.details.era;
-			this.resultList.details.faction = this.details.faction;
-			this.resultList.details.general = this.details.general;
-			this.resultList.setOptions(this.rules);
-			this.resultList.loadNewResults();
+		this.resultList.eras = this.details.eras;
+		this.resultList.factions = this.details.factions;
+		this.resultList.setOptions(this.rules);
+		this.resultList.loadResults();
 
-			this.clear();
-			this.sublists = listCode.sublists;
-			for (const unit of listCode.units) {
-				let baseUnit: MulUnit =
-					this.resultList.resultList.find((result: MulUnit) => {
-						return result.mulId == unit.mulId;
-					}) ?? (await this.loadUnit(unit.mulId));
-				//@ts-ignore
-				if (!unit.skill || unit.skill == "undefined") {
-					unit.skill = 4;
-				}
-				const tempUnit = { id: unit.id, baseUnit: baseUnit, skill: unit.skill, cost: getNewSkillCost(unit.skill, baseUnit.pv), customization: unit.customization };
-				this.units.push(tempUnit);
+		this.clear();
+		this.sublists = listCode.sublists;
+		for (const unit of listCode.units) {
+			let baseUnit: MulUnit =
+				this.resultList.resultList.find((result: MulUnit) => {
+					return result.mulId == unit.mulId;
+				}) ?? (await this.loadUnit(unit.mulId));
+			//@ts-ignore
+			if (!unit.skill || unit.skill == "undefined") {
+				unit.skill = 4;
 			}
-			this.formations = listCode.formations;
+			const tempUnit = { id: unit.id, baseUnit: baseUnit, skill: unit.skill, cost: getNewSkillCost(unit.skill, baseUnit.pv), customization: unit.customization };
+			this.units.push(tempUnit);
 		}
+		this.formations = listCode.formations;
 	}
 }

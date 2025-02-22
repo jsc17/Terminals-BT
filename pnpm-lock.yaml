@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@lucia-auth/adapter-prisma':
         specifier: ^4.0.1
-        version: 4.0.1(@prisma/client@6.3.1(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3))(lucia@3.2.2)
+        version: 4.0.1(@prisma/client@6.4.1(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3))(lucia@3.2.2)
       '@node-rs/argon2':
         specifier: ^2.0.2
         version: 2.0.2
@@ -21,8 +21,8 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0
       '@prisma/client':
-        specifier: ^6.3.1
-        version: 6.3.1(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3)
+        specifier: ^6.4.1
+        version: 6.4.1(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3)
       '@sveltejs/adapter-node':
         specifier: ^5.2.12
         version: 5.2.12(@sveltejs/kit@2.16.1(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.20.2)(vite@6.0.11(@types/node@22.13.0)))(svelte@5.20.2)(vite@6.0.11(@types/node@22.13.0)))
@@ -784,8 +784,8 @@ packages:
   '@polka/url@1.0.0-next.28':
     resolution: {integrity: sha512-8LduaNlMZGwdZ6qWrKlfa+2M4gahzFkprZiAt2TF8uS0qQgBizKXpXURqvTJ4WtmupWxaLqjRb2UCTe72mu+Aw==}
 
-  '@prisma/client@6.3.1':
-    resolution: {integrity: sha512-ARAJaPs+eBkemdky/XU3cvGRl+mIPHCN2lCXsl5Vlb0E2gV+R6IN7aCI8CisRGszEZondwIsW9Iz8EJkTdykyA==}
+  '@prisma/client@6.4.1':
+    resolution: {integrity: sha512-A7Mwx44+GVZVexT5e2GF/WcKkEkNNKbgr059xpr5mn+oUm2ZW1svhe+0TRNBwCdzhfIZ+q23jEgsNPvKD9u+6g==}
     engines: {node: '>=18.18'}
     peerDependencies:
       prisma: '*'
@@ -2446,9 +2446,9 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@lucia-auth/adapter-prisma@4.0.1(@prisma/client@6.3.1(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3))(lucia@3.2.2)':
+  '@lucia-auth/adapter-prisma@4.0.1(@prisma/client@6.4.1(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3))(lucia@3.2.2)':
     dependencies:
-      '@prisma/client': 6.3.1(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3)
+      '@prisma/client': 6.4.1(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3)
       lucia: 3.2.2
 
   '@napi-rs/canvas-android-arm64@0.1.65':
@@ -2737,7 +2737,7 @@ snapshots:
 
   '@polka/url@1.0.0-next.28': {}
 
-  '@prisma/client@6.3.1(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3)':
+  '@prisma/client@6.4.1(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3)':
     optionalDependencies:
       prisma: 6.3.1(typescript@5.7.3)
       typescript: 5.7.3

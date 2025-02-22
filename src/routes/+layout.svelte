@@ -62,6 +62,7 @@
 		--error: lightcoral;
 		--error-filter: invert(20%) sepia(40%) saturate(6999%) hue-rotate(353deg) brightness(87%) contrast(108%);
 		--error-foreground: black;
+		--warning-filter: invert(83%) sepia(74%) saturate(475%) hue-rotate(2deg) brightness(88%) contrast(97%);
 	}
 	:global(body) {
 		margin: 0;
@@ -213,6 +214,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		gap: 4px;
 	}
 	:global(.align-right) {
 		display: flex;

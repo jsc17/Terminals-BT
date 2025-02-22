@@ -13,8 +13,8 @@ type PrintableList = {
 	formations: FormationV2[];
 	playername: string;
 	listname: string;
-	era: number;
-	faction: number;
+	eras: number[];
+	factions: number[];
 	general: number;
 	style: "mul" | "detailed";
 	condensed: boolean;
@@ -153,7 +153,7 @@ async function loadUnitImages(unitList: UnitV2[], formations: FormationV2[]) {
 }
 
 export async function printList(list: PrintableList, drawFormations: boolean): Promise<Blob> {
-	const listDetails = eras.get(list.era) + " Era - " + factions.get(list.faction) + " with " + factions.get(list.general) + " general list";
+	// const listDetails = eras.get(list.era) + " Era - " + factions.get(list.faction) + " with " + factions.get(list.general) + " general list";
 	const tableheaders: TableCell[] =
 		list.style == "mul"
 			? [{ text: "Unit", style: "cellHeader" }].concat(
@@ -182,7 +182,7 @@ export async function printList(list: PrintableList, drawFormations: boolean): P
 				],
 				columnGap: 10
 			},
-			{ text: listDetails, style: "details" },
+			// { text: listDetails, style: "details" },
 			{
 				table: {
 					headerRows: 1,

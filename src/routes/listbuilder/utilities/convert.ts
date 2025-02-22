@@ -59,9 +59,8 @@ export function convertUnversionedJSONList(importedList: any): ListCode {
 	const updatedList: ListCode = {
 		id: crypto.randomUUID(),
 		name: importedList.name,
-		era: Number(importedList.era),
-		faction: Number(importedList.faction),
-		general: getGeneralList(Number(importedList.era), Number(importedList.faction)),
+		eras: Number(importedList.era) == 0 ? [] : [Number(importedList.era)],
+		factions: Number(importedList.faction) == 0 ? [] : [Number(importedList.faction)],
 		rules: importedList.rules.name ?? "noRes",
 		sublists: importedSublists,
 		units: importedUnits,

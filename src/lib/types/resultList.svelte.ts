@@ -12,22 +12,27 @@ export class ResultList {
 	#eras = $state<number[]>([]);
 	#factions = $state<number[]>([]);
 
-	get eras(): string[] {
-		return this.#eras.map((era) => {
-			return era.toString();
-		});
+	selectedEras = $state<string[]>([]);
+	selectedFactions = $state<string[]>([]);
+
+	get eras(): number[] {
+		return this.#eras;
 	}
 	set eras(newValue: string[] | number[]) {
+		this.selectedEras = newValue.map((value) => {
+			return value.toString();
+		});
 		this.#eras = newValue.map((value) => {
 			return Number(value);
 		});
 	}
-	get factions(): string[] {
-		return this.#factions.map((faction) => {
-			return faction.toString();
-		});
+	get factions(): number[] {
+		return this.#factions;
 	}
 	set factions(newValue: string[] | number[]) {
+		this.selectedFactions = newValue.map((value) => {
+			return value.toString();
+		});
 		this.#factions = newValue.map((value) => {
 			return Number(value);
 		});
@@ -49,12 +54,7 @@ export class ResultList {
 
 	options = $state<Options>();
 	availableList = $derived.by(() => {
-		let availableUnits = [];
-		if (this.includeGeneral) {
-			availableUnits = this.resultList.concat(this.generalList);
-		} else {
-			availableUnits = this.resultList;
-		}
+		let availableUnits = this.resultList.concat(this.generalList);
 		availableUnits = [...new Set(availableUnits)];
 		availableUnits.sort((a, b) => {
 			return (a.tonnage ?? 0) - (b.tonnage ?? 0);
@@ -69,34 +69,15 @@ export class ResultList {
 	sort = $state({ key: "", order: "asc" });
 	filteredList = $derived.by(() => this.filterList());
 
-	status = $state(this.initialLoad());
+	status = $state();
 
-	initialLoad() {
-		if (browser) {
-			return new Promise((resolve, reject) => {
-				// const existingList = localStorage.getItem("last-list");
-				// if (existingList) {
-				// 	const existingData = JSON.parse(existingList);
-				// 	if (existingData.lcversion == 1.1) {
-				// 		this.eras = existingData.eras ?? [0];
-				// 		this.factions = existingData.factions ?? [0];
-				// 	} else {
-				// 		this.eras = [existingData.era ?? 0];
-				// 		this.factions = [existingData.faction ?? 0];
-				// 	}
-				// }
-				this.loadUnits().then(() => {
-					if (this.resultList.length) {
-						resolve("Units Loaded");
-					} else {
-						reject("Units failed to load");
-					}
-				});
-			});
-		}
-	}
-
-	loadNewResults() {
+	loadResults() {
+		this.#eras = this.selectedEras.map((era) => {
+			return Number(era);
+		});
+		this.#factions = this.selectedFactions.map((faction) => {
+			return Number(faction);
+		});
 		this.status = new Promise((resolve, reject) => {
 			this.loadUnits().then(() => {
 				if (this.resultList.length) {
@@ -108,7 +89,8 @@ export class ResultList {
 		});
 	}
 
-	loadUnitsFromResponse(unitList: any[], resultList: MulUnit[]) {
+	loadUnitsFromResponse(unitList: any[]) {
+		let tempResultList: MulUnit[] = [];
 		unitList.forEach((unit: any) => {
 			let tempMovement: { speed: number; type: string }[] = [];
 			unit.move.split("/").forEach((movement: string) => {
@@ -153,17 +135,16 @@ export class ResultList {
 					availability: unit.availability,
 					technology: unit.technology
 				};
-				resultList.push(formattedUnit);
+				tempResultList.push(formattedUnit);
 			} catch (error) {
 				console.log(error);
 				console.log(`${unit.Name} could not be added to result list`);
 			}
 		});
+		return tempResultList;
 	}
 
 	async loadUnits() {
-		this.resultList = [];
-		this.generalList = [];
 		const response: any = deserialize(
 			await (await fetch("/?/getUnits", { method: "POST", body: JSON.stringify({ eras: this.#eras, factions: this.#factions, general: this.general }) })).text()
 		);
@@ -173,8 +154,12 @@ export class ResultList {
 		});
 		const generalList = response.data.generalList;
 
-		this.loadUnitsFromResponse(unitList, this.resultList);
-		this.loadUnitsFromResponse(generalList, this.generalList);
+		this.resultList = this.loadUnitsFromResponse(unitList);
+		if (this.includeGeneral) {
+			this.generalList = this.loadUnitsFromResponse(generalList);
+		} else {
+			this.generalList = [];
+		}
 	}
 
 	setOptions(newRules: string) {

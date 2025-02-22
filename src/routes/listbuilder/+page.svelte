@@ -16,10 +16,7 @@
 
 	let selectedRules = $state<string>("");
 	let showListbuilder = $state(false);
-	let recentChanges: string[] = [
-		"Combined generic and wolfnet 350 list builders into one, for easier maintainance and eventually customization of rules.",
-		"Choosing the correct ruleset from the dropdown above will limit the units offered in the results panel, but does not currently validate extra rules (such as 350's various rule of 2's)"
-	];
+	let recentChanges: string[] = [];
 	let description: string[] = [
 		"An Alpha Strike list builder I've created to help filter the data from the amazing work the Master Unit List team has done.",
 		"Feedback will always be welcome. If you found your way here, you probably know me on facebook or through the wolfnet discord, so feel free to ping me. (Discord - Jonathan 'Terminal' Colton)"

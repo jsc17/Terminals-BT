@@ -6,15 +6,63 @@ import { filters as filtersImport, additionalFilters as additionalFiltersImport 
 import type { Options } from "./options";
 import { ruleSets } from "./options";
 import customCards from "$lib/data/customCards.json";
+import { browser } from "$app/environment";
 
 export class ResultList {
-	details = $state({ era: 0, faction: 0, general: -1 });
+	#eras = $state<number[]>([]);
+	#factions = $state<number[]>([]);
+
+	get eras(): string[] {
+		return this.#eras.map((era) => {
+			return era.toString();
+		});
+	}
+	set eras(newValue: string[] | number[]) {
+		this.#eras = newValue.map((value) => {
+			return Number(value);
+		});
+	}
+	get factions(): string[] {
+		return this.#factions.map((faction) => {
+			return faction.toString();
+		});
+	}
+	set factions(newValue: string[] | number[]) {
+		this.#factions = newValue.map((value) => {
+			return Number(value);
+		});
+	}
+
+	general = $derived.by(() => {
+		if (this.#eras.length == 1 && this.#factions.length == 1) {
+			return getGeneralList(Number(this.#eras[0]), Number(this.#factions[0]));
+		} else {
+			return -1;
+		}
+	});
+
+	includeGeneral = $state(true);
 
 	resultList = $state<MulUnit[]>([]);
+	generalList = $state<MulUnit[]>([]);
 	uniqueList: any[] = [];
 
 	options = $state<Options>();
-	availableList = $derived.by(() => this.applyOptions());
+	availableList = $derived.by(() => {
+		let availableUnits = [];
+		if (this.includeGeneral) {
+			availableUnits = this.resultList.concat(this.generalList);
+		} else {
+			availableUnits = this.resultList;
+		}
+		availableUnits = [...new Set(availableUnits)];
+		availableUnits.sort((a, b) => {
+			return (a.tonnage ?? 0) - (b.tonnage ?? 0);
+		});
+		return availableUnits;
+	});
+
+	restrictedList = $derived.by(() => this.applyOptions());
 
 	filters = $state<Filter[]>(filtersImport);
 	additionalFilters = $state<Filter[]>(additionalFiltersImport);
@@ -24,22 +72,28 @@ export class ResultList {
 	status = $state(this.initialLoad());
 
 	initialLoad() {
-		return new Promise((resolve, reject) => {
-			const existingList = localStorage.getItem("last-list");
-			if (existingList) {
-				const existingData = JSON.parse(existingList);
-				this.details.era = existingData.era ?? 0;
-				this.details.faction = existingData.faction ?? 0;
-				this.details.general = existingData.general ?? getGeneralList(this.details.era, this.details.faction);
-			}
-			this.loadUnits().then(() => {
-				if (this.resultList.length) {
-					resolve("Units Loaded");
-				} else {
-					reject("Units failed to load");
-				}
+		if (browser) {
+			return new Promise((resolve, reject) => {
+				// const existingList = localStorage.getItem("last-list");
+				// if (existingList) {
+				// 	const existingData = JSON.parse(existingList);
+				// 	if (existingData.lcversion == 1.1) {
+				// 		this.eras = existingData.eras ?? [0];
+				// 		this.factions = existingData.factions ?? [0];
+				// 	} else {
+				// 		this.eras = [existingData.era ?? 0];
+				// 		this.factions = [existingData.faction ?? 0];
+				// 	}
+				// }
+				this.loadUnits().then(() => {
+					if (this.resultList.length) {
+						resolve("Units Loaded");
+					} else {
+						reject("Units failed to load");
+					}
+				});
 			});
-		});
+		}
 	}
 
 	loadNewResults() {
@@ -54,22 +108,7 @@ export class ResultList {
 		});
 	}
 
-	async loadUnits() {
-		if (this.details.era < 0 || undefined) {
-			this.details.era = 0;
-		}
-		if (this.details.faction < 0 || undefined) {
-			this.details.faction = 0;
-		}
-		this.resultList = [];
-		const response: any = deserialize(
-			await (await fetch("/?/getUnits", { method: "POST", body: JSON.stringify({ era: this.details.era, faction: this.details.faction, general: this.details.general }) })).text()
-		);
-		const unitList = response.data.unitList;
-		this.uniqueList = response.data.uniqueList.map((unit: any) => {
-			return unit.mulId;
-		});
-
+	loadUnitsFromResponse(unitList: any[], resultList: MulUnit[]) {
 		unitList.forEach((unit: any) => {
 			let tempMovement: { speed: number; type: string }[] = [];
 			unit.move.split("/").forEach((movement: string) => {
@@ -114,12 +153,28 @@ export class ResultList {
 					availability: unit.availability,
 					technology: unit.technology
 				};
-				this.resultList.push(formattedUnit);
+				resultList.push(formattedUnit);
 			} catch (error) {
 				console.log(error);
 				console.log(`${unit.Name} could not be added to result list`);
 			}
 		});
+	}
+
+	async loadUnits() {
+		this.resultList = [];
+		this.generalList = [];
+		const response: any = deserialize(
+			await (await fetch("/?/getUnits", { method: "POST", body: JSON.stringify({ eras: this.#eras, factions: this.#factions, general: this.general }) })).text()
+		);
+		const unitList = response.data.unitList;
+		this.uniqueList = response.data.uniqueList.map((unit: any) => {
+			return unit.mulId;
+		});
+		const generalList = response.data.generalList;
+
+		this.loadUnitsFromResponse(unitList, this.resultList);
+		this.loadUnitsFromResponse(generalList, this.generalList);
 	}
 
 	setOptions(newRules: string) {

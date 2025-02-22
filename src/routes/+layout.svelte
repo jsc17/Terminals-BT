@@ -2,7 +2,7 @@
 	import Footer from "$lib/components/Footer.svelte";
 	import Header from "$lib/components/Header.svelte";
 	import Toast from "$lib/components/Toast.svelte";
-	import { onMount, setContext } from "svelte";
+	import { setContext } from "svelte";
 
 	const { data, children } = $props();
 	let user = $state({ username: data.username });

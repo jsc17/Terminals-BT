@@ -90,8 +90,8 @@
 		<h2>Print Sublist:</h2>
 		<hr />
 		<form action="?/printList" method="post" use:enhance={handleForm} class="print-form">
-			<div><label for="listname">Print title</label><input id="listname" bind:value={printName} /></div>
-			<div><label for="playername">Player Name (optional)</label><input id="playername" bind:value={playerName} /></div>
+			<div><label for="export-listname">Print title</label><input id="export-listname" bind:value={printName} /></div>
+			<div><label for="export-playername">Player Name (optional)</label><input id="export-playername" bind:value={playerName} /></div>
 			<div>{`${eras.get(list.details.era)} - ${factions.get(list.details.faction)} with ${factions.get(list.details.general)} general list `}</div>
 			<h2>Style</h2>
 			<div>
@@ -110,7 +110,7 @@
 		<h2>Export Sublist:</h2>
 		<hr />
 		<div class="export-bar">
-			<label for="tts-code">TTS Code: </label><input type="text" name="tts-code" id="tts-code" disabled value={ttsCode} />
+			<label for="print-tts-code">TTS Code: </label><input type="text" name="print-tts-code" id="print-tts-code" disabled value={ttsCode} />
 			<button
 				onclick={() => {
 					navigator.clipboard.writeText(ttsCode!);

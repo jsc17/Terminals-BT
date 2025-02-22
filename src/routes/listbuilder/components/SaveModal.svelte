@@ -11,14 +11,14 @@
 	let list: List = getContext("list");
 	let user: any = getContext("user");
 
-	let saveDialog: HTMLDialogElement;
-	let existingListNames: { id: string; name: string }[] = [];
+	let saveDialog = $state<HTMLDialogElement>();
+	let existingListNames = $state<{ id: string; name: string }[]>([]);
 
 	let ttsCode = $state("");
 	let listCode = $state("");
 
 	export function show() {
-		saveDialog.showModal();
+		saveDialog?.showModal();
 		getListNames();
 		ttsCode = list.createTTSCode();
 		listCode = list.getListCode();
@@ -49,14 +49,14 @@
 			if (listNameExists) {
 				if (confirm("A list with that name already exists. Overwrite it?")) {
 					formData.append("body", list.getListCode());
-					saveDialog.close();
+					saveDialog?.close();
 				} else {
 					cancel();
 				}
 			} else {
 				list.id = crypto.randomUUID();
 				formData.append("body", list.getListCode());
-				saveDialog.close();
+				saveDialog?.close();
 			}
 		} else {
 			let listNames = JSON.parse(localStorage.getItem("lists") ?? "[]");
@@ -73,7 +73,7 @@
 			}
 			cancel();
 			toastController.addToast(`${list.details.name} saved successfully to this device. Consider creating an account to sync lists between devices.`);
-			saveDialog.close();
+			saveDialog?.close();
 		}
 		return async ({ result }: { result: ActionResult }) => {
 			if (result.status == 200) {
@@ -85,13 +85,7 @@
 	}
 </script>
 
-<dialog
-	bind:this={saveDialog}
-	onclose={() => {
-		saveDialog.close();
-	}}
-	class:dialog-wide={appWindow.isNarrow}
->
+<dialog bind:this={saveDialog} class:dialog-wide={appWindow.isNarrow}>
 	<div class="dialog-body">
 		<div class="space-between">
 			{#if user.username}
@@ -102,7 +96,7 @@
 			<button
 				class="close-button"
 				onclick={() => {
-					saveDialog.close();
+					saveDialog?.close();
 				}}>X</button
 			>
 		</div>
@@ -110,8 +104,8 @@
 		<form method="post" action="?/saveList" use:enhance={handleSaveList}>
 			<div class="inline gap8">
 				{#if user.username}
-					<input type="radio" name="saveLocation" id="accountSave" value="accountSave" checked />
-					<label for="accountSave">Save to account</label>
+					<input type="radio" name="saveLocation" id="saveToAccount" value="accountSave" checked />
+					<label for="saveToAccount">Save to account</label>
 					<input type="radio" name="saveLocation" id="localSave" value="localSave" />
 					<label for="LocalSave">Save to local device storage</label>
 				{:else}
@@ -122,7 +116,7 @@
 				{/if}
 			</div>
 			<div class="export-bar">
-				<label for="save-local">List Name: </label><input type="text" name="save-local" id="save-local" bind:value={list.details.name} />
+				<label for="saveDialogListName">List Name: </label><input type="text" id="saveDialogListName" bind:value={list.details.name} />
 				<button>
 					<img src="/icons/content-save.svg" alt="save" class="button-icon" />
 				</button>
@@ -135,26 +129,26 @@
 				onclick={() => {
 					navigator.clipboard.writeText(list.getListCode());
 					toastController.addToast("code copied to clipboard", 1500);
-					saveDialog.close();
+					saveDialog?.close();
 				}}
 			>
 				<img src="/icons/content-copy.svg" alt="copy to clipboard" class="button-icon" />
 			</button>
 		</div>
 		<div class="export-bar">
-			<label for="tts-code">TTS Code: </label><input type="text" name="tts-code" id="tts-code" disabled value={ttsCode} />
+			<label for="save-tts-code">TTS Code: </label><input type="text" name="save-tts-code" id="save-tts-code" disabled value={ttsCode} />
 			<button
 				onclick={() => {
 					navigator.clipboard.writeText(ttsCode!);
 					toastController.addToast("code copied to clipboard", 1500);
-					saveDialog.close();
+					saveDialog?.close();
 				}}
 			>
 				<img src="/icons/content-copy.svg" alt="copy to clipboard" class="button-icon" />
 			</button>
 		</div>
 		<div class="export-bar">
-			<label for="jeffs-tools">Jeff's Tools: </label><input type="text" name="jeff-tools" id="jeff's tools" bind:value={list.details.name} />
+			<label for="save-modal-jeffs-tools">Jeff's Tools: </label><input type="text" name="jeff-tools" id="save-modal-jeffs-tools" bind:value={list.details.name} />
 			<button
 				onclick={() => {
 					if (list.unitCount == 0) {

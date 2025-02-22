@@ -64,10 +64,12 @@ export const actions = {
 		return { unitList };
 	},
 	getUnits: async ({ request }) => {
-		let { era, faction, general } = await request.json();
-		let unitList;
-		let uniqueList;
-		if (era == 0 && faction == 0) {
+		let { eras, factions, general } = await request.json();
+
+		let unitList: any[] = [];
+		let uniqueList: any[] = [];
+		let generalList: any[] = [];
+		if (eras.length == 0 && factions.length == 0) {
 			unitList = await prisma.unit.findMany({});
 			uniqueList = await prisma.unit.findMany({
 				where: {
@@ -79,19 +81,23 @@ export const actions = {
 				}
 			});
 		} else {
-			const conditions: { [k: string]: any } = {};
-			const uniqueConditions: { [k: string]: any } = { faction: 4 };
-			if (era != 0) {
-				conditions.era = era;
-				uniqueConditions.era = era;
-			}
-			if (faction != 0) {
-				conditions.OR = [{ faction }, { faction: general }];
-			}
 			unitList = await prisma.unit.findMany({
 				where: {
 					factions: {
-						some: conditions
+						some: {
+							AND: [
+								{
+									OR: eras.map((era: number) => {
+										return { era };
+									})
+								},
+								{
+									OR: factions.map((faction: number) => {
+										return { faction };
+									})
+								}
+							]
+						}
 					}
 				},
 				orderBy: {
@@ -101,16 +107,39 @@ export const actions = {
 			uniqueList = await prisma.unit.findMany({
 				where: {
 					factions: {
-						some: uniqueConditions
+						some: {
+							AND: [
+								{
+									OR: eras.map((era: number) => {
+										return { era };
+									})
+								},
+								{
+									faction: 4
+								}
+							]
+						}
 					}
 				},
 				select: {
 					mulId: true
 				}
 			});
+			if (general != -1) {
+				generalList = await prisma.unit.findMany({
+					where: {
+						factions: {
+							some: { faction: general, era: eras[0] }
+						}
+					},
+					orderBy: {
+						tonnage: "asc"
+					}
+				});
+			}
 		}
 		if (unitList) {
-			return { unitList, uniqueList };
+			return { unitList, uniqueList, generalList };
 		} else {
 			return fail(400, { message: "Unit request failed" });
 		}

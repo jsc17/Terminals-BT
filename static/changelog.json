@@ -1,14 +1,20 @@
 [
 	{
 		"date": "2-22-25",
-		"updates": { "Unit Search / Listbuilder": ["Added ability to select multiple eras and factions", "Added checkbox to remove automatic general list from search results"] }
+		"updates": {
+			"Unit Search / List Builder": [
+				"Added ability to select multiple eras and factions",
+				"Added checkbox to remove automatic general list from search results",
+				"Add sorting by damage to search results"
+			]
+		}
 	},
 	{
 		"date": "2-16-25",
 		"notice": "New year, new stuff. Getting back to working on this site in my free time. Did a bunch of backend work to make further work easier and improve site performance. I have some big plans for the site this year, so stay tuned.",
 		"updates": {
 			"Site-wide": ["Added some visual effects to make the site feel nicer"],
-			"Listbuilder": [
+			"List Builder": [
 				"Fixed export functions for Jeff's tools, and added the ability to export specific formations and sublists.",
 				"Rebuilt how data is stored in the backend to prevent some errors that would occasionally crash the page.",
 				"Various tweaks/improvements that should hopefully improve the user experience."
@@ -18,7 +24,7 @@
 	{
 		"date": "12-20-24",
 		"updates": {
-			"Listbuilder": [
+			"List Builder": [
 				"Rebuilt PDF generation since it was originally put together without formations and ability references in mind. Previous version would cause units to start stacking on top of each other instead of creating a new page if too many units were added. New pdf generation should scale up without issues."
 			]
 		}
@@ -26,13 +32,13 @@
 	{
 		"date": "11-20-24",
 		"updates": {
-			"Unit Search / Listbuilder": ["Fixed dropdown overlay issues", "Fixed formation types not saving when changed"]
+			"Unit Search / List Builder": ["Fixed dropdown overlay issues", "Fixed formation types not saving when changed"]
 		}
 	},
 	{
 		"date": "11-19-24",
 		"updates": {
-			"Unit Search / Listbuilder": ["Added filter for movement type", "Fixed bug where max movement filter didn't work"],
+			"Unit Search / List Builder": ["Added filter for movement type", "Fixed bug where max movement filter didn't work"],
 			"List Builder": [
 				"Bumped up card sizes on printed list to match standard sleeve size. (previously it generated at the correct size on the pdf, but would scale down on most printers due to margins)"
 			]
@@ -67,7 +73,7 @@
 	{
 		"date": "7-7-24",
 		"updates": {
-			"Unit Search / Listbuilder": ["Fixed spacing issues with longer unit names.", "Added unit availability button to see what eras/factions have access to a unit."]
+			"Unit Search / List Builder": ["Fixed spacing issues with longer unit names.", "Added unit availability button to see what eras/factions have access to a unit."]
 		}
 	},
 	{
@@ -91,14 +97,14 @@
 	{
 		"date": "6-18-24",
 		"updates": {
-			"Listbuilder": ["Added Drag and drop functionality", "Added formations to unit list", "Changed shareable list code format"]
+			"List Builder": ["Added Drag and drop functionality", "Added formations to unit list", "Changed shareable list code format"]
 		}
 	},
 	{
 		"date": "6-1-24",
 		"notice": "Kind of stopped keeping this list up to date. These are the major changes implemented over the last month and a half.",
 		"updates": {
-			"Listbuilder": ["Combined generic and 350 list builders into one with a rules selector."],
+			"List Builder": ["Combined generic and 350 list builders into one with a rules selector."],
 			"Unit Search": ["Added a unit lookup separate from the list builder"],
 			"Tournament Dashboard": ["Created tournament dashboard and list validator"]
 		}
@@ -136,7 +142,7 @@
 		"date": "3-20-24",
 		"updates": {
 			"List Builder": [
-				" Add caching for faction lists. Should reduce the number of times the MUL is hit when searching for same faction in a day and add ability for listbuilder to still function when MUL is down."
+				" Add caching for faction lists. Should reduce the number of times the MUL is hit when searching for same faction in a day and add ability for List Builder to still function when MUL is down."
 			]
 		}
 	},

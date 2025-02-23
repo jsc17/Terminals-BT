@@ -65,7 +65,7 @@ export class ResultList {
 
 	filters = $state<Filter[]>(filtersImport);
 	additionalFilters = $state<Filter[]>(additionalFiltersImport);
-	sort = $state({ key: "", order: "asc" });
+	sort = $state<{ key: string; order: string; extra?: any }>({ key: "", order: "asc" });
 	filteredList = $derived.by(() => this.filterList());
 
 	status = $state();
@@ -327,9 +327,18 @@ export class ResultList {
 					} else {
 						second = b.move[0].speed;
 					}
-				} else if (this.sort.key == "health (a+s)") {
-					first = a.health;
-					second = b.health;
+				} else if (this.sort.key == "damage") {
+					if (this.sort.extra.type == "damageTotal") {
+						first = (a.damageS ?? 0) + (a.damageM ?? 0) + (a.damageL ?? 0);
+						second = (b.damageS ?? 0) + (b.damageM ?? 0) + (b.damageL ?? 0);
+					} else {
+						first = a[this.sort.extra.type];
+						second = b[this.sort.extra.type];
+					}
+					if (this.sort.extra.includeOV) {
+						first += a.overheat ?? 0;
+						second += b.overheat ?? 0;
+					}
 				} else {
 					first = a[this.sort.key];
 					second = b[this.sort.key];

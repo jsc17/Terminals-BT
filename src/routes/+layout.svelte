@@ -246,4 +246,8 @@
 		padding: 0;
 		margin: 0;
 	}
+	:global(.muted-separator) {
+		border: 1px solid var(--border);
+		margin: 4px 0px;
+	}
 </style>

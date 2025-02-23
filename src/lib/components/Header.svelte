@@ -83,7 +83,7 @@
 			<li><a href="/unitsearch" aria-current={page.url.pathname === "/unitsearch"} onclick={closeNav}>Alpha Strike Unit Search</a></li>
 			<hr />
 			<li><a href="http://masterunitlist.info" target="_blank">Master Unit List</a></li>
-			<li><a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rlies-2/" target="_blank">Wolfnet 350 Rules</a></li>
+			<li><a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">Wolfnet 350 Rules</a></li>
 			<hr />
 			<!-- <li><a href="/about" aria-current={page.url.pathname === "/about"} onclick={closeNav}>About</a></li> -->
 			<li><a href="/changelog" aria-current={page.url.pathname === "/changelog"} onclick={closeNav}>Changelog</a></li>

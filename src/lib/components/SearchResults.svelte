@@ -7,11 +7,28 @@
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { getContext } from "svelte";
 	import type { List } from "../../routes/listbuilder/types/list.svelte";
+	import DamageSortPopover from "./DamageSortPopover.svelte";
 
 	const list: List = getContext("list");
 	const resultList: ResultList = getContext("resultList");
 
-	let headers = $derived(appWindow.isMobile ? ["Type", "PV", "Move", "Health"] : ["Type", "PV", "Size", "Move", "TMM", "Health (A+S)"]);
+	let headers = $derived(
+		appWindow.isMobile
+			? [
+					{ label: "Type", key: "subtype" },
+					{ label: "PV", key: "pv" },
+					{ label: "Move", key: "move" },
+					{ label: "Health", key: "health" }
+				]
+			: [
+					{ label: "Type", key: "subtype" },
+					{ label: "PV", key: "pv" },
+					{ label: "Size", key: "size" },
+					{ label: "Move", key: "move" },
+					{ label: "TMM", key: "tmm" },
+					{ label: "Health (A+S)", key: "health" }
+				]
+	);
 
 	let listHeight = $state(500);
 	let listWidth = $state(0);
@@ -19,19 +36,15 @@
 	let availabilityDialog = $state<HTMLDialogElement>();
 	let availabilityResults = $state<any[]>([]);
 
-	function sort(event: Event) {
-		if (event.target instanceof HTMLElement) {
-			const target = event.currentTarget as HTMLElement;
-			const targetName = target.dataset.sort!;
-			if (resultList.sort.key != targetName) {
-				resultList.sort.key = targetName;
-				resultList.sort.order = "asc";
+	function sort(key: string) {
+		if (resultList.sort.key != key) {
+			resultList.sort.key = key;
+			resultList.sort.order = "asc";
+		} else {
+			if (resultList.sort.order == "asc") {
+				resultList.sort.order = "des";
 			} else {
-				if (resultList.sort.order == "asc") {
-					resultList.sort.order = "des";
-				} else {
-					resultList.sort.key = "";
-				}
+				resultList.sort.key = "";
 			}
 		}
 	}
@@ -54,7 +67,7 @@
 <div class="search-results">
 	<div class:result-list-header={!appWindow.isMobile} class:result-list-header-mobile={appWindow.isMobile}>
 		<div class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile}></div>
-		<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile} data-sort="name" onclick={sort} bind:clientWidth={listWidth}>
+		<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile} onclick={() => sort("name")} bind:clientWidth={listWidth}>
 			{appWindow.isMobile ? `Name` : `Name - ${resultList.filteredList.length}/${resultList.availableList.length} results shown`}
 			{#if resultList.sort.key == "name"}
 				<img class="sort-selected button-icon" src={resultList.sort.order == "asc" ? "/icons/sort-ascending.svg" : "/icons/sort-descending.svg"} alt="sort" />
@@ -63,16 +76,17 @@
 			{/if}
 		</button>
 		{#each headers as header}
-			<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile} data-sort={header.toLowerCase()} onclick={sort}>
-				{header}
-				{#if resultList.sort.key == header.toLowerCase()}
+			<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile} onclick={() => sort(header.key)}>
+				{header.label}
+				{#if resultList.sort.key == header.key}
 					<img class="sort-selected button-icon" src={resultList.sort.order == "asc" ? "/icons/sort-ascending.svg" : "/icons/sort-descending.svg"} alt="sort" />
 				{:else}
 					<img class="sort button-icon" src="/icons/sort.svg" alt="sort" />
 				{/if}
 			</button>
 		{/each}
-		<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile}> {appWindow.isMobile ? `DMG` : `DMG S/M/L-OV`}</button>
+		<!-- <button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile}> </button> -->
+		<DamageSortPopover {resultList}></DamageSortPopover>
 	</div>
 	{#await resultList.status}
 		<div class="loading-message">Loading units. Please wait ...</div>
@@ -200,8 +214,7 @@
 		display: flex;
 		font-size: x-large;
 	}
-	.sort-header-button,
-	.sort-header-button-mobile {
+	:global(.sort-header-button, .sort-header-button-mobile) {
 		background-color: var(--card);
 		display: flex;
 		align-items: center;
@@ -213,16 +226,17 @@
 		border: 1px solid var(--border);
 		border-radius: 0%;
 	}
-	.sort-header-button-mobile {
+	:global(.sort-header-button-mobile) {
 		display: flex;
 		flex-direction: column;
-		img {
-			width: 10px;
-			height: 10px;
-		}
 		gap: 0px;
 	}
-	.sort {
+	:global(.sort-header-button-mobile img) {
+		width: 10px;
+		height: 10px;
+	}
+
+	:global(.sort) {
 		filter: var(--muted-filter);
 	}
 	:global(.sort-selected) {

@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { Combobox, type WithoutChildrenOrChild, mergeProps } from "bits-ui";
-
-	export type ComboboxItem = { value: string; label: string };
+	import type { Item } from "./types";
 
 	type Props = Combobox.RootProps & {
-		items: ComboboxItem[];
+		items: Item[];
 		inputProps?: WithoutChildrenOrChild<Combobox.InputProps>;
 		contentProps?: WithoutChildrenOrChild<Combobox.ContentProps>;
 	};

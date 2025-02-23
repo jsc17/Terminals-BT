@@ -4,7 +4,8 @@
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { getContext, onMount } from "svelte";
-	import Combobox, { type ComboboxItem } from "./Generic/Combobox.svelte";
+	import Combobox from "./Generic/Combobox.svelte";
+	import type { Item } from "./Generic/types";
 	import type { List } from "../../routes/listbuilder/types/list.svelte";
 
 	const resultList: ResultList = getContext("resultList");
@@ -12,7 +13,7 @@
 
 	let showParameters = $state(false);
 
-	let allowedEras: ComboboxItem[] = eraLists
+	let allowedEras: Item[] = eraLists
 		.filter((era) => {
 			return era.id != 0;
 		})

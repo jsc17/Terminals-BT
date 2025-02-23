@@ -336,8 +336,17 @@ export class ResultList {
 						second = b[this.sort.extra.type];
 					}
 					if (this.sort.extra.includeOV) {
-						first += a.overheat ?? 0;
-						second += b.overheat ?? 0;
+						if (this.sort.extra.type == "damageL") {
+							if (a.abilities.toLowerCase().includes("ovl")) {
+								first += a.overheat ?? 0;
+							}
+							if (b.abilities.toLowerCase().includes("ovl")) {
+								second += b.overheat ?? 0;
+							}
+						} else {
+							first += a.overheat ?? 0;
+							second += b.overheat ?? 0;
+						}
 					}
 				} else {
 					first = a[this.sort.key];

@@ -64,11 +64,26 @@ export const actions = {
 		return { unitList };
 	},
 	getUnits: async ({ request }) => {
-		let { eras, factions, general } = await request.json();
+		let { eras, factions, general, eraSearchType, factionSearchType } = await request.json();
 
 		let unitList: any[] = [];
 		let uniqueList: any[] = [];
 		let generalList: any[] = [];
+		let eraCondition: { AND?: any[], OR?: any[]} = {};
+		if(eraSearchType == "any"){
+			eraCondition.OR = eras.map((era: number) => {return { era }})
+		} else {
+			eraCondition.AND = eras.map((era: number) => {return { era }})
+		}
+		let factionCondition: { AND?: any[], OR?: any[]} = {};
+		if(factionSearchType == "any"){
+			factionCondition.OR = factions.map((era: number) => {return { era }})
+		} else {
+			factionCondition.AND = factions.map((era: number) => {return { era }})
+		}
+		console.log(eraCondition);
+		console.log(factionCondition);
+
 		if (eras.length == 0 && factions.length == 0) {
 			unitList = await prisma.unit.findMany({});
 			uniqueList = await prisma.unit.findMany({

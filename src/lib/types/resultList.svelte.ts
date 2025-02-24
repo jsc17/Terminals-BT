@@ -14,6 +14,9 @@ export class ResultList {
 	selectedEras = $state<string[]>([]);
 	selectedFactions = $state<string[]>([]);
 
+	eraSearchType = $state<"any" | "all">("any");
+	factionSearchType = $state<"any" | "all">("any");
+
 	get eras(): number[] {
 		return this.#eras;
 	}
@@ -145,7 +148,7 @@ export class ResultList {
 
 	async loadUnits() {
 		const response: any = deserialize(
-			await (await fetch("/?/getUnits", { method: "POST", body: JSON.stringify({ eras: this.#eras, factions: this.#factions, general: this.general }) })).text()
+			await (await fetch("/?/getUnits", { method: "POST", body: JSON.stringify({ eras: this.#eras, factions: this.#factions, general: this.general, eraSearchType: this.eraSearchType, factionSearchType: this.factionSearchType }) })).text()
 		);
 		const unitList = response.data.unitList;
 		this.uniqueList = response.data.uniqueList.map((unit: any) => {
@@ -385,5 +388,11 @@ export class ResultList {
 
 	clear() {
 		this.resultList = [];
+		this.generalList = [];
+		this.uniqueList = [];
+		this.#eras = [];
+		this.#factions = [];
+		this.selectedEras = [];
+		this.selectedFactions = [];
 	}
 }

@@ -123,7 +123,7 @@ model Unit {
   date_introduced Int?
   role String?
   type String
-  subtype String
+  subtype String?
   size Int
   move String
   tmm Int
@@ -143,14 +143,36 @@ model Unit {
   abilities String?
   tonnage Int? @default(0)
   image_url String?
-  factions Faction[]
+  factionsOld FactionOld[]
 }
 
-model Faction{
+model FactionOld{
   id String   @id
   era Int
   faction Int
   general Int
   updated DateTime @default(now())
   units Unit[]
+}
+
+model Faction {
+  id Int @id
+  name String
+  eras FactionInEra[]
+}
+
+model Era {
+  id Int @id
+  name String
+  factions FactionInEra[]
+}
+
+model FactionInEra {
+  era Era @relation(fields: [eraId], references: [id])
+  eraId Int
+  faction Faction @relation(fields: [factionId], references: [id])
+  factionId Int
+  general Int
+  updated DateTime @default(now())
+  @@id([eraId, factionId])
 }

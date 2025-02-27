@@ -143,16 +143,7 @@ model Unit {
   abilities String?
   tonnage Int? @default(0)
   image_url String?
-  factionsOld FactionOld[]
-}
-
-model FactionOld{
-  id String   @id
-  era Int
-  faction Int
-  general Int
-  updated DateTime @default(now())
-  units Unit[]
+  availability Availability[]
 }
 
 model Faction {
@@ -174,5 +165,15 @@ model FactionInEra {
   factionId Int
   general Int
   updated DateTime @default(now())
+  units Availability[]
   @@id([eraId, factionId])
+}
+
+model Availability {
+  unit Unit @relation(fields: [unitId], references: [id])
+  unitId Int
+  factionAndEra FactionInEra @relation(fields: [era, faction], references: [eraId, factionId])
+  faction Int
+  era Int
+  @@id([unitId, faction, era])
 }

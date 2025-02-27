@@ -69,26 +69,12 @@ export const actions = {
 		let unitList: any[] = [];
 		let uniqueList: any[] = [];
 		let generalList: any[] = [];
-		let eraCondition: { AND?: any[], OR?: any[]} = {};
-		if(eraSearchType == "any"){
-			eraCondition.OR = eras.map((era: number) => {return { era }})
-		} else {
-			eraCondition.AND = eras.map((era: number) => {return { era }})
-		}
-		let factionCondition: { AND?: any[], OR?: any[]} = {};
-		if(factionSearchType == "any"){
-			factionCondition.OR = factions.map((era: number) => {return { era }})
-		} else {
-			factionCondition.AND = factions.map((era: number) => {return { era }})
-		}
-		console.log(eraCondition);
-		console.log(factionCondition);
 
 		if (eras.length == 0 && factions.length == 0) {
 			unitList = await prisma.unit.findMany({});
 			uniqueList = await prisma.unit.findMany({
 				where: {
-					factions: {
+					availability: {
 						some: {
 							faction: 4
 						}
@@ -98,20 +84,10 @@ export const actions = {
 		} else {
 			unitList = await prisma.unit.findMany({
 				where: {
-					factions: {
+					availability: {
 						some: {
-							AND: [
-								{
-									OR: eras.map((era: number) => {
-										return { era };
-									})
-								},
-								{
-									OR: factions.map((faction: number) => {
-										return { faction };
-									})
-								}
-							]
+							era: { in: eras },
+							faction: { in: factions }
 						}
 					}
 				},
@@ -121,18 +97,10 @@ export const actions = {
 			});
 			uniqueList = await prisma.unit.findMany({
 				where: {
-					factions: {
+					availability: {
 						some: {
-							AND: [
-								{
-									OR: eras.map((era: number) => {
-										return { era };
-									})
-								},
-								{
-									faction: 4
-								}
-							]
+							era: { in: eras },
+							faction: 4
 						}
 					}
 				},
@@ -143,8 +111,11 @@ export const actions = {
 			if (general != -1) {
 				generalList = await prisma.unit.findMany({
 					where: {
-						factions: {
-							some: { faction: general, era: eras[0] }
+						availability: {
+							some: {
+								era: { in: eras },
+								faction: general
+							}
 						}
 					},
 					orderBy: {
@@ -167,26 +138,28 @@ export const actions = {
 				mulId
 			},
 			select: {
-				factions: {
+				availability: {
 					select: {
-						era: true,
-						faction: true
+						faction: true,
+						era: true
 					}
 				}
 			}
 		});
 
-		const formattedAvailability = new Map<number, number[]>();
-		if (availabilityResults) {
-			for (const result of availabilityResults.factions) {
-				const factionList = formattedAvailability.get(result.era);
-				if (factionList) {
-					factionList.push(result.faction);
-				} else {
-					formattedAvailability.set(result.era, [result.faction]);
-				}
-			}
-		}
+		console.log(availabilityResults);
+
+		const formattedAvailability = new Map<string, string[]>();
+		// if (availabilityResults) {
+		// 	for (const result of availabilityResults.factions) {
+		// 		const factionList = formattedAvailability.get(result.eras.eraId);
+		// 		if (factionList) {
+		// 			factionList.push(result.id);
+		// 		} else {
+		// 			formattedAvailability.set(result.eras, [result.id]);
+		// 		}
+		// 	}
+		// }
 		const unitAvailability = [...formattedAvailability].map((entry) => {
 			return { era: entry[0], factionList: entry[1] };
 		});

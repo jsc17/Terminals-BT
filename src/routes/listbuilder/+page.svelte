@@ -110,22 +110,26 @@
 		margin: 0;
 		position: relative;
 		width: 100%;
+		height: 100%;
 		display: flex;
 		flex-direction: column;
 	}
-
+	.list-drawer-wrapper {
+		height: 100%;
+		width: 100%;
+	}
 	@media (width < 1000px) {
 		.list-drawer-wrapper {
 			visibility: hidden;
 			position: absolute;
-			bottom: 70px;
+			top: 1dvh;
 			left: 0;
 			right: 0;
 			margin-left: auto;
 			margin-right: auto;
 			z-index: 4;
-			height: 100%;
-			width: min(max-content, 95dvw);
+			height: 90dvh;
+			width: 95dvw;
 		}
 		.show-listbuilder {
 			visibility: visible;
@@ -161,10 +165,6 @@
 		gap: 8px;
 		width: 100%;
 		flex: 1;
-	}
-	.list-drawer-wrapper {
-		height: 100%;
-		width: 100%;
 	}
 	button {
 		height: min(30px, 90%);

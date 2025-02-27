@@ -169,13 +169,13 @@ export class ResultList {
 	}
 
 	applyOptions() {
-		let tempAvailableList: MulUnit[] = [];
+		let tempRestrictedList: MulUnit[] = [];
 		if (this.options) {
-			if (this.resultList.length) {
+			if (this.availableList.length) {
 				for (const unitList of customCards.unitPacks) {
 					if (this.options.customUnitPacks?.includes(unitList.name)) {
 						for (const unit of unitList.units) {
-							tempAvailableList.push({
+							tempRestrictedList.push({
 								mulId: unit.id,
 								type: unit.type,
 								subtype: unit.type,
@@ -191,14 +191,17 @@ export class ResultList {
 					}
 				}
 			}
-			for (const unit of this.resultList) {
+			for (const unit of this.availableList) {
 				if (this.options.allowedTypes && !this.options.allowedTypes?.includes(unit.subtype)) {
+					console.log("type", unit.name, unit.subtype);
 					continue;
 				}
 				if (this.options.allowedRules && !this.options.allowedRules?.includes(unit.rulesLevel)) {
+					console.log("rules", unit.name, unit.rulesLevel);
 					continue;
 				}
 				if (this.options.disallowUnique && this.uniqueList.includes(unit.mulId)) {
+					console.log("unique", unit.name);
 					continue;
 				}
 				if (this.options.disallowedAbilities) {
@@ -209,18 +212,19 @@ export class ResultList {
 						}
 					}
 					if (prohibited) {
+						console.log("ability", unit.name, unit.abilities)
 						continue;
 					}
 				}
-				tempAvailableList.push(unit);
+				tempRestrictedList.push(unit);
 			}
 		} else {
-			tempAvailableList = [...this.resultList];
+			tempRestrictedList = [...this.resultList];
 		}
-		return tempAvailableList;
+		return tempRestrictedList;
 	}
 	filterList() {
-		let tempResultList = [...this.availableList];
+		let tempResultList = [...this.restrictedList];
 		this.filters.concat(this.additionalFilters).forEach((filter) => {
 			switch (filter.type) {
 				case "string":

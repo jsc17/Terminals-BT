@@ -193,9 +193,6 @@
 							}}
 						>
 							<td class:local={localLists.includes(savedList.name)}>{savedList.name}</td>
-							<!-- <td style="text-align:center">{eras.get(savedList.eras[0])}</td>
-							<td style="text-align:center">{factions.get(savedList.factions[0])}</td>
-							<td style="text-align:center">{getRules(savedList.rules)?.display}</td> -->
 							<td><button onclick={() => deleteList(savedList.id)}>-</button></td>
 						</tr>
 					{/each}

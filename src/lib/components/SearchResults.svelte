@@ -3,7 +3,7 @@
 	import { enhance } from "$app/forms";
 	import { VirtualList } from "svelte-virtuallists";
 	import { type ActionResult } from "@sveltejs/kit";
-	import { eras, factions } from "$lib/data/erasFactionLookup";
+	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { getContext } from "svelte";
 	import type { List } from "../../routes/listbuilder/types/list.svelte";
@@ -34,7 +34,7 @@
 	let listWidth = $state(0);
 
 	let availabilityDialog = $state<HTMLDialogElement>();
-	let availabilityResults = $state<any[]>([]);
+	let availabilityResults = $state<{era: string, factionList:string[]}[]>([]);
 
 	function sort(key: string) {
 		if (resultList.sort.key != key) {
@@ -51,13 +51,12 @@
 	async function showAvailability() {
 		return async ({ result }: { result: ActionResult }) => {
 			if (result.type == "success") {
-				const order = [...eras].map(([key, value]) => {
+				const order = [...eraLookup].map(([key, value]) => {
 					return key;
 				});
 				availabilityResults = result.data?.unitAvailability.sort((a: any, b: any) => {
 					return order.indexOf(a.era) - order.indexOf(b.era);
 				});
-
 				availabilityDialog?.showModal();
 			}
 		};
@@ -68,7 +67,7 @@
 	<div class:result-list-header={!appWindow.isMobile} class:result-list-header-mobile={appWindow.isMobile}>
 		<div class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile}></div>
 		<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile} onclick={() => sort("name")} bind:clientWidth={listWidth}>
-			{appWindow.isMobile ? `Name` : `Name - ${resultList.filteredList.length}/${resultList.availableList.length} results shown`}
+			{appWindow.isMobile ? `Name` : `Name - ${resultList.filteredList.length}/${resultList.restrictedList.length} results shown`}
 			{#if resultList.sort.key == "name"}
 				<img class="sort-selected button-icon" src={resultList.sort.order == "asc" ? "/icons/sort-ascending.svg" : "/icons/sort-descending.svg"} alt="sort" />
 			{:else}
@@ -168,12 +167,9 @@
 		</div>
 		<div class="availability-result-container">
 			{#each availabilityResults as result}
-				<div class="availability-result-era">{eras.get(result.era)}:</div>
+				<div class="availability-result-era">{result.era}:</div>
 				<div>
 					{result.factionList
-						.map((faction: number) => {
-							return factions.get(faction);
-						})
 						.sort()
 						.join(", ")}
 				</div>

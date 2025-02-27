@@ -1,6 +1,6 @@
 <script lang="ts">
   import eraLists from "$lib/data/erasFactionsList.json";
-  import { eras, factions } from "$lib/data/erasFactionLookup.js";
+  import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup.js";
   import { appWindow } from "$lib/stores/appWindow.svelte";
   import { ResultList } from "$lib/types/resultList.svelte";
   import { getContext, onMount } from "svelte";
@@ -20,7 +20,7 @@
     .map((era) => {
       return {
         value: era.id.toString(),
-        label: eras.get(era.id) ?? "Not Found",
+        label: eraLookup.get(era.id) ?? "Not Found",
       };
     });
 
@@ -41,15 +41,15 @@
     }
     allowed = [...new Set(allowed)];
     allowed.sort((a, b) => {
-      return (factions.get(a)?.toString() ?? "Not found") <
-        (factions.get(b)?.toString() ?? "Not Found")
+      return (factionLookup.get(a)?.toString() ?? "Not found") <
+        (factionLookup.get(b)?.toString() ?? "Not Found")
         ? -1
         : 1;
     });
     return allowed.map((faction) => {
       return {
         value: faction.toString(),
-        label: factions.get(faction)?.toString() ?? "Not found",
+        label: factionLookup.get(faction)?.toString() ?? "Not found",
       };
     });
   });
@@ -110,7 +110,7 @@
               );
             }}
             ><img src="/icons/close.svg" alt="close" />
-            {eras.get(Number(selected)) ?? `${selected} not found`}</button
+            {eraLookup.get(Number(selected)) ?? `${selected} not found`}</button
           >
         {/each}
         {#if resultList.selectedEras.length > 4}
@@ -170,7 +170,7 @@
         {#if resultList.selectedEras.length == 1 && resultList.selectedFactions.length == 1}
           <a
             href={`http://masterunitlist.info/Era/FactionEraDetails?FactionId=${resultList.factions[0]}&EraId=${resultList.eras[0]}`}
-            >{factions.get(resultList.general)}</a
+            >{factionLookup.get(resultList.general)}</a
           >
         {:else}
           <p class="general-notice">Select a single Era and Faction</p>

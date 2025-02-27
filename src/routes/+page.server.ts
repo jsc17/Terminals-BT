@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import { fail } from "@sveltejs/kit";
 import { prisma } from "$lib/server/prisma.js";
+import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup.js";
 
 export const actions = {
 	search: async ({ request }) => {
@@ -70,6 +71,8 @@ export const actions = {
 		let uniqueList: any[] = [];
 		let generalList: any[] = [];
 
+		console.log(eras.length, eras);
+
 		if (eras.length == 0 && factions.length == 0) {
 			unitList = await prisma.unit.findMany({});
 			uniqueList = await prisma.unit.findMany({
@@ -83,7 +86,7 @@ export const actions = {
 			});
 		} else {
 			unitList = await prisma.unit.findMany({
-				where: {
+				 where:{
 					availability: {
 						some: {
 							era: { in: eras },
@@ -144,22 +147,25 @@ export const actions = {
 						era: true
 					}
 				}
-			}
+			},
+			
 		});
 
 		console.log(availabilityResults);
 
 		const formattedAvailability = new Map<string, string[]>();
-		// if (availabilityResults) {
-		// 	for (const result of availabilityResults.factions) {
-		// 		const factionList = formattedAvailability.get(result.eras.eraId);
-		// 		if (factionList) {
-		// 			factionList.push(result.id);
-		// 		} else {
-		// 			formattedAvailability.set(result.eras, [result.id]);
-		// 		}
-		// 	}
-		// }
+		if (availabilityResults) {
+			for (const result of availabilityResults.availability) {
+				const eraName = eraLookup.get(result.era) ?? "Unknown";
+				const factionName = factionLookup.get(result.faction) ?? "Unknown";
+				const factionList = formattedAvailability.get(eraName);
+				if (factionList) {
+					factionList.push(factionName);
+				} else {
+					formattedAvailability.set(eraName, [factionName]);
+				}
+			}
+		}
 		const unitAvailability = [...formattedAvailability].map((entry) => {
 			return { era: entry[0], factionList: entry[1] };
 		});

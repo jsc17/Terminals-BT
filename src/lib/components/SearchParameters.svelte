@@ -225,11 +225,7 @@
 		font-size: 0.75em;
 		color: var(--muted-foreground);
 	}
-	.card {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-	}
+
 	.warning-icon {
 		height: 1em;
 		width: 1em;

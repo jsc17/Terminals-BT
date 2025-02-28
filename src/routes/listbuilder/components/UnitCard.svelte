@@ -103,6 +103,9 @@
 		align-items: center;
 		justify-items: center;
 	}
+	.unit-row-container {
+		flex: 1;
+	}
 	.unit-detail-row,
 	.unit-stat-row {
 		display: grid;

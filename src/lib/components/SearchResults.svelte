@@ -68,7 +68,7 @@
 	<div class:result-list-header={!appWindow.isMobile} class:result-list-header-mobile={appWindow.isMobile}>
 		<div class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile}></div>
 		<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile} onclick={() => sort("name")} bind:clientWidth={listWidth}>
-			{appWindow.isMobile ? `Name` : `Name - ${resultList.filteredList.length}/${resultList.availableList.length} results shown`}
+			{appWindow.isMobile ? `Name` : `Name - ${resultList.filteredList.length}/${resultList.restrictedList.length} results shown`}
 			{#if resultList.sort.key == "name"}
 				<img class="sort-selected button-icon" src={resultList.sort.order == "asc" ? "/icons/sort-ascending.svg" : "/icons/sort-descending.svg"} alt="sort" />
 			{:else}

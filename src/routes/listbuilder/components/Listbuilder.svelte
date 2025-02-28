@@ -7,7 +7,8 @@
 	import type { ResultList } from "$lib/types/resultList.svelte";
 	import type { List } from "../types/list.svelte";
 	import type { FormationV2 } from "../types/formation";
-	import { dndzone, type DndEvent } from "svelte-dnd-action";
+	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
+	import { appWindow } from "$lib/stores/appWindow.svelte";
 
 	const resultList: ResultList = getContext("resultList");
 	let list: List = getContext("list");
@@ -152,6 +153,12 @@
 			</div>
 			<p>Mechwarrior, BattleMech, 'Mech and Aerotech are registered trademarks of The Topps Company, Inc. All Rights Reserved.</p>
 		</div>
+	{:else if appWindow.isMobile}
+		<div class="list-units" use:dragHandleZone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations" }} onconsider={handleSort} onfinalize={handleSort}>
+			{#each list.formations as formation (formation.id)}
+				<FormationCard {formation}></FormationCard>
+			{/each}
+		</div>
 	{:else}
 		<div class="list-units" use:dndzone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations" }} onconsider={handleSort} onfinalize={handleSort}>
 			{#each list.formations as formation (formation.id)}
@@ -189,6 +196,7 @@
 		flex-direction: column;
 		gap: 8px;
 		padding: 4px 0px 16px 0px;
+		flex: 1;
 	}
 	.list-info {
 		display: flex;

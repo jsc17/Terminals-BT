@@ -44,20 +44,24 @@
 	</div>
 	<Combobox.Portal>
 		<Combobox.Content class="combobox-content" {...contentProps}>
-			{#each filteredItems as item, i (i + item.value)}
-				<Combobox.Item class="combobox-item" value={item.value} label={item.label}>
-					{#snippet children({ selected })}
-						{#if selected}
-							<img src="/icons/check.svg" alt="checkmark" />
-						{:else}
-							<div></div>
-						{/if}
-						{item.label}
-					{/snippet}
-				</Combobox.Item>
-			{:else}
-				<span> No results found </span>
-			{/each}
+			<Combobox.ScrollUpButton class="combobox-scroll-button"><img class="combobox-scroll-img" src="/icons/chevron-up.svg" alt="scroll up" /></Combobox.ScrollUpButton>
+			<Combobox.Viewport class="combobox-viewport">
+				{#each filteredItems as item, i (i + item.value)}
+					<Combobox.Item class="combobox-item" value={item.value} label={item.label}>
+						{#snippet children({ selected })}
+							{#if selected}
+								<img src="/icons/check.svg" alt="checkmark" />
+							{:else}
+								<div></div>
+							{/if}
+							{item.label}
+						{/snippet}
+					</Combobox.Item>
+				{:else}
+					<span> No results found </span>
+				{/each}
+			</Combobox.Viewport>
+			<Combobox.ScrollDownButton class="combobox-scroll-button"><img class="combobox-scroll-img" src="/icons/chevron-down.svg" alt="scroll down" /></Combobox.ScrollDownButton>
 		</Combobox.Content>
 	</Combobox.Portal>
 </Combobox.Root>
@@ -81,6 +85,7 @@
 		background-color: transparent;
 		border: none;
 		padding-left: 8px;
+		font-size: 16px;
 	}
 	:global(.combobox-trigger) {
 		background-color: transparent;
@@ -92,8 +97,9 @@
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		padding: 8px 8px 8px 4px;
-		max-height: min(25em, 95dvh);
-		overflow: auto;
+	}
+	:global(.combobox-viewport) {
+		max-height: min(25em, 25dvh);
 	}
 	:global(.combobox-item) {
 		display: grid;
@@ -108,5 +114,16 @@
 	:global(.combobox-item:hover) {
 		background-color: var(--muted);
 		cursor: default;
+	}
+	:global(.combobox-scroll-button) {
+		height: 1.05em;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+	:global(.combobox-scroll-img) {
+		height: 1em;
+		width: 1em;
+		filter: var(--muted-filter);
 	}
 </style>

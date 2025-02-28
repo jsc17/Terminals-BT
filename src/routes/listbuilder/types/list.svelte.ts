@@ -72,9 +72,10 @@ export class List {
 				issueList.set("Era/Faction", new Set(["Must select a single era and faction"]));
 			}
 			for (const unit of this.units) {
+				console.log(unit);
 				if (
 					this.options.eraFactionRestriction &&
-					!this.resultList.availableList.find((result) => {
+					!this.resultList.restrictedList.find((result) => {
 						return result.mulId == unit.baseUnit.mulId;
 					})
 				) {

@@ -118,7 +118,7 @@
 		.list-drawer-wrapper {
 			visibility: hidden;
 			position: absolute;
-			bottom: 70px;
+			top: 0;
 			left: 0;
 			right: 0;
 			margin-left: auto;
@@ -126,6 +126,7 @@
 			z-index: 4;
 			height: 100%;
 			width: min(max-content, 95dvw);
+			padding: 4px;
 		}
 		.show-listbuilder {
 			visibility: visible;

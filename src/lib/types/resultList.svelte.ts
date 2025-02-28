@@ -188,7 +188,7 @@ export class ResultList {
 					}
 				}
 			}
-			for (const unit of this.resultList) {
+			for (const unit of this.availableList) {
 				if (this.options.allowedTypes && !this.options.allowedTypes?.includes(unit.subtype)) {
 					continue;
 				}
@@ -217,7 +217,7 @@ export class ResultList {
 		return tempAvailableList;
 	}
 	filterList() {
-		let tempResultList = [...this.availableList];
+		let tempResultList = [...this.restrictedList];
 		this.filters.concat(this.additionalFilters).forEach((filter) => {
 			switch (filter.type) {
 				case "string":

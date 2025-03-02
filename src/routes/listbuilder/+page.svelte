@@ -121,14 +121,15 @@
 		.list-drawer-wrapper {
 			visibility: hidden;
 			position: absolute;
-			top: 1dvh;
+			top: 0;
 			left: 0;
 			right: 0;
 			margin-left: auto;
 			margin-right: auto;
 			z-index: 4;
-			height: 90dvh;
-			width: 95dvw;
+			height: 100%;
+			width: min(max-content, 95dvw);
+			padding: 4px;
 		}
 		.show-listbuilder {
 			visibility: visible;

@@ -1,12 +1,13 @@
 <script lang="ts">
 	import UnitCard from "./UnitCard.svelte";
-	import { dndzone, type DndEvent } from "svelte-dnd-action";
+	import { dndzone, dragHandleZone, type DndEvent, dragHandle } from "svelte-dnd-action";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import Menu from "$lib/components/Generic/Menu.svelte";
 	import { getContext } from "svelte";
 	import type { List } from "../types/list.svelte";
 	import { type FormationV2, formationTypes } from "../types/formation";
 	import { exportToJeff } from "../utilities/export.svelte";
+	import { appWindow } from "$lib/stores/appWindow.svelte";
 
 	let list: List = getContext("list");
 	let { formation }: { formation: FormationV2 } = $props();
@@ -32,10 +33,15 @@
 	<button class="menu-button" onclick={exportFormationToJeff}>Export Formation to Jeff's Tools </button>
 {/snippet}
 
-<main>
+<div class="formation-card">
 	{#if formation.id == "unassigned"}
 		{#if list.formations.length != 1}
 			<div class="formation-header">
+				{#if appWindow.isMobile}
+					<div class="drag-handles" use:dragHandle>
+						<img class="combobox-img" src="/icons/chevron-updown.svg" alt="expand list chevrons" />
+					</div>
+				{/if}
 				Unassigned Units
 				<Menu img={"/icons/menu.svg"}>
 					{@render jeffExportButton()}
@@ -44,14 +50,17 @@
 		{/if}
 	{:else}
 		<div class="formation-header">
+			{#if appWindow.isMobile}
+				<div class="drag-handles" use:dragHandle>
+					<img class="combobox-img" src="/icons/chevron-updown.svg" alt="expand list chevrons" />
+				</div>
+			{/if}
 			<input class="formation-name" type="text" name="formation-name" id="formation-id" bind:value={formation.name} />
-			<div class="inline">
-				<select class="formation-type-select" name="formation-type" bind:value={formation.type}>
-					{#each formationTypes as formationType}
-						<option value={formationType}>{formationType}</option>
-					{/each}
-				</select>
-			</div>
+			<select class="formation-type-select" name="formation-type" bind:value={formation.type}>
+				{#each formationTypes as formationType}
+					<option value={formationType}>{formationType}</option>
+				{/each}
+			</select>
 			<Menu img={"/icons/menu.svg"}>
 				{@render jeffExportButton()}
 				<button
@@ -69,30 +78,43 @@
 	{#if !formation.units.length}
 		<div class="drop-message">Drop units here to add them to this formation</div>
 	{/if}
-	<div
-		class="unit-cards"
-		use:dndzone={{ items: formation.units, dropTargetStyle, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
-		onconsider={handleSort}
-		onfinalize={handleSort}
-	>
-		{#each formation.units as unit (unit.id)}
-			<UnitCard unitId={unit.id}></UnitCard>
-		{/each}
-	</div>
-</main>
+	{#if appWindow.isMobile}
+		<div
+			class="unit-cards"
+			use:dragHandleZone={{ items: formation.units, dropTargetStyle, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
+			onconsider={handleSort}
+			onfinalize={handleSort}
+		>
+			{#each formation.units as unit (unit.id)}
+				<UnitCard unitId={unit.id}></UnitCard>
+			{/each}
+		</div>
+	{:else}
+		<div
+			class="unit-cards"
+			use:dndzone={{ items: formation.units, dropTargetStyle, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
+			onconsider={handleSort}
+			onfinalize={handleSort}
+		>
+			{#each formation.units as unit (unit.id)}
+				<UnitCard unitId={unit.id}></UnitCard>
+			{/each}
+		</div>
+	{/if}
+</div>
 
 <style>
 	.menu-button {
 		background-color: transparent;
 		color: var(--primary);
 	}
-	main {
+	.formation-card {
 		position: relative;
-		/* border: 1px solid var(--border); */
 		width: 100%;
 		background-color: var(--card);
+		flex-shrink: 0;
 	}
-	main:hover {
+	.formation-card:hover {
 		box-shadow: 3px 0px 3px var(--primary) inset;
 		cursor: row-resize;
 	}
@@ -103,6 +125,7 @@
 		justify-content: space-between;
 		align-items: center;
 		border: 1px solid var(--border);
+		gap: 4px;
 	}
 	.unit-cards {
 		padding: 2px;
@@ -121,11 +144,16 @@
 		border: 1px solid var(--primary);
 	}
 	.formation-type-select {
-		width: 90%;
+		flex: 1;
 	}
 	.drop-message {
 		margin-top: 4px;
 		align-self: center;
 		justify-self: center;
+	}
+	.drag-handles {
+		display: flex;
+		align-items: center;
+		justify-items: center;
 	}
 </style>

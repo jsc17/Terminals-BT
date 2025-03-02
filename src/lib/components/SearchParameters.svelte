@@ -252,6 +252,7 @@
 		font-size: 0.75em;
 		color: var(--muted-foreground);
 	}
+
 	.warning-icon {
 		height: 1em;
 		width: 1em;

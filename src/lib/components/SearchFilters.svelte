@@ -100,7 +100,7 @@
 	>
 		<div class="space-between">
 			<div></div>
-			<div>Filters - {resultList.filteredList.length}/{resultList.availableList.length}</div>
+			<div>Filters - {resultList.filteredList.length}/{resultList.restrictedList.length}</div>
 			<div>
 				{#if showFilters}
 					-

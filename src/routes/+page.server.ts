@@ -71,66 +71,141 @@ export const actions = {
 		let uniqueList: any[] = [];
 		let generalList: any[] = [];
 
-		console.log(eras.length, eras);
+		let searchConditions: any;
+		let uniqueConditions: any;
 
-		if (eras.length == 0 && factions.length == 0) {
-			unitList = await prisma.unit.findMany({});
-			uniqueList = await prisma.unit.findMany({
-				where: {
-					availability: {
-						some: {
-							faction: 4
-						}
+		if (!eras.length) {
+			eraSearchType = "any";
+		}
+		if (!factions.length) {
+			factionSearchType = "any";
+		}
+
+		if (eraSearchType == "any" && factionSearchType == "any") {
+			searchConditions = {
+				availability: {
+					some: {
+						era: eras.length == 0 ? undefined : { in: eras },
+						faction: factions.length == 0 ? undefined : { in: factions }
 					}
 				}
-			});
-		} else {
-			unitList = await prisma.unit.findMany({
-				 where:{
-					availability: {
-						some: {
-							era: { in: eras },
-							faction: { in: factions }
-						}
+			};
+			uniqueConditions = {
+				availability: {
+					some: {
+						era: eras.length == 0 ? undefined : { in: eras },
+						faction: 4
 					}
-				},
-				orderBy: {
-					tonnage: "asc"
 				}
-			});
-			uniqueList = await prisma.unit.findMany({
-				where: {
-					availability: {
-						some: {
-							era: { in: eras },
-							faction: 4
-						}
-					}
-				},
-				select: {
-					mulId: true
-				}
-			});
-			if (general != -1) {
-				generalList = await prisma.unit.findMany({
-					where: {
+			};
+		} else if (eraSearchType == "every" && factionSearchType == "any") {
+			searchConditions = {
+				AND: eras.map((era: number) => {
+					return {
 						availability: {
 							some: {
-								era: { in: eras },
-								faction: general
+								era,
+								faction: factions.length == 0 ? undefined : { in: factions }
 							}
 						}
-					},
-					orderBy: {
-						tonnage: "asc"
+					};
+				})
+			};
+			uniqueConditions = {
+				availability: {
+					some: {
+						era: eras.length == 0 ? undefined : { in: eras },
+						faction: 4
+					}
+				}
+			};
+		} else if (eraSearchType == "every" && factionSearchType == "every") {
+			searchConditions = {
+				AND: eras.flatMap((era: number) => {
+					return factions.map((faction: number) => {
+						return {
+							availability: {
+								some: {
+									era,
+									faction
+								}
+							}
+						};
+					});
+				})
+			};
+
+			uniqueConditions = {
+				availability: {
+					some: {
+						era: eras.length == 0 ? undefined : { in: eras },
+						faction: 4
+					}
+				}
+			};
+		} else if (eraSearchType == "any" && factionSearchType == "every") {
+			searchConditions = {
+				AND: factions.map((faction: number) => {
+					return {
+						availability: {
+							some: {
+								era: eras.length == 0 ? undefined : { in: eras },
+								faction
+							}
+						}
+					};
+				})
+			};
+			uniqueConditions = {
+				availability: {
+					some: {
+						era: eras.length == 0 ? undefined : { in: eras },
+						faction: 4
+					}
+				}
+			};
+		}
+
+		try {
+			if (eras.length == 0 && factions.length == 0) {
+				unitList = await prisma.unit.findMany({});
+				uniqueList = await prisma.unit.findMany({
+					where: {
+						availability: {
+							some: { faction: 4 }
+						}
 					}
 				});
+			} else {
+				unitList = await prisma.unit.findMany({
+					where: searchConditions,
+					orderBy: { tonnage: "asc" }
+				});
+				uniqueList = await prisma.unit.findMany({
+					where: uniqueConditions,
+					select: { mulId: true }
+				});
+				if (general != -1) {
+					generalList = await prisma.unit.findMany({
+						where: {
+							availability: {
+								some: {
+									era: { in: eras },
+									faction: general
+								}
+							}
+						},
+						orderBy: { tonnage: "asc" }
+					});
+				}
 			}
+		} catch (error) {
+			return fail(400, { message: "Failed to load units" });
 		}
-		if (unitList) {
-			return { unitList, uniqueList, generalList };
+		if (unitList.length) {
+			return { message: "Units Loaded", unitList, uniqueList, generalList };
 		} else {
-			return fail(400, { message: "Unit request failed" });
+			return { message: "No Units Found" };
 		}
 	},
 	getUnitAvailability: async ({ request }) => {
@@ -147,11 +222,8 @@ export const actions = {
 						era: true
 					}
 				}
-			},
-			
+			}
 		});
-
-		console.log(availabilityResults);
 
 		const formattedAvailability = new Map<string, string[]>();
 		if (availabilityResults) {

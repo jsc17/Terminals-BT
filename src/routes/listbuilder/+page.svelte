@@ -36,7 +36,6 @@
 		if (lastList) {
 			importData = JSON.parse(lastList);
 			if (importData.lcVersion) {
-				console.log(importData);
 				let eras, factions;
 				if (importData.lcVersion == 2) {
 					eras = importData.eras;

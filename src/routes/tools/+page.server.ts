@@ -209,7 +209,7 @@ export const actions = {
 						}
 					});
 				} catch (error) {
-					console.log(unit.name, "failed to load", unit.id);
+					console.log(unit.Name, "failed to load", unit.Id);
 				}
 			}
 

@@ -250,4 +250,7 @@
 		border: 1px solid var(--border);
 		margin: 4px 0px;
 	}
+	:global(.primary-span) {
+		color: var(--primary);
+	}
 </style>

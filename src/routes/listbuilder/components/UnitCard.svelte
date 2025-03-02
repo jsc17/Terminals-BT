@@ -29,7 +29,6 @@
 				Skill - <input
 					class="skill-input"
 					onchange={(e) => {
-						console.log("changing skill");
 						modifySkill(e, unit);
 					}}
 					type="number"

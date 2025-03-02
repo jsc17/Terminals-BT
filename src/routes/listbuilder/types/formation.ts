@@ -25,12 +25,3 @@ export type FormationV2 = {
 	type: string;
 	units: { id: string }[];
 };
-
-export function convertOldFormations(items: any): [UnitV2[], FormationV2[]] {
-	let units: UnitV2[] = [];
-	let formations: FormationV2[] = [];
-
-	console.log(items);
-
-	return [units, formations];
-}

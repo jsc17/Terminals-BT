@@ -32,7 +32,6 @@
 				const responseLists = JSON.parse(response.data.lists);
 				console.log(`${responseLists.length} lists loaded`);
 				for (const tempList of responseLists) {
-					console.log(tempList);
 					savedLists.push({
 						id: tempList.id,
 						name: tempList.name,

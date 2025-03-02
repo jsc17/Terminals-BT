@@ -3,11 +3,11 @@
 	import { enhance } from "$app/forms";
 	import { VirtualList } from "svelte-virtuallists";
 	import { type ActionResult } from "@sveltejs/kit";
-	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { getContext } from "svelte";
 	import type { List } from "../../routes/listbuilder/types/list.svelte";
 	import DamageSortPopover from "./DamageSortPopover.svelte";
+	import { eraLookup } from "$lib/data/erasFactionLookup";
 
 	const list: List = getContext("list");
 	const resultList: ResultList = getContext("resultList");
@@ -34,7 +34,7 @@
 	let listWidth = $state(0);
 
 	let availabilityDialog = $state<HTMLDialogElement>();
-	let availabilityResults = $state<{era: string, factionList:string[]}[]>([]);
+	let availabilityResults = $state<{ era: string; factionList: string[] }[]>([]);
 
 	function sort(key: string) {
 		if (resultList.sort.key != key) {
@@ -52,11 +52,15 @@
 		return async ({ result }: { result: ActionResult }) => {
 			if (result.type == "success") {
 				const order = [...eraLookup].map(([key, value]) => {
-					return key;
+					return value;
 				});
-				availabilityResults = result.data?.unitAvailability.sort((a: any, b: any) => {
-					return order.indexOf(a.era) - order.indexOf(b.era);
-				});
+				availabilityResults = result.data?.unitAvailability
+					.sort((a: any, b: any) => {
+						return order.indexOf(a.era) - order.indexOf(b.era);
+					})
+					.map((list: { era: string; factionList: string[] }) => {
+						return { era: list.era, factionList: list.factionList.sort() };
+					});
 				availabilityDialog?.showModal();
 			}
 		};
@@ -90,62 +94,66 @@
 	{#await resultList.status}
 		<div class="loading-message">Loading units. Please wait ...</div>
 	{:then result}
-		<div class="virtual-list-container" bind:clientHeight={listHeight}>
-			<VirtualList items={resultList.filteredList} style="height:{listHeight}px;width:100%">
-				{#snippet vl_slot({ index, item })}
-					<div class:virtual-list-row={!appWindow.isMobile} class:virtual-list-row-mobile={appWindow.isMobile}>
-						{#if list}
-							<div class="align-center add-button"><button onclick={() => list.newUnit(item)}>+</button></div>
-						{:else}
-							<div></div>
-						{/if}
-						<a class="unit-name" href="http://masterunitlist.info/Unit/Details/{item.mulId}" target="_blank">{item.name}</a>
-						<div class="align-center">{item.subtype}</div>
-						<div class="align-center">{item.pv}</div>
-						{#if !appWindow.isMobile}
-							<div class="align-center">{item?.size ?? "-"}</div>
-						{/if}
-						<div class="align-center">
-							{#if item?.move == undefined}
-								-
+		{#if result == "No Units Found"}
+			<p class="loading-message">No Units found for the selected Era and Faction Combination.</p>
+		{:else}
+			<div class="virtual-list-container" bind:clientHeight={listHeight}>
+				<VirtualList items={resultList.filteredList} style="height:{listHeight}px;width:100%">
+					{#snippet vl_slot({ index, item })}
+						<div class:virtual-list-row={!appWindow.isMobile} class:virtual-list-row-mobile={appWindow.isMobile}>
+							{#if list}
+								<div class="align-center add-button"><button onclick={() => list.newUnit(item)}>+</button></div>
 							{:else}
-								{#each item.move as movement, index}
-									{#if index != 0}
-										{"/ "}
-									{/if}
-									{`${movement.speed}"${movement.type ?? ""}`}
-								{/each}
+								<div></div>
 							{/if}
-						</div>
-						{#if !appWindow.isMobile}
-							<div class="align-center">{item.tmm ?? "-"}</div>
-						{/if}
-						<div class="align-center">
-							{#if item.health == undefined}
-								-
-							{:else}
-								{appWindow.isMobile ? item.health : item.health + " (" + item.armor + "+" + item.structure + ")"}
+							<a class="unit-name" href="http://masterunitlist.info/Unit/Details/{item.mulId}" target="_blank">{item.name}</a>
+							<div class="align-center">{item.subtype}</div>
+							<div class="align-center">{item.pv}</div>
+							{#if !appWindow.isMobile}
+								<div class="align-center">{item?.size ?? "-"}</div>
 							{/if}
-						</div>
-						<div class="align-center">
-							{#if item.damageS == undefined}
-								-
-							{:else}
-								{item.damageS}{item.damageSMin ? "*" : ""}{"/" + item.damageM}{item.damageMMin ? "*" : ""}{"/" + item.damageL}{item.damageLMin ? "*" : ""}{" - " + item.overheat}
+							<div class="align-center">
+								{#if item?.move == undefined}
+									-
+								{:else}
+									{#each item.move as movement, index}
+										{#if index != 0}
+											{"/ "}
+										{/if}
+										{`${movement.speed}"${movement.type ?? ""}`}
+									{/each}
+								{/if}
+							</div>
+							{#if !appWindow.isMobile}
+								<div class="align-center">{item.tmm ?? "-"}</div>
 							{/if}
+							<div class="align-center">
+								{#if item.health == undefined}
+									-
+								{:else}
+									{appWindow.isMobile ? item.health : item.health + " (" + item.armor + "+" + item.structure + ")"}
+								{/if}
+							</div>
+							<div class="align-center">
+								{#if item.damageS == undefined}
+									-
+								{:else}
+									{item.damageS}{item.damageSMin ? "*" : ""}{"/" + item.damageM}{item.damageMMin ? "*" : ""}{"/" + item.damageL}{item.damageLMin ? "*" : ""}{" - " + item.overheat}
+								{/if}
+							</div>
+							<div class:abilities={!appWindow.isMobile} class:abilities-mobile={appWindow.isMobile}>{item.abilities}</div>
+							<form method="post" action="/?/getUnitAvailability" use:enhance={showAvailability} class="align-center">
+								<input type="hidden" name="mulId" value={item.mulId} />
+								<button class="availability-button">Availability</button>
+							</form>
 						</div>
-						<div class:abilities={!appWindow.isMobile} class:abilities-mobile={appWindow.isMobile}>{item.abilities}</div>
-						<form method="post" action="/?/getUnitAvailability" use:enhance={showAvailability} class="align-center">
-							<input type="hidden" name="mulId" value={item.mulId} />
-							<button class="availability-button">Availability</button>
-						</form>
-					</div>
-				{/snippet}
-			</VirtualList>
-		</div>
+					{/snippet}
+				</VirtualList>
+			</div>
+		{/if}
 	{:catch}
 		<div>
-			<p>Failed to load units. Please wait a moment, and try again</p>
+			<p class="loading-message">Failed to load units. Please wait a moment, and try again</p>
 			<button
 				onclick={() => {
 					resultList.loadResults();
@@ -169,9 +177,7 @@
 			{#each availabilityResults as result}
 				<div class="availability-result-era">{result.era}:</div>
 				<div>
-					{result.factionList
-						.sort()
-						.join(", ")}
+					{result.factionList.join(", ")}
 				</div>
 				<div class="separator-line"></div>
 			{/each}

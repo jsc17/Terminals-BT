@@ -14,8 +14,8 @@ export class ResultList {
 	selectedEras = $state<string[]>([]);
 	selectedFactions = $state<string[]>([]);
 
-	eraSearchType = $state<"any" | "all">("any");
-	factionSearchType = $state<"any" | "all">("any");
+	eraSearchType = $state<"any" | "every">("any");
+	factionSearchType = $state<"any" | "every">("any");
 
 	get eras(): number[] {
 		return this.#eras;
@@ -72,7 +72,6 @@ export class ResultList {
 	filteredList = $derived.by(() => this.filterList());
 
 	status = $state();
-
 	loadResults() {
 		this.#eras = this.selectedEras.map((era) => {
 			return Number(era);
@@ -81,9 +80,12 @@ export class ResultList {
 			return Number(faction);
 		});
 		this.status = new Promise((resolve, reject) => {
-			this.loadUnits().then(() => {
-				if (this.resultList.length) {
-					resolve("Units Loaded");
+			this.loadUnits().then((message) => {
+				console.log(message);
+				if (message == "Units Loaded") {
+					resolve(message);
+				} else if (message == "No Units Found") {
+					resolve(message);
 				} else {
 					reject("Units failed to load");
 				}
@@ -148,20 +150,32 @@ export class ResultList {
 
 	async loadUnits() {
 		const response: any = deserialize(
-			await (await fetch("/?/getUnits", { method: "POST", body: JSON.stringify({ eras: this.#eras, factions: this.#factions, general: this.general, eraSearchType: this.eraSearchType, factionSearchType: this.factionSearchType }) })).text()
+			await (
+				await fetch("/?/getUnits", {
+					method: "POST",
+					body: JSON.stringify({ eras: this.#eras, factions: this.#factions, general: this.general, eraSearchType: this.eraSearchType, factionSearchType: this.factionSearchType })
+				})
+			).text()
 		);
-		const unitList = response.data.unitList;
-		this.uniqueList = response.data.uniqueList.map((unit: any) => {
-			return unit.mulId;
-		});
-		const generalList = response.data.generalList;
 
-		this.resultList = this.loadUnitsFromResponse(unitList);
-		if (this.includeGeneral) {
-			this.generalList = this.loadUnitsFromResponse(generalList);
-		} else {
-			this.generalList = [];
+		this.resultList = [];
+		this.uniqueList = [];
+		this.generalList = [];
+
+		if (response.data.message == "Units Loaded") {
+			const unitList = response.data.unitList;
+			this.uniqueList = response.data.uniqueList.map((unit: any) => {
+				return unit.mulId;
+			});
+			const generalList = response.data.generalList;
+
+			this.resultList = this.loadUnitsFromResponse(unitList);
+			if (this.includeGeneral) {
+				this.generalList = this.loadUnitsFromResponse(generalList);
+			}
 		}
+
+		return response.data.message;
 	}
 
 	setOptions(newRules: string) {
@@ -193,15 +207,12 @@ export class ResultList {
 			}
 			for (const unit of this.availableList) {
 				if (this.options.allowedTypes && !this.options.allowedTypes?.includes(unit.subtype)) {
-					console.log("type", unit.name, unit.subtype);
 					continue;
 				}
 				if (this.options.allowedRules && !this.options.allowedRules?.includes(unit.rulesLevel)) {
-					console.log("rules", unit.name, unit.rulesLevel);
 					continue;
 				}
 				if (this.options.disallowUnique && this.uniqueList.includes(unit.mulId)) {
-					console.log("unique", unit.name);
 					continue;
 				}
 				if (this.options.disallowedAbilities) {
@@ -212,7 +223,6 @@ export class ResultList {
 						}
 					}
 					if (prohibited) {
-						console.log("ability", unit.name, unit.abilities)
 						continue;
 					}
 				}

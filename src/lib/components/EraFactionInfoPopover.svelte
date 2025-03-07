@@ -32,7 +32,7 @@
 		z-index: 5;
 		padding: 8px;
 		margin-left: 8px;
-		max-width: 50dvw;
+		max-width: max(50dvw, 25em);
 	}
 	:global(.info-popover-content li) {
 		margin-bottom: 4px;

@@ -1,5 +1,13 @@
 [
 	{
+		"date": "3-2-25",
+		"updates": {
+			"Unit Search / List Builder": ["Add additional options for multiple era/faction selections"],
+			"List Builder": ["Add Drag handles to mobile unit list", "Collapse Formations when rearranging them, to hopefully make it easier on small screens."]
+		}
+	},
+
+	{
 		"date": "2-22-25",
 		"updates": {
 			"Unit Search / List Builder": [

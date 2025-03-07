@@ -133,11 +133,7 @@
 			}
 		}
 	}
-	@media (max-width: 500px) {
-		:global(dialog) {
-			width: 99dvw;
-		}
-	}
+
 	:global(.dialog-wide) {
 		width: 90%;
 		height: 90%;
@@ -155,6 +151,14 @@
 	}
 	:global(dialog::backdrop) {
 		background: rgba(0, 0, 0, 0.7);
+	}
+	@media (max-width: 500px) {
+		:global(dialog) {
+			width: 98dvw;
+		}
+		:global(.dialog-body) {
+			padding: 4px;
+		}
 	}
 	:global(.form-buttons) {
 		display: flex;

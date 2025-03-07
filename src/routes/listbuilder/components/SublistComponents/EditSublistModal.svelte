@@ -33,7 +33,9 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each list.units as unit}
+					{#each list.units.toSorted((a, b) => {
+						return b.cost - a.cost;
+					}) as unit}
 						<tr>
 							<td
 								><input

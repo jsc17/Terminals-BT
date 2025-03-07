@@ -81,7 +81,6 @@ export class ResultList {
 		});
 		this.status = new Promise((resolve, reject) => {
 			this.loadUnits().then((message) => {
-				console.log(message);
 				if (message == "Units Loaded") {
 					resolve(message);
 				} else if (message == "No Units Found") {

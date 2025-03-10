@@ -127,8 +127,7 @@
 			margin-left: auto;
 			margin-right: auto;
 			z-index: 4;
-			height: 100%;
-			width: min(max-content, 95dvw);
+			height: calc(100% - 30px);
 			padding: 4px;
 		}
 		.show-listbuilder {
@@ -138,7 +137,7 @@
 			z-index: 5;
 		}
 		.backdrop {
-			height: 100dvh;
+			height: 100%;
 			width: 100dvw;
 			background-color: black;
 			opacity: 0.9;
@@ -173,10 +172,11 @@
 		background-color: var(--secondary);
 		color: var(--secondary-foreground);
 		position: fixed;
-		bottom: 15px;
-		right: 25px;
-		height: 50px;
-		font-size: 1.25rem;
+		bottom: 34px;
+		right: 5px;
+		height: 30px;
+		font-size: 1.25em;
+		width: max-content;
 	}
 	.rules-notice {
 		align-self: center;

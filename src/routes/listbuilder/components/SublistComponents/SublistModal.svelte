@@ -80,12 +80,12 @@
 					<button
 						onclick={() => {
 							autoSublistModal.show();
-						}}>Generate sublists</button
+						}}>Generate</button
 					>
 					<button
 						onclick={() => {
 							printModal.show();
-						}}>Print all sublists</button
+						}}>Print</button
 					>
 				</div>
 			</div>

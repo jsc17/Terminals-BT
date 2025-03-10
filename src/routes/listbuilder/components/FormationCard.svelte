@@ -121,7 +121,7 @@
 		flex-shrink: 0;
 	}
 	.formation-card:hover {
-		box-shadow: 3px 0px 3px var(--primary) inset;
+		/* box-shadow: 3px 0px 3px var(--primary) inset; */
 		cursor: row-resize;
 	}
 	.formation-header {

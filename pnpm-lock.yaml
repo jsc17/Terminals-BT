@@ -75,8 +75,8 @@ importers:
         specifier: ^3.4.2
         version: 3.4.2
       svelte-virtuallists:
-        specifier: ^1.4.0
-        version: 1.4.0(clsx@2.1.1)(svelte@5.20.2)
+        specifier: ^1.4.2
+        version: 1.4.2(svelte@5.20.2)
       svelty-email:
         specifier: github:socketopp/svelty-email#feature/component-render
         version: https://codeload.github.com/socketopp/svelty-email/tar.gz/9f341077e8f2ed0c41b828c1ab52e69c16fd80cf(@sveltejs/kit@2.16.1(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.20.2)(vite@6.0.11(@types/node@22.13.0)))(svelte@5.20.2)(vite@6.0.11(@types/node@22.13.0)))
@@ -478,6 +478,10 @@ packages:
 
   '@eslint/js@9.19.0':
     resolution: {integrity: sha512-rbq9/g38qjfqFLOVPvwjIvFFdNziEC5S65jmjPw5r6A//QH+W91akh9irMwjDN8zKUTak6W9EsAv4m/7Wnw0UQ==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@eslint/js@9.22.0':
+    resolution: {integrity: sha512-vLFajx9o8d1/oL2ZkpMYbkLv8nDB6yaIwFNt7nI4+I80U/z03SxmfOMsLbvWr3p7C+Wnoh//aOu2pQW8cS0HCQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@eslint/object-schema@2.1.6':
@@ -2231,11 +2235,10 @@ packages:
     peerDependencies:
       svelte: ^5.0.0
 
-  svelte-virtuallists@1.4.0:
-    resolution: {integrity: sha512-aN5t/bqaFamq4V8K4TPrV+gbexDH3BkZJaC76FPGJsjggZre3MowcmoOaL6jaOTdUngrUUpeL9a74yXdldis0g==}
+  svelte-virtuallists@1.4.2:
+    resolution: {integrity: sha512-ZvBU1BMmt2uY/spjuZn+XOtHVxOpU/Cfiy+dajxrOXe6KysjAY2O0R1cLonEGl+/AMy0or6/dO+KA3/C6R3l2A==}
     peerDependencies:
-      clsx: ^2.1.1
-      svelte: ^5.1.0
+      svelte: ^5.20.5
 
   svelte@5.20.2:
     resolution: {integrity: sha512-aYXJreNUiyTob0QOzRZeBXZMGeFZDch6SrSRV8QTncZb6zj0O3BEdUzPpojuHQ1pTvk+KX7I6rZCXPUf8pTPxA==}
@@ -2593,6 +2596,8 @@ snapshots:
       - supports-color
 
   '@eslint/js@9.19.0': {}
+
+  '@eslint/js@9.22.0': {}
 
   '@eslint/object-schema@2.1.6': {}
 
@@ -4343,9 +4348,9 @@ snapshots:
       style-to-object: 1.0.8
       svelte: 5.20.2
 
-  svelte-virtuallists@1.4.0(clsx@2.1.1)(svelte@5.20.2):
+  svelte-virtuallists@1.4.2(svelte@5.20.2):
     dependencies:
-      clsx: 2.1.1
+      '@eslint/js': 9.22.0
       svelte: 5.20.2
 
   svelte@5.20.2:

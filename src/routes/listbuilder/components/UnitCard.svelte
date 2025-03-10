@@ -28,14 +28,33 @@
 			<img class="combobox-img" src="/icons/chevron-updown.svg" alt="expand list chevrons" />
 		</div>
 	{/if}
-
-	<div class="unit-row-container">
-		<div class="unit-detail-row">
+	<div class="unit-row-container-mobile">
+		<div class="unit-name-row">
 			<p class="name" class:invalid-unit={list.issues.issueUnits.has(unit?.id ?? "0")}>{unit?.baseUnit.name}</p>
-			<p class="center">{unit?.baseUnit.subtype}</p>
-			<p class="center">
+			<button
+				class="remove-button center"
+				onclick={() => {
+					list.removeUnit(unitId);
+					toastController.addToast(`${unit?.baseUnit.name} removed from list`);
+				}}>-</button
+			>
+		</div>
+		<div class="unit-header-row">
+			<div class="unit-header">Type</div>
+			<div class="unit-header">Skill</div>
+			<div class="unit-header">PV</div>
+			{#if unit?.baseUnit.type != "BS"}
+				<div class="unit-header">Speed</div>
+				<div class="unit-header">Damage</div>
+				<div class="unit-header">Health</div>
+				<div class="unit-header">Size</div>
+			{/if}
+		</div>
+		<div class="unit-stat-row">
+			<div class="unit-stat">{unit?.baseUnit.subtype}</div>
+			<div class="unit-stat">
 				{#if unit?.skill}
-					Skill - <input
+					<input
 						class="skill-input"
 						onchange={(e) => {
 							console.log("changing skill");
@@ -49,20 +68,10 @@
 				{:else}
 					-
 				{/if}
-			</p>
-			<p class="center">PV - {unit?.cost}</p>
-			<button
-				class="remove-button center"
-				onclick={() => {
-					list.removeUnit(unitId);
-					toastController.addToast(`${unit?.baseUnit.name} removed from list`);
-				}}>-</button
-			>
-		</div>
-		<div class="unit-stat-row">
-			<p>{unit?.baseUnit.abilities}</p>
+			</div>
+			<div class="unit-stat">{unit?.cost}</div>
 			{#if unit?.baseUnit.type != "BS"}
-				<p class="center">
+				<div class="unit-stat">
 					{#each unit?.baseUnit.move! as movement, index}
 						{#if index != 0}
 							{"/ "}
@@ -70,16 +79,19 @@
 						{`${movement.speed}"${movement.type ?? ""}`}
 					{/each}
 					- TMM {unit?.baseUnit.tmm}
-				</p>
-				<p class="center">
+				</div>
+				<div class="unit-stat">
 					{unit?.baseUnit.damageS}{unit?.baseUnit.damageSMin ? "*" : ""}{"/" + unit?.baseUnit.damageM}{unit?.baseUnit.damageMMin ? "*" : ""}{"/" + unit?.baseUnit.damageL}{unit
 						?.baseUnit.damageLMin
 						? "*"
 						: ""}{" - " + unit?.baseUnit.overheat}
-				</p>
-				<p class="center">{unit?.baseUnit.health + " (" + unit?.baseUnit.armor + "+" + unit?.baseUnit.structure + ")"}</p>
-				<p class="center">Size - {unit?.baseUnit.size}</p>
+				</div>
+				<div class="unit-stat">{unit?.baseUnit.health + " (" + unit?.baseUnit.armor + "+" + unit?.baseUnit.structure + ")"}</div>
+				<div class="unit-stat">{unit?.baseUnit.size}</div>
 			{/if}
+		</div>
+		<div class="unit-ability-row">
+			<div class="unit-abilities">{unit?.baseUnit.abilities}</div>
 		</div>
 	</div>
 </div>
@@ -87,7 +99,7 @@
 <style>
 	.unit-card {
 		width: 100%;
-		border-bottom: 1px solid var(--border);
+		border-bottom: 1px solid var(-border);
 		flex: 1;
 		min-height: fit-content;
 		background-color: var(--card);
@@ -103,26 +115,38 @@
 		align-items: center;
 		justify-items: center;
 	}
-	.unit-row-container {
+	.unit-row-container-mobile {
 		flex: 1;
-	}
-	.unit-detail-row,
-	.unit-stat-row {
-		display: grid;
-		grid-template-columns: 40% 15% 20% 15% 10%;
-		padding-bottom: 8px;
-		align-items: center;
+		display: flex;
+		flex-direction: column;
 	}
 	.center {
 		justify-self: center;
 	}
-	.unit-detail-row {
-		padding-left: 5px;
-		font-size: 0.95em;
+	.unit-name-row {
+		display: grid;
+		grid-template-columns: 1fr max-content;
+		gap: 4px;
+		margin-top: 2px;
 	}
+	.unit-header-row,
 	.unit-stat-row {
-		padding-left: 15px;
-		font-size: 0.7em;
+		display: grid;
+		grid-template-columns: 11% 11% 11% 20% 20% 20% 5%;
+	}
+	.unit-header {
+		font-size: 0.75em;
+		color: var(--muted-foreground);
+		align-self: center;
+		justify-self: center;
+	}
+	.unit-stat {
+		font-size: 0.75em;
+		align-self: center;
+		justify-self: center;
+	}
+	.unit-ability-row {
+		margin: 2px 0px;
 	}
 	input[type="number"] {
 		width: 40px;
@@ -135,6 +159,16 @@
 		width: 20px;
 	}
 	.name {
-		margin-right: 8px;
+		font-size: 0.95em;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.name:hover {
+		white-space: wrap;
+	}
+	.unit-abilities {
+		font-size: 0.75em;
+		color: var(--muted-foreground);
 	}
 </style>

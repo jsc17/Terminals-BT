@@ -67,7 +67,7 @@
 	:global(body) {
 		margin: 0;
 		padding: 0;
-		padding-right: 15px;
+		/* padding-right: 15px; */
 		width: 100dvw;
 		min-height: 100dvh;
 		overflow-x: hidden;
@@ -75,6 +75,7 @@
 		font-family: Arial, Helvetica, sans-serif;
 		display: flex;
 		flex-direction: column;
+		scrollbar-gutter: stable;
 	}
 	:global(a) {
 		color: var(--primary);
@@ -118,6 +119,7 @@
 		border-radius: var(--radius);
 		min-height: fit-content;
 		max-height: 95dvh;
+		max-width: 98dvw;
 		overflow: auto;
 		transition:
 			display 0.2s allow-discrete,

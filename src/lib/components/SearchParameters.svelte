@@ -62,7 +62,7 @@
 <div class="parameter-container">
 	<button
 		class="accordian"
-		class:hidden={!appWindow.isMobile}
+		class:hidden={!appWindow.isNarrow}
 		onclick={() => {
 			showParameters = !showParameters;
 		}}
@@ -79,7 +79,7 @@
 			</div>
 		</div>
 	</button>
-	<div class="card" class:hidden={appWindow.isMobile && !showParameters}>
+	<div class="card" class:hidden={appWindow.isNarrow && !showParameters}>
 		<div class={appWindow.isMobile ? "parameters-mobile" : "parameters"}>
 			<div class="parameter">
 				<p>Era:</p>

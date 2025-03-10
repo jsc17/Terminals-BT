@@ -202,7 +202,6 @@
 		position: relative;
 		width: 100%;
 		height: 100%;
-		overflow: auto;
 		z-index: 1;
 		scrollbar-gutter: stable;
 		display: flex;
@@ -221,6 +220,7 @@
 		gap: 8px;
 		padding: 4px 0px 16px 0px;
 		flex: 1;
+		overflow: auto;
 	}
 	.list-info {
 		display: flex;

@@ -93,7 +93,7 @@
 <main>
 	<button
 		class="accordian"
-		class:hidden={!appWindow.isMobile}
+		class:hidden={!appWindow.isNarrow}
 		onclick={() => {
 			showFilters = !showFilters;
 		}}
@@ -111,7 +111,7 @@
 		</div></button
 	>
 
-	<div class="card" class:hidden={appWindow.isMobile && !showFilters}>
+	<div class="card" class:hidden={appWindow.isNarrow && !showFilters}>
 		{@render filters(resultList.filters)}
 		<div class="space-between filter-buttons">
 			<button

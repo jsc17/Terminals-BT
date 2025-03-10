@@ -1,6 +1,6 @@
 <script lang="ts">
 	import eraFactionData from "$lib/data/erasFactionsList.json";
-	import { eras, factions } from "$lib/data/erasFactionLookup.js";
+	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup.js";
 	import { getGeneralList } from "$lib/utilities/bt-utils";
 	import { deserialize, enhance } from "$app/forms";
 	import { calculateTMM } from "$lib/utilities/bt-utils";
@@ -20,7 +20,7 @@
 			}
 		});
 		allowed.sort((a, b) => {
-			return factions.get(a)! > factions.get(b)! ? 1 : -1;
+			return factionLookup.get(a)! > factionLookup.get(b)! ? 1 : -1;
 		});
 		return allowed;
 	});
@@ -130,7 +130,7 @@
 
 	//Combobox stuff
 	const eraList = eraFactionData.map((era) => {
-		return { value: era.id, label: eras.get(era.id)! };
+		return { value: era.id, label: eraLookup.get(era.id)! };
 	});
 
 	let inputValue = $state("");
@@ -147,7 +147,7 @@
 			<label for="eraParameter">Era:</label>
 			<select bind:value={selectedEra} id="eraParameter">
 				{#each eraFactionData as era}
-					<option value={era.id}>{eras.get(era.id)}</option>
+					<option value={era.id}>{eraLookup.get(era.id)}</option>
 				{/each}
 			</select>
 			<label for="factionParameter">Faction:</label>
@@ -156,13 +156,13 @@
 			{:else}
 				<select id="factionParameter" bind:value={selectedFaction}>
 					{#each allowedFactions as faction}
-						<option value={faction}>{factions.get(faction)}</option>
+						<option value={faction}>{factionLookup.get(faction)}</option>
 					{/each}
 				</select>
 			{/if}
 			<div class="parameter">
 				<p>General:</p>
-				<a href={`http://masterunitlist.info/Era/FactionEraDetails?FactionId=${selectedFaction}&EraId=${selectedEra}`}>{factions.get(general)}</a>
+				<a href={`http://masterunitlist.info/Era/FactionEraDetails?FactionId=${selectedFaction}&EraId=${selectedEra}`}>{factionLookup.get(general)}</a>
 			</div>
 			<button id="getData" bind:this={searchButton} onclick={createLink}>Search</button>
 		</form>

@@ -5,7 +5,7 @@ export function getNewSkillCost(newSkill: number | undefined, basePV: number) {
 	let newCost = 0;
 	let step = 0;
 
-	if (!newSkill || Number.isNaN(newSkill)) {
+	if (newSkill == undefined || Number.isNaN(newSkill)) {
 		return basePV;
 	}
 	if (newSkill == 4) {
@@ -24,6 +24,9 @@ export function getNewSkillCost(newSkill: number | undefined, basePV: number) {
 			step = Math.ceil((basePV - 7) / 5) + 1;
 		}
 		newCost = basePV + (4 - newSkill) * step;
+	}
+	if (newCost < 1) {
+		newCost = 1;
 	}
 	return newCost;
 }

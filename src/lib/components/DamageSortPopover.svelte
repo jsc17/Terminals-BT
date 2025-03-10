@@ -27,7 +27,7 @@
 
 <Popover.Root bind:open>
 	<Popover.Trigger class={appWindow.isMobile ? "sort-header-button-mobile" : "sort-header-button"}>
-		{#if appWindow.isMobile}
+		{#if appWindow.isNarrow}
 			<p>DMG</p>
 		{:else}
 			<p>

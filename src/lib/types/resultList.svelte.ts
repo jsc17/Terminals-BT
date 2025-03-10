@@ -14,6 +14,9 @@ export class ResultList {
 	selectedEras = $state<string[]>([]);
 	selectedFactions = $state<string[]>([]);
 
+	eraSearchType = $state<"any" | "every">("any");
+	factionSearchType = $state<"any" | "every">("any");
+
 	get eras(): number[] {
 		return this.#eras;
 	}
@@ -69,7 +72,6 @@ export class ResultList {
 	filteredList = $derived.by(() => this.filterList());
 
 	status = $state();
-
 	loadResults() {
 		this.#eras = this.selectedEras.map((era) => {
 			return Number(era);
@@ -78,9 +80,11 @@ export class ResultList {
 			return Number(faction);
 		});
 		this.status = new Promise((resolve, reject) => {
-			this.loadUnits().then(() => {
-				if (this.resultList.length) {
-					resolve("Units Loaded");
+			this.loadUnits().then((message) => {
+				if (message == "Units Loaded") {
+					resolve(message);
+				} else if (message == "No Units Found") {
+					resolve(message);
 				} else {
 					reject("Units failed to load");
 				}
@@ -145,20 +149,32 @@ export class ResultList {
 
 	async loadUnits() {
 		const response: any = deserialize(
-			await (await fetch("/?/getUnits", { method: "POST", body: JSON.stringify({ eras: this.#eras, factions: this.#factions, general: this.general }) })).text()
+			await (
+				await fetch("/?/getUnits", {
+					method: "POST",
+					body: JSON.stringify({ eras: this.#eras, factions: this.#factions, general: this.general, eraSearchType: this.eraSearchType, factionSearchType: this.factionSearchType })
+				})
+			).text()
 		);
-		const unitList = response.data.unitList;
-		this.uniqueList = response.data.uniqueList.map((unit: any) => {
-			return unit.mulId;
-		});
-		const generalList = response.data.generalList;
 
-		this.resultList = this.loadUnitsFromResponse(unitList);
-		if (this.includeGeneral) {
-			this.generalList = this.loadUnitsFromResponse(generalList);
-		} else {
-			this.generalList = [];
+		this.resultList = [];
+		this.uniqueList = [];
+		this.generalList = [];
+
+		if (response.data.message == "Units Loaded") {
+			const unitList = response.data.unitList;
+			this.uniqueList = response.data.uniqueList.map((unit: any) => {
+				return unit.mulId;
+			});
+			const generalList = response.data.generalList;
+
+			this.resultList = this.loadUnitsFromResponse(unitList);
+			if (this.includeGeneral) {
+				this.generalList = this.loadUnitsFromResponse(generalList);
+			}
 		}
+
+		return response.data.message;
 	}
 
 	setOptions(newRules: string) {
@@ -166,13 +182,13 @@ export class ResultList {
 	}
 
 	applyOptions() {
-		let tempAvailableList: MulUnit[] = [];
+		let tempRestrictedList: MulUnit[] = [];
 		if (this.options) {
-			if (this.resultList.length) {
+			if (this.availableList.length) {
 				for (const unitList of customCards.unitPacks) {
 					if (this.options.customUnitPacks?.includes(unitList.name)) {
 						for (const unit of unitList.units) {
-							tempAvailableList.push({
+							tempRestrictedList.push({
 								mulId: unit.id,
 								type: unit.type,
 								subtype: unit.type,
@@ -209,12 +225,12 @@ export class ResultList {
 						continue;
 					}
 				}
-				tempAvailableList.push(unit);
+				tempRestrictedList.push(unit);
 			}
 		} else {
-			tempAvailableList = [...this.resultList];
+			tempRestrictedList = [...this.resultList];
 		}
-		return tempAvailableList;
+		return tempRestrictedList;
 	}
 	filterList() {
 		let tempResultList = [...this.restrictedList];
@@ -385,5 +401,11 @@ export class ResultList {
 
 	clear() {
 		this.resultList = [];
+		this.generalList = [];
+		this.uniqueList = [];
+		this.#eras = [];
+		this.#factions = [];
+		this.selectedEras = [];
+		this.selectedFactions = [];
 	}
 }

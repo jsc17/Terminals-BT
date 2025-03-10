@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { eras, factions } from "$lib/data/erasFactionLookup";
+	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
 	import { enhance, deserialize } from "$app/forms";
 	import { getContext } from "svelte";
 	import { getNewSkillCost } from "$lib/utilities/bt-utils";
@@ -206,7 +206,7 @@
 			<p>Tournament Date:</p>
 			<p>{`${tournamentList.selectedTournament?.date.toUTCString().split(" ").slice(1, 4).join("-") ?? ""}`}</p>
 			<p>Tournament Era:</p>
-			<p>{`${eras.get(tournamentList.selectedTournament?.era!) ?? ""}`}</p>
+			<p>{`${eraLookup.get(tournamentList.selectedTournament?.era!) ?? ""}`}</p>
 			<p>Organizer Name:</p>
 			<p>{`${tournamentList.selectedTournament?.organizer ?? ""}`}</p>
 			<p>Contact Email:</p>
@@ -253,13 +253,13 @@
 				<div class="column">
 					<p>Era:</p>
 					<p style="color:var(--primary)">
-						{tournamentList.selectedParticipant?.listCodes?.at(selectedSubmission) ? eras.get(tournamentList.selectedParticipant.listCodes.at(selectedSubmission)!.era) : "-"}
+						{tournamentList.selectedParticipant?.listCodes?.at(selectedSubmission) ? eraLookup.get(tournamentList.selectedParticipant.listCodes.at(selectedSubmission)!.era) : "-"}
 					</p>
 				</div>
 				<div class="column">
 					<p>Faction:</p>
 					<p style="color:var(--primary)">
-						{tournamentList.selectedParticipant?.listCodes?.at(selectedSubmission) ? factions.get(tournamentList.selectedParticipant.listCodes.at(selectedSubmission)!.faction) : "-"}
+						{tournamentList.selectedParticipant?.listCodes?.at(selectedSubmission) ? factionLookup.get(tournamentList.selectedParticipant.listCodes.at(selectedSubmission)!.faction) : "-"}
 					</p>
 				</div>
 			</div>
@@ -305,7 +305,7 @@
 			<label for="tournamentEra">Tournament Era:</label>
 			<select name="tournamentEra" id="tournamentEra">
 				<option value="-1">Any</option>
-				{#each eras.entries() as [eraID, eraText]}
+				{#each eraLookup.entries() as [eraID, eraText]}
 					<option value={eraID} selected={tournamentList.selectedTournament?.era == eraID}>{eraText}</option>
 				{/each}
 			</select>

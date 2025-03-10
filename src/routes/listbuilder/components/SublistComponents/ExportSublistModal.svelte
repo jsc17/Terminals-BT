@@ -5,7 +5,7 @@
 	import { exportToJeff } from "../../utilities/export.svelte";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import { eras, factions } from "$lib/data/erasFactionLookup";
+	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
 	import { enhance } from "$app/forms";
 	import type { FormationV2 } from "../../types/formation";
 
@@ -92,7 +92,7 @@
 		<form action="?/printList" method="post" use:enhance={handleForm} class="print-form">
 			<div><label for="export-listname">Print title</label><input id="export-listname" bind:value={printName} /></div>
 			<div><label for="export-playername">Player Name (optional)</label><input id="export-playername" bind:value={playerName} /></div>
-			<div>{`${eras.get(list.details.era)} - ${factions.get(list.details.faction)} with ${factions.get(list.details.general)} general list `}</div>
+			<div>{`${eraLookup.get(list.details.era)} - ${factionLookup.get(list.details.faction)} with ${factionLookup.get(list.details.general)} general list `}</div>
 			<h2>Style</h2>
 			<div>
 				<label for="list-style-mul"

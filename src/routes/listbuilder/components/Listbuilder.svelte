@@ -22,8 +22,22 @@
 
 	let dropTargetStyle = { outline: "solid var(--primary)" };
 	let flipDurationMs = 100;
-	function handleSort(e: CustomEvent<DndEvent<FormationV2>>) {
+	let draggingColumns = $state(false);
+	function handleDndConsider(e: CustomEvent<DndEvent<FormationV2>>) {
+		draggingColumns = true;
 		list.formations = e.detail.items;
+	}
+	function handleDndFinalize(e: CustomEvent<DndEvent<FormationV2>>) {
+		draggingColumns = false;
+		list.formations = e.detail.items;
+	}
+	function transformDraggedElement(draggedEl: HTMLElement | undefined, data: any, index: number | undefined) {
+		const unitCardElement: HTMLElement | null | undefined = draggedEl?.querySelector(".unit-cards");
+		const dropMessageElement: HTMLElement | null | undefined = draggedEl?.querySelector(".drop-message");
+		if (unitCardElement) {
+			unitCardElement.innerHTML = "Unit list collapsed while dragging formations";
+		}
+		dropMessageElement?.remove();
 	}
 </script>
 
@@ -154,15 +168,25 @@
 			<p>Mechwarrior, BattleMech, 'Mech and Aerotech are registered trademarks of The Topps Company, Inc. All Rights Reserved.</p>
 		</div>
 	{:else if appWindow.isMobile}
-		<div class="list-units" use:dragHandleZone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations" }} onconsider={handleSort} onfinalize={handleSort}>
+		<div
+			class="list-units"
+			use:dragHandleZone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations", transformDraggedElement }}
+			onconsider={handleDndConsider}
+			onfinalize={handleDndFinalize}
+		>
 			{#each list.formations as formation (formation.id)}
-				<FormationCard {formation}></FormationCard>
+				<FormationCard {formation} {draggingColumns}></FormationCard>
 			{/each}
 		</div>
 	{:else}
-		<div class="list-units" use:dndzone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations" }} onconsider={handleSort} onfinalize={handleSort}>
+		<div
+			class="list-units"
+			use:dndzone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations", transformDraggedElement }}
+			onconsider={handleDndConsider}
+			onfinalize={handleDndFinalize}
+		>
 			{#each list.formations as formation (formation.id)}
-				<FormationCard {formation}></FormationCard>
+				<FormationCard {formation} {draggingColumns}></FormationCard>
 			{/each}
 		</div>
 	{/if}
@@ -178,7 +202,6 @@
 		position: relative;
 		width: 100%;
 		height: 100%;
-		overflow: auto;
 		z-index: 1;
 		scrollbar-gutter: stable;
 		display: flex;
@@ -197,6 +220,7 @@
 		gap: 8px;
 		padding: 4px 0px 16px 0px;
 		flex: 1;
+		overflow: auto;
 	}
 	.list-info {
 		display: flex;
@@ -230,20 +254,6 @@
 	.menu-button {
 		background-color: transparent;
 		color: var(--primary);
-	}
-	.mobileCard {
-		display: flex;
-		height: 100%;
-	}
-	.handle {
-		width: 25px;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		gap: 4px;
-	}
-	.move-arrow {
-		filter: var(--primary-filter);
 	}
 	.error-icon {
 		width: 20px;

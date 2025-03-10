@@ -3,10 +3,9 @@ import eraLists from "$lib/data/erasFactionsList.json";
 import { fail, redirect } from "@sveltejs/kit";
 import { sendResetEmail } from "$lib/emails/mailer.server.js";
 import fs from "fs/promises";
-import { calculateTMM, getGeneralList } from "$lib/utilities/bt-utils.js";
-import type { FormationV2 } from "../listbuilder/types/formation";
-import type { ListCodeUnit } from "../listbuilder/types/listCode";
-import type { SublistV2 } from "../listbuilder/types/sublist";
+import { calculateTMM } from "$lib/utilities/bt-utils.js";
+import { eraLookup as eraLookup, factionLookup as factionLookup } from "$lib/data/erasFactionLookup.js";
+import { connect } from "http2";
 
 export const load = async ({ locals }) => {
 	if (!locals.user || locals.user.username.toLowerCase() != "terminal") {
@@ -21,32 +20,54 @@ export const actions = {
 				continue;
 			}
 			for (const { general, factions } of era.lists) {
-				if (general != -1) {
+				for (const faction of factions) {
 					try {
-						await prisma.faction.create({
-							data: {
-								id: `${era.id}-${general}`,
-								era: era.id,
-								faction: general as number,
-								general: -1
+						console.log(faction, era.id);
+						await prisma.faction.upsert({
+							where: {
+								id: faction
+							},
+							create: {
+								id: faction,
+								name: factionLookup.get(faction)!,
+								eras: {
+									create: {
+										general,
+										era: {
+											connectOrCreate: {
+												where: {
+													id: era.id
+												},
+												create: {
+													id: era.id,
+													name: eraLookup.get(era.id)!
+												}
+											}
+										}
+									}
+								}
+							},
+							update: {
+								eras: {
+									create: {
+										general,
+										era: {
+											connectOrCreate: {
+												where: {
+													id: era.id
+												},
+												create: {
+													id: era.id,
+													name: eraLookup.get(era.id)!
+												}
+											}
+										}
+									}
+								}
 							}
 						});
-					} catch (error) {
-						console.log(era.id, general);
-					}
-				}
-				for (const faction of factions as number[]) {
-					try {
-						await prisma.faction.create({
-							data: {
-								id: `${era.id}-${faction}`,
-								era: era.id,
-								faction: faction,
-								general: general as number
-							}
-						});
-					} catch (error) {
-						console.log(era.id, faction);
+					} catch (err) {
+						console.error(err);
 					}
 				}
 			}
@@ -133,99 +154,72 @@ export const actions = {
 		}
 		return { message: "Load Complete" };
 	},
-	testUnit: async ({ request }) => {
-		const mulId = (await request.formData()).get("testId");
-		console.log(mulId);
-		const existing = await prisma.unit.findUnique({
-			where: {
-				mulId: Number(mulId)
-			},
-			include: {
-				factions: {
-					select: {
-						id: true
-					}
-				}
-			}
-		});
-		if (existing) {
-			console.log(existing);
-			return { exists: true, existing };
-		} else {
-			console.log("doesn't exist");
-			return { exists: false };
-		}
-	},
+	// testUnit: async ({ request }) => {
+	// 	const mulId = (await request.formData()).get("testId");
+	// 	console.log(mulId);
+	// 	const existing = await prisma.unit.findUnique({
+	// 		where: {
+	// 			mulId: Number(mulId)
+	// 		},
+	// 		include: {
+	// 			factions: {
+	// 				select: {
+	// 					id: true
+	// 				}
+	// 			}
+	// 		}
+	// 	});
+	// 	if (existing) {
+	// 		console.log(existing);
+	// 		return { exists: true, existing };
+	// 	} else {
+	// 		console.log("doesn't exist");
+	// 		return { exists: false };
+	// 	}
+	// },
 	sendResetEmail: async ({}) => {
 		sendResetEmail("jonathan.cibge@innernwgaw.com", "ASFVA");
 	},
 	linkUnits: async ({}) => {
 		let count = 0;
-		let unitCount = 0;
 		let fileList = await fs.readdir("./files/avail-upload");
 		for (const filename of fileList) {
 			const file = (await fs.readFile(`./files/avail-upload/${filename}`)).toString();
 			const [era, faction, ...rest] = filename.split("-");
-			const unitList = [];
 			count++;
 			for (const unit of JSON.parse(file).Units) {
-				unitCount++;
-				if (unit.Id) {
-					unitList.push({
-						where: { mulId: unit.Id },
-						create: {
-							mulId: unit.Id,
-							name: unit.Name.trim(),
-							class: unit.Class,
-							variant: unit.Variant?.trim() == "" ? null : unit.Variant?.trim(),
-							tonnage: Number(unit.FormatedTonnage),
-							technology: unit.Technology.Name,
-							rules: unit.Rules,
-							date_introduced: Number(unit.DateIntroduced),
-							image_url: unit.ImageUrl,
-							role: unit.Role.Name,
-							type: unit.Type.Name,
-							subtype: unit.BFType?.toUpperCase() ?? "Unknown",
-							size: unit.BFSize,
-							move: unit.BFMove,
-							tmm: calculateTMM(Number(unit.BFMove.split('"')[0])),
-							armor: unit.BFArmor,
-							structure: unit.BFStructure,
-							threshold: unit.BFThreshold,
-							damage_s: unit.BFDamageShort,
-							damage_s_min: unit.BFDamageShortMin,
-							damage_m: unit.BFDamageMedium,
-							damage_m_min: unit.BFDamageMediumMin,
-							damage_l: unit.BFDamageLong,
-							damage_l_min: unit.BFDamageLongMin,
-							damage_e: unit.BFDamageExtreme,
-							damage_e_min: unit.BFDamageExtemeMin,
-							overheat: unit.BFOverheat,
-							pv: unit.BFPointValue,
-							abilities: unit.BFAbilities
+				try {
+					await prisma.unit.update({
+						where: {
+							mulId: unit.Id
+						},
+						data: {
+							availability: {
+								create: {
+									factionAndEra: {
+										connect: {
+											eraId_factionId: {
+												eraId: Number(era),
+												factionId: Number(faction)
+											}
+										}
+									}
+								}
+							}
 						}
 					});
+				} catch (error) {
+					console.log(unit.Name, "failed to load", unit.Id);
 				}
 			}
 
 			try {
 				console.log(count, era, faction);
-				await prisma.faction.update({
-					where: {
-						id: `${era}-${faction}`
-					},
-					data: {
-						units: {
-							connectOrCreate: unitList
-						}
-					}
-				});
 			} catch (error) {
 				console.log("Failed - ", count, era, faction);
 				fs.appendFile(`./files/uploadFail.txt`, `${count} failed - ${error} \n`);
 			}
 		}
-		console.log(unitCount);
 		return { message: "success" };
 	},
 	convertLists: async ({}) => {

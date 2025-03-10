@@ -1,6 +1,5 @@
 import type { TDocumentDefinitions, TableCell } from "pdfmake/interfaces";
 import BlobStream, { type IBlobStream } from "blob-stream";
-import { eras, factions } from "$lib/data/erasFactionLookup";
 import references from "$lib/data/reference.json";
 import { existsSync } from "fs";
 import fs from "fs/promises";
@@ -153,7 +152,6 @@ async function loadUnitImages(unitList: UnitV2[], formations: FormationV2[]) {
 }
 
 export async function printList(list: PrintableList, drawFormations: boolean): Promise<Blob> {
-	// const listDetails = eras.get(list.era) + " Era - " + factions.get(list.faction) + " with " + factions.get(list.general) + " general list";
 	const tableheaders: TableCell[] =
 		list.style == "mul"
 			? [{ text: "Unit", style: "cellHeader" }].concat(

@@ -2,7 +2,7 @@
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { enhance } from "$app/forms";
 	import { toastController } from "$lib/stores/toastController.svelte";
-	import { eras, factions } from "$lib/data/erasFactionLookup";
+	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
 	import { getContext } from "svelte";
 	import { type List } from "../types/list.svelte";
 

@@ -1,12 +1,13 @@
 <script lang="ts">
 	import eraLists from "$lib/data/erasFactionsList.json";
-	import { eras, factions } from "$lib/data/erasFactionLookup.js";
+	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup.js";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { getContext, onMount } from "svelte";
 	import Combobox from "./Generic/Combobox.svelte";
 	import type { Item } from "./Generic/types";
 	import type { List } from "../../routes/listbuilder/types/list.svelte";
+	import EraFactionInfoPopover from "./EraFactionInfoPopover.svelte";
 
 	const resultList: ResultList = getContext("resultList");
 	const list: List = getContext("list");
@@ -18,7 +19,10 @@
 			return era.id != 0;
 		})
 		.map((era) => {
-			return { value: era.id.toString(), label: eras.get(era.id) ?? "Not Found" };
+			return {
+				value: era.id.toString(),
+				label: eraLookup.get(era.id) ?? "Not Found"
+			};
 		});
 
 	let allowedFactions = $derived.by(() => {
@@ -38,10 +42,13 @@
 		}
 		allowed = [...new Set(allowed)];
 		allowed.sort((a, b) => {
-			return (factions.get(a)?.toString() ?? "Not found") < (factions.get(b)?.toString() ?? "Not Found") ? -1 : 1;
+			return (factionLookup.get(a)?.toString() ?? "Not found") < (factionLookup.get(b)?.toString() ?? "Not Found") ? -1 : 1;
 		});
 		return allowed.map((faction) => {
-			return { value: faction.toString(), label: factions.get(faction)?.toString() ?? "Not found" };
+			return {
+				value: faction.toString(),
+				label: factionLookup.get(faction)?.toString() ?? "Not found"
+			};
 		});
 	});
 
@@ -55,7 +62,7 @@
 <div class="parameter-container">
 	<button
 		class="accordian"
-		class:hidden={!appWindow.isMobile}
+		class:hidden={!appWindow.isNarrow}
 		onclick={() => {
 			showParameters = !showParameters;
 		}}
@@ -72,13 +79,23 @@
 			</div>
 		</div>
 	</button>
-	<div class="card" class:hidden={appWindow.isMobile && !showParameters}>
+	<div class="card" class:hidden={appWindow.isNarrow && !showParameters}>
 		<div class={appWindow.isMobile ? "parameters-mobile" : "parameters"}>
 			<div class="parameter">
 				<p>Era:</p>
 				<Combobox items={allowedEras} bind:value={resultList.selectedEras} inputProps={{ clearOnDeselect: true, placeholder: "Any" }} type="multiple"></Combobox>
 			</div>
 			<div class="selected-container">
+				{#if resultList.selectedEras.length == 0}
+					<div class="selected-block">Any - choose an era to narrow down options</div>
+				{/if}
+				{#if resultList.selectedEras.length >= 2}
+					<select bind:value={resultList.eraSearchType}>
+						<option value="any">Any</option>
+						<option value="every">Every</option>
+					</select>
+					<EraFactionInfoPopover></EraFactionInfoPopover>:
+				{/if}
 				{#each resultList.selectedEras.slice(0, 4) as selected}
 					<button
 						class="selected-block"
@@ -88,7 +105,7 @@
 							});
 						}}
 						><img src="/icons/close.svg" alt="close" />
-						{eras.get(Number(selected)) ?? `${selected} not found`}</button
+						{eraLookup.get(Number(selected)) ?? `${selected} not found`}</button
 					>
 				{/each}
 				{#if resultList.selectedEras.length > 4}
@@ -102,6 +119,16 @@
 				<Combobox items={allowedFactions} bind:value={resultList.selectedFactions} inputProps={{ clearOnDeselect: true, placeholder: "Any" }} type="multiple"></Combobox>
 			</div>
 			<div class="selected-container">
+				{#if resultList.selectedFactions.length == 0}
+					<div class="selected-block">Any - choose a faction to narrow down options</div>
+				{/if}
+				{#if resultList.selectedFactions.length >= 2}
+					<select bind:value={resultList.factionSearchType}>
+						<option value="any">Any</option>
+						<option value="every">Every</option>
+					</select>
+					<EraFactionInfoPopover></EraFactionInfoPopover>:
+				{/if}
 				{#each resultList.selectedFactions.slice(0, 4) as selected}
 					<button
 						class="selected-block"
@@ -132,7 +159,7 @@
 				/>
 				<label for="include-general-list">Official General:</label>
 				{#if resultList.selectedEras.length == 1 && resultList.selectedFactions.length == 1}
-					<a href={`http://masterunitlist.info/Era/FactionEraDetails?FactionId=${resultList.factions[0]}&EraId=${resultList.eras[0]}`}>{factions.get(resultList.general)}</a>
+					<a href={`http://masterunitlist.info/Era/FactionEraDetails?FactionId=${resultList.factions[0]}&EraId=${resultList.eras[0]}`}>{factionLookup.get(resultList.general)}</a>
 				{:else}
 					<p class="general-notice">Select a single Era and Faction</p>
 				{/if}

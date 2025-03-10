@@ -1,4 +1,4 @@
-export const eras = new Map([
+export const eraLookup = new Map([
 	[-1, "None"],
 	[0, "Any"],
 	[10, "Star League"],
@@ -14,7 +14,7 @@ export const eras = new Map([
 	[257, "ilClan"]
 ]);
 
-export const factions = new Map([
+export const factionLookup = new Map([
 	[102, "Alyina Mercantile League"],
 	[78, "Calderon Protectorate"],
 	[5, "Capellan Confederation"],

@@ -9,8 +9,10 @@
 	import { exportToJeff } from "../utilities/export.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 
+	type Props = { formation: FormationV2; draggingColumns: boolean };
+
 	let list: List = getContext("list");
-	let { formation }: { formation: FormationV2 } = $props();
+	let { formation, draggingColumns }: Props = $props();
 
 	let dropTargetStyle = {};
 	let flipDurationMs = 100;
@@ -75,31 +77,35 @@
 			</Menu>
 		</div>
 	{/if}
-	{#if !formation.units.length}
-		<div class="drop-message">Drop units here to add them to this formation</div>
-	{/if}
-	{#if appWindow.isMobile}
-		<div
-			class="unit-cards"
-			use:dragHandleZone={{ items: formation.units, dropTargetStyle, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
-			onconsider={handleSort}
-			onfinalize={handleSort}
-		>
-			{#each formation.units as unit (unit.id)}
-				<UnitCard unitId={unit.id}></UnitCard>
-			{/each}
-		</div>
+	{#if !draggingColumns}
+		{#if !formation.units.length}
+			<div class="drop-message">Drop units here to add them to this formation</div>
+		{/if}
+		{#if appWindow.isMobile}
+			<div
+				class="unit-cards"
+				use:dragHandleZone={{ items: formation.units, dropTargetStyle, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
+				onconsider={handleSort}
+				onfinalize={handleSort}
+			>
+				{#each formation.units as unit (unit.id)}
+					<UnitCard unitId={unit.id}></UnitCard>
+				{/each}
+			</div>
+		{:else}
+			<div
+				class="unit-cards"
+				use:dndzone={{ items: formation.units, dropTargetStyle, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
+				onconsider={handleSort}
+				onfinalize={handleSort}
+			>
+				{#each formation.units as unit (unit.id)}
+					<UnitCard unitId={unit.id}></UnitCard>
+				{/each}
+			</div>
+		{/if}
 	{:else}
-		<div
-			class="unit-cards"
-			use:dndzone={{ items: formation.units, dropTargetStyle, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
-			onconsider={handleSort}
-			onfinalize={handleSort}
-		>
-			{#each formation.units as unit (unit.id)}
-				<UnitCard unitId={unit.id}></UnitCard>
-			{/each}
-		</div>
+		<div class="drop-message">Unit list collapsed while dragging formations</div>
 	{/if}
 </div>
 
@@ -115,7 +121,7 @@
 		flex-shrink: 0;
 	}
 	.formation-card:hover {
-		box-shadow: 3px 0px 3px var(--primary) inset;
+		/* box-shadow: 3px 0px 3px var(--primary) inset; */
 		cursor: row-resize;
 	}
 	.formation-header {

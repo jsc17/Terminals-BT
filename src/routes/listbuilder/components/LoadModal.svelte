@@ -30,9 +30,7 @@
 			const response: any = deserialize(await (await fetch("?/loadList", { method: "POST", body: "" })).text());
 			if (response.status == 200) {
 				const responseLists = JSON.parse(response.data.lists);
-				console.log(`${responseLists.length} lists loaded`);
 				for (const tempList of responseLists) {
-					console.log(tempList);
 					savedLists.push({
 						id: tempList.id,
 						name: tempList.name,
@@ -47,14 +45,12 @@
 				}
 			} else {
 				toastController.addToast("Failed to load lists from server, please try again");
-				console.log(response.data.message);
 			}
 		}
 		// load local storage saved sublists
 		localLists = JSON.parse(localStorage.getItem("lists") ?? "[]");
 		if (localLists.length) {
 			localListsExist = true;
-			console.log("Loading Local Lists");
 			for (const localListName of localLists) {
 				const localData = localStorage.getItem(localListName)!;
 				if (localData.charAt(0) == "{") {
@@ -193,9 +189,6 @@
 							}}
 						>
 							<td class:local={localLists.includes(savedList.name)}>{savedList.name}</td>
-							<!-- <td style="text-align:center">{eras.get(savedList.eras[0])}</td>
-							<td style="text-align:center">{factions.get(savedList.factions[0])}</td>
-							<td style="text-align:center">{getRules(savedList.rules)?.display}</td> -->
 							<td><button onclick={() => deleteList(savedList.id)}>-</button></td>
 						</tr>
 					{/each}

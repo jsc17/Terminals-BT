@@ -1,7 +1,7 @@
 import { type Actions, fail } from "@sveltejs/kit";
 import { prisma } from "$lib/server/prisma";
 import { sendNewTournamentEmail } from "$lib/emails/mailer.server";
-import { eras } from "$lib/data/erasFactionLookup";
+import { eraLookup } from "$lib/data/erasFactionLookup";
 
 export const actions: Actions = {
 	addTournament: async ({ request, locals }) => {
@@ -40,7 +40,7 @@ export const actions: Actions = {
 				organizerName != "" ? organizerName : locals.user.username,
 				tournamentName,
 				tournamentDate.toString(),
-				eras.get(Number(tournamentEra))!,
+				eraLookup.get(Number(tournamentEra))!,
 				tournament.id.toString()
 			);
 			return { message: "Tournament added successfully", id: tournament.userId };

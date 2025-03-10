@@ -36,7 +36,6 @@
 		if (lastList) {
 			importData = JSON.parse(lastList);
 			if (importData.lcVersion) {
-				console.log(importData);
 				let eras, factions;
 				if (importData.lcVersion == 2) {
 					eras = importData.eras;
@@ -110,10 +109,14 @@
 		margin: 0;
 		position: relative;
 		width: 100%;
+		height: 100%;
 		display: flex;
 		flex-direction: column;
 	}
-
+	.list-drawer-wrapper {
+		height: 100%;
+		width: 100%;
+	}
 	@media (width < 1000px) {
 		.list-drawer-wrapper {
 			visibility: hidden;
@@ -124,8 +127,7 @@
 			margin-left: auto;
 			margin-right: auto;
 			z-index: 4;
-			height: 100%;
-			width: min(max-content, 95dvw);
+			height: calc(100% - 30px);
 			padding: 4px;
 		}
 		.show-listbuilder {
@@ -135,7 +137,7 @@
 			z-index: 5;
 		}
 		.backdrop {
-			height: 100dvh;
+			height: 100%;
 			width: 100dvw;
 			background-color: black;
 			opacity: 0.9;
@@ -163,10 +165,6 @@
 		width: 100%;
 		flex: 1;
 	}
-	.list-drawer-wrapper {
-		height: 100%;
-		width: 100%;
-	}
 	button {
 		height: min(30px, 90%);
 	}
@@ -174,10 +172,11 @@
 		background-color: var(--secondary);
 		color: var(--secondary-foreground);
 		position: fixed;
-		bottom: 15px;
-		right: 25px;
-		height: 50px;
-		font-size: 1.25rem;
+		bottom: 34px;
+		right: 5px;
+		height: 30px;
+		font-size: 1.25em;
+		width: max-content;
 	}
 	.rules-notice {
 		align-self: center;

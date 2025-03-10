@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import { dndzone, type DndEvent } from "svelte-dnd-action";
+	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
 	import VerticalSublist from "./VerticalSublist.svelte";
 	import SublistPrintModal from "./SublistPrintModal.svelte";
 	import HorizontalSublist from "./HorizontalSublist.svelte";
@@ -60,7 +60,7 @@
 				}}>Close</button
 			>
 		</div>
-		<main>
+		<div class="sublist-modal-content" class:sublist-modal-content-mobile={appWindow.isMobile}>
 			<div class="space-between">
 				<div>
 					<label for="scenarioFilter">Scenario:</label>
@@ -80,47 +80,69 @@
 					<button
 						onclick={() => {
 							autoSublistModal.show();
-						}}>Generate sublists</button
+						}}>Generate</button
 					>
 					<button
 						onclick={() => {
 							printModal.show();
-						}}>Print all sublists</button
+						}}>Print</button
 					>
 				</div>
 			</div>
-			<div
-				class="sublist-container"
-				use:dndzone={{ items: list.sublists, dropTargetStyle, flipDurationMs, dragDisabled: scenarioFilter != "All" }}
-				onconsider={handleSort}
-				onfinalize={handleSort}
-				class:sublist-container-vertical={layout == "vertical" && !appWindow.isMobile}
-				class:sublist-container-horizontal={layout == "horizontal" || appWindow.isMobile}
-			>
-				{#each list.sublists as sublist (sublist.id)}
-					{#if sublist.scenario == scenarioFilter || scenarioFilter == "All"}
-						<div class:panel-vertical={layout == "vertical" && !appWindow.isMobile} class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}>
-							{#if appWindow.isMobile}
+			{#if appWindow.isMobile}
+				<div
+					class="sublist-container sublist-container-mobile"
+					use:dragHandleZone={{ items: list.sublists, dropTargetStyle, flipDurationMs, dragDisabled: scenarioFilter != "All" }}
+					onconsider={handleSort}
+					onfinalize={handleSort}
+				>
+					{#each list.sublists as sublist (sublist.id)}
+						{#if sublist.scenario == scenarioFilter || scenarioFilter == "All"}
+							<div class="panel-horizontal">
 								<MobileSublist {sublist} {list} {editSublistModal} {exportSublistModal}></MobileSublist>
-							{:else if layout == "horizontal"}
-								<HorizontalSublist {sublist} {list} {editSublistModal} {exportSublistModal}></HorizontalSublist>
-							{:else}
-								<VerticalSublist {sublist} {list} {editSublistModal} {exportSublistModal}></VerticalSublist>
-							{/if}
-						</div>
-					{/if}
-				{/each}
-				<div class="add-panel" class:panel-vertical={layout == "vertical" && !appWindow.isMobile} class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}>
-					<button
-						onclick={() => {
-							const idAdded = list.addSublist();
-							editSublistModal?.show(idAdded);
-						}}>+</button
-					>
+							</div>
+						{/if}
+					{/each}
+					<div class="add-panel" class:panel-vertical={layout == "vertical" && !appWindow.isMobile} class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}>
+						<button
+							onclick={() => {
+								const idAdded = list.addSublist();
+								editSublistModal?.show(idAdded);
+							}}>+</button
+						>
+					</div>
 				</div>
-			</div>
-			<!-- {/if} -->
-		</main>
+			{:else}
+				<div
+					class="sublist-container"
+					use:dndzone={{ items: list.sublists, dropTargetStyle, flipDurationMs, dragDisabled: scenarioFilter != "All" }}
+					onconsider={handleSort}
+					onfinalize={handleSort}
+					class:sublist-container-vertical={layout == "vertical"}
+					class:sublist-container-horizontal={layout == "horizontal"}
+				>
+					{#each list.sublists as sublist (sublist.id)}
+						{#if sublist.scenario == scenarioFilter || scenarioFilter == "All"}
+							<div class:panel-vertical={layout == "vertical" && !appWindow.isMobile} class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}>
+								{#if layout == "horizontal"}
+									<HorizontalSublist {sublist} {list} {editSublistModal} {exportSublistModal}></HorizontalSublist>
+								{:else}
+									<VerticalSublist {sublist} {list} {editSublistModal} {exportSublistModal}></VerticalSublist>
+								{/if}
+							</div>
+						{/if}
+					{/each}
+					<div class="add-panel" class:panel-vertical={layout == "vertical" && !appWindow.isMobile} class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}>
+						<button
+							onclick={() => {
+								const idAdded = list.addSublist();
+								editSublistModal?.show(idAdded);
+							}}>+</button
+						>
+					</div>
+				</div>
+			{/if}
+		</div>
 	</div>
 </dialog>
 
@@ -134,7 +156,7 @@
 		width: 100%;
 		height: 100%;
 	}
-	main {
+	.sublist-modal-content {
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
@@ -143,21 +165,28 @@
 		width: 100%;
 		border: 1px solid var(--border);
 	}
+	.sublist-modal-content-mobile {
+		padding: 0px;
+		border: none;
+		gap: 4px;
+	}
 	.sublist-container {
 		display: flex;
 		gap: 8px;
-		padding: 8px;
+		/* padding: 8px; */
 		height: 100%;
 		overflow: auto;
 	}
-	.sublist-container-horizontal {
+	.sublist-container-horizontal,
+	.sublist-container-mobile {
 		flex-direction: column;
 	}
-
 	.sublist-container-vertical {
 		scrollbar-width: auto;
 	}
-
+	.sublist-container-mobile {
+		gap: 4px;
+	}
 	.add-panel {
 		button {
 			font-size: 10vmin;

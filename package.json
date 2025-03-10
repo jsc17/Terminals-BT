@@ -22,7 +22,7 @@
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "2.46.1",
 		"prettier-plugin-svelte": "^3.3.3",
-		"prisma": "^6.3.1",
+		"prisma": "^6.4.1",
 		"svelte": "^5.20.2",
 		"svelte-check": "^4.1.4",
 		"svelte-dnd-action": "^0.9.56",
@@ -54,7 +54,7 @@
 		"pdfjs-dist": "4.10.38",
 		"pdfmake": "^0.2.18",
 		"prettier": "^3.4.2",
-		"svelte-virtuallists": "^1.4.0",
+		"svelte-virtuallists": "^1.4.2",
 		"svelty-email": "github:socketopp/svelty-email#feature/component-render"
 	},
 	"pnpm": {

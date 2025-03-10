@@ -3,7 +3,7 @@ import { prisma } from "$lib/server/prisma.js";
 import { printList } from "./utilities/printList.js";
 import { type ListCode } from "./types/listCode.js";
 import { createSublistsPdf } from "./utilities/printSublists.js";
-import type { eras } from "$lib/data/erasFactionLookup.js";
+import type { eraLookup } from "$lib/data/erasFactionLookup.js";
 
 export const actions = {
 	getListNames: async ({ locals }) => {

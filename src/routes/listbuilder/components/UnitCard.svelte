@@ -20,6 +20,18 @@
 			unit.cost = getNewSkillCost(skill, unit?.baseUnit.pv);
 		}
 	}
+
+	let skillArray = $derived.by(() => {
+		if (list.options?.minSkill || list.options?.maxSkill) {
+			let array = [];
+			for (let i = list.options.minSkill ?? 0; i <= (list.options.maxSkill ?? 8); i++) {
+				array.push(i);
+			}
+			return array;
+		} else {
+			return [...Array(8).keys()];
+		}
+	});
 </script>
 
 <div class="unit-card">
@@ -53,18 +65,17 @@
 		<div class="unit-stat-row">
 			<div class="unit-stat">{unit?.baseUnit.subtype}</div>
 			<div class="unit-stat">
-				{#if unit?.skill}
-					<input
-						class="skill-input"
-						onchange={(e) => {
-							console.log("changing skill");
-							modifySkill(e, unit);
+				{#if unit?.skill != undefined}
+					<select
+						bind:value={unit.skill}
+						onchange={() => {
+							unit.cost = getNewSkillCost(unit.skill, unit.baseUnit.pv);
 						}}
-						type="number"
-						value={unit.skill}
-						min={list.options?.minSkill ?? 0}
-						max={list.options?.maxSkill ?? 7}
-					/>
+					>
+						{#each skillArray as skill}
+							<option value={skill}>{skill}</option>
+						{/each}
+					</select>
 				{:else}
 					-
 				{/if}
@@ -99,7 +110,7 @@
 <style>
 	.unit-card {
 		width: 100%;
-		border-bottom: 1px solid var(-border);
+		border-bottom: 1px solid var(--border);
 		flex: 1;
 		min-height: fit-content;
 		background-color: var(--card);
@@ -147,9 +158,8 @@
 	}
 	.unit-ability-row {
 		margin: 2px 0px;
-	}
-	input[type="number"] {
-		width: 40px;
+		justify-content: space-between;
+		display: flex;
 	}
 	.invalid-unit {
 		color: var(--error);
@@ -163,9 +173,12 @@
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		transition: 0s white-space;
+		transition-behavior: allow-discrete;
 	}
 	.name:hover {
 		white-space: wrap;
+		transition-delay: 0.25s;
 	}
 	.unit-abilities {
 		font-size: 0.75em;

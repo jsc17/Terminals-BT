@@ -11,27 +11,6 @@
 
 	let list: List = getContext("list");
 	let unit = list.getUnit(unitId);
-
-	function modifySkill(event: Event, unit: UnitV2) {
-		const target = event.target as HTMLInputElement;
-		if (target) {
-			let skill = parseInt(target.value);
-			unit.skill = skill;
-			unit.cost = getNewSkillCost(skill, unit?.baseUnit.pv);
-		}
-	}
-
-	let skillArray = $derived.by(() => {
-		if (list.options?.minSkill || list.options?.maxSkill) {
-			let array = [];
-			for (let i = list.options.minSkill ?? 0; i <= (list.options.maxSkill ?? 8); i++) {
-				array.push(i);
-			}
-			return array;
-		} else {
-			return [...Array(8).keys()];
-		}
-	});
 </script>
 
 <div class="unit-card">

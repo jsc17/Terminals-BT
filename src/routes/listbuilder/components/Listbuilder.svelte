@@ -9,6 +9,7 @@
 	import type { FormationV2 } from "../types/formation";
 	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
+	import { Popover } from "bits-ui";
 
 	const resultList: ResultList = getContext("resultList");
 	let list: List = getContext("list");
@@ -39,6 +40,55 @@
 		}
 		dropMessageElement?.remove();
 	}
+	let listStats = $derived.by(() => {
+		let totalPV = 0,
+			totalS = 0,
+			totalM = 0,
+			totalL = 0,
+			totalHealth = 0,
+			totalSize = 0,
+			totalSkill = 0,
+			unitCount = list.unitCount;
+
+		list.units.forEach((unit) => {
+			let unitStats = list.getUnit(unit.id);
+			if (unitStats) {
+				totalPV += unitStats.cost ?? 0;
+				totalS += unitStats.baseUnit.damageS ?? 0;
+				totalM += unitStats.baseUnit.damageM ?? 0;
+				totalL += unitStats.baseUnit.damageL ?? 0;
+				totalHealth += unitStats.baseUnit.health ?? 0;
+				totalSize += unitStats.baseUnit.size ?? 0;
+				totalSkill += unitStats.skill ?? 0;
+			}
+		});
+		let avgS = 0,
+			avgM = 0,
+			avgL = 0,
+			avgHealth = 0,
+			avgSize = 0,
+			avgSkill = 0;
+		if (unitCount) {
+			avgS = Number((totalS / unitCount).toFixed(2));
+			avgM = Number((totalM / unitCount).toFixed(2));
+			avgL = Number((totalL / unitCount).toFixed(2));
+			avgHealth = Number((totalHealth / unitCount).toFixed(2));
+			avgSkill = Number((totalSkill / unitCount).toFixed(2));
+			avgSize = Number((totalSize / unitCount).toFixed(2));
+		}
+		return {
+			totalS,
+			totalM,
+			totalL,
+			totalHealth,
+			avgS,
+			avgM,
+			avgL,
+			avgHealth,
+			avgSkill,
+			avgSize
+		};
+	});
 </script>
 
 <div class="card listbuilder">
@@ -72,6 +122,34 @@
 				{:else}
 					<p>Units: {list.unitCount}</p>
 				{/if}
+				<Popover.Root>
+					<Popover.Trigger class="list-info-trigger">
+						<img class="info-button-icon" src="/icons/information.svg" alt="information" />
+					</Popover.Trigger>
+					<Popover.Content class="list-info-content">
+						<div>Average Skill:</div>
+						<div>{listStats.avgSkill}</div>
+						<div>Average Size:</div>
+						<div>{listStats.avgSize}</div>
+						<div>Average Health:</div>
+						<div>{listStats.avgHealth}</div>
+						<div>Average Short Damage:</div>
+						<div>{listStats.avgS}</div>
+						<div>Average Medium Damage:</div>
+						<div>{listStats.avgM}</div>
+						<div>Average Long Damage:</div>
+						<div>{listStats.avgL}</div>
+						<hr class="list-info-separator" />
+						<div>Total Health:</div>
+						<div>{listStats.totalHealth}</div>
+						<div>Total Short Damage:</div>
+						<div>{listStats.totalS}</div>
+						<div>Total Medium Damage:</div>
+						<div>{listStats.totalM}</div>
+						<div>Total Long Damage:</div>
+						<div>{listStats.totalL}</div>
+					</Popover.Content>
+				</Popover.Root>
 			</div>
 			{#if list.issues?.issueList.size}
 				<button class="error-button" onclick={() => errorDialog?.showModal()}><img src="/icons/alert-outline.svg" alt="Error" class="error-icon" /> Show issues</button>
@@ -235,7 +313,10 @@
 	}
 	.list-stats {
 		display: flex;
-		gap: 16px;
+		gap: 4px;
+		p {
+			margin-left: 4px;
+		}
 	}
 	.info {
 		padding: 16px;
@@ -286,5 +367,33 @@
 	}
 	:global(.drop-target-zone) {
 		outline: solid green;
+	}
+	:global(.list-info-trigger) {
+		display: flex;
+		align-items: center;
+		background-color: transparent;
+		color: var(--muted-foreground);
+	}
+	:global(.list-info-content) {
+		display: grid;
+		grid-template-columns: max-content max-content;
+		column-gap: 8px;
+		row-gap: 2px;
+		width: max-content;
+		height: max-content;
+		background-color: var(--background);
+		border-radius: var(--radius);
+		border: 1px solid var(--border);
+		z-index: 5;
+		padding: 16px;
+	}
+	:global(.list-info-content div) {
+		align-self: center;
+		justify-self: flex-end;
+	}
+	:global(.list-info-separator) {
+		grid-column-start: 1;
+		grid-column-end: 3;
+		border: 1px solid var(--muted);
 	}
 </style>

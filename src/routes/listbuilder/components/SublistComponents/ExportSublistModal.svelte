@@ -23,10 +23,20 @@
 		sublist = list.getSublist(id)!;
 		exportName = `${list.details.name} ${sublist.scenario != "-" ? sublist.scenario : "sublist"}`;
 		exportDialog.showModal();
-		ttsCode = list.createTTSCode();
+		ttsCode = createSublistTTSCode();
 		printName = `${list.details.name} ${sublist.scenario} Sublist`;
 	}
 
+	function createSublistTTSCode(): string {
+		let tempTTSArray: string[] = [];
+		sublist.checked.forEach((id) => {
+			let unit = list.getUnit(id);
+			if (unit && unit.baseUnit.mulId > 0) {
+				tempTTSArray.push(`{${unit.baseUnit.mulId},${unit.skill}}`);
+			}
+		});
+		return `{${tempTTSArray.join(",")}}`;
+	}
 	async function handleForm({ formData }: any) {
 		exportDialog.close();
 		const units = sublist.checked.map((unitId) => {
@@ -46,8 +56,8 @@
 			formations: [sublistFormation],
 			playername: playerName,
 			listname: `${list.details.name} ${sublist.scenario != "-" ? sublist.scenario : "sublist"}`,
-			era: list.details.era,
-			faction: list.details.faction,
+			eras: list.details.eras,
+			factions: list.details.factions,
 			general: list.details.general,
 			style: style,
 			condense: false
@@ -92,7 +102,6 @@
 		<form action="?/printList" method="post" use:enhance={handleForm} class="print-form">
 			<div><label for="export-listname">Print title</label><input id="export-listname" bind:value={printName} /></div>
 			<div><label for="export-playername">Player Name (optional)</label><input id="export-playername" bind:value={playerName} /></div>
-			<div>{`${eraLookup.get(list.details.era)} - ${factionLookup.get(list.details.faction)} with ${factionLookup.get(list.details.general)} general list `}</div>
 			<h2>Style</h2>
 			<div>
 				<label for="list-style-mul"

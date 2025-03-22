@@ -8,6 +8,7 @@
 	import { List } from "./types/list.svelte";
 	import { convertUnversionedJSONList } from "./utilities/convert";
 	import type { ListCode } from "./types/listCode";
+	import { deserialize } from "$app/forms";
 
 	const resultList = new ResultList();
 	const list = new List(resultList);
@@ -27,6 +28,22 @@
 	let { data } = $props();
 
 	onMount(() => {
+		if (data.sharedList) {
+			console.log("mounting");
+			let listCode: ListCode = {
+				id: data.sharedList.id,
+				lcVersion: data.sharedList.lcVersion,
+				name: data.sharedList.name,
+				eras: JSON.parse(data.sharedList.eras),
+				factions: JSON.parse(data.sharedList.factions),
+				rules: data.sharedList.rules ?? "noRes",
+				units: JSON.parse(data.sharedList.units),
+				formations: JSON.parse(data.sharedList.formations),
+				sublists: JSON.parse(data.sharedList.sublists)
+			};
+			list.loadList(listCode);
+			return;
+		}
 		if (data.rules && ruleSets.find((value) => value.name == data.rules)) {
 			list.setOptions(data.rules);
 			resultList.setOptions(selectedRules);

@@ -9,6 +9,8 @@
 	import type { FormationV2 } from "../types/formation";
 	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
+	import { toastController } from "$lib/stores/toastController.svelte";
+	import { deserialize } from "$app/forms";
 
 	const resultList: ResultList = getContext("resultList");
 	let list: List = getContext("list");
@@ -38,6 +40,19 @@
 			unitCardElement.innerHTML = "Unit list collapsed while dragging formations";
 		}
 		dropMessageElement?.remove();
+	}
+
+	async function shareList() {
+		const formData = new FormData();
+		formData.append("list", list.getListCode());
+		const response: any = deserialize(await (await fetch("?/shareList", { method: "POST", body: formData })).text());
+		console.log(response);
+		if (response.type == "success") {
+			navigator.clipboard.writeText(`https://terminal.tools/listbuilder?share=${response.data.id}`);
+			toastController.addToast("Shareable list link saved to clipboard");
+		} else {
+			toastController.addToast("Failed to create shareable link. Please try again");
+		}
 	}
 </script>
 
@@ -127,6 +142,14 @@
 						}}
 					>
 						Print List
+					</button>
+					<button
+						class="menu-button"
+						onclick={() => {
+							shareList();
+						}}
+					>
+						Share List Link
 					</button>
 					<button
 						class="menu-button"

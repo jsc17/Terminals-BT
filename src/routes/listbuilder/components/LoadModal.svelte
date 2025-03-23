@@ -139,6 +139,7 @@
 	}
 
 	async function loadList(parsedCode?: ListCode) {
+		console.log(savedLists[selectedListIndex]);
 		await list.loadList(parsedCode ?? savedLists[selectedListIndex]);
 		dialogElement?.close();
 	}

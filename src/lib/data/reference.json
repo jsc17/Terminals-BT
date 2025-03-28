@@ -7,7 +7,7 @@
 	{ "ability": "AMS", "name": "Anti-Missile System", "page": "76" },
 	{ "ability": "ARM", "name": "Armored Component", "page": "76" },
 	{ "ability": "ARS", "name": "Armored Motive System", "page": "77" },
-	{ "ability": "ARTX-", "name": "Artillery", "page": "82" },
+	{ "ability": "ART", "name": "Artillery", "page": "82" },
 	{ "ability": "AT", "name": "Aerospace Transport", "page": "82" },
 	{ "ability": "ATAC", "name": "Adv Tactical Analysis Computer", "page": "82" },
 	{ "ability": "BAR", "name": "Barrier Armor Rating", "page": "77" },

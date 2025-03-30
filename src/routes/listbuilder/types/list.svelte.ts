@@ -484,5 +484,20 @@ export class List {
 			this.units.push(tempUnit);
 		}
 		this.formations = listCode.formations;
+		this.units.forEach((listUnit) => {
+			let assigned = false;
+			this.formations.forEach((formation) => {
+				if (
+					formation.units.find((formationUnit) => {
+						return listUnit.id == formationUnit.id;
+					})
+				) {
+					assigned = true;
+				}
+			});
+			if (!assigned) {
+				this.formations[0].units.push({ id: listUnit.id });
+			}
+		});
 	}
 }

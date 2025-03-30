@@ -334,9 +334,7 @@ export class List {
 		});
 		if (formationToRemove) {
 			formationToRemove.units.forEach((unitId) => {
-				this.units.filter((unit) => {
-					return unit.id == unitId.id;
-				});
+				this.removeUnit(unitId.id);
 			});
 		}
 		this.formations = this.formations.filter((formation) => {

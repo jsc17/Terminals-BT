@@ -54,8 +54,8 @@
 		"pdfjs-dist": "4.10.38",
 		"pdfmake": "^0.2.18",
 		"prettier": "^3.4.2",
-		"svelte-virtuallists": "^1.4.2",
-		"svelty-email": "github:socketopp/svelty-email#feature/component-render"
+		"svelty-email": "github:socketopp/svelty-email#feature/component-render",
+		"virtua": "^0.40.3"
 	},
 	"pnpm": {
 		"onlyBuiltDependencies": [

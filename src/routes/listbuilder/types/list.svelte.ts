@@ -471,7 +471,18 @@ export class List {
 
 		this.clear();
 		this.sublists = listCode.sublists;
+		const sublistIds = new Set();
+		this.sublists.forEach(sublist =>{
+			 if(sublistIds.has(sublist.id)){
+				sublist.id = crypto.randomUUID();
+			 }
+			 sublistIds.add(sublist.id);
+		})
+
 		for (const unit of listCode.units) {
+			if(this.units.find(existingUnit=>{return unit.id == existingUnit.id})){
+				unit.id = crypto.randomUUID();
+			}
 			let baseUnit: MulUnit =
 				this.resultList.resultList.find((result: MulUnit) => {
 					return result.mulId == unit.mulId;
@@ -484,6 +495,13 @@ export class List {
 			this.units.push(tempUnit);
 		}
 		this.formations = listCode.formations;
+		const formationIDs = new Set();
+		this.formations.forEach(formation =>{
+			 if(formationIDs.has(formation.id)){
+				formation.id = crypto.randomUUID();
+			 }
+			 formationIDs.add(formation.id);
+		})
 		this.units.forEach((listUnit) => {
 			let assigned = false;
 			this.formations.forEach((formation) => {

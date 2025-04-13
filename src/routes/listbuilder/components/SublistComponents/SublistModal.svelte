@@ -32,8 +32,6 @@
   function handleSort(e: CustomEvent<DndEvent<SublistV2>>) {
     list.sublists = e.detail.items;
   }
-
-
 </script>
 
 <!-- main sublist dialog -->
@@ -41,46 +39,18 @@
   <div class="dialog-body">
     <div class="space-between">
       <h2>Sublists</h2>
-      <Menu>
+      <Menu img={"/icons/settings.svg"}>
         {#if !appWindow.isMobile}
           <fieldset>
             <legend>Display</legend>
-            <label
-              ><input
-                type="radio"
-                name="layout"
-                bind:group={layout}
-                value="vertical"
-              /> Vertical</label
-            >
-            <label
-              ><input
-                type="radio"
-                name="layout"
-                bind:group={layout}
-                value="horizontal"
-              /> Horizontal</label
-            >
+            <label><input type="radio" name="layout" bind:group={layout} value="vertical" /> Vertical</label>
+            <label><input type="radio" name="layout" bind:group={layout} value="horizontal" /> Horizontal</label>
           </fieldset>
         {/if}
         <fieldset>
           <legend>Sublist unit sorting</legend>
-          <label
-            ><input
-              type="radio"
-              name="unitSortOrder"
-              bind:group={layout}
-              value="name"
-            /> Name</label
-          >
-          <label
-            ><input
-              type="radio"
-              name="unitSortOrder"
-              bind:group={layout}
-              value="pv"
-            /> PV</label
-          >
+          <label><input type="radio" name="unitSortOrder" bind:group={unitSortOrder} value="pv" /> PV</label>
+          <label><input type="radio" name="unitSortOrder" bind:group={unitSortOrder} value="name" /> Name</label>
         </fieldset>
       </Menu>
 
@@ -90,10 +60,7 @@
         }}>Close</button
       >
     </div>
-    <div
-      class="sublist-modal-content"
-      class:sublist-modal-content-mobile={appWindow.isMobile}
-    >
+    <div class="sublist-modal-content" class:sublist-modal-content-mobile={appWindow.isMobile}>
       <div class="space-between">
         <div>
           <label for="scenarioFilter">Scenario:</label>
@@ -137,13 +104,7 @@
           {#each list.sublists as sublist (sublist.id)}
             {#if sublist.scenario == scenarioFilter || scenarioFilter == "All"}
               <div class="panel-horizontal">
-                <Sublist
-                  {sublist}
-                  {list}
-                  {editSublistModal}
-                  {exportSublistModal}
-                  {unitSortOrder}
-                  layout="mobile"
+                <Sublist {sublist} {list} {editSublistModal} {exportSublistModal} {unitSortOrder} layout="mobile"
                 ></Sublist>
               </div>
             {/if}
@@ -151,8 +112,7 @@
           <div
             class="add-panel"
             class:panel-vertical={layout == "vertical" && !appWindow.isMobile}
-            class:panel-horizontal={layout == "horizontal" ||
-              appWindow.isMobile}
+            class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}
           >
             <button
               onclick={() => {
@@ -179,26 +139,17 @@
           {#each list.sublists as sublist (sublist.id)}
             {#if sublist.scenario == scenarioFilter || scenarioFilter == "All"}
               <div
-                class:panel-vertical={layout == "vertical" &&
-                  !appWindow.isMobile}
-                class:panel-horizontal={layout == "horizontal" ||
-                  appWindow.isMobile}
+                class:panel-vertical={layout == "vertical" && !appWindow.isMobile}
+                class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}
               >
-                  <Sublist
-                    {sublist}
-                    {list}
-                    {editSublistModal}
-                    {exportSublistModal}
-                    {unitSortOrder}
-                    {layout}
-                  ></Sublist>
+                <Sublist {sublist} {list} {editSublistModal} {exportSublistModal} {unitSortOrder} {layout}></Sublist>
               </div>
             {/if}
           {/each}
           <div
             class="add-panel"
             class:panel-vertical={layout == "vertical" && !appWindow.isMobile}
-            class:panel-horizontal={layout == "horizontal" ||appWindow.isMobile}
+            class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}
           >
             <button
               onclick={() => {

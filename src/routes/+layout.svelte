@@ -94,6 +94,12 @@
 		background-color: var(--input);
 		border: 1px solid var(--border);
 	}
+	:global(input[type="radio"]){
+		accent-color: var(--primary);
+	}
+	:global(input[type="checkbox"]){
+		accent-color: var(--primary);
+	}
 	:global(select) {
 		background-color: var(--input);
 		color: var(--foreground);

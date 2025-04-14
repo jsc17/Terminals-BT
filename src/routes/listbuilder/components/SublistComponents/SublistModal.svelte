@@ -39,26 +39,28 @@
   <div class="dialog-body">
     <div class="space-between">
       <h2>Sublists</h2>
-      <Menu img={"/icons/settings.svg"}>
-        {#if !appWindow.isMobile}
+      <p class="info-text">Current Sort Order: {unitSortOrder}</p>
+      <div class="sublist-modal-buttons">
+        <Menu img={"/icons/settings.svg"}>
+          {#if !appWindow.isMobile}
+            <fieldset>
+              <legend>Display</legend>
+              <label><input type="radio" name="layout" bind:group={layout} value="vertical" /> Vertical</label>
+              <label><input type="radio" name="layout" bind:group={layout} value="horizontal" /> Horizontal</label>
+            </fieldset>
+          {/if}
           <fieldset>
-            <legend>Display</legend>
-            <label><input type="radio" name="layout" bind:group={layout} value="vertical" /> Vertical</label>
-            <label><input type="radio" name="layout" bind:group={layout} value="horizontal" /> Horizontal</label>
+            <legend>Sublist unit sorting</legend>
+            <label><input type="radio" name="unitSortOrder" bind:group={unitSortOrder} value="pv" /> PV</label>
+            <label><input type="radio" name="unitSortOrder" bind:group={unitSortOrder} value="name" /> Name</label>
           </fieldset>
-        {/if}
-        <fieldset>
-          <legend>Sublist unit sorting</legend>
-          <label><input type="radio" name="unitSortOrder" bind:group={unitSortOrder} value="pv" /> PV</label>
-          <label><input type="radio" name="unitSortOrder" bind:group={unitSortOrder} value="name" /> Name</label>
-        </fieldset>
-      </Menu>
-
-      <button
-        onclick={() => {
-          sublistDialog.close();
-        }}>Close</button
-      >
+        </Menu>
+        <button
+          onclick={() => {
+            sublistDialog.close();
+          }}>Close</button
+        >
+      </div>
     </div>
     <div class="sublist-modal-content" class:sublist-modal-content-mobile={appWindow.isMobile}>
       <div class="space-between">
@@ -173,6 +175,11 @@
   .sublist-modal {
     width: 100%;
     height: 100%;
+  }
+  .sublist-modal-buttons {
+    display: flex;
+    gap: 4px;
+    align-items: center;
   }
   .sublist-modal-content {
     display: flex;

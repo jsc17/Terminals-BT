@@ -106,6 +106,8 @@
     display: grid;
     grid-template-columns: auto max-content;
     row-gap: 4px;
+    column-gap: 4px;
+    margin-right: 4px;
   }
   .sublist-stats {
     display: grid;

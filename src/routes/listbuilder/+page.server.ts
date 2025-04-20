@@ -3,7 +3,17 @@ import { prisma } from "$lib/server/prisma.js";
 import { printList } from "./utilities/printList.js";
 import { type ListCode } from "./types/listCode.js";
 import { createSublistsPdf } from "./utilities/printSublists.js";
-import type { eraLookup } from "$lib/data/erasFactionLookup.js";
+
+export const load = async ({ url }) => {
+	let sharedList;
+	if (url.searchParams.get("share")) {
+		sharedList = await prisma.sharedList.findUnique({ where: { id: url.searchParams.get("share")! } });
+	}
+	return {
+		rules: url.searchParams.get("rules"),
+		sharedList
+	};
+};
 
 export const actions = {
 	getListNames: async ({ locals }) => {
@@ -124,5 +134,33 @@ export const actions = {
 		const blob = await createSublistsPdf(sublists, layout, grouped, name);
 		const bytes = await blob.bytes();
 		return { pdf: JSON.stringify(bytes) };
+	},
+	shareList: async ({ request }) => {
+		const list = (await request.formData()).get("list");
+		if (!list) {
+			return fail(400, { message: "failed to save list. Data not transmitted" });
+		}
+		const parsedBody: ListCode = JSON.parse(list.toString());
+
+		const id: string = crypto.randomUUID();
+		const data = {
+			id,
+			name: parsedBody.name,
+			eras: JSON.stringify(parsedBody.eras),
+			factions: JSON.stringify(parsedBody.factions),
+			units: JSON.stringify(parsedBody.units),
+			formations: JSON.stringify(parsedBody.formations),
+			sublists: JSON.stringify(parsedBody.sublists),
+			rules: parsedBody.rules,
+			lcVersion: parsedBody.lcVersion
+		};
+
+		try {
+			const newSharedList = await prisma.sharedList.create({ data });
+			return { message: "list saved successfully", id: newSharedList.id };
+		} catch (error) {
+			console.error(error);
+			return fail(400, { message: "Failed to create shareable list" });
+		}
 	}
 };

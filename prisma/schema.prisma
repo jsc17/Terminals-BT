@@ -70,6 +70,19 @@ model ListV3 {
   sublists String? @db.Text
   rules String?
 }
+ 
+model SharedList {
+  id String @id
+  lcVersion Int
+  name String
+  eras String
+  factions String
+  units String @db.MediumText
+  formations String @db.Text
+  sublists String @db.Text
+  rules String
+  sharedDate DateTime @default(now())
+}
 
 model Tournament {
   id Int @id @default(autoincrement())

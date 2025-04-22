@@ -85,7 +85,7 @@
 </script>
 
 {#snippet jeffExportButton()}
-	<button class="menu-button" onclick={exportFormationToJeff}>Export Formation to Jeff's Tools </button>
+	<button class="transparent-button" onclick={exportFormationToJeff}>Export Formation to Jeff's Tools </button>
 {/snippet}
 
 {#snippet infoPopover()}
@@ -156,13 +156,13 @@
 			<Menu img={"/icons/menu.svg"}>
 				{@render jeffExportButton()}
 				<button
-					class="menu-button"
+					class="transparent-button"
 					onclick={() => {
 						if (formation.units.length == 0 || confirm("Formation is not empty and removing it will remove all units it contains. Continue?")) {
 							list.removeFormation(formation.id);
 							toastController.addToast(`${formation.name} removed from list`);
 						}
-					}}>Remove</button
+					}}>Remove Formation</button
 				>
 			</Menu>
 		</div>
@@ -200,10 +200,6 @@
 </div>
 
 <style>
-	.menu-button {
-		background-color: transparent;
-		color: var(--primary);
-	}
 	.formation-card {
 		position: relative;
 		width: 100%;

@@ -188,7 +188,7 @@
 			<div class="list-buttons">
 				<Menu text={"+"}>
 					<button
-						class="menu-button"
+						class="transparent-button"
 						onclick={() => {
 							list.newFormation();
 						}}>Add Formation</button
@@ -198,7 +198,7 @@
 				>
 				<Menu img={"/icons/menu.svg"}>
 					<button
-						class="menu-button"
+						class="transparent-button"
 						onclick={() => {
 							loadModal?.show();
 						}}
@@ -206,7 +206,7 @@
 						Load / Import List
 					</button>
 					<button
-						class="menu-button"
+						class="transparent-button"
 						onclick={() => {
 							saveModal?.show();
 						}}
@@ -214,7 +214,7 @@
 						Save / Export List
 					</button>
 					<button
-						class="menu-button"
+						class="transparent-button"
 						onclick={() => {
 							printModal?.show();
 						}}
@@ -222,7 +222,7 @@
 						Print List
 					</button>
 					<button
-						class="menu-button"
+						class="transparent-button"
 						onclick={() => {
 							shareList();
 						}}
@@ -230,7 +230,7 @@
 						Share List Link
 					</button>
 					<button
-						class="menu-button"
+						class="transparent-button"
 						onclick={() => {
 							sublistModal?.show();
 						}}
@@ -238,7 +238,7 @@
 						Generate Sublists
 					</button>
 					<button
-						class="menu-button"
+						class="transparent-button"
 						onclick={() => {
 							if (confirm("Remove all units and formations from the list?")) {
 								list.clear();
@@ -354,10 +354,6 @@
 	}
 	.errors {
 		color: var(--error);
-	}
-	.menu-button {
-		background-color: transparent;
-		color: var(--primary);
 	}
 	.error-icon {
 		width: 20px;

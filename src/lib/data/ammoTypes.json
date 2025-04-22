@@ -1,0 +1,233 @@
+[
+	{
+		"weaponType": "Artillery",
+		"ammoTypes": [
+			{
+				"name": "Air-Defense Arrow IV",
+				"requiredSpecial": ["ART-AIS", "ART-AC"],
+				"reference": 143
+			},
+
+			{
+				"name": "Air-to-Air Arrow IV",
+				"requiredSpecial": ["ART-AIS", "ART-AC"],
+				"reference": 143
+			},
+			{
+				"name": "Cluster",
+				"requiredSpecial": ["ART-AIS", "ART-AC", "ART-T", "ART-S", "ART-LT"],
+				"reference": 143
+			},
+			{
+				"name": "Copperhead",
+				"requiredSpecial": ["ART-LT", "ART-S", "ART-T"],
+				"reference": 144
+			},
+			{
+				"name": "Flechette",
+				"requiredSpecial": ["ART-LT", "ART-S", "ART-T"],
+				"reference": 144
+			},
+			{
+				"name": "Illumination",
+				"requiredSpecial": ["ART-AIS", "ART-AC", "ART-LT", "ART-S", "ART-T"],
+				"reference": 144
+			},
+			{
+				"name": "Inferno IV",
+				"requiredSpecial": ["ART-AIS", "ART-AC"],
+				"reference": 144
+			},
+			{
+				"name": "Smoke",
+				"requiredSpecial": ["ART-AIS", "ART-AC", "ART-LT", "ART-S", "ART-T"],
+				"reference": 144
+			},
+			{
+				"name": "Thunder",
+				"requiredSpecial": ["ART-AIS", "ART-AC"],
+				"reference": 145
+			},
+			{
+				"name": "Thunder-Active",
+				"requiredSpecial": ["ART-AIS", "ART-AC"],
+				"reference": 145
+			}
+		]
+	},
+	{
+		"weaponType": "Autocannon",
+		"ammoTypes": [
+			{
+				"name": "Armor Piercing",
+				"requiredSpecial": ["AC"],
+				"reference": 145
+			},
+			{
+				"name": "Flak",
+				"requiredSpecial": ["AC"],
+				"reference": 145
+			},
+			{
+				"name": "Flechette",
+				"requiredSpecial": ["AC"],
+				"reference": 145
+			},
+			{
+				"name": "Precision",
+				"requiredSpecial": ["AC"],
+				"reference": 145
+			},
+			{
+				"name": "Tracer",
+				"requiredSpecial": ["AC"],
+				"reference": 145
+			}
+		]
+	},
+	{
+		"weaponType": "Bomb/Aerospace Missile",
+		"ammoTypes": [
+			{
+				"name": "Air-to-Air Arrow IV",
+				"requiredSpecial": ["BOMB"],
+				"reference": 147
+			},
+			{
+				"name": "Arrow IV",
+				"requiredSpecial": ["BOMB"],
+				"reference": 147
+			},
+			{
+				"name": "Inferno",
+				"requiredSpecial": ["BOMB"],
+				"reference": 147
+			},
+			{
+				"name": "Laser-Guided",
+				"requiredSpecial": ["BOMB"],
+				"reference": 147
+			},
+			{
+				"name": "Light Air-to-Air Arrow IV",
+				"requiredSpecial": ["BOMB"],
+				"reference": 147
+			},
+			{
+				"name": "Rocket Launcher",
+				"requiredSpecial": ["BOMB"],
+				"reference": 147
+			},
+			{
+				"name": "Tag",
+				"requiredSpecial": ["BOMB"],
+				"reference": 147
+			},
+			{
+				"name": "Thunder",
+				"requiredSpecial": ["BOMB"],
+				"reference": 148
+			},
+			{
+				"name": "Torpedo",
+				"requiredSpecial": ["BOMB"],
+				"reference": 148
+			}
+		]
+	},
+	{
+		"weaponType": "NARC/INARC Pods",
+		"ammoTypes": [
+			{
+				"name": "ECM",
+				"requiredSpecial": ["INARC"],
+				"reference": 148
+			},
+			{
+				"name": "Explosive",
+				"requiredSpecial": ["CNARC", "SNARC", "INARC"],
+				"reference": 148
+			},
+			{
+				"name": "Haywire",
+				"requiredSpecial": ["INARC"],
+				"reference": 148
+			},
+			{
+				"name": "Shoot and Sit Missiles",
+				"requiredSpecial": ["SNARC"],
+				"reference": 148
+			}
+		]
+	},
+	{
+		"weaponType": "LRM/SRM",
+		"ammoTypes": [
+			{
+				"name": "Anti-TSM Warheads",
+				"requiredSpecial": ["LRM", "SRM"],
+				"reference": 148
+			},
+			{
+				"name": "Dead-Fire Missiles",
+				"requiredSpecial": ["LRM", "SRM"],
+				"reference": 149
+			},
+			{
+				"name": "Heat-Seeker",
+				"requiredSpecial": ["LRM", "SRM"],
+				"reference": 149
+			},
+			{
+				"name": "Inferno",
+				"requiredSpecial": ["SRM"],
+				"reference": 149
+			},
+			{
+				"name": "Listen-Kill Warhead",
+				"requiredSpecial": ["LRM", "SRM"],
+				"reference": 149
+			},
+			{
+				"name": "Magnetic Pulse",
+				"requiredSpecial": ["LRM", "SRM"],
+				"reference": 149
+			},
+			{
+				"name": "Mine Clearance",
+				"requiredSpecial": ["LRM", "SRM"],
+				"reference": 149
+			},
+			{
+				"name": "Semi-Guided",
+				"requiredSpecial": ["LRM"],
+				"reference": 150
+			},
+			{
+				"name": "Smoke",
+				"requiredSpecial": ["LRM", "SRM"],
+				"reference": 150
+			},
+			{
+				"name": "Swarm",
+				"requiredSpecial": ["LRM"],
+				"reference": 150
+			},
+			{
+				"name": "Swarm-I",
+				"requiredSpecial": ["LRM"],
+				"reference": 150
+			},
+			{
+				"name": "Tandem",
+				"requiredSpecial": ["SRM"],
+				"reference": 150
+			},
+			{
+				"name": "Thunder",
+				"requiredSpecial": ["LRM"],
+				"reference": 150
+			}
+		]
+	}
+]

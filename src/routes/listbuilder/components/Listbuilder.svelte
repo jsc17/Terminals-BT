@@ -12,6 +12,7 @@
 	import { Popover } from "bits-ui";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { deserialize } from "$app/forms";
+	import UnitCustomizationModal from "./UnitCustomizationModal.svelte";
 
 	const resultList: ResultList = getContext("resultList");
 	let list: List = getContext("list");
@@ -21,6 +22,7 @@
 	let saveModal: SaveModal | undefined = $state();
 	let loadModal: LoadModal | undefined = $state();
 	let sublistModal: SublistModal | undefined = $state();
+	let unitCustomizationModal: UnitCustomizationModal | undefined = $state();
 	let errorDialog = $state<HTMLDialogElement>();
 
 	let dropTargetStyle = { outline: "solid var(--primary)" };
@@ -271,23 +273,23 @@
 	{:else if appWindow.isMobile}
 		<div
 			class="list-units"
-			use:dragHandleZone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations", transformDraggedElement }}
+			use:dragHandleZone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations", transformDraggedElement, dragDisabled: list.formations.length == 1 }}
 			onconsider={handleDndConsider}
 			onfinalize={handleDndFinalize}
 		>
 			{#each list.formations as formation (formation.id)}
-				<FormationCard {formation} {draggingColumns}></FormationCard>
+				<FormationCard {formation} {draggingColumns} {unitCustomizationModal}></FormationCard>
 			{/each}
 		</div>
 	{:else}
 		<div
 			class="list-units"
-			use:dndzone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations", transformDraggedElement }}
+			use:dndzone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations", transformDraggedElement, dragDisabled: list.formations.length == 1 }}
 			onconsider={handleDndConsider}
 			onfinalize={handleDndFinalize}
 		>
 			{#each list.formations as formation (formation.id)}
-				<FormationCard {formation} {draggingColumns}></FormationCard>
+				<FormationCard {formation} {draggingColumns} {unitCustomizationModal}></FormationCard>
 			{/each}
 		</div>
 	{/if}
@@ -297,6 +299,7 @@
 <SaveModal bind:this={saveModal}></SaveModal>
 <LoadModal bind:this={loadModal}></LoadModal>
 <SublistModal bind:this={sublistModal}></SublistModal>
+<UnitCustomizationModal bind:this={unitCustomizationModal}></UnitCustomizationModal>
 
 <style>
 	.listbuilder {

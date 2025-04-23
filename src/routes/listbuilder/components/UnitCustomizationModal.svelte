@@ -2,65 +2,111 @@
 	import type { UnitV2 } from "$lib/types/unit";
 	import spaList from "$lib/data/spas.json";
 	import ammoList from "$lib/data/ammoTypes.json";
+	import type { List } from "../types/list.svelte";
+	import { getContext } from "svelte";
 
-	let UnitCustomizationDialog: HTMLDialogElement;
-	let unitToModify = $state<UnitV2>();
+	let list: List = getContext("list");
+	let unit = $state<UnitV2 | undefined>();
+
+	let UnitCustomizationDialog = $state<HTMLDialogElement | undefined>();
 
 	let selectAmmoValue = $state<string>(ammoList[0].ammoTypes[0].name);
 	let selectSPAValue = $state<string>(spaList[0].name);
+	let filterWeapons = $state<boolean>(true);
 
-	export function show(unit: UnitV2) {
-		UnitCustomizationDialog.showModal();
-		unitToModify = unit;
+	let filteredAmmoList = $derived.by(() => {
+		if (filterWeapons && unit) {
+			let filteredList = [];
+			for (const weapon of ammoList) {
+				let allowedAmmo: { name: string; requiredSpecial: string[]; reference: number }[] = [];
+				ammoTypeLoop: for (const ammoType of weapon.ammoTypes) {
+					for (const requiredSpecial of ammoType.requiredSpecial) {
+						if (unit.baseUnit.abilities.includes(requiredSpecial)) {
+							allowedAmmo.push(ammoType);
+							continue ammoTypeLoop;
+						}
+					}
+				}
+				if (allowedAmmo.length) {
+					filteredList.push({ weaponType: weapon.weaponType, ammoTypes: allowedAmmo });
+				}
+			}
+			return filteredList;
+		} else {
+			return ammoList;
+		}
+	});
+
+	$effect(() => {
+		selectAmmoValue = filteredAmmoList[0].ammoTypes[0].name;
+	});
+
+	export function show(unitId: string) {
+		UnitCustomizationDialog?.showModal();
+		unit = list.getUnit(unitId);
 	}
 </script>
 
 <dialog bind:this={UnitCustomizationDialog}>
 	<div class="dialog-header">
-		<h2>{unitToModify?.baseUnit?.name} customization</h2>
-		<button class="close-button" onclick={() => UnitCustomizationDialog.close()}>Close</button>
+		<h2>{unit?.baseUnit?.name} customization</h2>
+		<button class="close-button" onclick={() => UnitCustomizationDialog?.close()}>Close</button>
 	</div>
 	<div class="customization-body">
 		<div class="customization-column">
 			<h3 class="customization-column-title">Alternate Ammo</h3>
 			<ul class="customization-column-list">
-				{#each unitToModify?.customization.ammo ?? [] as ammo, index}
+				{#each unit?.customization.ammo ?? [] as ammo, index}
 					<li class="customization-column-list-item">
 						{ammo}
 						<button
 							onclick={() => {
-								unitToModify?.customization.ammo?.splice(index, 1);
+								unit?.customization.ammo?.splice(index, 1);
 							}}>-</button
 						>
 					</li>
 				{/each}
 			</ul>
 			<div class="customization-column-add-row">
-				<select class="customization-column-add-select" bind:value={selectAmmoValue}>
-					{#each ammoList as ammoType}
-						<optgroup label={ammoType.weaponType}>
-							{#each ammoType.ammoTypes as ammo}
-								<option value={ammo.name}>{ammo.name} ({ammo.requiredSpecial.join(", ")})</option>
-							{/each}
-						</optgroup>
-					{/each}
-				</select>
-				<button
-					onclick={() => {
-						unitToModify?.customization.ammo?.push(selectAmmoValue);
-					}}>Add</button
+				{#if filteredAmmoList.length == 0}
+					<p>No valid weapons that can use alternate ammo</p>
+				{:else}
+					<select class="customization-column-add-select" bind:value={selectAmmoValue} disabled={filteredAmmoList.length == 0} placeholder="">
+						{#each filteredAmmoList as ammoType}
+							<optgroup label={ammoType.weaponType}>
+								{#each ammoType.ammoTypes as ammo}
+									<option value={ammo.name}>{ammo.name} ({ammo.requiredSpecial.join(", ")})</option>
+								{/each}
+							</optgroup>
+						{/each}
+					</select>
+					<button
+						disabled={filteredAmmoList.length == 0}
+						onclick={() => {
+							if (unit && !unit?.customization.ammo) {
+								unit.customization.ammo = [selectAmmoValue];
+							} else {
+								unit?.customization.ammo?.push(selectAmmoValue);
+							}
+						}}>Add</button
+					>
+				{/if}
+			</div>
+			<div class="alternate-ammo-option-row">
+				<input type="checkbox" name="filterWeapons" id="filterWeapons" bind:checked={filterWeapons} /><label class="filterWeapons" for="filterWeapons"
+					>Only allow valid ammo types</label
 				>
 			</div>
 		</div>
 		<div class="customization-column">
 			<h3 class="customization-column-title">SPA's</h3>
 			<ul class="customization-column-list">
-				{#each unitToModify?.customization.spa ?? [] as spa, index}
+				{#each unit?.customization.spa ?? [] as spa, index}
 					<li class="customization-column-list-item">
 						{spa}
 						<button
 							onclick={() => {
-								unitToModify?.customization.spa?.splice(index, 1);
+								unit?.customization.spa?.splice(index, 1);
 							}}>-</button
 						>
 					</li>
@@ -74,7 +120,11 @@
 				</select>
 				<button
 					onclick={() => {
-						unitToModify?.customization.spa?.push(selectSPAValue);
+						if (unit && !unit.customization.spa) {
+							unit.customization.spa = [selectSPAValue];
+						} else {
+							unit?.customization.spa?.push(selectSPAValue);
+						}
 					}}>Add</button
 				>
 			</div>
@@ -86,6 +136,7 @@
 	dialog {
 		padding: 16px;
 		width: max-content;
+		max-height: 90%;
 	}
 	.dialog-header {
 		display: flex;
@@ -106,7 +157,7 @@
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		background-color: var(--card);
-		height: 250px;
+		min-height: 250px;
 		padding: 4px 8px;
 		gap: 4px;
 	}
@@ -120,6 +171,7 @@
 		flex: 1;
 		padding-left: 6px;
 		margin: 0;
+		overflow: auto;
 	}
 	.customization-column-list-item {
 		display: flex;
@@ -136,5 +188,14 @@
 	}
 	.customization-column-add-select {
 		flex: 1;
+	}
+	.alternate-ammo-option-row {
+		display: flex;
+		gap: 2px;
+		align-items: center;
+	}
+	.filterWeapons {
+		color: var(--muted-foreground);
+		font-size: 0.85em;
 	}
 </style>

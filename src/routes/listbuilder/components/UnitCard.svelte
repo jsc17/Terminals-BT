@@ -8,12 +8,15 @@
 	import Menu from "$lib/components/Generic/Menu.svelte";
 	import UnitCustomizationModal from "./UnitCustomizationModal.svelte";
 
-	const { unitId }: { unitId: string } = $props();
+	type Props = {
+		unitId: string;
+		unitCustomizationModal?: UnitCustomizationModal;
+	};
+
+	const { unitId, unitCustomizationModal }: Props = $props();
 
 	let list: List = getContext("list");
-	let unit = list.getUnit(unitId)!;
-
-	let unitCustomizationDialog = $state<UnitCustomizationModal | undefined>();
+	let unit = list.getUnit(unitId);
 </script>
 
 <div class="unit-card">
@@ -30,7 +33,7 @@
 				<button
 					class="transparent-button"
 					onclick={() => {
-						unitCustomizationDialog?.show(unit);
+						unitCustomizationModal?.show(unitId);
 					}}
 				>
 					Add Ammo/SPA
@@ -110,8 +113,6 @@
 	</div>
 </div>
 
-<UnitCustomizationModal bind:this={unitCustomizationDialog}></UnitCustomizationModal>
-
 <style>
 	.unit-card {
 		width: 100%;
@@ -171,7 +172,8 @@
 	.unit-custom-row {
 		margin: 2px 0px;
 		display: flex;
-		gap: 16px;
+		column-gap: 16px;
+		flex-wrap: wrap;
 	}
 	.invalid-unit {
 		color: var(--error);

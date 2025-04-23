@@ -9,11 +9,12 @@
 	import { exportToJeff } from "../utilities/export.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { Popover } from "bits-ui";
+	import UnitCustomizationModal from "./UnitCustomizationModal.svelte";
 
-	type Props = { formation: FormationV2; draggingColumns: boolean };
+	type Props = { formation: FormationV2; draggingColumns: boolean; unitCustomizationModal?: UnitCustomizationModal };
 
 	let list: List = getContext("list");
-	let { formation, draggingColumns }: Props = $props();
+	let { formation, draggingColumns, unitCustomizationModal }: Props = $props();
 
 	let dropTargetStyle = {};
 	let flipDurationMs = 100;
@@ -179,7 +180,7 @@
 				onfinalize={handleSort}
 			>
 				{#each formation.units as unit (unit.id)}
-					<UnitCard unitId={unit.id}></UnitCard>
+					<UnitCard unitId={unit.id} {unitCustomizationModal}></UnitCard>
 				{/each}
 			</div>
 		{:else}
@@ -190,7 +191,7 @@
 				onfinalize={handleSort}
 			>
 				{#each formation.units as unit (unit.id)}
-					<UnitCard unitId={unit.id}></UnitCard>
+					<UnitCard unitId={unit.id} {unitCustomizationModal}></UnitCard>
 				{/each}
 			</div>
 		{/if}

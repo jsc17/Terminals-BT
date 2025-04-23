@@ -121,7 +121,8 @@ export const actions = {
 		const formData = await request.formData();
 		const list = JSON.parse(formData.get("body")!.toString());
 		const printFormations = formData.get("drawFormations")?.toString() == "on";
-		const blob = await printList(list, printFormations);
+		const printUnitsByFormation = formData.get("printUnitsByFormation")?.toString() == "on";
+		const blob = await printList(list, printFormations, printUnitsByFormation);
 		const bytes = await blob.bytes();
 		return { pdf: JSON.stringify(bytes) };
 	},

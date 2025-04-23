@@ -4,53 +4,53 @@
 		"ammoTypes": [
 			{
 				"name": "Air-Defense Arrow IV",
-				"requiredSpecial": ["ART-AIS", "ART-AC"],
+				"requiredSpecial": ["ARTAIS", "ARTAC"],
 				"reference": 143
 			},
 
 			{
 				"name": "Air-to-Air Arrow IV",
-				"requiredSpecial": ["ART-AIS", "ART-AC"],
+				"requiredSpecial": ["ARTAIS", "ARTAC"],
 				"reference": 143
 			},
 			{
 				"name": "Cluster",
-				"requiredSpecial": ["ART-AIS", "ART-AC", "ART-T", "ART-S", "ART-LT"],
+				"requiredSpecial": ["ARTAIS", "ARTAC", "ARTT", "ARTS", "ARTLT"],
 				"reference": 143
 			},
 			{
 				"name": "Copperhead",
-				"requiredSpecial": ["ART-LT", "ART-S", "ART-T"],
+				"requiredSpecial": ["ARTLT", "ARTS", "ARTT"],
 				"reference": 144
 			},
 			{
 				"name": "Flechette",
-				"requiredSpecial": ["ART-LT", "ART-S", "ART-T"],
+				"requiredSpecial": ["ARTLT", "ARTS", "ARTT"],
 				"reference": 144
 			},
 			{
 				"name": "Illumination",
-				"requiredSpecial": ["ART-AIS", "ART-AC", "ART-LT", "ART-S", "ART-T"],
+				"requiredSpecial": ["ARTAIS", "ARTAC", "ARTLT", "ARTS", "ARTT"],
 				"reference": 144
 			},
 			{
 				"name": "Inferno IV",
-				"requiredSpecial": ["ART-AIS", "ART-AC"],
+				"requiredSpecial": ["ARTAIS", "ARTAC"],
 				"reference": 144
 			},
 			{
 				"name": "Smoke",
-				"requiredSpecial": ["ART-AIS", "ART-AC", "ART-LT", "ART-S", "ART-T"],
+				"requiredSpecial": ["ARTAIS", "ARTAC", "ARTLT", "ARTS", "ARTT"],
 				"reference": 144
 			},
 			{
 				"name": "Thunder",
-				"requiredSpecial": ["ART-AIS", "ART-AC"],
+				"requiredSpecial": ["ARTAIS", "ARTAC"],
 				"reference": 145
 			},
 			{
 				"name": "Thunder-Active",
-				"requiredSpecial": ["ART-AIS", "ART-AC"],
+				"requiredSpecial": ["ARTAIS", "ARTAC"],
 				"reference": 145
 			}
 		]

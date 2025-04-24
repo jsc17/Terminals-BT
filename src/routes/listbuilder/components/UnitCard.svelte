@@ -3,11 +3,17 @@
 	import { getNewSkillCost } from "$lib/utilities/bt-utils";
 	import { getContext } from "svelte";
 	import type { List } from "../types/list.svelte";
-	import type { UnitV2 } from "$lib/types/unit";
 	import { dragHandle } from "svelte-dnd-action";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
+	import Menu from "$lib/components/Generic/Menu.svelte";
+	import UnitCustomizationModal from "./UnitCustomizationModal.svelte";
 
-	const { unitId }: { unitId: string } = $props();
+	type Props = {
+		unitId: string;
+		unitCustomizationModal?: UnitCustomizationModal;
+	};
+
+	const { unitId, unitCustomizationModal }: Props = $props();
 
 	let list: List = getContext("list");
 	let unit = list.getUnit(unitId);
@@ -19,26 +25,37 @@
 			<img class="combobox-img" src="/icons/chevron-updown.svg" alt="expand list chevrons" />
 		</div>
 	{/if}
-	<div class="unit-row-container-mobile">
+	<div class="unit-row-container">
 		<div class="unit-name-row">
-			<p class="name" class:invalid-unit={list.issues.issueUnits.has(unit?.id ?? "0")}>{unit?.baseUnit.name}</p>
-			<button
-				class="remove-button center"
-				onclick={() => {
-					list.removeUnit(unitId);
-					toastController.addToast(`${unit?.baseUnit.name} removed from list`);
-				}}>-</button
-			>
+			<p class="name-row-name" class:invalid-unit={list.issues.issueUnits.has(unit?.id ?? "0")}>{unit?.baseUnit.name}</p>
+			<p class="name-row-pv"><span class="muted">PV:</span> {unit?.cost}</p>
+			<Menu img={"/icons/menu.svg"}>
+				<button
+					class="transparent-button"
+					onclick={() => {
+						unitCustomizationModal?.show(unitId);
+					}}
+				>
+					Add Ammo/SPA
+				</button>
+				<button
+					class="transparent-button"
+					onclick={() => {
+						list.removeUnit(unitId);
+						toastController.addToast(`${unit?.baseUnit.name} removed from list`);
+					}}>Remove unit</button
+				>
+			</Menu>
 		</div>
 		<div class="unit-header-row">
 			<div class="unit-header">Type</div>
 			<div class="unit-header">Skill</div>
-			<div class="unit-header">PV</div>
 			{#if unit?.baseUnit.type != "BS"}
 				<div class="unit-header">Speed</div>
 				<div class="unit-header">Damage</div>
 				<div class="unit-header">Health</div>
 				<div class="unit-header">Size</div>
+				<div class="unit-header">Role</div>
 			{/if}
 		</div>
 		<div class="unit-stat-row">
@@ -59,7 +76,6 @@
 					-
 				{/if}
 			</div>
-			<div class="unit-stat">{unit?.cost}</div>
 			{#if unit?.baseUnit.type != "BS"}
 				<div class="unit-stat">
 					{#each unit?.baseUnit.move! as movement, index}
@@ -78,11 +94,22 @@
 				</div>
 				<div class="unit-stat">{unit?.baseUnit.health + " (" + unit?.baseUnit.armor + "+" + unit?.baseUnit.structure + ")"}</div>
 				<div class="unit-stat">{unit?.baseUnit.size}</div>
+				<div class="unit-stat">{unit?.baseUnit.role}</div>
 			{/if}
 		</div>
 		<div class="unit-ability-row">
 			<div class="unit-abilities">{unit?.baseUnit.abilities}</div>
 		</div>
+		{#if unit?.customization.ammo || unit?.customization.spa}
+			<div class="unit-custom-row">
+				{#if unit.customization.ammo?.length}
+					<p class="unit-abilities">Alt. Ammo: {unit.customization.ammo?.join(", ")}</p>
+				{/if}
+				{#if unit.customization.spa?.length}
+					<p class="unit-abilities">SPA: {unit.customization.spa?.join(", ")}</p>
+				{/if}
+			</div>
+		{/if}
 	</div>
 </div>
 
@@ -105,49 +132,53 @@
 		align-items: center;
 		justify-items: center;
 	}
-	.unit-row-container-mobile {
+	.unit-row-container {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
 	}
-	.center {
-		justify-self: center;
-	}
 	.unit-name-row {
 		display: grid;
-		grid-template-columns: 1fr max-content;
-		gap: 4px;
-		margin-top: 2px;
+		grid-template-columns: 1fr max-content max-content;
+		gap: 8px;
+		margin: 2px 0px;
+	}
+	.unit-name-row p {
+		align-self: center;
 	}
 	.unit-header-row,
 	.unit-stat-row {
 		display: grid;
-		grid-template-columns: 11% 11% 11% 20% 20% 20% 5%;
+		grid-template-columns: 10% 10% 22% 20% 15% 8% 15%;
 	}
 	.unit-header {
 		font-size: 0.75em;
 		color: var(--muted-foreground);
 		align-self: center;
-		justify-self: center;
+		justify-self: safe center;
 	}
 	.unit-stat {
 		font-size: 0.75em;
 		align-self: center;
-		justify-self: center;
+		justify-self: safe center;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 	.unit-ability-row {
 		margin: 2px 0px;
 		justify-content: space-between;
 		display: flex;
 	}
+	.unit-custom-row {
+		margin: 2px 0px;
+		display: flex;
+		column-gap: 16px;
+		flex-wrap: wrap;
+	}
 	.invalid-unit {
 		color: var(--error);
 	}
-	.remove-button {
-		height: 20px;
-		width: 20px;
-	}
-	.name {
+	.name-row-name {
 		font-size: 0.95em;
 		white-space: nowrap;
 		overflow: hidden;
@@ -155,9 +186,12 @@
 		transition: 0s white-space;
 		transition-behavior: allow-discrete;
 	}
-	.name:hover {
+	.name-row-name:hover {
 		white-space: wrap;
 		transition-delay: 0.25s;
+	}
+	.name-row-pv {
+		font-size: 0.9em;
 	}
 	.unit-abilities {
 		font-size: 0.75em;

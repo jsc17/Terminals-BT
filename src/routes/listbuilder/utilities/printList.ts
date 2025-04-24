@@ -1,4 +1,5 @@
-import type { TDocumentDefinitions, TableCell } from "pdfmake/interfaces";
+import type { TDocumentDefinitions, TableCell, Content } from "pdfmake/interfaces";
+import { Canvas, loadImage } from "skia-canvas";
 import BlobStream, { type IBlobStream } from "blob-stream";
 import references from "$lib/data/reference.json";
 import { existsSync } from "fs";
@@ -132,26 +133,90 @@ async function loadUnitCard(mulId: number, skill?: number): Promise<string> {
 	});
 }
 
-async function loadUnitImages(unitList: UnitV2[], formations: FormationV2[]) {
+async function createUnitCardColumns(unitList: UnitV2[], formations: FormationV2[], printByFormation: boolean) {
 	const promises = [];
 
-	for (const formation of formations) {
-		for (const unitId of formation.units) {
-			const unit = unitList.find((unit) => {
-				return unit.id == unitId.id;
-			})!;
-			promises.push(loadUnitCard(unit.baseUnit.mulId, unit.skill));
+	for (const unit of unitList) {
+		promises.push(loadUnitCard(unit.baseUnit.mulId, unit.skill));
+	}
+
+	await Promise.all(promises);
+
+	let unitsToPrint: { name: string; type: string; pv: number; units: UnitV2[] }[] = [];
+
+	if (printByFormation) {
+		for (const formation of formations) {
+			if (formation.units.length == 0) {
+				continue;
+			}
+			let tempFormation: { name: string; type: string; pv: number; units: UnitV2[] } = { name: formation.name, type: formation.type, pv: 0, units: [] };
+			for (const unitId of formation.units) {
+				const unit = unitList.find((tempUnit) => {
+					return tempUnit.id == unitId.id;
+				});
+				if (unit) {
+					tempFormation.units.push(unit);
+					tempFormation.pv += unit.cost;
+				}
+			}
+			unitsToPrint.push(tempFormation);
+		}
+	} else {
+		unitsToPrint = [{ name: "list", type: "none", pv: 0, units: [] }];
+		for (const unit of unitList) {
+			unitsToPrint[0].units.push(unit);
 		}
 	}
-	const results = await Promise.all(promises);
-	const unitCards = [];
-	for (const path of results) {
-		unitCards.push({ image: path, width: 250 });
+
+	const unitCardColumns: Content[] = [];
+	for (const formation of unitsToPrint) {
+		unitCardColumns.push({
+			text: printByFormation && formation.type != "none" ? `${formation.name} - ${formation.type} formation - ${formation.units.length} units - ${formation.pv}pv` : "",
+			style: "subheader",
+			pageBreak: "before"
+		});
+
+		const unitCards: { image: any; width: number }[] = [];
+		for (const unit of formation.units) {
+			let path = "";
+			if (unit.baseUnit.mulId < 0) {
+				path = `./files/cached-cards/customCardImages/${unit.baseUnit.mulId}.png`;
+			} else {
+				path = `./files/cached-cards/${unit.baseUnit.mulId}-${unit.skill}.png`;
+			}
+			let img = await loadImage(path);
+			const canvas = new Canvas(img.width, img.height);
+			const ctx = canvas.getContext("2d");
+			ctx.drawImage(img, 0, 0);
+			if (unit.customization.spa?.length) {
+				ctx.font = "18pt serif";
+				ctx.fillText(`SPA: ${unit.customization.spa.join(", ")}`, 50, 643);
+			}
+			if (unit.customization.ammo?.length) {
+				ctx.font = "18pt serif";
+				ctx.fillText(`Alt. Ammo: ${unit.customization.ammo.join(", ")}`, 50, 607);
+			}
+
+			const buffer = await canvas.toBuffer("png");
+			unitCards.push({ image: buffer, width: 250 });
+		}
+		unitCardColumns.push({
+			columns: [
+				unitCards.filter((v, i) => {
+					return i % 8 < 4;
+				}),
+				unitCards.filter((v, i) => {
+					return i % 8 >= 4;
+				})
+			],
+			columnGap: 10
+		});
 	}
-	return unitCards;
+
+	return unitCardColumns;
 }
 
-export async function printList(list: PrintableList, drawFormations: boolean): Promise<Blob> {
+export async function printList(list: PrintableList, drawFormations: boolean, printUnitsByFormation: boolean): Promise<Blob> {
 	const tableheaders: TableCell[] =
 		list.style == "mul"
 			? [{ text: "Unit", style: "cellHeader" }].concat(
@@ -167,7 +232,7 @@ export async function printList(list: PrintableList, drawFormations: boolean): P
 	const tableWidths = list.style == "mul" ? ["*", "auto", "auto", "auto"] : ["*", "auto", "auto", "auto", "auto", "auto", "auto"];
 	const unitTable = createUnitTable(list.style, list.units, list.formations, drawFormations);
 	const abilityReferences = createReferenceList(list.units);
-	const unitCards = await loadUnitImages(list.units, list.formations);
+	const unitCardColumns = await createUnitCardColumns(list.units, list.formations, printUnitsByFormation);
 
 	const dd: TDocumentDefinitions = {
 		pageSize: "LETTER",
@@ -180,7 +245,6 @@ export async function printList(list: PrintableList, drawFormations: boolean): P
 				],
 				columnGap: 10
 			},
-			// { text: listDetails, style: "details" },
 			{
 				table: {
 					headerRows: 1,
@@ -190,20 +254,9 @@ export async function printList(list: PrintableList, drawFormations: boolean): P
 			},
 			{ text: "Ability references:", style: "subheader" },
 			{
-				columns: [{ ul: abilityReferences.slice(0, Math.ceil(abilityReferences.length / 2)) }, { ul: abilityReferences.slice(Math.ceil(abilityReferences.length / 2)) }],
-				pageBreak: "after"
+				columns: [{ ul: abilityReferences.slice(0, Math.ceil(abilityReferences.length / 2)) }, { ul: abilityReferences.slice(Math.ceil(abilityReferences.length / 2)) }]
 			},
-			{
-				columns: [
-					unitCards.filter((v, i) => {
-						return i % 8 < 4;
-					}),
-					unitCards.filter((v, i) => {
-						return i % 8 >= 4;
-					})
-				],
-				columnGap: 10
-			}
+			...unitCardColumns
 		],
 		footer: {
 			columns: [{ text: "https://Terminal.tools/listbuilder", fontSize: 8, margin: [25, 0, 0, 25] }]

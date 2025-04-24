@@ -53,22 +53,29 @@
 	<div class="dialog-body">
 		<h2>Print</h2>
 		<form action="?/printList" method="post" use:enhance={handleForm} class="print-form">
-			<div><label for="print-listname">Print title</label><input id="print-listname" bind:value={printName} /></div>
+			<div><label for="print-listname">List Name</label><input id="print-listname" bind:value={printName} /></div>
 			<div><label for="print-playername">Player Name (optional)</label><input id="print-playername" bind:value={playerName} /></div>
-			<h3>Style</h3>
-			<div>
-				<label for="print-list-style-mul"
-					><input type="radio" name="print-list-style-mul" id="print-list-style-mul" value="mul" bind:group={style} />MUL style - Generates a summary page similar to the MUL
-					printout.</label
-				>
-			</div>
-			<div>
-				<label for="print-list-style-detailed"
-					><input type="radio" name="print-list-style-detailed" id="print-list-style-detailed" value="detailed" bind:group={style} />Detailed - Generates a summary page with more
-					details for quick reference.</label
-				>
-			</div>
-			<div><input type="checkbox" name="drawFormations" id="formations" checked /><label for="formations">Print formations?</label></div>
+			<fieldset>
+				<legend>Printing Style</legend>
+				<div>
+					<label for="print-list-style-mul"
+						><input type="radio" name="print-list-style-mul" id="print-list-style-mul" value="mul" bind:group={style} />MUL style - Generates a summary page similar to the MUL
+						printout.</label
+					>
+				</div>
+				<div>
+					<label for="print-list-style-detailed"
+						><input type="radio" name="print-list-style-detailed" id="print-list-style-detailed" value="detailed" bind:group={style} />Detailed - Generates a summary page with more
+						details for quick reference.</label
+					>
+				</div>
+			</fieldset>
+
+			<fieldset>
+				<legend>Formation Options</legend>
+				<div><input type="checkbox" name="drawFormations" id="formations" checked /><label for="formations">Print formations?</label></div>
+				<div><input type="checkbox" name="printUnitsByFormation" id="printUnitsByFormation" /><label for="printUnitsByFormation">Print Unit Cards by formation?</label></div>
+			</fieldset>
 
 			<div class="print-buttons">
 				<button>Submit</button>
@@ -101,8 +108,16 @@
 		justify-content: center;
 		gap: 24px;
 	}
-	h2,
-	h3 {
+	h2 {
 		margin: 8px;
+	}
+	fieldset {
+		border: 2px solid var(--border);
+	}
+	legend {
+		color: var(--muted-foreground);
+	}
+	fieldset label {
+		color: var(--muted-foreground);
 	}
 </style>

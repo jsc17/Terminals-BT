@@ -30,6 +30,7 @@ export type MulUnit = {
 	role?: string;
 	technology?: string;
 	availability?: { era: number; faction: number }[];
+	threshold?: number;
 };
 
 export type UnitCustomization = {

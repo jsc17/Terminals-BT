@@ -136,7 +136,8 @@ export class ResultList {
 					date: unit.date_introduced,
 					role: unit.role,
 					availability: unit.availability,
-					technology: unit.technology
+					technology: unit.technology,
+					threshold: unit.threshold
 				};
 				tempResultList.push(formattedUnit);
 			} catch (error) {

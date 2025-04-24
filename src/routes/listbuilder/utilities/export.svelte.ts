@@ -45,7 +45,7 @@ export function exportToJeff(name: string, units: UnitV2[]) {
 				showDetails: false,
 				tmm: 0,
 				uuid: unit.id,
-				threshhold: 0,
+				threshold: unit.baseUnit.threshold ?? 0,
 				move: unit.baseUnit.move?.map((movement) => {
 					return { move: movement.speed, currentMove: movement.speed, type: movement.type ?? "" };
 				}),

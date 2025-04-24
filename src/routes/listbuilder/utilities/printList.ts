@@ -1,5 +1,5 @@
 import type { TDocumentDefinitions, TableCell, Content } from "pdfmake/interfaces";
-import { createCanvas, loadImage } from "canvas";
+import { Canvas, loadImage } from "skia-canvas";
 import BlobStream, { type IBlobStream } from "blob-stream";
 import references from "$lib/data/reference.json";
 import { existsSync } from "fs";
@@ -185,7 +185,7 @@ async function createUnitCardColumns(unitList: UnitV2[], formations: FormationV2
 				path = `./files/cached-cards/${unit.baseUnit.mulId}-${unit.skill}.png`;
 			}
 			let img = await loadImage(path);
-			const canvas = createCanvas(img.width, img.height);
+			const canvas = new Canvas(img.width, img.height);
 			const ctx = canvas.getContext("2d");
 			ctx.drawImage(img, 0, 0);
 			if (unit.customization.spa?.length) {
@@ -197,7 +197,7 @@ async function createUnitCardColumns(unitList: UnitV2[], formations: FormationV2
 				ctx.fillText(`Alt. Ammo: ${unit.customization.ammo.join(", ")}`, 50, 607);
 			}
 
-			const buffer = canvas.toBuffer();
+			const buffer = await canvas.toBuffer("png");
 			unitCards.push({ image: buffer, width: 250 });
 		}
 		unitCardColumns.push({

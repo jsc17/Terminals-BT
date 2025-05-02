@@ -35,22 +35,21 @@
 			<li>Customizable rules in the list builder</li>
 			<li><span class="complete">Reimplement list builder validation</span> (7-13-24)</li>
 			<li><span class="complete">multiple era and faction selections</span> (2-22-25)</li>
-			<li>Improved list sharing capabilities</li>
+			<li><span class="complete">Improved list sharing capabilities</span></li>
 			<li>Expanded sublist generation options</li>
+			<li>Formation validation</li>
 		</ul>
 		<h3>General updates: Idea's I'd like to implement when I have time</h3>
 		<ul>
 			<li>Finish tournament organization</li>
 			<li>Layout customization</li>
 			<li>Favorite and save units/formation for quick adding</li>
-			<li>Alternate Ammo/Pilot SPA's</li>
-			<li>Battlefield Support Cards</li>
-			<li>Formation validation</li>
+			<li><span class="complete">Alternate Ammo/Pilot SPA's</span></li>
 		</ul>
 		<h3>Low priority updates: Someday, possibly</h3>
 		<ul>
 			<li>Public player list sharing</li>
-			<li>Play feature (might not be worth the effort when other tools already exist)</li>
+			<li>Play feature</li>
 		</ul>
 	</div>
 </main>

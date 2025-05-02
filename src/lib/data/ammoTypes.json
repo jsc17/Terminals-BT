@@ -5,53 +5,53 @@
 			{
 				"name": "Air-Defense Arrow IV",
 				"requiredSpecial": ["ARTAIS", "ARTAC"],
-				"reference": 143
+				"page": 143
 			},
 
 			{
 				"name": "Air-to-Air Arrow IV",
 				"requiredSpecial": ["ARTAIS", "ARTAC"],
-				"reference": 143
+				"page": 143
 			},
 			{
 				"name": "Cluster",
 				"requiredSpecial": ["ARTAIS", "ARTAC", "ARTT", "ARTS", "ARTLT"],
-				"reference": 143
+				"page": 143
 			},
 			{
 				"name": "Copperhead",
 				"requiredSpecial": ["ARTLT", "ARTS", "ARTT"],
-				"reference": 144
+				"page": 144
 			},
 			{
 				"name": "Flechette",
 				"requiredSpecial": ["ARTLT", "ARTS", "ARTT"],
-				"reference": 144
+				"page": 144
 			},
 			{
 				"name": "Illumination",
 				"requiredSpecial": ["ARTAIS", "ARTAC", "ARTLT", "ARTS", "ARTT"],
-				"reference": 144
+				"page": 144
 			},
 			{
 				"name": "Inferno IV",
 				"requiredSpecial": ["ARTAIS", "ARTAC"],
-				"reference": 144
+				"page": 144
 			},
 			{
 				"name": "Smoke",
 				"requiredSpecial": ["ARTAIS", "ARTAC", "ARTLT", "ARTS", "ARTT"],
-				"reference": 144
+				"page": 144
 			},
 			{
 				"name": "Thunder",
 				"requiredSpecial": ["ARTAIS", "ARTAC"],
-				"reference": 145
+				"page": 145
 			},
 			{
 				"name": "Thunder-Active",
 				"requiredSpecial": ["ARTAIS", "ARTAC"],
-				"reference": 145
+				"page": 145
 			}
 		]
 	},
@@ -61,27 +61,27 @@
 			{
 				"name": "Armor Piercing",
 				"requiredSpecial": ["AC"],
-				"reference": 145
+				"page": 145
 			},
 			{
 				"name": "Flak",
 				"requiredSpecial": ["AC"],
-				"reference": 145
+				"page": 145
 			},
 			{
 				"name": "Flechette",
 				"requiredSpecial": ["AC"],
-				"reference": 145
+				"page": 145
 			},
 			{
 				"name": "Precision",
 				"requiredSpecial": ["AC"],
-				"reference": 145
+				"page": 145
 			},
 			{
 				"name": "Tracer",
 				"requiredSpecial": ["AC"],
-				"reference": 145
+				"page": 145
 			}
 		]
 	},
@@ -91,47 +91,47 @@
 			{
 				"name": "Air-to-Air Arrow IV",
 				"requiredSpecial": ["BOMB"],
-				"reference": 147
+				"page": 147
 			},
 			{
 				"name": "Arrow IV",
 				"requiredSpecial": ["BOMB"],
-				"reference": 147
+				"page": 147
 			},
 			{
 				"name": "Inferno",
 				"requiredSpecial": ["BOMB"],
-				"reference": 147
+				"page": 147
 			},
 			{
 				"name": "Laser-Guided",
 				"requiredSpecial": ["BOMB"],
-				"reference": 147
+				"page": 147
 			},
 			{
 				"name": "Light Air-to-Air Arrow IV",
 				"requiredSpecial": ["BOMB"],
-				"reference": 147
+				"page": 147
 			},
 			{
 				"name": "Rocket Launcher",
 				"requiredSpecial": ["BOMB"],
-				"reference": 147
+				"page": 147
 			},
 			{
 				"name": "Tag",
 				"requiredSpecial": ["BOMB"],
-				"reference": 147
+				"page": 147
 			},
 			{
 				"name": "Thunder",
 				"requiredSpecial": ["BOMB"],
-				"reference": 148
+				"page": 148
 			},
 			{
 				"name": "Torpedo",
 				"requiredSpecial": ["BOMB"],
-				"reference": 148
+				"page": 148
 			}
 		]
 	},
@@ -141,22 +141,22 @@
 			{
 				"name": "ECM",
 				"requiredSpecial": ["INARC"],
-				"reference": 148
+				"page": 148
 			},
 			{
 				"name": "Explosive",
 				"requiredSpecial": ["CNARC", "SNARC", "INARC"],
-				"reference": 148
+				"page": 148
 			},
 			{
 				"name": "Haywire",
 				"requiredSpecial": ["INARC"],
-				"reference": 148
+				"page": 148
 			},
 			{
 				"name": "Shoot and Sit Missiles",
 				"requiredSpecial": ["SNARC"],
-				"reference": 148
+				"page": 148
 			}
 		]
 	},
@@ -166,67 +166,67 @@
 			{
 				"name": "Anti-TSM Warheads",
 				"requiredSpecial": ["LRM", "SRM"],
-				"reference": 148
+				"page": 148
 			},
 			{
 				"name": "Dead-Fire Missiles",
 				"requiredSpecial": ["LRM", "SRM"],
-				"reference": 149
+				"page": 149
 			},
 			{
 				"name": "Heat-Seeker",
 				"requiredSpecial": ["LRM", "SRM"],
-				"reference": 149
+				"page": 149
 			},
 			{
 				"name": "Inferno",
 				"requiredSpecial": ["SRM"],
-				"reference": 149
+				"page": 149
 			},
 			{
 				"name": "Listen-Kill Warhead",
 				"requiredSpecial": ["LRM", "SRM"],
-				"reference": 149
+				"page": 149
 			},
 			{
 				"name": "Magnetic Pulse",
 				"requiredSpecial": ["LRM", "SRM"],
-				"reference": 149
+				"page": 149
 			},
 			{
 				"name": "Mine Clearance",
 				"requiredSpecial": ["LRM", "SRM"],
-				"reference": 149
+				"page": 149
 			},
 			{
 				"name": "Semi-Guided",
 				"requiredSpecial": ["LRM"],
-				"reference": 150
+				"page": 150
 			},
 			{
 				"name": "Smoke",
 				"requiredSpecial": ["LRM", "SRM"],
-				"reference": 150
+				"page": 150
 			},
 			{
 				"name": "Swarm",
 				"requiredSpecial": ["LRM"],
-				"reference": 150
+				"page": 150
 			},
 			{
 				"name": "Swarm-I",
 				"requiredSpecial": ["LRM"],
-				"reference": 150
+				"page": 150
 			},
 			{
 				"name": "Tandem",
 				"requiredSpecial": ["SRM"],
-				"reference": 150
+				"page": 150
 			},
 			{
 				"name": "Thunder",
 				"requiredSpecial": ["LRM"],
-				"reference": 150
+				"page": 150
 			}
 		]
 	}

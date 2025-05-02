@@ -1,11 +1,11 @@
-import type { TDocumentDefinitions, TableCell, Content } from "pdfmake/interfaces";
+import type { TDocumentDefinitions, TableCell, Content, Column } from "pdfmake/interfaces";
 import { Canvas, loadImage } from "skia-canvas";
 import BlobStream, { type IBlobStream } from "blob-stream";
-import references from "$lib/data/reference.json";
+import { abilityReferences, spaReferences, ammoReferences, formationReferences, scaReferences } from "$lib/data/index.js";
 import { existsSync } from "fs";
 import fs from "fs/promises";
 import type { UnitV2 } from "$lib/types/unit";
-import type { FormationV2 } from "../types/formation";
+import type { FormationType, FormationV2 } from "../types/formation";
 import { printer } from "$lib/server/printer";
 
 type PrintableList = {
@@ -91,16 +91,82 @@ function createUnitTable(listStyle: string, unitList: UnitV2[], formations: Form
 	return unitTable;
 }
 
-function createReferenceList(units: UnitV2[]) {
-	const includedReferences = new Set();
+function createReferenceList(units: UnitV2[], formations: FormationV2[]) {
+	const referenceColumns: Column[] = [];
+	const abilityReferenceList = new Set();
+	const spaReferenceList = new Set();
+	const ammoReferenceList = new Set();
+	const formationReferenceList = new Set();
+	const scaReferenceList = new Set();
+
+	formations.forEach((formation) => {
+		if (formation.type == "none") {
+			return;
+		}
+		let formationReference: FormationType | undefined;
+		formationReferences.forEach(({ formations }) => {
+			if (formationReference != undefined) {
+				return;
+			}
+			formationReference = formations.find((formationRef: FormationType) => {
+				if (formation.type == formationRef.name) {
+					return formationRef;
+				} else if (formationRef.variations?.length) {
+					return formationRef.variations.find((variant) => {
+						return variant.name == formation.type;
+					});
+				}
+			});
+		});
+		formationReference?.grantedSPAs?.forEach((spa) => {
+			let spaReference = spaReferences.find(({ name }) => {
+				return name.toLocaleLowerCase() == spa.toLocaleLowerCase();
+			});
+			if (spaReference != undefined) {
+				spaReferenceList.add(spaReference);
+			} else {
+				spaReferenceList.add({ name: spa, cost: 0, page: "Not Found" });
+			}
+		});
+		if (formationReference != undefined) {
+			formationReferenceList.add(formationReference);
+		} else {
+			formationReferenceList.add({ name: formation.type, page: "Not Found" });
+		}
+	});
 	units.forEach((unit) => {
-		references.forEach((reference) => {
+		abilityReferences.forEach((reference) => {
 			if (unit.baseUnit.abilities.includes(reference.ability)) {
-				includedReferences.add(reference);
+				abilityReferenceList.add(reference);
+			}
+		});
+		unit.customization.spa?.forEach((spa) => {
+			let spaReference = spaReferences.find(({ name }) => {
+				return name.toLocaleLowerCase() == spa.toLocaleLowerCase();
+			});
+			if (spaReference != undefined) {
+				spaReferenceList.add(spaReference);
+			} else {
+				spaReferenceList.add({ name: spa, cost: 0, page: "Not Found" });
+			}
+		});
+		unit.customization.ammo?.forEach((ammo) => {
+			let ammoReference: any;
+			ammoReferences.forEach(({ ammoTypes }) => {
+				if (ammoReference == undefined) {
+					ammoReference = ammoTypes.find(({ name }) => {
+						return ammo == name;
+					});
+				}
+			});
+			if (ammoReference != undefined) {
+				ammoReferenceList.add(ammoReference);
+			} else {
+				ammoReferenceList.add({ name: ammo, page: "Not Found" });
 			}
 		});
 	});
-	const referenceLines = [...includedReferences]
+	const abilityReferenceLines = [...abilityReferenceList]
 		.map((reference: any) => {
 			return `${reference.ability} (${reference.name}, pg.${reference.page})`;
 		})
@@ -108,8 +174,56 @@ function createReferenceList(units: UnitV2[]) {
 		.map((reference: any) => {
 			return { text: reference, style: "listItem" };
 		});
-
-	return referenceLines;
+	referenceColumns.push({ columns: [{ text: "Abilities:", style: "referenceSectionHeader" }] });
+	referenceColumns.push({
+		columns: [{ ul: abilityReferenceLines.slice(0, Math.ceil(abilityReferenceLines.length / 2)) }, { ul: abilityReferenceLines.slice(Math.ceil(abilityReferenceLines.length / 2)) }]
+	});
+	if (spaReferenceList.size != 0) {
+		referenceColumns.push({ columns: [{ text: "SPAs:", style: "referenceSectionHeader" }] });
+		const spaReferenceLines = [...spaReferenceList]
+			.map((reference: any) => {
+				return `${reference.name} (pg.${reference.page})`;
+			})
+			.sort()
+			.map((reference: any) => {
+				return { text: reference, style: "listItem" };
+			});
+		referenceColumns.push({
+			columns: [{ ul: spaReferenceLines.slice(0, Math.ceil(spaReferenceLines.length / 2)) }, { ul: spaReferenceLines.slice(Math.ceil(spaReferenceLines.length / 2)) }]
+		});
+	}
+	if (ammoReferenceList.size != 0) {
+		referenceColumns.push({ columns: [{ text: "Alt. Ammo:", style: "referenceSectionHeader" }] });
+		const ammoReferenceLines = [...ammoReferenceList]
+			.map((reference: any) => {
+				return `${reference.name} (pg.${reference.page})`;
+			})
+			.sort()
+			.map((reference: any) => {
+				return { text: reference, style: "listItem" };
+			});
+		referenceColumns.push({
+			columns: [{ ul: ammoReferenceLines.slice(0, Math.ceil(ammoReferenceLines.length / 2)) }, { ul: ammoReferenceLines.slice(Math.ceil(ammoReferenceLines.length / 2)) }]
+		});
+	}
+	if (formationReferenceList.size != 0) {
+		referenceColumns.push({ columns: [{ text: "Formations:", style: "referenceSectionHeader" }] });
+		const formationReferenceLines = [...formationReferenceList]
+			.map((reference: any) => {
+				return `${reference.name} (${reference.page})`;
+			})
+			.sort()
+			.map((reference: any) => {
+				return { text: reference, style: "listItem" };
+			});
+		referenceColumns.push({
+			columns: [
+				{ ul: formationReferenceLines.slice(0, Math.ceil(formationReferenceLines.length / 2)) },
+				{ ul: formationReferenceLines.slice(Math.ceil(formationReferenceLines.length / 2)) }
+			]
+		});
+	}
+	return referenceColumns;
 }
 
 async function loadUnitCard(mulId: number, skill?: number): Promise<string> {
@@ -189,8 +303,15 @@ async function createUnitCardColumns(unitList: UnitV2[], formations: FormationV2
 			const ctx = canvas.getContext("2d");
 			ctx.drawImage(img, 0, 0);
 			if (unit.customization.spa?.length) {
+				let spaCost = 0;
+				unit.customization.spa.forEach((spa) => {
+					spaCost +=
+						spaReferences.find(({ name }) => {
+							return name == spa;
+						})?.cost ?? 0;
+				});
 				ctx.font = "18pt serif";
-				ctx.fillText(`SPA: ${unit.customization.spa.join(", ")}`, 50, 643);
+				ctx.fillText(`SPA (${spaCost}): ${unit.customization.spa.join(", ")}`, 50, 643);
 			}
 			if (unit.customization.ammo?.length) {
 				ctx.font = "18pt serif";
@@ -231,7 +352,7 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 				);
 	const tableWidths = list.style == "mul" ? ["*", "auto", "auto", "auto"] : ["*", "auto", "auto", "auto", "auto", "auto", "auto"];
 	const unitTable = createUnitTable(list.style, list.units, list.formations, drawFormations);
-	const abilityReferences = createReferenceList(list.units);
+	const referenceColumns = createReferenceList(list.units, list.formations);
 	const unitCardColumns = await createUnitCardColumns(list.units, list.formations, printUnitsByFormation);
 
 	const dd: TDocumentDefinitions = {
@@ -252,10 +373,8 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 					body: [tableheaders, ...unitTable]
 				}
 			},
-			{ text: "Ability references:", style: "subheader" },
-			{
-				columns: [{ ul: abilityReferences.slice(0, Math.ceil(abilityReferences.length / 2)) }, { ul: abilityReferences.slice(Math.ceil(abilityReferences.length / 2)) }]
-			},
+			{ text: "References:", style: "subheader" },
+			...referenceColumns,
 			...unitCardColumns
 		],
 		footer: {
@@ -308,6 +427,10 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 			formationHeader: {
 				margin: [2, 1, 0, 0],
 				fillColor: "#e6e6e6"
+			},
+			referenceSectionHeader: {
+				margin: [0, 2],
+				bold: true
 			},
 			listItem: {
 				margin: [0, 2]

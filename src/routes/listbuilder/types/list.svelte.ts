@@ -311,7 +311,7 @@ export class List {
 
 	newFormation() {
 		const id: string = crypto.randomUUID();
-		this.formations.push({ id, name: `New formation`, type: "battle", units: [] });
+		this.formations.push({ id, name: `New formation`, type: "Battle", units: [] });
 	}
 	removeUnit(idToRemove: string) {
 		this.units = this.units.filter((unit) => {
@@ -472,15 +472,19 @@ export class List {
 		this.clear();
 		this.sublists = listCode.sublists;
 		const sublistIds = new Set();
-		this.sublists.forEach(sublist =>{
-			 if(sublistIds.has(sublist.id)){
+		this.sublists.forEach((sublist) => {
+			if (sublistIds.has(sublist.id)) {
 				sublist.id = crypto.randomUUID();
-			 }
-			 sublistIds.add(sublist.id);
-		})
+			}
+			sublistIds.add(sublist.id);
+		});
 
 		for (const unit of listCode.units) {
-			if(this.units.find(existingUnit=>{return unit.id == existingUnit.id})){
+			if (
+				this.units.find((existingUnit) => {
+					return unit.id == existingUnit.id;
+				})
+			) {
 				unit.id = crypto.randomUUID();
 			}
 			let baseUnit: MulUnit =
@@ -496,12 +500,12 @@ export class List {
 		}
 		this.formations = listCode.formations;
 		const formationIDs = new Set();
-		this.formations.forEach(formation =>{
-			 if(formationIDs.has(formation.id)){
+		this.formations.forEach((formation) => {
+			if (formationIDs.has(formation.id)) {
 				formation.id = crypto.randomUUID();
-			 }
-			 formationIDs.add(formation.id);
-		})
+			}
+			formationIDs.add(formation.id);
+		});
 		this.units.forEach((listUnit) => {
 			let assigned = false;
 			this.formations.forEach((formation) => {

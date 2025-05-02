@@ -5,16 +5,27 @@
 	import Menu from "$lib/components/Generic/Menu.svelte";
 	import { getContext } from "svelte";
 	import type { List } from "../types/list.svelte";
-	import { type FormationV2, formationTypes } from "../types/formation";
+	import { type FormationType, type FormationV2 } from "../types/formation";
+	import formationTypes from "$lib/data/formations.json" assert { type: "json" };
 	import { exportToJeff } from "../utilities/export.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { Popover } from "bits-ui";
 	import UnitCustomizationModal from "./UnitCustomizationModal.svelte";
+	import Select from "$lib/components/Generic/Select.svelte";
 
 	type Props = { formation: FormationV2; draggingColumns: boolean; unitCustomizationModal?: UnitCustomizationModal };
 
 	let list: List = getContext("list");
 	let { formation, draggingColumns, unitCustomizationModal }: Props = $props();
+
+	let formationTypeList: { label: string; items: { value: string; label: string }[] }[] = formationTypes.map((group) => {
+		return {
+			label: group.type,
+			items: group.formations.map((formation) => {
+				return { value: formation.name, label: formation.name };
+			})
+		};
+	});
 
 	let dropTargetStyle = {};
 	let flipDurationMs = 100;
@@ -148,11 +159,9 @@
 				</div>
 			{/if}
 			<input class="formation-name" type="text" name="formation-name" id="formation-id" bind:value={formation.name} />
-			<select class="formation-type-select" name="formation-type" bind:value={formation.type}>
-				{#each formationTypes as formationType}
-					<option value={formationType}>{formationType}</option>
-				{/each}
-			</select>
+
+			<Select bind:value={formation.type} type="single" groupedItems={formationTypeList}></Select>
+
 			{@render infoPopover()}
 			<Menu img={"/icons/menu.svg"}>
 				{@render jeffExportButton()}
@@ -237,9 +246,6 @@
 	input:hover {
 		border: 1px solid var(--primary);
 	}
-	.formation-type-select {
-		width: min(15em, 33%);
-	}
 	.drop-message {
 		margin-top: 4px;
 		align-self: center;
@@ -280,5 +286,8 @@
 		grid-column-start: 1;
 		grid-column-end: 3;
 		border: 1px solid var(--muted);
+	}
+	.variation {
+		padding-left: 16px;
 	}
 </style>

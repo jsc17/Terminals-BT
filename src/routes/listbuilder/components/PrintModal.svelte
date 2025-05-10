@@ -26,6 +26,7 @@
 			let body = JSON.stringify({
 				units: list.units,
 				formations: list.formations,
+				scas: list.scaList,
 				playername: playerName,
 				listname: printName,
 				eras: list.details.eras,

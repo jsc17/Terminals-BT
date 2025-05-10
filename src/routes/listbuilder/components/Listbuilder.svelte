@@ -13,6 +13,7 @@
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { deserialize } from "$app/forms";
 	import UnitCustomizationModal from "./UnitCustomizationModal.svelte";
+	import ScaModal from "./SCAModal.svelte";
 
 	const resultList: ResultList = getContext("resultList");
 	let list: List = getContext("list");
@@ -23,6 +24,7 @@
 	let loadModal: LoadModal | undefined = $state();
 	let sublistModal: SublistModal | undefined = $state();
 	let unitCustomizationModal: UnitCustomizationModal | undefined = $state();
+	let scaModal: ScaModal | undefined = $state();
 	let errorDialog = $state<HTMLDialogElement>();
 
 	let dropTargetStyle = { outline: "solid var(--primary)" };
@@ -44,61 +46,11 @@
 		}
 		dropMessageElement?.remove();
 	}
-	let listStats = $derived.by(() => {
-		let totalPV = 0,
-			totalS = 0,
-			totalM = 0,
-			totalL = 0,
-			totalHealth = 0,
-			totalSize = 0,
-			totalSkill = 0,
-			unitCount = list.unitCount;
-
-		list.units.forEach((unit) => {
-			let unitStats = list.getUnit(unit.id);
-			if (unitStats) {
-				totalPV += unitStats.cost ?? 0;
-				totalS += unitStats.baseUnit.damageS ?? 0;
-				totalM += unitStats.baseUnit.damageM ?? 0;
-				totalL += unitStats.baseUnit.damageL ?? 0;
-				totalHealth += unitStats.baseUnit.health ?? 0;
-				totalSize += unitStats.baseUnit.size ?? 0;
-				totalSkill += unitStats.skill ?? 0;
-			}
-		});
-		let avgS = 0,
-			avgM = 0,
-			avgL = 0,
-			avgHealth = 0,
-			avgSize = 0,
-			avgSkill = 0;
-		if (unitCount) {
-			avgS = Number((totalS / unitCount).toFixed(2));
-			avgM = Number((totalM / unitCount).toFixed(2));
-			avgL = Number((totalL / unitCount).toFixed(2));
-			avgHealth = Number((totalHealth / unitCount).toFixed(2));
-			avgSkill = Number((totalSkill / unitCount).toFixed(2));
-			avgSize = Number((totalSize / unitCount).toFixed(2));
-		}
-		return {
-			totalS,
-			totalM,
-			totalL,
-			totalHealth,
-			avgS,
-			avgM,
-			avgL,
-			avgHealth,
-			avgSkill,
-			avgSize
-		};
-	});
 
 	async function shareList() {
 		const formData = new FormData();
 		formData.append("list", list.getListCode());
 		const response: any = deserialize(await (await fetch("?/shareList", { method: "POST", body: formData })).text());
-		console.log(response);
 		if (response.type == "success") {
 			navigator.clipboard.writeText(`https://terminal.tools/listbuilder?share=${response.data.id}`);
 			toastController.addToast("Shareable list link saved to clipboard");
@@ -145,26 +97,26 @@
 					</Popover.Trigger>
 					<Popover.Content class="list-info-content">
 						<div>Average Skill:</div>
-						<div>{listStats.avgSkill}</div>
+						<div>{list.stats.avgSkill}</div>
 						<div>Average Size:</div>
-						<div>{listStats.avgSize}</div>
+						<div>{list.stats.avgSize}</div>
 						<div>Average Health:</div>
-						<div>{listStats.avgHealth}</div>
+						<div>{list.stats.avgHealth}</div>
 						<div>Average Short Damage:</div>
-						<div>{listStats.avgS}</div>
+						<div>{list.stats.avgS}</div>
 						<div>Average Medium Damage:</div>
-						<div>{listStats.avgM}</div>
+						<div>{list.stats.avgM}</div>
 						<div>Average Long Damage:</div>
-						<div>{listStats.avgL}</div>
+						<div>{list.stats.avgL}</div>
 						<hr class="list-info-separator" />
 						<div>Total Health:</div>
-						<div>{listStats.totalHealth}</div>
+						<div>{list.stats.totalHealth}</div>
 						<div>Total Short Damage:</div>
-						<div>{listStats.totalS}</div>
+						<div>{list.stats.totalS}</div>
 						<div>Total Medium Damage:</div>
-						<div>{listStats.totalM}</div>
+						<div>{list.stats.totalM}</div>
 						<div>Total Long Damage:</div>
-						<div>{listStats.totalL}</div>
+						<div>{list.stats.totalL}</div>
 					</Popover.Content>
 				</Popover.Root>
 			</div>
@@ -194,6 +146,12 @@
 						onclick={() => {
 							list.newFormation();
 						}}>Add Formation</button
+					>
+					<button
+						class="transparent-button"
+						onclick={() => {
+							scaModal?.show();
+						}}>Add Special Command Ability</button
 					>
 					<hr />
 					<div>More features coming soon</div></Menu
@@ -271,6 +229,21 @@
 			<p>Mechwarrior, BattleMech, 'Mech and Aerotech are registered trademarks of The Topps Company, Inc. All Rights Reserved.</p>
 		</div>
 	{:else if appWindow.isMobile}
+		{#if list.scaList.length}
+			<div class="list-scas">
+				<div class="list-scas-header">Strategic Command Abilities</div>
+				{#each list.scaList as sca, index}
+					<div class="list-sca-row">
+						<p>{sca.name}</p>
+						<button
+							onclick={() => {
+								list.removeSCA(index);
+							}}>Remove</button
+						>
+					</div>
+				{/each}
+			</div>
+		{/if}
 		<div
 			class="list-units"
 			use:dragHandleZone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations", transformDraggedElement, dragDisabled: list.formations.length == 1 }}
@@ -282,6 +255,22 @@
 			{/each}
 		</div>
 	{:else}
+		{#if list.scaList.length}
+			<div class="list-scas">
+				<div class="list-scas-header">Strategic Command Abilities</div>
+				{#each list.scaList as sca, index}
+					<div class="list-sca-row">
+						<p>{sca.name}</p>
+						<button
+							onclick={() => {
+								list.removeSCA(index);
+							}}>Remove</button
+						>
+					</div>
+				{/each}
+			</div>
+		{/if}
+
 		<div
 			class="list-units"
 			use:dndzone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations", transformDraggedElement, dragDisabled: list.formations.length == 1 }}
@@ -300,6 +289,7 @@
 <LoadModal bind:this={loadModal}></LoadModal>
 <SublistModal bind:this={sublistModal}></SublistModal>
 <UnitCustomizationModal bind:this={unitCustomizationModal}></UnitCustomizationModal>
+<ScaModal bind:this={scaModal}></ScaModal>
 
 <style>
 	.listbuilder {
@@ -317,6 +307,37 @@
 		border-bottom: 1px solid var(--border);
 		padding-bottom: 4px;
 		gap: 8px;
+	}
+	.list-scas {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		border-bottom: 2px solid var(--border);
+		border-left: 1px solid var(--border);
+		border-right: 1px solid var(--border);
+		margin-bottom: 2px;
+	}
+	.list-scas-header {
+		padding: 4px;
+		background-color: var(--background);
+		display: flex;
+		align-items: center;
+		border: 1px solid var(--border);
+	}
+	.list-sca-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 2px 16px;
+
+		button {
+			background-color: transparent;
+			border: none;
+			color: var(--primary);
+		}
+	}
+	.list-sca-row:not(:last-child) {
+		border-bottom: 1px solid var(--border);
 	}
 	.list-units {
 		display: flex;

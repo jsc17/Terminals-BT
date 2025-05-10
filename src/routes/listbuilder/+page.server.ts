@@ -53,7 +53,8 @@ export const actions = {
 			formations: JSON.stringify(parsedBody.formations),
 			sublists: JSON.stringify(parsedBody.sublists),
 			rules: parsedBody.rules,
-			lcVersion: parsedBody.lcVersion
+			lcVersion: parsedBody.lcVersion,
+			scas: parsedBody.scas && parsedBody.scas.length ? JSON.stringify(parsedBody.scas) : null
 		};
 		try {
 			const existingList = await prisma.listV3.findFirst({
@@ -66,6 +67,7 @@ export const actions = {
 				await prisma.listV3.create({ data });
 				return { message: "List created successfully" };
 			} else {
+				data.id = existingList.id;
 				await prisma.listV3.update({
 					where: {
 						id: existingList.id
@@ -153,7 +155,8 @@ export const actions = {
 			formations: JSON.stringify(parsedBody.formations),
 			sublists: JSON.stringify(parsedBody.sublists),
 			rules: parsedBody.rules,
-			lcVersion: parsedBody.lcVersion
+			lcVersion: parsedBody.lcVersion,
+			scas: parsedBody.scas && parsedBody.scas.length ? JSON.stringify(parsedBody.scas) : null
 		};
 
 		try {

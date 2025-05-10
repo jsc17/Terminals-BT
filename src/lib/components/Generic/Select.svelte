@@ -21,7 +21,7 @@ from the perspective of the consumer of this component, it will be typed appropr
 <Select.Root bind:value={value as never} {...restProps} bind:open>
 	<Select.Trigger>
 		<div class="select-trigger">
-			{value}
+			<p class="select-trigger-text">{value?.length ? value : placeholder}</p>
 			<img src="./icons/chevron-updown.svg" alt="expand" />
 		</div>
 	</Select.Trigger>
@@ -71,17 +71,25 @@ from the perspective of the consumer of this component, it will be typed appropr
 <style>
 	:global([data-select-trigger]) {
 		height: fit-content;
-		width: min(15em, 33%);
+		width: 100%;
 		background-color: var(--muted);
 		color: var(--muted-foreground);
 	}
 	:global(.select-trigger) {
-		display: flex;
+		display: grid;
 		align-items: center;
-		justify-content: space-between;
+		grid-template-columns: 1fr 1.05em;
 		img {
 			height: 1em;
+			width: 1em;
 		}
+	}
+	:global(.select-trigger-text) {
+		padding: 0px 4px;
+		display: flex;
+		justify-content: flex-start;
+		overflow: hidden;
+		text-wrap: none;
 	}
 	:global([data-select-content]) {
 		background-color: var(--background);

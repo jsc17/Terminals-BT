@@ -69,6 +69,7 @@ model ListV3 {
   formations String @db.Text
   sublists String? @db.Text
   rules String?
+  scas String?
 }
  
 model SharedList {
@@ -82,6 +83,7 @@ model SharedList {
   sublists String @db.Text
   rules String
   sharedDate DateTime @default(now())
+  scas String?
 }
 
 model Tournament {

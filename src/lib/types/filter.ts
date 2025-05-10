@@ -14,22 +14,22 @@ type NumberGroupFilter = {
 	labels?: string[];
 	values?: { min?: number; max?: number }[];
 	defaults?: number[];
-}
+};
 
 type StringFilter = {
 	name: string;
 	label: string;
 	type: "string";
 	value: string;
-}
+};
 
 type SelectFilter = {
 	name: string;
 	label: string;
 	type: "select";
-	value: string;
-	possibleValues: { value: string; display: string }[];
-}
+	value: string[];
+	possibleValues: { value: string; label: string }[];
+};
 
 type UniqueFilter = {
 	name: string;
@@ -44,16 +44,16 @@ type MovementFilter = {
 	type: "movement";
 	speedMinValue?: number;
 	speedMaxValue?: number;
-	typeValue: string;
-	possibleTypeValues: { value: string; display: string }[];
-}
+	typeValue: string[];
+	possibleTypeValues: { value: string; label: string }[];
+};
 
 type AbilityFilter = {
 	name: string;
 	label: string;
 	type: "abilities";
 	value: string;
-}
+};
 
 export type Filter = AbilityFilter | UniqueFilter | MovementFilter | StringFilter | NumberFilter | SelectFilter | NumberGroupFilter;
 // { name: "name", type: "string", values: [{ label: "", value: "", default: "" }] },

@@ -160,7 +160,7 @@
 			{/if}
 			<input class="formation-name" type="text" name="formation-name" id="formation-id" bind:value={formation.name} />
 
-			<Select bind:value={formation.type} type="single" groupedItems={formationTypeList}></Select>
+			<div class="select-formation-type-wrapper"><Select bind:value={formation.type} type="single" groupedItems={formationTypeList}></Select></div>
 
 			{@render infoPopover()}
 			<Menu img={"/icons/menu.svg"}>

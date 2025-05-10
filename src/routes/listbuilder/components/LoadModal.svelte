@@ -40,7 +40,8 @@
 						formations: JSON.parse(tempList.formations),
 						sublists: JSON.parse(tempList.sublists),
 						rules: tempList.rules ?? "noRes",
-						lcVersion: tempList.lcVersion
+						lcVersion: tempList.lcVersion,
+						scas: tempList.scas ?? undefined
 					});
 				}
 			} else {
@@ -101,7 +102,7 @@
 			const importData = JSON.parse(importCode);
 			if (importData.lcVersion) {
 				if (importData.lcVersion == 2) {
-					const parsedCode = {
+					const parsedCode: ListCode = {
 						id: importData.id ?? crypto.randomUUID(),
 						name: importData.name ?? "Imported List",
 						eras: importData.eras,
@@ -112,6 +113,9 @@
 						lcVersion: importData.lcVersion ?? 0,
 						formations: importData.formations ?? []
 					};
+					if (importData.scas !== undefined) {
+						parsedCode.scas = importData.scas;
+					}
 					list.loadList(parsedCode);
 				} else {
 					const parsedCode = {
@@ -138,9 +142,8 @@
 		}
 	}
 
-	async function loadList(parsedCode?: ListCode) {
-		console.log(savedLists[selectedListIndex]);
-		await list.loadList(parsedCode ?? savedLists[selectedListIndex]);
+	async function loadList() {
+		await list.loadList(savedLists[selectedListIndex]);
 		dialogElement?.close();
 	}
 </script>

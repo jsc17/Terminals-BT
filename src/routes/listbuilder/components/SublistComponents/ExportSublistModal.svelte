@@ -50,10 +50,10 @@
 				return { id: unit.id };
 			})
 		};
-		console.table(units);
 		let body = JSON.stringify({
 			units,
 			formations: [sublistFormation],
+			scas: list.scaList,
 			playername: playerName,
 			listname: `${list.details.name} ${sublist.scenario != "-" ? sublist.scenario : "sublist"}`,
 			eras: list.details.eras,

@@ -29,7 +29,6 @@
 
 	onMount(() => {
 		if (data.sharedList) {
-			console.log("mounting");
 			let listCode: ListCode = {
 				id: data.sharedList.id,
 				lcVersion: data.sharedList.lcVersion,
@@ -39,7 +38,8 @@
 				rules: data.sharedList.rules ?? "noRes",
 				units: JSON.parse(data.sharedList.units),
 				formations: JSON.parse(data.sharedList.formations),
-				sublists: JSON.parse(data.sharedList.sublists)
+				sublists: JSON.parse(data.sharedList.sublists),
+				scas: data.sharedList.scas ? JSON.parse(data.sharedList.scas) : undefined
 			};
 			list.loadList(listCode);
 			return;
@@ -72,6 +72,9 @@
 					lcVersion: importData.lcVersion ?? 0,
 					formations: importData.formations ?? []
 				};
+				if (importData.scas !== undefined) {
+					parsedCode.scas = importData.scas;
+				}
 				list.loadList(parsedCode);
 			} else {
 				const updatedList = convertUnversionedJSONList(importData);

@@ -238,7 +238,6 @@ export class ResultList {
 		this.filters.concat(this.additionalFilters).forEach((filter) => {
 			switch (filter.type) {
 				case "string":
-				case "select":
 					if (filter.value && filter.value != "any") {
 						tempResultList = tempResultList.filter((unit) => {
 							if (unit[filter.name] != null) {
@@ -247,6 +246,14 @@ export class ResultList {
 						});
 					}
 					break;
+				case "select":
+					if (filter.value.length) {
+						tempResultList = tempResultList.filter((unit) => {
+							return filter.value.includes(unit[filter.name]);
+						});
+					}
+					break;
+
 				case "number":
 					if (filter.valueMin) {
 						tempResultList = tempResultList.filter((unit) => {
@@ -275,7 +282,7 @@ export class ResultList {
 
 					break;
 				case "movement":
-					if (filter.speedMaxValue || filter.speedMinValue || filter.typeValue != "any") {
+					if (filter.speedMaxValue || filter.speedMinValue || filter.typeValue.length) {
 						tempResultList = tempResultList.filter((unit) => {
 							if (unit.move === undefined) {
 								return false;
@@ -285,7 +292,7 @@ export class ResultList {
 								meetsMinSpeed = false,
 								meetsMaxSpeed = false;
 							for (const move of unit.move) {
-								if (filter.typeValue == move.type || filter.typeValue == "any") {
+								if (filter.typeValue.includes(move.type) || !filter.typeValue.length) {
 									meetsType = true;
 									if (!filter.speedMinValue || move.speed >= filter.speedMinValue) {
 										meetsMinSpeed = true;
@@ -389,11 +396,11 @@ export class ResultList {
 					values[index] = {};
 				});
 			} else if (filter.type == "select") {
-				filter.value = "any";
+				filter.value = [];
 			} else if (filter.type == "movement") {
 				filter.speedMaxValue = undefined;
 				filter.speedMinValue = undefined;
-				filter.typeValue = "any";
+				filter.typeValue = [];
 			} else if (filter.type != "unique") {
 				filter.value = "";
 			}

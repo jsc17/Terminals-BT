@@ -3,6 +3,7 @@
 	import { type Filter } from "$lib/types/filter";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { getContext } from "svelte";
+	import Select from "./Generic/Select.svelte";
 
 	const resultList: ResultList = getContext("resultList");
 
@@ -66,22 +67,14 @@
 						</div>
 					</div>
 				{:else if filter.type == "select"}
-					<select id={filter.name} bind:value={filter.value}>
-						{#each filter.possibleValues as option}
-							<option value={option.value}>{option.display}</option>
-						{/each}
-					</select>
+					<div class="select-filter-wrapper"><Select bind:value={filter.value} type="multiple" items={filter.possibleValues} placeholder="Any"></Select></div>
 				{:else if filter.type == "movement"}
 					<div class="filter-number">
 						<input id={filter.name} type="number" min="0" bind:value={filter.speedMinValue} placeholder="min" />
 						-
 						<input id={filter.name + "max"} type="number" min="0" bind:value={filter.speedMaxValue} placeholder="max" />
 					</div>
-					<select id={filter.name} bind:value={filter.typeValue}>
-						{#each filter.possibleTypeValues! as option}
-							<option value={option.value}>{option.display}</option>
-						{/each}
-					</select>
+					<div class="select-filter-wrapper"><Select bind:value={filter.typeValue} type="multiple" items={filter.possibleTypeValues} placeholder="Any"></Select></div>
 				{:else if filter.type == "unique"}
 					<input type="checkbox" name={filter.name} id={filter.name} bind:checked={filter.checked} />
 				{/if}
@@ -189,5 +182,8 @@
 	.backgroundless-button {
 		background-color: transparent;
 		color: var(--primary);
+	}
+	.select-filter-wrapper {
+		width: 5em;
 	}
 </style>

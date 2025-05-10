@@ -2,74 +2,68 @@ import type { Filter } from "$lib/types/filter";
 
 //if types field doesn't exist, will check against value
 export const typeValues = [
-	{ value: "any", display: "Any" },
-	{ value: "AF", display: "Aerospace Fighter" },
-	{ value: "CF", display: "Conventional Fighter" },
-	{ value: "BA", display: "Battle Armor" },
-	{ value: "BS", display: "Battlefield Support" },
-	{ value: "BM", display: "Battlemech" },
-	{ value: "CI", display: "Combat Infantry" },
-	{ value: "CV", display: "Combat Vehicle" },
-	{ value: "IM", display: "Industrial Mech" },
-	{ value: "PM", display: "Protomech" },
-	{ value: "SV", display: "Support Vehicle" }
+	{ value: "AF", label: "Aerospace Fighter" },
+	{ value: "CF", label: "Conventional Fighter" },
+	{ value: "BA", label: "Battle Armor" },
+	{ value: "BS", label: "Battlefield Support" },
+	{ value: "BM", label: "Battlemech" },
+	{ value: "CI", label: "Combat Infantry" },
+	{ value: "CV", label: "Combat Vehicle" },
+	{ value: "IM", label: "Industrial Mech" },
+	{ value: "PM", label: "Protomech" },
+	{ value: "SV", label: "Support Vehicle" }
 ];
 const rulesLevels = [
-	{ value: "any", display: "Any" },
-	{ value: "introductory", display: "Introductory" },
-	{ value: "standard", display: "Standard" },
-	{ value: "advanced", display: "Advanced" },
-	{ value: "experimental", display: "Experimental" },
-	{ value: "unknown", display: "Unknown" }
+	{ value: "Introductory", label: "Introductory" },
+	{ value: "Standard", label: "Standard" },
+	{ value: "Advanced", label: "Advanced" },
+	{ value: "Experimental", label: "Experimental" },
+	{ value: "Unknown", label: "Unknown" }
 ];
 const technology = [
-	{ value: "any", display: "Any" },
-	{ value: "inner sphere", display: "Inner Sphere" },
-	{ value: "clan", display: "Clan" },
-	{ value: "mixed", display: "Mixed" },
-	{ value: "primative", display: "Primitive" }
+	{ value: "Inner Sphere", label: "Inner Sphere" },
+	{ value: "Clan", label: "Clan" },
+	{ value: "Mixed", label: "Mixed" },
+	{ value: "Primative", label: "Primitive" }
 ];
 
 const roles = [
-	{ value: "any", display: "Any" },
-	{ value: "Scout", display: "Scout" },
-	{ value: "Striker", display: "Striker" },
-	{ value: "Missile Boat", display: "Missile Boat" },
-	{ value: "Sniper", display: "Sniper" },
-	{ value: "Brawler", display: "Brawler" },
-	{ value: "Ambusher", display: "Ambusher" },
-	{ value: "Skirmisher", display: "Skirmisher" },
-	{ value: "Juggernaut", display: "Juggernaut" },
-	{ value: "Interceptor", display: "Interceptor" },
-	{ value: "Fast Dogfighter", display: "Fast Dogfighter" },
-	{ value: "Dogfighter", display: "Dogfighter" },
-	{ value: "Fire-Support", display: "Fire-Support" },
-	{ value: "Attack", display: "Attack" },
-	{ value: "Transport", display: "Transport" }
+	{ value: "Scout", label: "Scout" },
+	{ value: "Striker", label: "Striker" },
+	{ value: "Missile Boat", label: "Missile Boat" },
+	{ value: "Sniper", label: "Sniper" },
+	{ value: "Brawler", label: "Brawler" },
+	{ value: "Ambusher", label: "Ambusher" },
+	{ value: "Skirmisher", label: "Skirmisher" },
+	{ value: "Juggernaut", label: "Juggernaut" },
+	{ value: "Interceptor", label: "Interceptor" },
+	{ value: "Fast Dogfighter", label: "Fast Dogfighter" },
+	{ value: "Dogfighter", label: "Dogfighter" },
+	{ value: "Fire-Support", label: "Fire-Support" },
+	{ value: "Attack", label: "Attack" },
+	{ value: "Transport", label: "Transport" }
 ];
 
 const movementTypes = [
-	{ value: "any", display: "Any" },
-	{ value: "j", display: "Jump" },
-	{ value: "h", display: "Hover" },
-	{ value: "t", display: "Tracked" },
-	{ value: "v", display: "VTOL" },
-	{ value: "w", display: "Wheeled" },
-	{ value: "g", display: "WiGE" },
-	{ value: "f", display: "Foot" },
-	{ value: "m", display: "Motorized" },
-	{ value: "s", display: "Submersible" },
-	{ value: "a", display: "Aerodyne" },
-	{ value: "i", display: "Airship" },
-	{ value: "p", display: "Spheriod" }
-
-]
+	{ value: "j", label: "Jump" },
+	{ value: "h", label: "Hover" },
+	{ value: "t", label: "Tracked" },
+	{ value: "v", label: "VTOL" },
+	{ value: "w", label: "Wheeled" },
+	{ value: "g", label: "WiGE" },
+	{ value: "f", label: "Foot" },
+	{ value: "m", label: "Motorized" },
+	{ value: "s", label: "Submersible" },
+	{ value: "a", label: "Aerodyne" },
+	{ value: "i", label: "Airship" },
+	{ value: "p", label: "Spheriod" }
+];
 
 export const filters: Filter[] = [
 	{ name: "name", label: "Name", type: "string", value: "" },
-	{ name: "subtype", label: "Type", type: "select", value: "any", possibleValues: typeValues },
+	{ name: "subtype", label: "Type", type: "select", value: [], possibleValues: typeValues },
 	{ name: "pv", label: "PV", type: "number" },
-	{ name: "move", label: "Move", type: "movement", typeValue: "any", possibleTypeValues: movementTypes },
+	{ name: "move", label: "Move", type: "movement", typeValue: [], possibleTypeValues: movementTypes },
 	{ name: "tmm", label: "TMM", type: "number" },
 	{ name: "health", label: "Health", type: "number" },
 	{
@@ -87,9 +81,9 @@ export const filters: Filter[] = [
 
 export const additionalFilters: Filter[] = [
 	{ name: "date", label: "Date Introduced", type: "number" },
-	{ name: "role", label: "Role", type: "select", value: "any", possibleValues: roles },
-	{ name: "rulesLevel", label: "Rules", type: "select", value: "any", possibleValues: rulesLevels },
-	{ name: "technology", label: "Technology", type: "select", value: "any", possibleValues: technology },
+	{ name: "role", label: "Role", type: "select", value: [], possibleValues: roles },
+	{ name: "rulesLevel", label: "Rules", type: "select", value: [], possibleValues: rulesLevels },
+	{ name: "technology", label: "Technology", type: "select", value: [], possibleValues: technology },
 	{ name: "tonnage", label: "Tonnage", type: "number" },
 	{ name: "unique", label: "Allow Uniques", type: "unique", checked: true }
 ];

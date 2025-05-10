@@ -7,12 +7,13 @@ import type { ListCode, ListCodeUnit } from "./listCode";
 import type { SublistV2 } from "./sublist";
 import type { ResultList } from "$lib/types/resultList.svelte";
 import { getRules } from "$lib/types/options";
-import { convertUnversionedJSONList } from "../utilities/convert";
+import { getSCAfromId, type SCA } from "./sca";
 
 export class List {
 	units: UnitV2[] = $state([]);
 	formations: FormationV2[] = $state([{ id: "unassigned", name: "Unassigned units", type: "none", units: [] }]);
 	sublists: SublistV2[] = $state([]);
+	scaList: SCA[] = $state([]);
 
 	details: { name: string; eras: number[]; factions: number[]; general: number } = $state({ name: "New List", eras: [], factions: [], general: -1 });
 	rules = $state<string>("noRes");
@@ -24,6 +25,55 @@ export class List {
 			return total + current.cost;
 		}, 0)
 	);
+
+	stats = $derived.by(() => {
+		let totalPV = 0,
+			totalS = 0,
+			totalM = 0,
+			totalL = 0,
+			totalHealth = 0,
+			totalSize = 0,
+			totalSkill = 0,
+			unitCount = this.unitCount;
+
+		this.units.forEach((unit) => {
+			if (unit) {
+				totalPV += unit.cost ?? 0;
+				totalS += unit.baseUnit.damageS ?? 0;
+				totalM += unit.baseUnit.damageM ?? 0;
+				totalL += unit.baseUnit.damageL ?? 0;
+				totalHealth += unit.baseUnit.health ?? 0;
+				totalSize += unit.baseUnit.size ?? 0;
+				totalSkill += unit.skill ?? 0;
+			}
+		});
+		let avgS = 0,
+			avgM = 0,
+			avgL = 0,
+			avgHealth = 0,
+			avgSize = 0,
+			avgSkill = 0;
+		if (unitCount) {
+			avgS = Number((totalS / unitCount).toFixed(2));
+			avgM = Number((totalM / unitCount).toFixed(2));
+			avgL = Number((totalL / unitCount).toFixed(2));
+			avgHealth = Number((totalHealth / unitCount).toFixed(2));
+			avgSkill = Number((totalSkill / unitCount).toFixed(2));
+			avgSize = Number((totalSize / unitCount).toFixed(2));
+		}
+		return {
+			totalS,
+			totalM,
+			totalL,
+			totalHealth,
+			avgS,
+			avgM,
+			avgL,
+			avgHealth,
+			avgSkill,
+			avgSize
+		};
+	});
 
 	resultList: ResultList;
 
@@ -50,6 +100,11 @@ export class List {
 			formations: this.formations,
 			sublists: this.sublists
 		};
+		if (this.scaList.length) {
+			newListCode.scas = this.scaList.map(({ id }) => {
+				return id;
+			});
+		}
 		if (this.unitCount != 0 || localStorage.getItem("last-list") === null) {
 			localStorage.setItem("last-list", JSON.stringify(newListCode));
 		}
@@ -345,6 +400,7 @@ export class List {
 		this.units = [];
 		this.formations = [{ id: "unassigned", name: "Unassigned units", type: "none", units: [] }];
 		this.sublists = [];
+		this.scaList = [];
 	}
 
 	addSublist(sublistToAdd?: SublistV2): string {
@@ -374,6 +430,17 @@ export class List {
 		this.sublists = this.sublists.filter((sublist) => {
 			return sublist.id != sublistId;
 		});
+	}
+
+	addSCA(idToAdd: number) {
+		const sca = getSCAfromId(idToAdd);
+		if (sca !== undefined) {
+			this.scaList.push(sca);
+		}
+	}
+
+	removeSCA(indexToRemove: number) {
+		this.scaList.splice(indexToRemove, 1);
 	}
 
 	getListCode() {
@@ -521,5 +588,10 @@ export class List {
 				this.formations[0].units.push({ id: listUnit.id });
 			}
 		});
+		if (listCode.scas !== undefined) {
+			for (const scaId of listCode.scas) {
+				this.addSCA(scaId);
+			}
+		}
 	}
 }

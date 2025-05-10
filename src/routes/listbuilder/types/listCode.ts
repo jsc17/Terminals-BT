@@ -1,6 +1,7 @@
 import type { UnitCustomization } from "$lib/types/unit";
 import type { FormationV2 } from "./formation";
 import type { SublistV2 } from "./sublist";
+import type { SCA } from "./sca";
 
 export type ListCodeUnit = {
 	id: string;
@@ -19,4 +20,5 @@ export type ListCode = {
 	units: ListCodeUnit[];
 	formations: FormationV2[];
 	sublists: SublistV2[];
+	scas?: number[];
 };

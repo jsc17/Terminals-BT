@@ -19,7 +19,7 @@ type PrintableList = {
 	general: number;
 	style: "mul" | "detailed";
 	condensed: boolean;
-	scas: number[];
+	scas: SCA[];
 };
 
 function createUnitLine(unit: UnitV2, listStyle: string, indent: boolean) {
@@ -93,7 +93,7 @@ function createUnitTable(listStyle: string, unitList: UnitV2[], formations: Form
 	return unitTable;
 }
 
-function createReferenceList(units: UnitV2[], formations: FormationV2[], scas: number[]) {
+function createReferenceList(units: UnitV2[], formations: FormationV2[]) {
 	const referenceColumns: Column[] = [];
 	const abilityReferenceList = new Set();
 	const spaReferenceList = new Set();
@@ -174,9 +174,6 @@ function createReferenceList(units: UnitV2[], formations: FormationV2[], scas: n
 			}
 		});
 	});
-	scas.forEach((sca) => {
-		scaReferenceList.add(sca);
-	});
 	const abilityReferenceLines = [...abilityReferenceList]
 		.map((reference: any) => {
 			return `${reference.ability} (${reference.name}, pg.${reference.page})`;
@@ -235,7 +232,7 @@ function createReferenceList(units: UnitV2[], formations: FormationV2[], scas: n
 		});
 	}
 	if (scaReferenceList.size != 0) {
-		referenceColumns.push({ columns: [{ text: "SCAs:", style: "referenceSectionHeader" }] });
+		referenceColumns.push({ columns: [{ text: "SCAs from Formations:", style: "referenceSectionHeader" }] });
 		const scaReferenceLines = [...scaReferenceList]
 			.map((reference: any) => {
 				return `${reference.name} (${reference.page})`;
@@ -362,6 +359,23 @@ async function createUnitCardColumns(unitList: UnitV2[], formations: FormationV2
 	return unitCardColumns;
 }
 
+function createSCAColumns(scas: SCA[]) {
+	const referenceColumns: Column[] = [];
+
+	const scaReferenceLines = scas
+		.map((reference: any) => {
+			return `${reference.name} (${reference.page})`;
+		})
+		.sort()
+		.map((reference: any) => {
+			return { text: reference, style: "listItem" };
+		});
+	referenceColumns.push({
+		columns: [{ ul: scaReferenceLines.slice(0, Math.ceil(scaReferenceLines.length / 2)) }, { ul: scaReferenceLines.slice(Math.ceil(scaReferenceLines.length / 2)) }]
+	});
+	return referenceColumns;
+}
+
 export async function printList(list: PrintableList, drawFormations: boolean, printUnitsByFormation: boolean): Promise<Blob> {
 	const tableheaders: TableCell[] =
 		list.style == "mul"
@@ -377,8 +391,14 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 				);
 	const tableWidths = list.style == "mul" ? ["*", "auto", "auto", "auto"] : ["*", "auto", "auto", "auto", "auto", "auto", "auto"];
 	const unitTable = createUnitTable(list.style, list.units, list.formations, drawFormations);
-	const referenceColumns = createReferenceList(list.units, list.formations, list.scas);
+	const referenceColumns = createReferenceList(list.units, list.formations);
 	const unitCardColumns = await createUnitCardColumns(list.units, list.formations, printUnitsByFormation);
+
+	let scaSection: Content[] = [];
+	if (list.scas.length) {
+		scaSection.push({ text: "Special Command Abilities", style: "subheader" });
+		scaSection.push(createSCAColumns(list.scas));
+	}
 
 	const dd: TDocumentDefinitions = {
 		pageSize: "LETTER",
@@ -398,6 +418,7 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 					body: [tableheaders, ...unitTable]
 				}
 			},
+			...scaSection,
 			{ text: "References:", style: "subheader" },
 			...referenceColumns,
 			...unitCardColumns

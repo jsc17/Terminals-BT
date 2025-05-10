@@ -41,7 +41,7 @@
 						sublists: JSON.parse(tempList.sublists),
 						rules: tempList.rules ?? "noRes",
 						lcVersion: tempList.lcVersion,
-						scas: tempList.scas ?? undefined
+						scas: tempList.scas ? JSON.parse(tempList.scas) : undefined
 					});
 				}
 			} else {
@@ -143,6 +143,7 @@
 	}
 
 	async function loadList() {
+		console.log($state.snapshot(savedLists[selectedListIndex]));
 		await list.loadList(savedLists[selectedListIndex]);
 		dialogElement?.close();
 	}

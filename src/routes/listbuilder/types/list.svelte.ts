@@ -525,6 +525,7 @@ export class List {
 	}
 	async loadList(data: any) {
 		const listCode: ListCode = data;
+		console.log("data", data.scas);
 		this.id = listCode.id;
 		this.details.name = listCode.name;
 		this.details.eras = listCode.eras;

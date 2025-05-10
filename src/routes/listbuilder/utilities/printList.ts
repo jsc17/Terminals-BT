@@ -1,7 +1,7 @@
 import type { TDocumentDefinitions, TableCell, Content, Column } from "pdfmake/interfaces";
 import { Canvas, loadImage } from "skia-canvas";
 import BlobStream, { type IBlobStream } from "blob-stream";
-import { abilityReferences, spaReferences, ammoReferences, formationReferences, scaReferences } from "$lib/data/index.js";
+import { abilityReferences, spaReferences, ammoReferences, formationReferences } from "$lib/data/index.js";
 import { existsSync } from "fs";
 import fs from "fs/promises";
 import type { UnitV2 } from "$lib/types/unit";
@@ -102,24 +102,29 @@ function createReferenceList(units: UnitV2[], formations: FormationV2[]) {
 	const scaReferenceList = new Set();
 
 	formations.forEach((formation) => {
+		console.log(formation.type);
 		if (formation.type == "none") {
 			return;
 		}
 		let formationReference: FormationType | undefined;
-		formationReferences.forEach(({ formations }) => {
-			if (formationReference != undefined) {
-				return;
-			}
-			formationReference = formations.find((formationRef: FormationType) => {
-				if (formation.type == formationRef.name) {
-					return formationRef;
-				} else if (formationRef.variations?.length) {
-					return formationRef.variations.find((variant) => {
-						return variant.name == formation.type;
-					});
+
+		for (const { formations } of formationReferences as { type: string; formations: FormationType[] }[]) {
+			for (const reference of formations) {
+				if (reference.name == formation.type) {
+					formationReference = reference;
+				} else if (reference.variations) {
+					for (const variation of reference.variations) {
+						if (variation.name == formation.type) {
+							formationReference = variation;
+						}
+					}
 				}
-			});
-		});
+			}
+			if (formationReference) {
+				break;
+			}
+		}
+
 		formationReference?.grantedSPAs?.forEach((spa) => {
 			let spaReference = spaReferences.find(({ name }) => {
 				return name.toLocaleLowerCase() == spa.toLocaleLowerCase();

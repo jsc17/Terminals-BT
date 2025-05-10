@@ -182,6 +182,7 @@
 				>
 			</Menu>
 		</div>
+		<div>{formation.type}</div>
 	{/if}
 	{#if !draggingColumns}
 		{#if !formation.units.length}

@@ -9,7 +9,7 @@
 	import formationTypes from "$lib/data/formations.json" assert { type: "json" };
 	import { exportToJeff } from "../utilities/export.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import { Popover } from "bits-ui";
+	import { Label, Popover } from "bits-ui";
 	import UnitCustomizationModal from "./UnitCustomizationModal.svelte";
 	import Select from "$lib/components/Generic/Select.svelte";
 
@@ -18,11 +18,17 @@
 	let list: List = getContext("list");
 	let { formation, draggingColumns, unitCustomizationModal }: Props = $props();
 
-	let formationTypeList: { label: string; items: { value: string; label: string }[] }[] = formationTypes.map((group) => {
+	let formationTypeList: { groupLabel: string; items: { value: string; label: string }[] }[] = formationTypes.map((group) => {
 		return {
-			label: group.type,
-			items: group.formations.map((formation) => {
-				return { value: formation.name, label: formation.name };
+			groupLabel: group.type,
+			items: group.formations.map((formation: FormationType) => {
+				return {
+					value: formation.name,
+					label: formation.name,
+					subitems: formation.variations?.map((variation) => {
+						return { value: variation.name, label: variation.name };
+					})
+				};
 			})
 		};
 	});

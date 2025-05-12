@@ -598,29 +598,31 @@ export class List {
 		});
 		//update id's
 		for (const unit of this.units) {
-			const oldId = unit.id;
-			let newId = nanoid(6);
-			while (
-				this.units.find(({ id }) => {
-					return id == newId;
-				})
-			) {
-				newId = nanoid(6);
-			}
-			for (const formation of this.formations) {
-				for (const unit of formation.units) {
-					if (unit.id == oldId) {
-						unit.id = newId;
+			if (unit.id.length > 6) {
+				const oldId = unit.id;
+				let newId = nanoid(6);
+				while (
+					this.units.find(({ id }) => {
+						return id == newId;
+					})
+				) {
+					newId = nanoid(6);
+				}
+				for (const formation of this.formations) {
+					for (const unit of formation.units) {
+						if (unit.id == oldId) {
+							unit.id = newId;
+						}
 					}
 				}
-			}
-			for (const sublist of this.sublists) {
-				const index = sublist.checked.indexOf(oldId);
-				if (index != -1) {
-					sublist.checked[index] = newId;
+				for (const sublist of this.sublists) {
+					const index = sublist.checked.indexOf(oldId);
+					if (index != -1) {
+						sublist.checked[index] = newId;
+					}
 				}
+				unit.id = newId;
 			}
-			unit.id = newId;
 		}
 		if (listCode.scas !== undefined) {
 			for (const scaId of listCode.scas) {

@@ -8,6 +8,7 @@ import type { SublistV2 } from "./sublist";
 import type { ResultList } from "$lib/types/resultList.svelte";
 import { getRules } from "$lib/types/options";
 import { getSCAfromId, type SCA } from "./sca";
+import { nanoid } from "nanoid";
 
 export class List {
 	units: UnitV2[] = $state([]);
@@ -349,7 +350,14 @@ export class List {
 	}
 
 	newUnit(baseUnit: MulUnit) {
-		const unitId: string = crypto.randomUUID();
+		let unitId: string = nanoid(6);
+		while (
+			this.units.find(({ id }) => {
+				return id == unitId;
+			})
+		) {
+			unitId = nanoid(6);
+		}
 		this.units.push({ id: unitId, baseUnit, skill: 4, cost: baseUnit.pv, customization: {} });
 		this.formations
 			.find((formation) => {
@@ -525,7 +533,6 @@ export class List {
 	}
 	async loadList(data: any) {
 		const listCode: ListCode = data;
-		console.log("data", data.scas);
 		this.id = listCode.id;
 		this.details.name = listCode.name;
 		this.details.eras = listCode.eras;
@@ -541,19 +548,19 @@ export class List {
 		this.sublists = listCode.sublists;
 		const sublistIds = new Set();
 		this.sublists.forEach((sublist) => {
-			if (sublistIds.has(sublist.id)) {
-				sublist.id = crypto.randomUUID();
+			while (sublistIds.has(sublist.id) || sublist.id.length > 6) {
+				sublist.id = nanoid(6);
 			}
 			sublistIds.add(sublist.id);
 		});
 
 		for (const unit of listCode.units) {
-			if (
+			while (
 				this.units.find((existingUnit) => {
 					return unit.id == existingUnit.id;
 				})
 			) {
-				unit.id = crypto.randomUUID();
+				unit.id = nanoid(6);
 			}
 			let baseUnit: MulUnit =
 				this.resultList.resultList.find((result: MulUnit) => {
@@ -569,8 +576,8 @@ export class List {
 		this.formations = listCode.formations;
 		const formationIDs = new Set();
 		this.formations.forEach((formation) => {
-			if (formationIDs.has(formation.id)) {
-				formation.id = crypto.randomUUID();
+			while (formation.id != "unassigned" && (formationIDs.has(formation.id) || formation.id.length > 6)) {
+				formation.id = nanoid(6);
 			}
 			formationIDs.add(formation.id);
 		});
@@ -589,6 +596,32 @@ export class List {
 				this.formations[0].units.push({ id: listUnit.id });
 			}
 		});
+		//update id's
+		for (const unit of this.units) {
+			const oldId = unit.id;
+			let newId = nanoid(6);
+			while (
+				this.units.find(({ id }) => {
+					return id == newId;
+				})
+			) {
+				newId = nanoid(6);
+			}
+			for (const formation of this.formations) {
+				for (const unit of formation.units) {
+					if (unit.id == oldId) {
+						unit.id = newId;
+					}
+				}
+			}
+			for (const sublist of this.sublists) {
+				const index = sublist.checked.indexOf(oldId);
+				if (index != -1) {
+					sublist.checked[index] = newId;
+				}
+			}
+			unit.id = newId;
+		}
 		if (listCode.scas !== undefined) {
 			for (const scaId of listCode.scas) {
 				this.addSCA(scaId);

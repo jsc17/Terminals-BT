@@ -134,11 +134,15 @@
 					<div>{sublist.unitString}</div>
 					<div class="center">{sublist.count}</div>
 					<div class="center">{sublist.pv}</div>
-					<div class="center"><button style:padding="8px 16px" 
-						onclick={() => {
-							sublist.sublist.id = crypto.randomUUID(); 
-							list.addSublist($state.snapshot(sublist.sublist))}}
-						>+</button></div>
+					<div class="center">
+						<button
+							style:padding="8px 16px"
+							onclick={() => {
+								sublist.sublist.id = crypto.randomUUID();
+								list.addSublist($state.snapshot(sublist.sublist));
+							}}>+</button
+						>
+					</div>
 				{/each}
 			</div>
 		</div>

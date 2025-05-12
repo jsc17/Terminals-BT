@@ -1,4 +1,5 @@
 import { getGeneralList } from "$lib/utilities/bt-utils";
+import { nanoid } from "nanoid";
 import type { FormationV2 } from "../types/formation";
 import type { ListCode, ListCodeUnit } from "../types/listCode";
 import type { SublistV2 } from "../types/sublist";
@@ -20,11 +21,11 @@ export function convertUnversionedJSONList(importedList: any): ListCode {
 	for (const item of importedList.units) {
 		if (item.charAt(0) == "{") {
 			const formationData = JSON.parse(item);
-			const formationId: string = crypto.randomUUID();
+			const formationId: string = nanoid(6);
 			let formationUnitList: { id: string }[] = [];
 
 			for (const unit of formationData.units) {
-				const unitId: string = crypto.randomUUID();
+				const unitId: string = nanoid(6);
 				let [mulId, skill] = unit.split(",");
 				if (skill == "undefined") {
 					skill = 4;
@@ -35,7 +36,7 @@ export function convertUnversionedJSONList(importedList: any): ListCode {
 			}
 			importedFormations.push({ id: formationId, name: formationData.name, type: formationData.type, units: formationUnitList });
 		} else {
-			const unitId = crypto.randomUUID();
+			const unitId = nanoid(6);
 			let [mulId, skill] = item.split(",");
 			if (skill == "undefined") {
 				skill = 4;
@@ -47,7 +48,7 @@ export function convertUnversionedJSONList(importedList: any): ListCode {
 	//convert sublist to lcv1 formatting
 	for (const sublist of importedList.sublists) {
 		const subListData = JSON.parse(sublist);
-		const sublistId: string = crypto.randomUUID();
+		const sublistId: string = nanoid(6);
 		const scenario: string = subListData.sc;
 		const checked = subListData.un.map((unitPos: number) => {
 			return importedUnits[unitPos].id;

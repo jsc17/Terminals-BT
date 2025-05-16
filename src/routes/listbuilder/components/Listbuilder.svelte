@@ -14,17 +14,19 @@
 	import { deserialize } from "$app/forms";
 	import UnitCustomizationModal from "./UnitCustomizationModal.svelte";
 	import ScaModal from "./SCAModal.svelte";
+	import EditFormationModal from "./EditFormationModal.svelte";
 
 	const resultList: ResultList = getContext("resultList");
 	let list: List = getContext("list");
 
 	let { recentChanges, description }: { recentChanges: string[]; description: string[] } = $props();
-	let printModal: PrintModal | undefined = $state();
-	let saveModal: SaveModal | undefined = $state();
-	let loadModal: LoadModal | undefined = $state();
-	let sublistModal: SublistModal | undefined = $state();
-	let unitCustomizationModal: UnitCustomizationModal | undefined = $state();
-	let scaModal: ScaModal | undefined = $state();
+	let printModal = $state<PrintModal>();
+	let saveModal = $state<SaveModal>();
+	let loadModal = $state<LoadModal>();
+	let sublistModal = $state<SublistModal>();
+	let unitCustomizationModal = $state<UnitCustomizationModal>();
+	let editFormationModal = $state<EditFormationModal>();
+	let scaModal = $state<ScaModal>();
 	let errorDialog = $state<HTMLDialogElement>();
 
 	let dropTargetStyle = { outline: "solid var(--primary)" };

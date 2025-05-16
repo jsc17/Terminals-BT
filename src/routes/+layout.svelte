@@ -37,6 +37,7 @@
 	:global(:root) {
 		--radius: 0.5rem;
 		--background: hsl(20, 14.3%, 4.1%);
+		--background-light: hsl(15, 17%, 5%);
 		--foreground: hsl(0, 0%, 83%);
 		--card: hsl(24, 9.8%, 10%);
 		--card-foreground: hsl(0, 0%, 95%);
@@ -156,6 +157,18 @@
 		height: max(100%, 400px);
 		width: 100%;
 		overflow: auto;
+	}
+	:global(.dialog-header) {
+		display: flex;
+		gap: 24px;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0px 2px 4px 2px;
+		border-bottom: 1px solid var(--border);
+		margin-bottom: 4px;
+	}
+	:global(.dialog-header h2) {
+		margin: 0;
 	}
 	:global(dialog::backdrop) {
 		background: rgba(0, 0, 0, 0.7);

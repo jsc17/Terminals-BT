@@ -18,6 +18,63 @@
 
 	let { value = $bindable(), items, groupedItems, contentProps, placeholder, ...restProps }: Props = $props();
 	let open = $state(false);
+
+	let valueString = $derived.by(() => {
+		if (!value || !value.length) {
+			return placeholder;
+		}
+		if (restProps.type == "single") {
+			for (const item of items ?? []) {
+				if (item.value == value) {
+					return item.label;
+				}
+				for (const subitem of item.subitems ?? []) {
+					if (subitem.value == value) {
+						return subitem.label;
+					}
+				}
+			}
+			for (const group of groupedItems ?? []) {
+				for (const item of group.items) {
+					if (item.value == value) {
+						return item.label;
+					}
+					for (const subitem of item.subitems ?? []) {
+						if (subitem.value == value) {
+							return subitem.label;
+						}
+					}
+				}
+			}
+		} else {
+			const selectedLabels = [];
+			for (const tempValue of value) {
+				for (const item of items ?? []) {
+					if (item.value == tempValue) {
+						selectedLabels.push(item.label);
+					}
+					for (const subitem of item.subitems ?? []) {
+						if (subitem.value == tempValue) {
+							selectedLabels.push(subitem.label);
+						}
+					}
+				}
+				for (const group of groupedItems ?? []) {
+					for (const item of group.items) {
+						if (item.value == tempValue) {
+							selectedLabels.push(item.label);
+						}
+						for (const subitem of item.subitems ?? []) {
+							if (subitem.value == tempValue) {
+								selectedLabels.push(subitem.label);
+							}
+						}
+					}
+				}
+			}
+			return selectedLabels.join(", ");
+		}
+	});
 </script>
 
 <!--
@@ -29,7 +86,7 @@ from the perspective of the consumer of this component, it will be typed appropr
 <Select.Root bind:value={value as never} {...restProps} bind:open>
 	<Select.Trigger>
 		<div class="select-trigger">
-			<p class="select-trigger-text">{value?.length ? value : placeholder}</p>
+			<p class="select-trigger-text">{valueString}</p>
 			<img src="./icons/chevron-updown.svg" alt="expand" />
 		</div>
 	</Select.Trigger>
@@ -132,7 +189,7 @@ from the perspective of the consumer of this component, it will be typed appropr
 	}
 	:global([data-select-content]) {
 		background-color: var(--background);
-		z-index: 5;
+		z-index: 100;
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		padding: 4px;

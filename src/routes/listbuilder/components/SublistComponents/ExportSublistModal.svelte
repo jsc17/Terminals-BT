@@ -144,11 +144,6 @@
 </dialog>
 
 <style>
-	.dialog-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
 	h1 {
 		font-size: 1.25em;
 		margin-right: 3em;

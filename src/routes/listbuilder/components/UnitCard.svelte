@@ -122,6 +122,7 @@
 		background-color: var(--card);
 		display: flex;
 		flex-shrink: 0;
+		padding: 0px 4px;
 	}
 	.unit-card:hover {
 		box-shadow: 3px 0px 3px var(--primary) inset;

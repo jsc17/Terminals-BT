@@ -59,8 +59,6 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0px 2px 4px 2px;
-		border-bottom: 1px solid var(--border);
 	}
 	.sca-add-row {
 		display: flex;

@@ -1,0 +1,18 @@
+[
+	{ "id": 0, "name": "Lance", "size": 4, "details": ["4 Battlemechs", "4 Combat Vehicles (same movement type)", "4 Battle Armor Squads/Infantry Platoons"], "weights": [] },
+	{ "id": 1, "name": "Squadron", "size": 6, "details": ["3 pairs of Aerospace Fighters", "3 pairs of Convential Fighters"], "weights": [] },
+	{
+		"id": 2,
+		"name": "Star",
+		"size": 5,
+		"details": ["5 Battlemechs", "10 Combat  Vehicles (same movement type)", "5 pairs of Aerospace fighters", "5 Battle Armor Squads/Infantry Points"],
+		"weights": []
+	},
+	{
+		"id": 3,
+		"name": "Level II",
+		"size": 6,
+		"details": ["6 Level I's (1 Battlemech, Combat Vehicle, Aerospace Fighter, Battle Armor Squadron, or Infantry Platoon)"],
+		"weights": []
+	}
+]

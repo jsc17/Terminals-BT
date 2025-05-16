@@ -8,7 +8,7 @@
 	let list: List = getContext("list");
 	let unit = $state<UnitV2 | undefined>();
 
-	let UnitCustomizationDialog = $state<HTMLDialogElement | undefined>();
+	let unitCustomizationDialog = $state<HTMLDialogElement>();
 
 	let selectAmmoValue = $state<string>(ammoList[0].ammoTypes[0].name);
 	let selectSPAValue = $state<string>(spaList[0].name);
@@ -42,15 +42,15 @@
 	});
 
 	export function show(unitId: string) {
-		UnitCustomizationDialog?.showModal();
+		unitCustomizationDialog?.showModal();
 		unit = list.getUnit(unitId);
 	}
 </script>
 
-<dialog bind:this={UnitCustomizationDialog}>
+<dialog bind:this={unitCustomizationDialog}>
 	<div class="dialog-header">
 		<h2>{unit?.baseUnit?.name} customization</h2>
-		<button class="close-button" onclick={() => UnitCustomizationDialog?.close()}>Close</button>
+		<button class="close-button" onclick={() => unitCustomizationDialog?.close()}>Close</button>
 	</div>
 	<div class="customization-body">
 		<div class="customization-column">
@@ -137,11 +137,6 @@
 		padding: 16px;
 		width: max-content;
 		max-height: 90%;
-	}
-	.dialog-header {
-		display: flex;
-		gap: 24px;
-		align-items: center;
 	}
 	.close-button {
 		height: max-content;

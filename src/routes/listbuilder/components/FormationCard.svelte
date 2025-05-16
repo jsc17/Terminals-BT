@@ -5,36 +5,24 @@
 	import Menu from "$lib/components/Generic/Menu.svelte";
 	import { getContext } from "svelte";
 	import type { List } from "../types/list.svelte";
-	import { type FormationType, type FormationV2 } from "../types/formation";
-	import formationTypes from "$lib/data/formations.json" assert { type: "json" };
+	import { type FormationV2 } from "../types/formation";
 	import { exportToJeff } from "../utilities/export.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import { Label, Popover } from "bits-ui";
+	import { Popover } from "bits-ui";
 	import UnitCustomizationModal from "./UnitCustomizationModal.svelte";
-	import Select from "$lib/components/Generic/Select.svelte";
+	import EditFormationModal from "./EditFormationModal.svelte";
+	import Collapsible from "$lib/components/Generic/Collapsible.svelte";
 
 	type Props = { formation: FormationV2; draggingColumns: boolean; unitCustomizationModal?: UnitCustomizationModal };
 
-	let list: List = getContext("list");
 	let { formation, draggingColumns, unitCustomizationModal }: Props = $props();
-
-	let formationTypeList: { groupLabel: string; items: { value: string; label: string }[] }[] = formationTypes.map((group) => {
-		return {
-			groupLabel: group.type,
-			items: group.formations.map((formation: FormationType) => {
-				return {
-					value: formation.name,
-					label: formation.name,
-					subitems: formation.variations?.map((variation) => {
-						return { value: variation.name, label: variation.name };
-					})
-				};
-			})
-		};
-	});
+	let list: List = getContext("list");
+	let editModalOpen = $state(false);
 
 	let dropTargetStyle = {};
 	let flipDurationMs = 100;
+	let open = $state(true);
+	let secondaryOpen = $state(true);
 
 	let formationStats = $derived.by(() => {
 		let totalPV = 0,
@@ -90,6 +78,9 @@
 
 	function handleSort(e: CustomEvent<DndEvent<{ id: string }>>) {
 		formation.units = e.detail.items;
+	}
+	function handleSecondarySort(e: CustomEvent<DndEvent<{ id: string }>>) {
+		formation.secondary!.units = e.detail.items;
 	}
 
 	function exportFormationToJeff() {
@@ -150,37 +141,59 @@
 						<img class="combobox-img" src="/icons/chevron-updown.svg" alt="expand list chevrons" />
 					</div>
 				{/if}
-				<div class="formation-name">Unassigned Units</div>
-				{@render infoPopover()}
-				<Menu img={"/icons/menu.svg"}>
-					{@render jeffExportButton()}
-				</Menu>
+				<div class="formation-header-details">Unassigned Units</div>
+				<div class="formation-header-buttons">
+					{@render infoPopover()}
+					<Menu img={"/icons/menu.svg"}>
+						{@render jeffExportButton()}
+					</Menu>
+					<button
+						onclick={() => {
+							open = !open;
+						}}
+						class="transparent-button expand-collapse">{open ? "collapse" : "expand"}</button
+					>
+				</div>
 			</div>
 		{/if}
 	{:else}
 		<div class="formation-header">
 			{#if appWindow.isMobile}
 				<div class="drag-handles" use:dragHandle>
-					<img class="combobox-img" src="/icons/chevron-updown.svg" alt="expand list chevrons" />
+					<img class="combobox-img" src="/icons/chevron-updown.svg" alt="Drag handle chevrons" />
 				</div>
 			{/if}
-			<input class="formation-name" type="text" name="formation-name" id="formation-id" bind:value={formation.name} />
-
-			<div class="select-formation-type-wrapper"><Select bind:value={formation.type} type="single" groupedItems={formationTypeList}></Select></div>
-
-			{@render infoPopover()}
-			<Menu img={"/icons/menu.svg"}>
-				{@render jeffExportButton()}
+			<div class="formation-header-details">
+				<p>{formation.name}</p>
+				<p class="muted">{formation.type}</p>
+			</div>
+			<div class="formation-header-buttons">
+				{@render infoPopover()}
+				<Menu img={"/icons/menu.svg"}>
+					<button
+						class="transparent-button"
+						onclick={() => {
+							editModalOpen = true;
+						}}>Edit Formation</button
+					>
+					{@render jeffExportButton()}
+					<button
+						class="transparent-button"
+						onclick={() => {
+							if (formation.units.length == 0 || confirm("Formation is not empty and removing it will remove all units it contains. Continue?")) {
+								list.removeFormation(formation.id);
+								toastController.addToast(`${formation.name} removed from list`);
+							}
+						}}>Remove Formation</button
+					>
+				</Menu>
 				<button
-					class="transparent-button"
 					onclick={() => {
-						if (formation.units.length == 0 || confirm("Formation is not empty and removing it will remove all units it contains. Continue?")) {
-							list.removeFormation(formation.id);
-							toastController.addToast(`${formation.name} removed from list`);
-						}
-					}}>Remove Formation</button
+						open = !open;
+					}}
+					class="transparent-button expand-collapse">{open ? "collapse" : "expand"}</button
 				>
-			</Menu>
+			</div>
 		</div>
 	{/if}
 	{#if !draggingColumns}
@@ -188,32 +201,90 @@
 			<div class="drop-message">Drop units here to add them to this formation</div>
 		{/if}
 		{#if appWindow.isMobile}
-			<div
-				class="unit-cards"
-				use:dragHandleZone={{ items: formation.units, dropTargetStyle, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
-				onconsider={handleSort}
-				onfinalize={handleSort}
-			>
-				{#each formation.units as unit (unit.id)}
-					<UnitCard unitId={unit.id} {unitCustomizationModal}></UnitCard>
-				{/each}
-			</div>
+			<Collapsible bind:open>
+				<div
+					class="unit-cards"
+					use:dragHandleZone={{ items: formation.units, dropTargetStyle, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
+					onconsider={handleSort}
+					onfinalize={handleSort}
+				>
+					{#each formation.units as unit (unit.id)}
+						<UnitCard unitId={unit.id} {unitCustomizationModal}></UnitCard>
+					{/each}
+				</div>
+			</Collapsible>
+			{#if formation.secondary && !draggingColumns}
+				<div class="secondary-formation-header">
+					{formation.secondary.type}
+					<button
+						onclick={() => {
+							secondaryOpen = !secondaryOpen;
+						}}
+						class="transparent-button expand-collapse">{secondaryOpen ? "collapse" : "expand"}</button
+					>
+				</div>
+				<Collapsible bind:open={secondaryOpen}>
+					{#if !formation.secondary.units.length}
+						<div class="drop-message">Drop units here to add them to this sub-formation</div>
+					{/if}
+					<div
+						class="unit-cards"
+						use:dragHandleZone={{ items: formation.secondary.units, dropTargetStyle, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
+						onconsider={handleSecondarySort}
+						onfinalize={handleSecondarySort}
+					>
+						{#each formation.secondary.units as unit (unit.id)}
+							<UnitCard unitId={unit.id} {unitCustomizationModal}></UnitCard>
+						{/each}
+					</div>
+				</Collapsible>
+			{/if}
 		{:else}
-			<div
-				class="unit-cards"
-				use:dndzone={{ items: formation.units, dropTargetStyle, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
-				onconsider={handleSort}
-				onfinalize={handleSort}
-			>
-				{#each formation.units as unit (unit.id)}
-					<UnitCard unitId={unit.id} {unitCustomizationModal}></UnitCard>
-				{/each}
-			</div>
+			<Collapsible bind:open>
+				<div
+					class="unit-cards"
+					use:dndzone={{ items: formation.units, dropTargetStyle, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
+					onconsider={handleSort}
+					onfinalize={handleSort}
+				>
+					{#each formation.units as unit (unit.id)}
+						<UnitCard unitId={unit.id} {unitCustomizationModal}></UnitCard>
+					{/each}
+				</div>
+			</Collapsible>
+			{#if formation.secondary && !draggingColumns}
+				<div class="secondary-formation-header">
+					{`${formation.name} ${formation.secondary.type}`}
+					<button
+						onclick={() => {
+							secondaryOpen = !secondaryOpen;
+						}}
+						class="transparent-button expand-collapse">{secondaryOpen ? "collapse" : "expand"}</button
+					>
+				</div>
+				<Collapsible bind:open={secondaryOpen}>
+					{#if !formation.secondary.units.length}
+						<div class="drop-message">Drop units here to add them to this sub-formation</div>
+					{/if}
+					<div
+						class="unit-cards"
+						use:dndzone={{ items: formation.secondary.units, dropTargetStyle, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
+						onconsider={handleSecondarySort}
+						onfinalize={handleSecondarySort}
+					>
+						{#each formation.secondary.units as unit (unit.id)}
+							<UnitCard unitId={unit.id} {unitCustomizationModal}></UnitCard>
+						{/each}
+					</div>
+				</Collapsible>
+			{/if}
 		{/if}
 	{:else}
 		<div class="drop-message">Unit list collapsed while dragging formations</div>
 	{/if}
 </div>
+
+<EditFormationModal bind:open={editModalOpen} {formation}></EditFormationModal>
 
 <style>
 	.formation-card {
@@ -221,6 +292,7 @@
 		width: 100%;
 		background-color: var(--card);
 		flex-shrink: 0;
+		border: 1px solid var(--border);
 	}
 	.formation-card:hover {
 		cursor: row-resize;
@@ -231,27 +303,46 @@
 		display: flex;
 		align-items: center;
 		border: 1px solid var(--border);
+		gap: 16px;
+	}
+	.formation-header-details {
+		display: flex;
+		flex: 1;
+		justify-content: space-between;
+		align-items: center;
+
+		p {
+			font-size: 0.95em;
+		}
+	}
+
+	.formation-header-buttons {
+		display: flex;
+		align-items: center;
 		gap: 4px;
 	}
-	.formation-name {
-		flex: 1;
-	}
 	.unit-cards {
+		width: 100%;
 		padding: 2px;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 	}
+	.secondary-formation-header {
+		display: flex;
+		padding: 2px 16px;
+		background-color: var(--background-light);
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		border: 1px solid var(--border);
+		font-size: 0.9em;
+	}
 	:global(.droppable) {
 		outline: 1px solid var(--primary);
 		min-height: 2em;
 	}
-	input {
-		background-color: var(--muted);
-	}
-	input:hover {
-		border: 1px solid var(--primary);
-	}
+
 	.drop-message {
 		margin-top: 4px;
 		align-self: center;
@@ -292,8 +383,5 @@
 		grid-column-start: 1;
 		grid-column-end: 3;
 		border: 1px solid var(--muted);
-	}
-	.variation {
-		padding-left: 16px;
 	}
 </style>

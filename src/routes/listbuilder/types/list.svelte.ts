@@ -371,11 +371,6 @@ export class List {
 			return unit.id == idToFind;
 		});
 	}
-
-	newFormation() {
-		const id: string = crypto.randomUUID();
-		this.formations.push({ id, name: `New formation`, type: "Battle", units: [] });
-	}
 	removeUnit(idToRemove: string) {
 		this.units = this.units.filter((unit) => {
 			return unit.id != idToRemove;
@@ -389,6 +384,15 @@ export class List {
 			sublist.checked = sublist.checked.filter((unitId) => {
 				return unitId != idToRemove;
 			});
+		});
+	}
+	newFormation() {
+		const id: string = crypto.randomUUID();
+		this.formations.push({ id, name: `New formation`, type: "Battle", units: [] });
+	}
+	getFormation(formationId: string) {
+		return this.formations.find(({ id }) => {
+			return id == formationId;
 		});
 	}
 	removeFormation(idToRemove: string) {
@@ -587,6 +591,9 @@ export class List {
 				if (
 					formation.units.find((formationUnit) => {
 						return listUnit.id == formationUnit.id;
+					}) ||
+					formation.secondary?.units.find((formationUnit) => {
+						return listUnit.id == formationUnit.id;
 					})
 				) {
 					assigned = true;
@@ -610,6 +617,11 @@ export class List {
 				}
 				for (const formation of this.formations) {
 					for (const unit of formation.units) {
+						if (unit.id == oldId) {
+							unit.id = newId;
+						}
+					}
+					for (const unit of formation.secondary?.units ?? []) {
 						if (unit.id == oldId) {
 							unit.id = newId;
 						}

@@ -5,7 +5,7 @@ import { abilityReferences, spaReferences, ammoReferences, formationReferences }
 import { existsSync } from "fs";
 import fs from "fs/promises";
 import type { UnitV2 } from "$lib/types/unit";
-import type { FormationType, FormationV2 } from "../types/formation";
+import { getFormationTypeByName, type FormationType, type FormationV2 } from "../types/formation";
 import { printer } from "$lib/server/printer";
 import { type SCA, getSCAfromName } from "../types/sca";
 
@@ -79,11 +79,31 @@ function createUnitTable(listStyle: string, unitList: UnitV2[], formations: Form
 		}
 		if (drawFormations && formation.id != "unassigned") {
 			unitTable.push([
-				{ text: `${formation.name} - ${formation.type} formation - ${formation.units.length} Units - ${formationPV} PV`, colSpan: headerLength, style: "formationHeader" },
-				...Array(headerLength - 1).fill("")
+				{ text: `${formation.name} - ${formation.type} formation - ${formation.units.length} Units - ${formationPV} PV`, colSpan: headerLength, style: "formationHeader" }
 			]);
 		}
 		unitTable = unitTable.concat(formationUnitLines);
+		if (drawFormations && formation.secondary) {
+			let secondaryPv = 0;
+			const secondaryUnitLines = [];
+			for (const unitId of formation.secondary.units) {
+				const unit = unitList.find((unit) => {
+					return unit.id == unitId.id;
+				})!;
+				unitCount++;
+				totalPV += unit.cost;
+				secondaryPv += unit.cost;
+				secondaryUnitLines.push(createUnitLine(unit, listStyle, drawFormations));
+			}
+			unitTable.push([
+				{
+					text: `${formation.name} - ${formation.secondary.type} formation - ${formation.secondary.units.length} Units - ${secondaryPv} PV`,
+					colSpan: headerLength,
+					style: "formationHeader"
+				}
+			]);
+			unitTable = unitTable.concat(secondaryUnitLines);
+		}
 	}
 	unitTable.push([
 		{ text: `${unitCount} Units`, colSpan: headerLength - 1, style: "cellHeader" },
@@ -102,30 +122,12 @@ function createReferenceList(units: UnitV2[], formations: FormationV2[]) {
 	const scaReferenceList = new Set();
 
 	formations.forEach((formation) => {
-		console.log(formation.type);
 		if (formation.type == "none") {
 			return;
 		}
-		let formationReference: FormationType | undefined;
+		let formationReference = getFormationTypeByName(formation.type);
 
-		for (const { formations } of formationReferences as { type: string; formations: FormationType[] }[]) {
-			for (const reference of formations) {
-				if (reference.name == formation.type) {
-					formationReference = reference;
-				} else if (reference.variations) {
-					for (const variation of reference.variations) {
-						if (variation.name == formation.type) {
-							formationReference = variation;
-						}
-					}
-				}
-			}
-			if (formationReference) {
-				break;
-			}
-		}
-
-		formationReference?.grantedSPAs?.forEach((spa) => {
+		formationReference?.referencedSPAs?.forEach((spa) => {
 			let spaReference = spaReferences.find(({ name }) => {
 				return name.toLocaleLowerCase() == spa.toLocaleLowerCase();
 			});

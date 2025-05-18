@@ -15,6 +15,7 @@
 	import UnitCustomizationModal from "./UnitCustomizationModal.svelte";
 	import ScaModal from "./SCAModal.svelte";
 	import EditFormationModal from "./EditFormationModal.svelte";
+	import { loadListForPlay } from "$lib/types/playList";
 
 	const resultList: ResultList = getContext("resultList");
 	let list: List = getContext("list");
@@ -25,7 +26,6 @@
 	let loadModal = $state<LoadModal>();
 	let sublistModal = $state<SublistModal>();
 	let unitCustomizationModal = $state<UnitCustomizationModal>();
-	let editFormationModal = $state<EditFormationModal>();
 	let scaModal = $state<ScaModal>();
 	let errorDialog = $state<HTMLDialogElement>();
 
@@ -159,6 +159,12 @@
 					<div>More features coming soon</div></Menu
 				>
 				<Menu img={"/icons/menu.svg"}>
+					<button
+						class="transparent-button"
+						onclick={() => {
+							loadListForPlay(list.formations, list.units);
+						}}>Play List</button
+					>
 					<button
 						class="transparent-button"
 						onclick={() => {

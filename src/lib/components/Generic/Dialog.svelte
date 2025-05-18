@@ -17,7 +17,7 @@
 		<Dialog.Content>
 			<Dialog.Title>
 				{title}
-				<Dialog.Close>Close</Dialog.Close>
+				<Dialog.Close><img src="/icons/close.svg" alt="close button" class="close-button" /></Dialog.Close>
 			</Dialog.Title>
 			{#if description}
 				<Dialog.Description>{@render description()}</Dialog.Description>
@@ -54,11 +54,12 @@
 		align-items: center;
 		justify-content: space-between;
 		border-bottom: 1px solid var(--border);
-	}
-
-	:global([data-dialog-title]) {
 		padding: 16px;
 	}
+	:global([data-dialog-close]) {
+		background-color: transparent;
+	}
+
 	:global([data-dialog-description], .dialog-children-wrapper) {
 		padding: 4px 16px;
 	}
@@ -67,5 +68,10 @@
 			padding: 4px;
 			overflow-x: hidden;
 		}
+	}
+	.close-button {
+		width: 25px;
+		height: 25px;
+		filter: var(--primary-filter);
 	}
 </style>

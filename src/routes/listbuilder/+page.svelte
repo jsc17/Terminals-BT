@@ -8,7 +8,6 @@
 	import { List } from "./types/list.svelte";
 	import { convertUnversionedJSONList } from "./utilities/convert";
 	import type { ListCode } from "./types/listCode";
-	import { deserialize } from "$app/forms";
 
 	const resultList = new ResultList();
 	const list = new List(resultList);

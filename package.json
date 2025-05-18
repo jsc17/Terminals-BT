@@ -55,6 +55,7 @@
 		"pdfjs-dist": "4.10.38",
 		"pdfmake": "^0.2.18",
 		"prettier": "^3.4.2",
+		"runed": "^0.28.0",
 		"skia-canvas": "^2.0.2",
 		"svelty-email": "github:socketopp/svelty-email#feature/component-render",
 		"v8": "^0.1.0",

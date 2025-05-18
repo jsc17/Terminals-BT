@@ -100,23 +100,16 @@
 	.damage-amount-button {
 		font-size: 30px;
 	}
-	.input-slider {
-		width: 200px;
-		height: 50px;
-	}
-	:global([data-slider-root]) {
-		position: relative;
-	}
-	:global([data-slider-root], [data-slider-range], [data-slider-thumb]) {
-		background-color: blue;
-		width: 100%;
-		z-index: 60;
-	}
 	.apply-buttons {
 		display: flex;
 		justify-content: center;
 		align-items: center;
 		gap: 24px;
+
+		button {
+			padding: 8px;
+			font-size: 18px;
+		}
 	}
 	.remove-button-row {
 		display: flex;

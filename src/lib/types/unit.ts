@@ -49,6 +49,14 @@ export type UnitV2 = {
 };
 
 export type PlayUnit = UnitV2 & {
-	pending: { damage: number; heat: number; crits: { [index: string]: any; engine: number; fireControl: number; mp: number; weapon: number; destroyed: boolean } };
-	current: { damage: number; heat: number; crits: { [index: string]: any; engine: number; fireControl: number; mp: number; weapon: number; destroyed: boolean } };
+	pending: {
+		damage: number;
+		heat: number;
+		crits: { [index: string]: any; engine: number; fireControl: number; mp: number; weapon: number; destroyed: boolean; motiveHit: number; motiveHalf: number; motiveIm: boolean };
+	};
+	current: {
+		damage: number;
+		heat: number;
+		crits: { [index: string]: any; engine: number; fireControl: number; mp: number; weapon: number; destroyed: boolean; motiveHit: number; motiveHalf: number; motiveIm: boolean };
+	};
 };

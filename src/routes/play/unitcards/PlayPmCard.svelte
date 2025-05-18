@@ -28,9 +28,6 @@
 		}
 	});
 
-	function handleHeat() {
-		openHeatModal = true;
-	}
 	function handleDamage() {
 		openDamageModal = true;
 	}
@@ -78,16 +75,6 @@
 					<p class="bold damage">{unit.baseUnit.damageL}{unit.baseUnit.damageLMin ? "*" : ""}</p>
 				</div>
 			</div>
-			<button onclick={handleHeat} class="unit-card-block unit-heat-block">
-				<div>OV: <span class="bold damage">{unit.baseUnit.overheat}</span></div>
-				<div class="heatscale">
-					Heat Scale:
-					<div class="heat-level heat-level-first" class:heat-level-1={unit.current.heat >= 1}>1</div>
-					<div class="heat-level" class:heat-level-2={unit.current.heat >= 2}>2</div>
-					<div class="heat-level" class:heat-level-3={unit.current.heat >= 3}>3</div>
-					<div class="heat-level heat-level-last" class:heat-level-4={unit.current.heat >= 4}>S</div>
-				</div>
-			</button>
 			<button class="unit-card-block unit-health-block" onclick={handleDamage}>
 				<p>A ({armorRemaining >= 0 ? armorRemaining : 0}/{unit.baseUnit.armor}):</p>
 				<div class="health-pips">
@@ -95,6 +82,7 @@
 						<div class="pip" class:damaged={armorRemaining <= index}></div>
 					{/each}
 				</div>
+
 				<p>
 					S ({structRemaining}/{unit.baseUnit.structure}):
 				</p>
@@ -117,14 +105,6 @@
 			</div>
 			<button onclick={handleCrit} class="unit-card-block unit-crit-block">
 				<div class="crit-block-body">
-					<span class="crit-header">Engine</span>
-					<div class="crit-line">
-						{#each { length: 1 }, index}
-							<div class="pip" class:damaged={unit.current.crits.engine > index}></div>
-						{/each}
-						<p>+1 Heat / Firing</p>
-					</div>
-
 					<span class="crit-header">Fire Control</span>
 					<div class="crit-line">
 						{#each { length: 4 }, index}
@@ -144,7 +124,7 @@
 						{#each { length: 4 }, index}
 							<div class="pip" class:damaged={unit.current.crits.weapon > index}></div>
 						{/each}
-						<p>-1 Dmg</p>
+						<p>-1 Damage</p>
 					</div>
 				</div>
 			</button>
@@ -165,7 +145,6 @@
 </div>
 
 <DamageModal {unit} bind:open={openDamageModal}></DamageModal>
-<HeatModal {unit} bind:open={openHeatModal}></HeatModal>
 <CritModal {unit} bind:open={openCritModal}></CritModal>
 
 <style>
@@ -227,48 +206,6 @@
 			justify-self: center;
 		}
 	}
-	.unit-heat-block {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-	.heatscale {
-		display: flex;
-		align-items: center;
-	}
-	.heat-level {
-		background-color: rgb(158, 158, 158);
-		border: 1px solid black;
-		width: 1.5em;
-		font-weight: bold;
-		color: white;
-		text-shadow:
-			-1px -1px 0 black,
-			1px -1px 0 black,
-			-1px 1px 0 black,
-			1px 1px 0 black;
-	}
-	.heat-level-first {
-		margin-left: 4px;
-		border-top-left-radius: var(--radius);
-		border-bottom-left-radius: var(--radius);
-	}
-	.heat-level-last {
-		border-top-right-radius: var(--radius);
-		border-bottom-right-radius: var(--radius);
-	}
-	.heat-level-1 {
-		background-color: yellow;
-	}
-	.heat-level-2 {
-		background-color: orange;
-	}
-	.heat-level-3 {
-		background-color: orangered;
-	}
-	.heat-level-4 {
-		background-color: red;
-	}
 	.unit-health-block {
 		display: grid;
 		grid-template-columns: max-content 1fr;
@@ -325,7 +262,7 @@
 	}
 	.unit-custom-block {
 		margin-top: 4px;
-		min-height: 46px;
+		min-height: 3em;
 		p {
 			font-size: 0.85em;
 		}

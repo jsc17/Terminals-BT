@@ -12,8 +12,8 @@ export function loadListForPlay(formations: FormationV2[], units: UnitV2[]) {
 	for (const unit of units) {
 		playUnits.push({
 			...unit,
-			pending: { damage: 0, heat: 0, crits: { engine: 0, fireControl: 0, mp: 0, weapon: 0, destroyed: false } },
-			current: { damage: 0, heat: 0, crits: { engine: 0, fireControl: 0, mp: 0, weapon: 0, destroyed: false } }
+			pending: { damage: 0, heat: 0, crits: { engine: 0, fireControl: 0, mp: 0, weapon: 0, destroyed: false, motiveHit: 0, motiveHalf: 0, motiveIm: false } },
+			current: { damage: 0, heat: 0, crits: { engine: 0, fireControl: 0, mp: 0, weapon: 0, destroyed: false, motiveHit: 0, motiveHalf: 0, motiveIm: false } }
 		});
 	}
 	const playList: PlayList = {

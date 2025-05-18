@@ -2,7 +2,7 @@
 	import { Collapsible } from "$lib/components/Generic";
 	import type { PlayUnit } from "$lib/types/unit";
 	import type { FormationV2 } from "../listbuilder/types/formation";
-	import PlayMechCard from "./unitcards/PlayMechCard.svelte";
+	import { PlayCvCard, PlayInfCard, PlayMechCard, PlayPmCard, PlayAeroCard } from "./unitcards";
 
 	type Props = {
 		formation: FormationV2;
@@ -23,6 +23,14 @@
 			{#if unit}
 				{#if ["BM", "IM"].includes(unit.baseUnit.subtype)}
 					<PlayMechCard {unit}></PlayMechCard>
+				{:else if ["BA", "CI"].includes(unit.baseUnit.subtype)}
+					<PlayInfCard {unit}></PlayInfCard>
+				{:else if ["CV", "SV"].includes(unit.baseUnit.subtype)}
+					<PlayCvCard {unit}></PlayCvCard>
+				{:else if ["PM"].includes(unit.baseUnit.subtype)}
+					<PlayPmCard {unit}></PlayPmCard>
+				{:else if ["AF", "CF"].includes(unit.baseUnit.subtype)}
+					<PlayAeroCard {unit}></PlayAeroCard>
 				{/if}
 			{/if}
 		{/each}
@@ -31,7 +39,7 @@
 
 <div class="play-formation-container">
 	<div class="play-formation-header">
-		<p>{formation.name} - {formation.type} Formation</p>
+		<p>{formation.name}{formation.type != "none" ? `- ${formation.type} Formation` : ""}</p>
 		<button
 			onclick={() => {
 				openPrimary = !openPrimary;

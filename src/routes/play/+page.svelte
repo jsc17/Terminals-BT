@@ -16,8 +16,8 @@
 			const reset = confirm("Are you sure you wish to reset all units to default? This cannot be undone.");
 			if (reset) {
 				for (const unit of playList.units) {
-					unit.current = { damage: 0, heat: 0, crits: { engine: 0, fireControl: 0, mp: 0, weapon: 0, destroyed: false } };
-					unit.pending = { damage: 0, heat: 0, crits: { engine: 0, fireControl: 0, mp: 0, weapon: 0, destroyed: false } };
+					unit.current = { damage: 0, heat: 0, crits: { engine: 0, fireControl: 0, mp: 0, weapon: 0, destroyed: false, motiveHit: 0, motiveHalf: 0, motiveIm: false } };
+					unit.pending = { damage: 0, heat: 0, crits: { engine: 0, fireControl: 0, mp: 0, weapon: 0, destroyed: false, motiveHit: 0, motiveHalf: 0, motiveIm: false } };
 				}
 			}
 			localStorage.setItem("playList", JSON.stringify(playList));
@@ -32,7 +32,9 @@
 {:else}
 	<div class="play-body">
 		<div class="toolbar">
-			<a href="/listbuilder">Return to listbuilder</a>
+			<h2>
+				Beta Feature: No Automation and I can't guarantee no bugs, but it seems to be working pretty well. Should support all unit types You can mark damage, heat, and criticals.
+			</h2>
 			<button class="transparent-button" onclick={resetUnits}>Reset List</button>
 		</div>
 		{#each playList.formations as formation}
@@ -57,5 +59,7 @@
 	.toolbar {
 		display: flex;
 		gap: 16px;
+		align-items: center;
+		justify-content: space-between;
 	}
 </style>

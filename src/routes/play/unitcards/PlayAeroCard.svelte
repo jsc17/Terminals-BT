@@ -15,7 +15,7 @@
 	let movementString = $derived(
 		unit.baseUnit.move
 			?.map((mode) => {
-				return `${mode.speed}"${mode.type ?? ""}`;
+				return `${mode.speed}${mode.type ?? ""}`;
 			})
 			.join("/")
 	);
@@ -56,8 +56,7 @@
 				<div class="stat-block-first-row">
 					<p>TP: <span class="bold"> {unit.baseUnit.subtype}</span></p>
 					<p>SZ: <span class="bold">{unit.baseUnit.size}</span></p>
-					<p>TMM: <span class="bold">{unit.baseUnit.tmm}</span></p>
-					<p>MV: <span class="bold">{movementString}</span></p>
+					<p>THR: <span class="bold">{movementString}</span></p>
 				</div>
 				<div class="stat-block-second-row">
 					<p>Role: <span class="bold">{unit.baseUnit.role}</span></p>
@@ -77,6 +76,10 @@
 					<p>L (+4)</p>
 					<p class="bold damage">{unit.baseUnit.damageL}{unit.baseUnit.damageLMin ? "*" : ""}</p>
 				</div>
+				<div>
+					<p>E (+6)</p>
+					<p class="bold damage">{unit.baseUnit.damageE}{unit.baseUnit.damageEMin ? "*" : ""}</p>
+				</div>
 			</div>
 			<button onclick={handleHeat} class="unit-card-block unit-heat-block">
 				<div>OV: <span class="bold damage">{unit.baseUnit.overheat}</span></div>
@@ -95,6 +98,7 @@
 						<div class="pip" class:damaged={armorRemaining <= index}></div>
 					{/each}
 				</div>
+				<p>TH</p>
 				<p>
 					S ({structRemaining}/{unit.baseUnit.structure}):
 				</p>
@@ -103,6 +107,7 @@
 						<div class="pip" class:damaged={structRemaining <= index}></div>
 					{/each}
 				</div>
+				<p class="bold">{unit.baseUnit.threshold}</p>
 			</button>
 			<div class="unit-card-block unit-abilities-block">
 				<p>{unit.baseUnit.abilities}</p>
@@ -122,7 +127,7 @@
 						{#each { length: 1 }, index}
 							<div class="pip" class:damaged={unit.current.crits.engine > index}></div>
 						{/each}
-						<p>+1 Heat / Firing</p>
+						<p>1/2 THR</p>
 					</div>
 
 					<span class="crit-header">Fire Control</span>
@@ -131,13 +136,6 @@
 							<div class="pip" class:damaged={unit.current.crits.fireControl > index}></div>
 						{/each}
 						<p>+2 To-Hit</p>
-					</div>
-					<span class="crit-header">MP</span>
-					<div class="crit-line">
-						{#each { length: 4 }, index}
-							<div class="pip" class:damaged={unit.current.crits.mp > index}></div>
-						{/each}
-						<p>1/2 MV</p>
 					</div>
 					<span class="crit-header">Weapons</span>
 					<div class="crit-line">
@@ -211,8 +209,8 @@
 	}
 	.stat-block-first-row {
 		display: grid;
-		grid-template-columns: repeat(3, max-content) 1fr;
-		gap: 6px;
+		grid-template-columns: repeat(2, max-content) 1fr;
+		gap: 16px;
 	}
 	.stat-block-second-row {
 		display: grid;
@@ -221,7 +219,7 @@
 	}
 	.unit-damage-block {
 		display: grid;
-		grid-template-columns: repeat(3, 1fr);
+		grid-template-columns: repeat(4, 1fr);
 
 		p {
 			justify-self: center;
@@ -271,7 +269,7 @@
 	}
 	.unit-health-block {
 		display: grid;
-		grid-template-columns: max-content 1fr;
+		grid-template-columns: max-content 1fr max-content;
 		column-gap: 2px;
 		min-height: 25px;
 		p {

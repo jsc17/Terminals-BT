@@ -1,24 +1,26 @@
-import { discordOauth, lucia } from "$lib/server/lucia";
 import type { RequestHandler } from "@sveltejs/kit";
 import { OAuth2RequestError } from "arctic";
+import { generateSessionToken, createSession, setSessionTokenCookie, generateUserId } from "$lib/server/auth";
 import { prisma } from "$lib/server/prisma";
-import { generateId } from "lucia";
+import { discord } from "$lib/server/oauth";
 
 export const GET: RequestHandler = async (event) => {
 	const code = event.url.searchParams.get("code");
 	const state = event.url.searchParams.get("state");
 
 	const storedState = event.cookies.get("discord_oauth_state");
+	const storedCodeVerifier = event.cookies.get("discord_oauth_code_verifier") ?? null;
 
-	if (!code || !state || !storedState || state !== storedState) {
+	if (!code || !state || !storedState || !storedCodeVerifier || state !== storedState) {
 		return new Response(null, { status: 400 });
 	}
 
 	try {
-		const tokens = await discordOauth.validateAuthorizationCode(code);
+		const tokens = await discord.validateAuthorizationCode(code, storedCodeVerifier);
+
 		const discordResponse = await fetch("https://discord.com/api/users/@me", {
 			headers: {
-				Authorization: `Bearer ${tokens.accessToken}`
+				Authorization: `Bearer ${tokens.accessToken()}`
 			}
 		});
 		const discordUser = (await discordResponse.json()) as DiscordUser;
@@ -32,12 +34,10 @@ export const GET: RequestHandler = async (event) => {
 		//check if logging into existing user
 		const existingLinkedUser = await prisma.user.findUnique({ where: { discord_id: discordUser.id } });
 		if (existingLinkedUser) {
-			const session = await lucia.createSession(existingLinkedUser.id, {});
-			const sessionCookie = lucia.createSessionCookie(session.id);
-			event.cookies.set(sessionCookie.name, sessionCookie.value, {
-				path: ".",
-				...sessionCookie.attributes
-			});
+			const SessionToken = generateSessionToken();
+			const session = await createSession(SessionToken, existingLinkedUser.id);
+			setSessionTokenCookie(event, SessionToken, session.expiresAt);
+			return new Response(null, { status: 302, headers: { Location: "/" } });
 		} else {
 			//check if user is logged in and link account
 			if (event.locals.user) {
@@ -56,12 +56,9 @@ export const GET: RequestHandler = async (event) => {
 							}
 						});
 					}
-					const session = await lucia.createSession(existingUser.id, {});
-					const sessionCookie = lucia.createSessionCookie(session.id);
-					event.cookies.set(sessionCookie.name, sessionCookie.value, {
-						path: ".",
-						...sessionCookie.attributes
-					});
+					const SessionToken = generateSessionToken();
+					const session = await createSession(SessionToken, existingUser.id);
+					setSessionTokenCookie(event, SessionToken, session.expiresAt);
 					//create user with discord email address, discord oauth id, random username, and no password
 				} else {
 					let username = "";
@@ -75,17 +72,14 @@ export const GET: RequestHandler = async (event) => {
 					const newUser = await prisma.user.create({
 						data: {
 							username,
-							id: generateId(15),
+							id: generateUserId(),
 							email: discordUser.email,
 							discord_id: discordUser.id
 						}
 					});
-					const session = await lucia.createSession(newUser.id, {});
-					const sessionCookie = lucia.createSessionCookie(session.id);
-					event.cookies.set(sessionCookie.name, sessionCookie.value, {
-						path: ".",
-						...sessionCookie.attributes
-					});
+					const SessionToken = generateSessionToken();
+					const session = await createSession(SessionToken, newUser.id);
+					setSessionTokenCookie(event, SessionToken, session.expiresAt);
 				}
 			}
 		}

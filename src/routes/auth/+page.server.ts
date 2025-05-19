@@ -1,12 +1,11 @@
-import { lucia } from "$lib/server/lucia";
-import { fail, type Cookies } from "@sveltejs/kit";
-import { generateId } from "lucia";
-import { Argon2id } from "oslo/password";
+import * as auth from "$lib/server/auth.js";
+import { fail } from "@sveltejs/kit";
+import { hash, verify } from "@node-rs/argon2";
 import { prisma } from "$lib/server/prisma";
 
 export const actions = {
-	register: async ({ request, cookies }: { request: Request; cookies: Cookies }) => {
-		const { username, password, verifyPassword, email } = Object.fromEntries(await request.formData()) as Record<string, string>;
+	register: async (event) => {
+		const { username, password, verifyPassword, email } = Object.fromEntries(await event.request.formData()) as Record<string, string>;
 
 		if (username.length < 3 || username.length > 30 || !/^[a-zA-Z0-9]+$/.test(username)) {
 			return fail(400, {
@@ -22,8 +21,14 @@ export const actions = {
 			return fail(400, { message: "Passwords did not match" });
 		}
 
-		const id = generateId(15);
-		const hashedPassword = await new Argon2id().hash(password);
+		const id = auth.generateUserId();
+		const hashedPassword = await hash(password, {
+			// recommended minimum parameters
+			memoryCost: 19456,
+			timeCost: 2,
+			outputLen: 32,
+			parallelism: 1
+		});
 
 		try {
 			const existingUser = await prisma.user.findFirst({ where: { OR: [{ username }, { email }] }, select: { username: true, email: true } });
@@ -47,43 +52,41 @@ export const actions = {
 			return fail(400, { message: "Failed to create user" });
 		}
 
-		const session = await lucia.createSession(id, {});
-		const sessionCookie = lucia.createSessionCookie(session.id);
-		cookies.set(sessionCookie.name, sessionCookie.value, {
-			path: ".",
-			...sessionCookie.attributes
-		});
+		const sessionToken = auth.generateSessionToken();
+		const session = await auth.createSession(sessionToken, id);
+		auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
 		return { message: "Account created successfully", username: username };
 	},
-	login: async ({ request, cookies }: { request: Request; cookies: Cookies }) => {
-		const { username, password } = Object.fromEntries(await request.formData()) as Record<string, string>;
+	login: async (event) => {
+		const { username, password } = Object.fromEntries(await event.request.formData()) as Record<string, string>;
 
 		const existingUser = await prisma.user.findFirst({ where: { OR: [{ username: username }, { email: username }] } });
 		if (!existingUser) {
 			return fail(400, { message: "Incorrect username or password" });
 		}
-		const validPassword = await new Argon2id().verify(existingUser.hashedPassword ?? "", password);
+		const validPassword = await verify(existingUser.hashedPassword ?? "", password);
 		if (!validPassword) {
 			return fail(400, { message: "Incorrect username or password" });
 		}
-		const session = await lucia.createSession(existingUser.id, {});
-		const sessionCookie = lucia.createSessionCookie(session.id);
-		cookies.set(sessionCookie.name, sessionCookie.value, {
-			path: ".",
-			...sessionCookie.attributes
-		});
+		const sessionToken = auth.generateSessionToken();
+		const session = await auth.createSession(sessionToken, existingUser.id);
+		auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
 		return { message: "Login successful", username: existingUser.username };
 	},
-	logout: async ({ locals, cookies }: { locals: any; cookies: Cookies }) => {
-		if (!locals.session) {
+	logout: async (event) => {
+		if (!event.locals.session) {
 			return fail(401);
 		}
-		await lucia.invalidateSession(locals.session.id);
-		const sessionCookie = lucia.createBlankSessionCookie();
-		cookies.set(sessionCookie.name, sessionCookie.value, {
-			path: ".",
-			...sessionCookie.attributes
-		});
+		await auth.invalidateSession(event.locals.session.id);
+		auth.deleteSessionTokenCookie(event);
 		return { message: "User logged out successfully" };
 	}
 };
+
+function validateUsername(username: unknown): username is string {
+	return typeof username === "string" && username.length >= 3 && username.length <= 31 && /^[a-z0-9_-]+$/.test(username);
+}
+
+function validatePassword(password: unknown): password is string {
+	return typeof password === "string" && password.length >= 6 && password.length <= 255;
+}

@@ -32,9 +32,10 @@
 {:else}
 	<div class="play-body">
 		<div class="toolbar">
-			<h2>
-				Beta Feature: No Automation and I can't guarantee no bugs, but it seems to be working pretty well. Should support all unit types You can mark damage, heat, and criticals.
-			</h2>
+			<h3>
+				Beta Feature: No Automation and I can't guarantee no bugs, but it seems to be working pretty well. There are some layout issues, but it should support all unit types and
+				you can mark damage, heat, and criticals.
+			</h3>
 			<button class="transparent-button" onclick={resetUnits}>Reset List</button>
 		</div>
 		{#each playList.formations as formation}

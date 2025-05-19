@@ -1,6 +1,6 @@
 import { prisma } from "$lib/server/prisma";
 import { fail } from "@sveltejs/kit";
-import { Argon2id } from "oslo/password";
+import { hash, verify } from "@node-rs/argon2";
 
 export async function load({ url }) {
 	const token = url.searchParams.get("token");
@@ -34,7 +34,7 @@ export const actions = {
 
 		let hashedPassword = "";
 		if (newPassword) {
-			hashedPassword = await new Argon2id().hash(newPassword);
+			hashedPassword = await hash(newPassword);
 		}
 
 		if (token) {

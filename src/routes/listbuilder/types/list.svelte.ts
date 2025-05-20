@@ -530,7 +530,8 @@ export class List {
 				tonnage: unitData.tonnage,
 				date: unitData.date_introduced,
 				role: unitData.role,
-				availability: unitData.availability
+				availability: unitData.availability,
+				threshold: unitData.threshold
 			};
 		}
 		return unitToAdd;

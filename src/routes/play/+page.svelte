@@ -1,28 +1,22 @@
 <script lang="ts">
 	import type { PlayList } from "$lib/types/playList";
-	import { onMount } from "svelte";
 	import PlayFormationCard from "./PlayFormationCard.svelte";
-
-	let playList = $state<PlayList>();
-	onMount(() => {
-		const localList = localStorage.getItem("playList");
-		if (localList) {
-			playList = JSON.parse(localList);
-		}
-	});
+	import { PersistedState } from "runed";
+	import UiScalePopover from "./components/UIScalePopover.svelte";
 
 	function resetUnits() {
 		if (playList) {
 			const reset = confirm("Are you sure you wish to reset all units to default? This cannot be undone.");
 			if (reset) {
-				for (const unit of playList.units) {
+				for (const unit of playList.current.units) {
 					unit.current = { damage: 0, heat: 0, crits: { engine: 0, fireControl: 0, mp: 0, weapon: 0, destroyed: false, motiveHit: 0, motiveHalf: 0, motiveIm: false } };
 					unit.pending = { damage: 0, heat: 0, crits: { engine: 0, fireControl: 0, mp: 0, weapon: 0, destroyed: false, motiveHit: 0, motiveHalf: 0, motiveIm: false } };
 				}
 			}
-			localStorage.setItem("playList", JSON.stringify(playList));
 		}
 	}
+	const uiScale = new PersistedState("uiScale", 50);
+	const playList = new PersistedState<PlayList>("playList", { formations: [], units: [] });
 </script>
 
 {#if !playList}
@@ -32,14 +26,15 @@
 {:else}
 	<div class="play-body">
 		<div class="toolbar">
-			<h3>
-				Beta Feature: No Automation and I can't guarantee no bugs, but it seems to be working pretty well. There are some layout issues, but it should support all unit types and
-				you can mark damage, heat, and criticals.
-			</h3>
-			<button class="transparent-button" onclick={resetUnits}>Reset List</button>
+			<div class="toolbar-section"></div>
+			<div class="toolbar-section">
+				<UiScalePopover bind:uiScale={uiScale.current}></UiScalePopover>
+				<button class="toolbar-button" onclick={resetUnits}>Reset List</button>
+			</div>
 		</div>
-		{#each playList.formations as formation}
-			<PlayFormationCard {formation} units={playList.units}></PlayFormationCard>
+		<p class="announcement">Still Beta, but getting better. Some UI improvements done, but still missing automation. Click on a units name to expand its card.</p>
+		{#each playList.current.formations as formation}
+			<PlayFormationCard {formation} units={playList.current.units} uiScale={uiScale.current}></PlayFormationCard>
 		{/each}
 	</div>
 {/if}
@@ -54,13 +49,35 @@
 	}
 	.play-body {
 		padding: 0px 16px 0px 12px;
-		gap: 12px;
 		overflow: auto;
 	}
 	.toolbar {
+		background-color: var(--card);
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
 		display: flex;
-		gap: 16px;
-		align-items: center;
 		justify-content: space-between;
+	}
+	.toolbar-section {
+		display: flex;
+		gap: 8px;
+		align-items: center;
+	}
+	.toolbar-button {
+		padding: 12px;
+		font-size: 16px;
+		background-color: transparent;
+		border-radius: 0;
+		color: var(--card-foreground);
+	}
+	.toolbar-button:hover {
+		background-color: var(--muted);
+		color: var(--muted-foreground);
+	}
+	.announcement {
+		margin: 16px;
+		width: 100%;
+		align-self: center;
+		color: var(--muted-foreground);
 	}
 </style>

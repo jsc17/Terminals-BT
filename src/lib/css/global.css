@@ -1,0 +1,12 @@
+.bold {
+	font-weight: bold;
+}
+.flex-column {
+	display: flex;
+	flex-direction: column;
+}
+.flex-between {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}

@@ -2,14 +2,15 @@
 	import { Collapsible } from "$lib/components/Generic";
 	import type { PlayUnit } from "$lib/types/unit";
 	import type { FormationV2 } from "../listbuilder/types/formation";
-	import { PlayCvCard, PlayInfCard, PlayMechCard, PlayPmCard, PlayAeroCard } from "./unitcards";
+	import PlayUnitCard from "./unitcards/PlayUnitCard.svelte";
 
 	type Props = {
 		formation: FormationV2;
 		units: PlayUnit[];
+		uiScale: number;
 	};
 
-	let { formation, units }: Props = $props();
+	let { formation, units, uiScale }: Props = $props();
 	let openPrimary = $state(true),
 		openSecondary = $state(true);
 </script>
@@ -21,17 +22,9 @@
 				return unit.id == unitId.id;
 			})}
 			{#if unit}
-				{#if ["BM", "IM"].includes(unit.baseUnit.subtype)}
-					<PlayMechCard {unit}></PlayMechCard>
-				{:else if ["BA", "CI"].includes(unit.baseUnit.subtype)}
-					<PlayInfCard {unit}></PlayInfCard>
-				{:else if ["CV", "SV"].includes(unit.baseUnit.subtype)}
-					<PlayCvCard {unit}></PlayCvCard>
-				{:else if ["PM"].includes(unit.baseUnit.subtype)}
-					<PlayPmCard {unit}></PlayPmCard>
-				{:else if ["AF", "CF"].includes(unit.baseUnit.subtype)}
-					<PlayAeroCard {unit}></PlayAeroCard>
-				{/if}
+				<div class="unit-card-container" style="width: {252 * ((uiScale + 50) / 100)}pt; height:{180 * ((uiScale + 50) / 100)}pt">
+					<PlayUnitCard {unit}></PlayUnitCard>
+				</div>
 			{/if}
 		{/each}
 	</div>
@@ -97,6 +90,9 @@
 		align-items: center;
 		border-bottom: 1px solid var(--border);
 		background-color: var(--card);
+		p {
+			color: var(--card-foreground);
+		}
 	}
 	.play-formation-header {
 		padding: 4px 16px;
@@ -107,9 +103,9 @@
 		padding: 2px 16px;
 	}
 	.play-formation-unit-list {
-		padding: 16px;
-		display: grid;
-		grid-template-columns: repeat(auto-fill, 400px);
+		padding: 8px;
+		display: flex;
+		flex-wrap: wrap;
 		gap: 8px;
 		width: 100%;
 	}
@@ -122,5 +118,8 @@
 		img {
 			filter: var(--primary-filter);
 		}
+	}
+	.unit-card-container {
+		container: unit-card / size;
 	}
 </style>

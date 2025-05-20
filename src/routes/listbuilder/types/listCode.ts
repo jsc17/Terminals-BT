@@ -1,5 +1,5 @@
 import type { UnitCustomization } from "$lib/types/unit";
-import type { FormationV2 } from "./formation";
+import type { FormationV2 } from "$lib/types/formation";
 import type { SublistV2 } from "./sublist";
 import type { SCA } from "./sca";
 

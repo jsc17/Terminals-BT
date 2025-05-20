@@ -20,6 +20,14 @@ export type FormationType = {
 	secondary?: boolean;
 };
 
+export type PlayFormation = {
+	id: string;
+	name: string;
+	type: string;
+	units: string[];
+	secondary?: { type?: string; units?: string[] };
+};
+
 export function getFormationTypeByName(name: string) {
 	let formationReference: FormationType | undefined;
 

@@ -48,7 +48,12 @@ export type UnitV2 = {
 	customization: UnitCustomization;
 };
 
-export type PlayUnit = UnitV2 & {
+export type PlayUnit = {
+	id: string;
+	mulId: string;
+	skill?: number;
+	cost: number;
+	customization?: UnitCustomization;
 	pending: {
 		damage: number;
 		heat: number;

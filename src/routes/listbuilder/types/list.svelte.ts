@@ -2,7 +2,7 @@ import type { UnitV2, MulUnit } from "$lib/types/unit";
 import { getNewSkillCost } from "$lib/utilities/bt-utils";
 import customCards from "$lib/data/customCards.json";
 import { deserialize } from "$app/forms";
-import type { FormationV2 } from "./formation";
+import type { FormationV2 } from "$lib/types/formation";
 import type { ListCode, ListCodeUnit } from "./listCode";
 import type { SublistV2 } from "./sublist";
 import type { ResultList } from "$lib/types/resultList.svelte";

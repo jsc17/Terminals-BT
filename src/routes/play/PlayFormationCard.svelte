@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { Collapsible } from "$lib/components/Generic";
-	import type { PlayUnit } from "$lib/types/unit";
-	import type { FormationV2 } from "../listbuilder/types/formation";
+	import type { MulUnit, PlayUnit } from "$lib/types/unit";
+	import type { PlayFormation } from "../../lib/types/formation";
 	import PlayUnitCard from "./unitcards/PlayUnitCard.svelte";
+	import type { SvelteMap } from "svelte/reactivity";
 
 	type Props = {
-		formation: FormationV2;
+		formation: PlayFormation;
 		units: PlayUnit[];
 		uiScale: number;
 	};
@@ -15,12 +16,13 @@
 		openSecondary = $state(true);
 </script>
 
-{#snippet drawFormationUnits(formationUnits: { id: string }[])}
+{#snippet drawFormationUnits(formationUnits: string[])}
 	<div class="play-formation-unit-list">
 		{#each formationUnits as unitId}
 			{@const unit = units.find((unit) => {
-				return unit.id == unitId.id;
+				return unit.id == unitId;
 			})}
+
 			{#if unit}
 				<div class="unit-card-container" style="width: {252 * ((uiScale + 50) / 100)}pt; height:{180 * ((uiScale + 50) / 100)}pt">
 					<PlayUnitCard {unit}></PlayUnitCard>
@@ -51,7 +53,7 @@
 			}}>Expand collapsed formation <img src="/icons/expand.svg" alt="Expand formation" /></button
 		>
 	{/if}
-	{#if formation.secondary && formation.secondary.units.length}
+	{#if formation.secondary?.units?.length}
 		<div class="secondary-header">
 			<p>{formation.secondary.type}</p>
 			<button

@@ -1,27 +1,49 @@
-import type { FormationV2 } from "../../routes/listbuilder/types/formation";
-import type { PlayUnit, UnitV2 } from "./unit";
+import type { FormationV2, PlayFormation } from "./formation";
+import type { PlayUnit, UnitCustomization, UnitV2 } from "./unit";
 
 export type PlayList = {
-	formations: FormationV2[];
+	formations: PlayFormation[];
 	units: PlayUnit[];
 };
 
-export function loadListForPlay(formations: FormationV2[], units: UnitV2[]) {
-	console.log("loading list to play");
+export function sendListToPlay(formations: FormationV2[], units: UnitV2[]) {
 	const playUnits: PlayUnit[] = [];
 	for (const unit of units) {
 		playUnits.push({
-			...unit,
-			pending: { damage: 0, heat: 0, crits: { engine: 0, fireControl: 0, mp: 0, weapon: 0, destroyed: false, motiveHit: 0, motiveHalf: 0, motiveIm: false } },
-			current: { damage: 0, heat: 0, crits: { engine: 0, fireControl: 0, mp: 0, weapon: 0, destroyed: false, motiveHit: 0, motiveHalf: 0, motiveIm: false } }
+			id: unit.id,
+			mulId: unit.baseUnit.mulId.toString(),
+			skill: unit.skill,
+			cost: unit.cost,
+			customization: unit.customization,
+			current: { damage: 0, heat: 0, crits: { engine: 0, fireControl: 0, mp: 0, weapon: 0, destroyed: false, motiveHit: 0, motiveHalf: 0, motiveIm: false } },
+			pending: { damage: 0, heat: 0, crits: { engine: 0, fireControl: 0, mp: 0, weapon: 0, destroyed: false, motiveHit: 0, motiveHalf: 0, motiveIm: false } }
 		});
 	}
-	const playList: PlayList = {
-		formations: formations.filter((formation) => {
+	const playFormations: PlayFormation[] = formations
+		.filter((formation) => {
 			return formation.units.length;
-		}),
+		})
+		.map((formation) => {
+			return {
+				id: formation.id,
+				name: formation.name,
+				type: formation.type,
+				units: formation.units.map(({ id }) => {
+					return id;
+				}),
+				secondary: {
+					type: formation.secondary?.type,
+					units: formation.secondary?.units.map(({ id }) => {
+						return id;
+					})
+				}
+			};
+		});
+	const playList: PlayList = {
+		formations: playFormations,
 		units: playUnits
 	};
+
 	if (localStorage.getItem("playList")) {
 		let overwrite = confirm("Game already in progress, do you wish to overwrite the existing list?");
 		if (overwrite) {

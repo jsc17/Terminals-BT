@@ -1,12 +1,13 @@
 <script lang="ts">
-	import type { PlayUnit } from "$lib/types/unit";
-	import { getContext } from "svelte";
+	import type { MulUnit, PlayUnit } from "$lib/types/unit";
+	import { getContext, onMount } from "svelte";
 	import AeroCritBox from "./card-components/AeroCritBox.svelte";
 	import CvCritBox from "./card-components/CvCritBox.svelte";
 	import MechCritBox from "./card-components/MechCritBox.svelte";
 	import ProtoCritBox from "./card-components/ProtoCritBox.svelte";
 	import { DamageModal, HeatModal, CritModal } from "./modals";
 	import ExpandModal from "./modals/ExpandModal.svelte";
+	import { deserialize } from "$app/forms";
 
 	type Props = {
 		unit: PlayUnit;
@@ -21,23 +22,69 @@
 
 	let aeroTypes = ["AF", "CF"];
 
+	let reference = $state<MulUnit>();
+
 	let expanded = getContext("expanded");
 	let movementString = $derived(
-		unit.baseUnit.move
-			?.map((mode) => {
-				return `${mode.speed}${!aeroTypes.includes(unit.baseUnit.subtype) ? `"` : ""}${mode.type ?? ""}`;
+		reference?.move
+			?.map((mode: any) => {
+				return `${mode.speed}${!aeroTypes.includes(reference?.subtype ?? "" ?? "") ? `"` : ""}${mode.type ?? ""}`;
 			})
 			.join("/")
 	);
-	let armorRemaining = $derived((unit.baseUnit.armor ?? 0) - unit.current.damage);
+	let armorRemaining = $derived((reference?.armor ?? 0) - unit.current.damage);
 	let structRemaining = $derived.by(() => {
 		if (armorRemaining < 0) {
-			return (unit.baseUnit.structure ?? 0) + armorRemaining;
+			return (reference?.structure ?? 0) + armorRemaining;
 		} else {
-			return unit.baseUnit.structure ?? 0;
+			return reference?.structure ?? 0;
 		}
 	});
 
+	async function loadreference() {
+		let response: any = deserialize(await (await fetch("/?/getUnit", { method: "POST", body: JSON.stringify({ mulId: unit.mulId }) })).text());
+		let tempMovement: { speed: number; type: string }[] = [];
+		response.data!.unit.move.split("/").forEach((movement: string) => {
+			let moveSpeed = movement.replaceAll('"', "").match(/\d+/) ?? "0";
+			let moveType = movement.replaceAll('"', "").match(/\D+/) ?? "";
+			tempMovement.push({ speed: parseInt(moveSpeed[0]), type: moveType[0] });
+		});
+		const unitData = response.data!.unit;
+		reference = {
+			mulId: unitData.mulId,
+			name: unitData.name,
+			class: unitData.class,
+			variant: unitData.variant,
+			type: unitData.type,
+			subtype: unitData.subtype.toUpperCase(),
+			pv: unitData.pv,
+			cost: unitData.pv,
+			skill: 4,
+			size: unitData.size,
+			move: tempMovement,
+			tmm: unitData.tmm,
+			health: unitData.armor + unitData.structure,
+			armor: unitData.armor,
+			structure: unitData.structure,
+			damageS: unitData.damage_s,
+			damageSMin: unitData.damage_s_min,
+			damageM: unitData.damage_m,
+			damageMMin: unitData.damage_m_min,
+			damageL: unitData.damage_l,
+			damageLMin: unitData.damage_l_min,
+			damageE: unitData.damage_e,
+			damageEMin: unitData.damage_e_min,
+			overheat: unitData.overheat,
+			abilities: (unitData.abilities ?? "-").replaceAll(",", ", "),
+			imageLink: unitData.image_url,
+			rulesLevel: unitData.rules,
+			tonnage: unitData.tonnage,
+			date: unitData.date_introduced,
+			role: unitData.role,
+			availability: unitData.availability,
+			threshold: unitData.threshold
+		};
+	}
 	function handleHeat() {
 		openHeatModal = true;
 	}
@@ -52,17 +99,21 @@
 			openExpandModal = true;
 		}
 	}
+
+	onMount(() => {
+		loadreference();
+	});
 </script>
 
 <div class="play-unit-card-container">
 	<button class="expand-button" onclick={handleExpand}>
 		<div class="flex-between">
-			<p class="unit-variant">{unit.baseUnit.variant}</p>
+			<p class="unit-variant">{reference?.variant}</p>
 			<p class="unit-pv bold">PV: {unit.cost}</p>
 		</div>
 		<div class="flex-between">
-			<p class="unit-name bold">{unit.baseUnit.class}</p>
-			{#if structRemaining < (unit.baseUnit.structure ?? 0) / 2}
+			<p class="unit-name bold">{reference?.class}</p>
+			{#if structRemaining < (reference?.structure ?? 0) / 2}
 				<p class="unit-half-pv">Half: {Math.round(unit.cost / 2)}</p>
 			{/if}
 		</div>
@@ -71,46 +122,46 @@
 		<div class="unit-card-left">
 			<div class="unit-card-block unit-stat-block">
 				<div class="stat-block-first-row">
-					<p>TP: <span class="bold"> {unit.baseUnit.subtype}</span></p>
-					<p>SZ: <span class="bold">{unit.baseUnit.size}</span></p>
-					{#if aeroTypes.includes(unit.baseUnit.subtype)}
+					<p>TP: <span class="bold"> {reference?.subtype ?? ""}</span></p>
+					<p>SZ: <span class="bold">{reference?.size}</span></p>
+					{#if aeroTypes.includes(reference?.subtype ?? "" ?? "")}
 						<p>THR: <span class="bold">{movementString}</span></p>
 					{:else}
-						<p>TMM: <span class="bold">{unit.baseUnit.tmm}</span></p>
+						<p>TMM: <span class="bold">{reference?.tmm}</span></p>
 						<p>MV: <span class="bold">{movementString}</span></p>
 					{/if}
 				</div>
 				<div class="stat-block-second-row">
-					<p>Role: <span class="bold">{unit.baseUnit.role}</span></p>
+					<p>Role: <span class="bold">{reference?.role}</span></p>
 					<p>Skill: <span class="bold">{unit.skill}</span></p>
 				</div>
 			</div>
 			<div class="unit-card-block unit-damage-block">
 				<div>
 					<p>S (+0)</p>
-					<p class="bold damage">{unit.baseUnit.damageS}{unit.baseUnit.damageSMin ? "*" : ""}</p>
+					<p class="bold damage">{reference?.damageS}{reference?.damageSMin ? "*" : ""}</p>
 				</div>
 				<div>
 					<p>M (+2)</p>
-					<p class="bold damage">{unit.baseUnit.damageM}{unit.baseUnit.damageMMin ? "*" : ""}</p>
+					<p class="bold damage">{reference?.damageM}{reference?.damageMMin ? "*" : ""}</p>
 				</div>
 				<div>
 					<p>L (+4)</p>
-					<p class="bold damage">{unit.baseUnit.damageL}{unit.baseUnit.damageLMin ? "*" : ""}</p>
+					<p class="bold damage">{reference?.damageL}{reference?.damageLMin ? "*" : ""}</p>
 				</div>
-				{#if aeroTypes.includes(unit.baseUnit.subtype)}
+				{#if aeroTypes.includes(reference?.subtype ?? "")}
 					<div>
 						<p>E (+6)</p>
-						<p class="bold damage">{unit.baseUnit.damageE}{unit.baseUnit.damageEMin ? "*" : ""}</p>
+						<p class="bold damage">{reference?.damageE}{reference?.damageEMin ? "*" : ""}</p>
 					</div>
 				{/if}
 			</div>
-			{#if ["BM", "IM", "AF", "CF"].includes(unit.baseUnit.subtype)}
+			{#if ["BM", "IM", "AF", "CF"].includes(reference?.subtype ?? "")}
 				<button onclick={handleHeat} class="unit-card-block unit-heat-block">
 					<div>
 						<p>
 							OV:
-							<span class="bold damage">{unit.baseUnit.overheat}</span>
+							<span class="bold damage">{reference?.overheat}</span>
 						</p>
 					</div>
 					<div class="heatscale">
@@ -122,55 +173,55 @@
 					</div>
 				</button>
 			{/if}
-			<button class="unit-card-block unit-health-block" class:aero-health-block={aeroTypes.includes(unit.baseUnit.subtype)} onclick={handleDamage}>
-				<p>A ({armorRemaining >= 0 ? armorRemaining : 0}/{unit.baseUnit.armor}):</p>
+			<button class="unit-card-block unit-health-block" class:aero-health-block={aeroTypes.includes(reference?.subtype ?? "")} onclick={handleDamage}>
+				<p>A ({armorRemaining >= 0 ? armorRemaining : 0}/{reference?.armor}):</p>
 				<div class="health-pips">
-					{#each { length: unit.baseUnit.armor ?? 0 }, index}
+					{#each { length: reference?.armor ?? 0 }, index}
 						<div class="pip" class:damaged={armorRemaining <= index}></div>
 					{/each}
 				</div>
-				{#if aeroTypes.includes(unit.baseUnit.subtype)}
+				{#if aeroTypes.includes(reference?.subtype ?? "")}
 					<p class="bold">TH</p>
 				{/if}
 				<p>
-					S ({structRemaining}/{unit.baseUnit.structure}):
+					S ({structRemaining}/{reference?.structure}):
 				</p>
 				<div class="health-pips">
-					{#each { length: unit.baseUnit.structure ?? 0 }, index}
+					{#each { length: reference?.structure ?? 0 }, index}
 						<div class="pip" class:damaged={structRemaining <= index}></div>
 					{/each}
 				</div>
-				{#if aeroTypes.includes(unit.baseUnit.subtype)}
-					<p class="bold">{unit.baseUnit.threshold}</p>
+				{#if aeroTypes.includes(reference?.subtype ?? "")}
+					<p class="bold">{reference?.threshold}</p>
 				{/if}
 			</button>
 			<div class="unit-card-block unit-abilities-block">
-				<p>{unit.baseUnit.abilities}</p>
+				<p>{reference?.abilities}</p>
 			</div>
 		</div>
 		<div class="unit-card-right">
 			<div class="unit-image-block">
-				<img src={unit.baseUnit.imageLink} alt="unit" class="unit-image" />
+				<img src={reference?.imageLink} alt="unit" class="unit-image" />
 				{#if structRemaining <= 0 || unit.current.crits.engine >= 2 || unit.current.crits.destroyed}
 					<img src="/icons/close.svg" alt="Destroyed" class="destroyed" />
 				{/if}
 			</div>
-			{#if !["BA", "CI"].includes(unit.baseUnit.subtype)}
+			{#if !["BA", "CI"].includes(reference?.subtype ?? "")}
 				<button onclick={handleCrit} class="unit-card-block">
-					{#if ["BM", "IM"].includes(unit.baseUnit.subtype)}
+					{#if ["BM", "IM"].includes(reference?.subtype ?? "")}
 						<MechCritBox {unit}></MechCritBox>
-					{:else if aeroTypes.includes(unit.baseUnit.subtype)}
+					{:else if aeroTypes.includes(reference?.subtype ?? "")}
 						<AeroCritBox {unit}></AeroCritBox>
-					{:else if ["CV", "SV"].includes(unit.baseUnit.subtype)}
+					{:else if ["CV", "SV"].includes(reference?.subtype ?? "")}
 						<CvCritBox {unit}></CvCritBox>
-					{:else if unit.baseUnit.subtype == "PM"}
+					{:else if reference?.subtype == "PM"}
 						<ProtoCritBox {unit}></ProtoCritBox>
 					{/if}
 				</button>
 			{/if}
 		</div>
 	</div>
-	{#if unit.customization.spa || unit.customization.ammo}
+	{#if unit.customization?.spa || unit.customization?.ammo}
 		<div class="unit-card-block unit-custom-block">
 			{#if unit.customization.spa && unit.customization.spa.length}
 				<p><span class="bold">SPA:</span> {unit.customization.spa.join(", ")}</p>
@@ -195,13 +246,10 @@
 		padding: 1cqw;
 		display: flex;
 		flex-direction: column;
+		gap: 1cqh;
 		width: 100%;
 		height: 100%;
 	}
-	.test {
-		background-color: red;
-	}
-
 	p,
 	span {
 		color: black;

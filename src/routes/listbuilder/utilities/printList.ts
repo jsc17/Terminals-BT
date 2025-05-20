@@ -5,7 +5,7 @@ import { abilityReferences, spaReferences, ammoReferences, formationReferences }
 import { existsSync } from "fs";
 import fs from "fs/promises";
 import type { UnitV2 } from "$lib/types/unit";
-import { getFormationTypeByName, type FormationType, type FormationV2 } from "../types/formation";
+import { getFormationTypeByName, type FormationType, type FormationV2 } from "$lib/types/formation";
 import { printer } from "$lib/server/printer";
 import { type SCA, getSCAfromName } from "../types/sca";
 

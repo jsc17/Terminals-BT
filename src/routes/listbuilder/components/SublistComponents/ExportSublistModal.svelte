@@ -7,9 +7,9 @@
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
 	import { enhance } from "$app/forms";
-	import type { FormationV2 } from "../../types/formation";
+	import type { FormationV2 } from "../../../../lib/types/formation";
 	import { nanoid } from "nanoid";
-	import { loadListForPlay } from "$lib/types/playList";
+	import { sendListToPlay } from "$lib/types/playList";
 
 	let list: List = getContext("list");
 
@@ -99,7 +99,7 @@
 				return { id: unit.id };
 			})
 		};
-		loadListForPlay([sublistFormation], list.units);
+		sendListToPlay([sublistFormation], list.units);
 	}
 </script>
 

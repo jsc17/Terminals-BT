@@ -6,7 +6,7 @@
 	import { getContext } from "svelte";
 	import type { ResultList } from "$lib/types/resultList.svelte";
 	import type { List } from "../types/list.svelte";
-	import type { FormationV2 } from "../types/formation";
+	import type { FormationV2 } from "$lib/types/formation";
 	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { Popover } from "bits-ui";
@@ -15,7 +15,7 @@
 	import UnitCustomizationModal from "./UnitCustomizationModal.svelte";
 	import ScaModal from "./SCAModal.svelte";
 	import EditFormationModal from "./EditFormationModal.svelte";
-	import { loadListForPlay } from "$lib/types/playList";
+	import { sendListToPlay } from "$lib/types/playList";
 
 	const resultList: ResultList = getContext("resultList");
 	let list: List = getContext("list");
@@ -162,7 +162,7 @@
 					<button
 						class="transparent-button"
 						onclick={() => {
-							loadListForPlay(list.formations, list.units);
+							sendListToPlay(list.formations, list.units);
 						}}>Play List</button
 					>
 					<button

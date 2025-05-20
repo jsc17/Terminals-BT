@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { Dialog } from "$lib/components/Generic";
-	import type { PlayUnit } from "$lib/types/unit";
+	import type { MulUnit, PlayUnit } from "$lib/types/unit";
 
 	type Props = {
 		unit: PlayUnit;
 		open: boolean;
+		reference: MulUnit;
 	};
 
-	let { unit, open = $bindable(false) }: Props = $props();
+	let { unit, open = $bindable(false), reference }: Props = $props();
 
 	let damageToTake = $state(0);
 
@@ -37,7 +38,7 @@
 	}
 </script>
 
-<Dialog bind:open title={`Damage ${unit.baseUnit.name}`}>
+<Dialog bind:open title={`Damage ${reference.name}`}>
 	<div class="damage-modal-body">
 		<div class="input-row">
 			<button

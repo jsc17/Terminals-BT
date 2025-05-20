@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { Dialog } from "$lib/components/Generic";
-	import type { PlayUnit } from "$lib/types/unit";
+	import type { MulUnit, PlayUnit } from "$lib/types/unit";
 	import { watch } from "runed";
 
 	type Props = {
 		unit: PlayUnit;
+		reference: MulUnit;
 		open: boolean;
 	};
 
-	let { unit, open = $bindable(false) }: Props = $props();
+	let { unit, open = $bindable(false), reference }: Props = $props();
 
 	watch(
 		() => open,
@@ -22,16 +23,16 @@
 
 	let currentCritSelection = $state<number>();
 	let destroyedString = $derived.by(() => {
-		if (["BM", "IM"].includes(unit.baseUnit.subtype)) {
+		if (["BM", "IM"].includes(reference.subtype)) {
 			return "Ammo Hit / Destroyed";
-		} else if (["CV", "SV"].includes(unit.baseUnit.subtype)) {
+		} else if (["CV", "SV"].includes(reference.subtype)) {
 			return "Ammo Hit / Crew Killed";
-		} else if (unit.baseUnit.subtype == "PM") {
+		} else if (reference.subtype == "PM") {
 			return "Unit Destroyed";
-		} else if (["AF", "CF"].includes(unit.baseUnit.subtype)) {
+		} else if (["AF", "CF"].includes(reference.subtype)) {
 			return "Fuel Hit / Crew Killed";
 		} else {
-			return `${unit.baseUnit.subtype} not found`;
+			return `${reference.subtype} not found`;
 		}
 	});
 	let critKeys = $derived([
@@ -69,11 +70,11 @@
 	}
 </script>
 
-<Dialog bind:open title={`Critical Hit ${unit.baseUnit.name}`}>
+<Dialog bind:open title={`Critical Hit ${reference.name}`}>
 	<div class="crit-modal-body">
 		<fieldset class="crit-button-list">
 			<legend>Critical Hits</legend>
-			{#if unit.baseUnit.subtype != "PM"}
+			{#if reference.subtype != "PM"}
 				<button
 					class="crit-button"
 					onclick={() => {
@@ -87,7 +88,7 @@
 					currentCritSelection = 1;
 				}}>Fire Control</button
 			>
-			{#if !["CV", "SV", "AF", "CF"].includes(unit.baseUnit.subtype)}
+			{#if !["CV", "SV", "AF", "CF"].includes(reference.subtype)}
 				<button
 					class="crit-button"
 					onclick={() => {
@@ -108,7 +109,7 @@
 				}}>{destroyedString}</button
 			>
 		</fieldset>
-		{#if ["CV", "SV"].includes(unit.baseUnit.subtype)}
+		{#if ["CV", "SV"].includes(reference.subtype)}
 			<fieldset class="crit-button-list">
 				<legend>Motive Hits</legend>
 				<button

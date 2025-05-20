@@ -105,140 +105,144 @@
 	});
 </script>
 
-<div class="play-unit-card-container">
-	<button class="expand-button" onclick={handleExpand}>
-		<div class="flex-between">
-			<p class="unit-variant">{reference?.variant}</p>
-			<p class="unit-pv bold">PV: {unit.cost}</p>
-		</div>
-		<div class="flex-between">
-			<p class="unit-name bold">{reference?.class}</p>
-			{#if structRemaining < (reference?.structure ?? 0) / 2}
-				<p class="unit-half-pv">Half: {Math.round(unit.cost / 2)}</p>
-			{/if}
-		</div>
-	</button>
-	<div class="play-unit-card-body">
-		<div class="unit-card-left">
-			<div class="unit-card-block unit-stat-block">
-				<div class="stat-block-first-row">
-					<p>TP: <span class="bold"> {reference?.subtype ?? ""}</span></p>
-					<p>SZ: <span class="bold">{reference?.size}</span></p>
-					{#if aeroTypes.includes(reference?.subtype ?? "" ?? "")}
-						<p>THR: <span class="bold">{movementString}</span></p>
-					{:else}
-						<p>TMM: <span class="bold">{reference?.tmm}</span></p>
-						<p>MV: <span class="bold">{movementString}</span></p>
+{#if reference}
+	<div class="play-unit-card-container">
+		<button class="expand-button" onclick={handleExpand}>
+			<div class="flex-between">
+				<p class="unit-variant">{reference?.variant}</p>
+				<p class="unit-pv bold">PV: {unit.cost}</p>
+			</div>
+			<div class="flex-between">
+				<p class="unit-name bold">{reference?.class}</p>
+				{#if structRemaining < (reference?.structure ?? 0) / 2}
+					<p class="unit-half-pv">Half: {Math.round(unit.cost / 2)}</p>
+				{/if}
+			</div>
+		</button>
+		<div class="play-unit-card-body">
+			<div class="unit-card-left">
+				<div class="unit-card-block unit-stat-block">
+					<div class="stat-block-first-row">
+						<p>TP: <span class="bold"> {reference?.subtype ?? ""}</span></p>
+						<p>SZ: <span class="bold">{reference?.size}</span></p>
+						{#if aeroTypes.includes(reference?.subtype ?? "" ?? "")}
+							<p>THR: <span class="bold">{movementString}</span></p>
+						{:else}
+							<p>TMM: <span class="bold">{reference?.tmm}</span></p>
+							<p>MV: <span class="bold">{movementString}</span></p>
+						{/if}
+					</div>
+					<div class="stat-block-second-row">
+						<p>Role: <span class="bold">{reference?.role}</span></p>
+						<p>Skill: <span class="bold">{unit.skill}</span></p>
+					</div>
+				</div>
+				<div class="unit-card-block unit-damage-block">
+					<div>
+						<p>S (+0)</p>
+						<p class="bold damage">{reference?.damageS}{reference?.damageSMin ? "*" : ""}</p>
+					</div>
+					<div>
+						<p>M (+2)</p>
+						<p class="bold damage">{reference?.damageM}{reference?.damageMMin ? "*" : ""}</p>
+					</div>
+					<div>
+						<p>L (+4)</p>
+						<p class="bold damage">{reference?.damageL}{reference?.damageLMin ? "*" : ""}</p>
+					</div>
+					{#if aeroTypes.includes(reference?.subtype ?? "")}
+						<div>
+							<p>E (+6)</p>
+							<p class="bold damage">{reference?.damageE}{reference?.damageEMin ? "*" : ""}</p>
+						</div>
 					{/if}
 				</div>
-				<div class="stat-block-second-row">
-					<p>Role: <span class="bold">{reference?.role}</span></p>
-					<p>Skill: <span class="bold">{unit.skill}</span></p>
-				</div>
-			</div>
-			<div class="unit-card-block unit-damage-block">
-				<div>
-					<p>S (+0)</p>
-					<p class="bold damage">{reference?.damageS}{reference?.damageSMin ? "*" : ""}</p>
-				</div>
-				<div>
-					<p>M (+2)</p>
-					<p class="bold damage">{reference?.damageM}{reference?.damageMMin ? "*" : ""}</p>
-				</div>
-				<div>
-					<p>L (+4)</p>
-					<p class="bold damage">{reference?.damageL}{reference?.damageLMin ? "*" : ""}</p>
-				</div>
-				{#if aeroTypes.includes(reference?.subtype ?? "")}
-					<div>
-						<p>E (+6)</p>
-						<p class="bold damage">{reference?.damageE}{reference?.damageEMin ? "*" : ""}</p>
+				{#if ["BM", "IM", "AF", "CF"].includes(reference?.subtype ?? "")}
+					<button onclick={handleHeat} class="unit-card-block unit-heat-block">
+						<div>
+							<p>
+								OV:
+								<span class="bold damage">{reference?.overheat}</span>
+							</p>
+						</div>
+						<div class="heatscale">
+							<p>Heat Scale:</p>
+							<div class="heat-level heat-level-first" class:heat-level-1={unit.current.heat >= 1}>1</div>
+							<div class="heat-level" class:heat-level-2={unit.current.heat >= 2}>2</div>
+							<div class="heat-level" class:heat-level-3={unit.current.heat >= 3}>3</div>
+							<div class="heat-level heat-level-last" class:heat-level-4={unit.current.heat >= 4}>S</div>
+						</div>
+					</button>
+				{/if}
+				<button class="unit-card-block unit-health-block" class:aero-health-block={aeroTypes.includes(reference?.subtype ?? "")} onclick={handleDamage}>
+					<p>A ({armorRemaining >= 0 ? armorRemaining : 0}/{reference?.armor}):</p>
+					<div class="health-pips">
+						{#each { length: reference?.armor ?? 0 }, index}
+							<div class="pip" class:damaged={armorRemaining <= index}></div>
+						{/each}
 					</div>
-				{/if}
-			</div>
-			{#if ["BM", "IM", "AF", "CF"].includes(reference?.subtype ?? "")}
-				<button onclick={handleHeat} class="unit-card-block unit-heat-block">
-					<div>
-						<p>
-							OV:
-							<span class="bold damage">{reference?.overheat}</span>
-						</p>
+					{#if aeroTypes.includes(reference?.subtype ?? "")}
+						<p class="bold">TH</p>
+					{/if}
+					<p>
+						S ({structRemaining}/{reference?.structure}):
+					</p>
+					<div class="health-pips">
+						{#each { length: reference?.structure ?? 0 }, index}
+							<div class="pip" class:damaged={structRemaining <= index}></div>
+						{/each}
 					</div>
-					<div class="heatscale">
-						<p>Heat Scale:</p>
-						<div class="heat-level heat-level-first" class:heat-level-1={unit.current.heat >= 1}>1</div>
-						<div class="heat-level" class:heat-level-2={unit.current.heat >= 2}>2</div>
-						<div class="heat-level" class:heat-level-3={unit.current.heat >= 3}>3</div>
-						<div class="heat-level heat-level-last" class:heat-level-4={unit.current.heat >= 4}>S</div>
-					</div>
-				</button>
-			{/if}
-			<button class="unit-card-block unit-health-block" class:aero-health-block={aeroTypes.includes(reference?.subtype ?? "")} onclick={handleDamage}>
-				<p>A ({armorRemaining >= 0 ? armorRemaining : 0}/{reference?.armor}):</p>
-				<div class="health-pips">
-					{#each { length: reference?.armor ?? 0 }, index}
-						<div class="pip" class:damaged={armorRemaining <= index}></div>
-					{/each}
-				</div>
-				{#if aeroTypes.includes(reference?.subtype ?? "")}
-					<p class="bold">TH</p>
-				{/if}
-				<p>
-					S ({structRemaining}/{reference?.structure}):
-				</p>
-				<div class="health-pips">
-					{#each { length: reference?.structure ?? 0 }, index}
-						<div class="pip" class:damaged={structRemaining <= index}></div>
-					{/each}
-				</div>
-				{#if aeroTypes.includes(reference?.subtype ?? "")}
-					<p class="bold">{reference?.threshold}</p>
-				{/if}
-			</button>
-			<div class="unit-card-block unit-abilities-block">
-				<p>{reference?.abilities}</p>
-			</div>
-		</div>
-		<div class="unit-card-right">
-			<div class="unit-image-block">
-				<img src={reference?.imageLink} alt="unit" class="unit-image" />
-				{#if structRemaining <= 0 || unit.current.crits.engine >= 2 || unit.current.crits.destroyed}
-					<img src="/icons/close.svg" alt="Destroyed" class="destroyed" />
-				{/if}
-			</div>
-			{#if !["BA", "CI"].includes(reference?.subtype ?? "")}
-				<button onclick={handleCrit} class="unit-card-block">
-					{#if ["BM", "IM"].includes(reference?.subtype ?? "")}
-						<MechCritBox {unit}></MechCritBox>
-					{:else if aeroTypes.includes(reference?.subtype ?? "")}
-						<AeroCritBox {unit}></AeroCritBox>
-					{:else if ["CV", "SV"].includes(reference?.subtype ?? "")}
-						<CvCritBox {unit}></CvCritBox>
-					{:else if reference?.subtype == "PM"}
-						<ProtoCritBox {unit}></ProtoCritBox>
+					{#if aeroTypes.includes(reference?.subtype ?? "")}
+						<p class="bold">{reference?.threshold}</p>
 					{/if}
 				</button>
-			{/if}
+				<div class="unit-card-block unit-abilities-block">
+					<p>{reference?.abilities}</p>
+				</div>
+			</div>
+			<div class="unit-card-right">
+				<div class="unit-image-block">
+					<img src={reference?.imageLink} alt="unit" class="unit-image" />
+					{#if structRemaining <= 0 || unit.current.crits.engine >= 2 || unit.current.crits.destroyed}
+						<img src="/icons/close.svg" alt="Destroyed" class="destroyed" />
+					{/if}
+				</div>
+				{#if !["BA", "CI"].includes(reference?.subtype ?? "")}
+					<button onclick={handleCrit} class="unit-card-block">
+						{#if ["BM", "IM"].includes(reference?.subtype ?? "")}
+							<MechCritBox {unit}></MechCritBox>
+						{:else if aeroTypes.includes(reference?.subtype ?? "")}
+							<AeroCritBox {unit}></AeroCritBox>
+						{:else if ["CV", "SV"].includes(reference?.subtype ?? "")}
+							<CvCritBox {unit}></CvCritBox>
+						{:else if reference?.subtype == "PM"}
+							<ProtoCritBox {unit}></ProtoCritBox>
+						{/if}
+					</button>
+				{/if}
+			</div>
 		</div>
+		{#if unit.customization?.spa || unit.customization?.ammo}
+			<div class="unit-card-block unit-custom-block">
+				{#if unit.customization.spa && unit.customization.spa.length}
+					<p><span class="bold">SPA:</span> {unit.customization.spa.join(", ")}</p>
+				{/if}
+				{#if unit.customization.ammo && unit.customization.ammo.length}
+					<p><span class="bold">Alt. ammo:</span> {unit.customization.ammo.join(", ")}</p>
+				{/if}
+			</div>
+		{:else}
+			<div class="unit-custom-block"></div>
+		{/if}
 	</div>
-	{#if unit.customization?.spa || unit.customization?.ammo}
-		<div class="unit-card-block unit-custom-block">
-			{#if unit.customization.spa && unit.customization.spa.length}
-				<p><span class="bold">SPA:</span> {unit.customization.spa.join(", ")}</p>
-			{/if}
-			{#if unit.customization.ammo && unit.customization.ammo.length}
-				<p><span class="bold">Alt. ammo:</span> {unit.customization.ammo.join(", ")}</p>
-			{/if}
-		</div>
-	{:else}
-		<div class="unit-custom-block"></div>
-	{/if}
-</div>
 
-<DamageModal {unit} bind:open={openDamageModal}></DamageModal>
-<HeatModal {unit} bind:open={openHeatModal}></HeatModal>
-<CritModal {unit} bind:open={openCritModal}></CritModal>
-<ExpandModal {unit} bind:open={openExpandModal}></ExpandModal>
+	<DamageModal {unit} bind:open={openDamageModal} {reference}></DamageModal>
+	<HeatModal {unit} bind:open={openHeatModal} {reference}></HeatModal>
+	<CritModal {unit} bind:open={openCritModal} {reference}></CritModal>
+	<ExpandModal {unit} bind:open={openExpandModal} {reference}></ExpandModal>
+{:else}
+	<p>Loading unit card</p>
+{/if}
 
 <style>
 	.play-unit-card-container {

@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { Dialog } from "$lib/components/Generic";
-	import type { PlayUnit } from "$lib/types/unit";
+	import type { MulUnit, PlayUnit } from "$lib/types/unit";
 	import { watch } from "runed";
 
 	type Props = {
 		unit: PlayUnit;
 		open: boolean;
+		reference: MulUnit;
 	};
 
-	let { unit, open = $bindable(false) }: Props = $props();
+	let { unit, open = $bindable(false), reference }: Props = $props();
 
 	let newHeatLevel = $state(0);
 
@@ -35,7 +36,7 @@
 	}
 </script>
 
-<Dialog bind:open title={`Heat ${unit.baseUnit.name}`}>
+<Dialog bind:open title={`Heat ${reference.name}`}>
 	<div class="heat-modal-body">
 		<div class="heatscale">
 			New Heat Level:

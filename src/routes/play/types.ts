@@ -1,5 +1,11 @@
 export type LogEntry = {
 	unitId: string;
 	damageTaken?: number;
-	crit?: "engine" | "fireControl" | "mp" | "weapons";
+	crit?: string;
+};
+
+export type Options = {
+	uiScale: number;
+	renderOriginal: boolean;
+	showPhysical: boolean;
 };

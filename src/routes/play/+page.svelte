@@ -2,39 +2,38 @@
 	import type { PlayList } from "$lib/types/playList";
 	import PlayFormationCard from "./PlayFormationCard.svelte";
 	import { PersistedState } from "runed";
-	import UiScalePopover from "./components/UIScalePopover.svelte";
-	import { onMount } from "svelte";
-	import { type MulUnit } from "$lib/types/unit";
-	import { SvelteMap } from "svelte/reactivity";
-	import { deserialize } from "$app/forms";
+	import OptionsPopover from "./components/OptionsPopover.svelte";
+	import type { Options } from "./types";
 
 	function resetUnits() {
 		if (playList) {
 			const reset = confirm("Are you sure you wish to reset all units to default? This cannot be undone.");
 			if (reset) {
 				for (const unit of playList.current.units) {
-					unit.current = { damage: 0, heat: 0, crits: { engine: 0, fireControl: 0, mp: 0, weapon: 0, destroyed: false, motiveHit: 0, motiveHalf: 0, motiveIm: false } };
-					unit.pending = { damage: 0, heat: 0, crits: { engine: 0, fireControl: 0, mp: 0, weapon: 0, destroyed: false, motiveHit: 0, motiveHalf: 0, motiveIm: false } };
+					unit.current = { damage: 0, heat: 0, crits: [] };
+					unit.pending = { damage: 0, heat: 0, crits: [] };
 				}
 			}
 		}
 	}
-	const uiScale = new PersistedState("uiScale", 50);
 	const playList = new PersistedState<PlayList>("playList", { formations: [], units: [] });
+	const options = new PersistedState<Options>("playOptions", { renderOriginal: true, uiScale: 50, showPhysical: false });
 </script>
 
 <div class="play-body">
 	<div class="toolbar">
 		<div class="toolbar-section"></div>
 		<div class="toolbar-section">
-			<UiScalePopover bind:uiScale={uiScale.current}></UiScalePopover>
+			<OptionsPopover bind:options={options.current}></OptionsPopover>
 			<button class="toolbar-button" onclick={resetUnits}>Reset List</button>
 		</div>
 	</div>
-	<p class="announcement">Still Beta, but getting better. Some UI improvements done, but still missing automation. Click on a units name to expand its card.</p>
+	<p class="announcement">
+		Still Beta, but getting better. Basic automation done, but doesn't apply abilities or SPAs. Everything subject to change at my whim. Click on a units name to expand its card.
+	</p>
 	{#if playList.current.formations.length}
 		{#each playList.current.formations as formation}
-			<PlayFormationCard {formation} units={playList.current.units} uiScale={uiScale.current}></PlayFormationCard>
+			<PlayFormationCard {formation} units={playList.current.units} options={options.current}></PlayFormationCard>
 		{/each}
 	{:else}
 		<div class="list-load-error-body">

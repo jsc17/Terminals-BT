@@ -1,6 +1,11 @@
 .bold {
 	font-weight: bold;
 }
+.flex-4 {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
 .flex-column {
 	display: flex;
 	flex-direction: column;

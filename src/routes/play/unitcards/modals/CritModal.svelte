@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Dialog } from "$lib/components/Generic";
 	import type { MulUnit, PlayUnit } from "$lib/types/unit";
+	import { nanoid } from "nanoid";
 	import { watch } from "runed";
 
 	type Props = {
@@ -15,126 +16,96 @@
 		() => open,
 		() => {
 			if (open) {
-				currentCritSelection = -1;
+				currentCritSelection = "";
 				undoSelection = "";
 			}
 		}
 	);
 
-	let currentCritSelection = $state<number>();
-	let destroyedString = $derived.by(() => {
-		if (["BM", "IM"].includes(reference.subtype)) {
-			return "Ammo Hit / Destroyed";
-		} else if (["CV", "SV"].includes(reference.subtype)) {
-			return "Ammo Hit / Crew Killed";
-		} else if (reference.subtype == "PM") {
-			return "Unit Destroyed";
-		} else if (["AF", "CF"].includes(reference.subtype)) {
-			return "Fuel Hit / Crew Killed";
-		} else {
-			return `${reference.subtype} not found`;
+	let currentCritSelection = $state<string>("");
+
+	const availableButtons = $derived.by(() => {
+		switch (reference.subtype) {
+			case "BM":
+			case "IM":
+				return { crits: ["Engine", "Fire Control", "MP", "Weapon", "Ammo Hit / Destroyed"] };
+			case "CV":
+			case "SV":
+				return { crits: ["Engine", "Fire Control", "Weapon", "Ammo Hit / Crew Killed"], motive: ["-2 MV", "1/2 MV", "0 MV"] };
+			case "PM":
+				return { crits: ["Fire Control", "MP", "Weapon", "Unit Destroyed"] };
+			case "AF":
+			case "CF":
+				return { crits: ["Engine", "Fire Control", "Weapon", "Fuel Hit / Crew Killed"] };
+			default:
+				return { crits: [] };
 		}
 	});
-	let critKeys = $derived([
-		{ key: "engine", label: "Engine Hit" },
-		{ key: "fireControl", label: "Fire Control" },
-		{ key: "mp", label: "MP Hit" },
-		{ key: "weapon", label: "Weapon Hit" },
-		{ key: "destroyed", label: destroyedString },
-		{ key: "motiveHit", label: "-2 MV" },
-		{ key: "motiveHalf", label: "1/2 MV" },
-		{ key: "motiveIm", label: "0 MV" }
-	]);
 
 	function applyCrit() {
-		if (currentCritSelection != undefined && currentCritSelection >= 0) {
-			console.log($state.snapshot(currentCritSelection));
-			if (currentCritSelection == 4) {
-				unit.current.crits.destroyed = true;
-			} else {
-				const key = critKeys[currentCritSelection].key;
-				unit.current.crits[key] += 1;
+		if (currentCritSelection != "") {
+			let critType = currentCritSelection;
+			if (critType == "Ammo Hit / Destroyed" || critType == "Ammo Hit / Crew Killed" || critType == "Unit Destroyed" || critType == "Fuel Hit / Crew Killed") {
+				critType = "destroyed";
 			}
+			if (critType == "-2 MV") {
+				critType = "mhit";
+			}
+			if (critType == "1/2 MV") {
+				critType = "mhalf";
+			}
+			if (critType == "0 MV") {
+				critType = "mimm";
+			}
+			const newCrit = { id: nanoid(6), type: critType.toLowerCase().replaceAll(" ", "") };
+			unit.current.crits.push(newCrit);
 			open = false;
 		}
 	}
-	let undoSelection = $state<string>("");
+
+	let undoSelection = $state<string>();
 	function undoCrit() {
-		if (undoSelection.length) {
-			if (undoSelection == "destroyed" || undoSelection == "motiveIm") {
-				unit.current.crits[undoSelection] = false;
-			} else {
-				unit.current.crits[undoSelection] -= 1;
-			}
-		}
+		let critIndex = unit.current.crits.findIndex((crit) => {
+			return crit.id == undoSelection;
+		});
+		unit.current.crits.splice(critIndex, 1);
 	}
 </script>
 
+{#snippet critButton(value: string)}
+	<button
+		class="crit-button"
+		onclick={() => {
+			currentCritSelection = value;
+		}}>{value}</button
+	>
+{/snippet}
+
 <Dialog bind:open title={`Critical Hit ${reference.name}`}>
 	<div class="crit-modal-body">
-		<fieldset class="crit-button-list">
-			<legend>Critical Hits</legend>
-			{#if reference.subtype != "PM"}
-				<button
-					class="crit-button"
-					onclick={() => {
-						currentCritSelection = 0;
-					}}>Engine</button
-				>
-			{/if}
-			<button
-				class="crit-button"
-				onclick={() => {
-					currentCritSelection = 1;
-				}}>Fire Control</button
-			>
-			{#if !["CV", "SV", "AF", "CF"].includes(reference.subtype)}
-				<button
-					class="crit-button"
-					onclick={() => {
-						currentCritSelection = 2;
-					}}>MP Hit</button
-				>
-			{/if}
-			<button
-				class="crit-button"
-				onclick={() => {
-					currentCritSelection = 3;
-				}}>Weapon</button
-			>
-			<button
-				class="destroy-crit"
-				onclick={() => {
-					currentCritSelection = 4;
-				}}>{destroyedString}</button
-			>
-		</fieldset>
-		{#if ["CV", "SV"].includes(reference.subtype)}
+		{#if availableButtons.crits}
+			<fieldset class="crit-button-list">
+				<legend>Critical Hits</legend>
+				{#each availableButtons?.crits as button}
+					{@render critButton(button)}
+				{/each}
+			</fieldset>
+		{:else}
+			<p>Unknown unit type, you shouldn't have been able to get here.</p>
+		{/if}
+
+		{#if availableButtons.motive}
 			<fieldset class="crit-button-list">
 				<legend>Motive Hits</legend>
-				<button
-					class="crit-button"
-					onclick={() => {
-						currentCritSelection = 5;
-					}}>-2 MV</button
-				>
-				<button
-					class="crit-button"
-					onclick={() => {
-						currentCritSelection = 6;
-					}}>1/2 MV</button
-				>
-				<button
-					class="crit-button"
-					onclick={() => {
-						currentCritSelection = 7;
-					}}>0 MV</button
-				>
+				{#each availableButtons?.motive as button}
+					{@render critButton(button)}
+				{/each}
 			</fieldset>
 		{/if}
+
 		<p class="crit-choice">
 			<span class="muted">Critical to apply:</span>
-			{currentCritSelection !== undefined && currentCritSelection >= 0 ? critKeys[currentCritSelection].label : "Choose a critical above"}
+			{currentCritSelection !== undefined && currentCritSelection != "" ? currentCritSelection : "Choose a critical above"}
 		</p>
 		<div class="apply-buttons">
 			<button onclick={applyCrit}>Apply Now</button>
@@ -144,20 +115,8 @@
 		</div>
 		<div class="remove-button-row">
 			<select bind:value={undoSelection}>
-				{#each Object.entries(unit.current.crits) as crit}
-					{#if (crit[0] == "destroyed" || crit[0] == "motiveIm") && crit[1]}
-						<option value={crit[0]}
-							>{critKeys.find(({ key }) => {
-								return key == crit[0];
-							})?.label}</option
-						>
-					{:else if crit[1] > 0}
-						<option value={crit[0]}
-							>{critKeys.find(({ key }) => {
-								return key == crit[0];
-							})?.label}</option
-						>
-					{/if}
+				{#each Object.values(unit.current.crits) as crit}
+					<option value={crit.id}>{crit.type}</option>
 				{/each}
 			</select>
 			<button class="remove-button" onclick={undoCrit}>Undo Critical</button>
@@ -183,12 +142,6 @@
 		font-size: 16px;
 		font-weight: bold;
 		padding: 8px;
-	}
-	.destroy-crit {
-		font-size: 16px;
-		font-weight: bold;
-		padding: 4px;
-		background-color: var(--error);
 	}
 	.apply-buttons {
 		display: flex;

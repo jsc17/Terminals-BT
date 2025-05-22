@@ -7,13 +7,17 @@
 	import ProtoCritBox from "./card-components/ProtoCritBox.svelte";
 	import { DamageModal, HeatModal, CritModal } from "./modals";
 	import ExpandModal from "./modals/ExpandModal.svelte";
-	import { deserialize } from "$app/forms";
+	import { loadreference } from "./utilities/load";
+	import * as auto from "./utilities/automation";
+	import type { Options } from "../types";
+	import { infTypes, mechTypes, typeIncludes, vTypes } from "./utilities/utilities";
 
 	type Props = {
 		unit: PlayUnit;
+		options: Options;
 	};
 
-	let { unit }: Props = $props();
+	let { unit, options }: Props = $props();
 
 	let openDamageModal = $state(false),
 		openHeatModal = $state(false),
@@ -25,66 +29,14 @@
 	let reference = $state<MulUnit>();
 
 	let expanded = getContext("expanded");
-	let movementString = $derived(
-		reference?.move
-			?.map((mode: any) => {
-				return `${mode.speed}${!aeroTypes.includes(reference?.subtype ?? "" ?? "") ? `"` : ""}${mode.type ?? ""}`;
-			})
-			.join("/")
-	);
-	let armorRemaining = $derived((reference?.armor ?? 0) - unit.current.damage);
-	let structRemaining = $derived.by(() => {
-		if (armorRemaining < 0) {
-			return (reference?.structure ?? 0) + armorRemaining;
-		} else {
-			return reference?.structure ?? 0;
-		}
-	});
+	let critCount = $derived(auto.countCrits(unit));
+	let moveSpeeds = $derived(auto.calculateMovement(unit, reference));
+	let armorRemaining = $derived(auto.calculateArmor(unit, reference));
+	let structRemaining = $derived(auto.calculateStructure(armorRemaining, unit, reference));
+	let firepowerRemaining = $derived(auto.calculateFirepower(unit, reference));
+	let currentSkill = $derived(auto.calculateSkill(unit, critCount, reference));
+	let physical = $derived(auto.calculatePhysical(moveSpeeds[0].tmm, firepowerRemaining.s, reference));
 
-	async function loadreference() {
-		let response: any = deserialize(await (await fetch("/?/getUnit", { method: "POST", body: JSON.stringify({ mulId: unit.mulId }) })).text());
-		let tempMovement: { speed: number; type: string }[] = [];
-		response.data!.unit.move.split("/").forEach((movement: string) => {
-			let moveSpeed = movement.replaceAll('"', "").match(/\d+/) ?? "0";
-			let moveType = movement.replaceAll('"', "").match(/\D+/) ?? "";
-			tempMovement.push({ speed: parseInt(moveSpeed[0]), type: moveType[0] });
-		});
-		const unitData = response.data!.unit;
-		reference = {
-			mulId: unitData.mulId,
-			name: unitData.name,
-			class: unitData.class,
-			variant: unitData.variant,
-			type: unitData.type,
-			subtype: unitData.subtype.toUpperCase(),
-			pv: unitData.pv,
-			cost: unitData.pv,
-			skill: 4,
-			size: unitData.size,
-			move: tempMovement,
-			tmm: unitData.tmm,
-			health: unitData.armor + unitData.structure,
-			armor: unitData.armor,
-			structure: unitData.structure,
-			damageS: unitData.damage_s,
-			damageSMin: unitData.damage_s_min,
-			damageM: unitData.damage_m,
-			damageMMin: unitData.damage_m_min,
-			damageL: unitData.damage_l,
-			damageLMin: unitData.damage_l_min,
-			damageE: unitData.damage_e,
-			damageEMin: unitData.damage_e_min,
-			overheat: unitData.overheat,
-			abilities: (unitData.abilities ?? "-").replaceAll(",", ", "),
-			imageLink: unitData.image_url,
-			rulesLevel: unitData.rules,
-			tonnage: unitData.tonnage,
-			date: unitData.date_introduced,
-			role: unitData.role,
-			availability: unitData.availability,
-			threshold: unitData.threshold
-		};
-	}
 	function handleHeat() {
 		openHeatModal = true;
 	}
@@ -101,9 +53,24 @@
 	}
 
 	onMount(() => {
-		loadreference();
+		loadreference(unit.mulId).then((value) => {
+			reference = value;
+		});
 	});
 </script>
+
+{#snippet damageValue(original: number, min: boolean, current: number)}
+	{#if options.renderOriginal || options.renderOriginal === undefined}
+		<p>
+			<span class="bold">{original}{min ? "*" : ""}</span>
+			{#if critCount.weapon || ((reference?.subtype == "CV" || reference?.subtype == "SV") && critCount.engine)}
+				(<span class="damaged-stat">{current}</span>)
+			{/if}
+		</p>
+	{:else}
+		<p class="bold" class:damaged-stat={critCount.weapon}>{current}{min && !critCount.weapon ? "*" : ""}</p>
+	{/if}
+{/snippet}
 
 {#if reference}
 	<div class="play-unit-card-container">
@@ -123,47 +90,90 @@
 			<div class="unit-card-left">
 				<div class="unit-card-block unit-stat-block">
 					<div class="stat-block-first-row">
-						<p>TP: <span class="bold"> {reference?.subtype ?? ""}</span></p>
+						<p>
+							TP:
+							<span class="bold">{reference?.subtype ?? ""}</span>
+						</p>
 						<p>SZ: <span class="bold">{reference?.size}</span></p>
-						{#if aeroTypes.includes(reference?.subtype ?? "" ?? "")}
-							<p>THR: <span class="bold">{movementString}</span></p>
+						{#if typeIncludes([...aeroTypes], reference)}
+							<p>
+								THR: <span class="bold" class:damaged-stat={critCount.engine}>{moveSpeeds[0].speed}{moveSpeeds[0].type}</span>
+							</p>
 						{:else}
-							<p>TMM: <span class="bold">{reference?.tmm}</span></p>
-							<p>MV: <span class="bold">{movementString}</span></p>
+							<p>
+								TMM: {#each moveSpeeds as { tmm, type, damaged }, index}
+									<span class="bold" class:damaged-stat={damaged}>{tmm}{type == "j" ? "j" : ""}</span>{#if index + 1 != moveSpeeds.length}/{/if}
+								{/each}
+							</p>
+							<p>
+								MV: {#if moveSpeeds[0].type == "I"}<span class="damaged-stat">Immobile</span>{:else}{#each moveSpeeds as { speed, type, damaged }, index}
+										<span class="bold" class:damaged-stat={damaged}>{speed}"{type}</span>{#if index + 1 != moveSpeeds.length}/{/if}
+									{/each}
+								{/if}
+							</p>
 						{/if}
 					</div>
 					<div class="stat-block-second-row">
 						<p>Role: <span class="bold">{reference?.role}</span></p>
-						<p>Skill: <span class="bold">{unit.skill}</span></p>
+						<p>
+							Skill: <span class="bold">{unit.skill}</span>
+							{#if unit.current.heat || critCount.firecontrol}
+								(<span class="damaged-stat">{currentSkill.ranged}</span>)
+							{/if}
+						</p>
 					</div>
 				</div>
 				<div class="unit-card-block unit-damage-block">
+					{#if options.showPhysical && physical.attackTypeCount}
+						<div>
+							{#if physical.standard && physical.charge !== undefined}
+								<p class="damage-header"><span class="small-header">Phy (+0)</span> / <span class="small-header">Chg (+1)</span></p>
+								<p class="bold">
+									{physical.standard} / <span class:damaged-stat={moveSpeeds[0].damaged}>{physical.charge}</span>
+								</p>
+							{/if}
+							{#if physical.melee && physical.charge !== undefined}
+								<p class="damage-header"><span class="small-header">Mel (+0)</span> / <span class="small-header">Chg (+1)</span></p>
+								<p class="bold">
+									{physical.melee} / <span class:damaged-stat={moveSpeeds[0].damaged}>{physical.charge}</span>
+								</p>
+							{/if}
+							{#if !physical.standard && !physical.melee && physical.charge !== undefined}
+								<p>Chg (+1)</p>
+								<p class="bold">
+									<span class:damaged-stat={moveSpeeds[0].damaged}>{physical.charge}</span>
+								</p>
+							{/if}
+							{#if physical.am !== undefined}
+								<p>AM (+1)</p>
+								<p class="bold">{physical.am}</p>
+							{/if}
+						</div>
+					{/if}
 					<div>
 						<p>S (+0)</p>
-						<p class="bold damage">{reference?.damageS}{reference?.damageSMin ? "*" : ""}</p>
+						{@render damageValue(reference.damageS ?? 0, reference.damageSMin ?? false, firepowerRemaining.s)}
 					</div>
 					<div>
 						<p>M (+2)</p>
-						<p class="bold damage">{reference?.damageM}{reference?.damageMMin ? "*" : ""}</p>
+						{@render damageValue(reference.damageM ?? 0, reference.damageMMin ?? false, firepowerRemaining.m)}
 					</div>
 					<div>
 						<p>L (+4)</p>
-						<p class="bold damage">{reference?.damageL}{reference?.damageLMin ? "*" : ""}</p>
+						{@render damageValue(reference.damageL ?? 0, reference.damageLMin ?? false, firepowerRemaining.l)}
 					</div>
-					{#if aeroTypes.includes(reference?.subtype ?? "")}
+					{#if typeIncludes([...aeroTypes], reference)}
 						<div>
 							<p>E (+6)</p>
-							<p class="bold damage">{reference?.damageE}{reference?.damageEMin ? "*" : ""}</p>
+							{@render damageValue(reference.damageE ?? 0, reference.damageEMin ?? false, firepowerRemaining.e)}
 						</div>
 					{/if}
 				</div>
-				{#if ["BM", "IM", "AF", "CF"].includes(reference?.subtype ?? "")}
+				{#if typeIncludes([...mechTypes, ...aeroTypes], reference)}
 					<button onclick={handleHeat} class="unit-card-block unit-heat-block">
-						<div>
-							<p>
-								OV:
-								<span class="bold damage">{reference?.overheat}</span>
-							</p>
+						<div class="flex-4">
+							<p>OV:</p>
+							{@render damageValue(reference.ov ?? 0, false, firepowerRemaining.ov)}
 						</div>
 						<div class="heatscale">
 							<p>Heat Scale:</p>
@@ -174,14 +184,14 @@
 						</div>
 					</button>
 				{/if}
-				<button class="unit-card-block unit-health-block" class:aero-health-block={aeroTypes.includes(reference?.subtype ?? "")} onclick={handleDamage}>
+				<button class="unit-card-block unit-health-block" class:aero-health-block={typeIncludes([...aeroTypes], reference)} onclick={handleDamage}>
 					<p>A ({armorRemaining >= 0 ? armorRemaining : 0}/{reference?.armor}):</p>
 					<div class="health-pips">
 						{#each { length: reference?.armor ?? 0 }, index}
-							<div class="pip" class:damaged={armorRemaining <= index}></div>
+							<div class="pip" class:damaged-pip={armorRemaining <= index}></div>
 						{/each}
 					</div>
-					{#if aeroTypes.includes(reference?.subtype ?? "")}
+					{#if typeIncludes([...aeroTypes], reference)}
 						<p class="bold">TH</p>
 					{/if}
 					<p>
@@ -189,34 +199,39 @@
 					</p>
 					<div class="health-pips">
 						{#each { length: reference?.structure ?? 0 }, index}
-							<div class="pip" class:damaged={structRemaining <= index}></div>
+							<div class="pip" class:damaged-pip={structRemaining <= index}></div>
 						{/each}
 					</div>
-					{#if aeroTypes.includes(reference?.subtype ?? "")}
+					{#if typeIncludes([...aeroTypes], reference)}
 						<p class="bold">{reference?.threshold}</p>
 					{/if}
 				</button>
 				<div class="unit-card-block unit-abilities-block">
-					<p>{reference?.abilities}</p>
+					{#if reference.abilities != "-"}
+						<p>{reference?.abilities}</p>
+					{/if}
 				</div>
 			</div>
 			<div class="unit-card-right">
 				<div class="unit-image-block">
 					<img src={reference?.imageLink} alt="unit" class="unit-image" />
-					{#if structRemaining <= 0 || unit.current.crits.engine >= 2 || unit.current.crits.destroyed}
+					{#if structRemaining <= 0 || critCount.engine >= 2 || critCount.destroyed}
 						<img src="/icons/close.svg" alt="Destroyed" class="destroyed" />
 					{/if}
+					{#if unit.current.heat >= 4}
+						<p class="shutdown-message">Shutdown</p>
+					{/if}
 				</div>
-				{#if !["BA", "CI"].includes(reference?.subtype ?? "")}
+				{#if !typeIncludes([...infTypes], reference)}
 					<button onclick={handleCrit} class="unit-card-block">
-						{#if ["BM", "IM"].includes(reference?.subtype ?? "")}
-							<MechCritBox {unit}></MechCritBox>
-						{:else if aeroTypes.includes(reference?.subtype ?? "")}
-							<AeroCritBox {unit}></AeroCritBox>
-						{:else if ["CV", "SV"].includes(reference?.subtype ?? "")}
-							<CvCritBox {unit}></CvCritBox>
+						{#if typeIncludes([...mechTypes], reference)}
+							<MechCritBox {unit} {critCount}></MechCritBox>
+						{:else if typeIncludes([...aeroTypes], reference)}
+							<AeroCritBox {unit} {critCount}></AeroCritBox>
+						{:else if typeIncludes([...vTypes], reference)}
+							<CvCritBox {unit} {critCount}></CvCritBox>
 						{:else if reference?.subtype == "PM"}
-							<ProtoCritBox {unit}></ProtoCritBox>
+							<ProtoCritBox {unit} {critCount}></ProtoCritBox>
 						{/if}
 					</button>
 				{/if}
@@ -257,7 +272,7 @@
 	p,
 	span {
 		color: black;
-		font-size: 3.5cqmax;
+		font-size: 3.25cqmax;
 	}
 	.play-unit-card-body {
 		flex: 1;
@@ -311,19 +326,27 @@
 	}
 	.stat-block-first-row {
 		display: flex;
-		gap: 1.5cqw;
+		justify-content: space-between;
 	}
 	.stat-block-second-row {
 		display: grid;
-		grid-template-columns: 2fr 1fr;
-		gap: 1.5cqw;
+		grid-template-columns: 5fr 4fr;
+		gap: 0.5cqw;
 	}
 	.unit-damage-block {
 		display: flex;
+		align-items: center;
 		justify-content: space-evenly;
 		p {
 			justify-self: center;
 		}
+	}
+	.damage-header {
+		display: flex;
+		align-items: center;
+	}
+	.small-header {
+		font-size: 2.5cqmax;
 	}
 	.unit-heat-block {
 		display: flex;
@@ -392,8 +415,12 @@
 		height: 3cqmax;
 		width: 3cqmax;
 	}
-	.damaged {
+	.damaged-pip {
 		background-color: red;
+	}
+	.damaged-stat {
+		color: red;
+		font-weight: bold;
 	}
 	.unit-abilities-block {
 		flex: 1;
@@ -401,7 +428,6 @@
 			font-size: 3cqmax;
 		}
 	}
-
 	.destroyed {
 		width: 100%;
 		height: 100%;
@@ -409,5 +435,16 @@
 		position: absolute;
 		top: 0;
 		left: 0;
+	}
+	.shutdown-message {
+		position: absolute;
+		color: red;
+		font-size: 7cqmax;
+		font-weight: bold;
+		text-shadow:
+			-1px -1px 0 black,
+			1px -1px 0 black,
+			-1px 1px 0 black,
+			1px 1px 0 black;
 	}
 </style>

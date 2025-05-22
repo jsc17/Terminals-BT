@@ -15,8 +15,8 @@ export function sendListToPlay(formations: FormationV2[], units: UnitV2[]) {
 			skill: unit.skill,
 			cost: unit.cost,
 			customization: unit.customization,
-			current: { damage: 0, heat: 0, crits: { engine: 0, fireControl: 0, mp: 0, weapon: 0, destroyed: false, motiveHit: 0, motiveHalf: 0, motiveIm: false } },
-			pending: { damage: 0, heat: 0, crits: { engine: 0, fireControl: 0, mp: 0, weapon: 0, destroyed: false, motiveHit: 0, motiveHalf: 0, motiveIm: false } }
+			current: { damage: 0, heat: 0, crits: [] },
+			pending: { damage: 0, heat: 0, crits: [] }
 		});
 	}
 	const playFormations: PlayFormation[] = formations

@@ -2,16 +2,16 @@
 	import { Collapsible } from "$lib/components/Generic";
 	import type { MulUnit, PlayUnit } from "$lib/types/unit";
 	import type { PlayFormation } from "../../lib/types/formation";
+	import type { Options } from "./types";
 	import PlayUnitCard from "./unitcards/PlayUnitCard.svelte";
-	import type { SvelteMap } from "svelte/reactivity";
 
 	type Props = {
 		formation: PlayFormation;
 		units: PlayUnit[];
-		uiScale: number;
+		options: Options;
 	};
 
-	let { formation, units, uiScale }: Props = $props();
+	let { formation, units, options }: Props = $props();
 	let openPrimary = $state(true),
 		openSecondary = $state(true);
 </script>
@@ -22,10 +22,9 @@
 			{@const unit = units.find((unit) => {
 				return unit.id == unitId;
 			})}
-
 			{#if unit}
-				<div class="unit-card-container" style="width: {252 * ((uiScale + 50) / 100)}pt; height:{180 * ((uiScale + 50) / 100)}pt">
-					<PlayUnitCard {unit}></PlayUnitCard>
+				<div class="unit-card-container" style="width: {252 * ((options.uiScale + 50) / 100)}pt; height:{180 * ((options.uiScale + 50) / 100)}pt">
+					<PlayUnitCard {unit} {options}></PlayUnitCard>
 				</div>
 			{/if}
 		{/each}

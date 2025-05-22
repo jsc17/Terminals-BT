@@ -1,32 +1,34 @@
 <script lang="ts">
 	import type { PlayUnit } from "$lib/types/unit";
+	import type { CritList } from "../utilities/automation";
 
 	type Props = {
 		unit: PlayUnit;
+		critCount: CritList;
 	};
 
-	let { unit }: Props = $props();
+	let { unit, critCount }: Props = $props();
 </script>
 
 <div class="crit-block-body">
 	<p class="crit-header">Fire Control</p>
 	<div class="crit-line">
 		{#each { length: 4 }, index}
-			<div class="pip" class:damaged={unit.current.crits.fireControl > index}></div>
+			<div class="pip" class:damaged={critCount.firecontrol > index}></div>
 		{/each}
 		<p>+2 To-Hit</p>
 	</div>
 	<p class="crit-header">MP</p>
 	<div class="crit-line">
 		{#each { length: 4 }, index}
-			<div class="pip" class:damaged={unit.current.crits.mp > index}></div>
+			<div class="pip" class:damaged={critCount.mp > index}></div>
 		{/each}
 		<p>1/2 MV</p>
 	</div>
 	<p class="crit-header">Weapons</p>
 	<div class="crit-line">
 		{#each { length: 4 }, index}
-			<div class="pip" class:damaged={unit.current.crits.weapon > index}></div>
+			<div class="pip" class:damaged={critCount.weapon > index}></div>
 		{/each}
 		<p>-1 Damage</p>
 	</div>

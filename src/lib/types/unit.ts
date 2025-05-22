@@ -57,11 +57,11 @@ export type PlayUnit = {
 	pending: {
 		damage: number;
 		heat: number;
-		crits: { [index: string]: any; engine: number; fireControl: number; mp: number; weapon: number; destroyed: boolean; motiveHit: number; motiveHalf: number; motiveIm: boolean };
+		crits: { id: string; type: string }[];
 	};
 	current: {
 		damage: number;
 		heat: number;
-		crits: { [index: string]: any; engine: number; fireControl: number; mp: number; weapon: number; destroyed: boolean; motiveHit: number; motiveHalf: number; motiveIm: boolean };
+		crits: { id: string; type: string }[];
 	};
 };

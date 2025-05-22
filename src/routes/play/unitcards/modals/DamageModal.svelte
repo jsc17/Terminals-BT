@@ -25,6 +25,12 @@
 		open = false;
 	}
 
+	function pendDamage() {
+		unit.pending.damage += damageToTake;
+		damageToTake = 0;
+		open = false;
+	}
+
 	function undoDamage() {
 		const confirmUndo = confirm(`Are you sure you wish to remove ${damageToTake} damage from this unit?`);
 		if (confirmUndo) {
@@ -72,7 +78,7 @@
 		<div class="apply-buttons">
 			<button onclick={applyDamage}>Apply Now</button>
 			<div class="temp-div">
-				<button disabled>Apply At End of Round <br /> (not implemented yet)</button>
+				<button onclick={pendDamage}>Apply At End of Round</button>
 			</div>
 		</div>
 		<div class="remove-button-row">

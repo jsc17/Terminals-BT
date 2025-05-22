@@ -8,4 +8,7 @@ export type Options = {
 	uiScale: number;
 	renderOriginal: boolean;
 	showPhysical: boolean;
+	showCrippled: boolean;
+	showJumpTMM: boolean;
+	confirmEnd: boolean;
 };

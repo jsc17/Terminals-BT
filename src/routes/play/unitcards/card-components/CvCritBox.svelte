@@ -4,7 +4,7 @@
 
 	type Props = {
 		unit: PlayUnit;
-		critCount: CritList;
+		critCount: { current: CritList; pending: CritList };
 	};
 
 	let { unit, critCount }: Props = $props();
@@ -14,7 +14,11 @@
 	<p class="crit-header">Engine</p>
 	<div class="crit-line">
 		{#each { length: 1 }, index}
-			<div class="pip" class:damaged={critCount.engine > index}></div>
+			<div
+				class="pip"
+				class:damaged={critCount.current.engine > index}
+				class:pending-pip={critCount.current.engine <= index && critCount.current.engine + critCount.pending.engine > index}
+			></div>
 		{/each}
 		<p>1/2 MV and Dmg</p>
 	</div>
@@ -22,14 +26,22 @@
 	<p class="crit-header">Fire Control</p>
 	<div class="crit-line">
 		{#each { length: 4 }, index}
-			<div class="pip" class:damaged={critCount.firecontrol > index}></div>
+			<div
+				class="pip"
+				class:damaged={critCount.current.firecontrol > index}
+				class:pending-pip={critCount.current.firecontrol <= index && critCount.current.firecontrol + critCount.pending.firecontrol > index}
+			></div>
 		{/each}
 		<p>+2 To-Hit</p>
 	</div>
 	<p class="crit-header">Weapons</p>
 	<div class="crit-line">
 		{#each { length: 4 }, index}
-			<div class="pip" class:damaged={critCount.weapon > index}></div>
+			<div
+				class="pip"
+				class:damaged={critCount.current.weapon > index}
+				class:pending-pip={critCount.current.weapon <= index && critCount.current.weapon + critCount.pending.weapon > index}
+			></div>
 		{/each}
 		<p>-1 Dmg</p>
 	</div>
@@ -38,19 +50,27 @@
 <div class="motive-line">
 	<div class="motive-section">
 		{#each { length: 2 }, index}
-			<div class="pip" class:damaged={critCount.mhit > index}></div>
+			<div
+				class="pip"
+				class:damaged={critCount.current.mhit > index}
+				class:pending-pip={critCount.current.mhit <= index && critCount.current.mhit + critCount.pending.mhit > index}
+			></div>
 		{/each}
 		<p>-2 MV</p>
 	</div>
 	<div class="motive-section">
 		{#each { length: 2 }, index}
-			<div class="pip" class:damaged={critCount.mhalf > index}></div>
+			<div
+				class="pip"
+				class:damaged={critCount.current.mhalf > index}
+				class:pending-pip={critCount.current.mhalf <= index && critCount.current.mhalf + critCount.pending.mhalf > index}
+			></div>
 		{/each}
 		<p>1/2 MV</p>
 	</div>
 	<div class="motive-section">
 		{#each { length: 1 }, index}
-			<div class="pip" class:damaged={critCount.mimm}></div>
+			<div class="pip" class:damaged={critCount.current.mimm} class:pending-pip={critCount.current.mimm <= index && critCount.current.mimm + critCount.pending.mimm > index}></div>
 		{/each}
 		<p>0 MV</p>
 	</div>
@@ -112,5 +132,8 @@
 	}
 	.damaged {
 		background-color: red;
+	}
+	.pending-pip {
+		background-color: yellow;
 	}
 </style>

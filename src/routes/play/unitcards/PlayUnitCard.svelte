@@ -32,9 +32,9 @@
 	let critCount = $derived(auto.countCrits(unit));
 	let moveSpeeds = $derived(auto.calculateMovement(unit, reference));
 	let armorRemaining = $derived(auto.calculateArmor(unit, reference));
-	let structRemaining = $derived(auto.calculateStructure(armorRemaining, unit, reference));
+	let structRemaining = $derived(auto.calculateStructure(unit, reference));
 	let firepowerRemaining = $derived(auto.calculateFirepower(unit, reference));
-	let currentSkill = $derived(auto.calculateSkill(unit, critCount, reference));
+	let currentSkill = $derived(auto.calculateSkill(unit, critCount.current, reference));
 	let physical = $derived(auto.calculatePhysical(moveSpeeds[0].tmm, firepowerRemaining.s, reference));
 
 	function handleHeat() {
@@ -63,12 +63,12 @@
 	{#if options.renderOriginal || options.renderOriginal === undefined}
 		<p>
 			<span class="bold">{original}{min ? "*" : ""}</span>
-			{#if critCount.weapon || ((reference?.subtype == "CV" || reference?.subtype == "SV") && critCount.engine)}
+			{#if critCount.current.weapon || ((reference?.subtype == "CV" || reference?.subtype == "SV") && critCount.current.engine)}
 				(<span class="damaged-stat">{current}</span>)
 			{/if}
 		</p>
 	{:else}
-		<p class="bold" class:damaged-stat={critCount.weapon}>{current}{min && !critCount.weapon ? "*" : ""}</p>
+		<p class="bold" class:damaged-stat={critCount.current.weapon}>{current}{min && !critCount.current.weapon ? "*" : ""}</p>
 	{/if}
 {/snippet}
 
@@ -81,7 +81,7 @@
 			</div>
 			<div class="flex-between">
 				<p class="unit-name bold">{reference?.class}</p>
-				{#if structRemaining < (reference?.structure ?? 0) / 2}
+				{#if structRemaining.current < (reference?.structure ?? 0) / 2}
 					<p class="unit-half-pv">Half: {Math.round(unit.cost / 2)}</p>
 				{/if}
 			</div>
@@ -97,12 +97,14 @@
 						<p>SZ: <span class="bold">{reference?.size}</span></p>
 						{#if typeIncludes([...aeroTypes], reference)}
 							<p>
-								THR: <span class="bold" class:damaged-stat={critCount.engine}>{moveSpeeds[0].speed}{moveSpeeds[0].type}</span>
+								THR: <span class="bold" class:damaged-stat={critCount.current.engine}>{moveSpeeds[0].speed}{moveSpeeds[0].type}</span>
 							</p>
 						{:else}
 							<p>
 								TMM: {#each moveSpeeds as { tmm, type, damaged }, index}
-									<span class="bold" class:damaged-stat={damaged}>{tmm}{type == "j" ? "j" : ""}</span>{#if index + 1 != moveSpeeds.length}/{/if}
+									{#if index == 0 || (tmm != moveSpeeds[0].tmm && options.showJumpTMM)}
+										{#if index != 0}/{/if}<span class="bold" class:damaged-stat={damaged}>{tmm}{type == "j" ? "j" : ""}</span>
+									{/if}
 								{/each}
 							</p>
 							<p>
@@ -117,7 +119,7 @@
 						<p>Role: <span class="bold">{reference?.role}</span></p>
 						<p>
 							Skill: <span class="bold">{unit.skill}</span>
-							{#if unit.current.heat || critCount.firecontrol}
+							{#if unit.current.heat || critCount.current.firecontrol}
 								(<span class="damaged-stat">{currentSkill.ranged}</span>)
 							{/if}
 						</p>
@@ -175,31 +177,60 @@
 							<p>OV:</p>
 							{@render damageValue(reference.ov ?? 0, false, firepowerRemaining.ov)}
 						</div>
+						{unit.current.heat}/{unit.pending.heat}
 						<div class="heatscale">
 							<p>Heat Scale:</p>
-							<div class="heat-level heat-level-first" class:heat-level-1={unit.current.heat >= 1}>1</div>
-							<div class="heat-level" class:heat-level-2={unit.current.heat >= 2}>2</div>
-							<div class="heat-level" class:heat-level-3={unit.current.heat >= 3}>3</div>
-							<div class="heat-level heat-level-last" class:heat-level-4={unit.current.heat >= 4}>S</div>
+							<div
+								class="heat-level heat-level-first"
+								class:heat-level-1={unit.current.heat >= 1}
+								class:pending-heat={unit.pending.heat >= 1 && unit.current.heat < 1}
+								class:pending-cooldown={unit.pending.heat <= 1 && unit.current.heat > 1}
+							>
+								1
+							</div>
+							<div
+								class="heat-level"
+								class:heat-level-2={unit.current.heat >= 2}
+								class:pending-heat={unit.pending.heat >= 2 && unit.current.heat < 2}
+								class:pending-cooldown={unit.pending.heat <= 1 && unit.current.heat > 1}
+							>
+								2
+							</div>
+							<div
+								class="heat-level"
+								class:heat-level-3={unit.current.heat >= 3}
+								class:pending-heat={unit.pending.heat >= 3 && unit.current.heat < 3}
+								class:pending-cooldown={unit.pending.heat <= 1 && unit.current.heat > 1}
+							>
+								3
+							</div>
+							<div
+								class="heat-level heat-level-last"
+								class:heat-level-4={unit.current.heat >= 4}
+								class:pending-heat={unit.pending.heat >= 4 && unit.current.heat < 4}
+								class:pending-cooldown={unit.pending.heat <= 1 && unit.current.heat > 1}
+							>
+								S
+							</div>
 						</div>
 					</button>
 				{/if}
 				<button class="unit-card-block unit-health-block" class:aero-health-block={typeIncludes([...aeroTypes], reference)} onclick={handleDamage}>
-					<p>A ({armorRemaining >= 0 ? armorRemaining : 0}/{reference?.armor}):</p>
+					<p>A ({armorRemaining.current >= 0 ? armorRemaining.current : 0}/{reference?.armor}):</p>
 					<div class="health-pips">
 						{#each { length: reference?.armor ?? 0 }, index}
-							<div class="pip" class:damaged-pip={armorRemaining <= index}></div>
+							<div class="pip" class:pending-pip={armorRemaining.pending <= index} class:damaged-pip={armorRemaining.current <= index}></div>
 						{/each}
 					</div>
 					{#if typeIncludes([...aeroTypes], reference)}
 						<p class="bold">TH</p>
 					{/if}
 					<p>
-						S ({structRemaining}/{reference?.structure}):
+						S ({structRemaining.current}/{reference?.structure}):
 					</p>
 					<div class="health-pips">
 						{#each { length: reference?.structure ?? 0 }, index}
-							<div class="pip" class:damaged-pip={structRemaining <= index}></div>
+							<div class="pip" class:pending-pip={true && structRemaining.pending <= index} class:damaged-pip={structRemaining.current <= index}></div>
 						{/each}
 					</div>
 					{#if typeIncludes([...aeroTypes], reference)}
@@ -213,9 +244,9 @@
 				</div>
 			</div>
 			<div class="unit-card-right">
-				<div class="unit-image-block">
+				<div class="unit-image-block" class:unit-crippled={reference.structure && structRemaining.current < reference.structure / 2}>
 					<img src={reference?.imageLink} alt="unit" class="unit-image" />
-					{#if structRemaining <= 0 || critCount.engine >= 2 || critCount.destroyed}
+					{#if structRemaining.current <= 0 || critCount.current.engine >= 2 || critCount.current.destroyed}
 						<img src="/icons/close.svg" alt="Destroyed" class="destroyed" />
 					{/if}
 					{#if unit.current.heat >= 4}
@@ -254,14 +285,14 @@
 	<DamageModal {unit} bind:open={openDamageModal} {reference}></DamageModal>
 	<HeatModal {unit} bind:open={openHeatModal} {reference}></HeatModal>
 	<CritModal {unit} bind:open={openCritModal} {reference}></CritModal>
-	<ExpandModal {unit} bind:open={openExpandModal} {reference}></ExpandModal>
+	<ExpandModal {unit} bind:open={openExpandModal} {reference} {options}></ExpandModal>
 {:else}
 	<p>Loading unit card</p>
 {/if}
 
 <style>
 	.play-unit-card-container {
-		background-color: white;
+		background-color: rgb(255, 255, 255);
 		padding: 1cqw;
 		display: flex;
 		flex-direction: column;
@@ -370,6 +401,7 @@
 			-1px 1px 0 black,
 			1px 1px 0 black;
 	}
+
 	.heat-level-first {
 		margin-left: 1cqw;
 		border-top-left-radius: var(--radius);
@@ -380,7 +412,7 @@
 		border-bottom-right-radius: var(--radius);
 	}
 	.heat-level-1 {
-		background-color: yellow;
+		background-color: rgb(255, 255, 1);
 	}
 	.heat-level-2 {
 		background-color: orange;
@@ -391,10 +423,39 @@
 	.heat-level-4 {
 		background-color: red;
 	}
+	@keyframes glowingHot {
+		0% {
+		}
+		50% {
+			background-color: darkred;
+		}
+		100% {
+		}
+	}
+	.pending-heat {
+		animation: glowingHot 2000ms infinite;
+	}
+	@keyframes glowingCool {
+		0% {
+		}
+		50% {
+			background-color: skyblue;
+		}
+		100% {
+		}
+	}
+
+	.pending-cooldown {
+		animation: glowingCool 2000ms infinite;
+	}
 	.unit-health-block {
 		display: grid;
 		grid-template-columns: max-content 1fr;
 		column-gap: 0.5cqw;
+	}
+	.unit-crippled {
+		border: 1.5cqmax solid white;
+		border-image: repeating-linear-gradient(-55deg, #000, #000 20px, #ffb101 20px, #ffb101 40px) 10;
 	}
 	.aero-health-block {
 		grid-template-columns: max-content 1fr max-content;
@@ -414,6 +475,9 @@
 		border-radius: 50%;
 		height: 3cqmax;
 		width: 3cqmax;
+	}
+	.pending-pip {
+		background-color: yellow;
 	}
 	.damaged-pip {
 		background-color: red;

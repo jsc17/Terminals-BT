@@ -4,7 +4,7 @@ import { mechTypes, typeIncludes, vTypes } from "./utilities";
 export type CritList = { [key: string]: any; engine: number; firecontrol: number; mp: number; weapon: number; destroyed: number; mhit: number; mhalf: number; mimm: number };
 
 export function countCrits(unit: PlayUnit) {
-	let currentCrits: CritList = {
+	let current: CritList = {
 		engine: 0,
 		firecontrol: 0,
 		mp: 0,
@@ -14,21 +14,44 @@ export function countCrits(unit: PlayUnit) {
 		mhalf: 0,
 		mimm: 0
 	};
+
+	let pending: CritList = {
+		engine: 0,
+		firecontrol: 0,
+		mp: 0,
+		weapon: 0,
+		destroyed: 0,
+		mhit: 0,
+		mhalf: 0,
+		mimm: 0
+	};
+
 	for (const crit of unit.current.crits) {
-		currentCrits[crit.type] += 1;
+		current[crit.type] += 1;
 	}
-	return currentCrits;
+	for (const crit of unit.pending.crits) {
+		pending[crit.type] += 1;
+	}
+	return { current, pending };
 }
 
 export function calculateArmor(unit: PlayUnit, reference?: MulUnit) {
-	return (reference?.armor ?? 0) - unit.current.damage;
+	const current = (reference?.armor ?? 0) - unit.current.damage;
+	const pending = current - unit.pending.damage;
+	return { current, pending };
 }
 
-export function calculateStructure(armorRemaining: number, unit: PlayUnit, reference?: MulUnit) {
-	if (armorRemaining < 0) {
-		return (reference?.structure ?? 0) + armorRemaining;
+export function calculateStructure(unit: PlayUnit, reference?: MulUnit) {
+	const totalArmor = reference?.armor ?? 0;
+	const totalStructure = reference?.structure ?? 0;
+
+	if (unit.current.damage + unit.pending.damage > totalArmor) {
+		const current = totalArmor + totalStructure - unit.current.damage;
+		const pending = current - unit.pending.damage;
+
+		return { current, pending };
 	} else {
-		return reference?.structure ?? 0;
+		return { current: totalStructure, pending: totalStructure };
 	}
 }
 

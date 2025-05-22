@@ -13,7 +13,7 @@
 </script>
 
 <Popover.Root bind:open>
-	<Popover.Trigger class="popover-play-toolbar-button">Display Options</Popover.Trigger>
+	<Popover.Trigger class="popover-play-toolbar-button">Settings</Popover.Trigger>
 	<Popover.Content class="popover-play-toolbar-display-body">
 		<div class="option-row">
 			UI Scale:
@@ -27,6 +27,12 @@
 		</div>
 		<div class="option-row">
 			<label><input type="checkbox" bind:checked={options.showPhysical} /> Show physical damage on unit card</label>
+		</div>
+		<div class="option-row">
+			<label><input type="checkbox" bind:checked={options.showCrippled} /> Show unit crippled at half structure</label>
+		</div>
+		<div class="option-row">
+			<label><input type="checkbox" bind:checked={options.showJumpTMM} /> Show units jump TMM</label>
 		</div>
 	</Popover.Content>
 </Popover.Root>

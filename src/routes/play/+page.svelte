@@ -5,6 +5,9 @@
 	import OptionsPopover from "./components/OptionsPopover.svelte";
 	import type { Options } from "./types";
 
+	const playList = new PersistedState<PlayList>("playList", { formations: [], units: [] });
+	const options = new PersistedState<Options>("playOptions", { renderOriginal: true, uiScale: 50, showPhysical: false, showCrippled: true, showJumpTMM: true, confirmEnd: true });
+
 	function resetUnits() {
 		if (playList) {
 			const reset = confirm("Are you sure you wish to reset all units to default? This cannot be undone.");
@@ -16,17 +19,33 @@
 			}
 		}
 	}
-	const playList = new PersistedState<PlayList>("playList", { formations: [], units: [] });
-	const options = new PersistedState<Options>("playOptions", { renderOriginal: true, uiScale: 50, showPhysical: false });
+
+	function endRound() {
+		if (playList) {
+			const end = confirm("End round and apply all pending damage, heat, and critical effects?");
+			if (end) {
+				for (const unit of playList.current.units) {
+					unit.current.damage = unit.current.damage + unit.pending.damage;
+					unit.current.heat = unit.pending.heat;
+					unit.current.crits = unit.current.crits.concat(unit.pending.crits);
+
+					unit.pending.damage = 0;
+					unit.pending.crits = [];
+				}
+			}
+		}
+	}
 </script>
 
 <div class="play-body">
 	<div class="toolbar">
-		<div class="toolbar-section"></div>
+		<button class="toolbar-button end-round-button" onclick={endRound}>End Round</button>
 		<div class="toolbar-section">
 			<OptionsPopover bind:options={options.current}></OptionsPopover>
 			<button class="toolbar-button" onclick={resetUnits}>Reset List</button>
+			<button class="toolbar-button" disabled>Load List</button>
 		</div>
+		<button class="toolbar-button log-button" disabled>Log</button>
 	</div>
 	<p class="announcement">
 		Still Beta, but getting better. Basic automation done, but doesn't apply abilities or SPAs. Everything subject to change at my whim. Click on a units name to expand its card.
@@ -55,19 +74,24 @@
 		overflow: auto;
 	}
 	.toolbar {
-		position: sticky;
-		top: 0;
 		background-color: var(--card);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
+		position: sticky;
+		top: 0;
 		display: flex;
 		justify-content: space-between;
 		z-index: 2;
 	}
 	.toolbar-section {
+		flex: 1;
 		display: flex;
 		gap: 8px;
 		align-items: center;
+		border-left: 3px solid var(--border);
+		border-right: 3px solid var(--border);
+		padding: 0px 16px;
+		justify-content: flex-end;
 	}
 	.toolbar-button {
 		padding: 12px;
@@ -75,6 +99,14 @@
 		background-color: transparent;
 		border-radius: 0;
 		color: var(--card-foreground);
+	}
+	.log-button,
+	.end-round-button {
+		min-width: min(25dvw, 100px);
+	}
+	.end-round-button {
+		border-top-left-radius: var(--radius);
+		border-bottom-left-radius: var(--radius);
 	}
 	.toolbar-button:hover {
 		background-color: var(--muted);

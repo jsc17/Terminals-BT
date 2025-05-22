@@ -4,7 +4,7 @@
 
 	type Props = {
 		unit: PlayUnit;
-		critCount: CritList;
+		critCount: { current: CritList; pending: CritList };
 	};
 
 	let { unit, critCount }: Props = $props();
@@ -14,7 +14,11 @@
 	<p class="crit-header">Engine</p>
 	<div class="crit-line">
 		{#each { length: 1 }, index}
-			<div class="pip" class:damaged={critCount.engine > index}></div>
+			<div
+				class="pip"
+				class:damaged={critCount.current.engine > index}
+				class:pending-pip={critCount.current.engine <= index && critCount.current.engine + critCount.pending.engine > index}
+			></div>
 		{/each}
 		<p>+1 Heat / Firing</p>
 	</div>
@@ -22,21 +26,29 @@
 	<p class="crit-header">Fire Control</p>
 	<div class="crit-line">
 		{#each { length: 4 }, index}
-			<div class="pip" class:damaged={critCount.firecontrol > index}></div>
+			<div
+				class="pip"
+				class:damaged={critCount.current.firecontrol > index}
+				class:pending-pip={critCount.current.firecontrol <= index && critCount.current.firecontrol + critCount.pending.firecontrol > index}
+			></div>
 		{/each}
 		<p>+2 To-Hit</p>
 	</div>
 	<p class="crit-header">MP</p>
 	<div class="crit-line">
 		{#each { length: 4 }, index}
-			<div class="pip" class:damaged={critCount.mp > index}></div>
+			<div class="pip" class:damaged={critCount.current.mp > index} class:pending-pip={critCount.current.mp <= index && critCount.current.mp + critCount.pending.mp > index}></div>
 		{/each}
 		<p>1/2 MV</p>
 	</div>
 	<p class="crit-header">Weapons</p>
 	<div class="crit-line">
 		{#each { length: 4 }, index}
-			<div class="pip" class:damaged={critCount.weapon > index}></div>
+			<div
+				class="pip"
+				class:damaged={critCount.current.weapon > index}
+				class:pending-pip={critCount.current.weapon <= index && critCount.current.weapon + critCount.pending.weapon > index}
+			></div>
 		{/each}
 		<p>-1 Dmg</p>
 	</div>
@@ -79,5 +91,8 @@
 	}
 	.damaged {
 		background-color: red;
+	}
+	.pending-pip {
+		background-color: yellow;
 	}
 </style>

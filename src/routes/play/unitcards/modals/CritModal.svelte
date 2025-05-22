@@ -12,16 +12,6 @@
 
 	let { unit, open = $bindable(false), reference }: Props = $props();
 
-	watch(
-		() => open,
-		() => {
-			if (open) {
-				currentCritSelection = "";
-				undoSelection = "";
-			}
-		}
-	);
-
 	let currentCritSelection = $state<string>("");
 
 	const availableButtons = $derived.by(() => {
@@ -59,6 +49,8 @@
 			}
 			const newCrit = { id: nanoid(6), type: critType.toLowerCase().replaceAll(" ", "") };
 			unit.current.crits.push(newCrit);
+			currentCritSelection = "";
+			undoSelection = "";
 			open = false;
 		}
 	}
@@ -69,6 +61,29 @@
 			return crit.id == undoSelection;
 		});
 		unit.current.crits.splice(critIndex, 1);
+	}
+
+	function pendCrit() {
+		if (currentCritSelection != "") {
+			let critType = currentCritSelection;
+			if (critType == "Ammo Hit / Destroyed" || critType == "Ammo Hit / Crew Killed" || critType == "Unit Destroyed" || critType == "Fuel Hit / Crew Killed") {
+				critType = "destroyed";
+			}
+			if (critType == "-2 MV") {
+				critType = "mhit";
+			}
+			if (critType == "1/2 MV") {
+				critType = "mhalf";
+			}
+			if (critType == "0 MV") {
+				critType = "mimm";
+			}
+			const newCrit = { id: nanoid(6), type: critType.toLowerCase().replaceAll(" ", "") };
+			unit.pending.crits.push(newCrit);
+			currentCritSelection = "";
+			undoSelection = "";
+			open = false;
+		}
 	}
 </script>
 
@@ -110,7 +125,7 @@
 		<div class="apply-buttons">
 			<button onclick={applyCrit}>Apply Now</button>
 			<div class="temp-div">
-				<button disabled>Apply At End of Round <br /> (not implemented yet)</button>
+				<button onclick={pendCrit}>Apply At End of Round</button>
 			</div>
 		</div>
 		<div class="remove-button-row">

@@ -4,9 +4,15 @@
 	import { PersistedState } from "runed";
 	import OptionsPopover from "./components/OptionsPopover.svelte";
 	import type { Options } from "./types";
+	import Drawer from "$lib/components/Generic/Drawer.svelte";
+	import LoadModal from "./LoadModal.svelte";
+	import { deserialize } from "$app/forms";
 
 	const playList = new PersistedState<PlayList>("playList", { formations: [], units: [] });
 	const options = new PersistedState<Options>("playOptions", { renderOriginal: true, uiScale: 50, showPhysical: false, showCrippled: true, showJumpTMM: true, confirmEnd: true });
+	let logDrawerOpen = $state(false);
+	let loadModalOpen = $state(false);
+	let lists: { name: string; units: string; formations: string }[] = $state([]);
 
 	function resetUnits() {
 		if (playList) {
@@ -35,6 +41,15 @@
 			}
 		}
 	}
+	function openLog() {
+		logDrawerOpen = !logDrawerOpen;
+	}
+
+	async function openLoadModal() {
+		const response: any = deserialize(await (await fetch("?/loadLists", { method: "POST", body: "" })).text());
+		lists = JSON.parse(response.data.lists);
+		loadModalOpen = true;
+	}
 </script>
 
 <div class="play-body">
@@ -43,9 +58,9 @@
 		<div class="toolbar-section">
 			<OptionsPopover bind:options={options.current}></OptionsPopover>
 			<button class="toolbar-button" onclick={resetUnits}>Reset List</button>
-			<button class="toolbar-button" disabled>Load List</button>
+			<button class="toolbar-button" onclick={openLoadModal}>Load List</button>
 		</div>
-		<button class="toolbar-button log-button" disabled>Log</button>
+		<button class="toolbar-button log-button" onclick={openLog}>Log</button>
 	</div>
 	<p class="announcement">
 		Still Beta, but getting better. Basic automation done, but doesn't apply abilities or SPAs. Everything subject to change at my whim. Click on a units name to expand its card.
@@ -60,6 +75,12 @@
 		</div>
 	{/if}
 </div>
+
+<Drawer bind:open={logDrawerOpen} side={"right"}>
+	<p>Coming soon ...</p>
+</Drawer>
+
+<LoadModal bind:open={loadModalOpen} {lists} bind:playList={playList.current}></LoadModal>
 
 <style>
 	.list-load-error-body {

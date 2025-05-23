@@ -7,7 +7,7 @@
 	import ProtoCritBox from "./card-components/ProtoCritBox.svelte";
 	import { DamageModal, HeatModal, CritModal } from "./modals";
 	import ExpandModal from "./modals/ExpandModal.svelte";
-	import { loadreference } from "./utilities/load";
+	import { loadreference } from "./utilities/loadReference";
 	import * as auto from "./utilities/automation";
 	import type { Options } from "../types";
 	import { infTypes, mechTypes, typeIncludes, vTypes } from "./utilities/utilities";

@@ -5,7 +5,7 @@ import { abilityReferences, spaReferences, ammoReferences, formationReferences }
 import { existsSync } from "fs";
 import fs from "fs/promises";
 import type { UnitV2 } from "$lib/types/unit";
-import { getFormationTypeByName, type FormationType, type FormationV2 } from "../types/formation";
+import { getFormationTypeByName, type FormationType, type FormationV2 } from "$lib/types/formation";
 import { printer } from "$lib/server/printer";
 import { type SCA, getSCAfromName } from "../types/sca";
 
@@ -327,28 +327,33 @@ async function createUnitCardColumns(unitList: UnitV2[], formations: FormationV2
 			} else {
 				path = `./files/cached-cards/${unit.baseUnit.mulId}-${unit.skill}.png`;
 			}
-			let img = await loadImage(path);
-			const canvas = new Canvas(img.width, img.height);
-			const ctx = canvas.getContext("2d");
-			ctx.drawImage(img, 0, 0);
-			if (unit.customization.spa?.length) {
-				let spaCost = 0;
-				unit.customization.spa.forEach((spa) => {
-					spaCost +=
-						spaReferences.find(({ name }) => {
-							return name == spa;
-						})?.cost ?? 0;
-				});
-				ctx.font = "18pt serif";
-				ctx.fillText(`SPA (${spaCost}): ${unit.customization.spa.join(", ")}`, 50, 643);
-			}
-			if (unit.customization.ammo?.length) {
-				ctx.font = "18pt serif";
-				ctx.fillText(`Alt. Ammo: ${unit.customization.ammo.join(", ")}`, 50, 607);
-			}
+			if (!unit.customization.spa && !unit.customization.ammo) {
+				unitCards.push({ image: path, width: 250 });
+			} else {
+				console.log("generating unit");
+				let img = await loadImage(path);
+				const canvas = new Canvas(img.width, img.height);
+				const ctx = canvas.getContext("2d");
+				ctx.drawImage(img, 0, 0);
+				if (unit.customization.spa?.length) {
+					let spaCost = 0;
+					unit.customization.spa.forEach((spa) => {
+						spaCost +=
+							spaReferences.find(({ name }) => {
+								return name == spa;
+							})?.cost ?? 0;
+					});
+					ctx.font = "18pt serif";
+					ctx.fillText(`SPA (${spaCost}): ${unit.customization.spa.join(", ")}`, 50, 643);
+				}
+				if (unit.customization.ammo?.length) {
+					ctx.font = "18pt serif";
+					ctx.fillText(`Alt. Ammo: ${unit.customization.ammo.join(", ")}`, 50, 607);
+				}
 
-			const buffer = await canvas.toBuffer("png");
-			unitCards.push({ image: buffer, width: 250 });
+				const buffer = await canvas.toBuffer("png");
+				unitCards.push({ image: buffer, width: 250 });
+			}
 		}
 		unitCardColumns.push({
 			columns: [

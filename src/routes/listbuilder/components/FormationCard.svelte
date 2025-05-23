@@ -5,13 +5,14 @@
 	import Menu from "$lib/components/Generic/Menu.svelte";
 	import { getContext } from "svelte";
 	import type { List } from "../types/list.svelte";
-	import { type FormationV2 } from "../types/formation";
+	import { type FormationV2 } from "$lib/types/formation";
 	import { exportToJeff } from "../utilities/export.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { Popover } from "bits-ui";
 	import UnitCustomizationModal from "./UnitCustomizationModal.svelte";
 	import EditFormationModal from "./EditFormationModal.svelte";
 	import Collapsible from "$lib/components/Generic/Collapsible.svelte";
+	import { sendListToPlay } from "$lib/types/playList";
 
 	type Props = { formation: FormationV2; draggingColumns: boolean; unitCustomizationModal?: UnitCustomizationModal };
 
@@ -145,6 +146,12 @@
 				<div class="formation-header-buttons">
 					{@render infoPopover()}
 					<Menu img={"/icons/menu.svg"}>
+						<button
+							class="transparent-button"
+							onclick={() => {
+								sendListToPlay([formation], list.units);
+							}}>Play Formation</button
+						>
 						{@render jeffExportButton()}
 					</Menu>
 					<button
@@ -175,6 +182,12 @@
 						onclick={() => {
 							editModalOpen = true;
 						}}>Edit Formation</button
+					>
+					<button
+						class="transparent-button"
+						onclick={() => {
+							sendListToPlay([formation], list.units);
+						}}>Play Formation</button
 					>
 					{@render jeffExportButton()}
 					<button

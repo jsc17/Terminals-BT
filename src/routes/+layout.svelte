@@ -3,6 +3,7 @@
 	import Header from "$lib/components/Header.svelte";
 	import Toast from "$lib/components/Toast.svelte";
 	import { setContext } from "svelte";
+	import "$lib/css/global.css";
 
 	const { data, children } = $props();
 	let user = $state({ username: data.username });

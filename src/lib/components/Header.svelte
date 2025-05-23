@@ -72,6 +72,8 @@
 			Changelog
 		{:else if page.url.pathname == "/settings"}
 			Settings
+		{:else if page.url.pathname == "/play"}
+			Digital List
 		{/if}
 	</button>
 	<nav bind:this={navbar} id="navbar">
@@ -81,6 +83,7 @@
 			<hr />
 			<li><a href="/listbuilder" aria-current={page.url.pathname === "/listbuilder"} onclick={closeNav}>Alpha Strike Listbuilder</a></li>
 			<li><a href="/unitsearch" aria-current={page.url.pathname === "/unitsearch"} onclick={closeNav}>Alpha Strike Unit Search</a></li>
+			<li><a href="/play" aria-current={page.url.pathname === "/play"} onclick={closeNav}>Alpha Strike Digital List</a></li>
 			<hr />
 			<li><a href="http://masterunitlist.info" target="_blank">Master Unit List</a></li>
 			<li><a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">Wolfnet 350 Rules</a></li>
@@ -145,7 +148,7 @@
 		flex-shrink: 0;
 	}
 	.link-button {
-		img {
+		& img {
 			height: 30px;
 			width: 30px;
 			filter: var(--primary-filter);

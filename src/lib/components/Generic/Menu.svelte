@@ -1,24 +1,34 @@
 <script lang="ts">
 	import { type Snippet } from "svelte";
-	let { text, children, img }: { text?: string; children: Snippet; img?: string } = $props();
+
+	type Props = {
+		children: Snippet;
+		img?: string;
+		text?: string;
+		trigger?: Snippet;
+	};
+
+	let { text, children, img, trigger }: Props = $props();
 	let showMenuBar = $state(false);
 </script>
 
 <menu class="dropdown">
 	<button
-		class="menu-button"
 		onclick={() => {
 			showMenuBar = !showMenuBar;
 		}}
 	>
-		{#if text}
-			{text}
+		{#if trigger}
+			{@render trigger()}
+		{:else if text}
+			<div class="menu-button">{text}</div>
 		{:else if img}
-			<img class="menu-image" src={img} alt="Context menu icon" />
+			<div class="menu-button"><img class="menu-image" src={img} alt="Context menu icon" /></div>
 		{:else}
-			menu
+			<div class="menu-button">menu</div>
 		{/if}
 	</button>
+
 	<div
 		class="dropdown-content dropdown-right"
 		class:dropdown-hidden={!showMenuBar}
@@ -40,17 +50,19 @@
 
 <style>
 	.menu-button {
-		img {
-			height: 20px;
-			width: 20px;
-			filter: invert(0%) sepia(6%) saturate(24%) hue-rotate(244deg) brightness(93%) contrast(105%);
-		}
 		background-color: var(--primary);
 		display: flex;
 		font-size: 16px;
 		min-width: 40px;
 		align-items: center;
 		justify-content: center;
+		color: black;
+
+		& img {
+			height: 20px;
+			width: 20px;
+			filter: invert(0%) sepia(6%) saturate(24%) hue-rotate(244deg) brightness(93%) contrast(105%);
+		}
 	}
 	.overlay {
 		display: none;

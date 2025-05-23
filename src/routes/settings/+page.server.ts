@@ -1,6 +1,6 @@
 import { fail, redirect } from "@sveltejs/kit";
 import { prisma } from "$lib/server/prisma.js";
-import { Argon2id } from "oslo/password";
+import { hash, verify } from "@node-rs/argon2";
 
 export const load = async ({ locals }) => {
 	if (!locals.user) {
@@ -75,11 +75,11 @@ export const actions = {
 			return fail(400, { message: "User account not found. Please try again." });
 		}
 
-		if (!(await new Argon2id().verify(existingUser.hashedPassword ?? "", currentPassword))) {
+		if (!(await verify(existingUser.hashedPassword ?? "", currentPassword))) {
 			return fail(401, { message: "Current password is invalid" });
 		}
 
-		const hashedPassword = await new Argon2id().hash(newPassword);
+		const hashedPassword = await hash(newPassword);
 
 		await prisma.user.update({
 			where: {

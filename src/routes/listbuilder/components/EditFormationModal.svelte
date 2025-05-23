@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getContext } from "svelte";
-	import { getFormationTypeByName, type FormationType, type FormationV2 } from "../types/formation";
+	import { getFormationTypeByName, type FormationType, type FormationV2 } from "$lib/types/formation";
 	import type { List } from "../types/list.svelte";
 	import Select from "$lib/components/Generic/Select.svelte";
 	import formationTypes from "$lib/data/formationTypes.json" assert { type: "json" };

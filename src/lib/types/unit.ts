@@ -47,3 +47,21 @@ export type UnitV2 = {
 	cost: number;
 	customization: UnitCustomization;
 };
+
+export type PlayUnit = {
+	id: string;
+	mulId: string;
+	skill?: number;
+	cost: number;
+	customization?: UnitCustomization;
+	pending: {
+		damage: number;
+		heat: number;
+		crits: { id: string; type: string }[];
+	};
+	current: {
+		damage: number;
+		heat: number;
+		crits: { id: string; type: string }[];
+	};
+};

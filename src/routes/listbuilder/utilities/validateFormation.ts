@@ -1,4 +1,4 @@
-import type { FormationV2 } from "../types/formation";
+import type { FormationV2 } from "$lib/types/formation";
 import type { List } from "../types/list.svelte";
 
 export function validateFormation(formation: FormationV2, list: List) {

@@ -247,9 +247,6 @@
 	tbody tr:nth-child(even) {
 		background-color: var(--muted);
 	}
-	th {
-		border-bottom: 1px solid var(--border);
-	}
 	.selected {
 		box-shadow: 5px 0px 5px var(--primary) inset;
 	}

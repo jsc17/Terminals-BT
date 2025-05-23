@@ -1,0 +1,20 @@
+.bold {
+	font-weight: bold;
+}
+.italic {
+	font-style: italic;
+}
+.flex-4 {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+.flex-column {
+	display: flex;
+	flex-direction: column;
+}
+.flex-between {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}

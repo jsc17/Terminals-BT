@@ -13,6 +13,9 @@
 		<li>
 			<p><a href="/unitsearch">Alpha Strike Unit Lookup</a>: Detailed unit search.</p>
 		</li>
+		<li>
+			<p><a href="/play">Alpha Strike Digital List</a>(Beta): Digital card list to play alphastrike with out printing.</p>
+		</li>
 	</ul>
 	<h2>Wolfnet 350</h2>
 	<ul>

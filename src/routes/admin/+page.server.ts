@@ -3,13 +3,11 @@ import eraLists from "$lib/data/erasFactionsList.json";
 import { fail, redirect } from "@sveltejs/kit";
 import { sendResetEmail } from "$lib/emails/mailer.server.js";
 import fs from "fs/promises";
-import { calculateTMM } from "$lib/utilities/bt-utils.js";
 import { eraLookup as eraLookup, factionLookup as factionLookup } from "$lib/data/erasFactionLookup.js";
-import { connect } from "http2";
 
 export const load = async ({ locals }) => {
 	if (!locals.user || locals.user.username.toLowerCase() != "terminal") {
-		redirect(302, "/");
+		redirect(303, "/");
 	}
 };
 

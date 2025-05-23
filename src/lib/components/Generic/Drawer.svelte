@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onClickOutside } from "runed";
+	import { onClickOutside, watch } from "runed";
 	import type { Snippet } from "svelte";
 
 	type Props = {
@@ -11,9 +11,21 @@
 	let { open = $bindable(), children, side = "left" }: Props = $props();
 	let drawer = $state<HTMLElement>();
 
-	onClickOutside(
+	const closeListener = onClickOutside(
 		() => drawer,
-		() => (open = closed)
+		() => (open = closed),
+		{ immediate: false }
+	);
+
+	watch(
+		() => open,
+		() => {
+			if (open) {
+				closeListener.start();
+			} else {
+				closeListener.stop();
+			}
+		}
 	);
 </script>
 
@@ -35,13 +47,12 @@
 	.drawer {
 		position: fixed;
 		top: 0;
-		width: min(20em, 90%);
+		width: min(max-content, 90%);
 		height: 100%;
 		z-index: 10;
 		display: flex;
 		flex-direction: column;
 		background-color: var(--background);
-		padding: 16px;
 	}
 	.drawer-left {
 		left: -100%;

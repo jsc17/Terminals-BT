@@ -7,7 +7,7 @@ import { eraLookup as eraLookup, factionLookup as factionLookup } from "$lib/dat
 
 export const load = async ({ locals }) => {
 	if (!locals.user || locals.user.username.toLowerCase() != "terminal") {
-		redirect(302, "/");
+		redirect(303, "/");
 	}
 };
 

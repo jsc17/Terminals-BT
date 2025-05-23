@@ -48,6 +48,7 @@ export function sendListToPlay(formations: FormationV2[], units: UnitV2[]) {
 		let overwrite = confirm("Game already in progress, do you wish to overwrite the existing list?");
 		if (overwrite) {
 			localStorage.setItem("playList", JSON.stringify(playList));
+			localStorage.removeItem("playCurrentRound");
 			window.location.href = "/play";
 		} else {
 			let loadGame = confirm("Do you wish to load the game in progress?");

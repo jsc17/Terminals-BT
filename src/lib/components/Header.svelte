@@ -148,7 +148,7 @@
 		flex-shrink: 0;
 	}
 	.link-button {
-		img {
+		& img {
 			height: 30px;
 			width: 30px;
 			filter: var(--primary-filter);

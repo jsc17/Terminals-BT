@@ -2,15 +2,17 @@
 	import { Dialog } from "$lib/components/Generic";
 	import type { MulUnit, PlayUnit } from "$lib/types/unit";
 	import { nanoid } from "nanoid";
-	import { watch } from "runed";
+	import { getContext, untrack } from "svelte";
+	import type { LogRound } from "../../types";
 
 	type Props = {
 		unit: PlayUnit;
 		reference: MulUnit;
 		open: boolean;
+		currentRoundLog: LogRound;
 	};
 
-	let { unit, open = $bindable(false), reference }: Props = $props();
+	let { unit, open = $bindable(false), reference, currentRoundLog }: Props = $props();
 
 	let currentCritSelection = $state<string>("");
 
@@ -47,20 +49,19 @@
 			if (critType == "0 MV") {
 				critType = "mimm";
 			}
-			const newCrit = { id: nanoid(6), type: critType.toLowerCase().replaceAll(" ", "") };
+			const critId = nanoid(6);
+			const newCrit = { id: critId, type: critType.toLowerCase().replaceAll(" ", "") };
 			unit.current.crits.push(newCrit);
+			currentRoundLog.logs.push({
+				unitId: unit.id,
+				unitName: reference.name,
+				crit: { id: critId, type: critType.toLowerCase().replaceAll(" ", ""), name: currentCritSelection },
+				applied: true,
+				undone: false
+			});
 			currentCritSelection = "";
-			undoSelection = "";
 			open = false;
 		}
-	}
-
-	let undoSelection = $state<string>();
-	function undoCrit() {
-		let critIndex = unit.current.crits.findIndex((crit) => {
-			return crit.id == undoSelection;
-		});
-		unit.current.crits.splice(critIndex, 1);
 	}
 
 	function pendCrit() {
@@ -78,10 +79,18 @@
 			if (critType == "0 MV") {
 				critType = "mimm";
 			}
-			const newCrit = { id: nanoid(6), type: critType.toLowerCase().replaceAll(" ", "") };
+			const critId = nanoid(6);
+			const newCrit = { id: critId, type: critType.toLowerCase().replaceAll(" ", "") };
 			unit.pending.crits.push(newCrit);
+			currentRoundLog.logs.push({
+				unitId: unit.id,
+				unitName: reference.name,
+				crit: { id: critId, type: critType.toLowerCase().replaceAll(" ", ""), name: currentCritSelection },
+				applied: false,
+				undone: false
+			});
+
 			currentCritSelection = "";
-			undoSelection = "";
 			open = false;
 		}
 	}
@@ -128,14 +137,6 @@
 				<button onclick={pendCrit}>Apply At End of Round</button>
 			</div>
 		</div>
-		<div class="remove-button-row">
-			<select bind:value={undoSelection}>
-				{#each Object.values(unit.current.crits) as crit}
-					<option value={crit.id}>{crit.type}</option>
-				{/each}
-			</select>
-			<button class="remove-button" onclick={undoCrit}>Undo Critical</button>
-		</div>
 	</div>
 </Dialog>
 
@@ -149,13 +150,15 @@
 
 	.crit-button-list {
 		border: 1px solid var(--border);
-		display: grid;
-		grid-template-columns: repeat(auto-fill, min(30dvw, 150px));
+		display: flex;
+		flex-wrap: wrap;
 		gap: 16px;
 	}
 	.crit-button {
 		font-size: 16px;
 		font-weight: bold;
+		min-width: min(30dvw, 150px);
+		max-width: min(45dvw, 300px);
 		padding: 8px;
 	}
 	.apply-buttons {
@@ -165,17 +168,9 @@
 		gap: 24px;
 		margin-top: 16px;
 
-		button {
+		& button {
 			padding: 8px;
 			font-size: 18px;
 		}
-	}
-	.remove-button-row {
-		display: flex;
-		width: 100%;
-		justify-content: end;
-	}
-	.remove-button {
-		background-color: var(--error);
 	}
 </style>

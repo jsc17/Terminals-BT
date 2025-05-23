@@ -4,6 +4,7 @@
 	import type { PlayList } from "$lib/types/playList";
 	import { getNewSkillCost } from "$lib/utilities/bt-utils";
 	import { getContext } from "svelte";
+	import type { LogRound } from "./types";
 
 	type Props = {
 		open: boolean;
@@ -45,6 +46,7 @@
 		}
 		playList.units = newPlaylist.units;
 		playList.formations = newPlaylist.formations;
+		localStorage.removeItem("playCurrentRound");
 		location.reload();
 	}
 </script>

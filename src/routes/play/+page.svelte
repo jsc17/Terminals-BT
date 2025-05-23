@@ -3,18 +3,23 @@
 	import PlayFormationCard from "./PlayFormationCard.svelte";
 	import { PersistedState } from "runed";
 	import OptionsPopover from "./components/OptionsPopover.svelte";
-	import type { Options } from "./types";
-	import Drawer from "$lib/components/Generic/Drawer.svelte";
+	import type { LogRound, Options } from "./types";
 	import LoadModal from "./LoadModal.svelte";
 	import { deserialize } from "$app/forms";
+	import Log from "./Log.svelte";
+	import { appWindow } from "$lib/stores/appWindow.svelte";
+	import { Popover } from "$lib/components/Generic/";
 
-	const playList = new PersistedState<PlayList>("playList", { formations: [], units: [] });
-	const options = new PersistedState<Options>("playOptions", { renderOriginal: true, uiScale: 50, showPhysical: false, showCrippled: true, showJumpTMM: true, confirmEnd: true });
 	let logDrawerOpen = $state(false);
 	let loadModalOpen = $state(false);
 	let lists: { name: string; units: string; formations: string }[] = $state([]);
 
-	function resetUnits() {
+	const playList = new PersistedState<PlayList>("playList", { formations: [], units: [] });
+	const options = new PersistedState<Options>("playOptions", { renderOriginal: true, uiScale: 50, showPhysical: false, showCrippled: true, showJumpTMM: true, confirmEnd: true });
+	const currentRoundLog = new PersistedState<LogRound>("playCurrentRound", { round: 1, logs: [] });
+	let fullLogs: LogRound[] = $state([]);
+
+	function resetList() {
 		if (playList) {
 			const reset = confirm("Are you sure you wish to reset all units to default? This cannot be undone.");
 			if (reset) {
@@ -22,6 +27,8 @@
 					unit.current = { damage: 0, heat: 0, crits: [] };
 					unit.pending = { damage: 0, heat: 0, crits: [] };
 				}
+				fullLogs = [];
+				currentRoundLog.current = { round: 1, logs: [] };
 			}
 		}
 	}
@@ -38,9 +45,15 @@
 					unit.pending.damage = 0;
 					unit.pending.crits = [];
 				}
+				for (const log of currentRoundLog.current.logs) {
+					log.applied = true;
+				}
+				fullLogs.push({ round: currentRoundLog.current.round, logs: currentRoundLog.current.logs });
+				currentRoundLog.current = { round: currentRoundLog.current.round + 1, logs: [] };
 			}
 		}
 	}
+
 	function openLog() {
 		logDrawerOpen = !logDrawerOpen;
 	}
@@ -55,10 +68,25 @@
 <div class="play-body">
 	<div class="toolbar">
 		<button class="toolbar-button end-round-button" onclick={endRound}>End Round</button>
+		<div class="toolbar-section"></div>
+		<div class="toolbar-item">Round: {currentRoundLog.current.round}</div>
 		<div class="toolbar-section">
-			<OptionsPopover bind:options={options.current}></OptionsPopover>
-			<button class="toolbar-button" onclick={resetUnits}>Reset List</button>
-			<button class="toolbar-button" onclick={openLoadModal}>Load List</button>
+			{#if appWindow.isNarrow}
+				<div class="play-menu-container">
+					<Popover>
+						{#snippet trigger()}
+							<div class="menu-trigger-button">Menu</div>
+						{/snippet}
+						<OptionsPopover bind:options={options.current}></OptionsPopover>
+						<button class="toolbar-button" onclick={resetList}>Reset List</button>
+						<button class="toolbar-button" onclick={openLoadModal}>Load List</button>
+					</Popover>
+				</div>
+			{:else}
+				<OptionsPopover bind:options={options.current}></OptionsPopover>
+				<button class="toolbar-button" onclick={resetList}>Reset List</button>
+				<button class="toolbar-button" onclick={openLoadModal}>Load List</button>
+			{/if}
 		</div>
 		<button class="toolbar-button log-button" onclick={openLog}>Log</button>
 	</div>
@@ -67,7 +95,7 @@
 	</p>
 	{#if playList.current.formations.length}
 		{#each playList.current.formations as formation}
-			<PlayFormationCard {formation} units={playList.current.units} options={options.current}></PlayFormationCard>
+			<PlayFormationCard {formation} units={playList.current.units} options={options.current} currentRoundLog={currentRoundLog.current}></PlayFormationCard>
 		{/each}
 	{:else}
 		<div class="list-load-error-body">
@@ -76,10 +104,7 @@
 	{/if}
 </div>
 
-<Drawer bind:open={logDrawerOpen} side={"right"}>
-	<p>Coming soon ...</p>
-</Drawer>
-
+<Log bind:open={logDrawerOpen} currentRoundLog={currentRoundLog.current} {fullLogs} playList={playList.current}></Log>
 <LoadModal bind:open={loadModalOpen} {lists} bind:playList={playList.current}></LoadModal>
 
 <style>
@@ -109,10 +134,31 @@
 		display: flex;
 		gap: 8px;
 		align-items: center;
-		border-left: 3px solid var(--border);
-		border-right: 3px solid var(--border);
 		padding: 0px 16px;
 		justify-content: flex-end;
+	}
+	.play-menu-container {
+		display: flex;
+		height: 100%;
+		width: 100%;
+		align-items: center;
+		justify-content: center;
+	}
+	.menu-trigger-button {
+		background-color: transparent;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 16px;
+		/* padding: 16px; */
+	}
+	.toolbar-item {
+		display: flex;
+		align-items: center;
+		padding: 0px 16px;
+		font-size: 24px;
+		text-align: center;
 	}
 	.toolbar-button {
 		padding: 12px;

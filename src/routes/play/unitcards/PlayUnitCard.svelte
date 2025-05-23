@@ -9,15 +9,16 @@
 	import ExpandModal from "./modals/ExpandModal.svelte";
 	import { loadreference } from "./utilities/loadReference";
 	import * as auto from "./utilities/automation";
-	import type { Options } from "../types";
+	import type { LogRound, Options } from "../types";
 	import { infTypes, mechTypes, typeIncludes, vTypes } from "./utilities/utilities";
 
 	type Props = {
 		unit: PlayUnit;
 		options: Options;
+		currentRoundLog: LogRound;
 	};
 
-	let { unit, options }: Props = $props();
+	let { unit, options, currentRoundLog }: Props = $props();
 
 	let openDamageModal = $state(false),
 		openHeatModal = $state(false),
@@ -61,7 +62,7 @@
 
 {#snippet damageValue(original: number, min: boolean, current: number)}
 	{#if options.renderOriginal || options.renderOriginal === undefined}
-		<p>
+		<p class="damage-value">
 			<span class="bold">{original}{min ? "*" : ""}</span>
 			{#if critCount.current.weapon || ((reference?.subtype == "CV" || reference?.subtype == "SV") && critCount.current.engine)}
 				(<span class="damaged-stat">{current}</span>)
@@ -146,7 +147,7 @@
 									<span class:damaged-stat={moveSpeeds[0].damaged}>{physical.charge}</span>
 								</p>
 							{/if}
-							{#if physical.am !== undefined}
+							{#if typeIncludes(infTypes, reference) && physical.am !== undefined}
 								<p>AM (+1)</p>
 								<p class="bold">{physical.am}</p>
 							{/if}
@@ -177,7 +178,6 @@
 							<p>OV:</p>
 							{@render damageValue(reference.ov ?? 0, false, firepowerRemaining.ov)}
 						</div>
-						{unit.current.heat}/{unit.pending.heat}
 						<div class="heatscale">
 							<p>Heat Scale:</p>
 							<div
@@ -244,7 +244,7 @@
 				</div>
 			</div>
 			<div class="unit-card-right">
-				<div class="unit-image-block" class:unit-crippled={reference.structure && structRemaining.current < reference.structure / 2}>
+				<div class="unit-image-block" class:unit-crippled={options.showCrippled && reference.structure && structRemaining.current < reference.structure / 2}>
 					<img src={reference?.imageLink} alt="unit" class="unit-image" />
 					{#if structRemaining.current <= 0 || critCount.current.engine >= 2 || critCount.current.destroyed}
 						<img src="/icons/close.svg" alt="Destroyed" class="destroyed" />
@@ -282,10 +282,10 @@
 		{/if}
 	</div>
 
-	<DamageModal {unit} bind:open={openDamageModal} {reference}></DamageModal>
+	<DamageModal {unit} bind:open={openDamageModal} {reference} {currentRoundLog}></DamageModal>
 	<HeatModal {unit} bind:open={openHeatModal} {reference}></HeatModal>
-	<CritModal {unit} bind:open={openCritModal} {reference}></CritModal>
-	<ExpandModal {unit} bind:open={openExpandModal} {reference} {options}></ExpandModal>
+	<CritModal {unit} bind:open={openCritModal} {reference} {currentRoundLog}></CritModal>
+	<ExpandModal {unit} bind:open={openExpandModal} {reference} {options} {currentRoundLog}></ExpandModal>
 {:else}
 	<p>Loading unit card</p>
 {/if}
@@ -368,9 +368,12 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-evenly;
-		p {
+		& p {
 			justify-self: center;
 		}
+	}
+	.damage-value {
+		justify-self: center;
 	}
 	.damage-header {
 		display: flex;
@@ -459,7 +462,7 @@
 	}
 	.aero-health-block {
 		grid-template-columns: max-content 1fr max-content;
-		p {
+		& p {
 			align-self: center;
 		}
 	}
@@ -488,7 +491,7 @@
 	}
 	.unit-abilities-block {
 		flex: 1;
-		p {
+		& p {
 			font-size: 3cqmax;
 		}
 	}

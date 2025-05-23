@@ -97,7 +97,7 @@
 		display: flex;
 		gap: 0.5cqw;
 		align-items: center;
-		p {
+		& p {
 			font-size: 2.25cqmax;
 			margin-left: 0.5cqw;
 			white-space: nowrap;
@@ -116,7 +116,7 @@
 	.motive-section {
 		display: flex;
 		gap: 0.5cqw;
-		p {
+		& p {
 			font-size: 2.25cqmax;
 			margin-left: 0.5cqw;
 			white-space: nowrap;

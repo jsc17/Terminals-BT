@@ -3,22 +3,23 @@
 	import type { MulUnit, PlayUnit } from "$lib/types/unit";
 	import { setContext } from "svelte";
 	import PlayUnitCard from "../PlayUnitCard.svelte";
-	import type { Options } from "../../types";
+	import type { LogRound, Options } from "../../types";
 
 	type Props = {
 		unit: PlayUnit;
 		open: boolean;
 		reference: MulUnit;
 		options: Options;
+		currentRoundLog: LogRound;
 	};
-	let { unit, open = $bindable(false), reference, options }: Props = $props();
+	let { unit, open = $bindable(false), reference, options, currentRoundLog }: Props = $props();
 
 	setContext("expanded", true);
 </script>
 
 <Dialog title={reference.name} bind:open>
 	<div class="expanded-container">
-		<PlayUnitCard {unit} {options}></PlayUnitCard>
+		<PlayUnitCard {unit} {options} {currentRoundLog}></PlayUnitCard>
 	</div>
 </Dialog>
 

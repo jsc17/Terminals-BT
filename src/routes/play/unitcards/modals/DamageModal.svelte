@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { Dialog } from "$lib/components/Generic";
 	import type { MulUnit, PlayUnit } from "$lib/types/unit";
+	import type { LogRound } from "../../types";
 
 	type Props = {
 		unit: PlayUnit;
 		open: boolean;
 		reference: MulUnit;
+		currentRoundLog: LogRound;
 	};
 
-	let { unit, open = $bindable(false), reference }: Props = $props();
-
+	let { unit, open = $bindable(false), reference, currentRoundLog }: Props = $props();
 	let damageToTake = $state(0);
 
 	function modifyDamage(amount: number) {
@@ -21,26 +22,16 @@
 
 	function applyDamage() {
 		unit.current.damage += damageToTake;
+		currentRoundLog.logs.push({ unitId: unit.id, unitName: reference.name, damageTaken: damageToTake, applied: true, undone: false });
 		damageToTake = 0;
 		open = false;
 	}
 
 	function pendDamage() {
 		unit.pending.damage += damageToTake;
+		currentRoundLog.logs.push({ unitId: unit.id, unitName: reference.name, damageTaken: damageToTake, applied: false, undone: false });
 		damageToTake = 0;
 		open = false;
-	}
-
-	function undoDamage() {
-		const confirmUndo = confirm(`Are you sure you wish to remove ${damageToTake} damage from this unit?`);
-		if (confirmUndo) {
-			unit.current.damage -= damageToTake;
-			if (unit.current.damage < 0) {
-				unit.current.damage = 0;
-			}
-			damageToTake = 0;
-			open = false;
-		}
 	}
 </script>
 
@@ -81,9 +72,6 @@
 				<button onclick={pendDamage}>Apply At End of Round</button>
 			</div>
 		</div>
-		<div class="remove-button-row">
-			<button class="remove-button" onclick={undoDamage}>Undo damage</button>
-		</div>
 	</div>
 </Dialog>
 
@@ -117,13 +105,5 @@
 			padding: 8px;
 			font-size: 18px;
 		}
-	}
-	.remove-button-row {
-		display: flex;
-		width: 100%;
-		justify-content: end;
-	}
-	.remove-button {
-		background-color: var(--error);
 	}
 </style>

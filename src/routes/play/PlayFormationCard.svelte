@@ -2,16 +2,17 @@
 	import { Collapsible } from "$lib/components/Generic";
 	import type { MulUnit, PlayUnit } from "$lib/types/unit";
 	import type { PlayFormation } from "../../lib/types/formation";
-	import type { Options } from "./types";
+	import type { LogRound, Options } from "./types";
 	import PlayUnitCard from "./unitcards/PlayUnitCard.svelte";
 
 	type Props = {
 		formation: PlayFormation;
 		units: PlayUnit[];
 		options: Options;
+		currentRoundLog: LogRound;
 	};
 
-	let { formation, units, options }: Props = $props();
+	let { formation, units, options, currentRoundLog }: Props = $props();
 	let openPrimary = $state(true),
 		openSecondary = $state(true);
 </script>
@@ -24,7 +25,7 @@
 			})}
 			{#if unit}
 				<div class="unit-card-container" style="width: {252 * ((options.uiScale + 50) / 100)}pt; height:{180 * ((options.uiScale + 50) / 100)}pt">
-					<PlayUnitCard {unit} {options}></PlayUnitCard>
+					<PlayUnitCard {unit} {options} {currentRoundLog}></PlayUnitCard>
 				</div>
 			{/if}
 		{/each}

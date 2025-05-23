@@ -1,7 +1,15 @@
+export type LogRound = {
+	round: number;
+	logs: LogEntry[];
+};
+
 export type LogEntry = {
 	unitId: string;
+	unitName: string;
 	damageTaken?: number;
-	crit?: string;
+	crit?: { id: string; type: string; name: string; index?: number };
+	applied: boolean;
+	undone: boolean;
 };
 
 export type Options = {

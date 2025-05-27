@@ -210,7 +210,7 @@
 		border-radius: var(--radius);
 		padding: 16px;
 		width: max-content;
-		max-width: 90dvw;
+		max-width: 30dvw;
 		position: absolute;
 		z-index: 8;
 	}

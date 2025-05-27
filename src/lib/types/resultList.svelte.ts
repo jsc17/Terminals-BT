@@ -15,6 +15,7 @@ type SearchConstraint = {
 
 type SearchTerm = {
 	name: string;
+	extraType?: string;
 	value?: SearchConstraint;
 	medium?: SearchConstraint;
 	long?: SearchConstraint;
@@ -35,7 +36,7 @@ function parseSearchConstraint(constraintString?: string) {
 		if (condition == "+") {
 			constraint.min = value;
 		} else if (condition == "-") {
-			constraint.max == value;
+			constraint.max = value;
 		} else {
 			console.error("Unrecognized constraint: ", { condition });
 		}
@@ -368,33 +369,88 @@ export class ResultList {
 					break;
 				case "abilities":
 					if (filter.value) {
-						let rawSearchArray = filter.value.split(",").map((ability) => ability.trim());
+						const rawSearchBrackets = [...filter.value.matchAll(/\([^)]*\)/g)].map((match) => match[0].replaceAll(/[\s\(\)]/g, "").split(","));
+						const rawNonBrackets = filter.value.replaceAll(/\([^)]*\)/g, "");
+						let rawSearchArray = rawNonBrackets
+							.split(",")
+							.map((ability) => ability.trim())
+							.filter((split) => split != "");
 						let searchTermArray: SearchTerm[] = [];
+						let searchBracketArray: SearchTerm[][] = [];
+
 						for (const rawSearchTerm of rawSearchArray) {
 							let searchTerm: SearchTerm;
-							const rawArray: string[] = rawSearchTerm.split("/");
-							const nameIndex = rawArray[0].search(/\d(?:[^eEmMsSbBiI]|$)/);
 
-							if (nameIndex != -1) {
-								searchTerm = { name: rawSearchTerm.slice(0, nameIndex) };
-								rawArray[0] = rawArray[0].slice(nameIndex, rawArray[0].length);
-							} else {
-								searchTerm = { name: rawSearchTerm };
-								rawArray[0] = "";
-							}
-							if (rawArray.length == 1) {
-								if (rawArray[0] != "") {
-									searchTerm.value = parseSearchConstraint(rawArray[0]);
+							const rawArtSearch = rawSearchTerm.match(/(ART)/i);
+							if (rawArtSearch !== null) {
+								const valueStartIndex = rawSearchTerm.search(/\d/);
+								if (valueStartIndex == -1) {
+									searchTerm = { name: "ART", extraType: rawSearchTerm.slice(3, rawSearchTerm.length) };
+								} else {
+									searchTerm = { name: "ART", extraType: rawSearchTerm.slice(3, valueStartIndex) };
+									searchTerm.value = parseSearchConstraint(rawSearchTerm.slice(valueStartIndex));
 								}
 							} else {
-								searchTerm.value = parseSearchConstraint(rawArray[0]);
-								searchTerm.medium = parseSearchConstraint(rawArray[1]);
-								searchTerm.long = parseSearchConstraint(rawArray[2]);
-								searchTerm.extreme = parseSearchConstraint(rawArray[3]);
+								const rawArray: string[] = rawSearchTerm.split("/");
+								const valueStartIndex = rawArray[0].search(/\d(?:[^emsbi]|$)/i);
+								if (valueStartIndex != -1) {
+									searchTerm = { name: rawSearchTerm.slice(0, valueStartIndex) };
+									rawArray[0] = rawArray[0].slice(valueStartIndex, rawArray[0].length);
+								} else {
+									searchTerm = { name: rawSearchTerm };
+									rawArray[0] = "";
+								}
+								if (rawArray.length == 1) {
+									if (rawArray[0] != "") {
+										searchTerm.value = parseSearchConstraint(rawArray[0]);
+									}
+								} else {
+									searchTerm.value = parseSearchConstraint(rawArray[0]);
+									searchTerm.medium = parseSearchConstraint(rawArray[1]);
+									searchTerm.long = parseSearchConstraint(rawArray[2]);
+									searchTerm.extreme = parseSearchConstraint(rawArray[3]);
+								}
 							}
 							searchTermArray.push(searchTerm);
 						}
-						// console.log(searchTermArray);
+						for (const bracket of rawSearchBrackets) {
+							const bracketTermArray: SearchTerm[] = [];
+							for (const rawSearchTerm of bracket) {
+								let searchTerm: SearchTerm;
+								const rawArtSearch = rawSearchTerm.match(/(ART)/i);
+								if (rawArtSearch !== null) {
+									const valueStartIndex = rawSearchTerm.search(/\d/);
+									if (valueStartIndex == -1) {
+										searchTerm = { name: "ART", extraType: rawSearchTerm.slice(3, rawSearchTerm.length) };
+									} else {
+										searchTerm = { name: "ART", extraType: rawSearchTerm.slice(3, valueStartIndex) };
+										searchTerm.value = parseSearchConstraint(rawSearchTerm.slice(valueStartIndex));
+									}
+								} else {
+									const rawArray: string[] = rawSearchTerm.split("/");
+									const valueStartIndex = rawArray[0].search(/\d(?:[^emsbi]|$)/i);
+									if (valueStartIndex != -1) {
+										searchTerm = { name: rawSearchTerm.slice(0, valueStartIndex) };
+										rawArray[0] = rawArray[0].slice(valueStartIndex, rawArray[0].length);
+									} else {
+										searchTerm = { name: rawSearchTerm };
+										rawArray[0] = "";
+									}
+									if (rawArray.length == 1) {
+										if (rawArray[0] != "") {
+											searchTerm.value = parseSearchConstraint(rawArray[0]);
+										}
+									} else {
+										searchTerm.value = parseSearchConstraint(rawArray[0]);
+										searchTerm.medium = parseSearchConstraint(rawArray[1]);
+										searchTerm.long = parseSearchConstraint(rawArray[2]);
+										searchTerm.extreme = parseSearchConstraint(rawArray[3]);
+									}
+								}
+								bracketTermArray.push(searchTerm);
+							}
+							searchBracketArray.push(bracketTermArray);
+						}
 						tempResultList = tempResultList.filter((unit) => {
 							let allFound = true;
 							for (const searchTerm of searchTermArray) {
@@ -402,6 +458,9 @@ export class ResultList {
 								if (!unitAbility) {
 									allFound = false;
 								} else {
+									if (searchTerm.extraType !== undefined && unitAbility.name == "ART" && !unitAbility.artType?.toLowerCase().includes(searchTerm.extraType.toLowerCase())) {
+										allFound = false;
+									}
 									if (searchTerm.value !== undefined) {
 										for (const unitValue of [unitAbility.s, unitAbility.v, unitAbility.vhid]) {
 											if (unitValue !== undefined) {
@@ -420,6 +479,44 @@ export class ResultList {
 									if (!compareValues(searchTerm.extreme, unitAbility.e)) {
 										allFound = false;
 									}
+								}
+							}
+							for (const bracket of searchBracketArray) {
+								let anyFound = false;
+								for (const searchTerm of bracket) {
+									let stepFound = true;
+									const unitAbility = unit.abilities.find(({ name }) => name.toLowerCase() == searchTerm.name.toLowerCase());
+									if (!unitAbility) {
+										stepFound = false;
+									} else {
+										if (searchTerm.extraType !== undefined && unitAbility.name == "ART" && !unitAbility.artType?.toLowerCase().includes(searchTerm.extraType.toLowerCase())) {
+											stepFound = false;
+										}
+										if (searchTerm.value !== undefined) {
+											for (const unitValue of [unitAbility.s, unitAbility.v, unitAbility.vhid]) {
+												if (unitValue !== undefined) {
+													if (!compareValues(searchTerm.value, unitValue)) {
+														stepFound = false;
+													}
+												}
+											}
+										}
+										if (!compareValues(searchTerm.medium, unitAbility.m)) {
+											stepFound = false;
+										}
+										if (!compareValues(searchTerm.long, unitAbility.l)) {
+											stepFound = false;
+										}
+										if (!compareValues(searchTerm.extreme, unitAbility.e)) {
+											stepFound = false;
+										}
+									}
+									if (stepFound) {
+										anyFound = true;
+									}
+								}
+								if (!anyFound) {
+									allFound = false;
 								}
 							}
 							return allFound;

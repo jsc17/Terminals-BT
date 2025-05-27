@@ -46,7 +46,7 @@ function parseAbility(ability: string): UnitAbility {
 	) {
 		return { name: ability };
 	} else {
-		const index = ability.search(/\d(?:[^eEmMsSbBiI]|$)/);
+		const index = ability.search(/\d(?:[^emsbi]|$)/i);
 		let abilityName = "";
 		if (index != -1) {
 			abilityName = ability.slice(0, index);
@@ -65,8 +65,14 @@ function parseAbility(ability: string): UnitAbility {
 
 export function handleParse(abilityString: string) {
 	const parsedAbilities = [];
-	let turret: UnitAbility;
-	const turretMatch = abilityString.match(/TUR\(([^)]+)\)/);
+	let turret: UnitAbility, bimLam: UnitAbility, artAbility: UnitAbility;
+	const turretMatch = abilityString.match(/TUR\(([^)]+)\)/i);
+	const bimlamMatch = abilityString.match(/(BIM|LAM)(\([^)]+\))/i);
+	const artMatch = abilityString.match(/(ART)(.*?-)(\d+)/i);
+	if (bimlamMatch !== null) {
+		bimLam = { name: bimlamMatch[1], extracted: bimlamMatch[2] };
+		abilityString = abilityString.replace(/(BIM|LAM)(\([^)]+\))/i, bimlamMatch[1]);
+	}
 	if (turretMatch !== null) {
 		const turretAbilities = turretMatch[1].split(",").map((ability) => ability.trim());
 		const turretDamageValues = turretAbilities[0].split("/");
@@ -86,14 +92,26 @@ export function handleParse(abilityString: string) {
 			const parsedTurret = { name: "TUR", turretAbilities: parsedTurretAbilities };
 			turret = parsedTurret;
 		}
+		abilityString = abilityString.replace(/TUR\(([^)]+)\)/, "TUR");
 	}
-	abilityString = abilityString.replace(/TUR\(([^)]+)\)/, "TUR");
-
+	if (artMatch !== null) {
+		artAbility = { name: "ART", artType: artMatch[2], v: Number(artMatch[3]) };
+		abilityString = abilityString.replace(/(ART)(.*?-)(\d+)/i, "ART");
+	}
 	const unitAbilities = abilityString.split(",").map((ability) => ability.trim());
 	for (const ability of unitAbilities) {
 		switch (ability) {
 			case "TUR":
 				parsedAbilities.push(turret!);
+				break;
+			case "BIM":
+			case "LAM":
+				parsedAbilities.push(bimLam!);
+				break;
+			case "ART":
+				parsedAbilities.push(artAbility!);
+				break;
+			case "":
 				break;
 			default:
 				parsedAbilities.push(parseAbility(ability));
@@ -123,6 +141,8 @@ export function createSingleAbilityString(ability: UnitAbility): string {
 		turretString += `${turretAbility.e !== undefined ? `/${turretAbility.e != 0 || turretAbility.emin ? turretAbility.e : "-"}${turretAbility.emin ? "*" : ""}` : ""}`;
 	}
 	string += `${ability.name}`;
+	string += `${ability.artType ?? ""}`;
+	string += `${ability.extracted ?? ""}`;
 	string += `${ability.name == "TUR" ? "(" : ""}`;
 	string += `${ability.v !== undefined ? `${ability.v != 0 || ability.vmin ? ability.v : "-"}${ability.vmin ? "*" : ""}` : ""}`;
 	string += `${ability.s !== undefined ? `${ability.s != 0 || ability.smin ? ability.s : "-"}${ability.smin ? "*" : ""}` : ""}`;

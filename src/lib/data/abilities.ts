@@ -20,6 +20,8 @@ export type UnitAbility = {
 	e?: number;
 	emin?: boolean;
 	turretAbilities?: UnitAbility[];
+	extracted?: string;
+	artType?: string;
 };
 
 export const abilityReferences: AbilityReference[] = [
@@ -209,4 +211,4 @@ export const numberedAbilityReference = [
 	"C3BSM",
 	"FUEL"
 ];
-export const weaponAbilityReference = ["FLK", "HT", "REAR", "AC", "IATM", "LRM", "MSL", "SRM", "SDS-C", "SDS-CM", "SDS-SC", "IF"];
+export const weaponAbilityReference = ["FLK", "HT", "REAR", "AC", "IATM", "LRM", "MSL", "SRM", "SDS-C", "SDS-CM", "SDS-SC", "IF", "TOR", "TUR", "ART"];

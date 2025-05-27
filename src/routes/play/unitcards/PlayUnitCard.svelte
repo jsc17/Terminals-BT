@@ -10,10 +10,9 @@
 	import { loadMULUnit } from "$lib/utilities/load";
 	import * as auto from "./utilities/automation";
 	import type { LogRound, Options } from "../types";
-	import { infTypes, mechTypes, typeIncludes, vTypes } from "./utilities/utilities";
-	import { createAbilityLineString, createSingleAbilityString } from "$lib/utilities/parseAbilities";
+	import { createDamagedAbilityString, infTypes, mechTypes, typeIncludes, vTypes } from "./utilities/utilities";
 	import SpecialModal from "./modals/SpecialModal.svelte";
-	import { type AbilityReference, type UnitAbility } from "$lib/data/abilities";
+	import { type UnitAbility } from "$lib/data/abilities";
 
 	type Props = {
 		unit: PlayUnit;
@@ -112,8 +111,8 @@
 						{:else}
 							<p>
 								TMM: {#each moveSpeeds as { tmm, type, damaged }, index}
-									{#if index == 0 || (tmm != moveSpeeds[0].tmm && options.showJumpTMM)}
-										{#if index != 0}/{/if}<span class="bold" class:damaged-stat={damaged}>{tmm}{type == "j" ? "j" : ""}</span>
+									{#if index == 0 || (tmm != moveSpeeds[0].tmm && options.showJumpTMM) || (type == "j" && options.showJumpTMM)}
+										{#if index != 0}/{/if}<span class="bold" class:damaged-stat={damaged}>{tmm}{type == "j" ? "j" : ""}{type == "s" ? "s" : ""}</span>
 									{/if}
 								{/each}
 							</p>
@@ -129,7 +128,7 @@
 						<p>Role: <span class="bold">{reference?.role}</span></p>
 						<p>
 							Skill: <span class="bold">{unit.skill}</span>
-							{#if unit.current.heat || critCount.current.firecontrol}
+							{#if (unit.skill && Number(currentSkill.ranged) > unit.skill) || currentSkill.ranged == "S"}
 								(<span class="damaged-stat">{currentSkill.ranged}</span>)
 							{/if}
 						</p>
@@ -249,8 +248,14 @@
 				<div class="unit-card-block unit-abilities-block">
 					<div class="ability-names">
 						{#each reference.abilities ?? [] as referenceAbility, index}
+							{@const abilityString = createDamagedAbilityString(
+								$state.snapshot(referenceAbility),
+								unit.current.crits.map((crit) => crit.type),
+								reference
+							)}
 							<button class="ability-reference-button" onclick={() => handleSpecial(referenceAbility)}>
-								<span class="ability-reference-button underline">{createSingleAbilityString(referenceAbility)}</span>{#if index != reference.abilities.length - 1},&nbsp;{/if}
+								<span class="ability-reference-button underline" class:damaged-stat={abilityString.damaged}>{abilityString.string}</span
+								>{#if index != reference.abilities.length - 1},&nbsp;{/if}
 							</button>
 						{/each}
 					</div>

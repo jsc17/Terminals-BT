@@ -58,7 +58,7 @@
 									abilities)
 								</li>
 								<li>
-									Enter abilities followed by numbers to search for values, using + or minus at the end for greater than/less than (ex. jmps2 will return all units with jmpw2, and
+									Enter abilities followed by numbers to search for values, using + or - at the end for greater than/less than (ex. jmps2 will return all units with jmpw2, and
 									car4- will return all units with car4 or below)
 								</li>
 								<li>

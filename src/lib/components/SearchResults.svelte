@@ -7,7 +7,9 @@
 	import type { List } from "../../routes/listbuilder/types/list.svelte";
 	import DamageSortPopover from "./DamageSortPopover.svelte";
 	import { eraLookup } from "$lib/data/erasFactionLookup";
-	import {VList} from "virtua/svelte"
+	import { VList } from "virtua/svelte";
+	import { type UnitAbility } from "$lib/data/abilities";
+	import { createAbilityLineString } from "$lib/utilities/parseAbilities";
 
 	const list: List = getContext("list");
 	const resultList: ResultList = getContext("resultList");
@@ -65,8 +67,6 @@
 			}
 		};
 	}
-
-	const testData = $state([]);
 </script>
 
 <div class="search-results">
@@ -101,53 +101,55 @@
 			<div class="virtual-list-container" bind:clientHeight={listHeight}>
 				<VList data={resultList.filteredList} style="height:{listHeight}px">
 					{#snippet children(item, index)}
-					<div class:virtual-list-row={!appWindow.isMobile} class:virtual-list-row-mobile={appWindow.isMobile}>
-						{#if list}
-							<div class="align-center add-button"><button onclick={() => list.newUnit(item)}>+</button></div>
-						{:else}
-							<div></div>
-						{/if}
-						<a class="unit-name" href="http://masterunitlist.info/Unit/Details/{item.mulId}" target="_blank">{item.name}</a>
-						<div class="align-center">{item.subtype}</div>
-						<div class="align-center">{item.pv}</div>
-						{#if !appWindow.isMobile}
-							<div class="align-center">{item?.size ?? "-"}</div>
-						{/if}
-						<div class="align-center">
-							{#if item?.move == undefined}
-								-
+						<div class:virtual-list-row={!appWindow.isMobile} class:virtual-list-row-mobile={appWindow.isMobile}>
+							{#if list}
+								<div class="align-center add-button"><button onclick={() => list.newUnit(item)}>+</button></div>
 							{:else}
-								{#each item.move as movement, index}
-									{#if index != 0}
-										{"/ "}
-									{/if}
-									{`${movement.speed}"${movement.type ?? ""}`}
-								{/each}
+								<div></div>
 							{/if}
-						</div>
-						{#if !appWindow.isMobile}
-							<div class="align-center">{item.tmm ?? "-"}</div>
-						{/if}
-						<div class="align-center">
-							{#if item.health == undefined}
-								-
-							{:else}
-								{appWindow.isMobile ? item.health : item.health + " (" + item.armor + "+" + item.structure + ")"}
+							<a class="unit-name" href="http://masterunitlist.info/Unit/Details/{item.mulId}" target="_blank">{item.name}</a>
+							<div class="align-center">{item.subtype}</div>
+							<div class="align-center">{item.pv}</div>
+							{#if !appWindow.isMobile}
+								<div class="align-center">{item?.size ?? "-"}</div>
 							{/if}
-						</div>
-						<div class="align-center">
-							{#if item.damageS == undefined}
-								-
-							{:else}
-								{item.damageS}{item.damageSMin ? "*" : ""}{"/" + item.damageM}{item.damageMMin ? "*" : ""}{"/" + item.damageL}{item.damageLMin ? "*" : ""}{" - " + item.overheat}
+							<div class="align-center">
+								{#if item?.move == undefined}
+									-
+								{:else}
+									{#each item.move as movement, index}
+										{#if index != 0}
+											{"/ "}
+										{/if}
+										{`${movement.speed}"${movement.type ?? ""}`}
+									{/each}
+								{/if}
+							</div>
+							{#if !appWindow.isMobile}
+								<div class="align-center">{item.tmm ?? "-"}</div>
 							{/if}
+							<div class="align-center">
+								{#if item.health == undefined}
+									-
+								{:else}
+									{appWindow.isMobile ? item.health : item.health + " (" + item.armor + "+" + item.structure + ")"}
+								{/if}
+							</div>
+							<div class="align-center">
+								{#if item.damageS == undefined}
+									-
+								{:else}
+									{item.damageS}{item.damageSMin ? "*" : ""}{"/" + item.damageM}{item.damageMMin ? "*" : ""}{"/" + item.damageL}{item.damageLMin ? "*" : ""}{" - " + item.overheat}
+								{/if}
+							</div>
+							<div class:abilities={!appWindow.isMobile} class:abilities-mobile={appWindow.isMobile}>
+								<p>{createAbilityLineString(item.abilities)}</p>
+							</div>
+							<form method="post" action="/?/getUnitAvailability" use:enhance={showAvailability} class="align-center">
+								<input type="hidden" name="mulId" value={item.mulId} />
+								<button class="availability-button">Availability</button>
+							</form>
 						</div>
-						<div class:abilities={!appWindow.isMobile} class:abilities-mobile={appWindow.isMobile}>{item.abilities}</div>
-						<form method="post" action="/?/getUnitAvailability" use:enhance={showAvailability} class="align-center">
-							<input type="hidden" name="mulId" value={item.mulId} />
-							<button class="availability-button">Availability</button>
-						</form>
-					</div>
 					{/snippet}
 				</VList>
 			</div>

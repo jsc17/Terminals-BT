@@ -7,10 +7,13 @@
 	import ProtoCritBox from "./card-components/ProtoCritBox.svelte";
 	import { DamageModal, HeatModal, CritModal } from "./modals";
 	import ExpandModal from "./modals/ExpandModal.svelte";
-	import { loadreference } from "./utilities/loadReference";
+	import { loadMULUnit } from "$lib/utilities/load";
 	import * as auto from "./utilities/automation";
 	import type { LogRound, Options } from "../types";
 	import { infTypes, mechTypes, typeIncludes, vTypes } from "./utilities/utilities";
+	import { createAbilityLineString, createSingleAbilityString } from "$lib/utilities/parseAbilities";
+	import SpecialModal from "./modals/SpecialModal.svelte";
+	import { type AbilityReference, type UnitAbility } from "$lib/data/abilities";
 
 	type Props = {
 		unit: PlayUnit;
@@ -23,11 +26,13 @@
 	let openDamageModal = $state(false),
 		openHeatModal = $state(false),
 		openCritModal = $state(false),
-		openExpandModal = $state(false);
+		openExpandModal = $state(false),
+		openSpecialModal = $state(false);
 
 	let aeroTypes = ["AF", "CF"];
 
 	let reference = $state<MulUnit>();
+	let abilityReference = $state<UnitAbility>();
 
 	let expanded = getContext("expanded");
 	let critCount = $derived(auto.countCrits(unit));
@@ -52,9 +57,13 @@
 			openExpandModal = true;
 		}
 	}
+	function handleSpecial(ability: UnitAbility) {
+		abilityReference = ability;
+		openSpecialModal = true;
+	}
 
 	onMount(() => {
-		loadreference(unit.mulId).then((value) => {
+		loadMULUnit(unit.mulId).then((value) => {
 			reference = value;
 		});
 	});
@@ -238,9 +247,13 @@
 					{/if}
 				</button>
 				<div class="unit-card-block unit-abilities-block">
-					{#if reference.abilities != "-"}
-						<p>{reference?.abilities}</p>
-					{/if}
+					<div class="ability-names">
+						{#each reference.abilities ?? [] as referenceAbility, index}
+							<button class="ability-reference-button" onclick={() => handleSpecial(referenceAbility)}>
+								<span class="ability-reference-button underline">{createSingleAbilityString(referenceAbility)}</span>{#if index != reference.abilities.length - 1},&nbsp;{/if}
+							</button>
+						{/each}
+					</div>
 				</div>
 			</div>
 			<div class="unit-card-right">
@@ -286,6 +299,7 @@
 	<HeatModal {unit} bind:open={openHeatModal} {reference}></HeatModal>
 	<CritModal {unit} bind:open={openCritModal} {reference} {currentRoundLog}></CritModal>
 	<ExpandModal {unit} bind:open={openExpandModal} {reference} {options} {currentRoundLog}></ExpandModal>
+	<SpecialModal ability={abilityReference} bind:open={openSpecialModal}></SpecialModal>
 {:else}
 	<p>Loading unit card</p>
 {/if}
@@ -491,9 +505,16 @@
 	}
 	.unit-abilities-block {
 		flex: 1;
-		& p {
-			font-size: 3cqmax;
-		}
+	}
+	.ability-reference-button {
+		background-color: transparent;
+		padding: 0;
+		margin: 0;
+		font-size: 3cqmax;
+	}
+	.ability-names {
+		display: flex;
+		flex-wrap: wrap;
 	}
 	.destroyed {
 		width: 100%;

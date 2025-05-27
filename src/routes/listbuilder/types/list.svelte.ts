@@ -9,6 +9,7 @@ import type { ResultList } from "$lib/types/resultList.svelte";
 import { getRules } from "$lib/types/options";
 import { getSCAfromId, type SCA } from "./sca";
 import { nanoid } from "nanoid";
+import { loadMULUnit } from "$lib/utilities/load";
 
 export class List {
 	units: UnitV2[] = $state([]);
@@ -167,8 +168,8 @@ export class List {
 				}
 				if (this.options.disallowedAbilities) {
 					let prohibittedAbility = false;
-					for (const ability of unit.baseUnit.abilities.replaceAll(" ", "").split(",")) {
-						if (this.options.disallowedAbilities.includes(ability)) {
+					for (const ability of unit.baseUnit.abilities) {
+						if (this.options.disallowedAbilities.includes(ability.name)) {
 							prohibittedAbility = true;
 						}
 					}
@@ -295,7 +296,7 @@ export class List {
 
 			if (this.options.requireHitch) {
 				const htcUnits = this.units.filter((unit) => {
-					return unit.baseUnit.abilities.includes("HTC");
+					return unit.baseUnit.abilities?.find((ability) => ability.name == "HTC");
 				});
 				let trailers = htcUnits.filter((unit) => {
 					if (unit.baseUnit.move) {
@@ -317,26 +318,26 @@ export class List {
 
 			if (this.options.abilityLimits) {
 				for (const limit of this.options.abilityLimits) {
-					const abilityExp = new RegExp(`${limit.types}[0-9]`, "g");
-					const limitedUnits = this.units.filter((unit) => {
-						return unit.baseUnit.abilities.match(abilityExp);
-					});
-					const abilityCounts = limitedUnits.map((unit) => unit.baseUnit.abilities.match(abilityExp)?.toString());
-
-					let count = abilityCounts.reduce((accumulator, value) => {
-						return accumulator + Number(value?.at(-1));
-					}, 0);
-					if (limit.max && count > limit.max) {
-						issueList.set(
-							`${limit.types} limit exceeded`,
-							new Set(
-								limitedUnits.map((unit) => {
-									return unit.baseUnit.name;
-								})
-							)
-						);
-						for (const unit of limitedUnits) {
-							issueUnits.add(unit.id!);
+					for (const limitedAbility of limit.types) {
+						const limitedUnits = this.units.filter((unit) => {
+							return unit.baseUnit.abilities.find((ability) => limitedAbility == ability.name);
+						});
+						const count = limitedUnits.reduce((total, unit) => {
+							const unitAbility = unit.baseUnit.abilities.find((ability) => limitedAbility == ability.name);
+							return (total += (unitAbility?.v ?? 0) + (unitAbility?.vhid ?? 0));
+						}, 0);
+						if (limit.max && count > limit.max) {
+							issueList.set(
+								`${limit.types} limit exceeded`,
+								new Set(
+									limitedUnits.map((unit) => {
+										return unit.baseUnit.name;
+									})
+								)
+							);
+							for (const unit of limitedUnits) {
+								issueUnits.add(unit.id!);
+							}
 						}
 					}
 				}
@@ -484,55 +485,14 @@ export class List {
 							variant: unit.variant,
 							pv: unit.pv,
 							cost: unit.pv,
-							abilities: unit.abilities,
+							abilities: [],
 							rulesLevel: "Standard"
 						};
 					}
 				}
 			}
 		} else {
-			let response: any = deserialize(await (await fetch("/?/getUnit", { method: "POST", body: JSON.stringify({ mulId }) })).text());
-			let tempMovement: { speed: number; type: string }[] = [];
-			response.data!.unit.move.split("/").forEach((movement: string) => {
-				let moveSpeed = movement.replaceAll('"', "").match(/\d+/) ?? "0";
-				let moveType = movement.replaceAll('"', "").match(/\D+/) ?? "";
-				tempMovement.push({ speed: parseInt(moveSpeed[0]), type: moveType[0] });
-			});
-			const unitData = response.data!.unit;
-			unitToAdd = {
-				mulId: unitData.mulId,
-				name: unitData.name,
-				class: unitData.class,
-				variant: unitData.variant,
-				type: unitData.type,
-				subtype: unitData.subtype.toUpperCase(),
-				pv: unitData.pv,
-				cost: unitData.pv,
-				skill: 4,
-				size: unitData.size,
-				move: tempMovement,
-				tmm: unitData.tmm,
-				health: unitData.armor + unitData.structure,
-				armor: unitData.armor,
-				structure: unitData.structure,
-				damageS: unitData.damage_s,
-				damageSMin: unitData.damage_s_min,
-				damageM: unitData.damage_m,
-				damageMMin: unitData.damage_m_min,
-				damageL: unitData.damage_l,
-				damageLMin: unitData.damage_l_min,
-				damageE: unitData.damage_e,
-				damageEMin: unitData.damage_e_min,
-				overheat: unitData.overheat,
-				abilities: (unitData.abilities ?? "-").replaceAll(",", ", "),
-				imageLink: unitData.image_url,
-				rulesLevel: unitData.rules,
-				tonnage: unitData.tonnage,
-				date: unitData.date_introduced,
-				role: unitData.role,
-				availability: unitData.availability,
-				threshold: unitData.threshold
-			};
+			unitToAdd = await loadMULUnit(mulId.toString());
 		}
 		return unitToAdd;
 	}

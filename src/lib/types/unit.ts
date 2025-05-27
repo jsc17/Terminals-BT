@@ -1,3 +1,5 @@
+import type { UnitAbility } from "$lib/data/abilities";
+
 export type MulUnit = {
 	[key: string]: any;
 	mulId: number;
@@ -22,7 +24,7 @@ export type MulUnit = {
 	damageE?: number;
 	damageEMin?: boolean;
 	overheat?: number;
-	abilities: string;
+	abilities: UnitAbility[];
 	imageLink?: string;
 	rulesLevel: string;
 	tonnage?: number;

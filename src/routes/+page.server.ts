@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import { fail } from "@sveltejs/kit";
 import { prisma } from "$lib/server/prisma.js";
 import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup.js";
+import { handleParse } from "$lib/utilities/parseAbilities.js";
 
 export const actions = {
 	search: async ({ request }) => {
@@ -203,6 +204,14 @@ export const actions = {
 			return fail(400, { message: "Failed to load units" });
 		}
 		if (unitList.length) {
+			unitList.forEach((unit) => {
+				unit.abilities = unit.abilities ? JSON.stringify(handleParse(unit.abilities)) : "-";
+			});
+			if (generalList.length) {
+				generalList.forEach((unit) => {
+					unit.abilities = unit.abilities ? JSON.stringify(handleParse(unit.abilities)) : "-";
+				});
+			}
 			return { message: "Units Loaded", unitList, uniqueList, generalList };
 		} else {
 			return { message: "No Units Found" };
@@ -250,6 +259,11 @@ export const actions = {
 				mulId: Number(mulId)
 			}
 		});
+
+		if (unit) {
+			unit.abilities = JSON.stringify(unit.abilities ? handleParse(unit.abilities) : []);
+		}
+
 		return { unit };
 	}
 };

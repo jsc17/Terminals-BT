@@ -7,6 +7,7 @@
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import Menu from "$lib/components/Generic/Menu.svelte";
 	import UnitCustomizationModal from "./UnitCustomizationModal.svelte";
+	import { createAbilityLineString } from "$lib/utilities/parseAbilities";
 
 	type Props = {
 		unitId: string;
@@ -98,7 +99,11 @@
 			{/if}
 		</div>
 		<div class="unit-ability-row">
-			<div class="unit-abilities">{unit?.baseUnit.abilities}</div>
+			<div class="unit-abilities">
+				{#if unit}
+					{createAbilityLineString(unit?.baseUnit.abilities)}
+				{/if}
+			</div>
 		</div>
 		{#if unit?.customization.ammo || unit?.customization.spa}
 			<div class="unit-custom-row">

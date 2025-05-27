@@ -7,6 +7,58 @@ import type { Options } from "./options";
 import { ruleSets } from "./options";
 import customCards from "$lib/data/customCards.json";
 
+type SearchConstraint = {
+	equals?: number;
+	min?: number;
+	max?: number;
+};
+
+type SearchTerm = {
+	name: string;
+	value?: SearchConstraint;
+	medium?: SearchConstraint;
+	long?: SearchConstraint;
+	extreme?: SearchConstraint;
+};
+
+function parseSearchConstraint(constraintString?: string) {
+	if (constraintString === undefined || constraintString == "") {
+		return undefined;
+	}
+	let constraint: SearchConstraint = {};
+	let conditionIndex = constraintString.search(/[+\-]/);
+	if (conditionIndex == -1) {
+		constraint.equals = Number(constraintString);
+	} else {
+		const condition = constraintString.charAt(conditionIndex);
+		const value = Number(constraintString.slice(0, conditionIndex));
+		if (condition == "+") {
+			constraint.min = value;
+		} else if (condition == "-") {
+			constraint.max == value;
+		} else {
+			console.error("Unrecognized constraint: ", { condition });
+		}
+	}
+	return constraint;
+}
+
+function compareValues(searchTerm?: SearchConstraint, unitAbilityValue?: number) {
+	let match = true;
+	if (searchTerm !== undefined) {
+		if (searchTerm.equals !== undefined && searchTerm.equals != unitAbilityValue) {
+			match = false;
+		}
+		if (searchTerm.min !== undefined && (unitAbilityValue === undefined || searchTerm.min > unitAbilityValue)) {
+			match = false;
+		}
+		if (searchTerm.max !== undefined && unitAbilityValue !== undefined && searchTerm.max < unitAbilityValue) {
+			match = false;
+		}
+	}
+	return match;
+}
+
 export class ResultList {
 	#eras = $state<number[]>([]);
 	#factions = $state<number[]>([]);
@@ -73,6 +125,7 @@ export class ResultList {
 
 	status = $state();
 	loadResults() {
+		const startTime = performance.now();
 		this.#eras = this.selectedEras.map((era) => {
 			return Number(era);
 		});
@@ -90,6 +143,8 @@ export class ResultList {
 				}
 			});
 		});
+		const endTime = performance.now();
+		console.log(`Loading took ${endTime - startTime} ms`);
 	}
 
 	loadUnitsFromResponse(unitList: any[]) {
@@ -129,7 +184,7 @@ export class ResultList {
 					damageE: unit.damage_e,
 					damageEMin: unit.damage_e_min,
 					overheat: unit.overheat,
-					abilities: (unit.abilities ?? "-").replaceAll(",", ", "),
+					abilities: unit.abilities != "-" ? JSON.parse(unit.abilities) : [],
 					imageLink: unit.image_url,
 					rulesLevel: unit.rules,
 					tonnage: unit.tonnage,
@@ -198,7 +253,7 @@ export class ResultList {
 								variant: unit.variant,
 								pv: unit.pv,
 								cost: unit.pv,
-								abilities: unit.abilities,
+								abilities: [],
 								rulesLevel: "Standard"
 							});
 						}
@@ -217,8 +272,12 @@ export class ResultList {
 				}
 				if (this.options.disallowedAbilities) {
 					let prohibited = false;
-					for (const ability of this.options.disallowedAbilities) {
-						if (unit.abilities.includes(ability)) {
+					for (const disallowedAbility of this.options.disallowedAbilities) {
+						if (
+							unit.abilities.find((ability) => {
+								return ability.name == disallowedAbility;
+							})
+						) {
 							prohibited = true;
 						}
 					}
@@ -309,21 +368,60 @@ export class ResultList {
 					break;
 				case "abilities":
 					if (filter.value) {
-						tempResultList = tempResultList.filter((unit) => {
-							let searchedAbilities = filter.value!.toString().split(",");
-							let allFound = true;
-							searchedAbilities.forEach((ability) => {
-								let stepFound = false;
-								let steps = ability.split("^");
-								steps.forEach((step) => {
-									if (unit[filter.name].toLowerCase().includes(step.trim().toLowerCase())) {
-										stepFound = true;
-									}
-								});
-								if (!stepFound) {
-									allFound = false;
+						let rawSearchArray = filter.value.split(",").map((ability) => ability.trim());
+						let searchTermArray: SearchTerm[] = [];
+						for (const rawSearchTerm of rawSearchArray) {
+							let searchTerm: SearchTerm;
+							const rawArray: string[] = rawSearchTerm.split("/");
+							const nameIndex = rawArray[0].search(/\d(?:[^eEmMsSbBiI]|$)/);
+
+							if (nameIndex != -1) {
+								searchTerm = { name: rawSearchTerm.slice(0, nameIndex) };
+								rawArray[0] = rawArray[0].slice(nameIndex, rawArray[0].length);
+							} else {
+								searchTerm = { name: rawSearchTerm };
+								rawArray[0] = "";
+							}
+							if (rawArray.length == 1) {
+								if (rawArray[0] != "") {
+									searchTerm.value = parseSearchConstraint(rawArray[0]);
 								}
-							});
+							} else {
+								searchTerm.value = parseSearchConstraint(rawArray[0]);
+								searchTerm.medium = parseSearchConstraint(rawArray[1]);
+								searchTerm.long = parseSearchConstraint(rawArray[2]);
+								searchTerm.extreme = parseSearchConstraint(rawArray[3]);
+							}
+							searchTermArray.push(searchTerm);
+						}
+						// console.log(searchTermArray);
+						tempResultList = tempResultList.filter((unit) => {
+							let allFound = true;
+							for (const searchTerm of searchTermArray) {
+								const unitAbility = unit.abilities.find(({ name }) => name.toLowerCase() == searchTerm.name.toLowerCase());
+								if (!unitAbility) {
+									allFound = false;
+								} else {
+									if (searchTerm.value !== undefined) {
+										for (const unitValue of [unitAbility.s, unitAbility.v, unitAbility.vhid]) {
+											if (unitValue !== undefined) {
+												if (!compareValues(searchTerm.value, unitValue)) {
+													allFound = false;
+												}
+											}
+										}
+									}
+									if (!compareValues(searchTerm.medium, unitAbility.m)) {
+										allFound = false;
+									}
+									if (!compareValues(searchTerm.long, unitAbility.l)) {
+										allFound = false;
+									}
+									if (!compareValues(searchTerm.extreme, unitAbility.e)) {
+										allFound = false;
+									}
+								}
+							}
 							return allFound;
 						});
 					}
@@ -361,10 +459,10 @@ export class ResultList {
 					}
 					if (this.sort.extra.includeOV) {
 						if (this.sort.extra.type == "damageL") {
-							if (a.abilities.toLowerCase().includes("ovl")) {
+							if (a.abilities.find(({ name }) => name == "OVL")) {
 								first += a.overheat ?? 0;
 							}
-							if (b.abilities.toLowerCase().includes("ovl")) {
+							if (b.abilities.find(({ name }) => name == "OVL")) {
 								second += b.overheat ?? 0;
 							}
 						} else {

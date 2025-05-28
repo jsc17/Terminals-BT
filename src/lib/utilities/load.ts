@@ -1,7 +1,7 @@
 import { deserialize } from "$app/forms";
 import type { MulUnit } from "$lib/types/unit";
 
-export async function loadreference(mulId: string) {
+export async function loadMULUnit(mulId: string) {
 	let response: any = deserialize(await (await fetch("/?/getUnit", { method: "POST", body: JSON.stringify({ mulId }) })).text());
 	let tempMovement: { speed: number; type: string }[] = [];
 	response.data!.unit.move.split("/").forEach((movement: string) => {
@@ -39,7 +39,7 @@ export async function loadreference(mulId: string) {
 		damageE: unitData.damage_e,
 		damageEMin: unitData.damage_e_min,
 		overheat: unitData.overheat,
-		abilities: (unitData.abilities ?? "-").replaceAll(",", ", "),
+		abilities: JSON.parse(unitData.abilities),
 		imageLink: unitData.image_url,
 		rulesLevel: unitData.rules,
 		tonnage: unitData.tonnage,
@@ -48,5 +48,6 @@ export async function loadreference(mulId: string) {
 		availability: unitData.availability,
 		threshold: unitData.threshold
 	};
+
 	return reference;
 }

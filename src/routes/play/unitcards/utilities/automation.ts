@@ -81,7 +81,7 @@ export function calculateFirepower(unit: PlayUnit, reference?: MulUnit) {
 			firePower.eMin = false;
 			firePower.ov = firePower.ov == 0 ? 0 : firePower.ov - 1;
 		}
-		if (crit.type == "engine" && reference?.subtype == "CV") {
+		if ((crit.type == "engine" && reference?.subtype == "CV") || reference?.subtype == "SV") {
 			firePower.damaged = true;
 			firePower.s = Math.floor(firePower.s / 2);
 			firePower.sMin = false;
@@ -101,9 +101,27 @@ export function calculateSkill(unit: PlayUnit, critCount: CritList, reference?: 
 	if (unit.current.heat >= 4) {
 		return { ranged: "S" };
 	}
+	//checks for special modifiers (advanced fire control, shield, etc)
+	let modifiers = 0;
+	//check if industrial mech has Advanced Fire Control
+	if (reference?.subtype == "IM" && !reference.abilities.find(({ name }) => name == "AFC")) {
+		modifiers++;
+	}
+	//check if support vehicle has basic fire control, or neither advanced fire control or basic fire control
+	if (reference?.subtype == "SV") {
+		if (!reference.abilities.find(({ name }) => name == "AFC") || !reference.abilities.find(({ name }) => name == "BFC")) {
+			modifiers += 2;
+		}
+		if (reference.abilities.find(({ name }) => name == "BFC")) {
+			modifiers++;
+		}
+	}
+	if (reference?.abilities.find(({ name }) => name == "SHLD")) {
+		modifiers++;
+	}
 	return {
-		melee: Number(unit.skill ?? 0) + critCount.firecontrol * 2,
-		ranged: Number(unit.skill ?? 0) + unit.current.heat + critCount.firecontrol * 2
+		melee: Number(unit.skill ?? 0) + modifiers + critCount.firecontrol * 2,
+		ranged: Number(unit.skill ?? 0) + modifiers + unit.current.heat + critCount.firecontrol * 2
 	};
 }
 
@@ -140,6 +158,12 @@ export function calculateMovement(unit: PlayUnit, reference?: MulUnit) {
 		}
 		if (type == "j") {
 			newTMM++;
+			newTMM += reference?.abilities.find(({ name }) => name == "JMPS")?.v ?? 0;
+			newTMM -= reference?.abilities.find(({ name }) => name == "JMPW")?.v ?? 0;
+		}
+		if (type == "s") {
+			newTMM += reference?.abilities.find(({ name }) => name == "SUBS")?.v ?? 0;
+			newTMM -= reference?.abilities.find(({ name }) => name == "SUBW")?.v ?? 0;
 		}
 		if (type === undefined || type == "") {
 			if (unit.current.heat) {
@@ -177,7 +201,7 @@ export function calculatePhysical(tmm: number, sDamage: number, reference?: MulU
 		am: undefined
 	};
 
-	if (typeIncludes([...mechTypes, "PM"], reference) && !reference?.abilities.includes("MEL")) {
+	if (typeIncludes([...mechTypes, "PM"], reference) && !reference?.abilities.find(({ name }) => name == "MEL")) {
 		physical.attackTypeCount++;
 		physical.standard = reference?.size;
 	}
@@ -186,11 +210,11 @@ export function calculatePhysical(tmm: number, sDamage: number, reference?: MulU
 		physical.charge = (reference?.size ?? 0) + Math.floor(tmm / 2);
 		physical.charge = physical.charge < 0 ? 0 : physical.charge;
 	}
-	if (reference?.abilities.includes("MEL")) {
+	if (reference?.abilities.find(({ name }) => name == "MEL")) {
 		physical.attackTypeCount++;
 		physical.melee = (reference.size ?? 0) + 1;
 	}
-	if (reference && reference?.abilities.includes("AM")) {
+	if (reference && reference?.abilities.find(({ name }) => name == "AM")) {
 		physical.attackTypeCount++;
 		physical.am = sDamage;
 	}

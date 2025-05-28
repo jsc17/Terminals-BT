@@ -90,9 +90,7 @@
 		</div>
 		<button class="toolbar-button log-button" onclick={openLog}>Log</button>
 	</div>
-	<p class="announcement">
-		Still Beta, but getting better. Basic automation done, but doesn't apply abilities or SPAs. Everything subject to change at my whim. Click on a units name to expand its card.
-	</p>
+	<p class="announcement">Some minor tweaks still to go, but pretty close to being done. Click on a units name to expand its card.</p>
 	{#if playList.current.formations.length}
 		{#each playList.current.formations as formation}
 			<PlayFormationCard {formation} units={playList.current.units} options={options.current} currentRoundLog={currentRoundLog.current}></PlayFormationCard>

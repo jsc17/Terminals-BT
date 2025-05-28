@@ -169,9 +169,11 @@
 				id="getData"
 				onclick={() => {
 					resultList.loadResults();
-					list.details.eras = resultList.eras;
-					list.details.factions = resultList.factions;
-					list.details.general = resultList.general;
+					if (list) {
+						list.details.eras = resultList.eras;
+						list.details.factions = resultList.factions;
+						list.details.general = resultList.general;
+					}
 				}}>Search</button
 			>
 		</div>

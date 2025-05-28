@@ -61,6 +61,8 @@
 									Enter abilities followed by numbers to search for values, using + or - at the end for greater than/less than (ex. jmps2 will return all units with jmpw2, and
 									car4- will return all units with car4 or below)
 								</li>
+								<li>You can also search for values on weapon abilities (lrm2+/2+/2+ would return units that have at least 2 LRM damage at each range bracket)</li>
+
 								<li>
 									Enter abilities surrounded by parenthesis to search for units with either ability. (ex. (tag,ecm) will search for units that have either the TAG or the ECM
 									special abilities)

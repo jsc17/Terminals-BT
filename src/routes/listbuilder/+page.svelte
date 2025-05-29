@@ -5,9 +5,9 @@
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { SearchFilters, SearchParameters, SearchResults } from "$lib/components/index";
 	import { slide } from "svelte/transition";
-	import { List } from "./types/list.svelte";
+	import { List } from "../../lib/types/list.svelte";
 	import { convertUnversionedJSONList } from "./utilities/convert";
-	import type { ListCode } from "./types/listCode";
+	import type { ListCode } from "../../lib/types/listCode";
 
 	const resultList = new ResultList();
 	const list = new List(resultList);

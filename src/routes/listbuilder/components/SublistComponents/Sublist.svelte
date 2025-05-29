@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { List } from "../../types/list.svelte";
+	import type { List } from "../../../../lib/types/list.svelte";
 	import type { SublistStats, SublistV2 } from "../../types/sublist";
 	import { getRules } from "$lib/types/options";
 	import EditSublistModal from "./EditSublistModal.svelte";

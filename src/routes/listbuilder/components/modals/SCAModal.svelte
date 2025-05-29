@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getContext } from "svelte";
 	import { scaReferences } from "$lib/data";
-	import type { List } from "../types/list.svelte";
+	import type { List } from "../../../../lib/types/list.svelte";
 
 	const skillRatingTable = ["Legendary", "Heroic", "Elite", "Veteran", "Regular", "Green", "Really Green", "Wet Behind the Ears"];
 

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { UnitV2 } from "$lib/types/unit";
 	import spaList from "$lib/data/spas.json";
-	import ammoList from "../../../lib/data/ammoTypes.json";
-	import type { List } from "../types/list.svelte";
+	import ammoList from "$lib/data/ammoTypes.json";
+	import type { List } from "../../../../lib/types/list.svelte";
 	import { getContext } from "svelte";
 
 	let list: List = getContext("list");
@@ -21,7 +21,7 @@
 				let allowedAmmo: { name: string; requiredSpecial: string[]; page: number }[] = [];
 				ammoTypeLoop: for (const ammoType of weapon.ammoTypes) {
 					for (const requiredSpecial of ammoType.requiredSpecial) {
-						if (unit.baseUnit.abilities.includes(requiredSpecial)) {
+						if (unit.baseUnit.abilities.find(({ name }) => name == requiredSpecial)) {
 							allowedAmmo.push(ammoType);
 							continue ammoTypeLoop;
 						}

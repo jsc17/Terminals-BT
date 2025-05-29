@@ -4,10 +4,10 @@ import BlobStream, { type IBlobStream } from "blob-stream";
 import { abilityReferences, spaReferences, ammoReferences, formationReferences } from "$lib/data/index.js";
 import { existsSync } from "fs";
 import fs from "fs/promises";
-import type { UnitV2 } from "$lib/types/unit";
-import { getFormationTypeByName, type FormationType, type FormationV2 } from "$lib/types/formation";
+import type { UnitV2, FormationV2, SCA } from "$lib/types/";
 import { printer } from "$lib/server/printer";
-import { type SCA, getSCAfromName } from "../types/sca";
+import { getSCAfromName } from "../../../lib/types/sca";
+import { getFormationTypeByName } from "$lib/utilities/formation-utilities";
 
 type PrintableList = {
 	units: UnitV2[];
@@ -151,7 +151,7 @@ function createReferenceList(units: UnitV2[], formations: FormationV2[]) {
 	});
 	units.forEach((unit) => {
 		abilityReferences.forEach((reference) => {
-			if (unit.baseUnit.abilities.includes(reference.ability)) {
+			if (unit.baseUnit.abilities.find(({ name }) => name == reference.abbr)) {
 				abilityReferenceList.add(reference);
 			}
 		});
@@ -183,7 +183,7 @@ function createReferenceList(units: UnitV2[], formations: FormationV2[]) {
 	});
 	const abilityReferenceLines = [...abilityReferenceList]
 		.map((reference: any) => {
-			return `${reference.ability} (${reference.name}, pg.${reference.page})`;
+			return `${reference.abbr} (${reference.name}, pg.${reference.page})`;
 		})
 		.sort()
 		.map((reference: any) => {
@@ -330,7 +330,6 @@ async function createUnitCardColumns(unitList: UnitV2[], formations: FormationV2
 			if (!unit.customization.spa && !unit.customization.ammo) {
 				unitCards.push({ image: path, width: 250 });
 			} else {
-				console.log("generating unit");
 				let img = await loadImage(path);
 				const canvas = new Canvas(img.width, img.height);
 				const ctx = canvas.getContext("2d");

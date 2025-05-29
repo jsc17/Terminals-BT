@@ -4,7 +4,7 @@
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
 	import { getContext } from "svelte";
-	import { type List } from "../types/list.svelte";
+	import { type List } from "../../../../lib/types/list.svelte";
 
 	let list: List = getContext("list");
 

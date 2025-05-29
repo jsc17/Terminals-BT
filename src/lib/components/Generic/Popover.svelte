@@ -31,5 +31,6 @@
 		border-radius: var(--radius);
 		display: flex;
 		flex-direction: column;
+		z-index: 8;
 	}
 </style>

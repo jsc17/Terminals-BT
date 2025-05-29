@@ -1,13 +1,8 @@
-import type { UnitV2, MulUnit } from "$lib/types/unit";
+import type { UnitV2, MulUnit, ListCode, ListCodeUnit, SCA, FormationV2, SublistV2, ResultList } from "$lib/types/";
 import { getNewSkillCost } from "$lib/utilities/bt-utils";
 import customCards from "$lib/data/customCards.json";
-import { deserialize } from "$app/forms";
-import type { FormationV2 } from "$lib/types/formation";
-import type { ListCode, ListCodeUnit } from "./listCode";
-import type { SublistV2 } from "./sublist";
-import type { ResultList } from "$lib/types/resultList.svelte";
 import { getRules } from "$lib/types/options";
-import { getSCAfromId, type SCA } from "./sca";
+import { getSCAfromId } from "./sca";
 import { nanoid } from "nanoid";
 import { loadMULUnit } from "$lib/utilities/load";
 
@@ -477,6 +472,7 @@ export class List {
 				for (const unit of unitList.units) {
 					if (unit.id == mulId) {
 						unitToAdd = {
+							id: unit.id,
 							mulId: unit.id,
 							type: unit.type,
 							subtype: unit.type,

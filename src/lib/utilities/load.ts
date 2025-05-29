@@ -15,6 +15,7 @@ export async function loadMULUnit(mulId: string) {
 	}
 	const unitData = response.data!.unit;
 	const reference: MulUnit = {
+		id: unitData.id,
 		mulId: unitData.mulId,
 		name: unitData.name,
 		class: unitData.class,

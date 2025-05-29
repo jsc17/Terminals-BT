@@ -1,7 +1,7 @@
 import { fail } from "@sveltejs/kit";
 import { prisma } from "$lib/server/prisma.js";
 import { printList } from "./utilities/printList.js";
-import { type ListCode } from "./types/listCode.js";
+import { type ListCode } from "../../lib/types/listCode.js";
 import { createSublistsPdf } from "./utilities/printSublists.js";
 
 export const load = async ({ url }) => {
@@ -166,5 +166,34 @@ export const actions = {
 			console.error(error);
 			return fail(400, { message: "Failed to create shareable list" });
 		}
+	},
+	getFormationAvailability: async (event) => {
+		const requestedIds: number[] = await event.request.json();
+		const results = await prisma.factionInEra.findMany({ where: { units: { some: { unitId: { in: requestedIds } } } }, include: { units: true } });
+		let filteredResults = [];
+
+		for (const result of results) {
+			let generalList = await prisma.factionInEra.findUnique({ where: { eraId_factionId: { eraId: result.eraId, factionId: result.general } }, include: { units: true } });
+			let allFound = true;
+			for (const requestedId of requestedIds) {
+				const unitInFaction = result.units.find((unit) => {
+					return unit.unitId == requestedId;
+				});
+				const unitInGeneral = generalList?.units.find((unit) => {
+					return unit.unitId == requestedId;
+				});
+				if (unitInFaction === undefined && unitInGeneral === undefined) {
+					allFound = false;
+				}
+			}
+			if (allFound) {
+				filteredResults.push(result);
+			}
+		}
+		return {
+			results: filteredResults.map((result) => {
+				return { faction: result.factionId, era: result.eraId };
+			})
+		};
 	}
 };

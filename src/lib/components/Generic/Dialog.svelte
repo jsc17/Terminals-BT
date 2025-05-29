@@ -1,17 +1,24 @@
 <script lang="ts">
-	import { Dialog, Separator, type WithoutChildren } from "bits-ui";
-	import type { Snippet } from "svelte";
+	import { Dialog, type WithoutChildren } from "bits-ui";
+	import { createEventDispatcher, type Snippet } from "svelte";
 
 	type Props = Dialog.RootProps & {
 		title: string;
 		description?: Snippet;
 		contentProps?: WithoutChildren<Dialog.ContentProps>;
+		trigger?: Snippet;
+		triggerClasses?: string;
 	};
 
-	let { open = $bindable(false), children, title, description, contentProps, ...restProps }: Props = $props();
+	let { open = $bindable(false), children, title, description, contentProps, trigger, triggerClasses, onOpenChange, ...restProps }: Props = $props();
 </script>
 
-<Dialog.Root bind:open {...restProps}>
+<Dialog.Root bind:open {...restProps} {onOpenChange}>
+	{#if trigger}
+		<Dialog.Trigger class={triggerClasses}>
+			{@render trigger()}
+		</Dialog.Trigger>
+	{/if}
 	<Dialog.Portal>
 		<Dialog.Overlay />
 		<Dialog.Content>
@@ -61,7 +68,7 @@
 	}
 
 	:global([data-dialog-description], .dialog-children-wrapper) {
-		padding: 4px 16px;
+		padding: 8px 16px;
 	}
 	@media (max-width: 500px) {
 		:global([data-dialog-title], [data-dialog-description], .dialog-children-wrapper) {

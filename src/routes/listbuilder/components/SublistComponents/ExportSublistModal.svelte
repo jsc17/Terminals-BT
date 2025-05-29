@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getContext } from "svelte";
 	import type { SublistV2 } from "../../types/sublist";
-	import type { List } from "../../types/list.svelte";
+	import type { List } from "../../../../lib/types/list.svelte";
 	import { exportToJeff } from "../../utilities/export.svelte";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";

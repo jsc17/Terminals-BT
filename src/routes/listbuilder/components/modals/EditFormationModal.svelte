@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { getContext } from "svelte";
-	import { getFormationTypeByName, type FormationType, type FormationV2 } from "$lib/types/formation";
-	import type { List } from "../types/list.svelte";
-	import Select from "$lib/components/Generic/Select.svelte";
+	import { type FormationType, type FormationV2 } from "$lib/types/";
+	import { getFormationTypeByName } from "$lib/utilities/formation-utilities";
+	import type { List } from "../../../../lib/types/list.svelte";
+	import { Select, Dialog } from "$lib/components/Generic/";
 	import formationTypes from "$lib/data/formationTypes.json" assert { type: "json" };
-	import Dialog from "$lib/components/Generic/Dialog.svelte";
 
 	type Props = {
 		formation: FormationV2;

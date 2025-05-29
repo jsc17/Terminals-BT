@@ -6,7 +6,7 @@
 	import { getContext, onMount } from "svelte";
 	import Combobox from "./Generic/Combobox.svelte";
 	import type { Item } from "./Generic/types";
-	import type { List } from "../../routes/listbuilder/types/list.svelte";
+	import type { List } from "../types/list.svelte";
 	import EraFactionInfoPopover from "./EraFactionInfoPopover.svelte";
 
 	const resultList: ResultList = getContext("resultList");

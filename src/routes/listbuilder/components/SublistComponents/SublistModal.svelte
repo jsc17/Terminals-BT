@@ -4,7 +4,7 @@
 	import SublistPrintModal from "./SublistPrintModal.svelte";
 	import Sublist from "./Sublist.svelte";
 	import { getContext } from "svelte";
-	import type { List } from "../../types/list.svelte";
+	import type { List } from "../../../../lib/types/list.svelte";
 	import type { SublistV2 } from "../../types/sublist";
 	import EditSublistModal from "./EditSublistModal.svelte";
 	import ExportSublistModal from "./ExportSublistModal.svelte";

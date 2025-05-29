@@ -1,21 +1,12 @@
 <script lang="ts">
-	import { PrintModal, SaveModal, LoadModal, SublistModal } from "./index";
-	import { ruleSets } from "$lib/types/options";
-	import FormationCard from "./FormationCard.svelte";
-	import Menu from "$lib/components/Generic/Menu.svelte";
+	import { PrintModal, SaveModal, LoadModal, SublistModal, UnitCustomizationModal, ScaModal, FormationCard, ListInfoPopover, FindUnitAvailabilityModal } from "./";
+	import { ruleSets, type ResultList, type FormationV2, sendListToPlay } from "$lib/types/";
 	import { getContext } from "svelte";
-	import type { ResultList } from "$lib/types/resultList.svelte";
-	import type { List } from "../types/list.svelte";
-	import type { FormationV2 } from "$lib/types/formation";
+	import type { List } from "../../../lib/types/list.svelte";
 	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
-	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import { Popover } from "bits-ui";
-	import { toastController } from "$lib/stores/toastController.svelte";
+	import { appWindow, toastController } from "$lib/stores/";
 	import { deserialize } from "$app/forms";
-	import UnitCustomizationModal from "./UnitCustomizationModal.svelte";
-	import ScaModal from "./SCAModal.svelte";
-	import EditFormationModal from "./EditFormationModal.svelte";
-	import { sendListToPlay } from "$lib/types/playList";
+	import { Separator, Menu } from "$lib/components/Generic";
 
 	const resultList: ResultList = getContext("resultList");
 	let list: List = getContext("list");
@@ -93,34 +84,7 @@
 				{:else}
 					<p>Units: {list.unitCount}</p>
 				{/if}
-				<Popover.Root>
-					<Popover.Trigger class="list-info-trigger">
-						<img class="info-button-icon" src="/icons/information.svg" alt="information" />
-					</Popover.Trigger>
-					<Popover.Content class="list-info-content">
-						<div>Average Skill:</div>
-						<div>{list.stats.avgSkill}</div>
-						<div>Average Size:</div>
-						<div>{list.stats.avgSize}</div>
-						<div>Average Health:</div>
-						<div>{list.stats.avgHealth}</div>
-						<div>Average Short Damage:</div>
-						<div>{list.stats.avgS}</div>
-						<div>Average Medium Damage:</div>
-						<div>{list.stats.avgM}</div>
-						<div>Average Long Damage:</div>
-						<div>{list.stats.avgL}</div>
-						<hr class="list-info-separator" />
-						<div>Total Health:</div>
-						<div>{list.stats.totalHealth}</div>
-						<div>Total Short Damage:</div>
-						<div>{list.stats.totalS}</div>
-						<div>Total Medium Damage:</div>
-						<div>{list.stats.totalM}</div>
-						<div>Total Long Damage:</div>
-						<div>{list.stats.totalL}</div>
-					</Popover.Content>
-				</Popover.Root>
+				<ListInfoPopover {list} />
 			</div>
 			{#if list.issues?.issueList.size}
 				<button class="error-button" onclick={() => errorDialog?.showModal()}><img src="/icons/alert-outline.svg" alt="Error" class="error-icon" /> Show issues</button>
@@ -162,12 +126,6 @@
 					<button
 						class="transparent-button"
 						onclick={() => {
-							sendListToPlay(list.formations, list.units);
-						}}>Play List</button
-					>
-					<button
-						class="transparent-button"
-						onclick={() => {
 							loadModal?.show();
 						}}
 					>
@@ -197,6 +155,10 @@
 					>
 						Share List Link
 					</button>
+					<Separator orientation={"horizontal"} classes={"separator-border"} />
+
+					<FindUnitAvailabilityModal {list} />
+
 					<button
 						class="transparent-button"
 						onclick={() => {
@@ -205,6 +167,13 @@
 					>
 						Generate Sublists
 					</button>
+					<button
+						class="transparent-button"
+						onclick={() => {
+							sendListToPlay(list.formations, list.units);
+						}}>Play List</button
+					>
+					<Separator orientation={"horizontal"} classes={"separator-border"} />
 					<button
 						class="transparent-button"
 						onclick={() => {
@@ -304,7 +273,6 @@
 		position: relative;
 		width: 100%;
 		height: 100%;
-		z-index: 1;
 		scrollbar-gutter: stable;
 		display: flex;
 		flex-direction: column;
@@ -418,33 +386,5 @@
 	}
 	:global(.drop-target-zone) {
 		outline: solid green;
-	}
-	:global(.list-info-trigger) {
-		display: flex;
-		align-items: center;
-		background-color: transparent;
-		color: var(--muted-foreground);
-	}
-	:global(.list-info-content) {
-		display: grid;
-		grid-template-columns: max-content max-content;
-		column-gap: 8px;
-		row-gap: 2px;
-		width: max-content;
-		height: max-content;
-		background-color: var(--background);
-		border-radius: var(--radius);
-		border: 1px solid var(--border);
-		z-index: 5;
-		padding: 16px;
-	}
-	:global(.list-info-content div) {
-		align-self: center;
-		justify-self: flex-end;
-	}
-	:global(.list-info-separator) {
-		grid-column-start: 1;
-		grid-column-end: 3;
-		border: 1px solid var(--muted);
 	}
 </style>

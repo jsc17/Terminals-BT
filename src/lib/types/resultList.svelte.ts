@@ -161,6 +161,7 @@ export class ResultList {
 				//{"speed": 6,"type": "t" }
 
 				let formattedUnit: MulUnit = {
+					id: unit.id,
 					mulId: unit.mulId,
 					name: unit.name,
 					class: unit.class,
@@ -246,6 +247,7 @@ export class ResultList {
 					if (this.options.customUnitPacks?.includes(unitList.name)) {
 						for (const unit of unitList.units) {
 							tempRestrictedList.push({
+								id: unit.id,
 								mulId: unit.id,
 								type: unit.type,
 								subtype: unit.type,

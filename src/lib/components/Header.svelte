@@ -5,7 +5,7 @@
 	import LoginModal from "./LoginModal.svelte";
 	import { type ActionResult } from "@sveltejs/kit";
 	import { goto } from "$app/navigation";
-	import type { List } from "../../routes/listbuilder/types/list.svelte";
+	import type { List } from "../types/list.svelte";
 	import { page } from "$app/state";
 	import { enhance } from "$app/forms";
 

@@ -4,7 +4,7 @@
 	import { type ActionResult } from "@sveltejs/kit";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { getContext } from "svelte";
-	import type { List } from "../../routes/listbuilder/types/list.svelte";
+	import type { List } from "../types/list.svelte";
 	import DamageSortPopover from "./DamageSortPopover.svelte";
 	import { eraLookup } from "$lib/data/erasFactionLookup";
 	import { VList } from "virtua/svelte";

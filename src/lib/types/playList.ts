@@ -49,15 +49,15 @@ export function sendListToPlay(formations: FormationV2[], units: UnitV2[]) {
 		if (overwrite) {
 			localStorage.setItem("playList", JSON.stringify(playList));
 			localStorage.removeItem("playCurrentRound");
-			window.location.href = "/play";
+			window.open("/play", "_blank")?.focus();
 		} else {
 			let loadGame = confirm("Do you wish to load the game in progress?");
 			if (loadGame) {
-				window.location.href = "/play";
+				window.open("/play", "_blank")?.focus();
 			}
 		}
 	} else {
 		localStorage.setItem("playList", JSON.stringify(playList));
-		window.location.href = "/play";
+		window.open("/play", "_blank")?.focus();
 	}
 }

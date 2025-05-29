@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { List } from "../../types/list.svelte";
+	import { List } from "../../../../lib/types/list.svelte";
 	import { getRules } from "$lib/types/options";
 	import type { SublistStats, SublistV2 } from "../../types/sublist";
 	import EditSublistModal from "./EditSublistModal.svelte";
@@ -15,7 +15,7 @@
 		sublistMaxUnits?: number;
 		unitString: string;
 	};
-	
+
 	const { sublist = $bindable(), list, editSublistModal, exportSublistModal, stats, sublistMaxPv, sublistMaxUnits, unitString }: componentProps = $props();
 </script>
 

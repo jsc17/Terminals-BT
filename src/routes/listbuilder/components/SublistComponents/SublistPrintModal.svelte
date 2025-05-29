@@ -3,7 +3,7 @@
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { getContext } from "svelte";
-	import type { List } from "../../types/list.svelte";
+	import type { List } from "../../../../lib/types/list.svelte";
 	import type { UnitV2 } from "$lib/types/unit";
 
 	let list: List = getContext("list");

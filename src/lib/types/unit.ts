@@ -2,6 +2,7 @@ import type { UnitAbility } from "$lib/data/abilities";
 
 export type MulUnit = {
 	[key: string]: any;
+	id: number;
 	mulId: number;
 	name: string;
 	class: string;

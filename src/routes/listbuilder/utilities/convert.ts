@@ -1,8 +1,8 @@
 import { getGeneralList } from "$lib/utilities/bt-utils";
 import { nanoid } from "nanoid";
 import type { FormationV2 } from "$lib/types/formation";
-import type { ListCode, ListCodeUnit } from "../types/listCode";
-import type { SublistV2 } from "../types/sublist";
+import type { ListCode, ListCodeUnit } from "../../../lib/types/listCode";
+import type { SublistV2 } from "../../../lib/types/sublist";
 
 /**
  * Converts from original json list formatting to v1 json list formatting

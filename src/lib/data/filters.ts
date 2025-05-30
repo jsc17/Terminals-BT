@@ -1,4 +1,4 @@
-import type { Filter } from "$lib/types/filter";
+import type { Filter } from "../../filter";
 
 //if types field doesn't exist, will check against value
 export const typeValues = [

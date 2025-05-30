@@ -4,6 +4,7 @@ import { fail, redirect } from "@sveltejs/kit";
 import { sendResetEmail } from "$lib/emails/mailer.server.js";
 import fs from "fs/promises";
 import { eraLookup as eraLookup, factionLookup as factionLookup } from "$lib/data/erasFactionLookup.js";
+import SendNotification from "./SendNotification.svelte";
 
 export const load = async ({ locals }) => {
 	if (!locals.user || locals.user.username.toLowerCase() != "terminal") {
@@ -152,29 +153,6 @@ export const actions = {
 		}
 		return { message: "Load Complete" };
 	},
-	// testUnit: async ({ request }) => {
-	// 	const mulId = (await request.formData()).get("testId");
-	// 	console.log(mulId);
-	// 	const existing = await prisma.unit.findUnique({
-	// 		where: {
-	// 			mulId: Number(mulId)
-	// 		},
-	// 		include: {
-	// 			factions: {
-	// 				select: {
-	// 					id: true
-	// 				}
-	// 			}
-	// 		}
-	// 	});
-	// 	if (existing) {
-	// 		console.log(existing);
-	// 		return { exists: true, existing };
-	// 	} else {
-	// 		console.log("doesn't exist");
-	// 		return { exists: false };
-	// 	}
-	// },
 	sendResetEmail: async ({}) => {
 		sendResetEmail("jonathan.cibge@innernwgaw.com", "ASFVA");
 	},
@@ -244,5 +222,30 @@ export const actions = {
 				console.error(error);
 			}
 		}
+	},
+	sendNotification: async (event) => {
+		let formData = await event.request.formData();
+		let message = formData.get("notification-message")?.toString();
+		let summary = formData.get("notification-summary")?.toString();
+		let type = formData.get("notification-type")?.toString();
+
+		if (message && summary && type) {
+			let allUsers = await prisma.user.findMany({ select: { id: true } });
+
+			for (const user of allUsers) {
+				await prisma.notification.create({
+					data: {
+						userId: user.id,
+						read: false,
+						message,
+						summary,
+						type
+					}
+				});
+			}
+		} else {
+			return fail(400);
+		}
+		return {};
 	}
 };

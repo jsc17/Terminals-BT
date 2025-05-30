@@ -4,14 +4,16 @@
 	import Toast from "$lib/components/Toast.svelte";
 	import { setContext } from "svelte";
 	import "$lib/css/global.css";
+	import { type Notification } from "$lib/types";
 
 	const { data, children } = $props();
 	let user = $state({ username: data.username });
+	let notifications: Notification[] = $derived(data.notifications ?? []);
 	setContext("user", user);
 </script>
 
 <main>
-	<Header></Header>
+	<Header {notifications}></Header>
 	{@render children()}
 	<Footer></Footer>
 </main>

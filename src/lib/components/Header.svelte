@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext, onMount } from "svelte";
+	import { getContext } from "svelte";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import LoginModal from "./LoginModal.svelte";
@@ -8,6 +8,14 @@
 	import type { List } from "../types/list.svelte";
 	import { page } from "$app/state";
 	import { enhance } from "$app/forms";
+	import NotificationPopover from "./NotificationPopover.svelte";
+	import type { Notification } from "$lib/types";
+
+	type Props = {
+		notifications: Notification[];
+	};
+
+	let { notifications }: Props = $props();
 
 	let navbar = $state<HTMLElement>();
 	let openNavButton = $state<HTMLButtonElement>();
@@ -48,7 +56,9 @@
 				user.username = undefined;
 				toastController.addToast("User logged out successfully", 2000);
 				localStorage.removeItem("last-list");
-				list.clear();
+				if (list) {
+					list.clear();
+				}
 				goto("/");
 			} else if (result.type == "failure") {
 				if (result.data) {
@@ -97,10 +107,13 @@
 		<h1>Terminal's 'Tech Tools</h1>
 	{/if}
 	{#if user.username}
-		<button class="link-button" onclick={openUserMenu}>
-			{user.username}
-			<img src="/icons/settings.svg" alt="settings" />
-		</button>
+		<div class="user-buttons">
+			<NotificationPopover {notifications} />
+			<button class="link-button" onclick={openUserMenu}>
+				{user.username}
+				<img src="/icons/settings.svg" alt="settings" />
+			</button>
+		</div>
 		<menu bind:this={userMenu} id="usermenu">
 			<button class="link-button close-user-button" onclick={closeUserMenu} aria-label="Close user menu sidebar"><img src="/icons/close.svg" alt="close button" /></button>
 			<ul>
@@ -243,5 +256,10 @@
 	}
 	:global(menu.show ~ .overlay, nav.show ~ .overlay) {
 		display: block;
+	}
+	.user-buttons {
+		display: flex;
+		align-items: center;
+		gap: 16px;
 	}
 </style>

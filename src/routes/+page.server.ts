@@ -265,5 +265,31 @@ export const actions = {
 		}
 
 		return { unit };
+	},
+	getNotifications: async (event) => {
+		let userId = event.locals.user?.id;
+
+		let notifications;
+		if (userId) {
+			notifications = await prisma.notification.findMany({
+				where: { userId },
+				orderBy: { date: "desc" }
+			});
+		}
+
+		return { notifications };
+	},
+	markNotificationsRead: async (event) => {
+		let userId = event.locals.user?.id;
+
+		if (userId) {
+			await prisma.notification.updateMany({
+				where: { userId },
+				data: {
+					read: true
+				}
+			});
+		}
+		return {};
 	}
 };

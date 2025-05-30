@@ -7,42 +7,9 @@
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { type MulUnit } from "$lib/types/unit";
 	import { loadMULUnit } from "$lib/utilities/load";
-	import { abilityReferences, numberedAbilityReference, type UnitAbility } from "$lib/data/abilities";
+	import { type UnitAbility } from "$lib/data/abilities";
 	import { createAbilityLineString } from "$lib/utilities/parseAbilities";
-
-	let searchButton: HTMLButtonElement;
-	let selectedEra = $state(-1);
-	let selectedFaction = $state(-1);
-
-	let allowedFactions = $derived.by(() => {
-		let allowed: number[] = [];
-		eraFactionData.forEach((era) => {
-			if (era.id == selectedEra) {
-				era.lists.forEach((faction) => {
-					allowed = allowed.concat(faction.factions);
-				});
-			}
-		});
-		allowed.sort((a, b) => {
-			return factionLookup.get(a)! > factionLookup.get(b)! ? 1 : -1;
-		});
-		return allowed;
-	});
-	let general = $derived(getGeneralList(selectedEra, selectedFaction));
-	let link = $state("press search");
-
-	function createLink() {
-		link = `https://masterunitlist.azurewebsites.net/Unit/quicklist?&MinPV=1&MaxPV=100`;
-		if (general != undefined && general != -1) {
-			link += `&Factions=${general}`;
-		}
-		if (selectedFaction != undefined) {
-			link += `&Factions=${selectedFaction}`;
-		}
-		if (selectedEra != undefined) {
-			link += `&AvailableEras=${selectedEra}`;
-		}
-	}
+	import SendNotification from "./SendNotification.svelte";
 
 	async function loadUnits() {
 		const links: { type: string; link: string }[] = [];
@@ -150,32 +117,6 @@
 
 <main>
 	<div class="card">
-		<form class="parameters">
-			<label for="eraParameter">Era:</label>
-			<select bind:value={selectedEra} id="eraParameter">
-				{#each eraFactionData as era}
-					<option value={era.id}>{eraLookup.get(era.id)}</option>
-				{/each}
-			</select>
-			<label for="factionParameter">Faction:</label>
-			{#if selectedEra == -1}
-				<select id="factionParameter" disabled> </select>
-			{:else}
-				<select id="factionParameter" bind:value={selectedFaction}>
-					{#each allowedFactions as faction}
-						<option value={faction}>{factionLookup.get(faction)}</option>
-					{/each}
-				</select>
-			{/if}
-			<div class="parameter">
-				<p>General:</p>
-				<a href={`http://masterunitlist.info/Era/FactionEraDetails?FactionId=${selectedFaction}&EraId=${selectedEra}`}>{factionLookup.get(general)}</a>
-			</div>
-			<button id="getData" bind:this={searchButton} onclick={createLink}>Search</button>
-		</form>
-		<a href={link} target="_blank">{link}</a>
-	</div>
-	<div class="card">
 		<button
 			onclick={() => {
 				loadFactions();
@@ -199,9 +140,7 @@
 	<div class="card">
 		<button onclick={sendResetEmail}>Send Reset</button>
 	</div>
-	<div class="card">
-		<form method="post" action="?/convertLists"><button>Convert lists</button></form>
-	</div>
+
 	<div class="card">
 		<div class="flex-4">
 			<input type="text" bind:value={mulId} />
@@ -241,6 +180,8 @@
 			{/if}
 		</div>
 	</div>
+
+	<SendNotification />
 </main>
 
 <style>
@@ -250,26 +191,6 @@
 		gap: 24px;
 		justify-content: flex-start;
 		align-items: start;
-	}
-	.parameter {
-		display: flex;
-		gap: 8px;
-		align-items: center;
-	}
-	.parameters {
-		display: flex;
-		align-items: center;
-		gap: 16px;
-		width: 100%;
-	}
-	select {
-		width: min(100%, 240px);
-	}
-	select:not([disabled]) {
-		border-color: var(--ring);
-	}
-	a {
-		width: 240px;
 	}
 	.section {
 		background-color: var(--muted);

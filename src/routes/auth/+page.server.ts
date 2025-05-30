@@ -44,7 +44,17 @@ export const actions = {
 					username,
 					email,
 					id,
-					hashedPassword
+					hashedPassword,
+					notifications: {
+						create: [
+							{
+								summary: "Welcome!",
+								message: `I'm glad you found this site and decided to create an account. Hopefully it works well for you, and has everything you need. If you do have any issues, or some suggestions, please follow the link at the bottom that says "Page Source / Report Issues" and create a new issue. Otherwise, I hope the site helps make enjoying this game just a little bit easier for you.`,
+								type: "notice",
+								read: false
+							}
+						]
+					}
 				}
 			});
 		} catch (err) {

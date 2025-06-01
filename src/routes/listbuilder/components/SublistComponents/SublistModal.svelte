@@ -4,8 +4,7 @@
 	import SublistPrintModal from "./SublistPrintModal.svelte";
 	import Sublist from "./Sublist.svelte";
 	import { getContext } from "svelte";
-	import type { List } from "../../../../lib/types/list.svelte";
-	import type { SublistV2 } from "../../types/sublist";
+	import { List, type SublistV2 } from "$lib/types/";
 	import EditSublistModal from "./EditSublistModal.svelte";
 	import ExportSublistModal from "./ExportSublistModal.svelte";
 	import AutogenerationModal from "./AutogenerationModal.svelte";
@@ -23,6 +22,21 @@
 	let editSublistModal = $state<EditSublistModal>();
 	let exportSublistModal = $state<ExportSublistModal>();
 	let autoSublistModal: AutogenerationModal;
+
+	const scenarioList = [
+		"All",
+		"-",
+		"Bunkers",
+		"Capture the Flag",
+		"Domination",
+		"Headhunter",
+		"Hold the Line",
+		"King of the Hill",
+		"Overrun",
+		"Stand Up Fight",
+		"Pressure Plate",
+		"Stranglehold"
+	];
 
 	export function show() {
 		sublistDialog.showModal();
@@ -67,7 +81,7 @@
 				<div>
 					<label for="scenarioFilter">Scenario:</label>
 					<select id="scenarioFilter" bind:value={scenarioFilter}>
-						{#each ["All", "-", "Bunkers", "Capture the Flag", "Domination", "Headhunter", "Hold the Line", "King of the Hill", "Overrun", "Stand Up Fight"] as scenario}
+						{#each scenarioList as scenario}
 							<option value={scenario}>{scenario}</option>
 						{/each}
 					</select>

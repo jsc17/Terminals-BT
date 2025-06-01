@@ -1,9 +1,21 @@
 <script lang="ts">
-	import { List } from "../../../../lib/types/list.svelte";
-	import { getRules } from "$lib/types/options";
-	import type { SublistStats, SublistV2 } from "../../types/sublist";
+	import { List, type SublistStats, type SublistV2 } from "$lib/types/";
 	import EditSublistModal from "./EditSublistModal.svelte";
 	import ExportSublistModal from "./ExportSublistModal.svelte";
+
+	const scenarioList = [
+		"-",
+		"Bunkers",
+		"Capture the Flag",
+		"Domination",
+		"Headhunter",
+		"Hold the Line",
+		"King of the Hill",
+		"Overrun",
+		"Stand Up Fight",
+		"Pressure Plate",
+		"Stranglehold"
+	];
 
 	type componentProps = {
 		sublist: SublistV2;
@@ -23,7 +35,7 @@
 	<div class="space-between">
 		<div class="center gap8">
 			<select id={`scenario${sublist.id}`} bind:value={sublist.scenario}>
-				{#each ["-", "Bunkers", "Capture the Flag", "Domination", "Headhunter", "Hold the Line", "King of the Hill", "Overrun", "Stand Up Fight"] as scenario}
+				{#each scenarioList as scenario}
 					<option value={scenario}>{scenario}</option>
 				{/each}
 			</select>

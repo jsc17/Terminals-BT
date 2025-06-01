@@ -34,6 +34,9 @@
 		<div class="option-row">
 			<label><input type="checkbox" bind:checked={options.showJumpTMM} /> Show units jump TMM</label>
 		</div>
+		<div class="option-row">
+			<label><input type="checkbox" bind:checked={options.groupByFormation} /> Group units by formation</label>
+		</div>
 	</Popover.Content>
 </Popover.Root>
 

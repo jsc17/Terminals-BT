@@ -3,6 +3,7 @@ type Limit = {
 	min?: number;
 	max?: number;
 	equal?: number[];
+	exceptions?: { ability: { name: string; minValue: number; max: number }[] };
 };
 
 export type Options = {
@@ -26,6 +27,8 @@ export type Options = {
 	abilityLimits?: Limit[];
 	sublistMaxUnits?: number;
 	sublistMaxPv?: number;
+	uniqueMaxLimit?: number;
+	unitMinPV?: number;
 };
 
 export const ruleSets: Options[] = [
@@ -35,7 +38,7 @@ export const ruleSets: Options[] = [
 	},
 	{
 		name: "wn350",
-		display: "Wolfnet 350",
+		display: "Wolfnet 350 v2.3",
 		eraFactionRestriction: true,
 		maxPv: 350,
 		maxUnits: 16,
@@ -59,6 +62,37 @@ export const ruleSets: Options[] = [
 		abilityLimits: [{ types: ["JMPS"], max: 2 }],
 		sublistMaxUnits: 10,
 		sublistMaxPv: 250
+	},
+	{
+		name: "wn350v3",
+		display: "Wolfnet 350 v3.0",
+		eraFactionRestriction: true,
+		maxPv: 350,
+		maxUnits: 16,
+		allowedTypes: ["BA", "BM", "CV", "CI", "IM", "PM", "BS"],
+		allowedRules: ["Introductory", "Advanced", "Standard"],
+		disallowedAbilities: ["DRO"],
+		customUnitPacks: ["wn350v3"],
+		maxSkill: 6,
+		minSkill: 2,
+		unitLimits: [
+			{ types: ["BM", "IM"], max: 12 },
+			{ types: ["CV"], max: 6 },
+			{ types: ["BA", "CI"], max: 5 },
+			{ types: ["PM"], equal: [0, 5] }
+		],
+		chassisLimits: [{ types: ["All"], max: 2 }],
+		variantLimits: [
+			{ types: ["BM", "IM"], max: 1 },
+			{ types: ["CV"], max: 1, exceptions: { ability: [{ name: "IT", minValue: 3, max: 2 }] } }
+		],
+		skillLimits: [{ types: ["2", "6"], max: 2 }],
+		requireHitch: true,
+		abilityLimits: [{ types: ["JMPS"], max: 2 }],
+		sublistMaxUnits: 10,
+		sublistMaxPv: 250,
+		unitMinPV: 7,
+		uniqueMaxLimit: 1
 	}
 ];
 

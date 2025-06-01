@@ -1,11 +1,23 @@
 <script lang="ts">
-	import type { List } from "../../../../lib/types/list.svelte";
-	import type { SublistStats, SublistV2 } from "../../types/sublist";
-	import { getRules } from "$lib/types/options";
+	import type { List, SublistV2, SublistStats } from "$lib/types/";
 	import EditSublistModal from "./EditSublistModal.svelte";
 	import ExportSublistModal from "./ExportSublistModal.svelte";
 	import { dragHandle } from "svelte-dnd-action";
 	import Menu from "$lib/components/Generic/Menu.svelte";
+
+	const scenarioList = [
+		"-",
+		"Bunkers",
+		"Capture the Flag",
+		"Domination",
+		"Headhunter",
+		"Hold the Line",
+		"King of the Hill",
+		"Overrun",
+		"Stand Up Fight",
+		"Pressure Plate",
+		"Stranglehold"
+	];
 
 	type componentProps = {
 		sublist: SublistV2;
@@ -28,7 +40,7 @@
 	<div class="mobile-sublist-body">
 		<div class="space-between">
 			<select id={`scenario${sublist.id}`} bind:value={sublist.scenario}>
-				{#each ["-", "Bunkers", "Capture the Flag", "Domination", "Headhunter", "Hold the Line", "King of the Hill", "Overrun", "Stand Up Fight"] as scenario}
+				{#each scenarioList as scenario}
 					<option value={scenario}>{scenario}</option>
 				{/each}
 			</select>

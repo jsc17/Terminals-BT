@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PlayList } from "$lib/types/playList";
-	import PlayFormationCard from "./PlayFormationCard.svelte";
+	import PlayFormation from "./PlayFormation.svelte";
 	import { PersistedState } from "runed";
 	import OptionsPopover from "./components/OptionsPopover.svelte";
 	import type { LogRound, Options } from "./types";
@@ -9,13 +9,22 @@
 	import Log from "./Log.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { Popover } from "$lib/components/Generic/";
+	import PlayUnitList from "./PlayUnitList.svelte";
 
 	let logDrawerOpen = $state(false);
 	let loadModalOpen = $state(false);
 	let lists: { name: string; units: string; formations: string }[] = $state([]);
 
 	const playList = new PersistedState<PlayList>("playList", { formations: [], units: [] });
-	const options = new PersistedState<Options>("playOptions", { renderOriginal: true, uiScale: 50, showPhysical: false, showCrippled: true, showJumpTMM: true, confirmEnd: true });
+	const options = new PersistedState<Options>("playOptions", {
+		renderOriginal: true,
+		uiScale: 50,
+		showPhysical: false,
+		showCrippled: true,
+		showJumpTMM: true,
+		confirmEnd: true,
+		groupByFormation: true
+	});
 	const currentRoundLog = new PersistedState<LogRound>("playCurrentRound", { round: 1, logs: [] });
 	let fullLogs: LogRound[] = $state([]);
 
@@ -91,10 +100,14 @@
 		<button class="toolbar-button log-button" onclick={openLog}>Log</button>
 	</div>
 	<p class="announcement">Some minor tweaks still to go, but pretty close to being done. Click on a units name to expand its card.</p>
-	{#if playList.current.formations.length}
-		{#each playList.current.formations as formation}
-			<PlayFormationCard {formation} units={playList.current.units} options={options.current} currentRoundLog={currentRoundLog.current}></PlayFormationCard>
-		{/each}
+	{#if playList.current.units.length}
+		{#if options.current.groupByFormation}
+			{#each playList.current.formations as formation}
+				<PlayFormation {formation} units={playList.current.units} options={options.current} currentRoundLog={currentRoundLog.current}></PlayFormation>
+			{/each}
+		{:else}
+			<PlayUnitList units={playList.current.units} options={options.current} currentRoundLog={currentRoundLog.current}></PlayUnitList>
+		{/if}
 	{:else}
 		<div class="list-load-error-body">
 			<h2>No list loaded. Please try loading a list from the <a href="/listbuilder">list builder</a></h2>

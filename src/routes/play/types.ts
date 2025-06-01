@@ -19,4 +19,5 @@ export type Options = {
 	showCrippled: boolean;
 	showJumpTMM: boolean;
 	confirmEnd: boolean;
+	groupByFormation: boolean;
 };

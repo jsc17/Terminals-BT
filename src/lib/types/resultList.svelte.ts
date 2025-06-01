@@ -105,7 +105,7 @@ export class ResultList {
 
 	resultList = $state<MulUnit[]>([]);
 	generalList = $state<MulUnit[]>([]);
-	uniqueList: any[] = [];
+	uniqueList = $state<number[]>([]);
 
 	options = $state<Options>();
 	availableList = $derived.by(() => {

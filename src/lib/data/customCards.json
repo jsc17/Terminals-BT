@@ -22,6 +22,29 @@
 					"abilities": "ARTAIS-1"
 				}
 			]
+		},
+		{
+			"name": "wn350v3",
+			"units": [
+				{
+					"id": -1,
+					"name": "Off Board Artillery Support - Thumper",
+					"class": "Off Board Artillery Support - Thumper",
+					"variant": "",
+					"type": "BS",
+					"pv": 5,
+					"abilities": "ARTT-1"
+				},
+				{
+					"id": -2,
+					"name": "Off Board Artillery Support - Sniper",
+					"class": "Off Board Artillery Support - Sniper",
+					"variant": "",
+					"type": "BS",
+					"pv": 8,
+					"abilities": "ARTAIS-1"
+				}
+			]
 		}
 	]
 }

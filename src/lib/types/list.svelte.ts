@@ -193,6 +193,14 @@ export class List {
 					}
 					issueUnits.add(unit.id!);
 				}
+				if (this.options.unitMinPV && unit.cost < this.options.unitMinPV && unit.baseUnit.name != "Off Board Artillery Support - Thumper") {
+					if (issueList.has(`Minimum unit pv (${this.options.unitMinPV})`)) {
+						issueList.get(`Minimum unit pv (${this.options.unitMinPV})`)?.add(unit.baseUnit.name);
+					} else {
+						issueList.set(`Minimum unit pv (${this.options.unitMinPV})`, new Set([unit.baseUnit.name]));
+					}
+					issueUnits.add(unit.id!);
+				}
 			}
 			if (this.options.unitLimits) {
 				let groupedUnits = Object.groupBy(this.units, (unit) => unit.baseUnit.subtype);
@@ -253,14 +261,21 @@ export class List {
 						let variantList = Object.groupBy(chassisValue!, (unit) => unit.baseUnit.variant);
 						for (const [variantKey, variantValue] of Object.entries(variantList)) {
 							if (variantValue?.length && limit.max && variantValue.length > limit.max) {
-								if (issueList.has("Maximum variants")) {
-									issueList.get("Maximum variants")?.add(chassisKey);
-								} else {
-									issueList.set("Maximum variants", new Set([chassisKey]));
-								}
-								for (const unit of this.units) {
-									if (unit.baseUnit.class == chassisKey) {
-										issueUnits.add(unit.id!);
+								if (
+									!limit.exceptions ||
+									!variantValue[0].baseUnit.abilities.find((ability) => {
+										return ability.name == "IT" && (ability.v ?? 0) >= 3;
+									})
+								) {
+									if (issueList.has("Maximum variants")) {
+										issueList.get("Maximum variants")?.add(chassisKey);
+									} else {
+										issueList.set("Maximum variants", new Set([chassisKey]));
+									}
+									for (const unit of this.units) {
+										if (unit.baseUnit.class == chassisKey) {
+											issueUnits.add(unit.id!);
+										}
 									}
 								}
 							}
@@ -334,6 +349,20 @@ export class List {
 								issueUnits.add(unit.id!);
 							}
 						}
+					}
+				}
+			}
+			if (this.options.uniqueMaxLimit) {
+				let uniquesInList = this.units.filter((unit) => this.resultList.uniqueList.includes(unit.baseUnit.mulId));
+				console.log(uniquesInList);
+				if (uniquesInList.length > 1) {
+					for (const unit of uniquesInList) {
+						if (issueList.has("Unique units limit")) {
+							issueList.get("Unique units limit")?.add(unit.baseUnit.name);
+						} else {
+							issueList.set("Unique units limit", new Set([unit.baseUnit.name]));
+						}
+						issueUnits.add(unit.id!);
 					}
 				}
 			}

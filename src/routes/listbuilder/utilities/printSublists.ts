@@ -9,7 +9,19 @@ type PrintableSublist = {
 	unitList: UnitV2[];
 };
 
-const scenarios = ["Bunkers", "Capture the Flag", "Domination", "Headhunter", "Hold the Line", "King of the Hill", "Overrun", "Stand Up Fight", "-"];
+const scenarios = [
+	"Bunkers",
+	"Capture the Flag",
+	"Domination",
+	"Headhunter",
+	"Hold the Line",
+	"King of the Hill",
+	"Overrun",
+	"Stand Up Fight",
+	"Pressure Plate",
+	"Stranglehold",
+	"-"
+];
 
 /**
  * @param layout should be horizontal or vertical

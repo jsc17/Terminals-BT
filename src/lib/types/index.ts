@@ -6,7 +6,7 @@ import { List } from "./list.svelte";
 import { type ListCode, type ListCodeUnit } from "./listCode";
 import { type SCA } from "./sca";
 import type { UnitV2, UnitCustomization, MulUnit } from "./unit";
-import { type SublistV2 } from "./sublist";
+import { type SublistV2, type SublistStats } from "./sublist";
 import { type Notification } from "./notification";
 
 export {
@@ -27,5 +27,6 @@ export {
 	type MulUnit,
 	type SCA,
 	type SublistV2,
+	type SublistStats,
 	type Notification
 };

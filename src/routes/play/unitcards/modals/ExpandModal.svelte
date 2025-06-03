@@ -27,8 +27,18 @@
 	.expanded-container {
 		container: expanded / size;
 		aspect-ratio: 7/5;
-		width: 80dvw;
 		aspect-ratio: 7 / 5;
 		margin: 16px 0px;
+		overflow: auto;
+	}
+	@media (orientation: landscape) {
+		.expanded-container {
+			height: 80dvh;
+		}
+	}
+	@media (orientation: portrait) {
+		.expanded-container {
+			width: max(400px, 90dvw);
+		}
 	}
 </style>

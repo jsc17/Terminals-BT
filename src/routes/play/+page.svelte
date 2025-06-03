@@ -76,28 +76,23 @@
 
 <div class="play-body">
 	<div class="toolbar">
-		<button class="toolbar-button end-round-button" onclick={endRound}>End Round</button>
-		<div class="toolbar-section"></div>
+		<div class="toolbar-section">
+			<button class="toolbar-button" onclick={endRound}>End Round</button>
+		</div>
 		<div class="toolbar-item">Round: {currentRoundLog.current.round}</div>
 		<div class="toolbar-section">
-			{#if appWindow.isNarrow}
-				<div class="play-menu-container">
-					<Popover>
-						{#snippet trigger()}
-							<div class="menu-trigger-button">Menu</div>
-						{/snippet}
-						<OptionsPopover bind:options={options.current}></OptionsPopover>
-						<button class="toolbar-button" onclick={resetList}>Reset List</button>
-						<button class="toolbar-button" onclick={openLoadModal}>Load List</button>
-					</Popover>
+			<Popover>
+				{#snippet trigger()}
+					<div class="toolbar-button">Menu</div>
+				{/snippet}
+				<div class="play-menu-dropdown">
+					<OptionsPopover bind:options={options.current}></OptionsPopover>
+					<button class="toolbar-button" onclick={resetList}>Reset List</button>
+					<button class="toolbar-button" onclick={openLoadModal}>Load List</button>
 				</div>
-			{:else}
-				<OptionsPopover bind:options={options.current}></OptionsPopover>
-				<button class="toolbar-button" onclick={resetList}>Reset List</button>
-				<button class="toolbar-button" onclick={openLoadModal}>Load List</button>
-			{/if}
+			</Popover>
+			<button class="toolbar-button play-log-button" onclick={openLog}>Log</button>
 		</div>
-		<button class="toolbar-button log-button" onclick={openLog}>Log</button>
 	</div>
 	<p class="announcement">Some minor tweaks still to go, but pretty close to being done. Click on a units name to expand its card.</p>
 	{#if playList.current.units.length}
@@ -127,7 +122,6 @@
 	}
 	.play-body {
 		position: relative;
-		padding: 0px 16px 0px 12px;
 		overflow: auto;
 	}
 	.toolbar {
@@ -138,31 +132,13 @@
 		top: 0;
 		display: flex;
 		justify-content: space-between;
-		z-index: 2;
 	}
 	.toolbar-section {
-		flex: 1;
 		display: flex;
 		gap: 8px;
 		align-items: center;
 		padding: 0px 16px;
 		justify-content: flex-end;
-	}
-	.play-menu-container {
-		display: flex;
-		height: 100%;
-		width: 100%;
-		align-items: center;
-		justify-content: center;
-	}
-	.menu-trigger-button {
-		background-color: transparent;
-		height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 16px;
-		/* padding: 16px; */
 	}
 	.toolbar-item {
 		display: flex;
@@ -177,23 +153,23 @@
 		background-color: transparent;
 		border-radius: 0;
 		color: var(--card-foreground);
-	}
-	.log-button,
-	.end-round-button {
 		min-width: min(25dvw, 100px);
-	}
-	.end-round-button {
-		border-top-left-radius: var(--radius);
-		border-bottom-left-radius: var(--radius);
 	}
 	.toolbar-button:hover {
 		background-color: var(--muted);
 		color: var(--muted-foreground);
 	}
+	.play-menu-dropdown {
+		display: flex;
+		flex-direction: column;
+		margin: 12px 0px;
+	}
 	.announcement {
-		margin: 16px;
-		width: 100%;
+		width: calc(100%);
+		padding: 4px 16px;
 		align-self: center;
 		color: var(--muted-foreground);
+		box-sizing: border-box;
+		margin: 4px 0px;
 	}
 </style>

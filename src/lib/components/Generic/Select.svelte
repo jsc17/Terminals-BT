@@ -124,7 +124,9 @@ from the perspective of the consumer of this component, it will be typed appropr
 				{/each}
 				{#each groupedItems ?? [] as { groupLabel, items }}
 					<Select.Group>
-						<Select.GroupHeading>{groupLabel}</Select.GroupHeading>
+						{#if groupLabel != ""}
+							<Select.GroupHeading>{groupLabel}</Select.GroupHeading>
+						{/if}
 						{#each items ?? [] as { value, label, disabled, subitems } (value)}
 							<Select.Item {value} {label} {disabled}>
 								{#snippet children({ selected })}
@@ -189,7 +191,6 @@ from the perspective of the consumer of this component, it will be typed appropr
 	}
 	:global([data-select-content]) {
 		background-color: var(--background);
-		z-index: 100;
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		padding: 4px;

@@ -1,30 +1,28 @@
 <script lang="ts">
 	import { getContext } from "svelte";
-	import type { SublistV2 } from "../../types/sublist";
-	import type { List } from "../../../../lib/types/list.svelte";
+	import type { SublistV2, List, FormationV2 } from "$lib/types/";
 	import { exportToJeff } from "../../utilities/export.svelte";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
 	import { enhance } from "$app/forms";
-	import type { FormationV2 } from "../../../../lib/types/formation";
-	import { nanoid } from "nanoid";
-	import { sendListToPlay } from "$lib/types/playList";
+	import { Dialog } from "$lib/components/Generic";
 
-	let list: List = getContext("list");
+	type Props = {
+		open: boolean;
+		sublist: SublistV2;
+		list: List;
+	};
 
-	let exportDialog: HTMLDialogElement;
-	let sublist: SublistV2;
+	let { open = $bindable(), sublist, list }: Props = $props();
+
 	let exportName = $state("");
 	let playerName = $state("");
 	let style = $state("detailed");
 	let ttsCode = $state("");
 	let printName = $state("");
 
-	export function show(id: string) {
-		sublist = list.getSublist(id)!;
+	function onOpenChange() {
 		exportName = `${list.details.name} ${sublist.scenario != "-" ? sublist.scenario : "sublist"}`;
-		exportDialog.showModal();
 		ttsCode = createSublistTTSCode();
 		printName = `${list.details.name} ${sublist.scenario} Sublist`;
 	}
@@ -40,7 +38,7 @@
 		return `{${tempTTSArray.join(",")}}`;
 	}
 	async function handleForm({ formData }: any) {
-		exportDialog.close();
+		open = false;
 		const units = sublist.checked.map((unitId) => {
 			return $state.snapshot(list.getUnit(unitId)!);
 		});
@@ -86,35 +84,10 @@
 			toastController.addToast("Sublist has no selected units");
 		}
 	}
-
-	function loadForPlay() {
-		const units = sublist.checked.map((unitId) => {
-			return $state.snapshot(list.getUnit(unitId)!);
-		});
-		const sublistFormation: FormationV2 = {
-			id: nanoid(6),
-			name: `${list.details.name}${sublist.scenario != "-" ? ` ${sublist.scenario} ` : " "}Sublist`,
-			type: "none",
-			units: units.map((unit) => {
-				return { id: unit.id };
-			})
-		};
-		sendListToPlay([sublistFormation], list.units);
-	}
 </script>
 
-<dialog bind:this={exportDialog} class:dialog-wide={appWindow.isNarrow}>
-	<div class="dialog-body">
-		<div class="dialog-header">
-			<h1>Print/Export Sublist</h1>
-			<button
-				class="close-button"
-				onclick={() => {
-					exportDialog.close();
-				}}><img src="/icons/close.svg" alt="close button" /></button
-			>
-		</div>
-		<button class="play-button" onclick={loadForPlay}>Play Sublist</button>
+<Dialog title="Export / Print Sublist" bind:open {onOpenChange}>
+	<div class="export-sublist-dialog-content">
 		<fieldset>
 			<legend>Print Sublist:</legend>
 			<form action="?/printList" method="post" use:enhance={handleForm} class="print-form">
@@ -143,7 +116,6 @@
 					onclick={() => {
 						navigator.clipboard.writeText(ttsCode!);
 						toastController.addToast("code copied to clipboard", 1500);
-						exportDialog.close();
 					}}
 				>
 					<img src="/icons/content-copy.svg" alt="copy to clipboard" class="button-icon" />
@@ -161,13 +133,9 @@
 			</p>
 		</fieldset>
 	</div>
-</dialog>
+</Dialog>
 
 <style>
-	h1 {
-		font-size: 1.25em;
-		margin-right: 3em;
-	}
 	h2 {
 		font-size: 1.15em;
 		margin-bottom: 0;
@@ -191,21 +159,10 @@
 	label {
 		margin: 0px 4px;
 	}
-	.close-button {
-		background-color: transparent;
-		img {
-			height: 35px;
-			width: 35px;
-			filter: var(--primary-filter);
-		}
-	}
 	.export-button {
 		width: fit-content;
 	}
 	fieldset {
 		border: 1px solid var(--muted);
-	}
-	.play-button {
-		width: max-content;
 	}
 </style>

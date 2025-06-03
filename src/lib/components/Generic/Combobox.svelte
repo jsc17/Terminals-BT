@@ -93,7 +93,6 @@
 	}
 	:global(.combobox-content) {
 		background-color: var(--background);
-		z-index: 5;
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		padding: 8px 8px 8px 4px;

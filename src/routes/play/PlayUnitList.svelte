@@ -22,7 +22,6 @@
 
 <style>
 	.play-list-units {
-		padding: 8px;
 		display: flex;
 		flex-wrap: wrap;
 		gap: 8px;

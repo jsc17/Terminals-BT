@@ -1,23 +1,20 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
-	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { toastController } from "$lib/stores/toastController.svelte";
-	import { getContext } from "svelte";
-	import type { List } from "../../../../lib/types/list.svelte";
-	import type { UnitV2 } from "$lib/types/unit";
+	import type { UnitV2, List } from "$lib/types/";
+	import { Dialog } from "$lib/components/Generic";
 
-	let list: List = getContext("list");
+	type Props = {
+		open: boolean;
+		list: List;
+	};
 
-	let printDialog: HTMLDialogElement;
-
-	export function show() {
-		printDialog.showModal();
-	}
+	let { open = $bindable(), list }: Props = $props();
 
 	function handlePrintForm({ formData, cancel, submitter }: any) {
 		if (submitter.innerText == "Cancel") {
 			cancel();
-			printDialog.close();
+			open = false;
 			return;
 		}
 
@@ -39,7 +36,7 @@
 		formData.append("sublists", JSON.stringify(sublistData));
 		formData.append("name", list.details.name);
 		toastController.addToast("Generating sublist printout");
-		printDialog.close();
+		open = false;
 
 		return async ({ result }: any) => {
 			const blob = new Blob([new Uint8Array(Object.values(JSON.parse(result.data.pdf)))], { type: "application/pdf" });
@@ -51,7 +48,7 @@
 	}
 </script>
 
-<dialog bind:this={printDialog} class:dialog-wide={appWindow.isNarrow}>
+<Dialog title="Print Sublists" triggerClasses="transparent-button" bind:open>
 	<form action="?/printSublists" method="post" use:enhance={handlePrintForm} class="padding8">
 		<div class="inline column gap8">
 			<div class="inline gap8"><input type="radio" name="sublistPrintLayout" id="vertical" value="vertical" checked /><label for="vertical">Vertical</label></div>
@@ -64,4 +61,4 @@
 			<button>Print</button>
 		</div>
 	</form>
-</dialog>
+</Dialog>

@@ -9,15 +9,21 @@ export type PlayList = {
 export function sendListToPlay(formations: FormationV2[], units: UnitV2[]) {
 	const playUnits: PlayUnit[] = [];
 	for (const unit of units) {
-		playUnits.push({
-			id: unit.id,
-			mulId: unit.baseUnit.mulId.toString(),
-			skill: unit.skill,
-			cost: unit.cost,
-			customization: unit.customization,
-			current: { damage: 0, heat: 0, crits: [] },
-			pending: { damage: 0, heat: 0, crits: [] }
-		});
+		if (
+			formations.find((formation) => {
+				return formation.units.find(({ id }) => id == unit.id);
+			})
+		) {
+			playUnits.push({
+				id: unit.id,
+				mulId: unit.baseUnit.mulId.toString(),
+				skill: unit.skill,
+				cost: unit.cost,
+				customization: unit.customization,
+				current: { damage: 0, heat: 0, crits: [] },
+				pending: { damage: 0, heat: 0, crits: [] }
+			});
+		}
 	}
 	const playFormations: PlayFormation[] = formations
 		.filter((formation) => {

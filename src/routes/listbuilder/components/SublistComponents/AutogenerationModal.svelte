@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import { getContext } from "svelte";
-	import type { List } from "../../../../lib/types/list.svelte";
-	import type { UnitV2 } from "$lib/types/unit";
-	import type { SublistV2 } from "../../types/sublist";
+	import type { UnitV2, List, SublistV2 } from "$lib/types/";
+	import { Dialog, Collapsible, Separator } from "$lib/components/Generic";
+	import { nanoid } from "nanoid";
+	import { appWindow } from "$lib/stores";
+	import { watch } from "runed";
 
 	type AutoSublist = {
 		id: string;
@@ -13,21 +13,48 @@
 		pv: number;
 	};
 
-	let list: List = getContext("list");
+	type Props = {
+		open: boolean;
+		list: List;
+	};
+
+	let { open = $bindable(), list }: Props = $props();
 
 	let autosublists = $state<AutoSublist[]>([]);
-	let showFilters = $state<boolean>(false);
-	let autoGenerationDialog: HTMLDialogElement;
+	let showFilters = $state<boolean>(true);
+	let showUnitFilters = $state<boolean>(!appWindow.isMobile);
 
-	let autoMinPV = $state<number>(),
-		autoMaxPV = $state<number>(),
-		autoMinUnitCost = $state<number>(10);
+	let options = $state({
+		autoMaxPV: list.options?.sublistMaxPv ?? 0,
+		autoMinPV: list.options?.sublistMaxPv ? list.options.sublistMaxPv - 10 : 0,
+		autoMaxUnits: list.options?.sublistMaxUnits ?? 0,
+		autoMinUnits: 0,
+		autoMinUnitCost: list.options?.unitMinPV ?? 0
+	});
 
-	export function show() {
-		autoGenerationDialog.showModal();
-		autoMaxPV = list.options?.sublistMaxPv ?? list.pv;
-		autoMinPV = autoMaxPV - 15;
-	}
+	watch(
+		() => list.options,
+		() => {
+			options.autoMaxPV = list.options?.sublistMaxPv ?? 0;
+			options.autoMinPV = list.options?.sublistMaxPv ? list.options.sublistMaxPv - 10 : 0;
+			options.autoMaxUnits = list.options?.sublistMaxUnits ?? 0;
+			options.autoMinUnits = 0;
+			options.autoMinUnitCost = list.options?.unitMinPV ?? 0;
+			filteredUnits = list.units
+				.sort((a, b) => a.baseUnit.subtype.localeCompare(b.baseUnit.subtype))
+				.map((unit) => {
+					return { id: unit.id, name: unit.baseUnit.name, included: true };
+				});
+		}
+	);
+
+	let filteredUnits = $state<{ id: string; name: string; included: boolean }[]>(
+		list.units
+			.sort((a, b) => a.baseUnit.subtype.localeCompare(b.baseUnit.subtype))
+			.map((unit) => {
+				return { id: unit.id, name: unit.baseUnit.name, included: true };
+			})
+	);
 
 	function generatesublists() {
 		autosublists = [];
@@ -35,7 +62,7 @@
 		const possibleUnits = $state
 			.snapshot(list.units)
 			.filter((unit: UnitV2) => {
-				return unit.cost >= autoMinUnitCost;
+				return unit.cost >= options.autoMinUnitCost && filteredUnits.find(({ id }) => id == unit.id)?.included;
 			})
 			.map((unit) => {
 				return { id: unit.id, name: unit.baseUnit.name, cost: unit.cost, skill: unit.skill };
@@ -49,7 +76,7 @@
 		}
 
 		for (const subset of combinations) {
-			if (subset.length && subset.length <= 10) {
+			if (subset.length && (!options.autoMinUnits || subset.length >= options.autoMinUnits) && (!options.autoMaxUnits || subset.length <= options.autoMaxUnits)) {
 				let checked: string[] = [];
 				let unitNameArray = [];
 				let pv = 0;
@@ -62,7 +89,7 @@
 				if (!existingCombinations.has(subsetString)) {
 					existingCombinations.add(subsetString);
 
-					if (pv <= autoMaxPV! && pv >= autoMinPV!) {
+					if ((!options.autoMaxPV || pv <= options.autoMaxPV) && (!options.autoMinPV || pv >= options.autoMinPV)) {
 						let newId = crypto.randomUUID();
 						let newList = $state<AutoSublist>({
 							id: newId,
@@ -77,96 +104,130 @@
 				}
 			}
 		}
+		showFilters = false;
 	}
 </script>
 
-<dialog bind:this={autoGenerationDialog} class="auto-modal" class:dialog-wide={appWindow.isNarrow}>
-	<div class="dialog-body">
-		<div class="space-between">
-			{#if !appWindow.isNarrow}
-				<h1>Auto-generated sublists</h1>
-			{/if}
-			<p>Total Lists - {autosublists.length}</p>
-			<button
-				onclick={() => {
-					autoGenerationDialog.close();
-				}}>Close</button
-			>
-		</div>
-		<div class:auto-main={!appWindow.isMobile} class:auto-main-mobile={appWindow.isMobile}>
-			<button
-				class="accordian"
-				class:hidden={!appWindow.isMobile}
-				onclick={() => {
-					showFilters = !showFilters;
-				}}
-			>
-				<div class="space-between">
-					<div></div>
-					<div>Filters</div>
-					<div>
-						{#if showFilters}
-							-
-						{:else}
-							+
-						{/if}
-					</div>
-				</div>
-			</button>
-			<div class:hidden={appWindow.isNarrow && !showFilters}>
-				<div class="options">
-					<label for="autoMinPv">Min PV:</label>
-					<input id="autoMinPv" type="number" bind:value={autoMinPV} />
-					<label for="autoMaxPv">Max PV:</label>
-					<input id="autoMaxPv" type="number" bind:value={autoMaxPV} />
-					<label for="autoMinUnitCost">Min unit PV:</label>
-					<input id="autoMinUnitCost" type="number" bind:value={autoMinUnitCost} />
-					<button onclick={generatesublists}>Generate sublists</button>
-					<p>Additional filters coming soon...</p>
-				</div>
+{#snippet autoSublistOptions()}
+	<p class="muted">Set filter to 0 to ignore that value</p>
+	<div class="auto-sublist-options">
+		<label for="autoMinPv">Min PV:</label>
+		<input id="autoMinPv" type="number" bind:value={options.autoMinPV} />
+		<label for="autoMaxPv">Max PV:</label>
+		<input id="autoMaxPv" type="number" bind:value={options.autoMaxPV} />
+		<label for="autoMinUnits">Min Units:</label>
+		<input id="autoMinUnits" type="number" bind:value={options.autoMinUnits} />
+		<label for="autoMaxUnits">Max Units:</label>
+		<input id="autoMaxUnits" type="number" bind:value={options.autoMaxUnits} />
+		<label for="autoMinUnitCost">Min unit PV:</label>
+		<input id="autoMinUnitCost" type="number" bind:value={options.autoMinUnitCost} />
+	</div>
+	<Separator classes="separator-card" />
+	<button class="auto-sublist-generate-button" onclick={generatesublists}>Generate sublists</button>
+	<Separator classes="separator-card" />
+
+	<div>
+		<Collapsible bind:open={showUnitFilters}>
+			{#snippet trigger()}
+				<p class="primary">Unit Filters {showUnitFilters ? "-" : "+"}</p>
+			{/snippet}
+			<div class="auto-sublist-unit-filters">
+				{#each filteredUnits as unit}
+					<label for="unitFilter-{unit.id}">{unit.name}</label>
+					<input type="checkbox" name="unitFilter-{unit.id}" id="unitFilter-{unit.id}" bind:checked={unit.included} />
+				{/each}
 			</div>
+		</Collapsible>
+	</div>
+{/snippet}
+
+<Dialog title="Generate Sublists" bind:open>
+	<div class={{ "auto-sublist-modal-content": !appWindow.isMobile, "auto-sublist-modal-content-mobile": appWindow.isMobile }}>
+		{#if !appWindow.isMobile}
+			<div class="auto-sublist-options-container">
+				{@render autoSublistOptions()}
+			</div>
+		{:else}
+			<div>
+				<Collapsible bind:open={showFilters}>
+					{#snippet trigger()}
+						<div class="sublist-filter-collapse-button"><p class="primary">Filters {showFilters ? "-" : "+"}</p></div>
+					{/snippet}
+					<div class="auto-sublist-options-container">
+						{@render autoSublistOptions()}
+					</div>
+				</Collapsible>
+			</div>
+		{/if}
+		{#if !appWindow.isMobile}
 			<div class="auto-list-container">
 				<div>Units</div>
 				<div class="center">Unit Count</div>
 				<div class="center">PV</div>
 				<div></div>
 				{#each autosublists as sublist}
-					<div>{sublist.unitString}</div>
-					<div class="center">{sublist.count}</div>
-					<div class="center">{sublist.pv}</div>
-					<div class="center">
+					<div class="auto-sublist-row">
+						<p>{sublist.unitString}</p>
+						<p class="center">{sublist.count}</p>
+						<p class="center">{sublist.pv}</p>
 						<button
-							style:padding="8px 16px"
+							class="auto-sublist-add-button center"
 							onclick={() => {
-								sublist.sublist.id = crypto.randomUUID();
+								sublist.sublist.id = nanoid(6);
 								list.addSublist($state.snapshot(sublist.sublist));
 							}}>+</button
 						>
 					</div>
 				{/each}
 			</div>
-		</div>
+		{:else}
+			<div class="auto-list-container-mobile">
+				{#each autosublists as sublist}
+					<div class="auto-sublist-row-mobile">
+						<p class="auto-sublist-mobile-unit-string">{sublist.unitString}</p>
+						<div class="auto-sublist-mobile-stat-line">
+							<p><span class="muted">Unit Count:</span> {sublist.count}</p>
+							<p><span class="muted">PV:</span> {sublist.pv}</p>
+							<button
+								class="auto-sublist-add-button center"
+								onclick={() => {
+									sublist.sublist.id = nanoid(6);
+									list.addSublist($state.snapshot(sublist.sublist));
+								}}>+</button
+							>
+						</div>
+					</div>
+				{/each}
+			</div>
+		{/if}
 	</div>
-</dialog>
+</Dialog>
 
 <style>
-	.auto-modal {
-		width: 80%;
-		height: 80%;
-	}
-	.auto-main {
+	.auto-sublist-modal-content {
 		display: grid;
 		grid-template-columns: 1fr 4fr;
-		width: 100%;
-		height: 100%;
+		height: 85dvh;
+		width: calc(99dvw - 36px);
 	}
-	.auto-main-mobile {
+	.auto-sublist-modal-content-mobile {
+		height: 85dvh;
+		width: 100%;
+		display: grid;
+		grid-template-rows: max-content 1fr;
+	}
+	.sublist-filter-collapse-button {
+		height: 30px;
+		width: 100%;
+		margin-bottom: 4px;
+		background-color: var(--card);
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
 		display: flex;
-		flex-direction: column;
-		width: 100%;
-		height: 100%;
+		align-items: center;
+		justify-content: center;
 	}
-	.options {
+	.auto-sublist-options-container {
 		padding: 8px;
 		height: 100%;
 		width: 100%;
@@ -177,29 +238,75 @@
 		flex-direction: column;
 		gap: 8px;
 	}
-	.auto-list-container {
-		div {
-			padding: 8px 16px;
+	.auto-sublist-options {
+		display: grid;
+		grid-template-columns: max-content 1fr;
+		gap: 8px 4px;
+
+		& label {
+			justify-self: end;
+		}
+	}
+	.auto-sublist-generate-button {
+		margin: 8px 0px;
+		width: fit-content;
+		padding: 4px 16px;
+		justify-self: center;
+		align-self: center;
+	}
+	.auto-sublist-unit-filters {
+		display: grid;
+		grid-template-columns: 1fr max-content;
+
+		& label {
+			padding: 4px 4px;
+			text-wrap: wrap;
 			border-bottom: 1px solid var(--border);
 		}
+	}
+	.auto-list-container {
 		padding: 8px;
 		display: grid;
 		width: 100%;
 		height: fit-content;
 		max-height: 100%;
 		overflow: auto;
-		grid-template-columns: auto max-content max-content 25px;
+		grid-template-columns: 1fr max-content max-content max-content;
+		gap: 4px 16px;
 	}
-	.accordian {
-		width: 100%;
-		background-color: var(--card);
-		border: 1px solid var(--border);
-		border-radius: var(--radius);
-		color: var(--card-foreground);
-		padding: 8px;
+	.auto-list-container-mobile {
+		height: 100%;
+		overflow: auto;
 	}
-	.center {
+	.auto-sublist-row {
+		display: grid;
+		grid-template-columns: subgrid;
+		grid-column: span 4;
+		padding: 4px;
+		border-bottom: 1px solid var(--border);
+	}
+	.auto-sublist-row-mobile {
 		display: flex;
-		justify-content: center;
+		flex-direction: column;
+		border-bottom: 1px solid var(--border);
+		margin-bottom: 4px;
+		padding: 4px 8px;
+		gap: 4px;
+	}
+	.auto-sublist-mobile-unit-string {
+		font-size: 0.9em;
+	}
+	.auto-sublist-mobile-stat-line {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+	.auto-sublist-add-button {
+		height: max-content;
+		width: max-content;
+		padding: 4px 16px;
+	}
+	input {
+		max-width: 150px;
 	}
 </style>

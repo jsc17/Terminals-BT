@@ -6,234 +6,212 @@
 	import { getContext } from "svelte";
 	import { List, type SublistV2 } from "$lib/types/";
 	import EditSublistModal from "./EditSublistModal.svelte";
-	import ExportSublistModal from "./ExportSublistModal.svelte";
 	import AutogenerationModal from "./AutogenerationModal.svelte";
-	import Menu from "$lib/components/Generic/Menu.svelte";
+	import { Dialog, Popover } from "$lib/components/Generic";
 
 	let list: List = getContext("list");
 
 	let scenarioFilter = $state<string>("All");
-	let layout = $state<"vertical" | "horizontal">("vertical");
+	let layoutSelection = $state<"vertical" | "horizontal">("vertical");
 	let unitSortOrder = $state<"name" | "pv">("pv");
 	let flipDurationMs = 300;
 
-	let sublistDialog: HTMLDialogElement;
-	let printModal: SublistPrintModal;
-	let editSublistModal = $state<EditSublistModal>();
-	let exportSublistModal = $state<ExportSublistModal>();
-	let autoSublistModal: AutogenerationModal;
+	let sublistPrintModalOpen = $state(false);
+	let sublistEditModalOpen = $state(false);
+	let sublistAutoModalOpen = $state(false);
 
-	const scenarioList = [
-		"All",
-		"-",
-		"Bunkers",
-		"Capture the Flag",
-		"Domination",
-		"Headhunter",
-		"Hold the Line",
-		"King of the Hill",
-		"Overrun",
-		"Stand Up Fight",
-		"Pressure Plate",
-		"Stranglehold"
-	];
-
-	export function show() {
-		sublistDialog.showModal();
-	}
+	let scenarioList = $derived.by(() => ["-"].concat(list.options?.sublistScenarios ?? []));
+	let layout: "mobile" | "vertical" | "horizontal" = $derived(appWindow.isMobile ? "mobile" : layoutSelection);
 
 	let dropTargetStyle = { outline: "none" };
 	function handleSort(e: CustomEvent<DndEvent<SublistV2>>) {
 		list.sublists = e.detail.items;
 	}
+
+	let sublistToEdit = $state<SublistV2>();
+	let edittingNewSublist = $state(false);
+
+	function openSublistEditModal(id: string, newSublist: boolean) {
+		sublistToEdit = list.getSublist(id);
+		sublistEditModalOpen = true;
+		edittingNewSublist = newSublist;
+	}
 </script>
 
-<!-- main sublist dialog -->
-<dialog bind:this={sublistDialog} class="sublist-modal">
-	<div class="dialog-body">
-		<div class="space-between">
-			<h2>Sublists</h2>
-			<p class="info-text">Current Sort Order: {unitSortOrder}</p>
-			<div class="sublist-modal-buttons">
-				<Menu img={"/icons/settings.svg"}>
-					{#if !appWindow.isMobile}
-						<fieldset>
-							<legend>Display</legend>
-							<label><input type="radio" name="layout" bind:group={layout} value="vertical" /> Vertical</label>
-							<label><input type="radio" name="layout" bind:group={layout} value="horizontal" /> Horizontal</label>
-						</fieldset>
-					{/if}
-					<fieldset>
-						<legend>Sublist unit sorting</legend>
-						<label><input type="radio" name="unitSortOrder" bind:group={unitSortOrder} value="pv" /> PV</label>
-						<label><input type="radio" name="unitSortOrder" bind:group={unitSortOrder} value="name" /> Name</label>
-					</fieldset>
-				</Menu>
-				<button
-					onclick={() => {
-						sublistDialog.close();
-					}}>Close</button
-				>
+{#snippet sublists()}
+	{#each list.sublists as sublist (sublist.id)}
+		{#if sublist.scenario == scenarioFilter || scenarioFilter == "All"}
+			<div class:panel-vertical={layout == "vertical" && !appWindow.isMobile} class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}>
+				<Sublist {sublist} {list} {scenarioList} {unitSortOrder} {layout} {openSublistEditModal}></Sublist>
 			</div>
-		</div>
-		<div class="sublist-modal-content" class:sublist-modal-content-mobile={appWindow.isMobile}>
-			<div class="space-between">
-				<div>
-					<label for="scenarioFilter">Scenario:</label>
-					<select id="scenarioFilter" bind:value={scenarioFilter}>
-						{#each scenarioList as scenario}
-							<option value={scenario}>{scenario}</option>
-						{/each}
-					</select>
-				</div>
-				<div class="center gap8">
-					<button
-						onclick={() => {
-							const idAdded = list.addSublist();
-							editSublistModal?.show(idAdded);
-						}}>Add</button
-					>
-					<button
-						onclick={() => {
-							autoSublistModal.show();
-						}}>Generate</button
-					>
-					<button
-						onclick={() => {
-							printModal.show();
-						}}>Print</button
-					>
-				</div>
-			</div>
-			{#if appWindow.isMobile}
-				<div
-					class="sublist-container sublist-container-mobile"
-					use:dragHandleZone={{
-						items: list.sublists,
-						dropTargetStyle,
-						flipDurationMs,
-						dragDisabled: scenarioFilter != "All"
-					}}
-					onconsider={handleSort}
-					onfinalize={handleSort}
-				>
-					{#each list.sublists as sublist (sublist.id)}
-						{#if sublist.scenario == scenarioFilter || scenarioFilter == "All"}
-							<div class="panel-horizontal">
-								<Sublist {sublist} {list} {editSublistModal} {exportSublistModal} {unitSortOrder} layout="mobile"></Sublist>
-							</div>
-						{/if}
-					{/each}
-					<div class="add-panel" class:panel-vertical={layout == "vertical" && !appWindow.isMobile} class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}>
-						<button
-							onclick={() => {
-								const idAdded = list.addSublist();
-								editSublistModal?.show(idAdded);
-							}}>+</button
-						>
-					</div>
-				</div>
-			{:else}
-				<div
-					class="sublist-container"
-					use:dndzone={{
-						items: list.sublists,
-						dropTargetStyle,
-						flipDurationMs,
-						dragDisabled: scenarioFilter != "All"
-					}}
-					onconsider={handleSort}
-					onfinalize={handleSort}
-					class:sublist-container-vertical={layout == "vertical"}
-					class:sublist-container-horizontal={layout == "horizontal"}
-				>
-					{#each list.sublists as sublist (sublist.id)}
-						{#if sublist.scenario == scenarioFilter || scenarioFilter == "All"}
-							<div class:panel-vertical={layout == "vertical" && !appWindow.isMobile} class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}>
-								<Sublist {sublist} {list} {editSublistModal} {exportSublistModal} {unitSortOrder} {layout}></Sublist>
-							</div>
-						{/if}
-					{/each}
-					<div class="add-panel" class:panel-vertical={layout == "vertical" && !appWindow.isMobile} class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}>
-						<button
-							onclick={() => {
-								const idAdded = list.addSublist();
-								editSublistModal?.show(idAdded);
-							}}>+</button
-						>
-					</div>
-				</div>
-			{/if}
-		</div>
+		{/if}
+	{/each}
+	<div class:panel-vertical={layout == "vertical" && !appWindow.isMobile} class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}>
+		<button
+			class="add-panel"
+			onclick={() => {
+				const idAdded = list.addSublist();
+				openSublistEditModal(idAdded, true);
+			}}
+			>+
+		</button>
 	</div>
-</dialog>
+{/snippet}
 
-<SublistPrintModal bind:this={printModal}></SublistPrintModal>
-<EditSublistModal bind:this={editSublistModal}></EditSublistModal>
-<ExportSublistModal bind:this={exportSublistModal}></ExportSublistModal>
-<AutogenerationModal bind:this={autoSublistModal}></AutogenerationModal>
+<Dialog title="Sublists" triggerClasses="transparent-button">
+	{#snippet trigger()}
+		Generate Sublists
+	{/snippet}
+	{#snippet description()}
+		<div class="space-between">
+			<div>
+				<label for="scenarioFilter">Scenario:</label>
+				<select id="scenarioFilter" bind:value={scenarioFilter}>
+					{#each ["All"].concat(scenarioList) as scenario}
+						<option value={scenario}>{scenario}</option>
+					{/each}
+				</select>
+			</div>
+			<div class="sublist-menus">
+				<Popover>
+					{#snippet trigger()}
+						<div class="sublist-modal-menu-button">
+							<img src="/icons/settings.svg" alt="settings menu" />
+						</div>
+					{/snippet}
+					<div class="sublist-modal-menu-body">
+						{#if !appWindow.isMobile}
+							<fieldset>
+								<legend>Display</legend>
+								<label><input type="radio" name="layout" bind:group={layoutSelection} value="vertical" /> Vertical</label>
+								<label><input type="radio" name="layout" bind:group={layoutSelection} value="horizontal" /> Horizontal</label>
+							</fieldset>
+						{/if}
+						<fieldset>
+							<legend>Sublist unit sorting</legend>
+							<label><input type="radio" name="unitSortOrder" bind:group={unitSortOrder} value="pv" /> PV</label>
+							<label><input type="radio" name="unitSortOrder" bind:group={unitSortOrder} value="name" /> Name</label>
+						</fieldset>
+					</div>
+				</Popover>
+				<Popover>
+					{#snippet trigger()}
+						<div class="sublist-modal-menu-button">
+							<img src="/icons/menu.svg" alt="sublist menu" />
+						</div>
+					{/snippet}
+					<div class="sublist-modal-menu-body">
+						<button
+							class="transparent-button"
+							onclick={() => {
+								const idAdded = list.addSublist();
+								openSublistEditModal(idAdded, true);
+							}}
+							>Add Sublist
+						</button>
+						<button class="transparent-button" onclick={() => (sublistPrintModalOpen = true)}>Print All Sublists</button>
+						<button class="transparent-button" onclick={() => (sublistAutoModalOpen = true)}>Automatically Generate Sublists</button>
+					</div>
+				</Popover>
+			</div>
+		</div>
+	{/snippet}
+	<div class="sublist-modal-content">
+		{#if appWindow.isMobile}
+			<div
+				class="sublist-modal-sublist-container sublist-modal-sublist-container-mobile"
+				use:dragHandleZone={{
+					items: list.sublists,
+					dropTargetStyle,
+					flipDurationMs,
+					dragDisabled: scenarioFilter != "All"
+				}}
+				onconsider={handleSort}
+				onfinalize={handleSort}
+			>
+				{@render sublists()}
+			</div>
+		{:else}
+			<div
+				class="sublist-modal-sublist-container"
+				use:dndzone={{
+					items: list.sublists,
+					dropTargetStyle,
+					flipDurationMs,
+					dragDisabled: scenarioFilter != "All"
+				}}
+				onconsider={handleSort}
+				onfinalize={handleSort}
+				class:sublist-modal-sublist-container-vertical={layout == "vertical"}
+				class:sublist-modal-sublist-container-horizontal={layout == "horizontal"}
+			>
+				{@render sublists()}
+			</div>
+		{/if}
+	</div>
+</Dialog>
+
+<EditSublistModal {list} sublist={sublistToEdit} newSublist={edittingNewSublist} bind:open={sublistEditModalOpen} />
+<SublistPrintModal {list} bind:open={sublistPrintModalOpen} />
+<AutogenerationModal {list} bind:open={sublistAutoModalOpen} />
 
 <style>
-	.sublist-modal {
-		width: 100%;
-		height: 100%;
+	.sublist-modal-content {
+		width: calc(99dvw - 32px);
+		display: flex;
+		height: 85dvh;
 	}
-	.sublist-modal-buttons {
+	.sublist-modal-sublist-container {
+		display: flex;
+	}
+	.sublist-modal-sublist-container-horizontal,
+	.sublist-modal-sublist-container-mobile {
+		width: 100%;
+		flex-direction: column;
+	}
+	.sublist-modal-sublist-container-vertical {
+		scrollbar-width: auto;
+	}
+	.sublist-menus {
 		display: flex;
 		gap: 4px;
 		align-items: center;
 	}
-	.sublist-modal-content {
+	.sublist-modal-menu-button {
+		background-color: var(--primary);
+		border-radius: var(--radius);
+		padding: 0px 16px;
+
+		& img {
+			height: 20px;
+			width: 20px;
+		}
+	}
+	.sublist-modal-menu-body {
 		display: flex;
 		flex-direction: column;
+		padding: 16px;
 		gap: 8px;
-		padding: 8px;
-		height: 100%;
-		width: 100%;
-		border: 1px solid var(--border);
-	}
-	.sublist-modal-content-mobile {
-		padding: 0px;
-		border: none;
-		gap: 4px;
-	}
-	.sublist-container {
-		display: flex;
-		gap: 8px;
-		/* padding: 8px; */
-		height: 100%;
-		overflow: auto;
-	}
-	.sublist-container-horizontal,
-	.sublist-container-mobile {
-		flex-direction: column;
-	}
-	.sublist-container-vertical {
-		scrollbar-width: auto;
-	}
-	.sublist-container-mobile {
-		gap: 4px;
 	}
 	.add-panel {
-		button {
-			font-size: 10vmin;
-			background-color: var(--card);
-			color: var(--card-foreground);
-			height: 100%;
-			width: 100%;
-		}
-		background-color: var(--primary);
 		flex-shrink: 0;
-		border-radius: var(--radius);
+		font-size: 10vmin;
+		border: 1px solid var(--border);
+		background-color: var(--card);
+		color: var(--card-foreground);
+		height: 100%;
+		width: 100%;
 	}
 	.panel-vertical {
-		height: 100%;
+		margin: 0px 4px;
 		width: 220px;
 		flex-shrink: 0;
 	}
 	.panel-horizontal {
+		margin: 2px 0px;
 		width: 100%;
 		flex-shrink: 0;
+		min-height: 100px;
 	}
 	fieldset {
 		border: 2px solid var(--border);

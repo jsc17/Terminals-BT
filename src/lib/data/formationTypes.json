@@ -1,5 +1,17 @@
 [
 	{
+		"type": "",
+		"formations": [
+			{
+				"id": 0,
+				"name": "Combat Group",
+				"requirements": ["No Special abilities, just used for force organization"],
+				"bonus": "None",
+				"page": "N/A"
+			}
+		]
+	},
+	{
 		"type": "Ground Formations",
 		"formations": [
 			{

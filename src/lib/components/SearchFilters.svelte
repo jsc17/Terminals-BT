@@ -138,7 +138,6 @@
 <style>
 	main {
 		width: 100%;
-		z-index: 2;
 	}
 	.filter-list {
 		display: flex;

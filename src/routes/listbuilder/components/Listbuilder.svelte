@@ -158,15 +158,7 @@
 					<Separator orientation={"horizontal"} classes={"separator-border"} />
 
 					<FindUnitAvailabilityModal {list} />
-
-					<button
-						class="transparent-button"
-						onclick={() => {
-							sublistModal?.show();
-						}}
-					>
-						Generate Sublists
-					</button>
+					<SublistModal />
 					<button
 						class="transparent-button"
 						onclick={() => {
@@ -264,7 +256,6 @@
 <PrintModal bind:this={printModal}></PrintModal>
 <SaveModal bind:this={saveModal}></SaveModal>
 <LoadModal bind:this={loadModal}></LoadModal>
-<SublistModal bind:this={sublistModal}></SublistModal>
 <UnitCustomizationModal bind:this={unitCustomizationModal}></UnitCustomizationModal>
 <ScaModal bind:this={scaModal}></ScaModal>
 

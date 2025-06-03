@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { getContext } from "svelte";
 	import { type FormationType, type FormationV2 } from "$lib/types/";
 	import { getFormationTypeByName } from "$lib/utilities/formation-utilities";
-	import type { List } from "../../../../lib/types/list.svelte";
 	import { Select, Dialog } from "$lib/components/Generic/";
 	import formationTypes from "$lib/data/formationTypes.json" assert { type: "json" };
 
@@ -12,8 +10,6 @@
 	};
 
 	let { formation, open = $bindable(false) }: Props = $props();
-
-	let list: List = getContext("list");
 
 	let formationTypeList: { groupLabel: string; items: { value: string; label: string }[] }[] = formationTypes.map((group) => {
 		return {

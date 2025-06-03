@@ -25,6 +25,9 @@
 	:global(.separator-border) {
 		background-color: var(--border);
 	}
+	:global(.separator-card) {
+		background-color: var(--card-foreground);
+	}
 	:global([data-separator-root][data-orientation="vertical"]) {
 		width: 1px;
 		height: 90%;

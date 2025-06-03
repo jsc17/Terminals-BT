@@ -11,11 +11,15 @@
 	};
 
 	let { open = $bindable(false), trigger, children, title, onOpenChange }: Props = $props();
+
+	function onFocusOutside() {
+		open = false;
+	}
 </script>
 
 <Popover.Root bind:open {onOpenChange}>
 	<Popover.Trigger class="generic-popover-trigger">{@render trigger?.()}</Popover.Trigger>
-	<Popover.Content class="generic-popover-content">
+	<Popover.Content class="generic-popover-content" {onFocusOutside}>
 		{@render title?.()}
 		{@render children?.()}
 	</Popover.Content>
@@ -34,8 +38,12 @@
 		border-radius: var(--radius);
 		display: flex;
 		flex-direction: column;
-		z-index: 8;
 		margin: 0px 8px;
 		max-width: max(30dvw, 600px);
+	}
+	:global([data-popover-close]) {
+		background-color: transparent;
+		border: none;
+		border-radius: 0;
 	}
 </style>

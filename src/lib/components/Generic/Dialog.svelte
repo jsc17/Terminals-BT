@@ -40,22 +40,24 @@
 		left: 50%;
 		top: 50%;
 		transform: translate(-50%, -50%);
-		z-index: 50;
 		min-width: 400px;
-		max-width: 95dvw;
+		max-width: 99dvw;
 		max-height: 95dvh;
 		background-color: var(--background);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
-		overflow: auto;
+		display: flex;
+		flex-direction: column;
+		z-index: 50;
 	}
 	:global([data-dialog-overlay][data-state="open"]) {
 		position: fixed;
 		inset: 0;
+		z-index: 10;
 		background-color: rgba(0, 0, 0, 0.8);
-		z-index: 50;
 	}
 	:global([data-dialog-title]) {
+		background-color: var(--background);
 		display: flex;
 		font-size: 1.25rem;
 		align-items: center;
@@ -73,8 +75,13 @@
 	@media (max-width: 500px) {
 		:global([data-dialog-title], [data-dialog-description], .dialog-children-wrapper) {
 			padding: 4px;
-			overflow-x: hidden;
 		}
+	}
+	.dialog-children-wrapper {
+		display: flex;
+		flex-direction: column;
+		height: max-content;
+		overflow: auto;
 	}
 	.close-button {
 		width: 25px;

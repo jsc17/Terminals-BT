@@ -354,7 +354,6 @@ export class List {
 			}
 			if (this.options.uniqueMaxLimit) {
 				let uniquesInList = this.units.filter((unit) => this.resultList.uniqueList.includes(unit.baseUnit.mulId));
-				console.log(uniquesInList);
 				if (uniquesInList.length > 1) {
 					for (const unit of uniquesInList) {
 						if (issueList.has("Unique units limit")) {

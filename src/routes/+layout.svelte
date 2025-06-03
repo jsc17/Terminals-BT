@@ -285,11 +285,4 @@
 		color: var(--muted-foreground);
 		font-size: 0.85rem;
 	}
-	:global(.transparent-button) {
-		background-color: transparent;
-		color: var(--primary);
-	}
-	:global(span.muted) {
-		color: var(--muted-foreground);
-	}
 </style>

@@ -157,8 +157,8 @@
 		justify-content: space-between;
 		position: sticky;
 		top: 0;
-		z-index: 3;
 		flex-shrink: 0;
+		z-index: 3;
 	}
 	.link-button {
 		& img {

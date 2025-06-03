@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Collapsible } from "$lib/components/Generic";
-	import type { MulUnit, PlayUnit } from "$lib/types/unit";
+	import type { PlayUnit } from "$lib/types/unit";
 	import type { PlayFormation } from "../../lib/types/formation";
 	import type { LogRound, Options } from "./types";
 	import PlayUnitCard from "./unitcards/PlayUnitCard.svelte";
@@ -79,7 +79,6 @@
 
 <style>
 	.play-formation-container {
-		margin-top: 8px;
 		width: 100%;
 		border: 1px solid var(--primary-muted);
 		border-radius: var(--radius);

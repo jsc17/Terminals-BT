@@ -25,16 +25,18 @@ export type Options = {
 	skillLimits?: Limit[];
 	requireHitch?: boolean;
 	abilityLimits?: Limit[];
-	sublistMaxUnits?: number;
-	sublistMaxPv?: number;
 	uniqueMaxLimit?: number;
 	unitMinPV?: number;
+	sublistMaxUnits?: number;
+	sublistMaxPv?: number;
+	sublistScenarios: string[];
 };
 
 export const ruleSets: Options[] = [
 	{
 		name: "noRes",
-		display: "No Restrictions"
+		display: "No Restrictions",
+		sublistScenarios: []
 	},
 	{
 		name: "wn350",
@@ -61,7 +63,8 @@ export const ruleSets: Options[] = [
 		requireHitch: true,
 		abilityLimits: [{ types: ["JMPS"], max: 2 }],
 		sublistMaxUnits: 10,
-		sublistMaxPv: 250
+		sublistMaxPv: 250,
+		sublistScenarios: ["Bunkers", "Capture the Flag", "Domination", "Headhunter", "Hold the Line", "King of the Hill", "Overrun", "Stand Up Fight"]
 	},
 	{
 		name: "wn350v3",
@@ -89,10 +92,22 @@ export const ruleSets: Options[] = [
 		skillLimits: [{ types: ["2", "6"], max: 2 }],
 		requireHitch: true,
 		abilityLimits: [{ types: ["JMPS"], max: 2 }],
+		unitMinPV: 7,
+		uniqueMaxLimit: 1,
 		sublistMaxUnits: 10,
 		sublistMaxPv: 250,
-		unitMinPV: 7,
-		uniqueMaxLimit: 1
+		sublistScenarios: [
+			"Bunkers",
+			"Capture the Flag",
+			"Domination",
+			"Headhunter",
+			"Hold the Line",
+			"King of the Hill",
+			"Overrun",
+			"Stand Up Fight",
+			"Pressure Plate",
+			"Stranglehold"
+		]
 	}
 ];
 

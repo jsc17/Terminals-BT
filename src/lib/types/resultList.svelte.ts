@@ -396,7 +396,7 @@ export class ResultList {
 								}
 							} else {
 								const rawArray: string[] = rawSearchTerm.split("/");
-								const valueStartIndex = rawArray[0].search(/\d(?:[^emsbi]|$)/i);
+								const valueStartIndex = rawArray[0].search(/(?<!^c)\d/i);
 								if (valueStartIndex != -1) {
 									searchTerm = { name: rawSearchTerm.slice(0, valueStartIndex) };
 									rawArray[0] = rawArray[0].slice(valueStartIndex, rawArray[0].length);
@@ -432,7 +432,7 @@ export class ResultList {
 									}
 								} else {
 									const rawArray: string[] = rawSearchTerm.split("/");
-									const valueStartIndex = rawArray[0].search(/\d(?:[^emsbi]|$)/i);
+									const valueStartIndex = rawArray[0].search(/(?<!^c)\d/i);
 									if (valueStartIndex != -1) {
 										searchTerm = { name: rawSearchTerm.slice(0, valueStartIndex) };
 										rawArray[0] = rawArray[0].slice(valueStartIndex, rawArray[0].length);
@@ -458,7 +458,7 @@ export class ResultList {
 						tempResultList = tempResultList.filter((unit) => {
 							let allFound = true;
 							for (const searchTerm of searchTermArray) {
-								const unitAbility = unit.abilities.find(({ name }) => name.toLowerCase() == searchTerm.name.toLowerCase());
+								const unitAbility = unit.abilities.find(({ name }) => name.toLowerCase().includes(searchTerm.name.toLowerCase()));
 								if (!unitAbility) {
 									allFound = false;
 								} else {

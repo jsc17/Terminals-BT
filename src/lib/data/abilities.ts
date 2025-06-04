@@ -39,9 +39,7 @@ export const abilityReferences: AbilityReference[] = [
 	{ id: 11, abbr: "BAR", name: "Barrier Armor Rating", page: "AS:CE pg.77" },
 	{ id: 12, abbr: "BFC", name: "Basic Fire Control", page: "AS:CE pg.77" },
 	{ id: 13, abbr: "BH", name: "Bloodhound Active Probe", page: "AS:CE pg.83" },
-	{ id: 14, abbr: "BHJ", name: "BattleMech HarJel", page: "AS:CE pg.77" },
-	{ id: 15, abbr: "BHJ2", name: "BattleMech HarJel II", page: "AS:CE pg.83" },
-	{ id: 16, abbr: "BHJ3", name: "BattleMech HarJel III", page: "AS:CE pg.83" },
+	{ id: 14, abbr: "BHJ", name: "BattleMech HarJel", page: "AS:CE pg.83" },
 	{ id: 17, abbr: "BIM", name: "(a) Bimodal Land-Air BattleMech", page: "AS:CE pg.83" },
 	{ id: 18, abbr: "BOMB", name: "Bomb", page: "AS:CE pg.77" },
 	{ id: 19, abbr: "BRA", name: "Ballistic-Reinforced Armor", page: "AS:CE pg.83" },
@@ -209,6 +207,7 @@ export const numberedAbilityReference = [
 	"VTM",
 	"VTH",
 	"C3BSM",
-	"FUEL"
+	"FUEL",
+	"BHJ"
 ];
 export const weaponAbilityReference = ["FLK", "HT", "REAR", "AC", "IATM", "LRM", "MSL", "SRM", "SDS-C", "SDS-CM", "SDS-SC", "IF", "TOR", "TUR", "ART"];

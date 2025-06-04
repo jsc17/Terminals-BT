@@ -74,22 +74,26 @@ export const actions = {
 		return { message: "Completed" };
 	},
 	uploadCustom: async () => {
-		await prisma.customCard.deleteMany({});
-		for (const pack of customCards.unitPacks) {
-			for (const unit of pack.units) {
-				await prisma.customCard.create({
-					data: {
-						pack: pack.name,
-						mulId: unit.id,
-						name: unit.name,
-						class: unit.class,
-						variant: unit.variant,
-						type: unit.type,
-						pv: unit.pv,
-						abilities: unit.abilities
-					}
-				});
+		try {
+			for (const pack of customCards.unitPacks) {
+				for (const unit of pack.units) {
+					await prisma.customCard.create({
+						data: {
+							pack: pack.name,
+							mulId: unit.id,
+							name: unit.name,
+							class: unit.class,
+							variant: unit.variant,
+							type: unit.type,
+							pv: unit.pv,
+							abilities: unit.abilities
+						}
+					});
+				}
 			}
+			console.log("Custom cards loaded");
+		} catch (error) {
+			console.log(error);
 		}
 	},
 	uploadUnits: async ({ request }) => {

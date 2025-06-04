@@ -7,7 +7,7 @@ export async function loadMULUnit(mulId: string) {
 		let tempMovement: { speed: number; type: string }[] = [];
 		response.data!.unit.move.split("/").forEach((movement: string) => {
 			let moveSpeed = movement.replaceAll('"', "").match(/\d+/) ?? "0";
-			let moveType = movement.replaceAll('"', "").match(/\D+/) ?? "";
+			let moveType = movement.replaceAll('"', "").match(/\d+/) ?? "";
 			tempMovement.push({ speed: parseInt(moveSpeed[0]), type: moveType[0] });
 		});
 		if (tempMovement[0].type == "j" && tempMovement.length == 1) {

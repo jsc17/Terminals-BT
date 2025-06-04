@@ -75,8 +75,8 @@ export function handleParse(abilityString: string) {
 	}
 	if (turretMatch !== null) {
 		const turretAbilities = turretMatch[1].split(",").map((ability) => ability.trim());
-		const turretDamageValues = turretAbilities[0].split("/");
-		if (turretDamageValues.length != 1) {
+		if (turretAbilities[0] == "-" || !isNaN(Number(turretAbilities[0][0]))) {
+			const turretDamageValues = turretAbilities[0].split("/");
 			const { s, smin, m, mmin, l, lmin, e, emin } = parseValues(turretDamageValues);
 			const parsedTurretAbilities: UnitAbility[] = [];
 			for (const ability of turretAbilities.slice(1)) {

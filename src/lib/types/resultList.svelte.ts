@@ -20,6 +20,7 @@ type SearchTerm = {
 	medium?: SearchConstraint;
 	long?: SearchConstraint;
 	extreme?: SearchConstraint;
+	exactMatch?: boolean;
 };
 
 function parseSearchConstraint(constraintString?: string) {
@@ -382,7 +383,11 @@ export class ResultList {
 						let searchTermArray: SearchTerm[] = [];
 						let searchBracketArray: SearchTerm[][] = [];
 
-						for (const rawSearchTerm of rawSearchArray) {
+						for (let rawSearchTerm of rawSearchArray) {
+							const exactMatch = rawSearchTerm[0] == "=";
+							if (exactMatch) {
+								rawSearchTerm = rawSearchTerm.slice(1);
+							}
 							let searchTerm: SearchTerm;
 
 							const rawArtSearch = rawSearchTerm.match(/(ART)/i);
@@ -391,7 +396,7 @@ export class ResultList {
 								if (valueStartIndex == -1) {
 									searchTerm = { name: "ART", extraType: rawSearchTerm.slice(3, rawSearchTerm.length) };
 								} else {
-									searchTerm = { name: "ART", extraType: rawSearchTerm.slice(3, valueStartIndex) };
+									searchTerm = { name: "ART", extraType: rawSearchTerm.slice(3, valueStartIndex), exactMatch };
 									searchTerm.value = parseSearchConstraint(rawSearchTerm.slice(valueStartIndex));
 								}
 							} else {
@@ -415,6 +420,7 @@ export class ResultList {
 									searchTerm.extreme = parseSearchConstraint(rawArray[3]);
 								}
 							}
+							searchTerm.exactMatch = exactMatch;
 							searchTermArray.push(searchTerm);
 						}
 						for (const bracket of rawSearchBrackets) {
@@ -458,7 +464,13 @@ export class ResultList {
 						tempResultList = tempResultList.filter((unit) => {
 							let allFound = true;
 							for (const searchTerm of searchTermArray) {
-								const unitAbility = unit.abilities.find(({ name }) => name.toLowerCase().includes(searchTerm.name.toLowerCase()));
+								const unitAbility = unit.abilities.find(({ name }) => {
+									if (searchTerm.exactMatch) {
+										return name.toLowerCase() == searchTerm.name.toLowerCase();
+									} else {
+										return name.toLowerCase().includes(searchTerm.name.toLowerCase());
+									}
+								});
 								if (!unitAbility) {
 									allFound = false;
 								} else {
@@ -489,7 +501,13 @@ export class ResultList {
 								let anyFound = false;
 								for (const searchTerm of bracket) {
 									let stepFound = true;
-									const unitAbility = unit.abilities.find(({ name }) => name.toLowerCase() == searchTerm.name.toLowerCase());
+									const unitAbility = unit.abilities.find(({ name }) => {
+										if (searchTerm.exactMatch) {
+											return name.toLowerCase() == searchTerm.name.toLowerCase();
+										} else {
+											return name.toLowerCase().includes(searchTerm.name.toLowerCase());
+										}
+									});
 									if (!unitAbility) {
 										stepFound = false;
 									} else {

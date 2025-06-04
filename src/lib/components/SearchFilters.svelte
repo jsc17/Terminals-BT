@@ -57,6 +57,7 @@
 									Enter abilities separated by comma's to search for units with all entered abilities (ex. tag,ecm will search for units that have both the TAG and ECM special
 									abilities)
 								</li>
+								<li>Add an = before the ability to only search for an exact match. (AM will return units with AM and AMS, =AM will return only units that have AM)</li>
 								<li>
 									Enter abilities followed by numbers to search for values, using + or - at the end for greater than/less than (ex. jmps2 will return all units with jmpw2, and
 									car4- will return all units with car4 or below)
@@ -65,7 +66,7 @@
 
 								<li>
 									Enter abilities surrounded by parenthesis to search for units with either ability. (ex. (tag,ecm) will search for units that have either the TAG or the ECM
-									special abilities)
+									special abilities. You can include as many as you want (tag, ecm, prb, rcn) and it will return units with any of them)
 								</li>
 								<li>
 									You can use combinations of the above for detailed searchs. (ex. snarc,(lrm,srm) will search for units with SNARC, and either the LRM or SRM special abilities)

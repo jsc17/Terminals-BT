@@ -40,6 +40,26 @@ export function createDamagedAbilityString(ability: UnitAbility, currentCritical
 	}
 
 	for (const turretAbility of ability.turretAbilities ?? []) {
+		if (weaponAbilityReference.includes(turretAbility.name)) {
+			for (const critical of currentCriticals) {
+				if (critical == "weapon") {
+					damaged = true;
+					for (const key of ["v", "vhid", "s", "m", "l", "e"]) {
+						if (turretAbility[key]) {
+							turretAbility[key] -= 1;
+						}
+					}
+				}
+				if ((critical == "engine" && reference.subtype == "CV") || reference.subtype == "SV") {
+					damaged = true;
+					for (let value of [turretAbility.v]) {
+						if (value) {
+							value = Math.floor(value / 2);
+						}
+					}
+				}
+			}
+		}
 		turretString += `, ${turretAbility.name}`;
 		turretString += `${turretAbility.v !== undefined ? `${turretAbility.v != 0 || turretAbility.vmin ? turretAbility.v : "-"}${turretAbility.vmin ? "*" : ""}` : ""}`;
 		turretString += `${turretAbility.s !== undefined ? `${turretAbility.s != 0 || turretAbility.smin ? turretAbility.s : "-"}${turretAbility.smin ? "*" : ""}` : ""}`;

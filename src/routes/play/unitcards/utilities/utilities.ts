@@ -28,11 +28,11 @@ export function createDamagedAbilityString(ability: UnitAbility, currentCritical
 					}
 				}
 			}
-			if ((critical == "engine" && reference.subtype == "CV") || reference.subtype == "SV") {
+			if (critical == "engine" && (reference.subtype == "CV" || reference.subtype == "SV")) {
 				damaged = true;
-				for (let value of [ability.v]) {
-					if (value) {
-						value = Math.floor(value / 2);
+				for (const key of ["v", "vhid", "s", "m", "l", "e"]) {
+					if (ability[key]) {
+						ability[key] = Math.floor(ability[key] / 2);
 					}
 				}
 			}
@@ -42,6 +42,7 @@ export function createDamagedAbilityString(ability: UnitAbility, currentCritical
 	for (const turretAbility of ability.turretAbilities ?? []) {
 		if (weaponAbilityReference.includes(turretAbility.name)) {
 			for (const critical of currentCriticals) {
+				console.log(critical);
 				if (critical == "weapon") {
 					damaged = true;
 					for (const key of ["v", "vhid", "s", "m", "l", "e"]) {
@@ -50,11 +51,11 @@ export function createDamagedAbilityString(ability: UnitAbility, currentCritical
 						}
 					}
 				}
-				if ((critical == "engine" && reference.subtype == "CV") || reference.subtype == "SV") {
+				if (critical == "engine" && (reference.subtype == "CV" || reference.subtype == "SV")) {
 					damaged = true;
-					for (let value of [turretAbility.v]) {
-						if (value) {
-							value = Math.floor(value / 2);
+					for (const key of ["v", "vhid", "s", "m", "l", "e"]) {
+						if (turretAbility[key]) {
+							turretAbility[key] = Math.floor(turretAbility[key] / 2);
 						}
 					}
 				}

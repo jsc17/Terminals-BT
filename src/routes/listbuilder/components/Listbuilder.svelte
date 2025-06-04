@@ -345,15 +345,6 @@
 		height: 20px;
 		filter: var(--error-filter);
 	}
-	.error-dialog {
-		padding: 16px;
-	}
-	.error-dialog-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 24px;
-	}
 	.error-dialog-body {
 		padding: 20px;
 		display: grid;
@@ -361,13 +352,6 @@
 		padding: 16px;
 		color: var(--error);
 		gap: 8px;
-	}
-	.error-button {
-		display: flex;
-		align-items: center;
-		background-color: transparent;
-		color: var(--primary);
-		gap: 4px;
 	}
 	:global(.drop-target-zone) {
 		outline: solid green;

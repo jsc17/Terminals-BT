@@ -145,10 +145,4 @@
 		justify-content: flex-start;
 		align-items: start;
 	}
-	.section {
-		background-color: var(--muted);
-		color: var(--muted-foreground);
-		padding: 2px 4px;
-		display: flex;
-	}
 </style>

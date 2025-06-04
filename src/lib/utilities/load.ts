@@ -7,13 +7,14 @@ export async function loadMULUnit(mulId: string) {
 		let tempMovement: { speed: number; type: string }[] = [];
 		response.data!.unit.move.split("/").forEach((movement: string) => {
 			let moveSpeed = movement.replaceAll('"', "").match(/\d+/) ?? "0";
-			let moveType = movement.replaceAll('"', "").match(/\d+/) ?? "";
+			let moveType = movement.replaceAll('"', "").match(/\D+/) ?? "";
 			tempMovement.push({ speed: parseInt(moveSpeed[0]), type: moveType[0] });
 		});
 		if (tempMovement[0].type == "j" && tempMovement.length == 1) {
 			tempMovement[0].type = "";
 			tempMovement.push({ type: "j", speed: tempMovement[0].speed });
 		}
+		console.log(tempMovement);
 		const unitData = response.data!.unit;
 		const reference: MulUnit = {
 			id: unitData.id,

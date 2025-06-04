@@ -166,9 +166,6 @@
 		font-size: 20px;
 		padding: 8px 16px;
 	}
-	.heat-level-pending {
-		background-color: lightskyblue;
-	}
 	.heat-level-first {
 		margin-left: 4px;
 		border-top-left-radius: var(--radius);

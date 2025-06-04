@@ -1,33 +1,27 @@
 <script lang="ts">
 	import { getContext } from "svelte";
 	import { scaReferences } from "$lib/data";
-	import type { List } from "../../../../lib/types/list.svelte";
+	import type { List } from "$lib/types/";
+	import { Dialog } from "$lib/components/Generic";
+
+	type Props = {
+		open: boolean;
+		list: List;
+	};
+
+	let { open = $bindable(), list }: Props = $props();
 
 	const skillRatingTable = ["Legendary", "Heroic", "Elite", "Veteran", "Regular", "Green", "Really Green", "Wet Behind the Ears"];
 
-	let scaModal = $state<HTMLDialogElement>();
-	let list: List = getContext("list");
 	let scaToAdd = $state<number>(scaReferences[0].id);
-
-	export function show() {
-		scaModal?.showModal();
-	}
-
-	function close() {
-		scaModal?.close();
-	}
 
 	function handleAddButton() {
 		list.addSCA(scaToAdd);
 	}
 </script>
 
-<dialog bind:this={scaModal}>
-	<div class="dialog-body">
-		<div class="dialog-header">
-			<div>Add Special Command Ability</div>
-			<button onclick={close}> Close </button>
-		</div>
+<Dialog title="Add Special Command Ability" bind:open>
+	<div class="sca-modal-content">
 		<p>Official Recommended SCA's by force skill level:</p>
 		<ul>
 			<li>Low-rated - <span class="muted">Green(5), Very Green(6), Wet Behind the Ears(7)</span>: 0 SCA's</li>
@@ -52,13 +46,13 @@
 			>
 		</div>
 	</div>
-</dialog>
+</Dialog>
 
 <style>
-	.dialog-header {
+	.sca-modal-content {
 		display: flex;
-		justify-content: space-between;
-		align-items: center;
+		flex-direction: column;
+		gap: 8px;
 	}
 	.sca-add-row {
 		display: flex;

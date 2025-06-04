@@ -6,7 +6,7 @@
 	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
 	import { appWindow, toastController } from "$lib/stores/";
 	import { deserialize } from "$app/forms";
-	import { Separator, Menu } from "$lib/components/Generic";
+	import { Separator, Menu, Dialog } from "$lib/components/Generic";
 
 	const resultList: ResultList = getContext("resultList");
 	let list: List = getContext("list");
@@ -15,10 +15,9 @@
 	let printModal = $state<PrintModal>();
 	let saveModal = $state<SaveModal>();
 	let loadModal = $state<LoadModal>();
-	let sublistModal = $state<SublistModal>();
 	let unitCustomizationModal = $state<UnitCustomizationModal>();
-	let scaModal = $state<ScaModal>();
-	let errorDialog = $state<HTMLDialogElement>();
+
+	let scaModalOpen = $state(false);
 
 	let dropTargetStyle = { outline: "solid var(--primary)" };
 	let flipDurationMs = 100;
@@ -87,23 +86,22 @@
 				<ListInfoPopover {list} />
 			</div>
 			{#if list.issues?.issueList.size}
-				<button class="error-button" onclick={() => errorDialog?.showModal()}><img src="/icons/alert-outline.svg" alt="Error" class="error-icon" /> Show issues</button>
-				<dialog bind:this={errorDialog} class="error-dialog">
-					<div class="error-dialog-header">
-						<p>{list.options?.name} rules issues</p>
-						<button
-							onclick={() => {
-								errorDialog?.close();
-							}}>Close</button
-						>
-					</div>
+				<Dialog title="List Rules Issues" triggerClasses="transparent-button">
+					{#snippet trigger()}
+						<div class="center"><img src="/icons/alert-outline.svg" alt="Error" class="error-icon" /> <span class="primary">Show issues</span></div>
+					{/snippet}
+					{#snippet description()}
+						{#if list.issues.issueMessage}
+							<p class="muted">{list.issues.issueMessage}</p>
+						{/if}
+					{/snippet}
 					<div class="error-dialog-body">
 						{#each list.issues.issueList as [issue, units]}
 							<div class="errors align-right">{issue}:</div>
 							<div>{Array.from(units).join(", ")}</div>
 						{/each}
 					</div>
-				</dialog>
+				</Dialog>
 			{/if}
 			<div class="list-buttons">
 				<Menu text={"+"}>
@@ -113,12 +111,7 @@
 							list.newFormation();
 						}}>Add Formation</button
 					>
-					<button
-						class="transparent-button"
-						onclick={() => {
-							scaModal?.show();
-						}}>Add Special Command Ability</button
-					>
+					<button class="transparent-button" onclick={() => (scaModalOpen = true)}>Add Special Command Ability</button>
 					<hr />
 					<div>More features coming soon</div></Menu
 				>
@@ -257,7 +250,8 @@
 <SaveModal bind:this={saveModal}></SaveModal>
 <LoadModal bind:this={loadModal}></LoadModal>
 <UnitCustomizationModal bind:this={unitCustomizationModal}></UnitCustomizationModal>
-<ScaModal bind:this={scaModal}></ScaModal>
+<!-- Updated to use generic dialog element -->
+<ScaModal bind:open={scaModalOpen} {list}></ScaModal>
 
 <style>
 	.listbuilder {

@@ -8,8 +8,9 @@
 	import DamageSortPopover from "./DamageSortPopover.svelte";
 	import { eraLookup } from "$lib/data/erasFactionLookup";
 	import { VList } from "virtua/svelte";
-	import { type UnitAbility } from "$lib/data/abilities";
 	import { createAbilityLineString } from "$lib/utilities/parseAbilities";
+	import { Dialog } from "./Generic";
+	import Separator from "./Generic/Separator.svelte";
 
 	const list: List = getContext("list");
 	const resultList: ResultList = getContext("resultList");
@@ -35,7 +36,7 @@
 	let listHeight = $state(500);
 	let listWidth = $state(0);
 
-	let availabilityDialog = $state<HTMLDialogElement>();
+	let availabilityDialogOpen = $state(false);
 	let availabilityResults = $state<{ era: string; factionList: string[] }[]>([]);
 
 	function sort(key: string) {
@@ -63,7 +64,7 @@
 					.map((list: { era: string; factionList: string[] }) => {
 						return { era: list.era, factionList: list.factionList.sort() };
 					});
-				availabilityDialog?.showModal();
+				availabilityDialogOpen = true;
 			}
 		};
 	}
@@ -166,27 +167,17 @@
 	{/await}
 </div>
 
-<dialog bind:this={availabilityDialog}>
-	<div class="availability-dialog">
-		<div class="availability-header">
-			<h2>Unit availability</h2>
-			<button
-				onclick={() => {
-					availabilityDialog?.close();
-				}}>Close</button
-			>
-		</div>
-		<div class="availability-result-container">
-			{#each availabilityResults as result}
-				<div class="availability-result-era">{result.era}:</div>
-				<div>
-					{result.factionList.join(", ")}
-				</div>
-				<div class="separator-line"></div>
-			{/each}
-		</div>
+<Dialog title="Unit Availability" triggerClasses="transparent-button" bind:open={availabilityDialogOpen}>
+	<div class="availability-result-container">
+		{#each availabilityResults as result}
+			<p class="availability-result-era">{result.era}:</p>
+			<p>{result.factionList.join(", ")}</p>
+			<div class="availability-separator-container">
+				<Separator classes={"separator-border"} />
+			</div>
+		{/each}
 	</div>
-</dialog>
+</Dialog>
 
 <style>
 	.search-results {
@@ -302,38 +293,25 @@
 		color: var(--primary);
 		border-radius: 3px;
 	}
-	.availability-dialog {
-		display: flex;
-		flex-direction: column;
-	}
-	.availability-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 16px;
-		border-bottom: 1px solid border;
-	}
 	.availability-result-container {
 		padding: 16px;
 		row-gap: 8px;
 		column-gap: 24px;
 		display: grid;
-		grid-template-columns: min(max-content, 20%) auto;
+		grid-template-columns: max-content 1fr;
 		max-height: 90dvh;
 		overflow: auto;
-	}
-	.availability-result-container > *:nth-child(3n) {
-		grid-column: span 2;
 	}
 	.availability-result-era {
 		display: flex;
 		justify-content: end;
+		color: var(--primary);
 	}
-	.separator-line {
-		content: "";
-		flex: 1;
-		border-bottom: 1px solid var(--border);
-		margin: 10px;
+	.availability-separator-container {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		grid-column: span 2;
 	}
 	@supports (-webkit-touch-callout: none) {
 		.availability-result-container {

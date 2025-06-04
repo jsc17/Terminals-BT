@@ -36,7 +36,8 @@ export const ruleSets: Options[] = [
 	{
 		name: "noRes",
 		display: "No Restrictions",
-		sublistScenarios: []
+		sublistScenarios: [],
+		customUnitPacks: ["none"]
 	},
 	{
 		name: "wn350",

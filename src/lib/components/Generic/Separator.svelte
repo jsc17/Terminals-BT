@@ -30,11 +30,11 @@
 	}
 	:global([data-separator-root][data-orientation="vertical"]) {
 		width: 1px;
-		height: 90%;
+		height: 95%;
 		margin: 0px 4px;
 	}
 	:global([data-separator-root][data-orientation="horizontal"]) {
-		width: 90%;
+		width: 95%;
 		height: 1px;
 		margin: 4px 0px;
 	}

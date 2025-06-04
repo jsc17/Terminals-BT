@@ -40,6 +40,7 @@
 		flex-direction: column;
 		margin: 0px 8px;
 		max-width: max(30dvw, 600px);
+		z-index: 10;
 	}
 	:global([data-popover-close]) {
 		background-color: transparent;

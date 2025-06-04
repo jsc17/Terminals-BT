@@ -2,7 +2,7 @@
 	import type { UnitV2 } from "$lib/types/unit";
 	import spaList from "$lib/data/spas.json";
 	import ammoList from "$lib/data/ammoTypes.json";
-	import type { List } from "../../../../lib/types/list.svelte";
+	import type { List } from "$lib/types/list.svelte";
 	import { getContext } from "svelte";
 
 	let list: List = getContext("list");

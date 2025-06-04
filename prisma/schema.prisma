@@ -204,3 +204,15 @@ model Notification {
   message String @db.Text
   type String
 }
+
+model CustomCard {
+  id Int @id @default(autoincrement())
+  pack String
+  mulId Int @unique
+  name String
+  class String
+  variant String
+  type String
+  pv Int
+  abilities String
+}

@@ -65,6 +65,19 @@ export const actions = {
 		const unitList = await prisma.unit.findMany();
 		return { unitList };
 	},
+	getCustomUnits: async (event) => {
+		let { unitPacks } = await event.request.json();
+
+		const customUnits = await prisma.customCard.findMany({
+			where: {
+				pack: { in: unitPacks }
+			}
+		});
+		customUnits.forEach((unit) => {
+			unit.abilities = unit.abilities ? JSON.stringify(handleParse(unit.abilities)) : "-";
+		});
+		return { customUnits };
+	},
 	getUnits: async ({ request }) => {
 		let { eras, factions, general, eraSearchType, factionSearchType } = await request.json();
 
@@ -253,13 +266,23 @@ export const actions = {
 		return { unitAvailability };
 	},
 	getUnit: async ({ request }) => {
-		let { mulId } = await request.json();
-		const unit = await prisma.unit.findUnique({
-			where: {
-				mulId: Number(mulId)
-			}
-		});
+		let { mulId }: { mulId: number } = await request.json();
 
+		let unit;
+
+		if (mulId >= 0) {
+			unit = await prisma.unit.findUnique({
+				where: {
+					mulId: Number(mulId)
+				}
+			});
+		} else {
+			unit = await prisma.customCard.findUnique({
+				where: {
+					mulId: Number(mulId)
+				}
+			});
+		}
 		if (unit) {
 			unit.abilities = JSON.stringify(unit.abilities ? handleParse(unit.abilities) : []);
 		}

@@ -99,21 +99,10 @@
 		const result: any = deserialize(await (await fetch("?/sendResetEmail", { method: "POST", body: "" })).text());
 	}
 
-	let mulId = $state("858");
-	let reference = $state<MulUnit>();
-
-	async function handleParse() {
-		reference = await loadMULUnit(mulId);
+	async function uploadCustomUnits() {
+		const result: any = deserialize(await (await fetch("?/uploadCustom", { method: "POST", body: "" })).text());
 	}
 </script>
-
-{#snippet abilityString(ability: UnitAbility)}
-	<p>{ability.v !== undefined ? `${ability.v}${ability.vmin ? "*" : ""}` : ""}</p>
-	<p>{ability.s !== undefined ? `${ability.s != 0 || ability.smin ? ability.s : "-"}${ability.smin ? "*" : ""}` : ""}</p>
-	<p>{ability.m !== undefined ? `/${ability.m != 0 || ability.mmin ? ability.m : "-"}${ability.mmin ? "*" : ""}` : ""}</p>
-	<p>{ability.l !== undefined ? `/${ability.l != 0 || ability.lmin ? ability.l : "-"}${ability.lmin ? "*" : ""}` : ""}</p>
-	<p>{ability.e !== undefined ? `/${ability.e != 0 || ability.emin ? ability.e : "-"}${ability.emin ? "*" : ""}` : ""}</p>
-{/snippet}
 
 <main>
 	<div class="card">
@@ -142,43 +131,7 @@
 	</div>
 
 	<div class="card">
-		<div class="flex-4">
-			<input type="text" bind:value={mulId} />
-			<button onclick={handleParse}>Submit</button>
-			<p>Madcat:</p>
-			<button onclick={() => (mulId = "1980")}>1980</button>
-			<p>Demolisher II:</p>
-			<button onclick={() => (mulId = "865")}>865</button>
-			<p>Panther:</p>
-			<button onclick={() => (mulId = "8298")}>8298</button>
-		</div>
-		<div class="flex-4">{reference?.name}</div>
-		<div class="flex-4">
-			parsed:
-			{#each reference?.abilities ?? [] as ability}
-				<div class="section">
-					{#if ability.name == "TUR"}
-						<p>{ability.name}</p>
-						<p>(</p>
-						{@render abilityString(ability)}
-						{#each ability.turretAbilities ?? [] as turretAbility}
-							<p>,&nbsp;</p>
-							<p>{turretAbility.name}</p>
-							<span style="background-color: blue">{@render abilityString(turretAbility)}</span>
-						{/each}
-						<p>)</p>
-					{:else}
-						<p>{ability.name}</p>
-						<span style="background-color: blue">{@render abilityString(ability)}</span>
-					{/if}
-				</div>
-			{/each}
-		</div>
-		<div class="flex-4">
-			{#if reference}
-				<p>{createAbilityLineString(reference?.abilities)}</p>
-			{/if}
-		</div>
+		<button onclick={uploadCustomUnits}>Upload custom</button>
 	</div>
 
 	<SendNotification />

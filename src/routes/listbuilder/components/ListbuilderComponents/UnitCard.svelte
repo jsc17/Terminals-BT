@@ -2,7 +2,7 @@
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { getNewSkillCost } from "$lib/utilities/bt-utils";
 	import { getContext } from "svelte";
-	import type { List } from "../../../../lib/types/list.svelte";
+	import type { List } from "$lib/types/list.svelte";
 	import { dragHandle } from "svelte-dnd-action";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import Menu from "$lib/components/Generic/Menu.svelte";
@@ -50,8 +50,8 @@
 		</div>
 		<div class="unit-header-row">
 			<div class="unit-header">Type</div>
-			<div class="unit-header">Skill</div>
 			{#if unit?.baseUnit.type != "BS"}
+				<div class="unit-header">Skill</div>
 				<div class="unit-header">Speed</div>
 				<div class="unit-header">Damage</div>
 				<div class="unit-header">Health</div>
@@ -61,23 +61,23 @@
 		</div>
 		<div class="unit-stat-row">
 			<div class="unit-stat">{unit?.baseUnit.subtype}</div>
-			<div class="unit-stat">
-				{#if unit?.skill != undefined}
-					<select
-						bind:value={unit.skill}
-						onchange={() => {
-							unit.cost = getNewSkillCost(unit.skill, unit.baseUnit.pv);
-						}}
-					>
-						{#each [...Array(8).keys()] as skill}
-							<option value={skill}>{skill}</option>
-						{/each}
-					</select>
-				{:else}
-					-
-				{/if}
-			</div>
 			{#if unit?.baseUnit.type != "BS"}
+				<div class="unit-stat">
+					{#if unit?.skill != undefined}
+						<select
+							bind:value={unit.skill}
+							onchange={() => {
+								unit.cost = getNewSkillCost(unit.skill, unit.baseUnit.pv);
+							}}
+						>
+							{#each [...Array(8).keys()] as skill}
+								<option value={skill}>{skill}</option>
+							{/each}
+						</select>
+					{:else}
+						-
+					{/if}
+				</div>
 				<div class="unit-stat">
 					{#each unit?.baseUnit.move! as movement, index}
 						{#if index != 0}

@@ -112,6 +112,7 @@ export class List {
 	issues = $derived.by(() => {
 		const issueList = new Map<string, Set<string>>();
 		const issueUnits = new Set<string>();
+		let issueMessage = "";
 
 		if (this.options) {
 			if (this.options.maxPv && this.pv > this.options.maxPv) {
@@ -130,6 +131,9 @@ export class List {
 						return result.mulId == unit.baseUnit.mulId;
 					})
 				) {
+					if (unit.baseUnit.mulId < 0) {
+						issueMessage = "If a battlefield support unit is showing as unavailable, it might have been added using a different rules selection. Remove and re-add the unit";
+					}
 					if (issueList.has("Unavailable Unit")) {
 						issueList.get("Unavailable Unit")?.add(unit.baseUnit.name);
 					} else {
@@ -366,7 +370,7 @@ export class List {
 				}
 			}
 		}
-		return { issueList, issueUnits };
+		return { issueList, issueUnits, issueMessage };
 	});
 
 	setOptions(newRules: string) {
@@ -495,29 +499,9 @@ export class List {
 	async loadUnit(mulId: number) {
 		let unitToAdd!: MulUnit;
 
-		if (mulId < 0) {
-			for (const unitList of customCards.unitPacks) {
-				for (const unit of unitList.units) {
-					if (unit.id == mulId) {
-						unitToAdd = {
-							id: unit.id,
-							mulId: unit.id,
-							type: unit.type,
-							subtype: unit.type,
-							name: unit.name,
-							class: unit.class,
-							variant: unit.variant,
-							pv: unit.pv,
-							cost: unit.pv,
-							abilities: [],
-							rulesLevel: "Standard"
-						};
-					}
-				}
-			}
-		} else {
-			unitToAdd = await loadMULUnit(mulId.toString());
-		}
+		unitToAdd = await loadMULUnit(mulId.toString());
+		unitToAdd.rulesLevel = "Standard";
+
 		return unitToAdd;
 	}
 	async loadList(data: any) {

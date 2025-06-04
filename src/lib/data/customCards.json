@@ -27,19 +27,19 @@
 			"name": "wn350v3",
 			"units": [
 				{
-					"id": -1,
+					"id": -3,
 					"name": "Off Board Artillery Support - Thumper",
-					"class": "Off Board Artillery Support - Thumper",
-					"variant": "",
+					"class": "Off Board Artillery Support",
+					"variant": "Thumper",
 					"type": "BS",
 					"pv": 5,
 					"abilities": "ARTT-1"
 				},
 				{
-					"id": -2,
+					"id": -4,
 					"name": "Off Board Artillery Support - Sniper",
-					"class": "Off Board Artillery Support - Sniper",
-					"variant": "",
+					"class": "Off Board Artillery Support",
+					"variant": "Sniper",
 					"type": "BS",
 					"pv": 8,
 					"abilities": "ARTAIS-1"

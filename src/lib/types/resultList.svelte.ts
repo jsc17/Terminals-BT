@@ -106,6 +106,7 @@ export class ResultList {
 	resultList = $state<MulUnit[]>([]);
 	generalList = $state<MulUnit[]>([]);
 	uniqueList = $state<number[]>([]);
+	customUnits = $state<MulUnit[]>([]);
 
 	options = $state<Options>();
 	availableList = $derived.by(() => {
@@ -235,33 +236,34 @@ export class ResultList {
 		return response.data.message;
 	}
 
-	setOptions(newRules: string) {
+	async setOptions(newRules: string) {
 		this.options = ruleSets.find((rules) => rules.name == newRules) ?? ruleSets[0];
+		const response: any = deserialize(await (await fetch("/?/getCustomUnits", { method: "POST", body: JSON.stringify({ unitPacks: this.options.customUnitPacks }) })).text());
+		this.customUnits = [];
+		if (response.type == "success") {
+			for (const unit of response.data.customUnits) {
+				this.customUnits.push({
+					id: unit.mulId,
+					mulId: unit.mulId,
+					type: unit.type,
+					subtype: unit.type,
+					name: unit.name,
+					class: unit.class,
+					variant: unit.variant,
+					pv: unit.pv,
+					cost: unit.pv,
+					abilities: unit.abilities != "-" ? JSON.parse(unit.abilities) : [],
+					rulesLevel: "Standard"
+				});
+			}
+		}
 	}
 
 	applyOptions() {
 		let tempRestrictedList: MulUnit[] = [];
 		if (this.options) {
 			if (this.availableList.length) {
-				for (const unitList of customCards.unitPacks) {
-					if (this.options.customUnitPacks?.includes(unitList.name)) {
-						for (const unit of unitList.units) {
-							tempRestrictedList.push({
-								id: unit.id,
-								mulId: unit.id,
-								type: unit.type,
-								subtype: unit.type,
-								name: unit.name,
-								class: unit.class,
-								variant: unit.variant,
-								pv: unit.pv,
-								cost: unit.pv,
-								abilities: [],
-								rulesLevel: "Standard"
-							});
-						}
-					}
-				}
+				tempRestrictedList = tempRestrictedList.concat(this.customUnits);
 			}
 			for (const unit of this.availableList) {
 				if (this.options.allowedTypes && !this.options.allowedTypes?.includes(unit.subtype)) {

@@ -4,7 +4,7 @@ import { fail, redirect } from "@sveltejs/kit";
 import { sendResetEmail } from "$lib/emails/mailer.server.js";
 import fs from "fs/promises";
 import { eraLookup as eraLookup, factionLookup as factionLookup } from "$lib/data/erasFactionLookup.js";
-import SendNotification from "./SendNotification.svelte";
+import customCards from "$lib/data/customCards.json";
 
 export const load = async ({ locals }) => {
 	if (!locals.user || locals.user.username.toLowerCase() != "terminal") {
@@ -72,6 +72,25 @@ export const actions = {
 			}
 		}
 		return { message: "Completed" };
+	},
+	uploadCustom: async () => {
+		await prisma.customCard.deleteMany({});
+		for (const pack of customCards.unitPacks) {
+			for (const unit of pack.units) {
+				await prisma.customCard.create({
+					data: {
+						pack: pack.name,
+						mulId: unit.id,
+						name: unit.name,
+						class: unit.class,
+						variant: unit.variant,
+						type: unit.type,
+						pv: unit.pv,
+						abilities: unit.abilities
+					}
+				});
+			}
+		}
 	},
 	uploadUnits: async ({ request }) => {
 		const unitList = JSON.parse((await request.formData()).get("unitList")!.toString());

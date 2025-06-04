@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Popover, Separator } from "$lib/components/Generic";
-	import type { List } from "../../../../lib/types/list.svelte";
+	import type { List } from "$lib/types/list.svelte";
 
 	type Props = {
 		list: List;

@@ -1,5 +1,6 @@
 import { toastController } from "$lib/stores/toastController.svelte";
 import type { UnitV2 } from "$lib/types/unit";
+import { createSingleAbilityString } from "$lib/utilities/parseAbilities";
 
 export function exportToJeff(name: string, units: UnitV2[]) {
 	const jeffList: any = { name: name, members: [], uuid: crypto.randomUUID(), lastUpdated: new Date().toISOString(), formationBonus: "none", groupLabel: "Lance" };
@@ -36,8 +37,8 @@ export function exportToJeff(name: string, units: UnitV2[]) {
 				armor: unit.baseUnit.armor,
 				type: unit.baseUnit.subtype,
 				size: unit.baseUnit.size,
-				abilities: unit.baseUnit.abilities.split(",").map((ability: string) => {
-					return ability.trim();
+				abilities: unit.baseUnit.abilities.map((ability) => {
+					return createSingleAbilityString(ability);
 				}),
 				overheat: unit.baseUnit.overheat,
 				basePoints: unit.baseUnit.pv,

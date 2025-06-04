@@ -158,7 +158,7 @@
 		position: sticky;
 		top: 0;
 		flex-shrink: 0;
-		z-index: 3;
+		z-index: 10;
 	}
 	.link-button {
 		& img {
@@ -183,7 +183,7 @@
 		background-color: var(--background);
 		height: 100dvh;
 		width: min(20em, 90%);
-		z-index: 10;
+		z-index: 11;
 		display: flex;
 		flex-direction: column;
 	}
@@ -250,7 +250,7 @@
 		background: rgba(0, 0, 0, 0.5);
 		position: fixed;
 		inset: 0;
-		z-index: 9;
+		z-index: 10;
 		height: 100dvh;
 		width: 100dvw;
 	}

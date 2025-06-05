@@ -1,0 +1,33 @@
+/* Collapsible styling */
+
+[data-collapsible-root] {
+	height: 100%;
+	width: 100%;
+	overflow: auto;
+}
+[data-collapsible-trigger] {
+	height: max-content;
+	width: 100%;
+	background-color: transparent;
+}
+
+[data-collapsible-content] {
+	width: 100%;
+	overflow: auto;
+}
+
+/* RadioGroup default styling */
+[data-radio-group-root][data-orientation="vertical"] {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+}
+[data-radio-group-root][data-orientation="horizontal"] {
+	display: flex;
+	gap: 4px;
+	align-items: center;
+}
+[data-radio-group-item] {
+	padding: 0;
+	margin: 0;
+	background-color: transparent;
+}

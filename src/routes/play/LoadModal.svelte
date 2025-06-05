@@ -26,7 +26,6 @@
 			newPlaylist.units.push({ ...unit, cost: getNewSkillCost(unit.skill, pv), current: { damage: 0, heat: 0, crits: [] }, pending: { damage: 0, heat: 0, crits: [] } });
 		}
 		for (const formation of JSON.parse(lists[selectedList].formations)) {
-			console.log(formation);
 			if (formation.units.length) {
 				newPlaylist.formations.push({
 					id: formation.id,

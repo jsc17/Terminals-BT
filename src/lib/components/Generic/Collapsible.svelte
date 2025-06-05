@@ -19,11 +19,3 @@
 		{@render children?.()}
 	</Collapsible.Content>
 </Collapsible.Root>
-
-<style>
-	:global([data-collapsible-trigger]) {
-		width: 100%;
-		height: 100%;
-		background-color: transparent;
-	}
-</style>

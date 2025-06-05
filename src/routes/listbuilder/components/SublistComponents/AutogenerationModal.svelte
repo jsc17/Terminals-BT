@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { UnitV2, List, SublistV2 } from "$lib/types/";
-	import { Dialog, Collapsible, Separator } from "$lib/components/Generic";
+	import { Dialog, Collapsible, Separator, RadioGroup, Popover } from "$lib/components/Generic";
 	import { nanoid } from "nanoid";
 	import { appWindow } from "$lib/stores";
 	import { watch } from "runed";
@@ -40,21 +40,13 @@
 			options.autoMaxUnits = list.options?.sublistMaxUnits ?? 0;
 			options.autoMinUnits = 0;
 			options.autoMinUnitCost = list.options?.unitMinPV ?? 0;
-			filteredUnits = list.units
-				.sort((a, b) => a.baseUnit.subtype.localeCompare(b.baseUnit.subtype))
-				.map((unit) => {
-					return { id: unit.id, name: unit.baseUnit.name, included: true };
-				});
 		}
 	);
 
-	let filteredUnits = $state<{ id: string; name: string; included: boolean }[]>(
-		list.units
-			.sort((a, b) => a.baseUnit.subtype.localeCompare(b.baseUnit.subtype))
-			.map((unit) => {
-				return { id: unit.id, name: unit.baseUnit.name, included: true };
-			})
-	);
+	let filteredUnits = $state<{ id: string; name: string; included: string }[]>([]);
+
+	let excludedUnits = $derived(filteredUnits.filter(({ included }) => included == "excluded").map(({ id }) => id));
+	let requiredUnits = $derived(filteredUnits.filter(({ included }) => included == "required").map(({ id }) => id));
 
 	function generatesublists() {
 		autosublists = [];
@@ -62,7 +54,7 @@
 		const possibleUnits = $state
 			.snapshot(list.units)
 			.filter((unit: UnitV2) => {
-				return unit.cost >= options.autoMinUnitCost && filteredUnits.find(({ id }) => id == unit.id)?.included;
+				return unit.cost >= options.autoMinUnitCost && !excludedUnits.includes(unit.id);
 			})
 			.map((unit) => {
 				return { id: unit.id, name: unit.baseUnit.name, cost: unit.cost, skill: unit.skill };
@@ -85,27 +77,37 @@
 					checked.push(unit.id);
 					pv += unit.cost;
 				}
-				let subsetString = unitNameArray.join(", ");
-				if (!existingCombinations.has(subsetString)) {
-					existingCombinations.add(subsetString);
+				if (!requiredUnits.length || requiredUnits.every((v) => checked.includes(v))) {
+					let subsetString = unitNameArray.join(", ");
+					if (!existingCombinations.has(subsetString)) {
+						existingCombinations.add(subsetString);
 
-					if ((!options.autoMaxPV || pv <= options.autoMaxPV) && (!options.autoMinPV || pv >= options.autoMinPV)) {
-						let newId = crypto.randomUUID();
-						let newList = $state<AutoSublist>({
-							id: newId,
-							unitString: subsetString,
-							sublist: { id: newId, scenario: "-", checked },
-							count: subset.length,
-							pv
-						});
+						if ((!options.autoMaxPV || pv <= options.autoMaxPV) && (!options.autoMinPV || pv >= options.autoMinPV)) {
+							let newId = crypto.randomUUID();
+							let newList = $state<AutoSublist>({
+								id: newId,
+								unitString: subsetString,
+								sublist: { id: newId, scenario: "-", checked },
+								count: subset.length,
+								pv
+							});
 
-						autosublists.push(newList);
+							autosublists.push(newList);
+						}
 					}
 				}
 			}
 		}
 		showFilters = false;
 	}
+
+	$effect(() => {
+		filteredUnits = list.units
+			.toSorted((a, b) => a.baseUnit.subtype.localeCompare(b.baseUnit.subtype))
+			.map((unit) => {
+				return { id: unit.id, name: unit.baseUnit.name, included: "allowed" };
+			});
+	});
 </script>
 
 {#snippet autoSublistOptions()}
@@ -126,15 +128,34 @@
 	<button class="auto-sublist-generate-button" onclick={generatesublists}>Generate sublists</button>
 	<Separator classes="separator-card" />
 
-	<div>
+	<div class="auto-sublist-unit-filter-container">
 		<Collapsible bind:open={showUnitFilters}>
 			{#snippet trigger()}
 				<p class="primary">Unit Filters {showUnitFilters ? "-" : "+"}</p>
 			{/snippet}
+
 			<div class="auto-sublist-unit-filters">
+				<p class="muted">Unit Name</p>
+				<Popover>
+					{#snippet trigger()}
+						<p style="color: var(--primary)">Legend</p>
+					{/snippet}
+					<div class="auto-sublist-legend-popover-body">
+						<div class="auto-sublist-filter-legend legend-excluded"></div>
+						<p>Unit won't be included in sublist</p>
+						<div class="auto-sublist-filter-legend legend-allowed"></div>
+						<p>Unit can be included in sublist</p>
+						<div class="auto-sublist-filter-legend legend-required"></div>
+						<p>Unit will be included in sublist</p>
+					</div>
+				</Popover>
 				{#each filteredUnits as unit}
-					<label for="unitFilter-{unit.id}">{unit.name}</label>
-					<input type="checkbox" name="unitFilter-{unit.id}" id="unitFilter-{unit.id}" bind:checked={unit.included} />
+					<p>{unit.name}</p>
+					<RadioGroup
+						items={[{ value: "excluded", selectedColor: "error" }, { value: "allowed", selectedColor: "muted-foreground" }, { value: "required" }]}
+						bind:value={unit.included}
+						orientation={"horizontal"}
+					/>
 				{/each}
 			</div>
 		</Collapsible>
@@ -257,12 +278,38 @@
 	.auto-sublist-unit-filters {
 		display: grid;
 		grid-template-columns: 1fr max-content;
-
-		& label {
+		gap: 4px;
+		& p {
 			padding: 4px 4px;
+			font-size: 0.9em;
 			text-wrap: wrap;
 			border-bottom: 1px solid var(--border);
 		}
+	}
+	.auto-sublist-legend-popover-body {
+		padding: 16px;
+		display: grid;
+		grid-template-columns: max-content 1fr;
+
+		& * {
+			align-self: center;
+		}
+	}
+	.auto-sublist-filter-legend {
+		width: 20px;
+		height: 20px;
+		border: 2px solid var(--border);
+		border-radius: calc(infinity * 1px);
+		box-sizing: border-box;
+	}
+	.auto-sublist-filter-legend.legend-excluded {
+		background-color: var(--error);
+	}
+	.auto-sublist-filter-legend.legend-allowed {
+		background-color: var(--muted-foreground);
+	}
+	.auto-sublist-filter-legend.legend-required {
+		background-color: var(--primary);
 	}
 	.auto-list-container {
 		padding: 8px;

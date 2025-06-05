@@ -143,7 +143,6 @@
 	}
 
 	async function loadList() {
-		console.log($state.snapshot(savedLists[selectedListIndex]));
 		await list.loadList(savedLists[selectedListIndex]);
 		dialogElement?.close();
 	}

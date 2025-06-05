@@ -42,7 +42,6 @@ export function createDamagedAbilityString(ability: UnitAbility, currentCritical
 	for (const turretAbility of ability.turretAbilities ?? []) {
 		if (weaponAbilityReference.includes(turretAbility.name)) {
 			for (const critical of currentCriticals) {
-				console.log(critical);
 				if (critical == "weapon") {
 					damaged = true;
 					for (const key of ["v", "vhid", "s", "m", "l", "e"]) {

@@ -14,7 +14,6 @@ export async function loadMULUnit(mulId: string) {
 			tempMovement[0].type = "";
 			tempMovement.push({ type: "j", speed: tempMovement[0].speed });
 		}
-		console.log(tempMovement);
 		const unitData = response.data!.unit;
 		const reference: MulUnit = {
 			id: unitData.id,

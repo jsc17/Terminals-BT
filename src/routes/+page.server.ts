@@ -286,7 +286,6 @@ export const actions = {
 		if (unit) {
 			unit.abilities = JSON.stringify(unit.abilities ? handleParse(unit.abilities) : []);
 		}
-		console.log();
 		return { unit };
 	},
 	getNotifications: async (event) => {

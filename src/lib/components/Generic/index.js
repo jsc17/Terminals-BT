@@ -7,5 +7,6 @@ import Slider from "./Slider.svelte";
 import Drawer from "./Drawer.svelte";
 import Popover from "./Popover.svelte";
 import Separator from "./Separator.svelte";
+import RadioGroup from "./RadioGroup.svelte";
 
-export { Select, Dialog, Menu, Combobox, Collapsible, Slider, Drawer, Popover, Separator };
+export { Select, Dialog, Menu, Combobox, Collapsible, Slider, Drawer, Popover, Separator, RadioGroup };

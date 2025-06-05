@@ -7,7 +7,6 @@
 	import LoadModal from "./LoadModal.svelte";
 	import { deserialize } from "$app/forms";
 	import Log from "./Log.svelte";
-	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { Popover } from "$lib/components/Generic/";
 	import PlayUnitList from "./PlayUnitList.svelte";
 

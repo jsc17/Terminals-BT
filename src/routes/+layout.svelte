@@ -4,6 +4,7 @@
 	import Toast from "$lib/components/Toast.svelte";
 	import { setContext } from "svelte";
 	import "$lib/css/global.css";
+	import "$lib/css/generic.css";
 	import { type Notification } from "$lib/types";
 
 	const { data, children } = $props();

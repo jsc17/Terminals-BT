@@ -1,4 +1,4 @@
-import * as auth from "$lib/server/auth.js";
+import * as auth from "$lib/server/auth/auth.js";
 import { fail } from "@sveltejs/kit";
 import { hash, verify } from "@node-rs/argon2";
 import { prisma } from "$lib/server/prisma";

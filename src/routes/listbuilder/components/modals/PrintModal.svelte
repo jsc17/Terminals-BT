@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { appWindow } from "$lib/stores/appWindow.svelte";
+	import { appWindow } from "$lib/global/stores/appWindow.svelte";
 	import { enhance } from "$app/forms";
-	import { toastController } from "$lib/stores/toastController.svelte";
+	import { toastController } from "$lib/global/stores/toastController.svelte";
 	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
 	import { getContext } from "svelte";
 	import { type List } from "$lib/types/list.svelte";

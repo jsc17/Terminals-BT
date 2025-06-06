@@ -1,39 +1,44 @@
 <script lang="ts">
 	import type { List, SublistV2 } from "$lib/types/";
-	import { Dialog } from "$lib/components/Generic";
+	import { Dialog } from "$lib/global/components";
 
 	type Props = {
 		list: List;
 		sublist?: SublistV2;
 		open: boolean;
-		newSublist: boolean;
 	};
 
-	let { list, sublist, open = $bindable(), newSublist }: Props = $props();
-
-	let inProgressSublist = $derived($state.snapshot(sublist));
+	let { list, sublist, open = $bindable() }: Props = $props();
 
 	let pv = $derived.by(() => {
-		return inProgressSublist?.checked.reduce((total, unitId) => {
+		return sublist?.checked.reduce((total, unitId) => {
 			return (total += list.getUnit(unitId)?.cost ?? 0);
 		}, 0);
 	});
 
 	function cancelSublist() {
-		if (newSublist) {
-			list.deleteSublist(inProgressSublist!.id);
+		let existingSublist = list.getSublist(sublist!.id);
+		if (existingSublist && existingSublist.checked.length == 0) {
+			list.deleteSublist(existingSublist.id);
 		}
 		open = false;
 	}
 
 	function updateSublist() {
-		sublist!.checked = inProgressSublist!.checked;
+		let existingSublist = list.getSublist(sublist!.id);
+		if (existingSublist && sublist) {
+			if (sublist?.checked.length == 0) {
+				list.deleteSublist(sublist.id);
+			} else {
+				existingSublist.checked = sublist.checked;
+			}
+		}
 		open = false;
 	}
 </script>
 
 <Dialog title="Edit Sublist" bind:open>
-	{#if inProgressSublist}
+	{#if sublist}
 		<div class="edit-sublist-modal-content">
 			<div class="edit-sublist-modal-body">
 				<div></div>
@@ -46,12 +51,12 @@
 					<input
 						type="checkbox"
 						id={`checkbox${unit.id}`}
-						checked={inProgressSublist?.checked.includes(unit.id)}
+						checked={sublist?.checked.includes(unit.id)}
 						onchange={(e) => {
 							if ((e.target as HTMLInputElement).checked) {
-								inProgressSublist.checked.push(unit.id);
+								sublist.checked.push(unit.id);
 							} else {
-								inProgressSublist.checked = inProgressSublist.checked.filter((id) => {
+								sublist.checked = sublist.checked.filter((id) => {
 									return id != unit.id;
 								});
 							}
@@ -63,7 +68,7 @@
 				{/each}
 			</div>
 			<div class="edit-sublist-stats">
-				<p><span class="muted">Units:</span> {`${inProgressSublist.checked.length}${list.options?.sublistMaxUnits ? `/${list.options.sublistMaxUnits}` : ""}`}</p>
+				<p><span class="muted">Units:</span> {`${sublist.checked.length}${list.options?.sublistMaxUnits ? `/${list.options.sublistMaxUnits}` : ""}`}</p>
 				<p><span class="muted">PV:</span> {`${pv}${list.options?.sublistMaxPv ? `/${list.options.sublistMaxPv}` : ""}`}</p>
 			</div>
 			<div class="edit-sublist-buttons">

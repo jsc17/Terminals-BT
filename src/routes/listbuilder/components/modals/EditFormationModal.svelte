@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { type FormationType, type FormationV2 } from "$lib/types/";
 	import { getFormationTypeByName } from "$lib/utilities/formation-utilities";
-	import { Select, Dialog } from "$lib/components/Generic/";
+	import { Select, Dialog } from "$lib/global/components/";
 	import formationTypes from "$lib/data/formationTypes.json" assert { type: "json" };
 
 	type Props = {

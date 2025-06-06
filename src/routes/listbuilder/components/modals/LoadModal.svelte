@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getContext } from "svelte";
 	import { deserialize } from "$app/forms";
-	import { toastController } from "$lib/stores/toastController.svelte";
+	import { toastController } from "$lib/global/stores/toastController.svelte";
 	import type { List } from "$lib/types/list.svelte";
 	import type { ListCode } from "$lib/types/listCode";
 	import { convertUnversionedJSONList } from "../../utilities/convert";

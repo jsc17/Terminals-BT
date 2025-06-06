@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
-	import { toastController } from "$lib/stores/toastController.svelte";
+	import { toastController } from "$lib/global/stores/toastController.svelte";
 	import type { UnitV2, List } from "$lib/types/";
-	import { Dialog } from "$lib/components/Generic";
+	import { Dialog } from "$lib/global/components";
 
 	type Props = {
 		open: boolean;

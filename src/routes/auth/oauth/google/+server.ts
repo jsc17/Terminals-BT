@@ -1,6 +1,6 @@
 import { redirect, type RequestEvent } from "@sveltejs/kit";
 import { generateState, generateCodeVerifier } from "arctic";
-import { google } from "$lib/server/oauth";
+import { google } from "$lib/server/auth/oauth";
 import { dev } from "$app/environment";
 
 export async function GET(event: RequestEvent): Promise<Response> {

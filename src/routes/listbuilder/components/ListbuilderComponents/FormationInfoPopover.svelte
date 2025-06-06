@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Popover, Separator } from "$lib/components/Generic";
+	import { Popover, Separator } from "$lib/global/components";
 
 	type Props = {
 		formationStats: any;

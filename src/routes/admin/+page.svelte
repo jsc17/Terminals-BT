@@ -4,7 +4,7 @@
 	import { getGeneralList } from "$lib/utilities/bt-utils";
 	import { deserialize, enhance } from "$app/forms";
 	import { calculateTMM } from "$lib/utilities/bt-utils";
-	import { toastController } from "$lib/stores/toastController.svelte";
+	import { toastController } from "$lib/global/stores/toastController.svelte";
 	import { type MulUnit } from "$lib/types/unit";
 	import { loadMULUnit } from "$lib/utilities/load";
 	import { type UnitAbility } from "$lib/data/abilities";

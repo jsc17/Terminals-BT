@@ -1,14 +1,10 @@
 <script lang="ts">
 	import type { PlayList } from "$lib/types/playList";
-	import PlayFormation from "./PlayFormation.svelte";
+	import { PlayFormations, DisplayOptionsPopover, LoadModal, Log, PlayFullList } from "$lib/playmode/components/";
 	import { PersistedState } from "runed";
-	import OptionsPopover from "./components/OptionsPopover.svelte";
-	import type { LogRound, Options } from "./types";
-	import LoadModal from "./LoadModal.svelte";
+	import type { LogRound, Options } from "../../lib/playmode/types/playtypes";
 	import { deserialize } from "$app/forms";
-	import Log from "./Log.svelte";
-	import { Popover } from "$lib/components/Generic/";
-	import PlayUnitList from "./PlayUnitList.svelte";
+	import { Popover } from "$lib/global/components/";
 
 	let logDrawerOpen = $state(false);
 	let loadModalOpen = $state(false);
@@ -85,7 +81,7 @@
 					<div class="toolbar-button">Menu</div>
 				{/snippet}
 				<div class="play-menu-dropdown">
-					<OptionsPopover bind:options={options.current}></OptionsPopover>
+					<DisplayOptionsPopover bind:options={options.current}></DisplayOptionsPopover>
 					<button class="toolbar-button" onclick={resetList}>Reset List</button>
 					<button class="toolbar-button" onclick={openLoadModal}>Load List</button>
 				</div>
@@ -97,10 +93,10 @@
 	{#if playList.current.units.length}
 		{#if options.current.groupByFormation}
 			{#each playList.current.formations as formation}
-				<PlayFormation {formation} units={playList.current.units} options={options.current} currentRoundLog={currentRoundLog.current}></PlayFormation>
+				<PlayFormations {formation} units={playList.current.units} options={options.current} currentRoundLog={currentRoundLog.current}></PlayFormations>
 			{/each}
 		{:else}
-			<PlayUnitList units={playList.current.units} options={options.current} currentRoundLog={currentRoundLog.current}></PlayUnitList>
+			<PlayFullList units={playList.current.units} options={options.current} currentRoundLog={currentRoundLog.current}></PlayFullList>
 		{/if}
 	{:else}
 		<div class="list-load-error-body">

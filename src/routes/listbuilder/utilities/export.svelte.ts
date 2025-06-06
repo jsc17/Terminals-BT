@@ -1,4 +1,4 @@
-import { toastController } from "$lib/stores/toastController.svelte";
+import { toastController } from "$lib/global/stores/toastController.svelte";
 import type { UnitV2 } from "$lib/types/unit";
 import { createSingleAbilityString } from "$lib/utilities/parseAbilities";
 

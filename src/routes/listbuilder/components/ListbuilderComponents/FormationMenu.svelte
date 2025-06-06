@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Popover, Separator } from "$lib/components/Generic";
-	import { toastController } from "$lib/stores";
+	import { Popover, Separator } from "$lib/global/components";
+	import { toastController } from "$lib/global/stores";
 	import { List, sendListToPlay, type FormationV2 } from "$lib/types";
 	import { exportToJeff } from "../../utilities/export.svelte";
 	import { FindUnitAvailabilityModal } from "../";

@@ -1,6 +1,6 @@
 import type { RequestHandler, RequestEvent } from "@sveltejs/kit";
-import { generateSessionToken, createSession, setSessionTokenCookie, generateUserId } from "$lib/server/auth";
-import { google } from "$lib/server/oauth";
+import { generateSessionToken, createSession, setSessionTokenCookie, generateUserId } from "$lib/server/auth/auth";
+import { google } from "$lib/server/auth/oauth";
 import { decodeIdToken, type OAuth2Tokens } from "arctic";
 import { prisma } from "$lib/server/prisma";
 

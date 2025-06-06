@@ -1,8 +1,8 @@
 import type { RequestHandler } from "@sveltejs/kit";
 import { OAuth2RequestError } from "arctic";
-import { generateSessionToken, createSession, setSessionTokenCookie, generateUserId } from "$lib/server/auth";
+import { generateSessionToken, createSession, setSessionTokenCookie, generateUserId } from "$lib/server/auth/auth";
 import { prisma } from "$lib/server/prisma";
-import { discord } from "$lib/server/oauth";
+import { discord } from "$lib/server/auth/oauth";
 
 export const GET: RequestHandler = async (event) => {
 	const code = event.url.searchParams.get("code");

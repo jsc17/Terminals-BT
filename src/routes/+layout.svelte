@@ -1,11 +1,9 @@
 <script lang="ts">
-	import Footer from "$lib/components/Footer.svelte";
-	import Header from "$lib/components/Header.svelte";
-	import Toast from "$lib/components/Toast.svelte";
 	import { setContext } from "svelte";
-	import "$lib/css/global.css";
-	import "$lib/css/generic.css";
-	import { type Notification } from "$lib/types";
+	import "$lib/global/css/global.css";
+	import "$lib/global/css/generic.css";
+	import { Footer, Header, Toast } from "$lib/ui/components/index";
+	import { type Notification } from "$lib/ui/types/index";
 
 	const { data, children } = $props();
 	let user = $state({ username: data.username });

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { appWindow } from "$lib/stores/appWindow.svelte";
+	import { appWindow } from "$lib/global/stores/appWindow.svelte";
 	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
 	import SublistPrintModal from "./SublistPrintModal.svelte";
 	import Sublist from "./Sublist.svelte";
@@ -7,7 +7,7 @@
 	import { List, type SublistV2 } from "$lib/types/";
 	import EditSublistModal from "./EditSublistModal.svelte";
 	import AutogenerationModal from "./AutogenerationModal.svelte";
-	import { Dialog, Popover } from "$lib/components/Generic";
+	import { Dialog, Popover } from "$lib/global/components";
 
 	let list: List = getContext("list");
 
@@ -28,13 +28,11 @@
 		list.sublists = e.detail.items;
 	}
 
-	let sublistToEdit = $state<SublistV2>();
-	let edittingNewSublist = $state(false);
+	let currentSublist = $state<SublistV2>();
 
-	function openSublistEditModal(id: string, newSublist: boolean) {
-		sublistToEdit = list.getSublist(id);
+	function openSublistEditModal(id: string) {
+		currentSublist = $state.snapshot(list.getSublist(id));
 		sublistEditModalOpen = true;
-		edittingNewSublist = newSublist;
 	}
 </script>
 
@@ -51,7 +49,7 @@
 			class="add-panel"
 			onclick={() => {
 				const idAdded = list.addSublist();
-				openSublistEditModal(idAdded, true);
+				openSublistEditModal(idAdded);
 			}}
 			>+
 		</button>
@@ -105,7 +103,7 @@
 							class="transparent-button"
 							onclick={() => {
 								const idAdded = list.addSublist();
-								openSublistEditModal(idAdded, true);
+								openSublistEditModal(idAdded);
 							}}
 							>Add Sublist
 						</button>
@@ -151,7 +149,7 @@
 	</div>
 </Dialog>
 
-<EditSublistModal {list} sublist={sublistToEdit} newSublist={edittingNewSublist} bind:open={sublistEditModalOpen} />
+<EditSublistModal {list} sublist={currentSublist} bind:open={sublistEditModalOpen} />
 <SublistPrintModal {list} bind:open={sublistPrintModalOpen} />
 <AutogenerationModal {list} bind:open={sublistAutoModalOpen} />
 

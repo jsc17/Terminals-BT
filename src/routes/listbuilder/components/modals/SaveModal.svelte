@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { appWindow } from "$lib/stores/appWindow.svelte";
+	import { appWindow } from "$lib/global/stores/appWindow.svelte";
 	import { getContext } from "svelte";
 	import { enhance } from "$app/forms";
-	import { toastController } from "$lib/stores/toastController.svelte";
+	import { toastController } from "$lib/global/stores/toastController.svelte";
 	import type { ActionResult } from "@sveltejs/kit";
 	import { deserialize } from "$app/forms";
 	import { exportToJeff } from "../../utilities/export.svelte";
@@ -127,8 +127,9 @@
 			<label for="list-code">List Code: </label><input type="text" name="list-code" id="list-code" disabled value={listCode} />
 			<button
 				onclick={() => {
-					navigator.clipboard.writeText(list.getListCode());
-					toastController.addToast("code copied to clipboard", 1500);
+					const text = new ClipboardItem({ "text/plain": list.getListCode() });
+					navigator.clipboard.write([text]);
+					toastController.addToast("List code copied to clipboard", 1500);
 					saveDialog?.close();
 				}}
 			>
@@ -139,7 +140,8 @@
 			<label for="save-tts-code">TTS Code: </label><input type="text" name="save-tts-code" id="save-tts-code" disabled value={ttsCode} />
 			<button
 				onclick={() => {
-					navigator.clipboard.writeText(ttsCode!);
+					const text = new ClipboardItem({ "text/plain": ttsCode });
+					navigator.clipboard.write([text]);
 					toastController.addToast("code copied to clipboard", 1500);
 					saveDialog?.close();
 				}}

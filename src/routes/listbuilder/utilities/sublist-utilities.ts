@@ -1,4 +1,4 @@
-import { toastController } from "$lib/stores";
+import { toastController } from "$lib/global/stores";
 import { sendListToPlay, type FormationV2, type List, type SublistV2 } from "$lib/types";
 import { nanoid } from "nanoid";
 

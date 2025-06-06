@@ -2,7 +2,7 @@
 	import { getContext } from "svelte";
 	import { scaReferences } from "$lib/data";
 	import type { List } from "$lib/types/";
-	import { Dialog } from "$lib/components/Generic";
+	import { Dialog } from "$lib/global/components";
 
 	type Props = {
 		open: boolean;

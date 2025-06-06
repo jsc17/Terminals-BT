@@ -1,11 +1,9 @@
 <script lang="ts">
-	import { getContext } from "svelte";
 	import type { SublistV2, List, FormationV2 } from "$lib/types/";
 	import { exportToJeff } from "../../utilities/export.svelte";
-	import { toastController } from "$lib/stores/toastController.svelte";
-	import { appWindow } from "$lib/stores/appWindow.svelte";
+	import { toastController } from "$lib/global/stores/toastController.svelte";
 	import { enhance } from "$app/forms";
-	import { Dialog } from "$lib/components/Generic";
+	import { Dialog } from "$lib/global/components";
 
 	type Props = {
 		open: boolean;
@@ -114,7 +112,8 @@
 				<label for="print-tts-code">TTS Code: </label><input type="text" name="print-tts-code" id="print-tts-code" disabled value={ttsCode} />
 				<button
 					onclick={() => {
-						navigator.clipboard.writeText(ttsCode!);
+						const text = new ClipboardItem({ "text/plain": ttsCode });
+						navigator.clipboard.write([text]);
 						toastController.addToast("code copied to clipboard", 1500);
 					}}
 				>

@@ -3,7 +3,7 @@
 	import { Listbuilder } from "./components/index";
 	import { ruleSets } from "$lib/types/options";
 	import { ResultList } from "$lib/types/resultList.svelte";
-	import { SearchFilters, SearchParameters, SearchResults } from "$lib/components/index";
+	import { SearchFilters, SearchParameters, SearchResults } from "$lib/UnitSearch/index";
 	import { slide } from "svelte/transition";
 	import { List } from "../../lib/types/list.svelte";
 	import { convertUnversionedJSONList } from "./utilities/convert";

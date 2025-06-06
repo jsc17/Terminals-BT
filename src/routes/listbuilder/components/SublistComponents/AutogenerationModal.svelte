@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { UnitV2, List, SublistV2 } from "$lib/types/";
-	import { Dialog, Collapsible, Separator, RadioGroup, Popover } from "$lib/components/Generic";
+	import { Dialog, Collapsible, Separator, RadioGroup, Popover } from "$lib/global/components";
 	import { nanoid } from "nanoid";
-	import { appWindow } from "$lib/stores";
+	import { appWindow } from "$lib/global/stores";
 	import { watch } from "runed";
 
 	type AutoSublist = {

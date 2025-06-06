@@ -1,5 +1,5 @@
 import { fail, redirect } from "@sveltejs/kit";
-import { validateSessionToken, setSessionTokenCookie, deleteSessionTokenCookie, sessionCookieName } from "$lib/server/auth";
+import { validateSessionToken, setSessionTokenCookie, deleteSessionTokenCookie, sessionCookieName } from "$lib/server/auth/auth";
 import { prisma } from "$lib/server/prisma";
 
 export const handle = async ({ event, resolve }) => {

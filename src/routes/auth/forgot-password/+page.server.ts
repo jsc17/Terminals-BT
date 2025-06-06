@@ -1,7 +1,7 @@
 import { prisma } from "$lib/server/prisma.js";
 import { fail } from "@sveltejs/kit";
 import { randomUUID } from "crypto";
-import { sendResetEmail } from "$lib/emails/mailer.server";
+import { sendResetEmail } from "$lib/server/emails/mailer.server";
 
 export const actions = {
 	forgotPassword: async ({ request }) => {

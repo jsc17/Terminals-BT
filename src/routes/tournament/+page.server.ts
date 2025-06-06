@@ -1,6 +1,6 @@
 import { type Actions, fail } from "@sveltejs/kit";
 import { prisma } from "$lib/server/prisma";
-import { sendNewTournamentEmail } from "$lib/emails/mailer.server";
+import { sendNewTournamentEmail } from "$lib/server/emails/mailer.server";
 import { eraLookup } from "$lib/data/erasFactionLookup";
 
 export const actions: Actions = {

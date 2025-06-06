@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { PrintModal, SaveModal, LoadModal, SublistModal, UnitCustomizationModal, ScaModal, FormationCard, ListInfoPopover, FindUnitAvailabilityModal } from "./";
-	import { ruleSets, type ResultList, type FormationV2, sendListToPlay } from "$lib/types/";
+	import { ResultList, ruleSets, type FormationV2, sendListToPlay, List } from "$lib/types/";
 	import { getContext } from "svelte";
-	import type { List } from "../../../lib/types/list.svelte";
 	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
-	import { appWindow, toastController } from "$lib/stores/";
+	import { appWindow, toastController } from "$lib/global/stores";
+	import { Separator, Menu, Dialog } from "$lib/global/components";
 	import { deserialize } from "$app/forms";
-	import { Separator, Menu, Dialog } from "$lib/components/Generic";
 
 	const resultList: ResultList = getContext("resultList");
 	let list: List = getContext("list");
@@ -44,7 +43,8 @@
 		formData.append("list", list.getListCode());
 		const response: any = deserialize(await (await fetch("?/shareList", { method: "POST", body: formData })).text());
 		if (response.type == "success") {
-			navigator.clipboard.writeText(`https://terminal.tools/listbuilder?share=${response.data.id}`);
+			const text = new ClipboardItem({ "text/plain": `https://terminal.tools/listbuilder?share=${response.data.id}` });
+			navigator.clipboard.write([text]);
 			toastController.addToast("Shareable list link saved to clipboard");
 		} else {
 			toastController.addToast("Failed to create shareable link. Please try again");
@@ -167,8 +167,22 @@
 							}
 						}}
 					>
-						Clear List
+						Clear Units/Formations
 					</button>
+					<button
+						class="transparent-button"
+						onclick={() => {
+							if (confirm("Clear all units,formations and faction/era selection, and start a new list?")) {
+								resultList.eras = [];
+								resultList.factions = [];
+								resultList.loadResults();
+								list.clear();
+								list.details = { name: "New List", eras: [], factions: [], general: -1 };
+								list.id = crypto.randomUUID();
+								list.rules = "noRes";
+							}
+						}}>New List</button
+					>
 				</Menu>
 			</div>
 		</div>

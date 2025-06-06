@@ -128,7 +128,6 @@ export class ResultList {
 
 	status = $state();
 	loadResults() {
-		const startTime = performance.now();
 		this.#eras = this.selectedEras.map((era) => {
 			return Number(era);
 		});
@@ -146,8 +145,6 @@ export class ResultList {
 				}
 			});
 		});
-		const endTime = performance.now();
-		console.log(`Loading took ${endTime - startTime} ms`);
 	}
 
 	loadUnitsFromResponse(unitList: any[]) {

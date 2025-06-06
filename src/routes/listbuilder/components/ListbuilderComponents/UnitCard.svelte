@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { toastController } from "$lib/stores/toastController.svelte";
+	import { toastController } from "$lib/global/stores/toastController.svelte";
 	import { getNewSkillCost } from "$lib/utilities/bt-utils";
 	import { getContext } from "svelte";
 	import type { List } from "$lib/types/list.svelte";
 	import { dragHandle } from "svelte-dnd-action";
-	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import Menu from "$lib/components/Generic/Menu.svelte";
+	import { appWindow } from "$lib/global/stores/appWindow.svelte";
+	import Menu from "$lib/global/components/Menu.svelte";
 	import { UnitCustomizationModal } from "../index";
 	import { createAbilityLineString } from "$lib/utilities/parseAbilities";
 

@@ -7,7 +7,6 @@ import { type ListCode, type ListCodeUnit } from "./listCode";
 import { type SCA } from "./sca";
 import type { UnitV2, UnitCustomization, MulUnit } from "./unit";
 import { type SublistV2, type SublistStats } from "./sublist";
-import { type Notification } from "./notification";
 
 export {
 	type Options,
@@ -27,6 +26,5 @@ export {
 	type MulUnit,
 	type SCA,
 	type SublistV2,
-	type SublistStats,
-	type Notification
+	type SublistStats
 };

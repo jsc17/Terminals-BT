@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { deserialize } from "$app/forms";
-	import { Dialog, Separator } from "$lib/components/Generic/";
+	import { Dialog, Separator } from "$lib/global/components/";
 	import { abilityReferences } from "$lib/data";
 	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
 	import type { FormationV2, List } from "$lib/types";

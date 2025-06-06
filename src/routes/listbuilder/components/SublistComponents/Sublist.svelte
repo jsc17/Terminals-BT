@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { type List, type SublistV2, type SublistStats, type UnitV2 } from "$lib/types/";
 	import { getRules } from "$lib/types/";
-	import { Popover, Separator } from "$lib/components/Generic";
+	import { Popover, Separator } from "$lib/global/components";
 	import { dragHandle } from "svelte-dnd-action";
 	import { loadSublistForPlay } from "../../utilities/sublist-utilities";
 	import ExportSublistModal from "./ExportSublistModal.svelte";

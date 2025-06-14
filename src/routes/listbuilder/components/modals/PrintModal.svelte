@@ -1,25 +1,26 @@
 <script lang="ts">
-	import { appWindow } from "$lib/global/stores/appWindow.svelte";
 	import { enhance } from "$app/forms";
 	import { toastController } from "$lib/global/stores/toastController.svelte";
-	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
-	import { getContext } from "svelte";
-	import { type List } from "$lib/types/list.svelte";
+	import { type List } from "$lib/types/";
+	import { Dialog } from "$lib/global/components";
 
-	let list: List = getContext("list");
+	type Props = {
+		list: List;
+	};
 
-	let printDialog: HTMLDialogElement;
+	let { list = $bindable() }: Props = $props();
+
+	let openState = $state(false);
 	let playerName = $state("");
-	let style = $state("detailed");
 	let printName = $state("");
 
-	export function show() {
-		printDialog.showModal();
+	export function open() {
 		printName = list.details.name;
+		openState = true;
 	}
 
 	async function handleForm({ formData, cancel, submitter }: any) {
-		printDialog.close();
+		openState = false;
 		if (submitter.innerText == "Cancel") {
 			cancel();
 		} else {
@@ -32,7 +33,6 @@
 				eras: list.details.eras,
 				factions: list.details.factions,
 				general: list.details.general,
-				style: style,
 				condense: false
 			});
 
@@ -50,9 +50,8 @@
 	}
 </script>
 
-<dialog bind:this={printDialog} class:dialog-wide={appWindow.isNarrow}>
+<Dialog bind:open={openState} title="Print">
 	<div class="dialog-body">
-		<h2>Print</h2>
 		<form action="?/printList" method="post" use:enhance={handleForm} class="print-form">
 			<div><label for="print-listname">List Name</label><input id="print-listname" bind:value={printName} /></div>
 			<div><label for="print-playername">Player Name (optional)</label><input id="print-playername" bind:value={playerName} /></div>
@@ -60,14 +59,13 @@
 				<legend>Printing Style</legend>
 				<div>
 					<label for="print-list-style-mul"
-						><input type="radio" name="print-list-style-mul" id="print-list-style-mul" value="mul" bind:group={style} />MUL style - Generates a summary page similar to the MUL
-						printout.</label
+						><input type="radio" name="printStyle" id="print-list-style-mul" value="mul" />MUL style - Generates a summary page similar to the MUL printout.</label
 					>
 				</div>
 				<div>
 					<label for="print-list-style-detailed"
-						><input type="radio" name="print-list-style-detailed" id="print-list-style-detailed" value="detailed" bind:group={style} />Detailed - Generates a summary page with more
-						details for quick reference.</label
+						><input type="radio" name="printStyle" id="print-list-style-detailed" value="detailed" checked />Detailed - Generates a summary page with more details for quick
+						reference.</label
 					>
 				</div>
 			</fieldset>
@@ -77,14 +75,22 @@
 				<div><input type="checkbox" name="drawFormations" id="formations" checked /><label for="formations">Print formations?</label></div>
 				<div><input type="checkbox" name="printUnitsByFormation" id="printUnitsByFormation" /><label for="printUnitsByFormation">Print Unit Cards by formation?</label></div>
 			</fieldset>
-
+			<fieldset>
+				<legend>Card Options</legend>
+				<div><input type="radio" name="cardStyle" id="card-type-mul" value="mul" checked /><label for="card-type-mul">Print cards downloaded from the MUL</label></div>
+				<div>
+					<input type="radio" name="cardStyle" id="card-type-generated" value="generated" /><label for="card-type-generated"
+						>Print generated cards. Required for printing SCA's and Alt. Ammo. May take a few seconds to print.</label
+					>
+				</div>
+			</fieldset>
 			<div class="print-buttons">
-				<button>Submit</button>
 				<button>Cancel</button>
+				<button>Print</button>
 			</div>
 		</form>
 	</div>
-</dialog>
+</Dialog>
 
 <style>
 	.print-form {
@@ -108,9 +114,6 @@
 		align-items: center;
 		justify-content: center;
 		gap: 24px;
-	}
-	h2 {
-		margin: 8px;
 	}
 	fieldset {
 		border: 2px solid var(--border);

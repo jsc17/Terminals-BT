@@ -3,7 +3,7 @@
 	import type { MulUnit, PlayUnit } from "$lib/types/unit";
 	import { setContext } from "svelte";
 	import PlayUnitCard from "../PlayUnitCard.svelte";
-	import type { LogRound, Options } from "../../playtypes";
+	import type { LogRound, Options } from "$lib/playmode/types/playtypes";
 
 	type Props = {
 		unit: PlayUnit;

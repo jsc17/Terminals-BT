@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Drawer } from "$lib/global/components/";
 	import type { PlayList } from "$lib/types/playList";
-	import type { LogEntry, LogRound } from "../playtypes";
+	import type { LogRound, LogEntry } from "$lib/playmode/types/playtypes";
 
 	type Props = {
 		open: boolean;

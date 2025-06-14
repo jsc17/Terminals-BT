@@ -1,13 +1,12 @@
 import type { TDocumentDefinitions, TableCell, Content, Column } from "pdfmake/interfaces";
-import { Canvas, loadImage } from "skia-canvas";
 import BlobStream, { type IBlobStream } from "blob-stream";
 import { abilityReferences, spaReferences, ammoReferences, formationReferences } from "$lib/data/index.js";
-import { existsSync } from "fs";
-import fs from "fs/promises";
 import type { UnitV2, FormationV2, SCA } from "$lib/types/";
 import { printer } from "$lib/server/printer";
 import { getSCAfromName } from "../../../lib/types/sca";
 import { getFormationTypeByName } from "$lib/utilities/formation-utilities";
+import { generateUnitCard, loadUnitCardImage } from "./loadUnitCard";
+import playwright, { type Browser } from "playwright";
 
 type PrintableList = {
 	units: UnitV2[];
@@ -18,6 +17,7 @@ type PrintableList = {
 	factions: number[];
 	general: number;
 	style: "mul" | "detailed";
+	cardStyle: "mul" | "generated";
 	condensed: boolean;
 	scas: SCA[];
 };
@@ -79,7 +79,11 @@ function createUnitTable(listStyle: string, unitList: UnitV2[], formations: Form
 		}
 		if (drawFormations && formation.id != "unassigned") {
 			unitTable.push([
-				{ text: `${formation.name} - ${formation.type} formation - ${formation.units.length} Units - ${formationPV} PV`, colSpan: headerLength, style: "formationHeader" }
+				{
+					text: `${formation.name} - ${formation.type} formation - ${formation.units.length} Units - ${formationPV} PV`,
+					colSpan: headerLength,
+					style: "formationHeader"
+				}
 			]);
 		}
 		unitTable = unitTable.concat(formationUnitLines);
@@ -255,118 +259,83 @@ function createReferenceList(units: UnitV2[], formations: FormationV2[]) {
 	return referenceColumns;
 }
 
-async function loadUnitCard(mulId: number, skill?: number): Promise<string> {
-	return new Promise(async (resolve) => {
-		if (mulId < 0) {
-			resolve(`./files/cached-cards/customCardImages/${mulId}.png`);
-		} else {
-			if (existsSync(`./files/cached-cards/${mulId}-${skill}.png`)) {
-				resolve(`./files/cached-cards/${mulId}-${skill}.png`);
-			} else {
-				try {
-					const url = `https://masterunitlist.azurewebsites.net/Unit/Card/${mulId}?skill=${skill}`;
-					const response = await (await fetch(url)).arrayBuffer();
-					await fs.writeFile(`./files/cached-cards/${mulId}-${skill}.png`, new Uint8Array(response));
-					resolve(`./files/cached-cards/${mulId}-${skill}.png`);
-				} catch (error) {
-					console.log(error);
-				}
-			}
-		}
-	});
-}
+async function loadUnitFormation(formation: FormationV2, units: UnitV2[], cardStyle: string, browser: Browser) {
+	let unitPromises: Promise<string>[] = [];
+	let formationData: { name: string; type: string; pv: number; unitcards: string[] } = { name: formation.name, type: formation.type, pv: 0, unitcards: [] };
 
-async function createUnitCardColumns(unitList: UnitV2[], formations: FormationV2[], printByFormation: boolean) {
-	const promises = [];
+	let formationUnits: UnitV2[] = formation.units.map(({ id }) => units.find((unit) => unit.id == id)).filter((result) => result != undefined);
 
-	for (const unit of unitList) {
-		promises.push(loadUnitCard(unit.baseUnit.mulId, unit.skill));
-	}
-
-	await Promise.all(promises);
-
-	let unitsToPrint: { name: string; type: string; pv: number; units: UnitV2[] }[] = [];
-
-	if (printByFormation) {
-		for (const formation of formations) {
-			if (formation.units.length == 0) {
-				continue;
-			}
-			let tempFormation: { name: string; type: string; pv: number; units: UnitV2[] } = { name: formation.name, type: formation.type, pv: 0, units: [] };
-			for (const unitId of formation.units) {
-				const unit = unitList.find((tempUnit) => {
-					return tempUnit.id == unitId.id;
-				});
-				if (unit) {
-					tempFormation.units.push(unit);
-					tempFormation.pv += unit.cost;
-				}
-			}
-			unitsToPrint.push(tempFormation);
+	if (cardStyle == "mul") {
+		for (const unit of formationUnits) {
+			unitPromises.push(loadUnitCardImage(unit.baseUnit.mulId, unit.skill));
+			formationData.pv += unit.cost;
 		}
 	} else {
-		unitsToPrint = [{ name: "list", type: "none", pv: 0, units: [] }];
-		for (const unit of unitList) {
-			unitsToPrint[0].units.push(unit);
+		for (const unit of formationUnits) {
+			unitPromises.push(generateUnitCard(unit, browser));
+			formationData.pv += unit.cost;
 		}
+	}
+
+	formationData.unitcards = await Promise.all(unitPromises);
+	return formationData;
+}
+
+async function createUnitCardColumns(unitList: UnitV2[], formationList: FormationV2[], printByFormation: boolean, cardStyle: string) {
+	let formationPromises: Promise<{ name: string; type: string; pv: number; unitcards: string[] }>[] = [];
+
+	const browser = await playwright.chromium.launch({ headless: true });
+
+	for (const formation of formationList) {
+		formationPromises.push(loadUnitFormation(formation, unitList, cardStyle, browser));
+		if (formation.secondary) {
+			const secondaryFormation = { id: "", name: `${formation.name} ${formation.secondary.type}`, type: formation.secondary.type, units: formation.secondary.units };
+			formationPromises.push(loadUnitFormation(secondaryFormation, unitList, cardStyle, browser));
+		}
+	}
+
+	let formationsToPrint = await Promise.all(formationPromises);
+
+	if (!printByFormation) {
+		formationsToPrint = [
+			formationsToPrint.reduce(
+				(combinedFormation, formation) => {
+					return {
+						name: combinedFormation.name,
+						type: combinedFormation.type,
+						pv: combinedFormation.pv + formation.pv,
+						unitcards: combinedFormation.unitcards.concat(formation.unitcards)
+					};
+				},
+				{ name: "list", type: "none", pv: 0, unitcards: [] }
+			)
+		];
 	}
 
 	const unitCardColumns: Content[] = [];
-	for (const formation of unitsToPrint) {
+	formationsToPrint.forEach((formation) => {
 		unitCardColumns.push({
-			text: printByFormation && formation.type != "none" ? `${formation.name} - ${formation.type} formation - ${formation.units.length} units - ${formation.pv}pv` : "",
+			text: printByFormation && formation.type != "none" ? `${formation.name} - ${formation.type} formation - ${formation.unitcards.length} units - ${formation.pv}pv` : "",
 			style: "subheader",
-			pageBreak: "before"
+			headlineLevel: 1
 		});
 
 		const unitCards: { image: any; width: number }[] = [];
-		for (const unit of formation.units) {
-			let path = "";
-			if (unit.baseUnit.mulId < 0) {
-				path = `./files/cached-cards/customCardImages/${unit.baseUnit.mulId}.png`;
-			} else {
-				path = `./files/cached-cards/${unit.baseUnit.mulId}-${unit.skill}.png`;
-			}
-			if (!unit.customization.spa && !unit.customization.ammo) {
-				unitCards.push({ image: path, width: 250 });
-			} else {
-				let img = await loadImage(path);
-				const canvas = new Canvas(img.width, img.height);
-				const ctx = canvas.getContext("2d");
-				ctx.drawImage(img, 0, 0);
-				if (unit.customization.spa?.length) {
-					let spaCost = 0;
-					unit.customization.spa.forEach((spa) => {
-						spaCost +=
-							spaReferences.find(({ name }) => {
-								return name == spa;
-							})?.cost ?? 0;
-					});
-					ctx.font = "18pt serif";
-					ctx.fillText(`SPA (${spaCost}): ${unit.customization.spa.join(", ")}`, 50, 643);
-				}
-				if (unit.customization.ammo?.length) {
-					ctx.font = "18pt serif";
-					ctx.fillText(`Alt. Ammo: ${unit.customization.ammo.join(", ")}`, 50, 607);
-				}
-
-				const buffer = await canvas.toBuffer("png");
-				unitCards.push({ image: buffer, width: 250 });
-			}
+		for (const unitCard of formation.unitcards) {
+			unitCards.push({ image: unitCard, width: 250 });
 		}
 		unitCardColumns.push({
 			columns: [
 				unitCards.filter((v, i) => {
-					return i % 8 < 4;
+					return i % 2 == 0;
 				}),
 				unitCards.filter((v, i) => {
-					return i % 8 >= 4;
+					return i % 2 == 1;
 				})
 			],
 			columnGap: 10
 		});
-	}
-
+	});
 	return unitCardColumns;
 }
 
@@ -388,6 +357,7 @@ function createSCAColumns(scas: SCA[]) {
 }
 
 export async function printList(list: PrintableList, drawFormations: boolean, printUnitsByFormation: boolean): Promise<Blob> {
+	const starttime = performance.now();
 	const tableheaders: TableCell[] =
 		list.style == "mul"
 			? [{ text: "Unit", style: "cellHeader" }].concat(
@@ -403,7 +373,7 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 	const tableWidths = list.style == "mul" ? ["*", "auto", "auto", "auto"] : ["*", "auto", "auto", "auto", "auto", "auto", "auto"];
 	const unitTable = createUnitTable(list.style, list.units, list.formations, drawFormations);
 	const referenceColumns = createReferenceList(list.units, list.formations);
-	const unitCardColumns = await createUnitCardColumns(list.units, list.formations, printUnitsByFormation);
+	const unitCardColumns = await createUnitCardColumns(list.units, list.formations, printUnitsByFormation, list.cardStyle);
 
 	let scaSection: Content[] = [];
 	if (list.scas.length) {
@@ -413,7 +383,7 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 
 	const dd: TDocumentDefinitions = {
 		pageSize: "LETTER",
-		pageMargins: 20,
+		pageMargins: [30, 10],
 		content: [
 			{
 				columns: [
@@ -432,11 +402,13 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 			...scaSection,
 			{ text: "References:", style: "subheader" },
 			...referenceColumns,
-			...unitCardColumns
+			{ text: "", pageBreak: "after" },
+
+			unitCardColumns
 		],
-		footer: {
-			columns: [{ text: "https://Terminal.tools/listbuilder", fontSize: 8, margin: [25, 0, 0, 25] }]
-		},
+		// footer: {
+		// 	columns: [{ text: "https://Terminal.tools/listbuilder", fontSize: 8, margin: [25, 0, 0, 25] }]
+		// },
 		defaultStyle: {
 			font: "Helvetica",
 			fontSize: 8
@@ -450,7 +422,7 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 			subheader: {
 				fontSize: 12,
 				bold: true,
-				margin: [0, 10, 0, 6]
+				margin: [0, 4, 0, 4]
 			},
 			player: {
 				fontSize: 12,
@@ -494,6 +466,9 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 			}
 		}
 	};
+
+	const endTime = performance.now();
+	console.log(`Generation Time ${endTime - starttime}ms`);
 
 	return new Promise((resolve, reject) => {
 		const pdfDoc = printer.createPdfKitDocument(dd);

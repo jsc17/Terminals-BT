@@ -9,7 +9,7 @@
 	import ExpandModal from "./modals/ExpandModal.svelte";
 	import { loadMULUnit } from "$lib/utilities/load";
 	import * as auto from "./utilities/automation";
-	import type { LogRound, Options } from "../playtypes";
+	import type { LogRound, Options } from "$lib/playmode/types/playtypes";
 	import { createDamagedAbilityString, infTypes, mechTypes, typeIncludes, vTypes } from "./utilities/utilities";
 	import SpecialModal from "./modals/SpecialModal.svelte";
 	import { type UnitAbility } from "$lib/data/abilities";

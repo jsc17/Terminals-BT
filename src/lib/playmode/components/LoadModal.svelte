@@ -4,7 +4,6 @@
 	import type { PlayList } from "$lib/types/playList";
 	import { getNewSkillCost } from "$lib/utilities/bt-utils";
 	import { getContext } from "svelte";
-	import type { LogRound } from "../playtypes";
 
 	type Props = {
 		open: boolean;

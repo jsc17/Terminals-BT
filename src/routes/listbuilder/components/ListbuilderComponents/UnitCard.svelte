@@ -8,6 +8,7 @@
 	import Menu from "$lib/global/components/Menu.svelte";
 	import { UnitCustomizationModal } from "../index";
 	import { createAbilityLineString } from "$lib/utilities/parseAbilities";
+	import Popover from "$lib/global/components/Popover.svelte";
 
 	type Props = {
 		unitId: string;
@@ -30,23 +31,28 @@
 		<div class="unit-name-row">
 			<p class="name-row-name" class:invalid-unit={list.issues.issueUnits.has(unit?.id ?? "0")}>{unit?.baseUnit.name}</p>
 			<p class="name-row-pv"><span class="muted">PV:</span> {unit?.cost}</p>
-			<Menu img={"/icons/menu.svg"}>
-				<button
-					class="transparent-button"
-					onclick={() => {
-						unitCustomizationModal?.show(unitId);
-					}}
-				>
-					Add Ammo/SPA
-				</button>
-				<button
-					class="transparent-button"
-					onclick={() => {
-						list.removeUnit(unitId);
-						toastController.addToast(`${unit?.baseUnit.name} removed from list`);
-					}}>Remove unit</button
-				>
-			</Menu>
+			<Popover>
+				{#snippet trigger()}
+					<div class="unit-menu-trigger"><img src="/icons/menu.svg" alt="unit menu" /></div>
+				{/snippet}
+				<div class="unit-menu-content">
+					<button
+						class="transparent-button"
+						onclick={() => {
+							unitCustomizationModal?.show(unitId);
+						}}
+					>
+						Add Ammo/SPA
+					</button>
+					<button
+						class="transparent-button"
+						onclick={() => {
+							list.removeUnit(unitId);
+							toastController.addToast(`${unit?.baseUnit.name} removed from list`);
+						}}>Remove unit</button
+					>
+				</div>
+			</Popover>
 		</div>
 		<div class="unit-header-row">
 			<div class="unit-header">Type</div>
@@ -202,5 +208,26 @@
 	.unit-abilities {
 		font-size: 0.75em;
 		color: var(--muted-foreground);
+	}
+	.unit-menu-trigger {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 100%;
+		width: 100%;
+		background-color: var(--primary);
+		padding: 0px 16px;
+		border-radius: var(--radius);
+
+		& img {
+			width: 15px;
+			height: 15px;
+		}
+	}
+	.unit-menu-content {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		padding: 16px;
 	}
 </style>

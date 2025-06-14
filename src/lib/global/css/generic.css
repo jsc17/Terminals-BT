@@ -1,7 +1,6 @@
 /* Collapsible styling */
 
 [data-collapsible-root] {
-	height: 100%;
 	width: 100%;
 	overflow: auto;
 }
@@ -30,4 +29,55 @@
 	padding: 0;
 	margin: 0;
 	background-color: transparent;
+}
+
+/* Popover Styling */
+.generic-popover-trigger {
+	height: 100%;
+	border-radius: 0;
+	border: none;
+	background-color: transparent;
+}
+.generic-popover-content {
+	background-color: var(--background);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	display: flex;
+	flex-direction: column;
+	margin: 0px 8px;
+	max-width: max(30dvw, 600px);
+	z-index: 10;
+}
+[data-popover-close] {
+	background-color: transparent;
+	border: none;
+	border-radius: 0;
+}
+
+/* Separator Styling */
+[data-separator-root] {
+	flex-shrink: 0;
+	align-self: center;
+}
+.separator-primary {
+	background-color: var(--primary);
+}
+.separator-muted {
+	background-color: var(--muted);
+}
+.separator-border {
+	background-color: var(--border);
+}
+.separator-card {
+	background-color: var(--card-foreground);
+}
+[data-separator-root][data-orientation="vertical"] {
+	width: 1px;
+	height: 95%;
+	margin: 0px 4px;
+}
+[data-separator-root][data-orientation="horizontal"] {
+	width: 95%;
+	height: 1px;
+	margin: 4px 0px;
 }

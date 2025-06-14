@@ -135,7 +135,7 @@
 					<button
 						class="transparent-button"
 						onclick={() => {
-							printModal?.show();
+							printModal?.open();
 						}}
 					>
 						Print List
@@ -260,19 +260,18 @@
 	{/if}
 </div>
 
-<PrintModal bind:this={printModal}></PrintModal>
 <SaveModal bind:this={saveModal}></SaveModal>
 <LoadModal bind:this={loadModal}></LoadModal>
 <UnitCustomizationModal bind:this={unitCustomizationModal}></UnitCustomizationModal>
 <!-- Updated to use generic dialog element -->
 <ScaModal bind:open={scaModalOpen} {list}></ScaModal>
+<PrintModal bind:this={printModal} {list}></PrintModal>
 
 <style>
 	.listbuilder {
 		position: relative;
 		width: 100%;
 		height: 100%;
-		scrollbar-gutter: stable;
 		display: flex;
 		flex-direction: column;
 	}
@@ -321,6 +320,7 @@
 		padding: 4px 0px 16px 0px;
 		flex: 1;
 		overflow: auto;
+		scrollbar-gutter: stable;
 	}
 	.list-info {
 		display: flex;

@@ -40,7 +40,7 @@
 <Dialog title="Edit Sublist" bind:open>
 	{#if sublist}
 		<div class="edit-sublist-modal-content">
-			<div class="edit-sublist-modal-body">
+			<div class="edit-sublist-units">
 				<div></div>
 				<p class="center">Unit</p>
 				<p class="center">Skill</p>
@@ -84,13 +84,15 @@
 <style>
 	.edit-sublist-modal-content {
 		width: 100%;
-		display: flex;
-		flex-direction: column;
+		display: grid;
+		grid-template-rows: 1fr max-content max-content;
 		gap: 16px;
 	}
-	.edit-sublist-modal-body {
+	.edit-sublist-units {
 		display: grid;
 		grid-template-columns: max-content 1fr max-content max-content;
+		grid-auto-rows: max-content;
+		overflow: auto;
 		gap: 4px 12px;
 	}
 	.edit-sublist-stats {

@@ -406,6 +406,11 @@ export class List {
 			formation.units = formation.units.filter((unit) => {
 				return unit.id != idToRemove;
 			});
+			if (formation.secondary) {
+				formation.secondary.units = formation.secondary.units.filter((unit) => {
+					return unit.id != idToRemove;
+				});
+			}
 		});
 		this.sublists.forEach((sublist) => {
 			sublist.checked = sublist.checked.filter((unitId) => {

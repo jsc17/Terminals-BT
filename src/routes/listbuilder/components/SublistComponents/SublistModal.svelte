@@ -10,10 +10,9 @@
 	import { Dialog, Popover } from "$lib/global/components";
 
 	let list: List = getContext("list");
+	let settings: Settings = getContext("listbuilderSettings");
 
 	let scenarioFilter = $state<string>("All");
-	let layoutSelection = $state<"vertical" | "horizontal">("vertical");
-	let unitSortOrder = $state<"name" | "pv">("pv");
 	let flipDurationMs = 300;
 
 	let sublistPrintModalOpen = $state(false);
@@ -21,7 +20,7 @@
 	let sublistAutoModalOpen = $state(false);
 
 	let scenarioList = $derived.by(() => ["-"].concat(list.options?.sublistScenarios ?? []));
-	let layout: "mobile" | "vertical" | "horizontal" = $derived(appWindow.isMobile ? "mobile" : layoutSelection);
+	let layout: "mobile" | "vertical" | "horizontal" = $derived(appWindow.isMobile ? "mobile" : settings.sublistUI.sublistOrientation);
 
 	let dropTargetStyle = { outline: "none" };
 	function handleSort(e: CustomEvent<DndEvent<SublistV2>>) {
@@ -40,7 +39,7 @@
 	{#each list.sublists as sublist (sublist.id)}
 		{#if sublist.scenario == scenarioFilter || scenarioFilter == "All"}
 			<div class:panel-vertical={layout == "vertical" && !appWindow.isMobile} class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}>
-				<Sublist {sublist} {list} {scenarioList} {unitSortOrder} {layout} {openSublistEditModal}></Sublist>
+				<Sublist {sublist} {list} {scenarioList} unitSortOrder={settings.sublistUI.sublistSortOrder} {layout} {openSublistEditModal}></Sublist>
 			</div>
 		{/if}
 	{/each}
@@ -81,14 +80,14 @@
 						{#if !appWindow.isMobile}
 							<fieldset>
 								<legend>Display</legend>
-								<label><input type="radio" name="layout" bind:group={layoutSelection} value="vertical" /> Vertical</label>
-								<label><input type="radio" name="layout" bind:group={layoutSelection} value="horizontal" /> Horizontal</label>
+								<label><input type="radio" name="layout" bind:group={settings.sublistUI.sublistOrientation} value="vertical" /> Vertical</label>
+								<label><input type="radio" name="layout" bind:group={settings.sublistUI.sublistOrientation} value="horizontal" /> Horizontal</label>
 							</fieldset>
 						{/if}
 						<fieldset>
 							<legend>Sublist unit sorting</legend>
-							<label><input type="radio" name="unitSortOrder" bind:group={unitSortOrder} value="pv" /> PV</label>
-							<label><input type="radio" name="unitSortOrder" bind:group={unitSortOrder} value="name" /> Name</label>
+							<label><input type="radio" name="unitSortOrder" bind:group={settings.sublistUI.sublistSortOrder} value="pv" /> PV</label>
+							<label><input type="radio" name="unitSortOrder" bind:group={settings.sublistUI.sublistSortOrder} value="name" /> Name</label>
 						</fieldset>
 					</div>
 				</Popover>

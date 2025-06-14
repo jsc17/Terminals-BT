@@ -3,6 +3,7 @@
 	import { toastController } from "$lib/global/stores/toastController.svelte";
 	import type { UnitV2, List } from "$lib/types/";
 	import { Dialog } from "$lib/global/components";
+	import { getContext } from "svelte";
 
 	type Props = {
 		open: boolean;
@@ -10,6 +11,8 @@
 	};
 
 	let { open = $bindable(), list }: Props = $props();
+
+	let settings: Settings = getContext("listbuilderSettings");
 
 	function handlePrintForm({ formData, cancel, submitter }: any) {
 		if (submitter.innerText == "Cancel") {
@@ -49,16 +52,47 @@
 </script>
 
 <Dialog title="Print Sublists" triggerClasses="transparent-button" bind:open>
-	<form action="?/printSublists" method="post" use:enhance={handlePrintForm} class="padding8">
-		<div class="inline column gap8">
-			<div class="inline gap8"><input type="radio" name="sublistPrintLayout" id="vertical" value="vertical" checked /><label for="vertical">Vertical</label></div>
-			<div class="inline gap8"><input type="radio" name="sublistPrintLayout" id="horizontal" value="horizontal" /><label for="horizontal">Horizontal</label></div>
+	<form action="?/printSublists" method="post" use:enhance={handlePrintForm} class="printAllForm">
+		<fieldset>
+			<legend>Style</legend>
+			<div class="inline gap8">
+				<input type="radio" name="sublistPrintLayout" id="vertical" value="vertical" bind:group={settings.sublistUI.sublistPrintAllOrientation} /><label for="vertical"
+					>Vertical</label
+				>
+			</div>
+			<div class="inline gap8">
+				<input type="radio" name="sublistPrintLayout" id="horizontal" value="horizontal" bind:group={settings.sublistUI.sublistPrintAllOrientation} /><label for="horizontal"
+					>Horizontal</label
+				>
+			</div>
+		</fieldset>
 
-			<div class="inline gap8"><input type="checkbox" name="sublistPrintGrouping" id="sublistPrintGroup" /><label for="sublistPrintGroup">Group sublists by scenario</label></div>
+		<div class="inline gap8">
+			<input type="checkbox" name="sublistPrintGrouping" id="sublistPrintGroup" bind:checked={settings.sublistUI.sublistPrintAllGroupByScenario} /><label for="sublistPrintGroup"
+				>Group sublists by scenario</label
+			>
 		</div>
+
 		<div class="center gap8">
 			<button>Cancel</button>
 			<button>Print</button>
 		</div>
 	</form>
 </Dialog>
+
+<style>
+	.printAllForm {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		padding: 8px;
+	}
+	fieldset {
+		border: 1px solid var(--border);
+		display: flex;
+		gap: 16px;
+	}
+	legend {
+		color: var(--muted-foreground);
+	}
+</style>

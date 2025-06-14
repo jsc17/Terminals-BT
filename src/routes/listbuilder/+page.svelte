@@ -1,18 +1,30 @@
 <script lang="ts">
 	import { onMount, setContext } from "svelte";
 	import { Listbuilder } from "./components/index";
-	import { ruleSets } from "$lib/types/options";
+	import { ruleSets } from "$lib/types/rulesets";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { SearchFilters, SearchParameters, SearchResults } from "$lib/UnitSearch/index";
 	import { slide } from "svelte/transition";
 	import { List } from "../../lib/types/list.svelte";
 	import { convertUnversionedJSONList } from "./utilities/convert";
 	import type { ListCode } from "../../lib/types/listCode";
+	import { PersistedState } from "runed";
 
 	const resultList = new ResultList();
 	const list = new List(resultList);
+	let settings = new PersistedState<Settings>("listbuilderSettings", {
+		print: { printingStyle: "detailed", printFormations: true, printCardsByFormation: false, cardStyle: "generated" },
+		sublistUI: {
+			sublistOrientation: "vertical",
+			sublistSortOrder: "pv",
+			sublistPrintListSettings: { printingStyle: "detailed", printFormations: true, printCardsByFormation: false, cardStyle: "generated" },
+			sublistPrintAllOrientation: "vertical",
+			sublistPrintAllGroupByScenario: false
+		}
+	});
 	setContext("resultList", resultList);
 	setContext("list", list);
+	setContext("listbuilderSettings", settings.current);
 
 	let selectedRules = $state<string>("");
 	let showListbuilder = $state(false);

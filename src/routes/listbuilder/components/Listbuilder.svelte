@@ -253,8 +253,8 @@
 			onconsider={handleDndConsider}
 			onfinalize={handleDndFinalize}
 		>
-			{#each list.formations as formation (formation.id)}
-				<FormationCard {formation} {draggingColumns} {unitCustomizationModal}></FormationCard>
+			{#each list.formations as formation, index (formation.id)}
+				<FormationCard bind:formation={list.formations[index]} {draggingColumns} {unitCustomizationModal}></FormationCard>
 			{/each}
 		</div>
 	{/if}

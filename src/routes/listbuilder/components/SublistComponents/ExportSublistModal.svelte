@@ -4,6 +4,7 @@
 	import { toastController } from "$lib/global/stores/toastController.svelte";
 	import { enhance } from "$app/forms";
 	import { Dialog } from "$lib/global/components";
+	import { getContext } from "svelte";
 
 	type Props = {
 		open: boolean;
@@ -13,9 +14,10 @@
 
 	let { open = $bindable(), sublist, list }: Props = $props();
 
+	let settings: Settings = getContext("listbuilderSettings");
+
 	let exportName = $state("");
 	let playerName = $state("");
-	let style = $state("detailed");
 	let ttsCode = $state("");
 	let printName = $state("");
 
@@ -57,7 +59,6 @@
 			eras: list.details.eras,
 			factions: list.details.factions,
 			general: list.details.general,
-			style: style,
 			condense: false
 		});
 
@@ -89,21 +90,44 @@
 		<fieldset>
 			<legend>Print Sublist:</legend>
 			<form action="?/printList" method="post" use:enhance={handleForm} class="print-form">
-				<div><label for="export-listname">Print title</label><input id="export-listname" bind:value={printName} /></div>
-				<div><label for="export-playername">Player Name (optional)</label><input id="export-playername" bind:value={playerName} /></div>
-				<h2>Style</h2>
-				<div>
-					<label for="list-style-mul"
-						><input type="radio" name="list-style-mul" id="list-style-mul" value="mul" bind:group={style} />MUL style - Generates a summary page similar to the MUL printout.</label
-					>
+				<div><label for="print-listname">List Name</label><input id="print-listname" bind:value={printName} /></div>
+				<div><label for="print-playername">Player Name (optional)</label><input id="print-playername" bind:value={playerName} /></div>
+				<fieldset>
+					<legend>Printing Style</legend>
+					<div>
+						<label for="print-list-style-mul"
+							><input type="radio" name="printStyle" id="print-list-style-mul" value="mul" bind:group={settings.sublistUI.sublistPrintListSettings.printingStyle} />MUL style -
+							Generates a summary page similar to the MUL printout.</label
+						>
+					</div>
+					<div>
+						<label for="print-list-style-detailed"
+							><input
+								type="radio"
+								name="printStyle"
+								id="print-list-style-detailed"
+								value="detailed"
+								bind:group={settings.sublistUI.sublistPrintListSettings.printingStyle}
+							/>Detailed - Generates a summary page with more details for quick reference.</label
+						>
+					</div>
+				</fieldset>
+				<fieldset>
+					<legend>Card Options</legend>
+					<div>
+						<input type="radio" name="cardStyle" id="card-type-mul" value="mul" bind:group={settings.sublistUI.sublistPrintListSettings.cardStyle} /><label for="card-type-mul"
+							>Print cards downloaded from the MUL</label
+						>
+					</div>
+					<div>
+						<input type="radio" name="cardStyle" id="card-type-generated" value="generated" bind:group={settings.sublistUI.sublistPrintListSettings.cardStyle} /><label
+							for="card-type-generated">Print generated cards. Required for printing SCA's and Alt. Ammo. May take a few seconds to print.</label
+						>
+					</div>
+				</fieldset>
+				<div class="print-buttons">
+					<button>Print</button>
 				</div>
-				<div>
-					<label for="list-style-detailed"
-						><input type="radio" name="list-style-detailed" id="list-style-detailed" value="detailed" bind:group={style} />Detailed - Generates a summary page with more details for
-						quick reference.</label
-					>
-				</div>
-				<button class="export-button">Print</button>
 			</form>
 		</fieldset>
 		<fieldset>

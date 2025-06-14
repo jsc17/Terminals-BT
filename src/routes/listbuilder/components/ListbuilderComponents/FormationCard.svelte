@@ -9,7 +9,7 @@
 
 	type Props = { formation: FormationV2; draggingColumns: boolean; unitCustomizationModal?: UnitCustomizationModal };
 
-	let { formation, draggingColumns, unitCustomizationModal }: Props = $props();
+	let { formation = $bindable(), draggingColumns, unitCustomizationModal }: Props = $props();
 	let list: List = getContext("list");
 	let editModalOpen = $state(false);
 

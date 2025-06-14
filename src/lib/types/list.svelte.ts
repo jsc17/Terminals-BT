@@ -1,7 +1,6 @@
 import type { UnitV2, MulUnit, ListCode, ListCodeUnit, SCA, FormationV2, SublistV2, ResultList } from "$lib/types/";
 import { getNewSkillCost } from "$lib/utilities/bt-utils";
-import customCards from "$lib/data/customCards.json";
-import { getRules } from "$lib/types/options";
+import { getRules } from "$lib/types/";
 import { getSCAfromId } from "./sca";
 import { nanoid } from "nanoid";
 import { loadMULUnit } from "$lib/utilities/load";

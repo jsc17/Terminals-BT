@@ -3,8 +3,8 @@ import { getGeneralList } from "$lib/utilities/bt-utils";
 import type { Filter } from "./filter";
 import { deserialize } from "$app/forms";
 import { filters as filtersImport, additionalFilters as additionalFiltersImport } from "$lib/data/filters";
-import type { Options } from "./options";
-import { ruleSets } from "./options";
+import type { Ruleset } from "./rulesets";
+import { ruleSets } from "./rulesets";
 import customCards from "$lib/data/customCards.json";
 
 type SearchConstraint = {
@@ -109,7 +109,7 @@ export class ResultList {
 	uniqueList = $state<number[]>([]);
 	customUnits = $state<MulUnit[]>([]);
 
-	options = $state<Options>();
+	options = $state<Ruleset>();
 	availableList = $derived.by(() => {
 		let availableUnits = this.resultList.concat(this.generalList);
 		availableUnits = [...new Set(availableUnits)];

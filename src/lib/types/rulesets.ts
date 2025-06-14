@@ -6,7 +6,7 @@ type Limit = {
 	exceptions?: { ability: { name: string; minValue: number; max: number }[] };
 };
 
-export type Options = {
+export type Ruleset = {
 	name: string;
 	display: string;
 	eraFactionRestriction?: boolean;
@@ -32,7 +32,7 @@ export type Options = {
 	sublistScenarios: string[];
 };
 
-export const ruleSets: Options[] = [
+export const ruleSets: Ruleset[] = [
 	{
 		name: "noRes",
 		display: "No Restrictions",

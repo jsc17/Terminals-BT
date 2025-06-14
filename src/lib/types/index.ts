@@ -1,4 +1,4 @@
-import { type Options, ruleSets, getRules } from "./options";
+import { type Ruleset, ruleSets, getRules } from "./rulesets";
 import { ResultList } from "./resultList.svelte";
 import { type FormationV2, type FormationType, type PlayFormation } from "./formation";
 import { type PlayList, sendListToPlay } from "./playList";
@@ -9,7 +9,7 @@ import type { UnitV2, UnitCustomization, MulUnit } from "./unit";
 import { type SublistV2, type SublistStats } from "./sublist";
 
 export {
-	type Options,
+	type Ruleset,
 	ruleSets,
 	getRules,
 	ResultList,

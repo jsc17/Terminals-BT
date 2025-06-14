@@ -3,12 +3,15 @@
 	import { toastController } from "$lib/global/stores/toastController.svelte";
 	import { type List } from "$lib/types/";
 	import { Dialog } from "$lib/global/components";
+	import { getContext } from "svelte";
 
 	type Props = {
 		list: List;
 	};
 
 	let { list = $bindable() }: Props = $props();
+
+	let settings: Settings = getContext("listbuilderSettings");
 
 	let openState = $state(false);
 	let playerName = $state("");
@@ -59,27 +62,36 @@
 				<legend>Printing Style</legend>
 				<div>
 					<label for="print-list-style-mul"
-						><input type="radio" name="printStyle" id="print-list-style-mul" value="mul" />MUL style - Generates a summary page similar to the MUL printout.</label
+						><input type="radio" name="printStyle" id="print-list-style-mul" value="mul" bind:group={settings.print.printingStyle} />MUL style - Generates a summary page similar to
+						the MUL printout.</label
 					>
 				</div>
 				<div>
 					<label for="print-list-style-detailed"
-						><input type="radio" name="printStyle" id="print-list-style-detailed" value="detailed" checked />Detailed - Generates a summary page with more details for quick
-						reference.</label
+						><input type="radio" name="printStyle" id="print-list-style-detailed" value="detailed" bind:group={settings.print.printingStyle} />Detailed - Generates a summary page
+						with more details for quick reference.</label
 					>
 				</div>
 			</fieldset>
 
 			<fieldset>
 				<legend>Formation Options</legend>
-				<div><input type="checkbox" name="drawFormations" id="formations" checked /><label for="formations">Print formations?</label></div>
-				<div><input type="checkbox" name="printUnitsByFormation" id="printUnitsByFormation" /><label for="printUnitsByFormation">Print Unit Cards by formation?</label></div>
+				<div><input type="checkbox" name="drawFormations" id="formations" bind:checked={settings.print.printFormations} /><label for="formations">Print formations?</label></div>
+				<div>
+					<input type="checkbox" name="printUnitsByFormation" id="printUnitsByFormation" bind:checked={settings.print.printCardsByFormation} /><label for="printUnitsByFormation"
+						>Print Unit Cards by formation?</label
+					>
+				</div>
 			</fieldset>
 			<fieldset>
 				<legend>Card Options</legend>
-				<div><input type="radio" name="cardStyle" id="card-type-mul" value="mul" checked /><label for="card-type-mul">Print cards downloaded from the MUL</label></div>
 				<div>
-					<input type="radio" name="cardStyle" id="card-type-generated" value="generated" /><label for="card-type-generated"
+					<input type="radio" name="cardStyle" id="card-type-mul" value="mul" bind:group={settings.print.cardStyle} /><label for="card-type-mul"
+						>Print cards downloaded from the MUL</label
+					>
+				</div>
+				<div>
+					<input type="radio" name="cardStyle" id="card-type-generated" value="generated" bind:group={settings.print.cardStyle} /><label for="card-type-generated"
 						>Print generated cards. Required for printing SCA's and Alt. Ammo. May take a few seconds to print.</label
 					>
 				</div>

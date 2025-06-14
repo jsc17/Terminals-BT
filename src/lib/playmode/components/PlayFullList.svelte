@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PlayUnit } from "$lib/types/unit";
-	import type { LogRound, Options } from "../playtypes";
+	import type { LogRound, Options } from "$lib/playmode/types/playtypes";
 	import PlayUnitCard from "../unitcards/PlayUnitCard.svelte";
 
 	type Props = {

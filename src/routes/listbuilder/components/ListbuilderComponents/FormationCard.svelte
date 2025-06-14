@@ -13,7 +13,6 @@
 	let list: List = getContext("list");
 	let editModalOpen = $state(false);
 
-	let dropTargetStyle = {};
 	let flipDurationMs = 100;
 	let open = $state(true);
 	let secondaryOpen = $state(true);
@@ -81,7 +80,7 @@
 			<Collapsible bind:open>
 				<div
 					class="unit-cards"
-					use:dragHandleZone={{ items: formation.units, dropTargetStyle, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
+					use:dragHandleZone={{ items: formation.units, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
 					onconsider={handleSort}
 					onfinalize={handleSort}
 				>
@@ -114,7 +113,7 @@
 					{/if}
 					<div
 						class="unit-cards"
-						use:dragHandleZone={{ items: formation.secondary.units, dropTargetStyle, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
+						use:dragHandleZone={{ items: formation.secondary.units, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
 						onconsider={handleSecondarySort}
 						onfinalize={handleSecondarySort}
 					>
@@ -136,7 +135,7 @@
 			<Collapsible bind:open>
 				<div
 					class="unit-cards"
-					use:dndzone={{ items: formation.units, dropTargetStyle, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
+					use:dndzone={{ items: formation.units, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
 					onconsider={handleSort}
 					onfinalize={handleSort}
 				>
@@ -169,7 +168,7 @@
 					{/if}
 					<div
 						class="unit-cards"
-						use:dndzone={{ items: formation.secondary.units, dropTargetStyle, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
+						use:dndzone={{ items: formation.secondary.units, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
 						onconsider={handleSecondarySort}
 						onfinalize={handleSecondarySort}
 					>
@@ -248,7 +247,7 @@
 		font-size: 0.9em;
 	}
 	:global(.droppable) {
-		outline: 1px solid var(--primary);
+		outline: 2px solid var(--primary);
 		min-height: 2em;
 	}
 

@@ -24,27 +24,3 @@
 		{@render children?.()}
 	</Popover.Content>
 </Popover.Root>
-
-<style>
-	:global(.generic-popover-trigger) {
-		height: 100%;
-		border-radius: 0;
-		border: none;
-		background-color: transparent;
-	}
-	:global(.generic-popover-content) {
-		background-color: var(--background);
-		border: 1px solid var(--border);
-		border-radius: var(--radius);
-		display: flex;
-		flex-direction: column;
-		margin: 0px 8px;
-		max-width: max(30dvw, 600px);
-		z-index: 10;
-	}
-	:global([data-popover-close]) {
-		background-color: transparent;
-		border: none;
-		border-radius: 0;
-	}
-</style>

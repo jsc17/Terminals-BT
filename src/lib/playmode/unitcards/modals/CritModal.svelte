@@ -2,8 +2,7 @@
 	import { Dialog } from "$lib/global/components";
 	import type { MulUnit, PlayUnit } from "$lib/types/unit";
 	import { nanoid } from "nanoid";
-	import { getContext, untrack } from "svelte";
-	import type { LogRound } from "../../playtypes";
+	import type { LogRound } from "$lib/playmode/types/playtypes";
 
 	type Props = {
 		unit: PlayUnit;

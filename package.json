@@ -50,7 +50,9 @@
 		"pdf-lib": "^1.17.1",
 		"pdfjs-dist": "4.10.38",
 		"pdfmake": "^0.2.20",
+		"playwright": "^1.53.0",
 		"prettier": "^3.5.3",
+		"puppeteer": "^24.10.0",
 		"runed": "^0.28.0",
 		"skia-canvas": "^2.0.2",
 		"svelty-email": "github:socketopp/svelty-email#feature/component-render",
@@ -63,6 +65,7 @@
 			"@prisma/engines",
 			"esbuild",
 			"prisma",
+			"puppeteer",
 			"skia-canvas"
 		]
 	},

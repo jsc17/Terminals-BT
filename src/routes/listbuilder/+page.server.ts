@@ -1,8 +1,8 @@
 import { fail } from "@sveltejs/kit";
 import { prisma } from "$lib/server/prisma.js";
-import { printList } from "./utilities/printList.js";
+import { printList } from "./printing/printList.js";
 import { type ListCode } from "../../lib/types/listCode.js";
-import { createSublistsPdf } from "./utilities/printSublists.js";
+import { createSublistsPdf } from "./printing/printSublists.js";
 
 export const load = async ({ url }) => {
 	let sharedList;
@@ -122,6 +122,8 @@ export const actions = {
 	printList: async ({ request }) => {
 		const formData = await request.formData();
 		const list = JSON.parse(formData.get("body")!.toString());
+		list.style = formData.get("printStyle")?.toString() ?? "detailed";
+		list.cardStyle = formData.get("cardStyle")?.toString() ?? "mul";
 		const printFormations = formData.get("drawFormations")?.toString() == "on";
 		const printUnitsByFormation = formData.get("printUnitsByFormation")?.toString() == "on";
 		const blob = await printList(list, printFormations, printUnitsByFormation);

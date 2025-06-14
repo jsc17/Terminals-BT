@@ -15,6 +15,7 @@
 	let saveModal = $state<SaveModal>();
 	let loadModal = $state<LoadModal>();
 	let unitCustomizationModal = $state<UnitCustomizationModal>();
+	let availabilityModal = $state<FindUnitAvailabilityModal>();
 
 	let scaModalOpen = $state(false);
 
@@ -149,8 +150,12 @@
 						Share List Link
 					</button>
 					<Separator orientation={"horizontal"} classes={"separator-border"} />
-
-					<FindUnitAvailabilityModal {list} />
+					<button
+						class="transparent-button"
+						onclick={() => {
+							availabilityModal?.show();
+						}}>Check List Availability</button
+					>
 					<SublistModal />
 					<button
 						class="transparent-button"
@@ -266,6 +271,7 @@
 <!-- Updated to use generic dialog element -->
 <ScaModal bind:open={scaModalOpen} {list}></ScaModal>
 <PrintModal bind:this={printModal} {list}></PrintModal>
+<FindUnitAvailabilityModal bind:this={availabilityModal} {list} />
 
 <style>
 	.listbuilder {

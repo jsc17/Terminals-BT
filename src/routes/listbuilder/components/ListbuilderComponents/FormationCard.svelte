@@ -5,13 +5,14 @@
 	import { Collapsible } from "$lib/global/components/";
 	import { List, type FormationV2 } from "$lib/types/";
 	import { getFormationStats } from "$lib/utilities/formation-utilities";
-	import { UnitCard, UnitCustomizationModal, EditFormationModal, FormationInfoPopover, FormationMenu } from "../";
+	import { UnitCard, UnitCustomizationModal, EditFormationModal, FormationInfoPopover, FormationMenu, FindUnitAvailabilityModal } from "../";
 
 	type Props = { formation: FormationV2; draggingColumns: boolean; unitCustomizationModal?: UnitCustomizationModal };
 
 	let { formation = $bindable(), draggingColumns, unitCustomizationModal }: Props = $props();
 	let list: List = getContext("list");
 	let editModalOpen = $state(false);
+	let availabilityModal = $state<FindUnitAvailabilityModal>();
 
 	let flipDurationMs = 100;
 	let open = $state(true);
@@ -28,28 +29,7 @@
 </script>
 
 <div class="formation-card">
-	{#if formation.id == "unassigned"}
-		{#if list.formations.length != 1}
-			<div class="formation-header">
-				{#if appWindow.isMobile}
-					<div class="drag-handles" use:dragHandle>
-						<img class="combobox-img" src="/icons/chevron-updown.svg" alt="expand list chevrons" />
-					</div>
-				{/if}
-				<div class="formation-header-details">Unassigned Units</div>
-				<div class="formation-header-buttons">
-					<FormationInfoPopover {formationStats} />
-					<FormationMenu {formation} {list} bind:editModalOpen />
-					<button
-						onclick={() => {
-							open = !open;
-						}}
-						class="transparent-button expand-collapse">{open ? "collapse" : "expand"}</button
-					>
-				</div>
-			</div>
-		{/if}
-	{:else}
+	{#if list.formations.length != 1}
 		<div class="formation-header">
 			{#if appWindow.isMobile}
 				<div class="drag-handles" use:dragHandle>
@@ -57,12 +37,16 @@
 				</div>
 			{/if}
 			<div class="formation-header-details">
-				<p>{formation.name}</p>
-				<p class="muted">{formation.type}</p>
+				{#if formation.id == "unassigned"}
+					<p>Unassigned Units</p>
+				{:else}
+					<p>{formation.name}</p>
+					<p class="muted">{formation.type}</p>
+				{/if}
 			</div>
 			<div class="formation-header-buttons">
 				<FormationInfoPopover {formationStats} />
-				<FormationMenu {formation} {list} bind:editModalOpen />
+				<FormationMenu {formation} {list} bind:editModalOpen availabilityModal={availabilityModal!} />
 				<button
 					onclick={() => {
 						open = !open;
@@ -193,6 +177,7 @@
 </div>
 
 <EditFormationModal bind:open={editModalOpen} {formation}></EditFormationModal>
+<FindUnitAvailabilityModal bind:this={availabilityModal} {formation} {list} />
 
 <style>
 	.formation-card {

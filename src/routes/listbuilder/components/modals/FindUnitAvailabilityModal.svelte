@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { deserialize } from "$app/forms";
 	import { Dialog, Separator } from "$lib/global/components/";
-	import { abilityReferences } from "$lib/data";
 	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
 	import type { FormationV2, List } from "$lib/types";
 
@@ -24,31 +23,27 @@
 
 	let availabilityResults = $state<{ era: string; factions: string[] }[]>();
 
-	async function onOpenChange() {
-		if (open) {
-			availabilityResults = undefined;
-			const result = deserialize(await fetch("?/getFormationAvailability", { method: "POST", body: JSON.stringify(unitList) }).then((response) => response.text()));
-			if (result.type == "success") {
-				availabilityResults = [];
-				for (const [era] of eraLookup) {
-					let factionList = (result.data!.results as { era: number; faction: number }[])
-						.filter((result) => {
-							return result.era == era;
-						})
-						.map((result) => result.faction);
-					if (factionList.length) {
-						availabilityResults.push({ era: eraLookup.get(era) ?? "not found", factions: factionList.map((faction) => factionLookup.get(faction) ?? "Not found") });
-					}
+	export async function show() {
+		open = true;
+		availabilityResults = undefined;
+		const result = deserialize(await fetch("?/getFormationAvailability", { method: "POST", body: JSON.stringify(unitList) }).then((response) => response.text()));
+		if (result.type == "success") {
+			availabilityResults = [];
+			for (const [era] of eraLookup) {
+				let factionList = (result.data!.results as { era: number; faction: number }[])
+					.filter((result) => {
+						return result.era == era;
+					})
+					.map((result) => result.faction);
+				if (factionList.length) {
+					availabilityResults.push({ era: eraLookup.get(era) ?? "not found", factions: factionList.map((faction) => factionLookup.get(faction) ?? "Not found") });
 				}
 			}
 		}
 	}
 </script>
 
-<Dialog title={"Formation Faction Availability"} triggerClasses="transparent-button" bind:open {onOpenChange}>
-	{#snippet trigger()}
-		Check Available Factions
-	{/snippet}
+<Dialog title={"Formation Faction Availability"} bind:open>
 	{#snippet description()}
 		<div class="description-body">
 			<p class="muted-text italic">Shows all eras and factions the selected formation is legal in</p>

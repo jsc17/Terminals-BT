@@ -3,15 +3,16 @@
 	import { toastController } from "$lib/global/stores";
 	import { List, sendListToPlay, type FormationV2 } from "$lib/types";
 	import { exportToJeff } from "../../utilities/export.svelte";
-	import { FindUnitAvailabilityModal } from "../";
+	import FindUnitAvailabilityModal from "../modals/FindUnitAvailabilityModal.svelte";
 
 	type Props = {
 		formation: FormationV2;
 		list: List;
 		editModalOpen: boolean;
+		availabilityModal: FindUnitAvailabilityModal;
 	};
 
-	let { formation, list, editModalOpen = $bindable(false) }: Props = $props();
+	let { formation, list, editModalOpen = $bindable(false), availabilityModal }: Props = $props();
 
 	function exportFormationToJeff() {
 		if (formation.units.length == 0) {
@@ -49,7 +50,12 @@
 				}}>Edit Formation</button
 			>
 		{/if}
-		<FindUnitAvailabilityModal {formation} {list} />
+		<button
+			class="transparent-button"
+			onclick={() => {
+				availabilityModal.show();
+			}}>Check Formation Availability</button
+		>
 		<Separator />
 		<button
 			class="transparent-button"

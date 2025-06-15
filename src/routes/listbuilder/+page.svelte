@@ -5,7 +5,6 @@
 	import { type ListCode, List, ResultList } from "$lib/types";
 	import { Tabs, ContextMenu } from "bits-ui";
 	import { convertUnversionedJSONList } from "./utilities/convert";
-	import { nanoid } from "nanoid";
 
 	let settings = new PersistedState<Settings>("listbuilderSettings", {
 		print: { printingStyle: "detailed", printFormations: true, printCardsByFormation: false, cardStyle: "generated" },
@@ -55,7 +54,6 @@
 			list.loadList(listCode);
 			activeLists.push(list);
 			selectedList = (activeLists.length - 1).toString();
-			return;
 		}
 		const lastList = localStorage.getItem("last-list");
 		let importData;
@@ -95,7 +93,6 @@
 			localStorage.removeItem("last-list");
 		}
 		for (const listCode of lastLists.current) {
-			console.log(listCode);
 			let list = new List(new ResultList());
 			importData = JSON.parse(listCode);
 			if (importData.lcVersion) {
@@ -128,6 +125,9 @@
 			}
 			activeLists.push(list);
 		}
+		if (activeLists.length == 0) {
+			activeLists.push(new List(new ResultList()));
+		}
 		selectedList = (activeLists.length - 1).toString();
 	});
 
@@ -139,6 +139,10 @@
 		if (confirm("Are you sure you wish to close this list? Any unsaved changes will be lost.")) {
 			const index = activeLists.findIndex((list) => list.id == id);
 			activeLists.splice(index, 1);
+			if (activeLists.length == 0) {
+				activeLists.push(new List(new ResultList()));
+			}
+
 			selectedList = (activeLists.length - 1).toString();
 		}
 	}
@@ -194,7 +198,7 @@
 	</Tabs.List>
 	{#each activeLists as list, index}
 		<Tabs.Content value={index.toString()} class="listbuilder-tabs-content">
-			<ListTab bind:list={activeLists[index]} bind:resultList={activeLists[index].resultList} {listCloseCallback}></ListTab>
+			<ListTab bind:list={activeLists[index]} bind:resultList={activeLists[index].resultList!} {listCloseCallback}></ListTab>
 		</Tabs.Content>
 	{/each}
 </Tabs.Root>
@@ -209,10 +213,15 @@
 		height: 100%;
 	}
 	:global(.listbuilder-tabs-list) {
-		padding: 0 16px;
-		display: flex;
+		padding: 0 2px;
+		display: grid;
+		grid-template-rows: max-content;
+		grid-auto-columns: max-content;
+		grid-auto-flow: column;
 		gap: 4px;
 		border-bottom: 1px solid var(--border);
+		overflow-x: auto;
+		margin-bottom: 2px;
 	}
 	:global(.listbuilder-tabs-trigger) {
 		padding: 8px 24px;

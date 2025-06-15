@@ -159,7 +159,7 @@ function createReferenceList(units: UnitV2[], formations: FormationV2[]) {
 				abilityReferenceList.add(reference);
 			}
 		});
-		unit.customization.spa?.forEach((spa) => {
+		unit.customization?.spa?.forEach((spa) => {
 			let spaReference = spaReferences.find(({ name }) => {
 				return name.toLocaleLowerCase() == spa.toLocaleLowerCase();
 			});
@@ -169,7 +169,7 @@ function createReferenceList(units: UnitV2[], formations: FormationV2[]) {
 				spaReferenceList.add({ name: spa, cost: 0, page: "Not Found" });
 			}
 		});
-		unit.customization.ammo?.forEach((ammo) => {
+		unit.customization?.ammo?.forEach((ammo) => {
 			let ammoReference: any;
 			ammoReferences.forEach(({ ammoTypes }) => {
 				if (ammoReference == undefined) {

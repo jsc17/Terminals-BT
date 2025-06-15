@@ -71,7 +71,7 @@ export class List {
 		};
 	});
 
-	resultList: ResultList;
+	resultList = $state<ResultList>();
 
 	constructor(resultList: ResultList) {
 		this.resultList = resultList;
@@ -122,7 +122,7 @@ export class List {
 			for (const unit of this.units) {
 				if (
 					this.options.eraFactionRestriction &&
-					!this.resultList.restrictedList.find((result) => {
+					!this.resultList!.restrictedList.find((result) => {
 						return result.mulId == unit.baseUnit.mulId;
 					})
 				) {
@@ -152,7 +152,7 @@ export class List {
 					}
 					issueUnits.add(unit.id!);
 				}
-				if (this.options.disallowUnique && this.resultList.uniqueList.includes(unit.baseUnit.mulId)) {
+				if (this.options.disallowUnique && this.resultList!.uniqueList.includes(unit.baseUnit.mulId)) {
 					if (issueList.has("Unique units")) {
 						issueList.get("Unique units")?.add(unit.baseUnit.name);
 					} else {
@@ -352,7 +352,7 @@ export class List {
 				}
 			}
 			if (this.options.uniqueMaxLimit) {
-				let uniquesInList = this.units.filter((unit) => this.resultList.uniqueList.includes(unit.baseUnit.mulId));
+				let uniquesInList = this.units.filter((unit) => this.resultList!.uniqueList.includes(unit.baseUnit.mulId));
 				if (uniquesInList.length > 1) {
 					for (const unit of uniquesInList) {
 						if (issueList.has("Unique units limit")) {
@@ -512,10 +512,10 @@ export class List {
 		this.details.factions = listCode.factions;
 		this.rules = listCode.rules;
 
-		this.resultList.eras = this.details.eras;
-		this.resultList.factions = this.details.factions;
-		this.resultList.setOptions(this.rules);
-		this.resultList.loadResults();
+		this.resultList!.eras = this.details.eras;
+		this.resultList!.factions = this.details.factions;
+		this.resultList!.setOptions(this.rules);
+		this.resultList!.loadResults();
 
 		this.clear();
 		this.sublists = listCode.sublists;
@@ -536,12 +536,15 @@ export class List {
 				unit.id = nanoid(6);
 			}
 			let baseUnit: MulUnit =
-				this.resultList.resultList.find((result: MulUnit) => {
+				this.resultList!.resultList.find((result: MulUnit) => {
 					return result.mulId == unit.mulId;
 				}) ?? (await this.loadUnit(unit.mulId));
 			//@ts-ignore
 			if (!unit.skill || unit.skill == "undefined") {
 				unit.skill = 4;
+			}
+			if (unit.customization && Object.keys(unit.customization).length == 0) {
+				unit.customization = undefined;
 			}
 			const tempUnit = { id: unit.id, baseUnit: baseUnit, skill: unit.skill, cost: getNewSkillCost(unit.skill, baseUnit.pv), customization: unit.customization };
 			this.units.push(tempUnit);

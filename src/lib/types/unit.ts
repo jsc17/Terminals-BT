@@ -48,7 +48,7 @@ export type UnitV2 = {
 	baseUnit: MulUnit;
 	skill?: number;
 	cost: number;
-	customization: UnitCustomization;
+	customization?: UnitCustomization;
 };
 
 export type PlayUnit = {

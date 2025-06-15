@@ -101,10 +101,6 @@ export class List {
 				return id;
 			});
 		}
-		if (this.unitCount != 0 || localStorage.getItem("last-list") === null) {
-			localStorage.setItem("last-list", JSON.stringify(newListCode));
-		}
-
 		return JSON.stringify(newListCode);
 	});
 

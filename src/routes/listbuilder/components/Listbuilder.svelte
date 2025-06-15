@@ -7,10 +7,16 @@
 	import { Separator, Menu, Dialog } from "$lib/global/components";
 	import { deserialize } from "$app/forms";
 
+	type Props = {
+		listCloseCallback: (id: string) => void;
+		recentChanges: string[];
+		description: string[];
+	};
+
 	const resultList: ResultList = getContext("resultList");
 	let list: List = getContext("list");
 
-	let { recentChanges, description }: { recentChanges: string[]; description: string[] } = $props();
+	let { recentChanges, description, listCloseCallback }: Props = $props();
 	let printModal = $state<PrintModal>();
 	let saveModal = $state<SaveModal>();
 	let loadModal = $state<LoadModal>();
@@ -186,8 +192,9 @@
 								list.id = crypto.randomUUID();
 								list.rules = "noRes";
 							}
-						}}>New List</button
+						}}>Reset List</button
 					>
+					<button class="transparent-button" onclick={() => listCloseCallback(list.id)}>Close List</button>
 				</Menu>
 			</div>
 		</div>

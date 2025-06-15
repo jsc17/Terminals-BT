@@ -81,3 +81,24 @@
 	height: 1px;
 	margin: 4px 0px;
 }
+
+/* Context Menu */
+
+[data-context-menu-content] {
+	background-color: var(--background);
+	border: 1px solid border;
+	padding: 10px 2px;
+	border-radius: var(--radius);
+}
+[data-context-menu-item] {
+	font-size: 0.9em;
+}
+[data-context-menu-item].context-button {
+	color: var(--primary);
+	padding: 8px 24px;
+	border-radius: var(--radius);
+}
+[data-context-menu-item].context-button:hover {
+	color: var(--primary);
+	background-color: var(--muted);
+}

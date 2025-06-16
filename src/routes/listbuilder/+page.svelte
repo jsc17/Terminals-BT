@@ -136,8 +136,8 @@
 		selectedList = (activeLists.length - 1).toString();
 	}
 	function listCloseCallback(id: string) {
-		if (confirm("Are you sure you wish to close this list? Any unsaved changes will be lost.")) {
-			selectedList = "";
+		const list = activeLists.find((list) => list.id == id);
+		if (!list?.units.length || confirm("Are you sure you wish to close this list? Any unsaved changes will be lost.")) {
 			activeLists = activeLists.filter((list) => list.id != id);
 			selectedList = (activeLists.length - 1).toString();
 		}

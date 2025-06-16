@@ -357,7 +357,6 @@ function createSCAColumns(scas: SCA[]) {
 }
 
 export async function printList(list: PrintableList, drawFormations: boolean, printUnitsByFormation: boolean): Promise<Blob> {
-	const starttime = performance.now();
 	const tableheaders: TableCell[] =
 		list.style == "mul"
 			? [{ text: "Unit", style: "cellHeader" }].concat(
@@ -466,8 +465,6 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 			}
 		}
 	};
-
-	const endTime = performance.now();
 
 	return new Promise((resolve, reject) => {
 		const pdfDoc = printer.createPdfKitDocument(dd);

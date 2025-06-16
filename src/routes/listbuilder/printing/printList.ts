@@ -468,7 +468,6 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 	};
 
 	const endTime = performance.now();
-	console.log(`Generation Time ${endTime - starttime}ms`);
 
 	return new Promise((resolve, reject) => {
 		const pdfDoc = printer.createPdfKitDocument(dd);

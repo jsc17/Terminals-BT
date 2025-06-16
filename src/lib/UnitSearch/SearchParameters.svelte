@@ -8,8 +8,12 @@
 	import type { Item } from "$lib/global/types/types";
 	import { EraFactionInfoPopover } from "$lib/UnitSearch";
 
-	const resultList: ResultList = getContext("resultList");
-	const list: List = getContext("list");
+	type Props = {
+		list: List;
+		resultList: ResultList;
+	};
+
+	let { list = $bindable(), resultList = $bindable() }: Props = $props();
 
 	let showParameters = $state(false);
 

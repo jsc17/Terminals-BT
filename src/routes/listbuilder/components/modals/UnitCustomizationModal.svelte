@@ -6,7 +6,11 @@
 	import { getContext } from "svelte";
 	import { Dialog } from "$lib/global/components";
 
-	let list: List = getContext("list");
+	type Props = {
+		list: List;
+	};
+
+	let { list = $bindable() }: Props = $props();
 	let unit = $state<UnitV2 | undefined>();
 
 	let open = $state(false);

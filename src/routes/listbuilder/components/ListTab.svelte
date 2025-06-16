@@ -12,7 +12,7 @@
 		listCloseCallback: (id: string) => void;
 	};
 
-	let { list = $bindable(), resultList = $bindable(), listCloseCallback }: Props = $props();
+	let { list, resultList, listCloseCallback }: Props = $props();
 
 	setContext("resultList", resultList);
 	setContext("list", list);
@@ -30,15 +30,15 @@
 
 <main>
 	<div class="search">
-		<SearchParameters />
+		<SearchParameters bind:list bind:resultList />
 		<SearchFilters />
 		{#if list.rules != "noRes"}
 			<p class="rules-notice">Some units may be filtered out due to the selected ruleset</p>
 		{/if}
-		<SearchResults />
+		<SearchResults bind:list bind:resultList />
 	</div>
 	<div class="list-drawer-wrapper" class:show-listbuilder={showListbuilder} transition:slide>
-		<Listbuilder {recentChanges} {description} {listCloseCallback} />
+		<Listbuilder {recentChanges} {description} {listCloseCallback} {list} />
 	</div>
 	<button
 		onclick={() => {

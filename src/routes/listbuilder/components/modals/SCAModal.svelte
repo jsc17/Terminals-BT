@@ -9,7 +9,7 @@
 		list: List;
 	};
 
-	let { open = $bindable(), list }: Props = $props();
+	let { open = $bindable(), list = $bindable() }: Props = $props();
 
 	const skillRatingTable = ["Legendary", "Heroic", "Elite", "Veteran", "Regular", "Green", "Really Green", "Wet Behind the Ears"];
 

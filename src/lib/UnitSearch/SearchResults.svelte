@@ -11,8 +11,12 @@
 	import { createAbilityLineString } from "$lib/utilities/parseAbilities";
 	import { Dialog, Separator } from "$lib/global/components";
 
-	const list: List = getContext("list");
-	const resultList: ResultList = getContext("resultList");
+	type Props = {
+		list: List;
+		resultList: ResultList;
+	};
+
+	let { list = $bindable(), resultList = $bindable() }: Props = $props();
 
 	let headers = $derived(
 		appWindow.isMobile

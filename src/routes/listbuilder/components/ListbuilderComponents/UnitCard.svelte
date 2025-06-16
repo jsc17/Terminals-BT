@@ -13,11 +13,11 @@
 	type Props = {
 		unitId: string;
 		unitCustomizationModal?: UnitCustomizationModal;
+		list: List;
 	};
 
-	const { unitId, unitCustomizationModal }: Props = $props();
+	const { unitId, unitCustomizationModal, list }: Props = $props();
 
-	let list: List = getContext("list");
 	let unit = list.getUnit(unitId);
 </script>
 

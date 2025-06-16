@@ -137,12 +137,8 @@
 	}
 	function listCloseCallback(id: string) {
 		if (confirm("Are you sure you wish to close this list? Any unsaved changes will be lost.")) {
-			const index = activeLists.findIndex((list) => list.id == id);
-			activeLists.splice(index, 1);
-			if (activeLists.length == 0) {
-				activeLists.push(new List(new ResultList()));
-			}
-
+			selectedList = "";
+			activeLists = activeLists.filter((list) => list.id != id);
 			selectedList = (activeLists.length - 1).toString();
 		}
 	}
@@ -167,6 +163,16 @@
 		newList.loadList(parsedCode);
 		activeLists.push(newList);
 	}
+
+	watch(
+		() => activeLists,
+		() => {
+			if (activeLists.length == 0) {
+				activeLists.push(new List(new ResultList()));
+				selectedList = (activeLists.length - 1).toString();
+			}
+		}
+	);
 </script>
 
 <svelte:head>
@@ -198,7 +204,7 @@
 	</Tabs.List>
 	{#each activeLists as list, index}
 		<Tabs.Content value={index.toString()} class="listbuilder-tabs-content">
-			<ListTab bind:list={activeLists[index]} bind:resultList={activeLists[index].resultList!} {listCloseCallback}></ListTab>
+			<ListTab {list} resultList={list.resultList!} {listCloseCallback}></ListTab>
 		</Tabs.Content>
 	{/each}
 </Tabs.Root>

@@ -4,11 +4,16 @@
 	import ammoList from "$lib/data/ammoTypes.json";
 	import type { List } from "$lib/types/list.svelte";
 	import { getContext } from "svelte";
+	import { Dialog } from "$lib/global/components";
 
-	let list: List = getContext("list");
+	type Props = {
+		list: List;
+	};
+
+	let { list = $bindable() }: Props = $props();
 	let unit = $state<UnitV2 | undefined>();
 
-	let unitCustomizationDialog = $state<HTMLDialogElement>();
+	let open = $state(false);
 
 	let selectAmmoValue = $state<string>(ammoList[0].ammoTypes[0].name);
 	let selectSPAValue = $state<string>(spaList[0].name);
@@ -38,109 +43,109 @@
 	});
 
 	$effect(() => {
-		selectAmmoValue = filteredAmmoList[0].ammoTypes[0].name;
+		if (filteredAmmoList.length) {
+			selectAmmoValue = filteredAmmoList[0].ammoTypes[0].name;
+		}
 	});
 
 	export function show(unitId: string) {
-		unitCustomizationDialog?.showModal();
+		open = true;
 		unit = list.getUnit(unitId);
 	}
 </script>
 
-<dialog bind:this={unitCustomizationDialog}>
-	<div class="dialog-header">
-		<h2>{unit?.baseUnit?.name} customization</h2>
-		<button class="close-button" onclick={() => unitCustomizationDialog?.close()}>Close</button>
-	</div>
+<Dialog title={`${unit?.baseUnit?.name} customization`} bind:open>
 	<div class="customization-body">
-		<div class="customization-column">
-			<h3 class="customization-column-title">Alternate Ammo</h3>
-			<ul class="customization-column-list">
-				{#each unit?.customization.ammo ?? [] as ammo, index}
-					<li class="customization-column-list-item">
-						{ammo}
+		{#if unit != undefined}
+			<div class="customization-column">
+				<h3 class="customization-column-title">Alternate Ammo</h3>
+				<ul class="customization-column-list">
+					{#each unit.customization?.ammo ?? [] as ammo, index}
+						<li class="customization-column-list-item">
+							{ammo}
+							<button
+								onclick={() => {
+									unit?.customization?.ammo?.splice(index, 1);
+								}}>-</button
+							>
+						</li>
+					{/each}
+				</ul>
+				<div class="customization-column-add-row">
+					{#if filteredAmmoList.length == 0}
+						<p>No valid weapons that can use alternate ammo</p>
+					{:else}
+						<select class="customization-column-add-select" bind:value={selectAmmoValue} disabled={filteredAmmoList.length == 0} placeholder="">
+							{#each filteredAmmoList as ammoType}
+								<optgroup label={ammoType.weaponType}>
+									{#each ammoType.ammoTypes as ammo}
+										<option value={ammo.name}>{ammo.name} ({ammo.requiredSpecial.join(", ")})</option>
+									{/each}
+								</optgroup>
+							{/each}
+						</select>
 						<button
+							disabled={filteredAmmoList.length == 0}
 							onclick={() => {
-								unit?.customization.ammo?.splice(index, 1);
-							}}>-</button
+								if (unit!.customization) {
+									if (unit?.customization.ammo) {
+										unit!.customization.ammo.push(selectAmmoValue);
+									} else {
+										unit!.customization.ammo = [selectAmmoValue];
+									}
+								} else {
+									unit!.customization = { ammo: [selectAmmoValue] };
+								}
+							}}>Add</button
 						>
-					</li>
-				{/each}
-			</ul>
-			<div class="customization-column-add-row">
-				{#if filteredAmmoList.length == 0}
-					<p>No valid weapons that can use alternate ammo</p>
-				{:else}
-					<select class="customization-column-add-select" bind:value={selectAmmoValue} disabled={filteredAmmoList.length == 0} placeholder="">
-						{#each filteredAmmoList as ammoType}
-							<optgroup label={ammoType.weaponType}>
-								{#each ammoType.ammoTypes as ammo}
-									<option value={ammo.name}>{ammo.name} ({ammo.requiredSpecial.join(", ")})</option>
-								{/each}
-							</optgroup>
+					{/if}
+				</div>
+				<div class="alternate-ammo-option-row">
+					<input type="checkbox" name="filterWeapons" id="filterWeapons" bind:checked={filterWeapons} /><label class="filterWeapons" for="filterWeapons"
+						>Only allow valid ammo types</label
+					>
+				</div>
+			</div>
+			<div class="customization-column">
+				<h3 class="customization-column-title">SPA's</h3>
+				<ul class="customization-column-list">
+					{#each unit?.customization?.spa ?? [] as spa, index}
+						<li class="customization-column-list-item">
+							{spa}
+							<button
+								onclick={() => {
+									unit?.customization?.spa?.splice(index, 1);
+								}}>-</button
+							>
+						</li>
+					{/each}
+				</ul>
+				<div class="customization-column-add-row">
+					<select class="customization-column-add-select" bind:value={selectSPAValue}>
+						{#each spaList as spa}
+							<option value={spa.name}>{spa.name} ({spa.cost})</option>
 						{/each}
 					</select>
 					<button
-						disabled={filteredAmmoList.length == 0}
 						onclick={() => {
-							if (unit && !unit?.customization.ammo) {
-								unit.customization.ammo = [selectAmmoValue];
+							if (unit!.customization) {
+								if (unit?.customization.spa) {
+									unit!.customization.spa.push(selectSPAValue);
+								} else {
+									unit!.customization.spa = [selectSPAValue];
+								}
 							} else {
-								unit?.customization.ammo?.push(selectAmmoValue);
+								unit!.customization = { spa: [selectSPAValue] };
 							}
 						}}>Add</button
 					>
-				{/if}
+				</div>
 			</div>
-			<div class="alternate-ammo-option-row">
-				<input type="checkbox" name="filterWeapons" id="filterWeapons" bind:checked={filterWeapons} /><label class="filterWeapons" for="filterWeapons"
-					>Only allow valid ammo types</label
-				>
-			</div>
-		</div>
-		<div class="customization-column">
-			<h3 class="customization-column-title">SPA's</h3>
-			<ul class="customization-column-list">
-				{#each unit?.customization.spa ?? [] as spa, index}
-					<li class="customization-column-list-item">
-						{spa}
-						<button
-							onclick={() => {
-								unit?.customization.spa?.splice(index, 1);
-							}}>-</button
-						>
-					</li>
-				{/each}
-			</ul>
-			<div class="customization-column-add-row">
-				<select class="customization-column-add-select" bind:value={selectSPAValue}>
-					{#each spaList as spa}
-						<option value={spa.name}>{spa.name} ({spa.cost})</option>
-					{/each}
-				</select>
-				<button
-					onclick={() => {
-						if (unit && !unit.customization.spa) {
-							unit.customization.spa = [selectSPAValue];
-						} else {
-							unit?.customization.spa?.push(selectSPAValue);
-						}
-					}}>Add</button
-				>
-			</div>
-		</div>
+		{/if}
 	</div>
-</dialog>
+</Dialog>
 
 <style>
-	dialog {
-		padding: 16px;
-		width: max-content;
-		max-height: 90%;
-	}
-	.close-button {
-		height: max-content;
-	}
 	.customization-body {
 		display: grid;
 		grid-template-columns: 1fr 1fr;

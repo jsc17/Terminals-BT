@@ -69,6 +69,9 @@ export async function loadImage(mulId: string, unitImageLink: string) {
 }
 
 export async function generateUnitCard(unit: UnitV2, browser: Browser) {
+	if (unit.baseUnit.mulId < 0) {
+		return loadUnitCardImage(unit.baseUnit.mulId);
+	}
 	const page = await browser.newPage();
 	const html = await renderHTMLfromUnit(unit);
 	await page.setContent(html);

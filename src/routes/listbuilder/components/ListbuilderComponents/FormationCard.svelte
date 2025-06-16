@@ -7,10 +7,9 @@
 	import { getFormationStats } from "$lib/utilities/formation-utilities";
 	import { UnitCard, UnitCustomizationModal, EditFormationModal, FormationInfoPopover, FormationMenu, FindUnitAvailabilityModal } from "../";
 
-	type Props = { formation: FormationV2; draggingColumns: boolean; unitCustomizationModal?: UnitCustomizationModal };
+	type Props = { formation: FormationV2; draggingColumns: boolean; unitCustomizationModal?: UnitCustomizationModal; list: List };
 
-	let { formation = $bindable(), draggingColumns, unitCustomizationModal }: Props = $props();
-	let list: List = getContext("list");
+	let { formation = $bindable(), draggingColumns, unitCustomizationModal, list }: Props = $props();
 	let editModalOpen = $state(false);
 	let availabilityModal = $state<FindUnitAvailabilityModal>();
 
@@ -69,7 +68,7 @@
 					onfinalize={handleSort}
 				>
 					{#each formation.units as unit (unit.id)}
-						<UnitCard unitId={unit.id} {unitCustomizationModal}></UnitCard>
+						<UnitCard unitId={unit.id} {unitCustomizationModal} {list}></UnitCard>
 					{/each}
 				</div>
 			</Collapsible>
@@ -102,7 +101,7 @@
 						onfinalize={handleSecondarySort}
 					>
 						{#each formation.secondary.units as unit (unit.id)}
-							<UnitCard unitId={unit.id} {unitCustomizationModal}></UnitCard>
+							<UnitCard unitId={unit.id} {unitCustomizationModal} {list}></UnitCard>
 						{/each}
 					</div>
 				</Collapsible>
@@ -124,7 +123,7 @@
 					onfinalize={handleSort}
 				>
 					{#each formation.units as unit (unit.id)}
-						<UnitCard unitId={unit.id} {unitCustomizationModal}></UnitCard>
+						<UnitCard unitId={unit.id} {unitCustomizationModal} {list}></UnitCard>
 					{/each}
 				</div>
 			</Collapsible>
@@ -157,7 +156,7 @@
 						onfinalize={handleSecondarySort}
 					>
 						{#each formation.secondary.units as unit (unit.id)}
-							<UnitCard unitId={unit.id} {unitCustomizationModal}></UnitCard>
+							<UnitCard unitId={unit.id} {unitCustomizationModal} {list}></UnitCard>
 						{/each}
 					</div>
 				</Collapsible>

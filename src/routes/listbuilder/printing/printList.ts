@@ -159,7 +159,7 @@ function createReferenceList(units: UnitV2[], formations: FormationV2[]) {
 				abilityReferenceList.add(reference);
 			}
 		});
-		unit.customization.spa?.forEach((spa) => {
+		unit.customization?.spa?.forEach((spa) => {
 			let spaReference = spaReferences.find(({ name }) => {
 				return name.toLocaleLowerCase() == spa.toLocaleLowerCase();
 			});
@@ -169,7 +169,7 @@ function createReferenceList(units: UnitV2[], formations: FormationV2[]) {
 				spaReferenceList.add({ name: spa, cost: 0, page: "Not Found" });
 			}
 		});
-		unit.customization.ammo?.forEach((ammo) => {
+		unit.customization?.ammo?.forEach((ammo) => {
 			let ammoReference: any;
 			ammoReferences.forEach(({ ammoTypes }) => {
 				if (ammoReference == undefined) {
@@ -357,7 +357,6 @@ function createSCAColumns(scas: SCA[]) {
 }
 
 export async function printList(list: PrintableList, drawFormations: boolean, printUnitsByFormation: boolean): Promise<Blob> {
-	const starttime = performance.now();
 	const tableheaders: TableCell[] =
 		list.style == "mul"
 			? [{ text: "Unit", style: "cellHeader" }].concat(
@@ -466,9 +465,6 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 			}
 		}
 	};
-
-	const endTime = performance.now();
-	console.log(`Generation Time ${endTime - starttime}ms`);
 
 	return new Promise((resolve, reject) => {
 		const pdfDoc = printer.createPdfKitDocument(dd);

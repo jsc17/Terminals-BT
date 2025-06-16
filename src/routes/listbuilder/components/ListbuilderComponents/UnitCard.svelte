@@ -13,11 +13,11 @@
 	type Props = {
 		unitId: string;
 		unitCustomizationModal?: UnitCustomizationModal;
+		list: List;
 	};
 
-	const { unitId, unitCustomizationModal }: Props = $props();
+	const { unitId, unitCustomizationModal, list }: Props = $props();
 
-	let list: List = getContext("list");
 	let unit = list.getUnit(unitId);
 </script>
 
@@ -111,13 +111,13 @@
 				{/if}
 			</div>
 		</div>
-		{#if unit?.customization.ammo || unit?.customization.spa}
+		{#if unit?.customization?.ammo || unit?.customization?.spa}
 			<div class="unit-custom-row">
 				{#if unit.customization.ammo?.length}
-					<p class="unit-abilities">Alt. Ammo: {unit.customization.ammo?.join(", ")}</p>
+					<p class="unit-abilities"><span class="muted-foreground">Alt. Ammo:</span> {unit.customization.ammo?.join(", ")}</p>
 				{/if}
 				{#if unit.customization.spa?.length}
-					<p class="unit-abilities">SPA: {unit.customization.spa?.join(", ")}</p>
+					<p class="unit-abilities"><span class="muted-foreground">SPA:</span> {unit.customization.spa?.join(", ")}</p>
 				{/if}
 			</div>
 		{/if}
@@ -207,7 +207,6 @@
 	}
 	.unit-abilities {
 		font-size: 0.75em;
-		color: var(--muted-foreground);
 	}
 	.unit-menu-trigger {
 		display: flex;
@@ -229,5 +228,8 @@
 		flex-direction: column;
 		gap: 8px;
 		padding: 16px;
+	}
+	.muted-foreground {
+		color: var(--muted-foreground);
 	}
 </style>

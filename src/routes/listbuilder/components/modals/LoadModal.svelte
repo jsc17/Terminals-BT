@@ -7,7 +7,11 @@
 	import { convertUnversionedJSONList } from "../../utilities/convert";
 
 	let user: any = getContext("user");
-	let list: List = getContext("list");
+	type Props = {
+		list: List;
+	};
+
+	let { list = $bindable() }: Props = $props();
 
 	let importCode = $state("");
 	let savedLists = $state<ListCode[]>([]);

@@ -8,8 +8,12 @@
 	import { exportToJeff } from "../../utilities/export.svelte";
 	import type { List } from "$lib/types/list.svelte";
 
-	let list: List = getContext("list");
 	let user: any = getContext("user");
+	type Props = {
+		list: List;
+	};
+
+	let { list = $bindable() }: Props = $props();
 
 	let saveDialog = $state<HTMLDialogElement>();
 	let existingListNames = $state<{ id: string; name: string }[]>([]);

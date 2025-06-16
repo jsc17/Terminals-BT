@@ -288,10 +288,10 @@
 		</div>
 		{#if unit.customization?.spa || unit.customization?.ammo}
 			<div class="unit-card-block unit-custom-block">
-				{#if unit.customization.spa && unit.customization.spa.length}
+				{#if unit.customization?.spa && unit.customization.spa.length}
 					<p><span class="bold">SPA:</span> {unit.customization.spa.join(", ")}</p>
 				{/if}
-				{#if unit.customization.ammo && unit.customization.ammo.length}
+				{#if unit.customization?.ammo && unit.customization.ammo.length}
 					<p><span class="bold">Alt. ammo:</span> {unit.customization.ammo.join(", ")}</p>
 				{/if}
 			</div>

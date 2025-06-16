@@ -4,7 +4,7 @@ export type ListCodeUnit = {
 	id: string;
 	mulId: number;
 	skill?: number;
-	customization: UnitCustomization;
+	customization?: UnitCustomization;
 };
 
 export type ListCode = {

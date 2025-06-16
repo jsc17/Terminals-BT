@@ -7,10 +7,16 @@
 	import { Separator, Menu, Dialog } from "$lib/global/components";
 	import { deserialize } from "$app/forms";
 
-	const resultList: ResultList = getContext("resultList");
-	let list: List = getContext("list");
+	type Props = {
+		listCloseCallback: (id: string) => void;
+		recentChanges: string[];
+		description: string[];
+		list: List;
+	};
 
-	let { recentChanges, description }: { recentChanges: string[]; description: string[] } = $props();
+	const resultList: ResultList = getContext("resultList");
+
+	let { recentChanges, description, listCloseCallback, list }: Props = $props();
 	let printModal = $state<PrintModal>();
 	let saveModal = $state<SaveModal>();
 	let loadModal = $state<LoadModal>();
@@ -84,7 +90,7 @@
 				{:else}
 					<p>Units: {list.unitCount}</p>
 				{/if}
-				<ListInfoPopover {list} />
+				<ListInfoPopover bind:list />
 			</div>
 			{#if list.issues?.issueList.size}
 				<Dialog title="List Rules Issues" triggerClasses="transparent-button">
@@ -156,7 +162,7 @@
 							availabilityModal?.show();
 						}}>Check List Availability</button
 					>
-					<SublistModal />
+					<SublistModal bind:list />
 					<button
 						class="transparent-button"
 						onclick={() => {
@@ -186,8 +192,9 @@
 								list.id = crypto.randomUUID();
 								list.rules = "noRes";
 							}
-						}}>New List</button
+						}}>Reset List</button
 					>
+					<button class="transparent-button" onclick={() => listCloseCallback(list.id)}>Close List</button>
 				</Menu>
 			</div>
 		</div>
@@ -232,7 +239,7 @@
 			onfinalize={handleDndFinalize}
 		>
 			{#each list.formations as formation (formation.id)}
-				<FormationCard {formation} {draggingColumns} {unitCustomizationModal}></FormationCard>
+				<FormationCard {formation} {draggingColumns} {unitCustomizationModal} bind:list></FormationCard>
 			{/each}
 		</div>
 	{:else}
@@ -259,19 +266,19 @@
 			onfinalize={handleDndFinalize}
 		>
 			{#each list.formations as formation, index (formation.id)}
-				<FormationCard bind:formation={list.formations[index]} {draggingColumns} {unitCustomizationModal}></FormationCard>
+				<FormationCard bind:formation={list.formations[index]} {draggingColumns} {unitCustomizationModal} bind:list></FormationCard>
 			{/each}
 		</div>
 	{/if}
 </div>
 
-<SaveModal bind:this={saveModal}></SaveModal>
-<LoadModal bind:this={loadModal}></LoadModal>
-<UnitCustomizationModal bind:this={unitCustomizationModal}></UnitCustomizationModal>
+<SaveModal bind:this={saveModal} bind:list></SaveModal>
+<LoadModal bind:this={loadModal} bind:list></LoadModal>
+<UnitCustomizationModal bind:this={unitCustomizationModal} bind:list></UnitCustomizationModal>
 <!-- Updated to use generic dialog element -->
-<ScaModal bind:open={scaModalOpen} {list}></ScaModal>
-<PrintModal bind:this={printModal} {list}></PrintModal>
-<FindUnitAvailabilityModal bind:this={availabilityModal} {list} />
+<ScaModal bind:open={scaModalOpen} bind:list></ScaModal>
+<PrintModal bind:this={printModal} bind:list></PrintModal>
+<FindUnitAvailabilityModal bind:this={availabilityModal} bind:list />
 
 <style>
 	.listbuilder {

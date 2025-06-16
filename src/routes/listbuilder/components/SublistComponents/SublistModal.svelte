@@ -9,7 +9,11 @@
 	import AutogenerationModal from "./AutogenerationModal.svelte";
 	import { Dialog, Popover } from "$lib/global/components";
 
-	let list: List = getContext("list");
+	type Props = {
+		list: List;
+	};
+
+	let { list = $bindable() }: Props = $props();
 	let settings: Settings = getContext("listbuilderSettings");
 
 	let scenarioFilter = $state<string>("All");

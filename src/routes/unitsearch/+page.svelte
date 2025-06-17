@@ -1,17 +1,14 @@
 <script lang="ts">
-	import { setContext } from "svelte";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { SearchFilters, SearchParameters, SearchResults } from "$lib/UnitSearch/index";
 
-	export const resultList = new ResultList();
-
-	setContext("resultList", resultList);
+	let resultList = $state(new ResultList());
 </script>
 
 <main>
-	<SearchParameters></SearchParameters>
-	<SearchFilters></SearchFilters>
-	<SearchResults></SearchResults>
+	<SearchParameters bind:resultList></SearchParameters>
+	<SearchFilters bind:resultList></SearchFilters>
+	<SearchResults bind:resultList></SearchResults>
 </main>
 
 <style>

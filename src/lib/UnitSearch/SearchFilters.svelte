@@ -5,7 +5,11 @@
 	import { getContext } from "svelte";
 	import { Select } from "$lib/global/components/";
 
-	const resultList: ResultList = getContext("resultList");
+	type Props = {
+		resultList: ResultList;
+	};
+
+	let { resultList = $bindable() }: Props = $props();
 
 	let showFilters = $state(false);
 	let showAdditionalFilters = $state(false);

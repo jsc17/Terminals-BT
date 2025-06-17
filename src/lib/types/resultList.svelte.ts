@@ -112,6 +112,7 @@ export class ResultList {
 	options = $state<Ruleset>();
 	availableList = $derived.by(() => {
 		let availableUnits = this.resultList.concat(this.generalList);
+		console.log(availableUnits.length);
 		availableUnits = [...new Set(availableUnits)];
 		availableUnits.sort((a, b) => {
 			return (a.tonnage ?? 0) - (b.tonnage ?? 0);
@@ -291,7 +292,7 @@ export class ResultList {
 				tempRestrictedList.push(unit);
 			}
 		} else {
-			tempRestrictedList = [...this.resultList];
+			tempRestrictedList = [...this.availableList];
 		}
 		return tempRestrictedList;
 	}

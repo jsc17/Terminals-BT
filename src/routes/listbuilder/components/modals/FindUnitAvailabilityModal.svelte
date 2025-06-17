@@ -9,7 +9,7 @@
 		list: List;
 	};
 
-	let { formation, list }: Props = $props();
+	let { formation, list = $bindable() }: Props = $props();
 
 	let open = $state(false);
 

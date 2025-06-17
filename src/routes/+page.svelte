@@ -14,19 +14,13 @@
 			<p><a href="/unitsearch">Alpha Strike Unit Lookup</a>: Detailed unit search.</p>
 		</li>
 		<li>
-			<p><a href="/play">Alpha Strike Digital List</a>(Beta): Digital card list to play alphastrike with out printing.</p>
+			<p><a href="/play">Alpha Strike Digital List</a>(Beta): Digital card list to play Alpha Strike without wasting paper</p>
 		</li>
 	</ul>
 	<h2>Wolfnet 350</h2>
 	<ul>
 		<li>
 			<a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">Wolfnet 350 Tournament Rules</a>
-		</li>
-		<li>
-			<p>
-				<a href="/listbuilder?rules=wn350">AS350 List Builder</a>: List builder with built in restrictions for the wolfnet 350 rules. (6-1-24: Combined with the regular Alpha
-				strike list)
-			</p>
 		</li>
 		<!-- <li>
 			<p><a href="/350validation">AS350 List Validator</a> (Alpha): List validator for wolfnet 350 rules</p>

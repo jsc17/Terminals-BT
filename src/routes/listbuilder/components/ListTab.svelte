@@ -31,7 +31,7 @@
 <main>
 	<div class="search">
 		<SearchParameters bind:list bind:resultList />
-		<SearchFilters />
+		<SearchFilters bind:resultList />
 		{#if list.rules != "noRes"}
 			<p class="rules-notice">Some units may be filtered out due to the selected ruleset</p>
 		{/if}

@@ -9,7 +9,7 @@
 
 	type Props = { formation: FormationV2; draggingColumns: boolean; unitCustomizationModal?: UnitCustomizationModal; list: List };
 
-	let { formation = $bindable(), draggingColumns, unitCustomizationModal, list }: Props = $props();
+	let { formation = $bindable(), draggingColumns, unitCustomizationModal, list = $bindable() }: Props = $props();
 	let editModalOpen = $state(false);
 	let availabilityModal = $state<FindUnitAvailabilityModal>();
 

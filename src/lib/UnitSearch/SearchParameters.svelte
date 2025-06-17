@@ -9,7 +9,7 @@
 	import { EraFactionInfoPopover } from "$lib/UnitSearch";
 
 	type Props = {
-		list: List;
+		list?: List;
 		resultList: ResultList;
 	};
 
@@ -38,8 +38,8 @@
 					return resultList.selectedEras.includes(era.id.toString());
 				})
 				.forEach((era) => {
-					era.lists.forEach((list) => {
-						allowed = allowed.concat(list.factions);
+					era.lists.forEach((eraList) => {
+						allowed = allowed.concat(eraList.factions);
 					});
 				});
 		}

@@ -12,7 +12,7 @@
 	import { Dialog, Separator } from "$lib/global/components";
 
 	type Props = {
-		list: List;
+		list?: List;
 		resultList: ResultList;
 	};
 

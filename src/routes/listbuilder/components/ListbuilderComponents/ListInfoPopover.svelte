@@ -6,7 +6,7 @@
 		list: List;
 	};
 
-	let { list }: Props = $props();
+	let { list = $bindable() }: Props = $props();
 </script>
 
 <Popover>

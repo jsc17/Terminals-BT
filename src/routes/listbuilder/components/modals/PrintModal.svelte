@@ -36,6 +36,7 @@
 				eras: list.details.eras,
 				factions: list.details.factions,
 				general: list.details.general,
+				bs: list.bsList,
 				condense: false
 			});
 

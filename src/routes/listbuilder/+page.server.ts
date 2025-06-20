@@ -54,7 +54,8 @@ export const actions = {
 			sublists: JSON.stringify(parsedBody.sublists),
 			rules: parsedBody.rules,
 			lcVersion: parsedBody.lcVersion,
-			scas: parsedBody.scas && parsedBody.scas.length ? JSON.stringify(parsedBody.scas) : null
+			scas: parsedBody.scas && parsedBody.scas.length ? JSON.stringify(parsedBody.scas) : null,
+			bs: parsedBody.bs && parsedBody.bs.length ? JSON.stringify(parsedBody.bs) : null
 		};
 		try {
 			const existingList = await prisma.listV3.findFirst({

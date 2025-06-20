@@ -1,11 +1,25 @@
 <script lang="ts">
-	import { PrintModal, SaveModal, LoadModal, SublistModal, UnitCustomizationModal, ScaModal, FormationCard, ListInfoPopover, FindUnitAvailabilityModal } from "./";
+	import {
+		PrintModal,
+		SaveModal,
+		LoadModal,
+		SublistModal,
+		UnitCustomizationModal,
+		ScaModal,
+		FormationCard,
+		ListInfoPopover,
+		FindUnitAvailabilityModal,
+		BattlefieldSupportModal
+	} from "./";
 	import { ResultList, ruleSets, type FormationV2, sendListToPlay, List } from "$lib/types/";
 	import { getContext } from "svelte";
 	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
 	import { appWindow, toastController } from "$lib/global/stores";
 	import { Separator, Menu, Dialog } from "$lib/global/components";
 	import { deserialize } from "$app/forms";
+	import { DropdownMenu } from "bits-ui";
+	import Collapsible from "$lib/global/components/Collapsible.svelte";
+	import { getBSCbyId } from "$lib/data/battlefieldSupport";
 
 	type Props = {
 		listCloseCallback: (id: string) => void;
@@ -22,8 +36,11 @@
 	let loadModal = $state<LoadModal>();
 	let unitCustomizationModal = $state<UnitCustomizationModal>();
 	let availabilityModal = $state<FindUnitAvailabilityModal>();
+	let battlefieldSupportModal = $state<BattlefieldSupportModal>();
 
 	let scaModalOpen = $state(false);
+	let scaListOpen = $state(true);
+	let bsListOpen = $state(true);
 
 	let dropTargetStyle = { outline: "solid var(--primary)" };
 	let flipDurationMs = 100;
@@ -111,17 +128,41 @@
 				</Dialog>
 			{/if}
 			<div class="list-buttons">
-				<Menu text={"+"}>
-					<button
-						class="transparent-button"
-						onclick={() => {
-							list.newFormation();
-						}}>Add Formation</button
-					>
-					<button class="transparent-button" onclick={() => (scaModalOpen = true)}>Add Special Command Ability</button>
-					<hr />
-					<div>More features coming soon</div></Menu
-				>
+				<DropdownMenu.Root>
+					<DropdownMenu.Trigger>+</DropdownMenu.Trigger>
+					<DropdownMenu.Portal>
+						<DropdownMenu.Content>
+							<DropdownMenu.Item
+								class="dropdown-button"
+								textValue="Add formation"
+								onSelect={() => {
+									list.newFormation();
+								}}
+							>
+								Add Formation
+							</DropdownMenu.Item>
+							<DropdownMenu.Item
+								class="dropdown-button"
+								textValue="Add Special Command Ability"
+								onSelect={() => {
+									scaModalOpen = true;
+								}}
+							>
+								Add Special Command Ability
+							</DropdownMenu.Item>
+							<DropdownMenu.Item
+								class="dropdown-button"
+								textValue="Add Battlefield Support"
+								onSelect={() => {
+									battlefieldSupportModal?.show();
+								}}
+							>
+								Add Battlefield Support
+							</DropdownMenu.Item>
+						</DropdownMenu.Content>
+					</DropdownMenu.Portal>
+				</DropdownMenu.Root>
+
 				<Menu img={"/icons/menu.svg"}>
 					<button
 						class="transparent-button"
@@ -219,17 +260,29 @@
 	{:else if appWindow.isMobile}
 		{#if list.scaList.length}
 			<div class="list-scas">
-				<div class="list-scas-header">Strategic Command Abilities</div>
-				{#each list.scaList as sca, index}
-					<div class="list-sca-row">
-						<p>{sca.name}</p>
+				<div class="list-scas-header">
+					<div class="flex-between">
+						<p>Strategic Command Abilities</p>
 						<button
 							onclick={() => {
-								list.removeSCA(index);
-							}}>Remove</button
+								scaListOpen = !scaListOpen;
+							}}
+							class="transparent-button expand-collapse">{scaListOpen ? "collapse" : "expand"}</button
 						>
 					</div>
-				{/each}
+				</div>
+				<Collapsible bind:open={scaListOpen}>
+					{#each list.scaList as sca, index}
+						<div class="list-sca-row">
+							<p>{sca.name}</p>
+							<button
+								onclick={() => {
+									list.removeSCA(index);
+								}}>Remove</button
+							>
+						</div>
+					{/each}
+				</Collapsible>
 			</div>
 		{/if}
 		<div
@@ -245,20 +298,72 @@
 	{:else}
 		{#if list.scaList.length}
 			<div class="list-scas">
-				<div class="list-scas-header">Strategic Command Abilities</div>
-				{#each list.scaList as sca, index}
-					<div class="list-sca-row">
-						<p>{sca.name}</p>
+				<div class="list-scas-header">
+					<div class="flex-between">
+						<p>Strategic Command Abilities</p>
 						<button
 							onclick={() => {
-								list.removeSCA(index);
-							}}>Remove</button
+								scaListOpen = !scaListOpen;
+							}}
+							class="transparent-button expand-collapse">{scaListOpen ? "collapse" : "expand"}</button
 						>
 					</div>
-				{/each}
+				</div>
+				<Collapsible bind:open={scaListOpen}>
+					{#each list.scaList as sca, index}
+						<div class="list-sca-row">
+							<p>{sca.name}</p>
+							<button
+								onclick={() => {
+									list.removeSCA(index);
+								}}>Remove</button
+							>
+						</div>
+					{/each}
+				</Collapsible>
 			</div>
 		{/if}
-
+		{#if list.bsList.length}
+			<div class="list-scas">
+				<div class="list-scas-header">
+					<div class="flex-between">
+						<p>Battlefield Support</p>
+						<p>
+							<span class="muted">Total BSP:</span>
+							{list.bsList.reduce((totalCost, currentBS) => {
+								return (totalCost += getBSCbyId(currentBS)?.bspCost ?? 0);
+							}, 0)}
+						</p>
+						<button
+							onclick={() => {
+								bsListOpen = !bsListOpen;
+							}}
+							class="transparent-button expand-collapse">{bsListOpen ? "collapse" : "expand"}</button
+						>
+					</div>
+				</div>
+				<Collapsible bind:open={bsListOpen}>
+					<div class="list-bs-container">
+						{#each list.bsList as bs, index}
+							{@const support = getBSCbyId(bs)}
+							{#if support}
+								<div class="list-bs-row">
+									<p>{support.name}</p>
+									<p class="bs-stat"><span class="muted">TN:</span> {support.btn}</p>
+									<p class="bs-stat"><span class="muted">Dmg:</span> {support.dmg}</p>
+									<p class="bs-stat"><span class="muted">BSP Cost:</span> {support.bspCost}</p>
+									<button
+										onclick={() => {
+											list.removeBS(index);
+										}}>Remove</button
+									>
+								</div>
+							{/if}
+						{/each}
+					</div>
+				</Collapsible>
+			</div>
+		{/if}
 		<div
 			class="list-units"
 			use:dndzone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations", transformDraggedElement, dragDisabled: list.formations.length == 1 }}
@@ -279,6 +384,7 @@
 <ScaModal bind:open={scaModalOpen} bind:list></ScaModal>
 <PrintModal bind:this={printModal} bind:list></PrintModal>
 <FindUnitAvailabilityModal bind:this={availabilityModal} bind:list />
+<BattlefieldSupportModal bind:this={battlefieldSupportModal} bind:list />
 
 <style>
 	.listbuilder {
@@ -326,6 +432,29 @@
 	.list-sca-row:not(:last-child) {
 		border-bottom: 1px solid var(--border);
 	}
+	.list-bs-container {
+		display: grid;
+		grid-template-columns: 1fr repeat(4, max-content);
+		column-gap: 16px;
+	}
+	.list-bs-row {
+		display: grid;
+		grid-template-columns: subgrid;
+		grid-column: span 5;
+		padding: 2px 16px;
+
+		button {
+			background-color: transparent;
+			border: none;
+			color: var(--primary);
+		}
+	}
+	.list-bs-row:not(:last-child) {
+		border-bottom: 1px solid var(--border);
+	}
+	.bs-stat {
+		font-size: 0.9em;
+	}
 	.list-units {
 		display: flex;
 		flex-direction: column;
@@ -342,7 +471,9 @@
 		height: max-content;
 	}
 	.list-buttons {
-		display: flex;
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		grid-template-rows: 80%;
 		gap: 8px;
 		align-items: center;
 	}

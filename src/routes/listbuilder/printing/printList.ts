@@ -7,6 +7,7 @@ import { getSCAfromName } from "../../../lib/types/sca";
 import { getFormationTypeByName } from "$lib/utilities/formation-utilities";
 import { generateUnitCard, loadUnitCardImage } from "./loadUnitCard";
 import playwright, { type Browser } from "playwright";
+import { getBSCbyId } from "$lib/data/battlefieldSupport";
 
 type PrintableList = {
 	units: UnitV2[];
@@ -20,6 +21,7 @@ type PrintableList = {
 	cardStyle: "mul" | "generated";
 	condensed: boolean;
 	scas: SCA[];
+	bs: number[];
 };
 
 function createUnitLine(unit: UnitV2, listStyle: string, indent: boolean) {
@@ -115,6 +117,28 @@ function createUnitTable(listStyle: string, unitList: UnitV2[], formations: Form
 		{ text: totalPV, style: "cellHeaderCentered" }
 	]);
 	return unitTable;
+}
+
+function createBattlefieldSupportTable(supportList: number[]) {
+	let supportTable: TableCell[][] = [];
+	let totalBSP = 0;
+
+	supportTable.push([
+		{ text: `Battlefield Support`, style: "cellHeader" },
+		{ text: `BSP Cost`, style: "cellHeaderCentered" }
+	]);
+
+	for (const supportId of supportList) {
+		const support = getBSCbyId(supportId);
+		totalBSP += support?.bspCost ?? 0;
+		supportTable.push([{ text: support?.name }, { text: support?.bspCost, style: "cellCentered" }]);
+	}
+
+	supportTable.push([
+		{ text: ``, style: "cellHeader" },
+		{ text: totalBSP, style: "cellHeaderCentered" }
+	]);
+	return supportTable;
 }
 
 function createReferenceList(units: UnitV2[], formations: FormationV2[]) {
@@ -373,16 +397,23 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 	const unitTable = createUnitTable(list.style, list.units, list.formations, drawFormations);
 	const referenceColumns = createReferenceList(list.units, list.formations);
 	const unitCardColumns = await createUnitCardColumns(list.units, list.formations, printUnitsByFormation, list.cardStyle);
+	const bsTable = createBattlefieldSupportTable(list.bs);
 
 	let scaSection: Content[] = [];
 	if (list.scas.length) {
-		scaSection.push({ text: "Special Command Abilities", style: "subheader" });
+		scaSection.push({ text: "Special Command Abilities", style: "subheader", headlineLevel: 1 });
 		scaSection.push(createSCAColumns(list.scas));
 	}
 
 	const dd: TDocumentDefinitions = {
 		pageSize: "LETTER",
 		pageMargins: [30, 10],
+		pageBreakBefore: (currentNode, followingNodesOnPage, nodesOnNextPage, previousNodesOnPage) => {
+			if (currentNode.headlineLevel == 1 && followingNodesOnPage.length == 0) {
+				return true;
+			}
+			return false;
+		},
 		content: [
 			{
 				columns: [
@@ -398,12 +429,17 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 					body: [tableheaders, ...unitTable]
 				}
 			},
+			{ text: "", marginTop: 4 },
+			list.bs.length
+				? {
+						table: { headerRows: 1, widths: ["*", "auto"], body: bsTable }
+					}
+				: { text: "" },
 			...scaSection,
 			{ text: "References:", style: "subheader" },
 			...referenceColumns,
 			{ text: "", pageBreak: "after" },
-
-			unitCardColumns
+			...unitCardColumns
 		],
 		// footer: {
 		// 	columns: [{ text: "https://Terminal.tools/listbuilder", fontSize: 8, margin: [25, 0, 0, 25] }]

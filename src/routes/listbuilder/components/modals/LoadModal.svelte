@@ -45,7 +45,8 @@
 						sublists: JSON.parse(tempList.sublists),
 						rules: tempList.rules ?? "noRes",
 						lcVersion: tempList.lcVersion,
-						scas: tempList.scas ? JSON.parse(tempList.scas) : undefined
+						scas: tempList.scas ? JSON.parse(tempList.scas) : undefined,
+						bs: tempList.bs ? JSON.parse(tempList.bs) : undefined
 					});
 				}
 			} else {

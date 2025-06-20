@@ -221,31 +221,6 @@ export const actions = {
 		}
 		return { message: "success" };
 	},
-	convertLists: async ({}) => {
-		const lists = await prisma.listV2.findMany();
-		for (const list of lists) {
-			try {
-				console.log(`Processing list: ${list.name}`);
-
-				const data = {
-					id: crypto.randomUUID(),
-					userId: list.userId,
-					name: list.name,
-					eras: JSON.stringify(list.era == 0 ? [] : [list.era]),
-					factions: JSON.stringify(list.faction == 0 ? [] : [list.faction]),
-					units: list.units,
-					formations: list.formations,
-					sublists: list.sublists,
-					rules: list.rules,
-					lcVersion: 2
-				};
-				await prisma.listV3.create({ data });
-			} catch (error) {
-				console.log(`${list.name} error`);
-				console.error(error);
-			}
-		}
-	},
 	sendNotification: async (event) => {
 		let formData = await event.request.formData();
 		let message = formData.get("notification-message")?.toString();

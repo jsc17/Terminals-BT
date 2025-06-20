@@ -78,11 +78,10 @@
 					units: importData.units ?? [],
 					sublists: importData.sublists ?? [],
 					lcVersion: importData.lcVersion ?? 0,
-					formations: importData.formations ?? []
+					formations: importData.formations ?? [],
+					scas: importData.scas,
+					bs: importData.bs
 				};
-				if (importData.scas !== undefined) {
-					parsedCode.scas = importData.scas;
-				}
 				list.loadList(parsedCode);
 			} else {
 				const updatedList = convertUnversionedJSONList(importData);
@@ -113,11 +112,10 @@
 					units: importData.units ?? [],
 					sublists: importData.sublists ?? [],
 					lcVersion: importData.lcVersion ?? 0,
-					formations: importData.formations ?? []
+					formations: importData.formations ?? [],
+					scas: importData.scas,
+					bs: importData.bs
 				};
-				if (importData.scas !== undefined) {
-					parsedCode.scas = importData.scas;
-				}
 				list.loadList(parsedCode);
 			} else {
 				const updatedList = convertUnversionedJSONList(importData);
@@ -155,11 +153,11 @@
 			units: copiedData.units,
 			sublists: copiedData.sublists,
 			lcVersion: copiedData.lcVersion,
-			formations: copiedData.formations
+			formations: copiedData.formations,
+			scas: copiedData.scas,
+			bs: copiedData.bs
 		};
-		if (copiedData.scas !== undefined) {
-			parsedCode.scas = copiedData.scas;
-		}
+
 		newList.loadList(parsedCode);
 		activeLists.push(newList);
 	}

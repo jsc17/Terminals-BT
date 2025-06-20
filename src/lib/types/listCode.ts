@@ -18,4 +18,5 @@ export type ListCode = {
 	formations: FormationV2[];
 	sublists: SublistV2[];
 	scas?: number[];
+	bs?: number[];
 };

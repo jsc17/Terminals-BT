@@ -11,7 +11,7 @@ export function sendListToPlay(formations: FormationV2[], units: UnitV2[]) {
 	for (const unit of units) {
 		if (
 			formations.find((formation) => {
-				return formation.units.find(({ id }) => id == unit.id);
+				return formation.units.find(({ id }) => id == unit.id) || formation.secondary?.units.find(({ id }) => id == unit.id);
 			})
 		) {
 			playUnits.push({

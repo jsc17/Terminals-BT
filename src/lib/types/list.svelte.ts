@@ -10,6 +10,7 @@ export class List {
 	formations: FormationV2[] = $state([{ id: "unassigned", name: "Unassigned units", type: "none", units: [] }]);
 	sublists: SublistV2[] = $state([]);
 	scaList: SCA[] = $state([]);
+	bsList = $state<number[]>([]);
 
 	details: { name: string; eras: number[]; factions: number[]; general: number } = $state({ name: "New List", eras: [], factions: [], general: -1 });
 	rules = $state<string>("noRes");
@@ -94,7 +95,8 @@ export class List {
 			rules: this.rules,
 			units: unitList,
 			formations: this.formations,
-			sublists: this.sublists
+			sublists: this.sublists,
+			bs: this.bsList
 		};
 		if (this.scaList.length) {
 			newListCode.scas = this.scaList.map(({ id }) => {
@@ -441,6 +443,7 @@ export class List {
 		this.formations = [{ id: "unassigned", name: "Unassigned units", type: "none", units: [] }];
 		this.sublists = [];
 		this.scaList = [];
+		this.bsList = [];
 	}
 
 	addSublist(sublistToAdd?: SublistV2): string {
@@ -481,6 +484,13 @@ export class List {
 
 	removeSCA(indexToRemove: number) {
 		this.scaList.splice(indexToRemove, 1);
+	}
+
+	addBS(id: number) {
+		this.bsList.push(id);
+	}
+	removeBS(indexToRemove: number) {
+		this.bsList.splice(indexToRemove, 1);
 	}
 
 	getListCode() {
@@ -612,6 +622,9 @@ export class List {
 			for (const scaId of listCode.scas) {
 				this.addSCA(scaId);
 			}
+		}
+		if (listCode.bs) {
+			this.bsList = listCode.bs;
 		}
 	}
 }

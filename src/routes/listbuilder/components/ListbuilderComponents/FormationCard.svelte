@@ -82,7 +82,13 @@
 			{/if}
 			{#if formation.secondary && !draggingColumns}
 				<div class="secondary-formation-header">
-					{formation.secondary.type}
+					<p>{formation.secondary.type}</p>
+					<p>
+						PV:
+						{formation.secondary.units.reduce((total, current) => {
+							return (total += list.units.find((unit) => unit.id == current.id)?.cost ?? 0);
+						}, 0)}
+					</p>
 					<button
 						onclick={() => {
 							secondaryOpen = !secondaryOpen;
@@ -137,7 +143,13 @@
 			{/if}
 			{#if formation.secondary && !draggingColumns}
 				<div class="secondary-formation-header">
-					{`${formation.name} ${formation.secondary.type}`}
+					<p>{`${formation.name} ${formation.secondary.type}`}</p>
+					<p class="muted">
+						PV:
+						{formation.secondary.units.reduce((total, current) => {
+							return (total += list.units.find((unit) => unit.id == current.id)?.cost ?? 0);
+						}, 0)}
+					</p>
 					<button
 						onclick={() => {
 							secondaryOpen = !secondaryOpen;

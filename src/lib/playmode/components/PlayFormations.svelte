@@ -91,7 +91,7 @@
 		align-items: center;
 		border-bottom: 1px solid var(--border);
 		background-color: var(--card);
-		p {
+		& p {
 			color: var(--card-foreground);
 		}
 	}
@@ -116,7 +116,7 @@
 		justify-content: center;
 		width: 100%;
 		height: 30px;
-		img {
+		& img {
 			filter: var(--primary-filter);
 		}
 	}

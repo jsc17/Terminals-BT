@@ -142,13 +142,15 @@ export const actions = {
 		return { pdf: JSON.stringify(bytes) };
 	},
 	shareList: async ({ request }) => {
-		const list = (await request.formData()).get("list");
+		const formData = await request.formData();
+		const list = formData.get("list");
+		const id = formData.get("id")?.toString() ?? "";
+
 		if (!list) {
 			return fail(400, { message: "failed to save list. Data not transmitted" });
 		}
 		const parsedBody: ListCode = JSON.parse(list.toString());
 
-		const id: string = crypto.randomUUID();
 		const data = {
 			id,
 			name: parsedBody.name,

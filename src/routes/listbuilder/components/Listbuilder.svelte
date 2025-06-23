@@ -65,10 +65,12 @@
 	async function shareList() {
 		const formData = new FormData();
 		formData.append("list", list.getListCode());
+		const id: string = crypto.randomUUID();
+		formData.append("id", id);
+		navigator.clipboard.writeText(`https://terminal.tools/listbuilder?share=${id}`);
+
 		const response: any = deserialize(await (await fetch("?/shareList", { method: "POST", body: formData })).text());
 		if (response.type == "success") {
-			const text = new ClipboardItem({ "text/plain": `https://terminal.tools/listbuilder?share=${response.data.id}` });
-			navigator.clipboard.write([text]);
 			toastController.addToast("Shareable list link saved to clipboard");
 		} else {
 			toastController.addToast("Failed to create shareable link. Please try again");

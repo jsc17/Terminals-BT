@@ -221,7 +221,8 @@
 	}
 
 	.formation-header-buttons {
-		display: flex;
+		display: grid;
+		grid-template-columns: max-content max-content max-content;
 		align-items: center;
 		gap: 4px;
 	}

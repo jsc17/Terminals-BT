@@ -1,14 +1,7 @@
 <script lang="ts">
-	import eraFactionData from "$lib/data/erasFactionsList.json";
-	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup.js";
-	import { getGeneralList } from "$lib/utilities/bt-utils";
 	import { deserialize, enhance } from "$app/forms";
 	import { calculateTMM } from "$lib/utilities/bt-utils";
 	import { toastController } from "$lib/global/stores/toastController.svelte";
-	import { type MulUnit } from "$lib/types/unit";
-	import { loadMULUnit } from "$lib/utilities/load";
-	import { type UnitAbility } from "$lib/data/abilities";
-	import { createAbilityLineString } from "$lib/utilities/parseAbilities";
 	import SendNotification from "./SendNotification.svelte";
 
 	async function loadUnits() {
@@ -33,9 +26,10 @@
 					const formattedUnit = {
 						mulId: unit.Id,
 						name: unit.Name.trim(),
+						group: unit.GroupName,
 						class: unit.Class,
 						variant: unit.Variant?.trim() == "" ? null : unit.Variant?.trim(),
-						tonnage: unit.FormatedTonnage,
+						tonnage: Number(unit.FormatedTonnage),
 						technology: unit.Technology.Name,
 						rules: unit.Rules,
 						date_introduced: Number(unit.DateIntroduced),

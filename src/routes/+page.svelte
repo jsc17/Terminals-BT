@@ -37,6 +37,7 @@
 		<li>
 			<p><a href="https://github.com/jsc17/Terminals-BT" target="_blank">Github</a>: Applications source code and issue tracker</p>
 		</li>
+		<li><a href="/about">About</a></li>
 	</ul>
 </main>
 

@@ -118,7 +118,7 @@ export class List {
 			if (this.options.maxUnits && this.unitCount > this.options.maxUnits) {
 				issueList.set("Max Units", new Set([`${this.unitCount}/${this.options.maxUnits}`]));
 			}
-			if (this.options.eraFactionRestriction && (this.details.eras.length != 1 || this.details.factions.length != 1)) {
+			if (this.options.singleEraFaction && (this.details.eras.length != 1 || this.details.factions.length != 1)) {
 				issueList.set("Era/Faction", new Set(["Must select a single era and faction"]));
 			}
 			for (const unit of this.units) {
@@ -418,7 +418,7 @@ export class List {
 	}
 	newFormation() {
 		const id: string = crypto.randomUUID();
-		this.formations.push({ id, name: `New formation`, type: "Battle", units: [] });
+		this.formations.push({ id, name: `New formation`, type: "Combat Group", units: [] });
 	}
 	getFormation(formationId: string) {
 		return this.formations.find(({ id }) => {

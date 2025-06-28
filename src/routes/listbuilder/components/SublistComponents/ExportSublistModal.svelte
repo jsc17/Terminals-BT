@@ -159,10 +159,6 @@
 </Dialog>
 
 <style>
-	h2 {
-		font-size: 1.15em;
-		margin-bottom: 0;
-	}
 	p {
 		margin: 0;
 		color: var(--muted-foreground);
@@ -181,9 +177,6 @@
 	}
 	label {
 		margin: 0px 4px;
-	}
-	.export-button {
-		width: fit-content;
 	}
 	fieldset {
 		border: 1px solid var(--muted);

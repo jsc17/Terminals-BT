@@ -110,9 +110,10 @@
 }
 [data-dropdown-menu-content] {
 	background-color: var(--background);
-	border: 1px solid border;
+	border: 2px solid var(--border);
 	padding: 10px 2px;
 	border-radius: var(--radius);
+	margin-right: 4px;
 	z-index: 40;
 }
 [data-dropdown-menu-item] {

@@ -72,6 +72,8 @@
 		<img src="/icons/menu.svg" alt="menu" />
 		{#if page.url.pathname == "/"}
 			Home
+		{:else if page.url.pathname == "/about"}
+			About
 		{:else if page.url.pathname == "/listbuilder"}
 			Alpha Strike Listbuilder
 		{:else if page.url.pathname == "/unitsearch"}
@@ -88,6 +90,7 @@
 		<button class="link-button close-menu-button" onclick={closeNav} aria-label="Close navigation sidebar"><img src="/icons/close.svg" alt="close button" /></button>
 		<ul>
 			<li><a href="/" aria-current={page.url.pathname === "/"} onclick={closeNav}>Home</a></li>
+			<li><a href="/about" aria-current={page.url.pathname === "/"} onclick={closeNav}>About</a></li>
 			<hr />
 			<li><a href="/listbuilder" aria-current={page.url.pathname === "/listbuilder"} onclick={closeNav}>Alpha Strike Listbuilder</a></li>
 			<li><a href="/unitsearch" aria-current={page.url.pathname === "/unitsearch"} onclick={closeNav}>Alpha Strike Unit Search</a></li>
@@ -96,7 +99,6 @@
 			<li><a href="http://masterunitlist.info" target="_blank">Master Unit List</a></li>
 			<li><a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">Wolfnet 350 Rules</a></li>
 			<hr />
-			<!-- <li><a href="/about" aria-current={page.url.pathname === "/about"} onclick={closeNav}>About</a></li> -->
 			<li><a href="/changelog" aria-current={page.url.pathname === "/changelog"} onclick={closeNav}>Changelog</a></li>
 			<li><a href="https://github.com/jsc17/Terminals-BT" target="_blank">Page Source Code: Github</a></li>
 		</ul>

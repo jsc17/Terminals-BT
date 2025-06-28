@@ -5,6 +5,7 @@ export type MulUnit = {
 	id: number;
 	mulId: number;
 	name: string;
+	group: string;
 	class: string;
 	variant: string;
 	type: string;

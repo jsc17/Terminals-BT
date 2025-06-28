@@ -2,10 +2,11 @@
 	import { dndzone, dragHandleZone, type DndEvent, dragHandle } from "svelte-dnd-action";
 	import { getContext } from "svelte";
 	import { appWindow } from "$lib/global/stores";
-	import { Collapsible } from "$lib/global/components/";
+	import { Collapsible, Popover } from "$lib/global/components/";
 	import { List, type FormationV2 } from "$lib/types/";
 	import { getFormationStats } from "$lib/utilities/formation-utilities";
 	import { UnitCard, UnitCustomizationModal, EditFormationModal, FormationInfoPopover, FormationMenu, FindUnitAvailabilityModal } from "../";
+	import { validateFormation } from "$lib/data/FormationData";
 
 	type Props = { formation: FormationV2; draggingColumns: boolean; unitCustomizationModal?: UnitCustomizationModal; list: List };
 
@@ -18,6 +19,7 @@
 	let secondaryOpen = $state(true);
 
 	let formationStats = $derived(getFormationStats(formation, list));
+	let validationResults = $derived(validateFormation(formation, list));
 
 	function handleSort(e: CustomEvent<DndEvent<{ id: string }>>) {
 		formation.units = e.detail.items;
@@ -42,6 +44,20 @@
 					<p>{formation.name}</p>
 					<p class="muted">{formation.type}</p>
 				{/if}
+				<div class="formation-error">
+					{#if formation.id != "unassigned" && !validationResults.primary.valid}
+						<Popover>
+							{#snippet trigger()}
+								<img src="/icons/alert-outline.svg" alt="Formation errors button" class="formation-error-icon" />
+							{/snippet}
+							<div class="formation-error-content">
+								{#each validationResults.primary.requirements.filter((req) => req.met == -1 || req.met == 0) as requirement}
+									<p>• {requirement.requirement}</p>
+								{/each}
+							</div>
+						</Popover>
+					{/if}
+				</div>
 			</div>
 			<div class="formation-header-buttons">
 				<FormationInfoPopover {formationStats} />
@@ -89,6 +105,20 @@
 							return (total += list.units.find((unit) => unit.id == current.id)?.cost ?? 0);
 						}, 0)}
 					</p>
+					<div class="formation-error">
+						{#if formation.id != "unassigned" && !validationResults.secondary.valid}
+							<Popover>
+								{#snippet trigger()}
+									<img src="/icons/alert-outline.svg" alt="Formation errors button" class="formation-error-icon" />
+								{/snippet}
+								<div class="formation-error-content">
+									{#each validationResults.secondary.requirements.filter((req) => req.met == -1 || req.met == 0) as requirement}
+										<p>• {requirement.requirement}</p>
+									{/each}
+								</div>
+							</Popover>
+						{/if}
+					</div>
 					<button
 						onclick={() => {
 							secondaryOpen = !secondaryOpen;
@@ -143,7 +173,21 @@
 			{/if}
 			{#if formation.secondary && !draggingColumns}
 				<div class="secondary-formation-header">
-					<p>{`${formation.name} ${formation.secondary.type}`}</p>
+					<p>{formation.secondary.type}</p>
+					<div class="formation-error">
+						{#if formation.id != "unassigned" && !validationResults.secondary.valid}
+							<Popover>
+								{#snippet trigger()}
+									<img src="/icons/alert-outline.svg" alt="Formation errors button" class="formation-error-icon" />
+								{/snippet}
+								<div class="formation-error-content">
+									{#each validationResults.secondary.requirements.filter((req) => req.met == -1 || req.met == 0) as requirement}
+										<p>• {requirement.requirement}</p>
+									{/each}
+								</div>
+							</Popover>
+						{/if}
+					</div>
 					<p class="muted">
 						PV:
 						{formation.secondary.units.reduce((total, current) => {
@@ -187,7 +231,7 @@
 	{/if}
 </div>
 
-<EditFormationModal bind:open={editModalOpen} {formation}></EditFormationModal>
+<EditFormationModal bind:open={editModalOpen} {formation} {list} {validationResults}></EditFormationModal>
 <FindUnitAvailabilityModal bind:this={availabilityModal} {formation} {list} />
 
 <style>
@@ -207,19 +251,39 @@
 		display: flex;
 		align-items: center;
 		border: 1px solid var(--border);
-		gap: 16px;
 	}
 	.formation-header-details {
-		display: flex;
+		display: grid;
+		grid-template-columns: 1fr max-content max-content;
 		flex: 1;
-		justify-content: space-between;
-		align-items: center;
 
-		p {
+		& * {
+			align-self: center;
+		}
+
+		& p {
 			font-size: 0.95em;
 		}
 	}
-
+	.formation-error {
+		width: 20px;
+	}
+	.formation-error-icon {
+		width: 15px;
+		height: 15px;
+		filter: var(--error-filter);
+	}
+	.formation-error-content {
+		display: grid;
+		grid-template-rows: max-content;
+		gap: 8px;
+		padding: 16px;
+		border: 2px solid var(--error);
+		border-radius: var(--radius);
+		& p {
+			color: var(--muted-foreground);
+		}
+	}
 	.formation-header-buttons {
 		display: grid;
 		grid-template-columns: max-content max-content max-content;
@@ -234,11 +298,12 @@
 		justify-content: center;
 	}
 	.secondary-formation-header {
-		display: flex;
+		display: grid;
+		grid-template-columns: 1fr max-content max-content max-content;
+		gap: 12px;
 		padding: 2px 16px;
 		background-color: var(--background-light);
 		align-items: center;
-		justify-content: space-between;
 		width: 100%;
 		border: 1px solid var(--border);
 		font-size: 0.9em;
@@ -264,7 +329,7 @@
 		justify-content: center;
 		width: 100%;
 		height: 30px;
-		img {
+		& img {
 			filter: var(--primary-filter);
 		}
 	}

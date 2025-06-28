@@ -38,7 +38,7 @@
 		<SearchResults bind:list bind:resultList />
 	</div>
 	<div class="list-drawer-wrapper" class:show-listbuilder={showListbuilder} transition:slide>
-		<Listbuilder {recentChanges} {description} {listCloseCallback} {list} />
+		<Listbuilder {listCloseCallback} bind:list />
 	</div>
 	<button
 		onclick={() => {

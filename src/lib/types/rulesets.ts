@@ -9,6 +9,7 @@ type Limit = {
 export type Ruleset = {
 	name: string;
 	display: string;
+	singleEraFaction?: boolean;
 	eraFactionRestriction?: boolean;
 	maxPv?: number;
 	maxUnits?: number;
@@ -36,12 +37,14 @@ export const ruleSets: Ruleset[] = [
 	{
 		name: "noRes",
 		display: "No Restrictions",
+		eraFactionRestriction: true,
 		sublistScenarios: [],
 		customUnitPacks: ["none"]
 	},
 	{
 		name: "wn350",
 		display: "Wolfnet 350 v2.3",
+		singleEraFaction: true,
 		eraFactionRestriction: true,
 		maxPv: 350,
 		maxUnits: 16,
@@ -70,6 +73,7 @@ export const ruleSets: Ruleset[] = [
 	{
 		name: "wn350v3",
 		display: "Wolfnet 350 v3.0",
+		singleEraFaction: true,
 		eraFactionRestriction: true,
 		maxPv: 350,
 		maxUnits: 16,

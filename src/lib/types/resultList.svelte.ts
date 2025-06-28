@@ -112,7 +112,6 @@ export class ResultList {
 	options = $state<Ruleset>();
 	availableList = $derived.by(() => {
 		let availableUnits = this.resultList.concat(this.generalList);
-		console.log(availableUnits.length);
 		availableUnits = [...new Set(availableUnits)];
 		availableUnits.sort((a, b) => {
 			return (a.tonnage ?? 0) - (b.tonnage ?? 0);
@@ -164,6 +163,7 @@ export class ResultList {
 					id: unit.id,
 					mulId: unit.mulId,
 					name: unit.name,
+					group: unit.group,
 					class: unit.class,
 					variant: unit.variant,
 					type: unit.type,
@@ -247,6 +247,7 @@ export class ResultList {
 					type: unit.type,
 					subtype: unit.type,
 					name: unit.name,
+					group: unit.group ?? "",
 					class: unit.class,
 					variant: unit.variant,
 					pv: unit.pv,
@@ -304,7 +305,17 @@ export class ResultList {
 					if (filter.value && filter.value != "any") {
 						tempResultList = tempResultList.filter((unit) => {
 							if (unit[filter.name] != null) {
-								return unit[filter.name].toLowerCase().includes(filter.value!.toString().toLowerCase());
+								return unit[filter.name]
+									.normalize("NFD")
+									.replace(/[\u0300-\u036f]/g, "")
+									.toLowerCase()
+									.includes(
+										filter
+											.value!.toString()
+											.normalize("NFD")
+											.replace(/[\u0300-\u036f]/g, "")
+											.toLowerCase()
+									);
 							}
 						});
 					}

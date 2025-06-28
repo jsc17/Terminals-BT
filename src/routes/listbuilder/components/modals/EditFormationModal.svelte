@@ -1,20 +1,24 @@
 <script lang="ts">
-	import { type FormationType, type FormationV2 } from "$lib/types/";
-	import { getFormationTypeByName } from "$lib/utilities/formation-utilities";
+	import { List, type FormationV2 } from "$lib/types/";
 	import { Select, Dialog } from "$lib/global/components/";
-	import formationTypes from "$lib/data/formationTypes.json" assert { type: "json" };
+	import { formationDataList, getFormationDataFromName, type FormationData } from "$lib/data/FormationData";
 
 	type Props = {
 		formation: FormationV2;
 		open: boolean;
+		list: List;
+		validationResults: {
+			primary: { valid: boolean; requirements: { requirement: string; met: number }[] };
+			secondary: { valid: boolean; requirements: { requirement: string; met: number }[] };
+		};
 	};
 
-	let { formation, open = $bindable(false) }: Props = $props();
+	let { formation, open = $bindable(false), validationResults }: Props = $props();
 
-	let formationTypeList: { groupLabel: string; items: { value: string; label: string }[] }[] = formationTypes.map((group) => {
+	let formationTypeList: { groupLabel: string; items: { value: string; label: string }[] }[] = formationDataList.map((group) => {
 		return {
 			groupLabel: group.type,
-			items: group.formations.map((formation: FormationType) => {
+			items: group.formations.map((formation: FormationData) => {
 				return {
 					value: formation.name,
 					label: formation.name,
@@ -27,23 +31,23 @@
 	});
 
 	let secondaryFormationList: { value: string; label: string }[] = [{ value: "None", label: "None" }].concat(
-		formationTypes.flatMap((group) => {
+		formationDataList.flatMap((group) => {
 			return group.formations
-				.filter((formation: FormationType) => {
+				.filter((formation: FormationData) => {
 					return formation.secondary;
 				})
-				.map((secondary: FormationType) => {
+				.map((secondary: FormationData) => {
 					return { value: secondary.name, label: secondary.name };
 				});
 		})
 	);
 
-	let formationDetails = $derived(getFormationTypeByName(formation.type));
+	let formationDetails = $derived(getFormationDataFromName(formation.type));
 	let secondaryDetails = $derived.by(() => {
 		if (secondaryValue == "None") {
 			return undefined;
 		} else {
-			return getFormationTypeByName(secondaryValue);
+			return getFormationDataFromName(secondaryValue);
 		}
 	});
 
@@ -65,56 +69,76 @@
 </script>
 
 {#snippet description()}
-	<span class="edit-formation-description"> Most formations require 3 units minimum. Many formations will have additional requirements that are listed below. </span>
+	<span class="edit-formation-description">
+		Vehicle formations should have matched pairs of combat vehicles, but that is not currently validated. All requirements appear to be validating correctly, but there are possibly
+		still bugs.
+	</span>
 {/snippet}
 
 <Dialog bind:open title={`Edit ${formation?.name}`} {description}>
 	<div class="edit-formation-body">
 		<label>Formation Name: <input class="edit-formation-name-input" type="text" name="formation-name" id="formation-id" bind:value={formation.name} /></label>
-		<div class="edit-formation-options-container">
-			<div class="edit-formation-option-wrapper">
+		<div class="formation">
+			<div class="formation-selection-row">
 				<div class="edit-formation-option-select-row">
 					<p>Formation Type:</p>
 					<div class="select-formation-type-wrapper"><Select bind:value={formation.type} type="single" groupedItems={formationTypeList}></Select></div>
 				</div>
-				<div class="edit-formation-option-details">
-					{#if formationDetails?.ideal}
-						<p>•</p>
-						<p>{`Ideal Role - ${formationDetails.ideal}`}</p>
-					{/if}
-					{#if formationDetails?.requirements}
-						{#each formationDetails.requirements as requirement}
-							<p>•</p>
-							<p>{requirement}</p>
-						{/each}
-					{/if}
-					{#if formationDetails?.secondary}
-						<p>•</p>
-						<p class="error">
-							I'm not your mother and you can organize your units how you like, but I recommend making this formation as a secondary on the formation they are attached to.
-						</p>
-					{/if}
-				</div>
 			</div>
-			<div class="edit-formation-option-wrapper">
-				<div class="edit-formation-option-select-row">
-					<p>Secondary:</p>
-					<div class="select-formation-type-wrapper"><Select bind:value={getSecondaryValue, setSecondaryValue} type="single" items={secondaryFormationList}></Select></div>
-				</div>
-				<div class="edit-formation-option-details">
-					{#if !secondaryDetails}
-						<p>•</p>
-						<p>{`Optionally select an attached secondary formation`}</p>
-					{:else if secondaryDetails.requirements}
-						{#each secondaryDetails.requirements as requirement}
-							<p>•</p>
-							<p>{requirement}</p>
-						{/each}
-					{/if}
-				</div>
+			<p class="formation-status-row">
+				Formation Status: {#if validationResults.primary.valid}
+					<span class="valid">Valid</span>
+				{:else}
+					<span class="invalid">Invalid</span>
+				{/if}
+			</p>
+			<div class="edit-formation-requirement-container">
+				{#each validationResults.primary.requirements as requirement}
+					<div class="requirement-row">
+						<p class:valid={requirement.met == 1} class:invalid={requirement.met == -1}>{requirement.met == 1 ? "✔" : "X"}</p>
+						<p>{requirement.requirement}</p>
+					</div>
+				{/each}
+			</div>
+			<div class="formation-bonus-container">
+				<p class="bold">Bonus Ability:</p>
+				{#each formationDetails?.bonus.split("\n") ?? [] as part}
+					<p class="muted">{part}</p>
+				{/each}
 			</div>
 		</div>
-		<div>Formation bonus details and formation validation coming soonish</div>
+		<div class="formation">
+			<div class="formation-selection-row">
+				<div class="edit-formation-option-select-row">
+					<p>Secondary Type:</p>
+					<div class="select-formation-type-wrapper"><Select bind:value={getSecondaryValue, setSecondaryValue} type="single" items={secondaryFormationList}></Select></div>
+				</div>
+			</div>
+			<p class="formation-status-row">
+				Secondary Status: {#if formation.secondary}{#if validationResults.secondary.valid}
+						<span class="valid">Valid</span>
+					{:else}
+						<span class="invalid">Invalid</span>
+					{/if}
+				{:else}
+					None
+				{/if}
+			</p>
+			<div class="edit-formation-requirement-container">
+				{#each validationResults.secondary.requirements as requirement}
+					<div class="requirement-row">
+						<p class:valid={requirement.met == 1} class:invalid={requirement.met == -1}>{requirement.met == 1 ? "✔" : "X"}</p>
+						<p>{requirement.requirement}</p>
+					</div>
+				{/each}
+			</div>
+			<div class="formation-bonus-container">
+				<p class="bold">Bonus Ability:</p>
+				{#each secondaryDetails?.bonus.split("\n") ?? [] as part}
+					<p class="muted">{part}</p>
+				{/each}
+			</div>
+		</div>
 	</div>
 </Dialog>
 
@@ -129,44 +153,56 @@
 		gap: 8px;
 		width: 100%;
 	}
-	.edit-formation-options-container {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-		gap: 4px;
-		width: 100%;
-	}
-	.edit-formation-option-wrapper {
+	.formation {
 		display: flex;
 		flex-direction: column;
+		gap: 4px;
 		border: 1px solid var(--border);
 	}
 	.select-formation-type-wrapper {
 		width: clamp(5em, 100%, 12em);
+	}
+	.formation-selection-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		padding: 4px 6px;
 	}
 	.edit-formation-option-select-row {
 		display: flex;
 		gap: 8px;
 		align-items: center;
 		padding: 4px;
-		border-bottom: 1px solid var(--border);
 
-		p {
+		& p {
 			font-size: 0.95em;
 		}
 	}
-	.edit-formation-option-details {
-		display: grid;
-		grid-template-columns: min-content 1fr;
-		gap: 4px 8px;
-		padding: 4px;
 
-		p {
-			color: var(--muted-foreground);
-			font-size: 0.95em;
+	.edit-formation-requirement-container {
+		border: 1px solid var(--border);
+		display: grid;
+		grid-template-columns: max-content 1fr;
+		column-gap: 16px;
+	}
+	.formation-status-row {
+		padding: 4px 10px;
+		font-size: 0.95em;
+	}
+	.requirement-row {
+		display: grid;
+		grid-template-columns: subgrid;
+		grid-column: span 2;
+		padding: 4px 8px;
+		border-bottom: 1px solid var(--border);
+		& p {
+			align-self: center;
 		}
-		p.error {
-			color: lightcoral;
-		}
+	}
+	.formation-bonus-container {
+		padding: 4px 16px;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
 	}
 	input {
 		background-color: var(--muted);
@@ -176,5 +212,13 @@
 	}
 	.edit-formation-name-input {
 		max-width: 30ch;
+	}
+	.valid {
+		color: forestgreen;
+		font-weight: bold;
+	}
+	.invalid {
+		color: red;
+		font-weight: bold;
 	}
 </style>

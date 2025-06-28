@@ -78,7 +78,9 @@
 			<DropdownMenu.Item class="dropdown-button" textValue="Export Formation to Jeff" onSelect={exportFormationToJeff}>Export Formation to Jeff's Tools</DropdownMenu.Item>
 			<DropdownMenu.Separator class="muted" />
 			<DropdownMenu.Item class="dropdown-button" textValue="Clear Formation" onSelect={clearFormation}>Clear Formation</DropdownMenu.Item>
-			<DropdownMenu.Item class="dropdown-button" textValue="Remove Formation" onSelect={removeFormation}>Remove Formation</DropdownMenu.Item>
+			{#if formation.id != "unassigned"}
+				<DropdownMenu.Item class="dropdown-button" textValue="Remove Formation" onSelect={removeFormation}>Remove Formation</DropdownMenu.Item>
+			{/if}
 		</DropdownMenu.Content>
 	</DropdownMenu.Portal>
 </DropdownMenu.Root>

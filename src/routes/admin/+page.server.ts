@@ -108,6 +108,7 @@ export const actions = {
 					update: {
 						mulId: unit.mulId,
 						name: unit.name,
+						group: unit.group,
 						class: unit.class,
 						variant: unit.variant,
 						tonnage: unit.tonnage,
@@ -139,6 +140,7 @@ export const actions = {
 					create: {
 						mulId: unit.mulId,
 						name: unit.name,
+						group: unit.group,
 						class: unit.class,
 						variant: unit.variant,
 						tonnage: unit.tonnage,
@@ -174,6 +176,8 @@ export const actions = {
 				return fail(400, { message: error });
 			}
 		}
+		//fix reaper BA being classified as a BM
+		await prisma.unit.update({ where: { mulId: 9535 }, data: { subtype: "BA" } });
 		return { message: "Load Complete" };
 	},
 	sendResetEmail: async ({}) => {

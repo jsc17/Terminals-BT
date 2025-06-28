@@ -72,7 +72,7 @@
 	>
 		<div class="space-between">
 			<div></div>
-			<div>Search Parameters</div>
+			<div>Era/Faction Selection</div>
 			<div>
 				{#if showParameters}
 					-

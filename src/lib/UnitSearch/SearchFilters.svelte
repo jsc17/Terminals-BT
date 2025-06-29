@@ -132,6 +132,9 @@
 					+
 				{/if}
 			</button>
+			{#if resultList.options?.name != "noRes"}
+				<label><input type="checkbox" bind:checked={resultList.filterByRules} /> Filter Results to Selected Ruleset</label>
+			{/if}
 			<button class="clear" onclick={() => resultList.resetFilters()}>Clear Filters</button>
 		</div>
 		{#if showAdditionalFilters}

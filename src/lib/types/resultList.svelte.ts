@@ -5,7 +5,6 @@ import { deserialize } from "$app/forms";
 import { filters as filtersImport, additionalFilters as additionalFiltersImport } from "$lib/data/filters";
 import type { Ruleset } from "./rulesets";
 import { ruleSets } from "./rulesets";
-import customCards from "$lib/data/customCards.json";
 
 type SearchConstraint = {
 	equals?: number;
@@ -110,6 +109,7 @@ export class ResultList {
 	customUnits = $state<MulUnit[]>([]);
 
 	options = $state<Ruleset>();
+	filterByRules = $state(true);
 	availableList = $derived.by(() => {
 		let availableUnits = this.resultList.concat(this.generalList);
 		availableUnits = [...new Set(availableUnits)];
@@ -261,7 +261,7 @@ export class ResultList {
 
 	applyOptions() {
 		let tempRestrictedList: MulUnit[] = [];
-		if (this.options) {
+		if (this.options && this.filterByRules) {
 			if (this.availableList.length) {
 				tempRestrictedList = tempRestrictedList.concat(this.customUnits);
 			}

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { deserialize } from "$app/forms";
-	import { Dialog, Separator } from "$lib/global/components/";
+	import { Dialog, Separator } from "$lib/components/global/";
 	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
-	import type { FormationV2, List } from "$lib/types";
+	import type { ListFormation, List } from "$lib/types/list.svelte";
 
 	type Props = {
-		formation?: FormationV2;
+		formation?: ListFormation;
 		list: List;
 	};
 

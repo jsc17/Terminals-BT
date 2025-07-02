@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
-	import { toastController } from "$lib/global/stores/toastController.svelte.js";
+	import { toastController } from "$lib/stores/toastController.svelte.js";
 	import { type ActionResult } from "@sveltejs/kit";
 	import { goto } from "$app/navigation";
 	import { getContext } from "svelte";
@@ -165,7 +165,7 @@
 </main>
 
 <style>
-	@import "$lib/global/css/google.css";
+	@import "$lib/styles/google.css";
 	main {
 		display: grid;
 		grid-template-columns: max-content auto;

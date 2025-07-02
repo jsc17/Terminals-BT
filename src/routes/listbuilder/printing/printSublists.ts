@@ -1,4 +1,4 @@
-import type { UnitV2 } from "$lib/types/unit";
+import type { ListUnit } from "$lib/types/listTypes";
 import { printer } from "$lib/server/printer";
 import type { Column, Content, ContentColumns, TDocumentDefinitions } from "pdfmake/interfaces";
 import BlobStream, { type IBlobStream } from "blob-stream";
@@ -6,7 +6,7 @@ import BlobStream, { type IBlobStream } from "blob-stream";
 type PrintableSublist = {
 	scenario: string;
 	pv: number;
-	unitList: UnitV2[];
+	unitList: ListUnit[];
 };
 
 const scenarios = [
@@ -122,15 +122,15 @@ function createVerticalBody(sublists: PrintableSublist[], content: Content[]) {
 				});
 			}
 			column.stack.push({
-				text: `Health: ${sublist.unitList.reduce((total: number, unit: UnitV2) => {
+				text: `Health: ${sublist.unitList.reduce((total: number, unit: ListUnit) => {
 					return (total += unit.baseUnit.health ?? 0);
-				}, 0)}  Size: ${sublist.unitList.reduce((total: number, unit: UnitV2) => {
+				}, 0)}  Size: ${sublist.unitList.reduce((total: number, unit: ListUnit) => {
 					return (total += unit.baseUnit.size ?? 0);
-				}, 0)}  Damage: ${sublist.unitList.reduce((total: number, unit: UnitV2) => {
+				}, 0)}  Damage: ${sublist.unitList.reduce((total: number, unit: ListUnit) => {
 					return (total += unit.baseUnit.damageS ?? 0);
-				}, 0)}/${sublist.unitList.reduce((total: number, unit: UnitV2) => {
+				}, 0)}/${sublist.unitList.reduce((total: number, unit: ListUnit) => {
 					return (total += unit.baseUnit.damageM ?? 0);
-				}, 0)}/${sublist.unitList.reduce((total: number, unit: UnitV2) => {
+				}, 0)}/${sublist.unitList.reduce((total: number, unit: ListUnit) => {
 					return (total += unit.baseUnit.damageL ?? 0);
 				}, 0)}`,
 				style: "columnHeader"

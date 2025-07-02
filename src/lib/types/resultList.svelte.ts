@@ -1,5 +1,5 @@
-import type { MulUnit } from "$lib/types/unit.js";
-import { getGeneralList } from "$lib/utilities/bt-utils";
+import type { MulUnit } from "$lib/types/listTypes";
+import { getGeneralList } from "$lib/utilities/genericBattletechUtilities";
 import type { Filter } from "./filter";
 import { deserialize } from "$app/forms";
 import { filters as filtersImport, additionalFilters as additionalFiltersImport } from "$lib/data/filters";

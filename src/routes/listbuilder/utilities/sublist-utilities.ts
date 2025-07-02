@@ -1,15 +1,16 @@
-import { toastController } from "$lib/global/stores";
-import { sendListToPlay, type FormationV2, type List, type SublistV2 } from "$lib/types";
+import { toastController } from "$lib/stores";
+import { type ListFormation, type List, type Sublist } from "$lib/types/list.svelte";
+import { sendListToPlay } from "$lib/utilities/playmodeUtilities";
 import { nanoid } from "nanoid";
 
-export function loadSublistForPlay(sublist: SublistV2, list: List) {
+export function loadSublistForPlay(sublist: Sublist, list: List) {
 	if (sublist.checked.length) {
 		const units = sublist.checked
 			.map((unitId) => {
 				return { id: list.getUnit(unitId)?.id ?? "" };
 			})
 			.filter((unit) => unit.id != "");
-		const sublistFormation: FormationV2 = {
+		const sublistFormation: ListFormation = {
 			id: nanoid(6),
 			name: `${list.details.name}${sublist.scenario != "-" ? ` ${sublist.scenario} ` : " "}Sublist`,
 			type: "none",

@@ -1,14 +1,14 @@
 <script lang="ts">
-	import type { SublistV2, List, FormationV2 } from "$lib/types/";
+	import type { Sublist, List, ListFormation } from "$lib/types/list.svelte";
 	import { exportToJeff } from "../../utilities/export.svelte";
-	import { toastController } from "$lib/global/stores/toastController.svelte";
+	import { toastController } from "$lib/stores/toastController.svelte";
 	import { enhance } from "$app/forms";
-	import { Dialog } from "$lib/global/components";
+	import { Dialog } from "$lib/components/global/";
 	import { getContext } from "svelte";
 
 	type Props = {
 		open: boolean;
-		sublist: SublistV2;
+		sublist: Sublist;
 		list: List;
 	};
 
@@ -42,7 +42,7 @@
 		const units = sublist.checked.map((unitId) => {
 			return $state.snapshot(list.getUnit(unitId)!);
 		});
-		const sublistFormation: FormationV2 = {
+		const sublistFormation: ListFormation = {
 			id: "temp",
 			name: "temp",
 			type: "none",

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ResultList } from "$lib/types/resultList.svelte";
-	import { SearchFilters, SearchParameters, SearchResults } from "$lib/UnitSearch/index";
+	import { SearchFilters, SearchParameters, SearchResults } from "$lib/components/UnitSearch/index";
 
 	let resultList = $state(new ResultList());
 </script>

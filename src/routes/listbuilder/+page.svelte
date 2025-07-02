@@ -2,7 +2,8 @@
 	import { PersistedState, watch } from "runed";
 	import ListTab from "./components/ListTab.svelte";
 	import { onMount, setContext } from "svelte";
-	import { type ListCode, List, ResultList } from "$lib/types";
+	import { type ListCode, List } from "$lib/types/list.svelte";
+	import { ResultList } from "$lib/types/resultList.svelte";
 	import { Tabs, ContextMenu } from "bits-ui";
 	import { convertUnversionedJSONList } from "./utilities/convert";
 

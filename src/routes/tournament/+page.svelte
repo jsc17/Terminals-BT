@@ -2,7 +2,7 @@
 	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
 	import { enhance, deserialize } from "$app/forms";
 	import { getContext } from "svelte";
-	import { getNewSkillCost } from "$lib/utilities/bt-utils";
+	import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 	import { tournamentList } from "./tournamentList.svelte";
 
 	let user: { username: string | undefined } = getContext("user");
@@ -107,7 +107,8 @@
 					onclick={() => {
 						tournamentList.selectTournament(-1);
 						tournamentDialog.showModal();
-					}}>Add</button>
+					}}>Add</button
+				>
 			</div>
 		</div>
 		<div class="table-container">
@@ -140,7 +141,8 @@
 								onclick={() => {
 									tournamentList.selectParticipant(-1);
 									tournamentList.selectTournament(index);
-								}}>
+								}}
+							>
 								<td>{tournament.name}</td>
 								<td class:passed={tournament.passed}>{tournament.date.toUTCString().split(" ").slice(1, 4).join("-")}</td>
 								<td>{tournament.participants.length}</td>
@@ -175,7 +177,8 @@
 								class:selected-row={tournamentList.selectedParticipantIndex == index}
 								onclick={() => {
 									tournamentList.selectParticipant(index);
-								}}>
+								}}
+							>
 								<td>{participant.name}</td>
 								<td>{participant.listCodes?.at(-1)?.valid ? "✅" : "❌"}</td>
 								<td
@@ -183,7 +186,8 @@
 										onclick={() => {
 											deleteParticipant(index);
 										}}>Del</button
-									></td>
+									></td
+								>
 							</tr>
 						{/each}
 					{/if}
@@ -198,7 +202,8 @@
 				disabled={tournamentList.selectedTournamentIndex == -1}
 				onclick={() => {
 					tournamentDialog.showModal();
-				}}>Edit</button>
+				}}>Edit</button
+			>
 		</div>
 		<div class="tournament-details">
 			<p>Tournament Name:</p>
@@ -259,7 +264,9 @@
 				<div class="column">
 					<p>Faction:</p>
 					<p style="color:var(--primary)">
-						{tournamentList.selectedParticipant?.listCodes?.at(selectedSubmission) ? factionLookup.get(tournamentList.selectedParticipant.listCodes.at(selectedSubmission)!.faction) : "-"}
+						{tournamentList.selectedParticipant?.listCodes?.at(selectedSubmission)
+							? factionLookup.get(tournamentList.selectedParticipant.listCodes.at(selectedSubmission)!.faction)
+							: "-"}
 					</p>
 				</div>
 			</div>
@@ -328,8 +335,8 @@
 		</div>
 		<div class="inline">
 			<input name="privateTournament" id="privateTournament" type="checkbox" value="true" checked={tournamentList.selectedTournament?.privateTournament ?? true} />
-			<label for="privateTournament"
-				>Display tournament on validation page. (Participants will require the tournament link if this is uncheck, so please provide it to them.)</label>
+			<label for="privateTournament">Display tournament on validation page. (Participants will require the tournament link if this is uncheck, so please provide it to them.)</label
+			>
 		</div>
 		<div class="center"><button>Submit</button></div>
 	</form>

@@ -1,17 +1,17 @@
 import type { TDocumentDefinitions, TableCell, Content, Column } from "pdfmake/interfaces";
 import BlobStream, { type IBlobStream } from "blob-stream";
-import { abilityReferences, spaReferences, ammoReferences, formationReferences } from "$lib/data/index.js";
-import type { UnitV2, FormationV2, SCA } from "$lib/types/";
+import { abilityReferences, spaReferences, ammoReferences } from "$lib/data/index.js";
+import type { ListUnit, ListFormation, SCA } from "$lib/types/listTypes";
 import { printer } from "$lib/server/printer";
-import { getSCAfromName } from "../../../lib/types/sca";
-import { getFormationTypeByName } from "$lib/utilities/formation-utilities";
+import { getSCAfromName } from "$lib/utilities/listUtilities";
+import { getFormationDataFromName } from "$lib/utilities/formationUtilities";
 import { generateUnitCard, loadUnitCardImage } from "./loadUnitCard";
 import playwright, { type Browser } from "playwright";
 import { getBSCbyId } from "$lib/data/battlefieldSupport";
 
 type PrintableList = {
-	units: UnitV2[];
-	formations: FormationV2[];
+	units: ListUnit[];
+	formations: ListFormation[];
 	playername: string;
 	listname: string;
 	eras: number[];
@@ -24,7 +24,7 @@ type PrintableList = {
 	bs: number[];
 };
 
-function createUnitLine(unit: UnitV2, listStyle: string, indent: boolean) {
+function createUnitLine(unit: ListUnit, listStyle: string, indent: boolean) {
 	let unitLine: TableCell[] = [];
 	const style = indent ? "cellIndented" : "cell";
 	if (listStyle == "mul") {
@@ -61,7 +61,7 @@ function createUnitLine(unit: UnitV2, listStyle: string, indent: boolean) {
 	return unitLine;
 }
 
-function createUnitTable(listStyle: string, unitList: UnitV2[], formations: FormationV2[], drawFormations: boolean): TableCell[][] {
+function createUnitTable(listStyle: string, unitList: ListUnit[], formations: ListFormation[], drawFormations: boolean): TableCell[][] {
 	let unitTable: TableCell[][] = [];
 	let unitCount = 0;
 	let totalPV = 0;
@@ -141,7 +141,7 @@ function createBattlefieldSupportTable(supportList: number[]) {
 	return supportTable;
 }
 
-function createReferenceList(units: UnitV2[], formations: FormationV2[]) {
+function createReferenceList(units: ListUnit[], formations: ListFormation[]) {
 	const referenceColumns: Column[] = [];
 	const abilityReferenceList = new Set();
 	const spaReferenceList = new Set();
@@ -153,7 +153,7 @@ function createReferenceList(units: UnitV2[], formations: FormationV2[]) {
 		if (formation.type == "none") {
 			return;
 		}
-		let formationReference = getFormationTypeByName(formation.type);
+		let formationReference = getFormationDataFromName(formation.type);
 
 		formationReference?.referencedSPAs?.forEach((spa) => {
 			let spaReference = spaReferences.find(({ name }) => {
@@ -165,7 +165,7 @@ function createReferenceList(units: UnitV2[], formations: FormationV2[]) {
 				spaReferenceList.add({ name: spa, cost: 0, page: "Not Found" });
 			}
 		});
-		formationReference?.grantedSCAs?.forEach((sca) => {
+		formationReference?.referencedSCAs?.forEach((sca) => {
 			const scaReference = getSCAfromName(sca);
 			if (scaReference) {
 				scaReferenceList.add(scaReference);
@@ -283,11 +283,11 @@ function createReferenceList(units: UnitV2[], formations: FormationV2[]) {
 	return referenceColumns;
 }
 
-async function loadUnitFormation(formation: FormationV2, units: UnitV2[], cardStyle: string, browser: Browser) {
+async function loadUnitFormation(formation: ListFormation, units: ListUnit[], cardStyle: string, browser: Browser) {
 	let unitPromises: Promise<string>[] = [];
 	let formationData: { name: string; type: string; pv: number; unitcards: string[] } = { name: formation.name, type: formation.type, pv: 0, unitcards: [] };
 
-	let formationUnits: UnitV2[] = formation.units.map(({ id }) => units.find((unit) => unit.id == id)).filter((result) => result != undefined);
+	let formationUnits: ListUnit[] = formation.units.map(({ id }) => units.find((unit) => unit.id == id)).filter((result) => result != undefined);
 
 	if (cardStyle == "mul") {
 		for (const unit of formationUnits) {
@@ -305,7 +305,7 @@ async function loadUnitFormation(formation: FormationV2, units: UnitV2[], cardSt
 	return formationData;
 }
 
-async function createUnitCardColumns(unitList: UnitV2[], formationList: FormationV2[], printByFormation: boolean, cardStyle: string) {
+async function createUnitCardColumns(unitList: ListUnit[], formationList: ListFormation[], printByFormation: boolean, cardStyle: string) {
 	let formationPromises: Promise<{ name: string; type: string; pv: number; unitcards: string[] }>[] = [];
 
 	const browser = await playwright.chromium.launch({ headless: true });

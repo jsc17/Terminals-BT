@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Popover, Separator } from "$lib/global/components";
+	import { Popover, Separator } from "$lib/components/global/";
 	import type { List } from "$lib/types/list.svelte";
 
 	type Props = {

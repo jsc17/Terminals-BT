@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
-	import { toastController } from "$lib/global/stores/toastController.svelte";
-	import type { UnitV2, List } from "$lib/types/";
-	import { Dialog } from "$lib/global/components";
+	import { toastController } from "$lib/stores/toastController.svelte";
+	import type { ListUnit, List } from "$lib/types/list.svelte";
+	import { Dialog } from "$lib/components/global/";
 	import { getContext } from "svelte";
 
 	type Props = {
@@ -23,7 +23,7 @@
 
 		let sublistData = [];
 		for (const sublist of list.sublists) {
-			let unitList: UnitV2[] = [];
+			let unitList: ListUnit[] = [];
 			let pv = 0;
 			for (const unitId of sublist.checked) {
 				const unit = list.getUnit(unitId);

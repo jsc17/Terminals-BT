@@ -2,7 +2,7 @@ import fs from "fs/promises";
 import { fail } from "@sveltejs/kit";
 import { prisma } from "$lib/server/prisma.js";
 import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup.js";
-import { handleParse } from "$lib/utilities/parseAbilities.js";
+import { handleParse } from "$lib/utilities/abilityUtilities.js";
 
 export const actions = {
 	search: async ({ request }) => {

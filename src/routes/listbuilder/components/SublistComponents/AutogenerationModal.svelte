@@ -1,13 +1,13 @@
 <script lang="ts">
-	import type { UnitV2, List, SublistV2 } from "$lib/types/";
-	import { Dialog, Collapsible, Separator, RadioGroup, Popover } from "$lib/global/components";
+	import type { ListUnit, List, Sublist } from "$lib/types/list.svelte";
+	import { Dialog, Collapsible, Separator, RadioGroup, Popover } from "$lib/components/global/";
 	import { nanoid } from "nanoid";
-	import { appWindow } from "$lib/global/stores";
+	import { appWindow } from "$lib/stores";
 	import { watch } from "runed";
 
 	type AutoSublist = {
 		id: string;
-		sublist: SublistV2;
+		sublist: Sublist;
 		unitString: string;
 		count: number;
 		pv: number;
@@ -53,7 +53,7 @@
 		let existingCombinations = new Set();
 		const possibleUnits = $state
 			.snapshot(list.units)
-			.filter((unit: UnitV2) => {
+			.filter((unit: ListUnit) => {
 				return unit.cost >= options.autoMinUnitCost && !excludedUnits.includes(unit.id);
 			})
 			.map((unit) => {

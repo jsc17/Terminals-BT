@@ -1,5 +1,7 @@
 https://terminal.tools
+https://terminal.tools/about
 https://terminal.tools/listbuilder
 https://terminal.tools/unitsearch
-https://terminal.tools/350validation
-https://terminal.tools/tournament
+https://terminal.tools/play
+https://terminal.tools/changelog
+https://terminal.tools/auth/forgot-password

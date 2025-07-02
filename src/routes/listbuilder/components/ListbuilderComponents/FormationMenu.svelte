@@ -1,14 +1,13 @@
 <script lang="ts">
-	import { Popover, Separator } from "$lib/global/components";
-	import Dropdown from "$lib/global/components/Dropdown.svelte";
-	import { toastController } from "$lib/global/stores";
-	import { List, sendListToPlay, type FormationV2 } from "$lib/types";
+	import { toastController } from "$lib/stores";
+	import { List, type ListFormation } from "$lib/types/list.svelte";
+	import { sendListToPlay } from "$lib/utilities/playmodeUtilities";
 	import { DropdownMenu } from "bits-ui";
 	import { exportToJeff } from "../../utilities/export.svelte";
 	import FindUnitAvailabilityModal from "../modals/FindUnitAvailabilityModal.svelte";
 
 	type Props = {
-		formation: FormationV2;
+		formation: ListFormation;
 		list: List;
 		editModalOpen: boolean;
 		availabilityModal: FindUnitAvailabilityModal;

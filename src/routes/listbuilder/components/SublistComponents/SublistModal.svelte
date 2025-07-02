@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { appWindow } from "$lib/global/stores/appWindow.svelte";
+	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
 	import SublistPrintModal from "./SublistPrintModal.svelte";
-	import Sublist from "./Sublist.svelte";
 	import { getContext } from "svelte";
-	import { List, type SublistV2 } from "$lib/types/";
+	import { List, type Sublist } from "$lib/types/list.svelte";
+	import SublistCard from "./SublistCard.svelte";
 	import EditSublistModal from "./EditSublistModal.svelte";
 	import AutogenerationModal from "./AutogenerationModal.svelte";
-	import { Dialog, Popover } from "$lib/global/components";
+	import { Dialog, Popover } from "$lib/components/global/";
 
 	type Props = {
 		list: List;
@@ -27,11 +27,11 @@
 	let layout: "mobile" | "vertical" | "horizontal" = $derived(appWindow.isMobile ? "mobile" : settings.sublistUI.sublistOrientation);
 
 	let dropTargetStyle = { outline: "none" };
-	function handleSort(e: CustomEvent<DndEvent<SublistV2>>) {
+	function handleSort(e: CustomEvent<DndEvent<Sublist>>) {
 		list.sublists = e.detail.items;
 	}
 
-	let currentSublist = $state<SublistV2>();
+	let currentSublist = $state<Sublist>();
 
 	function openSublistEditModal(id: string) {
 		currentSublist = $state.snapshot(list.getSublist(id));
@@ -43,7 +43,7 @@
 	{#each list.sublists as sublist (sublist.id)}
 		{#if sublist.scenario == scenarioFilter || scenarioFilter == "All"}
 			<div class:panel-vertical={layout == "vertical" && !appWindow.isMobile} class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}>
-				<Sublist {sublist} {list} {scenarioList} unitSortOrder={settings.sublistUI.sublistSortOrder} {layout} {openSublistEditModal}></Sublist>
+				<SublistCard {sublist} {list} {scenarioList} unitSortOrder={settings.sublistUI.sublistSortOrder} {layout} {openSublistEditModal}></SublistCard>
 			</div>
 		{/if}
 	{/each}

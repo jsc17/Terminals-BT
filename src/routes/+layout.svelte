@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { setContext } from "svelte";
-	import "$lib/global/css/global.css";
-	import "$lib/global/css/generic.css";
-	import { Footer, Header, Toast } from "$lib/ui/components/index";
-	import { type Notification } from "$lib/ui/types/index";
+	import "$lib/styles/global.css";
+	import "$lib/styles/generic.css";
+	import { Footer, Header, Toast } from "$lib/components/global/index";
+	import { type Notification } from "$lib/types/global";
 
 	const { data, children } = $props();
 	let user = $state({ username: data.username });

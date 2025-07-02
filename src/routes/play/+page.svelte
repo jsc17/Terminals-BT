@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { PlayList } from "$lib/types/playList";
-	import { PlayFormations, DisplayOptionsPopover, LoadModal, Log, PlayFullList } from "$lib/playmode/components/";
+	import type { PlayList } from "$lib/types/playmode";
+	import { PlayFormations, DisplayOptionsPopover, LoadModal, Log, PlayFullList } from "$lib/components/playmode/";
 	import { PersistedState } from "runed";
-	import type { LogRound, Options } from "../../lib/playmode/types/playtypes";
+	import type { LogRound, Options } from "../../lib/types/playmode";
 	import { deserialize } from "$app/forms";
-	import { Popover } from "$lib/global/components/";
+	import { Popover } from "$lib/components/global/";
 
 	let logDrawerOpen = $state(false);
 	let loadModalOpen = $state(false);

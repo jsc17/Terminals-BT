@@ -1,8 +1,5 @@
-import { getGeneralList } from "$lib/utilities/bt-utils";
 import { nanoid } from "nanoid";
-import type { FormationV2 } from "$lib/types/formation";
-import type { ListCode, ListCodeUnit } from "../../../lib/types/listCode";
-import type { SublistV2 } from "../../../lib/types/sublist";
+import type { ListFormation, ListCode, ListCodeUnit, Sublist } from "$lib/types/listTypes";
 
 /**
  * Converts from original json list formatting to v1 json list formatting
@@ -12,8 +9,8 @@ import type { SublistV2 } from "../../../lib/types/sublist";
  */
 export function convertUnversionedJSONList(importedList: any): ListCode {
 	let importedUnits: ListCodeUnit[] = [];
-	let importedFormations: FormationV2[] = [];
-	let importedSublists: SublistV2[] = [];
+	let importedFormations: ListFormation[] = [];
+	let importedSublists: Sublist[] = [];
 
 	importedFormations.push({ id: "unassigned", name: "Unassigned units", type: "none", units: [] });
 

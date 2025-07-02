@@ -1,10 +1,10 @@
 <svelte:options css="injected" />
 
 <script lang="ts">
-	import { type UnitV2 } from "$lib/types";
+	import { type ListUnit } from "$lib/types/list.svelte";
 	import PrintUnitCard from "./PrintUnitCard.svelte";
 
-	let { unit, image }: { unit: UnitV2; image: string } = $props();
+	let { unit, image }: { unit: ListUnit; image: string } = $props();
 </script>
 
 <body>

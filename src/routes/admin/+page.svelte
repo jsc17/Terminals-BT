@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { deserialize, enhance } from "$app/forms";
-	import { calculateTMM } from "$lib/utilities/bt-utils";
-	import { toastController } from "$lib/global/stores/toastController.svelte";
+	import { calculateTMM } from "$lib/utilities/genericBattletechUtilities";
+	import { toastController } from "$lib/stores/toastController.svelte";
 	import SendNotification from "./SendNotification.svelte";
 
 	async function loadUnits() {

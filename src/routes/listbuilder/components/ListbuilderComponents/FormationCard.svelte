@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { dndzone, dragHandleZone, type DndEvent, dragHandle } from "svelte-dnd-action";
-	import { getContext } from "svelte";
-	import { appWindow } from "$lib/global/stores";
-	import { Collapsible, Popover } from "$lib/global/components/";
-	import { List, type FormationV2 } from "$lib/types/";
-	import { getFormationStats } from "$lib/utilities/formation-utilities";
+	import { appWindow } from "$lib/stores";
+	import { Collapsible, Popover } from "$lib/components/global/";
+	import { List, type ListFormation } from "$lib/types/list.svelte";
+	import { getFormationStats } from "$lib/utilities/formationUtilities";
 	import { UnitCard, UnitCustomizationModal, EditFormationModal, FormationInfoPopover, FormationMenu, FindUnitAvailabilityModal } from "../";
-	import { validateFormation } from "$lib/data/FormationData";
+	import { validateFormation } from "$lib/utilities/formationRequirementValidation.svelte";
 
-	type Props = { formation: FormationV2; draggingColumns: boolean; unitCustomizationModal?: UnitCustomizationModal; list: List };
+	type Props = { formation: ListFormation; draggingColumns: boolean; unitCustomizationModal?: UnitCustomizationModal; list: List };
 
 	let { formation = $bindable(), draggingColumns, unitCustomizationModal, list = $bindable() }: Props = $props();
 	let editModalOpen = $state(false);

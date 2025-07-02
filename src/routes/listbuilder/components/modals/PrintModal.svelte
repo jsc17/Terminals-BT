@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
-	import { toastController } from "$lib/global/stores/toastController.svelte";
-	import { type List } from "$lib/types/";
-	import { Dialog } from "$lib/global/components";
+	import { toastController } from "$lib/stores/toastController.svelte";
+	import { type List } from "$lib/types/list.svelte";
+	import { Dialog } from "$lib/components/global/";
 	import { getContext } from "svelte";
 
 	type Props = {

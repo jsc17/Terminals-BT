@@ -1,7 +1,7 @@
 import { fail } from "@sveltejs/kit";
 import { prisma } from "$lib/server/prisma.js";
 import { printList } from "./printing/printList.js";
-import { type ListCode } from "../../lib/types/listCode.js";
+import { type ListCode } from "$lib/types/listTypes";
 import { createSublistsPdf } from "./printing/printSublists.js";
 
 export const load = async ({ url }) => {

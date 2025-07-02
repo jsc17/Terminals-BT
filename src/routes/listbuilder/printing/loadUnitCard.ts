@@ -1,8 +1,6 @@
-import type { Browser, Page } from "playwright";
+import type { Browser } from "playwright";
 import fs from "fs/promises";
-import { loadMULUnitServer } from "$lib/utilities/load";
-import type { UnitV2 } from "$lib/types";
-import { nanoid } from "nanoid";
+import type { ListUnit } from "$lib/types/listTypes";
 import { render } from "svelte/server";
 import Wrapper from "./Wrapper.svelte";
 import { existsSync } from "fs";
@@ -39,7 +37,7 @@ export async function loadUnitCardImage(mulId: number, skill?: number): Promise<
 }
 
 //puppeteer for card generation
-export async function renderHTMLfromUnit(unit: UnitV2) {
+export async function renderHTMLfromUnit(unit: ListUnit) {
 	let image = await loadImage(unit.baseUnit.mulId.toString(), unit.baseUnit.imageLink ?? "");
 	const renderedComponent = render(Wrapper, {
 		props: { unit, image }
@@ -68,7 +66,7 @@ export async function loadImage(mulId: string, unitImageLink: string) {
 	}
 }
 
-export async function generateUnitCard(unit: UnitV2, browser: Browser) {
+export async function generateUnitCard(unit: ListUnit, browser: Browser) {
 	if (unit.baseUnit.mulId < 0) {
 		return loadUnitCardImage(unit.baseUnit.mulId);
 	}

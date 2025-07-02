@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { getContext } from "svelte";
 	import { scaReferences } from "$lib/data";
-	import type { List } from "$lib/types/";
-	import { Dialog } from "$lib/global/components";
+	import type { List } from "$lib/types/list.svelte";
+	import { Dialog } from "$lib/components/global/";
 
 	type Props = {
 		open: boolean;

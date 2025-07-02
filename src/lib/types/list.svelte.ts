@@ -1,14 +1,17 @@
-import type { UnitV2, MulUnit, ListCode, ListCodeUnit, SCA, FormationV2, SublistV2, ResultList } from "$lib/types/";
-import { getNewSkillCost } from "$lib/utilities/bt-utils";
-import { getRules } from "$lib/types/";
-import { getSCAfromId } from "./sca";
+import type { ListUnit, MulUnit, ListCode, ListCodeUnit, SCA, ListFormation, Sublist, SublistStats } from "$lib/types/listTypes";
+import { getSCAfromId } from "$lib/utilities/listUtilities";
+import type { ResultList } from "./resultList.svelte";
+import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
+import { getRules } from "$lib/types/rulesets";
 import { nanoid } from "nanoid";
-import { loadMULUnit } from "$lib/utilities/load";
+import { loadMULUnit } from "$lib/utilities/loadUtilities";
+
+export type { ListCode, ListCodeUnit, ListUnit, ListFormation, SCA, MulUnit, Sublist, SublistStats };
 
 export class List {
-	units: UnitV2[] = $state([]);
-	formations: FormationV2[] = $state([{ id: "unassigned", name: "Unassigned units", type: "none", units: [] }]);
-	sublists: SublistV2[] = $state([]);
+	units: ListUnit[] = $state([]);
+	formations: ListFormation[] = $state([{ id: "unassigned", name: "Unassigned units", type: "none", units: [] }]);
+	sublists: Sublist[] = $state([]);
 	scaList: SCA[] = $state([]);
 	bsList = $state<number[]>([]);
 
@@ -446,7 +449,7 @@ export class List {
 		this.bsList = [];
 	}
 
-	addSublist(sublistToAdd?: SublistV2): string {
+	addSublist(sublistToAdd?: Sublist): string {
 		const id = crypto.randomUUID();
 		this.sublists.push(sublistToAdd ?? { id, checked: [], scenario: "-" });
 		return id;

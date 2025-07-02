@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { appWindow } from "$lib/global/stores/appWindow.svelte";
+	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { getContext } from "svelte";
 	import { enhance } from "$app/forms";
-	import { toastController } from "$lib/global/stores/toastController.svelte";
+	import { toastController } from "$lib/stores/toastController.svelte";
 	import type { ActionResult } from "@sveltejs/kit";
 	import { deserialize } from "$app/forms";
 	import { exportToJeff } from "../../utilities/export.svelte";

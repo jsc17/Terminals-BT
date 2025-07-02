@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { List, type FormationV2 } from "$lib/types/";
-	import { Select, Dialog } from "$lib/global/components/";
-	import { formationDataList, getFormationDataFromName, type FormationData } from "$lib/data/FormationData";
+	import { List, type ListFormation } from "$lib/types/list.svelte";
+	import { Select, Dialog } from "$lib/components/global/";
+	import { formationDataList, type FormationData } from "$lib/data/FormationData";
+	import { getFormationDataFromName } from "$lib/utilities/formationUtilities";
 
 	type Props = {
-		formation: FormationV2;
+		formation: ListFormation;
 		open: boolean;
 		list: List;
 		validationResults: {
@@ -101,7 +102,7 @@
 				{/each}
 			</div>
 			<div class="formation-bonus-container">
-				<p class="bold">Bonus Ability:</p>
+				<p class="bold">Bonus Ability: ({formationDetails?.page})</p>
 				{#each formationDetails?.bonus.split("\n") ?? [] as part}
 					<p class="muted">{part}</p>
 				{/each}
@@ -132,12 +133,14 @@
 					</div>
 				{/each}
 			</div>
-			<div class="formation-bonus-container">
-				<p class="bold">Bonus Ability:</p>
-				{#each secondaryDetails?.bonus.split("\n") ?? [] as part}
-					<p class="muted">{part}</p>
-				{/each}
-			</div>
+			{#if secondaryValue != "None"}
+				<div class="formation-bonus-container">
+					<p class="bold">Bonus Ability: ({secondaryDetails?.page})</p>
+					{#each secondaryDetails?.bonus.split("\n") ?? [] as part}
+						<p class="muted">{part}</p>
+					{/each}
+				</div>
+			{/if}
 		</div>
 	</div>
 </Dialog>

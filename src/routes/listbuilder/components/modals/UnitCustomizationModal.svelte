@@ -1,17 +1,17 @@
 <script lang="ts">
-	import type { UnitV2 } from "$lib/types/unit";
+	import type { ListUnit } from "$lib/types/listTypes";
 	import spaList from "$lib/data/spas.json";
 	import ammoList from "$lib/data/ammoTypes.json";
 	import type { List } from "$lib/types/list.svelte";
 	import { getContext } from "svelte";
-	import { Dialog } from "$lib/global/components";
+	import { Dialog } from "$lib/components/global/";
 
 	type Props = {
 		list: List;
 	};
 
 	let { list = $bindable() }: Props = $props();
-	let unit = $state<UnitV2 | undefined>();
+	let unit = $state<ListUnit | undefined>();
 
 	let open = $state(false);
 

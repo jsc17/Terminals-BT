@@ -1,8 +1,8 @@
-import { toastController } from "$lib/global/stores/toastController.svelte";
-import type { UnitV2 } from "$lib/types/unit";
-import { createSingleAbilityString } from "$lib/utilities/parseAbilities";
+import { toastController } from "$lib/stores";
+import type { ListUnit } from "$lib/types/listTypes";
+import { createSingleAbilityString } from "$lib/utilities/abilityUtilities";
 
-export function exportToJeff(name: string, units: UnitV2[]) {
+export function exportToJeff(name: string, units: ListUnit[]) {
 	const jeffList: any = { name: name, members: [], uuid: crypto.randomUUID(), lastUpdated: new Date().toISOString(), formationBonus: "none", groupLabel: "Lance" };
 	units.forEach((unit) => {
 		if (unit.baseUnit.mulId > 0) {

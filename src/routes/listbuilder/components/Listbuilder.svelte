@@ -11,14 +11,17 @@
 		FindUnitAvailabilityModal,
 		BattlefieldSupportModal
 	} from "./";
-	import { ResultList, ruleSets, type FormationV2, sendListToPlay, List } from "$lib/types/";
+	import { type ListFormation, List } from "$lib/types/list.svelte";
+	import { ResultList } from "$lib/types/resultList.svelte";
+	import { ruleSets } from "$lib/types/rulesets";
+	import { sendListToPlay } from "$lib/utilities/playmodeUtilities";
 	import { getContext } from "svelte";
 	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
-	import { appWindow, toastController } from "$lib/global/stores";
-	import { Separator, Menu, Dialog } from "$lib/global/components";
+	import { appWindow, toastController } from "$lib/stores";
+	import { Separator, Menu, Dialog } from "$lib/components/global/";
 	import { deserialize } from "$app/forms";
 	import { DropdownMenu } from "bits-ui";
-	import Collapsible from "$lib/global/components/Collapsible.svelte";
+	import { Collapsible } from "$lib/components/global/";
 	import { getBSCbyId } from "$lib/data/battlefieldSupport";
 
 	type Props = {
@@ -43,11 +46,11 @@
 	let dropTargetStyle = { outline: "solid var(--primary)" };
 	let flipDurationMs = 100;
 	let draggingColumns = $state(false);
-	function handleDndConsider(e: CustomEvent<DndEvent<FormationV2>>) {
+	function handleDndConsider(e: CustomEvent<DndEvent<ListFormation>>) {
 		draggingColumns = true;
 		list.formations = e.detail.items;
 	}
-	function handleDndFinalize(e: CustomEvent<DndEvent<FormationV2>>) {
+	function handleDndFinalize(e: CustomEvent<DndEvent<ListFormation>>) {
 		draggingColumns = false;
 		list.formations = e.detail.items;
 	}

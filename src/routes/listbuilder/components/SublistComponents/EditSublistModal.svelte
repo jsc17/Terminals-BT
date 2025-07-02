@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { List, SublistV2 } from "$lib/types/";
-	import { Dialog } from "$lib/global/components";
+	import type { List, Sublist } from "$lib/types/list.svelte";
+	import { Dialog } from "$lib/components/global/";
 
 	type Props = {
 		list: List;
-		sublist?: SublistV2;
+		sublist?: Sublist;
 		open: boolean;
 	};
 

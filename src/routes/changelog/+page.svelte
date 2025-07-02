@@ -31,25 +31,20 @@
 		<h2>Road Map:</h2>
 		<h3>Priority updates: Things I really want to get done</h3>
 		<ul>
-			<li><span class="complete">Era and faction filtering in unit search</span> (added 6-30-24)</li>
+			<li class="complete"><span class="strikethrough">Formation validation</span> (Complete)</li>
+			<li>Formation Bonuses in play feature</li>
+			<li>Collection manager</li>
 			<li>Customizable rules in the list builder</li>
-			<li><span class="complete">Reimplement list builder validation</span> (7-13-24)</li>
-			<li><span class="complete">multiple era and faction selections</span> (2-22-25)</li>
-			<li><span class="complete">Improved list sharing capabilities</span></li>
-			<li>Expanded sublist generation options</li>
-			<li>Formation validation</li>
 		</ul>
 		<h3>General updates: Idea's I'd like to implement when I have time</h3>
 		<ul>
 			<li>Finish tournament organization</li>
 			<li>Layout customization</li>
 			<li>Favorite and save units/formation for quick adding</li>
-			<li><span class="complete">Alternate Ammo/Pilot SPA's</span></li>
 		</ul>
 		<h3>Low priority updates: Someday, possibly</h3>
 		<ul>
 			<li>Public player list sharing</li>
-			<li>Play feature</li>
 		</ul>
 	</div>
 </main>
@@ -100,7 +95,10 @@
 		margin-left: 24px;
 	}
 	.complete {
-		text-decoration: line-through;
 		color: var(--primary);
+	}
+	.strikethrough {
+		color: var(--primary);
+		text-decoration: line-through;
 	}
 </style>

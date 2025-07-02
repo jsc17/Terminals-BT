@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Dialog, Select } from "$lib/global/components/";
-	import type { List } from "$lib/types";
+	import { Dialog, Select } from "$lib/components/global/";
+	import { List } from "$lib/types/list.svelte";
+	import type { Item } from "$lib/types/global";
 	import { battlefieldSupport, battlefieldSupportGroups } from "$lib/data/battlefieldSupport";
-	import type { Item } from "$lib/global/types/types";
 
 	type Props = {
 		list: List;

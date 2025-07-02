@@ -1,15 +1,15 @@
 <svelte:options css="injected" />
 
 <script lang="ts">
-	import { aeroTypes, infTypes, mechTypes, typeIncludes, vTypes } from "$lib/playmode/unitcards/utilities/utilities";
-	import type { UnitV2 } from "$lib/types";
-	import { createSingleAbilityString } from "$lib/utilities/parseAbilities";
+	import { aeroTypes, infTypes, mechTypes, typeIncludes, vTypes } from "$lib/utilities/playmodeUtilities";
+	import type { ListUnit } from "$lib/types/list.svelte";
+	import { createSingleAbilityString } from "$lib/utilities/abilityUtilities";
 	import AeroCritBox from "./critboxes/AeroCritBox.svelte";
 	import CvCritBox from "./critboxes/CvCritBox.svelte";
 	import MechCritBox from "./critboxes/MechCritBox.svelte";
 	import ProtoCritBox from "./critboxes/ProtoCritBox.svelte";
 
-	let { unit, image }: { unit: UnitV2; image: string } = $props();
+	let { unit, image }: { unit: ListUnit; image: string } = $props();
 </script>
 
 <div class="play-unit-card-container">

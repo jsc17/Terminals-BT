@@ -13,8 +13,8 @@
 
 <style>
 	body {
-		height: 480px;
-		width: 672px;
+		height: 187pt;
+		width: 262pt;
 		container: unit-card / size;
 		font-family: Arial, Helvetica, sans-serif;
 		padding: 0;

@@ -3,13 +3,13 @@
 	import { enhance } from "$app/forms";
 	import { type ActionResult } from "@sveltejs/kit";
 	import { ResultList } from "$lib/types/resultList.svelte";
-	import { getContext } from "svelte";
 	import type { List } from "$lib/types/list.svelte";
 	import DamageSortPopover from "./DamageSortPopover.svelte";
 	import { eraLookup } from "$lib/data/erasFactionLookup";
 	import { VList } from "virtua/svelte";
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
-	import { Dialog, Separator } from "$lib/components/global/";
+	import { Dialog, Separator, DropdownMenu } from "$lib/components/global/";
+	import { exportArrayToCSV } from "$lib/utilities/export";
 
 	type Props = {
 		list?: List;
@@ -75,7 +75,24 @@
 
 <div class="search-results">
 	<div class:result-list-header={!appWindow.isMobile} class:result-list-header-mobile={appWindow.isMobile}>
-		<div class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile}></div>
+		<div class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile}>
+			<DropdownMenu
+				items={[
+					{
+						type: "item",
+						label: "Export currently filtered results to CSV",
+						onSelect: () => {
+							exportArrayToCSV(resultList.filteredList);
+						}
+					}
+				]}
+				triggerClasses="transparent-button"
+			>
+				{#snippet trigger()}
+					<img class="result-list-menu-button button-icon" src="/icons/settings.svg" alt="Results list menu" />
+				{/snippet}
+			</DropdownMenu>
+		</div>
 		<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile} onclick={() => sort("name")} bind:clientWidth={listWidth}>
 			{appWindow.isNarrow ? `Name` : `Name - ${resultList.filteredList.length}/${resultList.restrictedList.length} results shown`}
 			{#if resultList.sort.key == "name"}
@@ -213,6 +230,9 @@
 		width: 100%;
 		display: flex;
 		font-size: x-large;
+	}
+	.result-list-menu-button {
+		filter: var(--primary-filter);
 	}
 	:global(.sort-header-button, .sort-header-button-mobile) {
 		background-color: var(--card);

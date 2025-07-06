@@ -3,6 +3,7 @@ type PrintSettings = {
 	printFormations: boolean;
 	printCardsByFormation: boolean;
 	cardStyle: "mul" | "generated";
+	formationHeaderStyle: "inline" | "side";
 };
 
 type SublistUISettings = {

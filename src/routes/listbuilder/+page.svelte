@@ -8,11 +8,11 @@
 	import { convertUnversionedJSONList } from "./utilities/convert";
 
 	let settings = new PersistedState<Settings>("listbuilderSettings", {
-		print: { printingStyle: "detailed", printFormations: true, printCardsByFormation: false, cardStyle: "generated" },
+		print: { printingStyle: "detailed", printFormations: true, printCardsByFormation: false, cardStyle: "generated", formationHeaderStyle: "inline" },
 		sublistUI: {
 			sublistOrientation: "vertical",
 			sublistSortOrder: "pv",
-			sublistPrintListSettings: { printingStyle: "detailed", printFormations: true, printCardsByFormation: false, cardStyle: "generated" },
+			sublistPrintListSettings: { printingStyle: "detailed", printFormations: true, printCardsByFormation: false, cardStyle: "generated", formationHeaderStyle: "inline" },
 			sublistPrintAllOrientation: "vertical",
 			sublistPrintAllGroupByScenario: false
 		}

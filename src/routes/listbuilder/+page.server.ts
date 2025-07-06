@@ -125,6 +125,7 @@ export const actions = {
 		const list = JSON.parse(formData.get("body")!.toString());
 		list.style = formData.get("printStyle")?.toString() ?? "detailed";
 		list.cardStyle = formData.get("cardStyle")?.toString() ?? "mul";
+		list.formationHeaderStyle = formData.get("formationHeaderStyle")?.toString() ?? "inline";
 		const printFormations = formData.get("drawFormations")?.toString() == "on";
 		const printUnitsByFormation = formData.get("printUnitsByFormation")?.toString() == "on";
 		const blob = await printList(list, printFormations, printUnitsByFormation);

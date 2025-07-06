@@ -8,9 +8,9 @@ import Drawer from "./generic/Drawer.svelte";
 import Popover from "./generic/Popover.svelte";
 import Separator from "./generic/Separator.svelte";
 import RadioGroup from "./generic/RadioGroup.svelte";
-import Dropdown from "./generic/Dropdown.svelte";
+import DropdownMenu from "./generic/DropdownMenu.svelte";
 
-export { Select, Dialog, Menu, Combobox, Collapsible, Slider, Drawer, Popover, Separator, RadioGroup, Dropdown };
+export { Select, Dialog, Menu, Combobox, Collapsible, Slider, Drawer, Popover, Separator, RadioGroup, DropdownMenu };
 
 import Header from "./ui/Header.svelte";
 import Footer from "./ui/Footer.svelte";

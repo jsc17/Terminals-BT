@@ -19,6 +19,7 @@ type PrintableList = {
 	general: number;
 	style: "mul" | "detailed";
 	cardStyle: "mul" | "generated";
+	formationHeaderStyle: "inline" | "side";
 	condensed: boolean;
 	scas: SCA[];
 	bs: number[];
@@ -84,7 +85,7 @@ function createUnitTable(listStyle: string, unitList: ListUnit[], formations: Li
 				{
 					text: `${formation.name} - ${formation.type} formation - ${formation.units.length} Units - ${formationPV} PV`,
 					colSpan: headerLength,
-					style: "formationHeader"
+					style: "formationTableHeader"
 				}
 			]);
 		}
@@ -305,7 +306,7 @@ async function loadUnitFormation(formation: ListFormation, units: ListUnit[], ca
 	return formationData;
 }
 
-async function createUnitCardColumns(unitList: ListUnit[], formationList: ListFormation[], printByFormation: boolean, cardStyle: string) {
+async function createUnitCardColumns(unitList: ListUnit[], formationList: ListFormation[], printByFormation: boolean, cardStyle: string, formationHeaderStyle: "inline" | "side") {
 	let formationPromises: Promise<{ name: string; type: string; pv: number; unitcards: string[] }>[] = [];
 
 	const browser = await playwright.chromium.launch({ headless: true });
@@ -336,28 +337,54 @@ async function createUnitCardColumns(unitList: ListUnit[], formationList: ListFo
 		];
 	}
 
-	const unitCardColumns: Content[] = [];
+	const unitCardColumns: Column[] = [];
 	formationsToPrint.forEach((formation) => {
-		unitCardColumns.push({
-			text: printByFormation && formation.type != "none" ? `${formation.name} - ${formation.type} formation - ${formation.unitcards.length} units - ${formation.pv}pv` : "",
-			style: "subheader",
-			headlineLevel: 1
-		});
-
-		const unitCards: { image: any; width: number }[] = [];
+		if (formation.unitcards.length == 0) return;
+		const unitCards: { image: any; width: number; style: string }[] = [];
 		for (const unitCard of formation.unitcards) {
-			unitCards.push({ image: unitCard, width: 250 });
+			unitCards.push({ image: unitCard, width: 262, style: "unitCard" });
 		}
+		if (formationHeaderStyle == "inline") {
+			unitCardColumns.push({
+				text: printByFormation && formation.type != "none" ? `${formation.name} - ${formation.type} formation - ${formation.unitcards.length} units - ${formation.pv}pv` : "",
+				style: "formationHeader",
+				headlineLevel: 1
+			});
+		}
+
+		const formationNameLine = `${formation.name} - ${formation.type} ${formation.type == "Combat Group" ? "" : "Formation"}`;
+		const formationStatLine = `${formation.unitcards.length} Units - ${formation.pv}pv`;
 		unitCardColumns.push({
 			columns: [
-				unitCards.filter((v, i) => {
-					return i % 2 == 0;
-				}),
-				unitCards.filter((v, i) => {
-					return i % 2 == 1;
-				})
+				{
+					stack:
+						formationHeaderStyle == "inline" || formation.type == "none" || !printByFormation
+							? []
+							: [
+									{
+										svg: `<svg> 
+							<text text-anchor="end" transform="translate(20, 10) rotate(-90)" font-weight="bold" style="font-size: 14px;"> ${formationNameLine} </text> 
+							<text text-anchor="end" transform="translate(40, 10) rotate(-90)" font-weight="bold" style="font-size: 12px;"> ${formationStatLine} </text> 
+							</svg>`
+									}
+								],
+					width: formationHeaderStyle == "inline" || !printByFormation ? 0 : "*"
+				},
+				{
+					stack: unitCards.filter((v, i) => {
+						return i % 2 == 0;
+					}),
+					width: 262
+				},
+				{
+					stack: unitCards.filter((v, i) => {
+						return i % 2 == 1;
+					}),
+					width: 262
+				}
 			],
-			columnGap: 10
+			columnGap: 2,
+			marginTop: 5
 		});
 	});
 	return unitCardColumns;
@@ -396,7 +423,7 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 	const tableWidths = list.style == "mul" ? ["*", "auto", "auto", "auto"] : ["*", "auto", "auto", "auto", "auto", "auto", "auto"];
 	const unitTable = createUnitTable(list.style, list.units, list.formations, drawFormations);
 	const referenceColumns = createReferenceList(list.units, list.formations);
-	const unitCardColumns = await createUnitCardColumns(list.units, list.formations, printUnitsByFormation, list.cardStyle);
+	const unitCardColumns = await createUnitCardColumns(list.units, list.formations, printUnitsByFormation, list.cardStyle, list.formationHeaderStyle);
 	const bsTable = createBattlefieldSupportTable(list.bs);
 
 	let scaSection: Content[] = [];
@@ -407,7 +434,7 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 
 	const dd: TDocumentDefinitions = {
 		pageSize: "LETTER",
-		pageMargins: [30, 10],
+		pageMargins: 9,
 		pageBreakBefore: (currentNode, followingNodesOnPage, nodesOnNextPage, previousNodesOnPage) => {
 			if (currentNode.headlineLevel == 1 && followingNodesOnPage.length == 0) {
 				return true;
@@ -488,7 +515,7 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 				margin: [2, 1, 0, 0],
 				alignment: "center"
 			},
-			formationHeader: {
+			formationTableHeader: {
 				margin: [2, 1, 0, 0],
 				fillColor: "#e6e6e6"
 			},
@@ -498,6 +525,14 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 			},
 			listItem: {
 				margin: [0, 2]
+			},
+			formationHeader: {
+				fontSize: 10,
+				bold: true,
+				margin: [0, 2]
+			},
+			unitCard: {
+				margin: 0
 			}
 		}
 	};

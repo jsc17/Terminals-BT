@@ -20,8 +20,7 @@
 	import { appWindow, toastController } from "$lib/stores";
 	import { Separator, Menu, Dialog } from "$lib/components/global/";
 	import { deserialize } from "$app/forms";
-	import { DropdownMenu } from "bits-ui";
-	import { Collapsible } from "$lib/components/global/";
+	import { Collapsible, DropdownMenu } from "$lib/components/global/";
 	import { getBSCbyId } from "$lib/data/battlefieldSupport";
 
 	type Props = {
@@ -131,40 +130,17 @@
 				</Dialog>
 			{/if}
 			<div class="list-buttons">
-				<DropdownMenu.Root>
-					<DropdownMenu.Trigger>+</DropdownMenu.Trigger>
-					<DropdownMenu.Portal>
-						<DropdownMenu.Content>
-							<DropdownMenu.Item
-								class="dropdown-button"
-								textValue="Add formation"
-								onSelect={() => {
-									list.newFormation();
-								}}
-							>
-								Add Formation
-							</DropdownMenu.Item>
-							<DropdownMenu.Item
-								class="dropdown-button"
-								textValue="Add Special Command Ability"
-								onSelect={() => {
-									scaModalOpen = true;
-								}}
-							>
-								Add Special Command Ability
-							</DropdownMenu.Item>
-							<DropdownMenu.Item
-								class="dropdown-button"
-								textValue="Add Battlefield Support"
-								onSelect={() => {
-									battlefieldSupportModal?.show();
-								}}
-							>
-								Add Battlefield Support
-							</DropdownMenu.Item>
-						</DropdownMenu.Content>
-					</DropdownMenu.Portal>
-				</DropdownMenu.Root>
+				<DropdownMenu
+					items={[
+						{ type: "item", label: "Add Formation", onSelect: () => list.newFormation() },
+						{ type: "item", label: "Add Special Command Ability", onSelect: () => (scaModalOpen = true) },
+						{ type: "item", label: "Add Battlefield Support", onSelect: () => battlefieldSupportModal?.show() }
+					]}
+				>
+					{#snippet trigger()}
+						+
+					{/snippet}
+				</DropdownMenu>
 
 				<Menu img={"/icons/menu.svg"}>
 					<button

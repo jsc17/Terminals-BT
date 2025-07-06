@@ -4,6 +4,19 @@ type Item = {
 	disabled?: boolean;
 };
 
+type MenuButton = {
+	type: "item";
+	label: string;
+	onSelect: () => void;
+};
+
+type MenuSeparator = {
+	type: "separator";
+	classes?: string;
+};
+
+type MenuItem = MenuButton | MenuSeparator;
+
 type Notification = {
 	date: Date;
 	read: boolean;
@@ -12,4 +25,4 @@ type Notification = {
 	type: string;
 };
 
-export type { Item, Notification };
+export type { Item, MenuItem, Notification };

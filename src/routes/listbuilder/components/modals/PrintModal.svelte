@@ -83,6 +83,15 @@
 						>Print Unit Cards by formation?</label
 					>
 				</div>
+				<fieldset class="formation-header-style-group">
+					<legend>Formation Header Style:</legend>
+					<label for="formationHeaderStyleInline">
+						<input type="radio" name="formationHeaderStyle" id="formationHeaderStyleInline" bind:group={settings.print.formationHeaderStyle} value="inline" /> In-line
+					</label>
+					<label for="formationHeaderStyleSide">
+						<input type="radio" name="formationHeaderStyle" id="formationHeaderStyleSide" bind:group={settings.print.formationHeaderStyle} value="side" /> To the side
+					</label>
+				</fieldset>
 			</fieldset>
 			<fieldset>
 				<legend>Card Options</legend>
@@ -136,5 +145,10 @@
 	}
 	fieldset label {
 		color: var(--muted-foreground);
+	}
+	.formation-header-style-group {
+		margin-top: 6px;
+		display: flex;
+		gap: 4px;
 	}
 </style>

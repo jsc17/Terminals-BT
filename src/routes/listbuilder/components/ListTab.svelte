@@ -2,7 +2,7 @@
 	import { setContext } from "svelte";
 	import { Listbuilder } from "./index";
 	import { ResultList } from "$lib/types/resultList.svelte";
-	import { SearchFilters, SearchParameters, SearchResults } from "$lib/components/UnitSearch/index";
+	import { SearchFilters, SearchParameters, SearchResults } from "$lib/components/unitsearch";
 	import { slide } from "svelte/transition";
 	import { List } from "$lib/types/list.svelte";
 

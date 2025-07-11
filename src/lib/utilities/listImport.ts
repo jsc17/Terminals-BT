@@ -1,5 +1,86 @@
 import { nanoid } from "nanoid";
 import type { ListFormation, ListCode, ListCodeUnit, Sublist } from "$lib/types/listTypes";
+import { List } from "$lib/types/list.svelte";
+import { ResultList } from "$lib/types/resultList.svelte";
+
+export function loadExistingListsFromLocalStorage(): List[] {
+	const activeLists: List[] = [];
+	//load list if still using localstorage from before tabs update
+	const lastList = localStorage.getItem("last-list");
+	if (lastList) {
+		let list = new List(new ResultList());
+		const parsedCode = getListCodeFromString(lastList);
+		if (parsedCode) {
+			list.loadList(parsedCode);
+		} else {
+			console.log("failed to import list");
+		}
+		activeLists.push(list);
+		localStorage.removeItem("last-list");
+	}
+	//load all localstorage previous list into tabs
+	const lastLists = JSON.parse(localStorage.getItem("last-lists") ?? "[]");
+	for (const existingListTab of lastLists ?? []) {
+		let list = new List(new ResultList());
+		const parsedCode = getListCodeFromString(existingListTab);
+		if (parsedCode) {
+			list.loadList(parsedCode);
+		} else {
+			console.log("failed to import list");
+		}
+		activeLists.push(list);
+	}
+	return activeLists;
+}
+
+export function getListCodeFromString(data: string): ListCode | undefined {
+	try {
+		const parsed = JSON.parse(data);
+		switch (parsed.lcVersion) {
+			case 2:
+				return importListCodeV2(parsed);
+			case 1:
+				return importListCodeV1(parsed);
+			default:
+				return convertUnversionedJSONList(parsed);
+		}
+	} catch (error) {
+		console.error("Invalid JSON");
+		return undefined;
+	}
+}
+
+function importListCodeV2(data: any): ListCode {
+	return {
+		id: data.id ?? crypto.randomUUID(),
+		name: data.name ?? "Imported List",
+		eras: data.eras ?? [],
+		factions: data.factions ?? [],
+		rules: data.rules ?? "noRes",
+		units: data.units ?? [],
+		sublists: data.sublists ?? [],
+		lcVersion: data.lcVersion ?? 0,
+		formations: data.formations ?? [],
+		scas: data.scas,
+		bs: data.bs
+	};
+}
+
+function importListCodeV1(data: any): ListCode {
+	return {
+		id: data.id ?? crypto.randomUUID(),
+		name: data.name ?? "Imported List",
+		eras: data.era == 0 ? [] : [data.era],
+		factions: data.faction == 0 ? [] : [data.faction],
+		rules: data.rules ?? "noRes",
+		units: data.units ?? [],
+		sublists: data.sublists ?? [],
+		lcVersion: data.lcVersion ?? 0,
+		formations: data.formations ?? [],
+		scas: data.scas,
+		bs: data.bs
+	};
+}
 
 /**
  * Converts from original json list formatting to v1 json list formatting
@@ -7,7 +88,7 @@ import type { ListFormation, ListCode, ListCodeUnit, Sublist } from "$lib/types/
  * @param importedList - the list in json format
  * @returns - a listcode in the v1 formatting
  */
-export function convertUnversionedJSONList(importedList: any): ListCode {
+function convertUnversionedJSONList(importedList: any): ListCode {
 	let importedUnits: ListCodeUnit[] = [];
 	let importedFormations: ListFormation[] = [];
 	let importedSublists: Sublist[] = [];

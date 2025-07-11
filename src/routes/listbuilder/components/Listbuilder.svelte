@@ -132,7 +132,7 @@
 			<div class="list-buttons">
 				<DropdownMenu
 					items={[
-						{ type: "item", label: "Add Formation", onSelect: () => list.newFormation() },
+						{ type: "item", label: "Add Formation", onSelect: () => list.addFormation() },
 						{ type: "item", label: "Add Special Command Ability", onSelect: () => (scaModalOpen = true) },
 						{ type: "item", label: "Add Battlefield Support", onSelect: () => battlefieldSupportModal?.show() }
 					]}

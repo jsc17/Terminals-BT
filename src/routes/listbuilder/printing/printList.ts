@@ -363,8 +363,8 @@ async function createUnitCardColumns(unitList: ListUnit[], formationList: ListFo
 							: [
 									{
 										svg: `<svg> 
-							<text text-anchor="end" transform="translate(20, 10) rotate(-90)" font-weight="bold" style="font-size: 14px;"> ${formationNameLine} </text> 
-							<text text-anchor="end" transform="translate(40, 10) rotate(-90)" font-weight="bold" style="font-size: 12px;"> ${formationStatLine} </text> 
+							<text text-anchor="end" transform="translate(40, 10) rotate(-90)" font-weight="bold" style="font-size: 14px;"> ${formationNameLine} </text> 
+							<text text-anchor="end" transform="translate(60, 10) rotate(-90)" font-weight="bold" style="font-size: 12px;"> ${formationStatLine} </text> 
 							</svg>`
 									}
 								],

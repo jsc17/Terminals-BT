@@ -82,3 +82,34 @@ export type Requirement =
 	| UnitTypeRequirement
 	| FactionRequirement
 	| UniqueRequirement;
+
+//timing: start of play, start of turn, at will
+//ability granted: does it grant a set ability, or something that is chosen?
+//amount: set number, portion of units, entire formation, all units of role
+//uses: does the ability have a set number of uses?
+
+export type Bonus = {
+	type: "SPA" | "SCA" | "Unique" | "None";
+	description: string;
+	timing?: "playStart" | "turnStart" | "atWill" | "constant";
+	grantedSCA?: string[];
+	grantedSPA?: string[];
+	grantedAbility?: { name: string; description: string }[];
+	amount?: number | { plus?: number; percent?: number };
+};
+
+export type FormationData = {
+	id: number;
+	name: string;
+	description?: string;
+	ideal?: string;
+	minimumUnits?: number;
+	maximumUnits?: number;
+	requirements?: Requirement[];
+	page?: string;
+	variations?: FormationData[];
+	referencedSPAs?: string[];
+	referencedSCAs?: string[];
+	secondary?: boolean;
+	bonus: Bonus[];
+};

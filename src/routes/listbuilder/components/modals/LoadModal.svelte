@@ -3,7 +3,7 @@
 	import { deserialize } from "$app/forms";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { List, type ListCode } from "$lib/types/list.svelte";
-	import { convertUnversionedJSONList } from "../../utilities/convert";
+	import { getListCodeFromString } from "$lib/utilities/listImport";
 
 	let user: any = getContext("user");
 	type Props = {
@@ -58,20 +58,8 @@
 			localListsExist = true;
 			for (const localListName of localLists) {
 				const localData = localStorage.getItem(localListName)!;
-				if (localData.charAt(0) == "{") {
-					const localList = JSON.parse(localData);
-					if (localList.lcVersion) {
-						if (localList.lcVersion != 2) {
-							localList.eras = localList.era == 0 ? [] : [localList.era];
-							localList.factions = localList.faction == 0 ? [] : [localList.faction];
-						}
-						savedLists.push(localList);
-					} else {
-						const updatedList = convertUnversionedJSONList(localList);
-						savedLists.push(updatedList);
-						localStorage.setItem(localList.name, JSON.stringify(updatedList));
-					}
-				}
+				const listCode = getListCodeFromString(localData);
+				if (listCode) savedLists.push(listCode);
 			}
 		}
 	}
@@ -102,43 +90,9 @@
 	}
 
 	async function importList() {
-		if (importCode.charAt(0) == "{") {
-			const importData = JSON.parse(importCode);
-			if (importData.lcVersion) {
-				if (importData.lcVersion == 2) {
-					const parsedCode: ListCode = {
-						id: importData.id ?? crypto.randomUUID(),
-						name: importData.name ?? "Imported List",
-						eras: importData.eras,
-						factions: importData.factions,
-						rules: importData.rules ?? "noRes",
-						units: importData.units ?? [],
-						sublists: importData.sublists ?? [],
-						lcVersion: importData.lcVersion ?? 0,
-						formations: importData.formations ?? []
-					};
-					if (importData.scas !== undefined) {
-						parsedCode.scas = importData.scas;
-					}
-					list.loadList(parsedCode);
-				} else {
-					const parsedCode = {
-						id: importData.id ?? crypto.randomUUID(),
-						name: importData.name ?? "Imported List",
-						eras: importData.era == 0 ? [] : [importData.era],
-						factions: importData.faction == 0 ? [] : [importData.faction],
-						rules: importData.rules ?? "noRes",
-						units: importData.units ?? [],
-						sublists: importData.sublists ?? [],
-						lcVersion: importData.lcVersion ?? 0,
-						formations: importData.formations ?? []
-					};
-					list.loadList(parsedCode);
-				}
-			} else {
-				const updatedList = convertUnversionedJSONList(importData);
-				list.loadList(updatedList);
-			}
+		const listCode = getListCodeFromString(importCode);
+		if (listCode) {
+			list.loadList(listCode);
 			toastController.addToast("List imported");
 			dialogElement.close();
 		} else {

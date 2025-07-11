@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { List, type ListFormation } from "$lib/types/list.svelte";
 	import { Select, Dialog } from "$lib/components/global/";
-	import { formationDataList, type FormationData } from "$lib/data/FormationData";
+	import { formationDataList } from "$lib/data/FormationData";
+	import type { FormationData } from "$lib/types/formationData";
 	import { getFormationDataFromName } from "$lib/utilities/formationUtilities";
 
 	type Props = {
@@ -97,14 +98,20 @@
 				{#each validationResults.primary.requirements as requirement}
 					<div class="requirement-row">
 						<p class:valid={requirement.met == 1} class:invalid={requirement.met == -1}>{requirement.met == 1 ? "✔" : "X"}</p>
-						<p>{requirement.requirement}</p>
+						<p class="muted">{requirement.requirement}</p>
 					</div>
 				{/each}
 			</div>
+			<p class="formation-status-row">
+				Bonus(es): {#if formationDetails?.page != "N/A"}
+					({formationDetails?.page})
+				{/if}
+			</p>
 			<div class="formation-bonus-container">
-				<p class="bold">Bonus Ability: ({formationDetails?.page})</p>
-				{#each formationDetails?.bonus.split("\n") ?? [] as part}
-					<p class="muted">{part}</p>
+				{#each formationDetails?.bonus ?? [] as bonus}
+					<div class="formation-bonus-row">
+						<p class="muted">{bonus.description}</p>
+					</div>
 				{/each}
 			</div>
 		</div>
@@ -134,10 +141,16 @@
 				{/each}
 			</div>
 			{#if secondaryValue != "None"}
+				<p class="formation-status-row">
+					Bonus(es): {#if secondaryDetails?.page != "N/A"}
+						({secondaryDetails?.page})
+					{/if}
+				</p>
 				<div class="formation-bonus-container">
-					<p class="bold">Bonus Ability: ({secondaryDetails?.page})</p>
-					{#each secondaryDetails?.bonus.split("\n") ?? [] as part}
-						<p class="muted">{part}</p>
+					{#each secondaryDetails?.bonus ?? [] as bonus}
+						<div class="formation-bonus-row">
+							<p class="muted">{bonus.description}</p>
+						</div>
 					{/each}
 				</div>
 			{/if}
@@ -161,6 +174,7 @@
 		flex-direction: column;
 		gap: 4px;
 		border: 1px solid var(--border);
+		padding-bottom: 8px;
 	}
 	.select-formation-type-wrapper {
 		width: clamp(5em, 100%, 12em);
@@ -186,6 +200,7 @@
 		display: grid;
 		grid-template-columns: max-content 1fr;
 		column-gap: 16px;
+		margin: 0px 8px;
 	}
 	.formation-status-row {
 		padding: 4px 10px;
@@ -203,9 +218,16 @@
 	}
 	.formation-bonus-container {
 		padding: 4px 16px;
-		display: flex;
-		flex-direction: column;
+		display: grid;
+		grid-template-columns: 1fr;
 		gap: 4px;
+		border: 1px solid var(--border);
+		margin: 0px 8px;
+	}
+	.formation-bonus-row {
+		display: grid;
+		grid-template-columns: subgrid;
+		grid-column: span 3;
 	}
 	input {
 		background-color: var(--muted);

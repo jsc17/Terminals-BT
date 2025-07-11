@@ -32,10 +32,12 @@ export function validateFormation(formation: ListFormation, list: List) {
 			});
 		}
 		//check if minimum unit count is defined by formation, or default to 3 units if not.
-		primaryRequirements.push({
-			requirement: `Formation must have at least ${formationData?.minimumUnits ?? 3} units`,
-			met: units.length >= (formationData?.minimumUnits ?? 3) ? 1 : -1
-		});
+		if (formationData.minimumUnits != 0) {
+			primaryRequirements.push({
+				requirement: `Formation must have at least ${formationData?.minimumUnits ?? 3} units`,
+				met: units.length >= (formationData.minimumUnits ?? 3) ? 1 : -1
+			});
+		}
 		if (formationData.maximumUnits) {
 			primaryRequirements.push({
 				requirement: `Formation must have at most ${formationData.maximumUnits} units`,

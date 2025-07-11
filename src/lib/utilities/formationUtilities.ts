@@ -68,3 +68,5 @@ export function getFormationStats(formation: ListFormation, list: List) {
 		avgSize
 	};
 }
+
+export function calculateBonusAmount(formation: ListFormation, bonus: string) {}

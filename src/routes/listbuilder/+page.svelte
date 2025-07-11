@@ -5,7 +5,7 @@
 	import { type ListCode, List } from "$lib/types/list.svelte";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { Tabs, ContextMenu } from "bits-ui";
-	import { convertUnversionedJSONList } from "./utilities/convert";
+	import { getListCodeFromString, loadExistingListsFromLocalStorage } from "$lib/utilities/listImport";
 
 	let settings = new PersistedState<Settings>("listbuilderSettings", {
 		print: { printingStyle: "detailed", printFormations: true, printCardsByFormation: false, cardStyle: "generated", formationHeaderStyle: "inline" },
@@ -38,6 +38,7 @@
 	let { data } = $props();
 
 	onMount(() => {
+		activeLists = loadExistingListsFromLocalStorage();
 		if (data.sharedList) {
 			let list = new List(new ResultList());
 			let listCode: ListCode = {
@@ -53,75 +54,6 @@
 				scas: data.sharedList.scas ? JSON.parse(data.sharedList.scas) : undefined
 			};
 			list.loadList(listCode);
-			activeLists.push(list);
-			selectedList = (activeLists.length - 1).toString();
-		}
-		const lastList = localStorage.getItem("last-list");
-		let importData;
-		if (lastList) {
-			let list = new List(new ResultList());
-			importData = JSON.parse(lastList);
-			if (importData.lcVersion) {
-				let eras, factions;
-				if (importData.lcVersion == 2) {
-					eras = importData.eras;
-					factions = importData.factions;
-				} else {
-					eras = importData.era == 0 ? [] : [importData.era];
-					factions = importData.faction == 0 ? [] : [importData.faction];
-				}
-				const parsedCode: ListCode = {
-					id: importData.id ?? crypto.randomUUID(),
-					name: importData.name ?? "Imported List",
-					eras,
-					factions,
-					rules: importData.rules ?? "noRes",
-					units: importData.units ?? [],
-					sublists: importData.sublists ?? [],
-					lcVersion: importData.lcVersion ?? 0,
-					formations: importData.formations ?? [],
-					scas: importData.scas,
-					bs: importData.bs
-				};
-				list.loadList(parsedCode);
-			} else {
-				const updatedList = convertUnversionedJSONList(importData);
-				list.loadList(updatedList);
-			}
-			activeLists.push(list);
-			selectedList = (activeLists.length - 1).toString();
-			localStorage.removeItem("last-list");
-		}
-		for (const listCode of lastLists.current) {
-			let list = new List(new ResultList());
-			importData = JSON.parse(listCode);
-			if (importData.lcVersion) {
-				let eras, factions;
-				if (importData.lcVersion == 2) {
-					eras = importData.eras;
-					factions = importData.factions;
-				} else {
-					eras = importData.era == 0 ? [] : [importData.era];
-					factions = importData.faction == 0 ? [] : [importData.faction];
-				}
-				const parsedCode: ListCode = {
-					id: importData.id ?? crypto.randomUUID(),
-					name: importData.name ?? "Imported List",
-					eras,
-					factions,
-					rules: importData.rules ?? "noRes",
-					units: importData.units ?? [],
-					sublists: importData.sublists ?? [],
-					lcVersion: importData.lcVersion ?? 0,
-					formations: importData.formations ?? [],
-					scas: importData.scas,
-					bs: importData.bs
-				};
-				list.loadList(parsedCode);
-			} else {
-				const updatedList = convertUnversionedJSONList(importData);
-				list.loadList(updatedList);
-			}
 			activeLists.push(list);
 		}
 		if (activeLists.length == 0) {

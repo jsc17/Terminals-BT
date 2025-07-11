@@ -1,5 +1,5 @@
 import type { ListUnit, MulUnit, ListCode, ListCodeUnit, SCA, ListFormation, Sublist, SublistStats } from "$lib/types/listTypes";
-import { getSCAfromId } from "$lib/utilities/listUtilities";
+import { getSCAfromId, calculateListStats } from "$lib/utilities/listUtilities";
 import type { ResultList } from "./resultList.svelte";
 import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 import { getRules } from "$lib/types/rulesets";
@@ -26,54 +26,7 @@ export class List {
 		}, 0)
 	);
 
-	stats = $derived.by(() => {
-		let totalPV = 0,
-			totalS = 0,
-			totalM = 0,
-			totalL = 0,
-			totalHealth = 0,
-			totalSize = 0,
-			totalSkill = 0,
-			unitCount = this.unitCount;
-
-		this.units.forEach((unit) => {
-			if (unit) {
-				totalPV += unit.cost ?? 0;
-				totalS += unit.baseUnit.damageS ?? 0;
-				totalM += unit.baseUnit.damageM ?? 0;
-				totalL += unit.baseUnit.damageL ?? 0;
-				totalHealth += unit.baseUnit.health ?? 0;
-				totalSize += unit.baseUnit.size ?? 0;
-				totalSkill += unit.skill ?? 0;
-			}
-		});
-		let avgS = 0,
-			avgM = 0,
-			avgL = 0,
-			avgHealth = 0,
-			avgSize = 0,
-			avgSkill = 0;
-		if (unitCount) {
-			avgS = Number((totalS / unitCount).toFixed(2));
-			avgM = Number((totalM / unitCount).toFixed(2));
-			avgL = Number((totalL / unitCount).toFixed(2));
-			avgHealth = Number((totalHealth / unitCount).toFixed(2));
-			avgSkill = Number((totalSkill / unitCount).toFixed(2));
-			avgSize = Number((totalSize / unitCount).toFixed(2));
-		}
-		return {
-			totalS,
-			totalM,
-			totalL,
-			totalHealth,
-			avgS,
-			avgM,
-			avgL,
-			avgHealth,
-			avgSkill,
-			avgSize
-		};
-	});
+	stats = $derived(calculateListStats(this.units));
 
 	resultList = $state<ResultList>();
 
@@ -377,7 +330,7 @@ export class List {
 		this.rules = newRules;
 	}
 
-	newUnit(baseUnit: MulUnit) {
+	addUnit(baseUnit: MulUnit) {
 		let unitId: string = nanoid(6);
 		while (
 			this.units.find(({ id }) => {
@@ -393,7 +346,6 @@ export class List {
 			})
 			?.units.push({ id: unitId });
 	}
-
 	getUnit(idToFind: string) {
 		return this.units.find((unit) => {
 			return unit.id == idToFind;
@@ -419,7 +371,7 @@ export class List {
 			});
 		});
 	}
-	newFormation() {
+	addFormation() {
 		const id: string = crypto.randomUUID();
 		this.formations.push({ id, name: `New formation`, type: "Combat Group", units: [] });
 	}
@@ -517,7 +469,7 @@ export class List {
 
 		return unitToAdd;
 	}
-	async loadList(data: any) {
+	async loadList(data: ListCode) {
 		const listCode: ListCode = data;
 		this.id = listCode.id;
 		this.details.name = listCode.name;

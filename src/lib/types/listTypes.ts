@@ -5,6 +5,7 @@ type ListFormation = {
 	name: string;
 	type: string;
 	units: { id: string }[];
+	bonuses?: { spa: string; units: string[] }[];
 	secondary?: { type: string; units: { id: string }[] };
 };
 

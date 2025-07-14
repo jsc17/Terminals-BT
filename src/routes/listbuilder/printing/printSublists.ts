@@ -145,15 +145,15 @@ function createHorizontalBody(sublists: PrintableSublist[], content: Content[]) 
 	for (const sublist of sublists) {
 		content.push({
 			text: `${sublist.scenario} - ${sublist.pv} PV - ${sublist.unitList.length} Units - Health: ${sublist.unitList.reduce((total: number, unit: any) => {
-				return (total += unit.health ?? 0);
+				return (total += unit.baseUnit.health ?? 0);
 			}, 0)}  Size: ${sublist.unitList.reduce((total: number, unit: any) => {
-				return (total += unit.size ?? 0);
+				return (total += unit.baseUnit.size ?? 0);
 			}, 0)}  Damage: ${sublist.unitList.reduce((total: number, unit: any) => {
-				return (total += unit.damageS ?? 0);
+				return (total += unit.baseUnit.damageS ?? 0);
 			}, 0)}/${sublist.unitList.reduce((total: number, unit: any) => {
-				return (total += unit.damageM ?? 0);
+				return (total += unit.baseUnit.damageM ?? 0);
 			}, 0)}/${sublist.unitList.reduce((total: number, unit: any) => {
-				return (total += unit.damageL ?? 0);
+				return (total += unit.baseUnit.damageL ?? 0);
 			}, 0)}`,
 			style: "horizontalHeader"
 		});

@@ -13,23 +13,24 @@
 	let { formation, units, options, currentRoundLog }: Props = $props();
 	let openPrimary = $state(true),
 		openSecondary = $state(true);
+	let formationWidth = $state<number>();
+	let cardWidth = $derived((formationWidth! - 16 - 8 * (options.cardsPerRow ?? 3)) / (options.cardsPerRow ?? 3));
 </script>
 
 {#snippet drawFormationUnits(formationUnits: string[])}
-	<div class="play-formation-unit-list">
+	<div class="play-formation-unit-list" bind:clientWidth={formationWidth}>
 		{#each formationUnits as unitId}
 			{@const unit = units.find((unit) => {
 				return unit.id == unitId;
 			})}
 			{#if unit}
-				<div class="unit-card-container" style="width: {252 * ((options.uiScale + 50) / 100)}pt; height:{180 * ((options.uiScale + 50) / 100)}pt">
+				<div class="unit-card-container" style="width: {cardWidth}px; height:{(cardWidth * 5) / 7}px">
 					<PlayUnitCard {unit} {options} {currentRoundLog}></PlayUnitCard>
 				</div>
 			{/if}
 		{/each}
 	</div>
 {/snippet}
-
 <div class="play-formation-container">
 	<div class="play-formation-header">
 		<p>{formation.name}{formation.type != "none" ? `- ${formation.type} Formation` : ""}</p>
@@ -104,6 +105,7 @@
 	.play-formation-unit-list {
 		padding: 8px;
 		display: flex;
+		justify-content: space-evenly;
 		flex-wrap: wrap;
 		gap: 8px;
 		width: 100%;

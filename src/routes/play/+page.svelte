@@ -13,6 +13,7 @@
 	const playList = new PersistedState<PlayList>("playList", { formations: [], units: [] });
 	const options = new PersistedState<Options>("playOptions", {
 		renderOriginal: true,
+		cardsPerRow: 3,
 		uiScale: 50,
 		showPhysical: false,
 		showCrippled: true,
@@ -68,6 +69,10 @@
 		loadModalOpen = true;
 	}
 </script>
+
+<svelte:head>
+	<title>Terminal's Play Mode</title>
+</svelte:head>
 
 <div class="play-body">
 	<div class="toolbar">

@@ -95,6 +95,10 @@
 				{/if}
 			</p>
 			<div class="edit-formation-requirement-container">
+				<div class="requirement-row">
+					<div></div>
+					<p class="muted">Source: {formationDetails?.page}</p>
+				</div>
 				{#each validationResults.primary.requirements as requirement}
 					<div class="requirement-row">
 						<p class:valid={requirement.met == 1} class:invalid={requirement.met == -1}>{requirement.met == 1 ? "✔" : "X"}</p>
@@ -102,11 +106,7 @@
 					</div>
 				{/each}
 			</div>
-			<p class="formation-status-row">
-				Bonus(es): {#if formationDetails?.page != "N/A"}
-					({formationDetails?.page})
-				{/if}
-			</p>
+			<p class="formation-status-row">Bonus(es):</p>
 			<div class="formation-bonus-container">
 				{#each formationDetails?.bonus ?? [] as bonus}
 					<div class="formation-bonus-row">
@@ -133,6 +133,12 @@
 				{/if}
 			</p>
 			<div class="edit-formation-requirement-container">
+				{#if secondaryDetails}
+					<div class="requirement-row">
+						<div></div>
+						<p class="muted">Source: {secondaryDetails?.page}</p>
+					</div>
+				{/if}
 				{#each validationResults.secondary.requirements as requirement}
 					<div class="requirement-row">
 						<p class:valid={requirement.met == 1} class:invalid={requirement.met == -1}>{requirement.met == 1 ? "✔" : "X"}</p>
@@ -141,11 +147,7 @@
 				{/each}
 			</div>
 			{#if secondaryValue != "None"}
-				<p class="formation-status-row">
-					Bonus(es): {#if secondaryDetails?.page != "N/A"}
-						({secondaryDetails?.page})
-					{/if}
-				</p>
+				<p class="formation-status-row">Bonus(es):</p>
 				<div class="formation-bonus-container">
 					{#each secondaryDetails?.bonus ?? [] as bonus}
 						<div class="formation-bonus-row">

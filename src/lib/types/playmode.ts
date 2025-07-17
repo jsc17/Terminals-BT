@@ -45,6 +45,7 @@ type LogEntry = {
 };
 
 type Options = {
+	cardsPerRow: number;
 	uiScale: number;
 	renderOriginal: boolean;
 	showPhysical: boolean;

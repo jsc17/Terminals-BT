@@ -179,7 +179,7 @@
 					<button onclick={handleHeat} class="unit-card-block unit-heat-block">
 						<div class="flex-4">
 							<p>OV:</p>
-							{@render damageValue(reference.ov ?? 0, false, firepowerRemaining.ov)}
+							{@render damageValue(reference.overheat ?? 0, false, firepowerRemaining.ov)}
 						</div>
 						<div class="heatscale">
 							<p>Heat Scale:</p>

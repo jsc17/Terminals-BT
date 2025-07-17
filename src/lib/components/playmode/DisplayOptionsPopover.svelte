@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Slider } from "$lib/components/global/";
 	import { Popover } from "bits-ui";
 	import type { Options } from "$lib/types/playmode";
 
@@ -16,12 +15,22 @@
 	<Popover.Trigger class="popover-play-toolbar-button">Settings</Popover.Trigger>
 	<Popover.Content class="popover-play-toolbar-display-body">
 		<div class="option-row">
+			Cards per row: <button
+				class="card-button"
+				onclick={() => {
+					if (options.cardsPerRow > 1) options.cardsPerRow--;
+				}}>-</button
+			>
+			{options.cardsPerRow}
+			<button class="card-button" onclick={() => options.cardsPerRow++}>+</button>
+		</div>
+		<!-- <div class="option-row">
 			UI Scale:
 			<div class="slider-container">
 				<Slider bind:value={options.uiScale} type="single"></Slider>
 			</div>
 			<p>x{(options.uiScale + 50) / 100}</p>
-		</div>
+		</div> -->
 		<div class="option-row">
 			<label><input type="checkbox" bind:checked={options.renderOriginal} /> Display Original Values when damaged</label>
 		</div>
@@ -66,8 +75,5 @@
 		display: flex;
 		gap: 16px;
 		align-items: center;
-	}
-	.slider-container {
-		width: 250px;
 	}
 </style>

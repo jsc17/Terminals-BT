@@ -5,22 +5,50 @@
 	import type { LogRound, Options } from "../../lib/types/playmode";
 	import { deserialize } from "$app/forms";
 	import { Popover } from "$lib/components/global/";
+	import { PlaymodeOptionsSchema } from "$lib/schemas/playmode";
+	import { isJson } from "$lib/utilities/utilities";
 
 	let logDrawerOpen = $state(false);
 	let loadModalOpen = $state(false);
 	let lists: { name: string; units: string; formations: string }[] = $state([]);
 
 	const playList = new PersistedState<PlayList>("playList", { formations: [], units: [] });
-	const options = new PersistedState<Options>("playOptions", {
-		renderOriginal: true,
-		cardsPerRow: 3,
-		uiScale: 50,
-		showPhysical: false,
-		showCrippled: true,
-		showJumpTMM: true,
-		confirmEnd: true,
-		groupByFormation: true
-	});
+
+	const options = new PersistedState<Options>(
+		"playOptions",
+		{
+			renderOriginal: true,
+			cardsPerRow: 3,
+			uiScale: 50,
+			showPhysical: false,
+			showCrippled: true,
+			showJumpTMM: true,
+			confirmEnd: true,
+			groupByFormation: true
+		},
+		{
+			serializer: {
+				serialize: JSON.stringify,
+				deserialize: (savedData) => {
+					if (isJson(savedData)) {
+						return PlaymodeOptionsSchema.parse(JSON.parse(savedData));
+					} else {
+						return {
+							renderOriginal: true,
+							cardsPerRow: 3,
+							uiScale: 50,
+							showPhysical: false,
+							showCrippled: true,
+							showJumpTMM: true,
+							confirmEnd: true,
+							groupByFormation: true
+						};
+					}
+				}
+			}
+		}
+	);
+
 	const currentRoundLog = new PersistedState<LogRound>("playCurrentRound", { round: 1, logs: [] });
 	let fullLogs: LogRound[] = $state([]);
 

@@ -86,6 +86,9 @@ importers:
       virtua:
         specifier: ^0.40.4
         version: 0.40.4(react@19.1.0)(svelte@5.33.14)
+      zod:
+        specifier: ^4.0.5
+        version: 4.0.5
     devDependencies:
       '@sveltejs/kit':
         specifier: ^2.21.2
@@ -2565,6 +2568,9 @@ packages:
   zod@3.25.56:
     resolution: {integrity: sha512-rd6eEF3BTNvQnR2e2wwolfTmUTnp70aUTqr0oaGbHifzC3BKJsoV+Gat8vxUMR1hwOKBs6El+qWehrHbCpW6SQ==}
 
+  zod@4.0.5:
+    resolution: {integrity: sha512-/5UuuRPStvHXu7RS+gmvRf4NXrNxpSllGwDnCBcJZtQsKrviYXm54yDGV2KYNLT5kq0lHGcl7lqWJLgSaG+tgA==}
+
 snapshots:
 
   '@ampproject/remapping@2.3.0':
@@ -4956,3 +4962,5 @@ snapshots:
   zimmerframe@1.1.2: {}
 
   zod@3.25.56: {}
+
+  zod@4.0.5: {}

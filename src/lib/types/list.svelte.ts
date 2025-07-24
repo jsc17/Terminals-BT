@@ -134,7 +134,7 @@ export class List {
 						issueUnits.add(unit.id!);
 					}
 				}
-				if (this.options.minSkill && unit.skill && this.options.minSkill > unit.skill) {
+				if (this.options.minSkill !== undefined && unit.skill !== undefined && this.options.minSkill > unit.skill) {
 					if (issueList.has("Minimum skill")) {
 						issueList.get("Minimum skill")?.add(unit.baseUnit.name);
 					} else {
@@ -505,7 +505,7 @@ export class List {
 					return result.mulId == unit.mulId;
 				}) ?? (await this.loadUnit(unit.mulId));
 			//@ts-ignore
-			if (!unit.skill || unit.skill == "undefined") {
+			if (unit.skill === undefined || unit.skill == "undefined") {
 				unit.skill = 4;
 			}
 			if (unit.customization && Object.keys(unit.customization).length == 0) {

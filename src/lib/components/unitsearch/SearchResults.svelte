@@ -124,7 +124,9 @@
 					{#snippet children(item, index)}
 						<div class:virtual-list-row={!appWindow.isMobile} class:virtual-list-row-mobile={appWindow.isMobile}>
 							{#if list}
-								<div class="align-center add-button"><button onclick={() => list.addUnit(item)}>+</button></div>
+								<div class="align-center add-button">
+									<button onclick={() => list.addUnit(item)}>+</button>
+								</div>
 							{:else}
 								<div></div>
 							{/if}

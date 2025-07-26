@@ -7,16 +7,27 @@
 	import { Popover } from "$lib/components/global/";
 	import { UnitCustomizationModal } from "../index";
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
+	import { getSPAfromId } from "$lib/utilities/listUtilities";
 
 	type Props = {
-		unitId: string;
+		unit: { id: string; bonus?: { ind: number; abil: number }[] };
 		unitCustomizationModal?: UnitCustomizationModal;
 		list: List;
 	};
 
-	const { unitId, unitCustomizationModal, list }: Props = $props();
+	const { unit, unitCustomizationModal, list }: Props = $props();
 
-	let unit = list.getUnit(unitId);
+	let unitDetails = list.getUnit(unit.id);
+
+	let unitSpas = $derived.by(() => {
+		let spas: string[] = [];
+		if (unitDetails) {
+			spas = spas.concat(unitDetails.customization?.spa ?? []);
+			const spasFromFormation = unit.bonus?.map(({ abil }) => `${getSPAfromId(abil)?.name} (Formation)`) ?? [];
+			spas = spas.concat(spasFromFormation);
+		}
+		return spas.join(", ");
+	});
 </script>
 
 <div class="unit-card">
@@ -27,8 +38,8 @@
 	{/if}
 	<div class="unit-row-container">
 		<div class="unit-name-row">
-			<p class="name-row-name" class:invalid-unit={list.issues.issueUnits.has(unit?.id ?? "0")}>{unit?.baseUnit.name}</p>
-			<p class="name-row-pv"><span class="muted">PV:</span> {unit?.cost}</p>
+			<p class="name-row-name" class:invalid-unit={list.issues.issueUnits.has(unitDetails?.id ?? "0")}>{unitDetails?.baseUnit.name}</p>
+			<p class="name-row-pv"><span class="muted">PV:</span> {unitDetails?.cost}</p>
 			<Popover>
 				{#snippet trigger()}
 					<div class="unit-menu-trigger"><img src="/icons/menu.svg" alt="unit menu" /></div>
@@ -37,7 +48,7 @@
 					<button
 						class="transparent-button"
 						onclick={() => {
-							unitCustomizationModal?.show(unitId);
+							unitCustomizationModal?.show(unit.id);
 						}}
 					>
 						Add Ammo/SPA
@@ -45,8 +56,8 @@
 					<button
 						class="transparent-button"
 						onclick={() => {
-							list.removeUnit(unitId);
-							toastController.addToast(`${unit?.baseUnit.name} removed from list`);
+							list.removeUnit(unit.id);
+							toastController.addToast(`${unitDetails?.baseUnit.name} removed from list`);
 						}}>Remove unit</button
 					>
 				</div>
@@ -54,7 +65,7 @@
 		</div>
 		<div class="unit-header-row">
 			<div class="unit-header">Type</div>
-			{#if unit?.baseUnit.type != "BS"}
+			{#if unitDetails?.baseUnit.type != "BS"}
 				<div class="unit-header">Skill</div>
 				<div class="unit-header">Speed</div>
 				<div class="unit-header">Damage</div>
@@ -64,14 +75,14 @@
 			{/if}
 		</div>
 		<div class="unit-stat-row">
-			<div class="unit-stat">{unit?.baseUnit.subtype}</div>
-			{#if unit?.baseUnit.type != "BS"}
+			<div class="unit-stat">{unitDetails?.baseUnit.subtype}</div>
+			{#if unitDetails?.baseUnit.type != "BS"}
 				<div class="unit-stat">
-					{#if unit?.skill != undefined}
+					{#if unitDetails?.skill != undefined}
 						<select
-							bind:value={unit.skill}
+							bind:value={unitDetails.skill}
 							onchange={() => {
-								unit.cost = getNewSkillCost(unit.skill, unit.baseUnit.pv);
+								unitDetails.cost = getNewSkillCost(unitDetails.skill, unitDetails.baseUnit.pv);
 							}}
 						>
 							{#each [...Array(8).keys()] as skill}
@@ -83,39 +94,40 @@
 					{/if}
 				</div>
 				<div class="unit-stat">
-					{#each unit?.baseUnit.move! as movement, index}
+					{#each unitDetails?.baseUnit.move! as movement, index}
 						{#if index != 0}
 							{"/ "}
 						{/if}
 						{`${movement.speed}"${movement.type ?? ""}`}
 					{/each}
-					- TMM {unit?.baseUnit.tmm}
+					- TMM {unitDetails?.baseUnit.tmm}
 				</div>
 				<div class="unit-stat">
-					{unit?.baseUnit.damageS}{unit?.baseUnit.damageSMin ? "*" : ""}{"/" + unit?.baseUnit.damageM}{unit?.baseUnit.damageMMin ? "*" : ""}{"/" + unit?.baseUnit.damageL}{unit
-						?.baseUnit.damageLMin
-						? "*"
-						: ""}{" - " + unit?.baseUnit.overheat}
+					{unitDetails?.baseUnit.damageS}{unitDetails?.baseUnit.damageSMin ? "*" : ""}{"/" + unitDetails?.baseUnit.damageM}{unitDetails?.baseUnit.damageMMin ? "*" : ""}{"/" +
+						unitDetails?.baseUnit.damageL}{unitDetails?.baseUnit.damageLMin ? "*" : ""}{" - " + unitDetails?.baseUnit.overheat}
 				</div>
-				<div class="unit-stat">{unit?.baseUnit.health + " (" + unit?.baseUnit.armor + "+" + unit?.baseUnit.structure + ")"}</div>
-				<div class="unit-stat">{unit?.baseUnit.size}</div>
-				<div class="unit-stat">{unit?.baseUnit.role}</div>
+				<div class="unit-stat">{unitDetails?.baseUnit.health + " (" + unitDetails?.baseUnit.armor + "+" + unitDetails?.baseUnit.structure + ")"}</div>
+				<div class="unit-stat">{unitDetails?.baseUnit.size}</div>
+				<div class="unit-stat">{unitDetails?.baseUnit.role}</div>
 			{/if}
 		</div>
 		<div class="unit-ability-row">
 			<div class="unit-abilities">
-				{#if unit}
-					{createAbilityLineString(unit?.baseUnit.abilities)}
+				{#if unitDetails}
+					{createAbilityLineString(unitDetails?.baseUnit.abilities)}
 				{/if}
 			</div>
 		</div>
-		{#if unit?.customization?.ammo || unit?.customization?.spa}
+		{#if unitDetails?.customization?.ammo || unitSpas.length}
 			<div class="unit-custom-row">
-				{#if unit.customization.ammo?.length}
-					<p class="unit-abilities"><span class="muted-foreground">Alt. Ammo:</span> {unit.customization.ammo?.join(", ")}</p>
+				{#if unitDetails?.customization?.ammo?.length}
+					<p class="unit-abilities"><span class="muted-foreground">Alt. Ammo:</span> {unitDetails.customization.ammo?.join(", ")}</p>
 				{/if}
-				{#if unit.customization.spa?.length}
-					<p class="unit-abilities"><span class="muted-foreground">SPA:</span> {unit.customization.spa?.join(", ")}</p>
+				{#if unitSpas.length}
+					<p class="unit-abilities">
+						<span class="muted-foreground">SPA:</span>
+						{unitSpas}
+					</p>
 				{/if}
 			</div>
 		{/if}

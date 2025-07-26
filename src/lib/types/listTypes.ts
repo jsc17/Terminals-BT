@@ -4,9 +4,9 @@ type ListFormation = {
 	id: string;
 	name: string;
 	type: string;
-	units: { id: string }[];
-	bonuses?: { spa: string; units: string[] }[];
-	secondary?: { type: string; units: { id: string }[] };
+	fwBonus?: { ind: number; abil: string | number; uses?: number }[];
+	units: { id: string; bonus?: { ind: number; abil: number }[] }[];
+	secondary?: { type: string; units: { id: string; bonus?: { ind: number; abil: number }[] }[] };
 };
 
 type UnitCustomization = {
@@ -67,6 +67,13 @@ type SCA = {
 	page: string;
 };
 
+type SPA = {
+	id: number;
+	name: string;
+	page: string;
+	cost: number;
+};
+
 type Sublist = {
 	id: string;
 	checked: string[];
@@ -103,4 +110,4 @@ type ListCode = {
 	bs?: number[];
 };
 
-export type { ListFormation, ListUnit, MulUnit, SCA, SublistStats, Sublist, UnitCustomization, ListCode, ListCodeUnit };
+export type { ListFormation, ListUnit, MulUnit, SCA, SPA, SublistStats, Sublist, UnitCustomization, ListCode, ListCodeUnit };

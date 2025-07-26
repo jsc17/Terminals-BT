@@ -88,15 +88,28 @@ export type Requirement =
 //amount: set number, portion of units, entire formation, all units of role
 //uses: does the ability have a set number of uses?
 
-export type Bonus = {
-	type: "SPA" | "SCA" | "Unique" | "None";
+type UniqueFormation = {
+	type: "Unique";
 	description: string;
-	timing?: "playStart" | "turnStart" | "atWill" | "constant";
-	grantedSCA?: string[];
-	grantedSPA?: string[];
-	grantedAbility?: { name: string; description: string }[];
-	amount?: number | { plus?: number; percent?: number };
 };
+
+type FormationWideBonus = {
+	type: "FormationWide";
+	abilityType: "SPA" | "SCA" | "Unique";
+	grantedAbility: string[];
+	uses?: { plus?: number };
+};
+
+export type AssignedBonus = {
+	type: "Assigned";
+	abilityType: "SPA" | "SCA" | "Unique";
+	grantedAbility: string[];
+	sameAbility?: boolean;
+	assignedNumber?: { flat?: number; plus?: number; portion?: number };
+	assignmentTiming?: "playStart" | "turnStart";
+};
+
+export type FormationBonus = UniqueFormation | FormationWideBonus | AssignedBonus;
 
 export type FormationData = {
 	id: number;
@@ -111,5 +124,5 @@ export type FormationData = {
 	referencedSPAs?: string[];
 	referencedSCAs?: string[];
 	secondary?: boolean;
-	bonus: Bonus[];
+	bonus: FormationBonus[];
 };

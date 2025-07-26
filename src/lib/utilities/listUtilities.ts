@@ -1,5 +1,5 @@
-import { scaReferences } from "$lib/data";
-import type { ListUnit, SCA } from "$lib/types/listTypes";
+import { scaReferences, spaReferences } from "$lib/data";
+import type { ListUnit, SCA, SPA } from "$lib/types/listTypes";
 
 export function getSCAfromId(id: number): SCA | undefined {
 	return scaReferences.find((sca) => {
@@ -10,6 +10,18 @@ export function getSCAfromId(id: number): SCA | undefined {
 export function getSCAfromName(name: string): SCA | undefined {
 	return scaReferences.find((sca) => {
 		return sca.name == name;
+	});
+}
+
+export function getSPAfromId(id: number): SPA | undefined {
+	return spaReferences.find((spa) => {
+		return spa.id == id;
+	});
+}
+
+export function getSPAfromName(name: string): SPA | undefined {
+	return spaReferences.find((spa) => {
+		return spa.name == name;
 	});
 }
 

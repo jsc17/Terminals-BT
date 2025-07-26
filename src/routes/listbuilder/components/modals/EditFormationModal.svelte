@@ -3,7 +3,8 @@
 	import { Select, Dialog } from "$lib/components/global/";
 	import { formationDataList } from "$lib/data/FormationData";
 	import type { FormationData } from "$lib/types/formationData";
-	import { getFormationDataFromName } from "$lib/utilities/formationUtilities";
+	import { calculateBonusAmount, getFormationDataFromName } from "$lib/utilities/formationUtilities";
+	import AssignFormationBonusModal from "./AssignFormationBonusModal.svelte";
 
 	type Props = {
 		formation: ListFormation;
@@ -15,7 +16,7 @@
 		};
 	};
 
-	let { formation, open = $bindable(false), validationResults }: Props = $props();
+	let { formation = $bindable(), open = $bindable(false), list, validationResults }: Props = $props();
 
 	let formationTypeList: { groupLabel: string; items: { value: string; label: string }[] }[] = formationDataList.map((group) => {
 		return {
@@ -53,6 +54,17 @@
 		}
 	});
 
+	function getPrimaryValue() {
+		return formation.type;
+	}
+	function setPrimaryValue(newValue: string) {
+		delete formation.fwBonus;
+		for (const unit of formation.units) {
+			delete unit.bonus;
+		}
+		formation.type = newValue;
+	}
+
 	let secondaryValue = $state(formation.secondary?.type ?? "None");
 	function getSecondaryValue() {
 		return secondaryValue;
@@ -84,7 +96,7 @@
 			<div class="formation-selection-row">
 				<div class="edit-formation-option-select-row">
 					<p>Formation Type:</p>
-					<div class="select-formation-type-wrapper"><Select bind:value={formation.type} type="single" groupedItems={formationTypeList}></Select></div>
+					<div class="select-formation-type-wrapper"><Select bind:value={getPrimaryValue, setPrimaryValue} type="single" groupedItems={formationTypeList}></Select></div>
 				</div>
 			</div>
 			<p class="formation-status-row">
@@ -108,9 +120,18 @@
 			</div>
 			<p class="formation-status-row">Bonus(es):</p>
 			<div class="formation-bonus-container">
-				{#each formationDetails?.bonus ?? [] as bonus}
+				{#each formationDetails?.bonus ?? [] as bonus, index}
 					<div class="formation-bonus-row">
-						<p class="muted">{bonus.description}</p>
+						{#if bonus.type == "Unique"}
+							<p class="muted">{bonus.description}</p>
+						{:else if bonus.type == "FormationWide"}
+							<p class="muted">{bonus.grantedAbility?.join("/")}</p>
+							<p class="muted">{bonus.uses ? `x${calculateBonusAmount(formation.units.length, bonus.uses)}` : "-"} (Formation-wide)</p>
+						{:else if bonus.type == "Assigned"}
+							<p class="muted">{bonus.grantedAbility?.join("/")}</p>
+							<p class="muted">{bonus.assignedNumber ? `x${calculateBonusAmount(formation.units.length, bonus.assignedNumber)}` : "-"}</p>
+							<AssignFormationBonusModal {bonus} {index} bind:formation {list}></AssignFormationBonusModal>
+						{/if}
 					</div>
 				{/each}
 			</div>
@@ -151,7 +172,7 @@
 				<div class="formation-bonus-container">
 					{#each secondaryDetails?.bonus ?? [] as bonus}
 						<div class="formation-bonus-row">
-							<p class="muted">{bonus.description}</p>
+							<!-- <p class="muted">{bonus.description}</p> -->
 						</div>
 					{/each}
 				</div>
@@ -219,9 +240,8 @@
 		}
 	}
 	.formation-bonus-container {
-		padding: 4px 16px;
 		display: grid;
-		grid-template-columns: 1fr;
+		grid-template-columns: max-content max-content max-content 1fr;
 		gap: 4px;
 		border: 1px solid var(--border);
 		margin: 0px 8px;
@@ -229,7 +249,17 @@
 	.formation-bonus-row {
 		display: grid;
 		grid-template-columns: subgrid;
-		grid-column: span 3;
+		grid-column: span 4;
+		column-gap: 14px;
+		border-bottom: 1px solid var(--border);
+		padding: 4px 8px;
+
+		& p {
+			text-align: end;
+		}
+	}
+	.formation-bonus-row:hover {
+		background-color: var(--muted);
 	}
 	input {
 		background-color: var(--muted);

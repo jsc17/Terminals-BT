@@ -4,7 +4,7 @@ type ListFormation = {
 	id: string;
 	name: string;
 	type: string;
-	fwBonus?: { ind: number; abil: string | number; uses?: number }[];
+	fwBonus?: { ind: number; abil: string }[];
 	units: { id: string; bonus?: { ind: number; abil: number }[] }[];
 	secondary?: { type: string; units: { id: string; bonus?: { ind: number; abil: number }[] }[] };
 };

@@ -1,4 +1,4 @@
-import { formationDataList } from "$lib/data/FormationData";
+import { formationDataList } from "$lib/data/formationData";
 import type { List, ListFormation } from "$lib/types/list.svelte";
 
 export function getFormationDataFromName(name: string) {

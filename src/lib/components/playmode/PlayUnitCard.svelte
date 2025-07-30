@@ -7,15 +7,18 @@
 	import * as automation from "$lib/utilities/playmodeAutomation";
 	import { createDamagedAbilityString, infTypes, mechTypes, typeIncludes, vTypes } from "$lib/utilities/playmodeUtilities";
 	import type { LogRound, Options, PlayUnit } from "$lib/types/playmode";
-	import { type UnitAbility } from "$lib/data/abilities";
+	import { abilityReferences, type UnitAbility } from "$lib/data/abilities";
+	import type { SvelteMap } from "svelte/reactivity";
+	import { getSPAfromId } from "$lib/utilities/listUtilities";
 
 	type Props = {
 		unit: PlayUnit;
 		options: Options;
 		currentRoundLog: LogRound;
+		assignedBonuses?: SvelteMap<number, SvelteMap<string, number>>;
 	};
 
-	let { unit, options, currentRoundLog }: Props = $props();
+	let { unit, options, currentRoundLog, assignedBonuses }: Props = $props();
 
 	let openDamageModal = $state(false),
 		openHeatModal = $state(false),
@@ -36,7 +39,16 @@
 	let firepowerRemaining = $derived(automation.calculateFirepower(unit, reference));
 	let currentSkill = $derived(automation.calculateSkill(unit, critCount.current, reference));
 	let physical = $derived(automation.calculatePhysical(moveSpeeds[0].tmm, firepowerRemaining.s, reference));
-
+	let formationBonuses = $derived.by(() => {
+		const bonusAbilities: string[] = [];
+		assignedBonuses?.forEach((value) => {
+			const existing = value.get(unit.id);
+			if (existing) {
+				bonusAbilities.push(`${getSPAfromId(existing)?.name} (Frmn)`);
+			}
+		});
+		return bonusAbilities;
+	});
 	function handleHeat() {
 		openHeatModal = true;
 	}
@@ -246,10 +258,12 @@
 							{@const abilityString = createDamagedAbilityString(
 								$state.snapshot(referenceAbility),
 								unit.current.crits.map((crit) => crit.type),
+								unit.current.disabledAbilities,
 								reference
 							)}
 							<button class="ability-reference-button" onclick={() => handleSpecial(referenceAbility)}>
-								<span class="ability-reference-button underline" class:damaged-stat={abilityString.damaged}>{abilityString.string}</span
+								<span class="ability-reference-button underline" class:damaged-stat={abilityString.damaged} class:disabled-ability={abilityString.disabled}
+									>{abilityString.string}</span
 								>{#if index != reference.abilities.length - 1},&nbsp;{/if}
 							</button>
 						{/each}
@@ -281,10 +295,13 @@
 				{/if}
 			</div>
 		</div>
-		{#if unit.customization?.spa || unit.customization?.ammo}
+		{#if unit.customization?.spa || unit.customization?.ammo || formationBonuses.length}
 			<div class="unit-card-block unit-custom-block">
-				{#if unit.customization?.spa && unit.customization.spa.length}
-					<p><span class="bold">SPA:</span> {unit.customization.spa.join(", ")}</p>
+				{#if unit.customization?.spa?.length || formationBonuses.length}
+					<p>
+						<span class="bold">SPA:</span>
+						{unit.customization?.spa?.join(", ")}{`${formationBonuses.length && unit.customization?.spa?.length ? ", " : ""}`}{formationBonuses.join(", ")}
+					</p>
 				{/if}
 				{#if unit.customization?.ammo && unit.customization.ammo.length}
 					<p><span class="bold">Alt. ammo:</span> {unit.customization.ammo.join(", ")}</p>
@@ -299,7 +316,7 @@
 	<HeatModal {unit} bind:open={openHeatModal} {reference}></HeatModal>
 	<CritModal {unit} bind:open={openCritModal} {reference} {currentRoundLog}></CritModal>
 	<ExpandModal {unit} bind:open={openExpandModal} {reference} {options} {currentRoundLog}></ExpandModal>
-	<SpecialModal ability={abilityReference} bind:open={openSpecialModal}></SpecialModal>
+	<SpecialModal ability={abilityReference} bind:open={openSpecialModal} {unit}></SpecialModal>
 {:else}
 	<p>Loading unit card</p>
 {/if}
@@ -500,6 +517,12 @@
 		background-color: red;
 	}
 	.damaged-stat {
+		color: red;
+		font-weight: bold;
+	}
+	.disabled-ability {
+		text-decoration: line-through;
+		text-decoration-thickness: 15%;
 		color: red;
 		font-weight: bold;
 	}

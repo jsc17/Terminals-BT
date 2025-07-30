@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { List, type ListFormation } from "$lib/types/list.svelte";
 	import { Select, Dialog } from "$lib/components/global/";
-	import { formationDataList } from "$lib/data/FormationData";
+	import { formationDataList } from "$lib/data/formationData";
 	import type { FormationData } from "$lib/types/formationData";
 	import { calculateBonusAmount, getFormationDataFromName } from "$lib/utilities/formationUtilities";
 	import AssignFormationBonusModal from "./AssignFormationBonusModal.svelte";
@@ -120,13 +120,35 @@
 			</div>
 			<p class="formation-status-row">Bonus(es):</p>
 			<div class="formation-bonus-container">
-				{#each formationDetails?.bonus ?? [] as bonus, index}
+				{#each formationDetails?.bonuses ?? [] as bonus, index}
 					<div class="formation-bonus-row">
 						{#if bonus.type == "Unique"}
 							<p class="muted">{bonus.description}</p>
 						{:else if bonus.type == "FormationWide"}
 							<p class="muted">{bonus.grantedAbility?.join("/")}</p>
 							<p class="muted">{bonus.uses ? `x${calculateBonusAmount(formation.units.length, bonus.uses)}` : "-"} (Formation-wide)</p>
+							{#if bonus.grantedAbility.length > 1}
+								<Select
+									type="single"
+									placeholder="Select Bonus"
+									items={bonus.grantedAbility.map((ability) => {
+										return { value: ability, label: ability };
+									})}
+									value={formation.fwBonus?.find((savedBonus) => savedBonus.ind == index)?.abil}
+									onValueChange={(value: string) => {
+										if (formation.fwBonus) {
+											const existingBonus = formation.fwBonus.find((savedBonus) => savedBonus.ind == index);
+											if (existingBonus) {
+												existingBonus.abil = value;
+											} else {
+												formation.fwBonus.push({ ind: index, abil: value });
+											}
+										} else {
+											formation.fwBonus = [{ ind: index, abil: value }];
+										}
+									}}
+								></Select>
+							{/if}
 						{:else if bonus.type == "Assigned"}
 							<p class="muted">{bonus.grantedAbility?.join("/")}</p>
 							<p class="muted">{bonus.assignedNumber ? `x${calculateBonusAmount(formation.units.length, bonus.assignedNumber)}` : "-"}</p>
@@ -170,7 +192,7 @@
 			{#if secondaryValue != "None"}
 				<p class="formation-status-row">Bonus(es):</p>
 				<div class="formation-bonus-container">
-					{#each secondaryDetails?.bonus ?? [] as bonus}
+					{#each secondaryDetails?.bonuses ?? [] as bonus}
 						<div class="formation-bonus-row">
 							<!-- <p class="muted">{bonus.description}</p> -->
 						</div>

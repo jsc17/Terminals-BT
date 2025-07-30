@@ -105,7 +105,7 @@ export type AssignedBonus = {
 	abilityType: "SPA" | "SCA" | "Unique";
 	grantedAbility: string[];
 	sameAbility?: boolean;
-	assignedNumber?: { flat?: number; plus?: number; portion?: number };
+	assignedNumber: { flat?: number; plus?: number; portion?: number };
 	assignmentTiming?: "playStart" | "turnStart";
 };
 
@@ -124,5 +124,5 @@ export type FormationData = {
 	referencedSPAs?: string[];
 	referencedSCAs?: string[];
 	secondary?: boolean;
-	bonus: FormationBonus[];
+	bonuses: FormationBonus[];
 };

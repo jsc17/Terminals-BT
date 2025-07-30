@@ -7,6 +7,9 @@
 	import { Popover } from "$lib/components/global/";
 	import { PlaymodeOptionsSchema } from "$lib/schemas/playmode";
 	import { isJson } from "$lib/utilities/utilities";
+	import { loadMULUnit } from "$lib/utilities/loadUtilities";
+	import { SvelteMap } from "svelte/reactivity";
+	import type { MulUnit } from "$lib/types/listTypes";
 
 	let logDrawerOpen = $state(false);
 	let loadModalOpen = $state(false);
@@ -49,6 +52,16 @@
 		}
 	);
 
+	let unitReferences = $derived.by(() => {
+		let references: SvelteMap<string, MulUnit> = new SvelteMap();
+		for (const unit of playList.current.units) {
+			loadMULUnit(unit.mulId).then((result) => {
+				references.set(unit.id, result);
+			});
+		}
+		return references;
+	});
+
 	const currentRoundLog = new PersistedState<LogRound>("playCurrentRound", { round: 1, logs: [] });
 	let fullLogs: LogRound[] = $state([]);
 
@@ -57,7 +70,7 @@
 			const reset = confirm("Are you sure you wish to reset all units to default? This cannot be undone.");
 			if (reset) {
 				for (const unit of playList.current.units) {
-					unit.current = { damage: 0, heat: 0, crits: [] };
+					unit.current = { damage: 0, heat: 0, crits: [], disabledAbilities: [] };
 					unit.pending = { damage: 0, heat: 0, crits: [] };
 				}
 				fullLogs = [];
@@ -126,7 +139,7 @@
 	{#if playList.current.units.length}
 		{#if options.current.groupByFormation}
 			{#each playList.current.formations as formation}
-				<PlayFormations {formation} units={playList.current.units} options={options.current} currentRoundLog={currentRoundLog.current}></PlayFormations>
+				<PlayFormations {formation} units={playList.current.units} options={options.current} currentRoundLog={currentRoundLog.current} {unitReferences}></PlayFormations>
 			{/each}
 		{:else}
 			<PlayFullList units={playList.current.units} options={options.current} currentRoundLog={currentRoundLog.current}></PlayFullList>

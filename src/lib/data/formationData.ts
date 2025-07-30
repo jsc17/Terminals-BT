@@ -9,7 +9,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 				name: "Combat Group",
 				page: "N/A",
 				minimumUnits: 0,
-				bonus: [{ type: "Unique", description: "No bonus abilities. Just used for force organization." }]
+				bonuses: [{ type: "Unique", description: "No bonus abilities. Just used for force organization." }]
 			}
 		]
 	},
@@ -31,7 +31,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 					}
 				],
 				page: "AS:CE pg.117",
-				bonus: [
+				bonuses: [
 					{
 						type: "FormationWide",
 						abilityType: "SPA",
@@ -50,7 +50,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							{ type: "Role", description: "At least 1 unit must have the Scout role", roles: ["Scout"], amount: 1, flatAmount: true }
 						],
 						page: "AS:CE pg.117",
-						bonus: [
+						bonuses: [
 							{
 								type: "FormationWide",
 								abilityType: "SPA",
@@ -68,7 +68,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							{ type: "Size", description: "No units may be Size 4 or greater", size: 3, limit: "equalOrLess", amount: 1, flatAmount: false }
 						],
 						page: "AS:CE pg.117",
-						bonus: [
+						bonuses: [
 							{
 								type: "FormationWide",
 								abilityType: "SPA",
@@ -86,7 +86,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							{ type: "Size", description: "No units may be Size 1", size: 2, limit: "equalOrGreater", amount: 1, flatAmount: false }
 						],
 						page: "AS:CE pg.117",
-						bonus: [
+						bonuses: [
 							{
 								type: "FormationWide",
 								abilityType: "SPA",
@@ -127,7 +127,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 					}
 				],
 				page: "AS:CE pg.118",
-				bonus: [
+				bonuses: [
 					{
 						type: "Assigned",
 						abilityType: "SPA",
@@ -175,7 +175,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							}
 						],
 						page: "AS:CE pg.118",
-						bonus: [
+						bonuses: [
 							{
 								type: "Assigned",
 								abilityType: "SPA",
@@ -215,7 +215,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 					{ type: "Role", description: "At least 50% of units must have the Striker or Skirmisher roles", roles: ["Striker", "Skirmisher"], amount: 0.5, flatAmount: false }
 				],
 				page: "AS:CE pg.118",
-				bonus: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Speed Demon"], assignedNumber: { portion: 0.75 }, assignmentTiming: "playStart" }],
+				bonuses: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Speed Demon"], assignedNumber: { portion: 0.75 }, assignmentTiming: "playStart" }],
 				referencedSPAs: ["Speed Demon"],
 				variations: [
 					{
@@ -243,7 +243,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							{ type: "Role", description: "At least 2 units must have the Striker or Skirmisher roles", roles: ["Striker", "Skirmisher"], amount: 2, flatAmount: true }
 						],
 						page: "AS:CE pg.118",
-						bonus: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Speed Demon"], assignedNumber: { portion: 0.75 }, assignmentTiming: "playStart" }],
+						bonuses: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Speed Demon"], assignedNumber: { portion: 0.75 }, assignmentTiming: "playStart" }],
 						referencedSPAs: ["Speed Demon"]
 					},
 					{
@@ -272,7 +272,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							{ type: "Role", description: "At least 2 units must have the Striker or Skirmisher roles", roles: ["Striker", "Skirmisher"], amount: 2, flatAmount: true }
 						],
 						page: "AS:CE pg.118",
-						bonus: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Speed Demon"], assignedNumber: { portion: 0.75 }, assignmentTiming: "playStart" }],
+						bonuses: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Speed Demon"], assignedNumber: { portion: 0.75 }, assignmentTiming: "playStart" }],
 						referencedSPAs: ["Speed Demon"]
 					}
 				]
@@ -286,7 +286,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 					{ type: "Role", description: "At least 75% of units must have the Missile Boat or Sniper roles", roles: ["Missile Boat", "Sniper"], amount: 0.75, flatAmount: false }
 				],
 				page: "AS:CE pg.119",
-				bonus: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Sniper"], assignedNumber: { portion: 0.5 }, assignmentTiming: "turnStart" }],
+				bonuses: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Sniper"], assignedNumber: { portion: 0.5 }, assignmentTiming: "turnStart" }],
 				referencedSPAs: ["Sniper"],
 				variations: [
 					{
@@ -302,7 +302,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							}
 						],
 						page: "AS:CE pg.119",
-						bonus: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Oblique Attacker"], assignedNumber: { portion: 0.5 }, assignmentTiming: "turnStart" }],
+						bonuses: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Oblique Attacker"], assignedNumber: { portion: 0.5 }, assignmentTiming: "turnStart" }],
 						referencedSPAs: ["Oblique Attacker"]
 					},
 					{
@@ -318,7 +318,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							}
 						],
 						page: "AS:CE pg.119",
-						bonus: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Oblique Artilleryman"], assignedNumber: { portion: 0.5 }, assignmentTiming: "turnStart" }],
+						bonuses: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Oblique Artilleryman"], assignedNumber: { portion: 0.5 }, assignmentTiming: "turnStart" }],
 						referencedSPAs: ["Oblique Artilleryman"]
 					},
 					{
@@ -337,7 +337,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							}
 						],
 						page: "AS:CE pg.119",
-						bonus: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Weapon Specialist"], assignedNumber: { portion: 0.5 }, assignmentTiming: "turnStart" }],
+						bonuses: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Weapon Specialist"], assignedNumber: { portion: 0.5 }, assignmentTiming: "turnStart" }],
 						referencedSPAs: ["Weapon Specialist"]
 					},
 					{
@@ -360,7 +360,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							}
 						],
 						page: "AS:CE pg.119",
-						bonus: [{ type: "Assigned", abilityType: "SCA", grantedAbility: ["Anti-Aircraft Specialist SCA"], assignedNumber: { portion: 0.5 }, assignmentTiming: "turnStart" }],
+						bonuses: [{ type: "Assigned", abilityType: "SCA", grantedAbility: ["Anti-Aircraft Specialist SCA"], assignedNumber: { portion: 0.5 }, assignmentTiming: "turnStart" }],
 						referencedSCAs: ["Anti-Aircraft Specialist"]
 					},
 					{
@@ -377,7 +377,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							}
 						],
 						page: "FM:D pg.82",
-						bonus: [
+						bonuses: [
 							{
 								type: "FormationWide",
 								abilityType: "Unique",
@@ -403,7 +403,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 					{ type: "Role", description: "At least 2 units must have the Striker or Scout roles", roles: ["Striker", "Scout"], amount: 2, flatAmount: true }
 				],
 				page: "AS:CE pg.119",
-				bonus: [
+				bonuses: [
 					{
 						type: "Assigned",
 						abilityType: "SPA",
@@ -430,7 +430,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							{ type: "Role", description: "All units must have the Scout role", roles: ["Scout"], amount: 1, flatAmount: false }
 						],
 						page: "AS:CE pg.119",
-						bonus: [
+						bonuses: [
 							{
 								type: "Assigned",
 								abilityType: "SPA",
@@ -466,7 +466,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							{ type: "Role", description: "At least 2 units must have the Scout role", roles: ["Scout"], amount: 2, flatAmount: true }
 						],
 						page: "AS:CE pg.119",
-						bonus: [
+						bonuses: [
 							{
 								type: "Assigned",
 								abilityType: "SPA",
@@ -505,7 +505,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 					}
 				],
 				page: "AS:CE pg.120",
-				bonus: [
+				bonuses: [
 					{
 						type: "Assigned",
 						abilityType: "SPA",
@@ -540,7 +540,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							}
 						],
 						page: "AS:CE pg.120",
-						bonus: [
+						bonuses: [
 							{
 								type: "Assigned",
 								abilityType: "SPA",
@@ -575,7 +575,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							}
 						],
 						page: "AS:CE pg.120",
-						bonus: [
+						bonuses: [
 							{
 								type: "Assigned",
 								abilityType: "SPA",
@@ -609,7 +609,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 					}
 				],
 				page: "AS:CE pg.120",
-				bonus: [
+				bonuses: [
 					{
 						type: "Assigned",
 						abilityType: "SPA",
@@ -641,7 +641,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							}
 						],
 						page: "AS:CE pg.120",
-						bonus: [
+						bonuses: [
 							{
 								type: "Assigned",
 								abilityType: "SPA",
@@ -666,7 +666,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 				name: "Support",
 				page: "AS:CE pg.121",
 				secondary: true,
-				bonus: [
+				bonuses: [
 					{
 						type: "Unique",
 						description:
@@ -686,7 +686,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 				],
 				page: "AS:CE pg.121",
 				secondary: true,
-				bonus: [{ type: "FormationWide", abilityType: "Unique", grantedAbility: ["Mechanized", "Nova"] }]
+				bonuses: [{ type: "FormationWide", abilityType: "Unique", grantedAbility: ["Mechanized", "Nova"] }]
 			},
 			{
 				id: 26,
@@ -699,7 +699,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 				],
 				page: "AS:CE pg.121",
 				secondary: true,
-				bonus: [{ type: "Unique", description: "No additional bonus ability is granted by this formation" }]
+				bonuses: [{ type: "Unique", description: "No additional bonus ability is granted by this formation" }]
 			},
 			{
 				id: 27,
@@ -714,7 +714,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 					}
 				],
 				page: "FM:D pg.82",
-				bonus: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Combat Intuition"], assignedNumber: { portion: 0.5 }, assignmentTiming: "turnStart" }],
+				bonuses: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Combat Intuition"], assignedNumber: { portion: 0.5 }, assignmentTiming: "turnStart" }],
 				referencedSPAs: ["Combat Intuition"]
 			},
 			{
@@ -735,7 +735,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 					}
 				],
 				page: "FM:K pg.87",
-				bonus: [
+				bonuses: [
 					{
 						type: "FormationWide",
 						abilityType: "Unique",
@@ -757,11 +757,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 					}
 				],
 				page: "FM:K pg.87",
-				bonus: [
-					{
-						type: "Unique",
-						description: "At the beginning of play, two units receive the Zweihander or Swordsman Special Pilot Ability; the same ability must be assigned to both Units."
-					},
+				bonuses: [
 					{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Zweihander", "Swordsman"], assignedNumber: { flat: 2 }, assignmentTiming: "playStart", sameAbility: true }
 				],
 				referencedSPAs: ["Zweihander", "Swordsman"]
@@ -771,7 +767,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 				name: "Anti-'Mech",
 				requirements: [{ type: "Types", description: "All units must be infantry", allowedTypes: ["BA", "CI"] }],
 				page: "FM:K pg.87",
-				bonus: [
+				bonuses: [
 					{
 						type: "Unique",
 						description: "Enemy Units in base-to-base contact with an Anti-'Mech Lance suffer a -1 To-Hit Modifier penalty to any weapon attacks made by that enemy Unit"
@@ -788,7 +784,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 				name: "Interceptor Squadron",
 				requirements: [{ type: "Role", description: "At least 50% of the formation must have the Interceptor role", roles: ["Interceptor"], amount: 0.5, flatAmount: false }],
 				page: "AS:CE pg.122",
-				bonus: [
+				bonuses: [
 					{
 						type: "Unique",
 						description: "Any units in an Interceptor Squadron with a Move (Thrust) of 9 or less receive the Speed Demon SPA (see p.99)"
@@ -810,7 +806,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 					}
 				],
 				page: "AS:CE pg.122",
-				bonus: [
+				bonuses: [
 					{
 						type: "Unique",
 						description:
@@ -848,7 +844,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 				],
 				page: "AS:CE pg.122",
 
-				bonus: [
+				bonuses: [
 					{
 						type: "Assigned",
 						abilityType: "SPA",
@@ -879,7 +875,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 					}
 				],
 				page: "AS:CE pg.122",
-				bonus: [
+				bonuses: [
 					{
 						type: "Unique",
 						description:
@@ -903,7 +899,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 					}
 				],
 				page: "AS:CE pg.122",
-				bonus: [
+				bonuses: [
 					{
 						type: "FormationWide",
 						abilityType: "SCA",
@@ -925,7 +921,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 					}
 				],
 				page: "AS:CE pg.123",
-				bonus: [
+				bonuses: [
 					{
 						type: "Unique",
 						description:
@@ -957,7 +953,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 					{ type: "Movement", description: 'All units must have a ground-movement speed of at least 8"', speed: 8, amount: 1, flatAmount: false }
 				],
 				page: "FM:D pg.82",
-				bonus: [
+				bonuses: [
 					{
 						type: "Assigned",
 						abilityType: "SPA",
@@ -980,7 +976,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 					}
 				],
 				page: "FM:K pg.87",
-				bonus: [
+				bonuses: [
 					{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Tactical Genius", "Antagonizer", "Sniper"], assignedNumber: { flat: 1 }, assignmentTiming: "playStart" },
 					{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Iron Will", "Speed Demon"], assignedNumber: { portion: 1 }, assignmentTiming: "playStart", sameAbility: true }
 				],

@@ -1,6 +1,7 @@
 import { weaponAbilityReference, type UnitAbility } from "$lib/data/abilities";
 import type { MulUnit, ListFormation, ListUnit } from "$lib/types/listTypes";
 import type { PlayFormation, PlayUnit, PlayList } from "$lib/types/playmode";
+import { calculateBonusAmount, getFormationDataFromName } from "./formationUtilities";
 
 export const aeroTypes = ["AF", "CF"];
 export const vTypes = ["CV", "SV"];
@@ -14,10 +15,15 @@ export function typeIncludes(typesToCheck: string[], reference?: MulUnit) {
 	return typesToCheck.includes(reference.subtype);
 }
 
-export function createDamagedAbilityString(ability: UnitAbility, currentCriticals: string[], reference: MulUnit) {
+export function createDamagedAbilityString(ability: UnitAbility, currentCriticals: string[], disabledAbilities: string[], reference: MulUnit) {
 	let string = "";
 	let turretString = "";
 	let damaged = false;
+	let disabled = false;
+
+	if (disabledAbilities.includes(ability.name)) {
+		disabled = true;
+	}
 
 	if (weaponAbilityReference.includes(ability.name)) {
 		for (const critical of currentCriticals) {
@@ -82,7 +88,7 @@ export function createDamagedAbilityString(ability: UnitAbility, currentCritical
 	}
 	string += turretString;
 	string += `${ability.name == "TUR" ? ")" : ""}`;
-	return { string, damaged };
+	return { string, damaged, disabled };
 }
 
 export function sendListToPlay(formations: ListFormation[], units: ListUnit[]) {
@@ -99,7 +105,7 @@ export function sendListToPlay(formations: ListFormation[], units: ListUnit[]) {
 				skill: unit.skill,
 				cost: unit.cost,
 				customization: unit.customization,
-				current: { damage: 0, heat: 0, crits: [] },
+				current: { damage: 0, heat: 0, crits: [], disabledAbilities: [] },
 				pending: { damage: 0, heat: 0, crits: [] }
 			});
 		}
@@ -109,6 +115,7 @@ export function sendListToPlay(formations: ListFormation[], units: ListUnit[]) {
 			return formation.units.length;
 		})
 		.map((formation) => {
+			const formationDetails = getFormationDataFromName(formation.type);
 			return {
 				id: formation.id,
 				name: formation.name,
@@ -121,7 +128,8 @@ export function sendListToPlay(formations: ListFormation[], units: ListUnit[]) {
 					units: formation.secondary?.units.map(({ id }) => {
 						return id;
 					})
-				}
+				},
+				bonuses: formationDetails?.bonuses
 			};
 		});
 	const playList: PlayList = {
@@ -144,5 +152,20 @@ export function sendListToPlay(formations: ListFormation[], units: ListUnit[]) {
 	} else {
 		localStorage.setItem("playList", JSON.stringify(playList));
 		window.open("/play", "_blank")?.focus();
+	}
+}
+
+export function getCritNameFromCode(critical: string): string {
+	switch (critical) {
+		case "destroyed":
+			return "Destroyed";
+		case "mhit":
+			return "-2 MV";
+		case "mhalf":
+			return "1/2 MV";
+		case "mimm":
+			return "0 MV";
+		default:
+			return critical.charAt(0).toUpperCase() + critical.slice(1);
 	}
 }

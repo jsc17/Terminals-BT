@@ -32,10 +32,17 @@
 .muted {
 	color: var(--muted-foreground);
 }
+.error {
+	color: var(--error);
+}
 .transparent-button {
 	background-color: transparent;
 	color: var(--primary);
 }
 .transparent-button:hover {
 	cursor: pointer;
+}
+
+.primary-filter {
+	filter: var(--primary-filter);
 }

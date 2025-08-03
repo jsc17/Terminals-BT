@@ -83,7 +83,7 @@
 					onfinalize={handleSort}
 				>
 					{#each formation.units as unit (unit.id)}
-						<UnitCard unitId={unit.id} {unitCustomizationModal} {list}></UnitCard>
+						<UnitCard {unit} {unitCustomizationModal} {list}></UnitCard>
 					{/each}
 				</div>
 			</Collapsible>
@@ -136,7 +136,7 @@
 						onfinalize={handleSecondarySort}
 					>
 						{#each formation.secondary.units as unit (unit.id)}
-							<UnitCard unitId={unit.id} {unitCustomizationModal} {list}></UnitCard>
+							<UnitCard {unit} {unitCustomizationModal} {list}></UnitCard>
 						{/each}
 					</div>
 				</Collapsible>
@@ -158,7 +158,7 @@
 					onfinalize={handleSort}
 				>
 					{#each formation.units as unit (unit.id)}
-						<UnitCard unitId={unit.id} {unitCustomizationModal} {list}></UnitCard>
+						<UnitCard {unit} {unitCustomizationModal} {list}></UnitCard>
 					{/each}
 				</div>
 			</Collapsible>
@@ -211,7 +211,7 @@
 						onfinalize={handleSecondarySort}
 					>
 						{#each formation.secondary.units as unit (unit.id)}
-							<UnitCard unitId={unit.id} {unitCustomizationModal} {list}></UnitCard>
+							<UnitCard {unit} {unitCustomizationModal} {list}></UnitCard>
 						{/each}
 					</div>
 				</Collapsible>
@@ -230,7 +230,7 @@
 	{/if}
 </div>
 
-<EditFormationModal bind:open={editModalOpen} {formation} {list} {validationResults}></EditFormationModal>
+<EditFormationModal bind:open={editModalOpen} bind:formation {list} {validationResults}></EditFormationModal>
 <FindUnitAvailabilityModal bind:this={availabilityModal} {formation} {list} />
 
 <style>

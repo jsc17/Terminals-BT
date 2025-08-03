@@ -22,7 +22,12 @@
 			const formData = new FormData();
 			formData.append("mulId", unit.mulId);
 			const pv = (deserialize(await (await fetch("?/getCost", { method: "POST", body: formData })).text()) as any).data.pv;
-			newPlaylist.units.push({ ...unit, cost: getNewSkillCost(unit.skill, pv), current: { damage: 0, heat: 0, crits: [] }, pending: { damage: 0, heat: 0, crits: [] } });
+			newPlaylist.units.push({
+				...unit,
+				cost: getNewSkillCost(unit.skill, pv),
+				current: { damage: 0, heat: 0, crits: [], disabledAbilities: [] },
+				pending: { damage: 0, heat: 0, crits: [] }
+			});
 		}
 		for (const formation of JSON.parse(lists[selectedList].formations)) {
 			if (formation.units.length) {

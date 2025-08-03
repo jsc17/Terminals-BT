@@ -1,4 +1,4 @@
-import { formationDataList } from "$lib/data/FormationData";
+import { formationDataList } from "$lib/data/formationData";
 import type { List, ListFormation } from "$lib/types/list.svelte";
 
 export function getFormationDataFromName(name: string) {
@@ -69,4 +69,14 @@ export function getFormationStats(formation: ListFormation, list: List) {
 	};
 }
 
-export function calculateBonusAmount(formation: ListFormation, bonus: string) {}
+export function calculateBonusAmount(unitCount: number, amount: { flat?: number; plus?: number; portion?: number }): number {
+	if (amount.flat) {
+		return amount.flat;
+	} else if (amount.plus) {
+		return unitCount + amount.plus;
+	} else if (amount.portion) {
+		return Math.floor(unitCount * amount.portion);
+	} else {
+		return 0;
+	}
+}

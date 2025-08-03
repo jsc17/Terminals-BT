@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { List, type ListFormation } from "$lib/types/list.svelte";
 	import { Select, Dialog } from "$lib/components/global/";
-	import { formationDataList } from "$lib/data/FormationData";
+	import { formationDataList } from "$lib/data/formationData";
 	import type { FormationData } from "$lib/types/formationData";
-	import { getFormationDataFromName } from "$lib/utilities/formationUtilities";
+	import { calculateBonusAmount, getFormationDataFromName } from "$lib/utilities/formationUtilities";
+	import AssignFormationBonusModal from "./AssignFormationBonusModal.svelte";
 
 	type Props = {
 		formation: ListFormation;
@@ -15,7 +16,7 @@
 		};
 	};
 
-	let { formation, open = $bindable(false), validationResults }: Props = $props();
+	let { formation = $bindable(), open = $bindable(false), list, validationResults }: Props = $props();
 
 	let formationTypeList: { groupLabel: string; items: { value: string; label: string }[] }[] = formationDataList.map((group) => {
 		return {
@@ -53,6 +54,17 @@
 		}
 	});
 
+	function getPrimaryValue() {
+		return formation.type;
+	}
+	function setPrimaryValue(newValue: string) {
+		delete formation.fwBonus;
+		for (const unit of formation.units) {
+			delete unit.bonus;
+		}
+		formation.type = newValue;
+	}
+
 	let secondaryValue = $state(formation.secondary?.type ?? "None");
 	function getSecondaryValue() {
 		return secondaryValue;
@@ -84,7 +96,7 @@
 			<div class="formation-selection-row">
 				<div class="edit-formation-option-select-row">
 					<p>Formation Type:</p>
-					<div class="select-formation-type-wrapper"><Select bind:value={formation.type} type="single" groupedItems={formationTypeList}></Select></div>
+					<div class="select-formation-type-wrapper"><Select bind:value={getPrimaryValue, setPrimaryValue} type="single" groupedItems={formationTypeList}></Select></div>
 				</div>
 			</div>
 			<p class="formation-status-row">
@@ -95,6 +107,10 @@
 				{/if}
 			</p>
 			<div class="edit-formation-requirement-container">
+				<div class="requirement-row">
+					<div></div>
+					<p class="muted">Source: {formationDetails?.page}</p>
+				</div>
 				{#each validationResults.primary.requirements as requirement}
 					<div class="requirement-row">
 						<p class:valid={requirement.met == 1} class:invalid={requirement.met == -1}>{requirement.met == 1 ? "✔" : "X"}</p>
@@ -102,15 +118,42 @@
 					</div>
 				{/each}
 			</div>
-			<p class="formation-status-row">
-				Bonus(es): {#if formationDetails?.page != "N/A"}
-					({formationDetails?.page})
-				{/if}
-			</p>
+			<p class="formation-status-row">Bonus(es):</p>
 			<div class="formation-bonus-container">
-				{#each formationDetails?.bonus ?? [] as bonus}
+				{#each formationDetails?.bonuses ?? [] as bonus, index}
 					<div class="formation-bonus-row">
-						<p class="muted">{bonus.description}</p>
+						{#if bonus.type == "Unique"}
+							<p class="muted bonus-description">{bonus.description}</p>
+						{:else if bonus.type == "FormationWide"}
+							<p class="muted">{bonus.grantedAbility?.join("/")}</p>
+							<p class="muted">{bonus.uses ? `x${calculateBonusAmount(formation.units.length, bonus.uses)}` : "-"} (Formation-wide)</p>
+							{#if bonus.grantedAbility.length > 1}
+								<Select
+									type="single"
+									placeholder="Select Bonus"
+									items={bonus.grantedAbility.map((ability) => {
+										return { value: ability, label: ability };
+									})}
+									value={formation.fwBonus?.find((savedBonus) => savedBonus.ind == index)?.abil}
+									onValueChange={(value: string) => {
+										if (formation.fwBonus) {
+											const existingBonus = formation.fwBonus.find((savedBonus) => savedBonus.ind == index);
+											if (existingBonus) {
+												existingBonus.abil = value;
+											} else {
+												formation.fwBonus.push({ ind: index, abil: value });
+											}
+										} else {
+											formation.fwBonus = [{ ind: index, abil: value }];
+										}
+									}}
+								></Select>
+							{/if}
+						{:else if bonus.type == "Assigned"}
+							<p class="muted">{bonus.grantedAbility?.join("/")}</p>
+							<p class="muted">{bonus.assignedNumber ? `x${calculateBonusAmount(formation.units.length, bonus.assignedNumber)}` : "-"}</p>
+							<AssignFormationBonusModal {bonus} {index} bind:formation {list}></AssignFormationBonusModal>
+						{/if}
 					</div>
 				{/each}
 			</div>
@@ -133,6 +176,12 @@
 				{/if}
 			</p>
 			<div class="edit-formation-requirement-container">
+				{#if secondaryDetails}
+					<div class="requirement-row">
+						<div></div>
+						<p class="muted">Source: {secondaryDetails?.page}</p>
+					</div>
+				{/if}
 				{#each validationResults.secondary.requirements as requirement}
 					<div class="requirement-row">
 						<p class:valid={requirement.met == 1} class:invalid={requirement.met == -1}>{requirement.met == 1 ? "✔" : "X"}</p>
@@ -141,15 +190,38 @@
 				{/each}
 			</div>
 			{#if secondaryValue != "None"}
-				<p class="formation-status-row">
-					Bonus(es): {#if secondaryDetails?.page != "N/A"}
-						({secondaryDetails?.page})
-					{/if}
-				</p>
+				<p class="formation-status-row">Bonus(es):</p>
 				<div class="formation-bonus-container">
-					{#each secondaryDetails?.bonus ?? [] as bonus}
+					{#each secondaryDetails?.bonuses ?? [] as bonus, index}
 						<div class="formation-bonus-row">
-							<p class="muted">{bonus.description}</p>
+							{#if bonus.type == "Unique"}
+								<p class="muted bonus-description">{bonus.description}</p>
+							{:else if bonus.type == "FormationWide"}
+								<p class="muted">{bonus.grantedAbility?.join("/")}</p>
+								<p class="muted">{bonus.uses ? `x${calculateBonusAmount(formation.units.length, bonus.uses)}` : "-"} (Formation-wide)</p>
+								{#if bonus.grantedAbility.length > 1}
+									<Select
+										type="single"
+										placeholder="Select Bonus"
+										items={bonus.grantedAbility.map((ability) => {
+											return { value: ability, label: ability };
+										})}
+										value={formation.secondary?.fwBonus?.find((savedBonus) => savedBonus.ind == index)?.abil}
+										onValueChange={(value: string) => {
+											if (formation.secondary?.fwBonus) {
+												const existingBonus = formation.secondary?.fwBonus.find((savedBonus) => savedBonus.ind == index);
+												if (existingBonus) {
+													existingBonus.abil = value;
+												} else {
+													formation.secondary?.fwBonus.push({ ind: index, abil: value });
+												}
+											} else {
+												formation.secondary!.fwBonus = [{ ind: index, abil: value }];
+											}
+										}}
+									></Select>
+								{/if}
+							{/if}
 						</div>
 					{/each}
 				</div>
@@ -217,9 +289,8 @@
 		}
 	}
 	.formation-bonus-container {
-		padding: 4px 16px;
 		display: grid;
-		grid-template-columns: 1fr;
+		grid-template-columns: max-content max-content max-content 1fr;
 		gap: 4px;
 		border: 1px solid var(--border);
 		margin: 0px 8px;
@@ -227,7 +298,13 @@
 	.formation-bonus-row {
 		display: grid;
 		grid-template-columns: subgrid;
-		grid-column: span 3;
+		grid-column: span 4;
+		column-gap: 14px;
+		border-bottom: 1px solid var(--border);
+		padding: 4px 8px;
+	}
+	.formation-bonus-row:hover {
+		background-color: var(--muted);
 	}
 	input {
 		background-color: var(--muted);
@@ -245,5 +322,8 @@
 	.invalid {
 		color: red;
 		font-weight: bold;
+	}
+	.bonus-description {
+		max-width: 90dvw;
 	}
 </style>

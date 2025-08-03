@@ -128,7 +128,8 @@ export const actions = {
 		list.formationHeaderStyle = formData.get("formationHeaderStyle")?.toString() ?? "inline";
 		const printFormations = formData.get("drawFormations")?.toString() == "on";
 		const printUnitsByFormation = formData.get("printUnitsByFormation")?.toString() == "on";
-		const blob = await printList(list, printFormations, printUnitsByFormation);
+		const printFormationBonuses = formData.get("printFormationBonuses")?.toString() == "on";
+		const blob = await printList(list, printFormations, printUnitsByFormation, printFormationBonuses);
 		const bytes = await blob.bytes();
 		return { pdf: JSON.stringify(bytes) };
 	},

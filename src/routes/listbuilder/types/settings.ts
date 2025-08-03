@@ -2,6 +2,7 @@ type PrintSettings = {
 	printingStyle: "mul" | "detailed";
 	printFormations: boolean;
 	printCardsByFormation: boolean;
+	printFormationBonuses: boolean;
 	cardStyle: "mul" | "generated";
 	formationHeaderStyle: "inline" | "side";
 };

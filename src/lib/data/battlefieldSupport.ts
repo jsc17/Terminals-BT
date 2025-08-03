@@ -1,14 +1,6 @@
-const battlefieldSupportGroups = ["Offensive Aerospace Support", "Defensive Aerospace Support", "Artillery Support", "Minefield Support"];
+import { type battlefieldSupportCard } from "$lib/types/battlefieldSupport";
 
-type battlefieldSupportCard = {
-	id: number;
-	source: string;
-	group: string;
-	name: string;
-	btn: string;
-	dmg: string;
-	bspCost: number;
-};
+const battlefieldSupportGroups = ["Offensive Aerospace Support", "Defensive Aerospace Support", "Artillery Support", "Minefield Support"];
 
 const battlefieldSupport = [
 	{ id: 0, source: "AS:CE", group: "Offensive Aerospace Support", name: "Light Strike", btn: "5", dmg: "1", bspCost: 2 },

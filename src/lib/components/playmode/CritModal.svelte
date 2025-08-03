@@ -3,6 +3,7 @@
 	import type { MulUnit } from "$lib/types/listTypes";
 	import { nanoid } from "nanoid";
 	import type { LogRound, PlayUnit } from "$lib/types/playmode";
+	import CritRemovalModal from "./CritRemovalModal.svelte";
 
 	type Props = {
 		unit: PlayUnit;
@@ -136,6 +137,9 @@
 				<button onclick={pendCrit}>Apply At End of Round</button>
 			</div>
 		</div>
+		<div class="remove-button">
+			<CritRemovalModal {unit}></CritRemovalModal>
+		</div>
 	</div>
 </Dialog>
 
@@ -171,5 +175,8 @@
 			padding: 8px;
 			font-size: 18px;
 		}
+	}
+	.remove-button {
+		align-self: end;
 	}
 </style>

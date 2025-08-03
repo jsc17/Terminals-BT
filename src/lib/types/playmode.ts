@@ -1,3 +1,4 @@
+import type { FormationBonus } from "./formationData";
 import type { UnitCustomization } from "./listTypes";
 
 type PlayUnit = {
@@ -15,6 +16,7 @@ type PlayUnit = {
 		damage: number;
 		heat: number;
 		crits: { id: string; type: string }[];
+		disabledAbilities: string[];
 	};
 };
 
@@ -24,6 +26,7 @@ type PlayFormation = {
 	type: string;
 	units: string[];
 	secondary?: { type?: string; units?: string[] };
+	bonuses?: FormationBonus[];
 };
 
 type PlayList = {
@@ -45,6 +48,7 @@ type LogEntry = {
 };
 
 type Options = {
+	cardsPerRow: number;
 	uiScale: number;
 	renderOriginal: boolean;
 	showPhysical: boolean;

@@ -10,11 +10,14 @@
 	};
 
 	let { units, options, currentRoundLog }: Props = $props();
+
+	let listWidth = $state<number>();
+	let cardWidth = $derived((listWidth! - 16 - 8 * (options.cardsPerRow ?? 3)) / (options.cardsPerRow ?? 3));
 </script>
 
-<div class="play-list-units">
+<div class="play-list-units" bind:clientWidth={listWidth}>
 	{#each units as unit}
-		<div class="unit-card-container" style="width: {252 * ((options.uiScale + 50) / 100)}pt; height:{180 * ((options.uiScale + 50) / 100)}pt">
+		<div class="unit-card-container" style="width: {cardWidth}px; height:{(cardWidth * 5) / 7}px">
 			<PlayUnitCard {unit} {options} {currentRoundLog}></PlayUnitCard>
 		</div>
 	{/each}

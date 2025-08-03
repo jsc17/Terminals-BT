@@ -123,7 +123,7 @@
 				{#each formationDetails?.bonuses ?? [] as bonus, index}
 					<div class="formation-bonus-row">
 						{#if bonus.type == "Unique"}
-							<p class="muted">{bonus.description}</p>
+							<p class="muted bonus-description">{bonus.description}</p>
 						{:else if bonus.type == "FormationWide"}
 							<p class="muted">{bonus.grantedAbility?.join("/")}</p>
 							<p class="muted">{bonus.uses ? `x${calculateBonusAmount(formation.units.length, bonus.uses)}` : "-"} (Formation-wide)</p>
@@ -192,9 +192,36 @@
 			{#if secondaryValue != "None"}
 				<p class="formation-status-row">Bonus(es):</p>
 				<div class="formation-bonus-container">
-					{#each secondaryDetails?.bonuses ?? [] as bonus}
+					{#each secondaryDetails?.bonuses ?? [] as bonus, index}
 						<div class="formation-bonus-row">
-							<!-- <p class="muted">{bonus.description}</p> -->
+							{#if bonus.type == "Unique"}
+								<p class="muted bonus-description">{bonus.description}</p>
+							{:else if bonus.type == "FormationWide"}
+								<p class="muted">{bonus.grantedAbility?.join("/")}</p>
+								<p class="muted">{bonus.uses ? `x${calculateBonusAmount(formation.units.length, bonus.uses)}` : "-"} (Formation-wide)</p>
+								{#if bonus.grantedAbility.length > 1}
+									<Select
+										type="single"
+										placeholder="Select Bonus"
+										items={bonus.grantedAbility.map((ability) => {
+											return { value: ability, label: ability };
+										})}
+										value={formation.secondary?.fwBonus?.find((savedBonus) => savedBonus.ind == index)?.abil}
+										onValueChange={(value: string) => {
+											if (formation.secondary?.fwBonus) {
+												const existingBonus = formation.secondary?.fwBonus.find((savedBonus) => savedBonus.ind == index);
+												if (existingBonus) {
+													existingBonus.abil = value;
+												} else {
+													formation.secondary?.fwBonus.push({ ind: index, abil: value });
+												}
+											} else {
+												formation.secondary!.fwBonus = [{ ind: index, abil: value }];
+											}
+										}}
+									></Select>
+								{/if}
+							{/if}
 						</div>
 					{/each}
 				</div>
@@ -275,10 +302,6 @@
 		column-gap: 14px;
 		border-bottom: 1px solid var(--border);
 		padding: 4px 8px;
-
-		& p {
-			text-align: end;
-		}
 	}
 	.formation-bonus-row:hover {
 		background-color: var(--muted);
@@ -299,5 +322,8 @@
 	.invalid {
 		color: red;
 		font-weight: bold;
+	}
+	.bonus-description {
+		max-width: 90dvw;
 	}
 </style>

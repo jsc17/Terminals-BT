@@ -23,7 +23,7 @@
 		let spas: string[] = [];
 		if (unitDetails) {
 			spas = spas.concat(unitDetails.customization?.spa ?? []);
-			const spasFromFormation = unit.bonus?.map(({ abil }) => `${getSPAfromId(abil)?.name} (Formation)`) ?? [];
+			const spasFromFormation = unit.bonus?.map(({ abil }) => `${getSPAfromId(abil)?.name} (Frmn)`) ?? [];
 			spas = spas.concat(spasFromFormation);
 		}
 		return spas.join(", ");

@@ -74,14 +74,38 @@
 					>
 				</div>
 			</fieldset>
-
+			<fieldset>
+				<legend>Card Options</legend>
+				<div>
+					<input type="radio" name="cardStyle" id="card-type-mul" value="mul" bind:group={settings.print.cardStyle} /><label for="card-type-mul"
+						>Print cards downloaded from the MUL</label
+					>
+				</div>
+				<div>
+					<input type="radio" name="cardStyle" id="card-type-generated" value="generated" bind:group={settings.print.cardStyle} /><label for="card-type-generated"
+						>Print generated cards. Required for printing SPA's and Alt. Ammo. May take a few seconds to print.</label
+					>
+				</div>
+			</fieldset>
 			<fieldset>
 				<legend>Formation Options</legend>
-				<div><input type="checkbox" name="drawFormations" id="formations" bind:checked={settings.print.printFormations} /><label for="formations">Print formations?</label></div>
-				<div>
-					<input type="checkbox" name="printUnitsByFormation" id="printUnitsByFormation" bind:checked={settings.print.printCardsByFormation} /><label for="printUnitsByFormation"
-						>Print Unit Cards by formation?</label
-					>
+				<div class="field-row">
+					<input type="checkbox" name="drawFormations" id="formations" bind:checked={settings.print.printFormations} />
+					<label for="formations">Print formations?</label>
+				</div>
+				<div class="field-row">
+					<input type="checkbox" name="printUnitsByFormation" id="printUnitsByFormation" bind:checked={settings.print.printCardsByFormation} />
+					<label for="printUnitsByFormation">Print Unit Cards by formation?</label>
+				</div>
+				<div class="field-row">
+					<input
+						type="checkbox"
+						name="printFormationBonuses"
+						id="printFormationBonuses"
+						bind:checked={settings.print.printFormationBonuses}
+						disabled={settings.print.cardStyle != "generated"}
+					/>
+					<label for="printFormationBonuses">Print formation Bonuses</label>
 				</div>
 				<fieldset class="formation-header-style-group">
 					<legend>Formation Header Style:</legend>
@@ -92,19 +116,6 @@
 						<input type="radio" name="formationHeaderStyle" id="formationHeaderStyleSide" bind:group={settings.print.formationHeaderStyle} value="side" /> To the side
 					</label>
 				</fieldset>
-			</fieldset>
-			<fieldset>
-				<legend>Card Options</legend>
-				<div>
-					<input type="radio" name="cardStyle" id="card-type-mul" value="mul" bind:group={settings.print.cardStyle} /><label for="card-type-mul"
-						>Print cards downloaded from the MUL</label
-					>
-				</div>
-				<div>
-					<input type="radio" name="cardStyle" id="card-type-generated" value="generated" bind:group={settings.print.cardStyle} /><label for="card-type-generated"
-						>Print generated cards. Required for printing SCA's and Alt. Ammo. May take a few seconds to print.</label
-					>
-				</div>
 			</fieldset>
 			<div class="print-buttons">
 				<button>Cancel</button>
@@ -139,6 +150,12 @@
 	}
 	fieldset {
 		border: 2px solid var(--border);
+		display: flex;
+		flex-direction: column;
+	}
+	.field-row {
+		display: flex;
+		align-items: center;
 	}
 	legend {
 		color: var(--muted-foreground);

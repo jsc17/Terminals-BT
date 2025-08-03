@@ -42,3 +42,7 @@
 .transparent-button:hover {
 	cursor: pointer;
 }
+
+.primary-filter {
+	filter: var(--primary-filter);
+}

@@ -669,8 +669,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 				bonuses: [
 					{
 						type: "Unique",
-						description:
-							"Before the start of play, each Support Lance must designate one other formation type in its army to support . Half of the units in the Support Lance (round down) receive the same SPAs as the supported formation . The Support Lance’s number of SPAs received of each type may not exceed the number the supported formation receives, as determined at start of play . If a bonus ability from the supported formation is assigned at the beginning of each turn, the Support Lance must assign them at start of play and may not switch them to another unit during game play . This bonus ability is retained as long as the Support Lance still has three or more active units on the field; they are not lost if the supported lance is reduced below its own ability to retain the bonus ability . If the Support Lance is supporting a Command Lance, it receives the two SPAs assigned to the Command Lance’s non-commander units, assigning one SPA each to any appropriate Support Lance unit . However, the Support Lance does not receive the commander’s Tactical Genius Special Pilot Ability ."
+						description: "Half of the units in the Support Lance (round down) receive the same SPAs as the supported formation."
 					}
 				]
 			},

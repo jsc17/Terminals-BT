@@ -284,7 +284,7 @@ function createReferenceList(units: ListUnit[], formations: ListFormation[]) {
 	return referenceColumns;
 }
 
-async function loadUnitFormation(formation: ListFormation, units: ListUnit[], cardStyle: string, browser: Browser) {
+async function loadUnitFormation(formation: ListFormation, units: ListUnit[], cardStyle: string, browser: Browser, printFormationBonuses: boolean) {
 	let unitPromises: Promise<string>[] = [];
 	let formationData: { name: string; type: string; pv: number; unitcards: string[] } = { name: formation.name, type: formation.type, pv: 0, unitcards: [] };
 
@@ -297,7 +297,8 @@ async function loadUnitFormation(formation: ListFormation, units: ListUnit[], ca
 		}
 	} else {
 		for (const unit of formationUnits) {
-			unitPromises.push(generateUnitCard(unit, browser));
+			const assignedBonuses = printFormationBonuses ? (formation.units.find(({ id }) => unit.id == id)?.bonus?.map((bonus) => bonus.abil) ?? []) : [];
+			unitPromises.push(generateUnitCard(unit, browser, assignedBonuses));
 			formationData.pv += unit.cost;
 		}
 	}
@@ -306,16 +307,23 @@ async function loadUnitFormation(formation: ListFormation, units: ListUnit[], ca
 	return formationData;
 }
 
-async function createUnitCardColumns(unitList: ListUnit[], formationList: ListFormation[], printByFormation: boolean, cardStyle: string, formationHeaderStyle: "inline" | "side") {
+async function createUnitCardColumns(
+	unitList: ListUnit[],
+	formationList: ListFormation[],
+	printByFormation: boolean,
+	cardStyle: string,
+	formationHeaderStyle: "inline" | "side",
+	printFormationBonuses: boolean
+) {
 	let formationPromises: Promise<{ name: string; type: string; pv: number; unitcards: string[] }>[] = [];
 
 	const browser = await playwright.chromium.launch({ headless: true });
 
 	for (const formation of formationList) {
-		formationPromises.push(loadUnitFormation(formation, unitList, cardStyle, browser));
+		formationPromises.push(loadUnitFormation(formation, unitList, cardStyle, browser, printFormationBonuses));
 		if (formation.secondary) {
 			const secondaryFormation = { id: "", name: `${formation.name} ${formation.secondary.type}`, type: formation.secondary.type, units: formation.secondary.units };
-			formationPromises.push(loadUnitFormation(secondaryFormation, unitList, cardStyle, browser));
+			formationPromises.push(loadUnitFormation(secondaryFormation, unitList, cardStyle, browser, printFormationBonuses));
 		}
 	}
 
@@ -352,7 +360,7 @@ async function createUnitCardColumns(unitList: ListUnit[], formationList: ListFo
 			});
 		}
 
-		const formationNameLine = `${formation.name} - ${formation.type} ${formation.type == "Combat Group" ? "" : "Formation"}`;
+		const formationNameLine = `${formation.name} - ${formation.type}`;
 		const formationStatLine = `${formation.unitcards.length} Units - ${formation.pv}pv`;
 		unitCardColumns.push({
 			columns: [
@@ -407,7 +415,7 @@ function createSCAColumns(scas: SCA[]) {
 	return referenceColumns;
 }
 
-export async function printList(list: PrintableList, drawFormations: boolean, printUnitsByFormation: boolean): Promise<Blob> {
+export async function printList(list: PrintableList, drawFormations: boolean, printUnitsByFormation: boolean, printFormationBonuses: boolean): Promise<Blob> {
 	const tableheaders: TableCell[] =
 		list.style == "mul"
 			? [{ text: "Unit", style: "cellHeader" }].concat(
@@ -423,7 +431,7 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 	const tableWidths = list.style == "mul" ? ["*", "auto", "auto", "auto"] : ["*", "auto", "auto", "auto", "auto", "auto", "auto"];
 	const unitTable = createUnitTable(list.style, list.units, list.formations, drawFormations);
 	const referenceColumns = createReferenceList(list.units, list.formations);
-	const unitCardColumns = await createUnitCardColumns(list.units, list.formations, printUnitsByFormation, list.cardStyle, list.formationHeaderStyle);
+	const unitCardColumns = await createUnitCardColumns(list.units, list.formations, printUnitsByFormation, list.cardStyle, list.formationHeaderStyle, printFormationBonuses);
 	const bsTable = createBattlefieldSupportTable(list.bs);
 
 	let scaSection: Content[] = [];

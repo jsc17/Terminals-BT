@@ -8,8 +8,22 @@
 	import CvCritBox from "./critboxes/CvCritBox.svelte";
 	import MechCritBox from "./critboxes/MechCritBox.svelte";
 	import ProtoCritBox from "./critboxes/ProtoCritBox.svelte";
+	import { getSPAfromId } from "$lib/utilities/listUtilities";
 
-	let { unit, image }: { unit: ListUnit; image: string } = $props();
+	type Props = {
+		unit: ListUnit;
+		image: string;
+		formationSPAs: number[];
+	};
+	let { unit, image, formationSPAs }: Props = $props();
+
+	let formationBonuses = $derived.by(() => {
+		const bonusAbilities: string[] = [];
+		formationSPAs?.forEach((value) => {
+			bonusAbilities.push(`${getSPAfromId(value)?.name} (Frmn)`);
+		});
+		return bonusAbilities;
+	});
 </script>
 
 <div class="play-unit-card-container">
@@ -138,11 +152,14 @@
 		</div>
 	</div>
 	<div class="unit-card-block unit-custom-block">
-		{#if unit.customization?.spa && unit.customization.spa.length}
-			<p class="ability-reference"><span class="bold ability-reference">SPA:</span> {unit.customization.spa.join(", ")}</p>
+		{#if unit.customization?.spa?.length || formationBonuses.length}
+			<p>
+				<span class="bold">SPA:</span>
+				{unit.customization?.spa?.join(", ")}{`${formationBonuses.length && unit.customization?.spa?.length ? ", " : ""}`}{formationBonuses.join(", ")}
+			</p>
 		{/if}
 		{#if unit.customization?.ammo && unit.customization.ammo.length}
-			<p class="ability-reference"><span class="bold ability-reference">Alt. Ammo:</span> {unit.customization.ammo.join(", ")}</p>
+			<p><span class="bold">Alt. ammo:</span> {unit.customization.ammo.join(", ")}</p>
 		{/if}
 	</div>
 </div>

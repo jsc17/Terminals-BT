@@ -6,7 +6,7 @@ type ListFormation = {
 	type: string;
 	fwBonus?: { ind: number; abil: string }[];
 	units: { id: string; bonus?: { ind: number; abil: number }[] }[];
-	secondary?: { type: string; units: { id: string; bonus?: { ind: number; abil: number }[] }[] };
+	secondary?: { type: string; fwBonus?: { ind: number; abil: string }[]; units: { id: string; bonus?: { ind: number; abil: number }[] }[] };
 };
 
 type UnitCustomization = {

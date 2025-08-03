@@ -80,6 +80,7 @@
 		Assign
 	{/snippet}
 	{#snippet description()}
+		<p class="muted">Does not currently enforce ability limits and restrictions</p>
 		{#if bonus.sameAbility}
 			<p>Units should be assigned the same {bonus.abilityType == "SPA" ? "SPA" : "ability"}</p>
 		{:else}

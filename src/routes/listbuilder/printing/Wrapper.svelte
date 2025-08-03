@@ -4,11 +4,16 @@
 	import { type ListUnit } from "$lib/types/list.svelte";
 	import PrintUnitCard from "./PrintUnitCard.svelte";
 
-	let { unit, image }: { unit: ListUnit; image: string } = $props();
+	type Props = {
+		unit: ListUnit;
+		image: string;
+		formationSPAs: number[];
+	};
+	let { unit, image, formationSPAs }: Props = $props();
 </script>
 
 <body>
-	<PrintUnitCard {unit} {image}></PrintUnitCard>
+	<PrintUnitCard {unit} {image} {formationSPAs}></PrintUnitCard>
 </body>
 
 <style>

@@ -11,11 +11,13 @@
 		assignedBonuses: SvelteMap<number, SvelteMap<string, number>>;
 		formationWideBonuses: SvelteMap<number, string>;
 		unitReferences: SvelteMap<string, MulUnit>;
+		destroyedUnits: string[];
 	};
 
-	let { formation, assignedBonuses, formationWideBonuses = $bindable(), unitReferences }: Props = $props();
+	let { formation, assignedBonuses, formationWideBonuses = $bindable(), unitReferences, destroyedUnits }: Props = $props();
 
 	let selectedOption = $state<SvelteMap<string, string>>(new SvelteMap());
+	let remainingUnitCount = $derived(formation.units.length - destroyedUnits.length);
 
 	function getSelectedValue(index: string) {
 		return selectedOption.get(index);
@@ -44,55 +46,60 @@
 	{#snippet description()}
 		Assign bonuses to units in the formation. Does not enforce any restrictions at the moment.
 	{/snippet}
-	{#each formation.bonuses ?? [] as bonus, index}
-		<div class="bonus-details">
-			{#if bonus.type != "Unique"}
-				<p class="muted">{bonus.grantedAbility?.join("/")}</p>
-			{/if}
-			{#if bonus.type == "Assigned"}
-				<p class="muted">
-					<span class={{ muted: true, error: (assignedBonuses.get(index)?.size ?? 0) > calculateBonusAmount(formation.units.length, bonus.assignedNumber) }}
-						>{`${assignedBonuses.get(index)?.size ?? "0"}`}</span
-					>{`/${calculateBonusAmount(formation.units.length, bonus.assignedNumber)}`}
-				</p>
-			{/if}
-		</div>
-		<div class="bonus-container">
-			{#if bonus.type == "FormationWide" && bonus.grantedAbility.length > 1}
-				<div class="bonus-row">
-					<p class="muted">Formation Wide:</p>
-					<select bind:value={() => getSelectedValue(index.toString()), (value) => setSelectedValue(index.toString(), value)}>
-						{#each bonus.grantedAbility as ability}
-							<option value={ability}>{ability}</option>
-						{/each}
-					</select>
-					<button class="assign-button" onclick={() => applyFWBonus(index)}>Assign</button>
-				</div>
-			{:else if bonus.type == "Assigned"}
-				{#each formation.units as id}
-					<div class={{ "bonus-row": true, "assigned-row": assignedBonuses.get(index)?.get(id) }}>
-						<p>{unitReferences.get(id)?.name}</p>
-						<select bind:value={() => getSelectedValue(`${index}-${id}`), (value) => setSelectedValue(`${index}-${id}`, value)}>
+	<div class="bonus-assignment-wrapper">
+		{#each formation.bonuses ?? [] as bonus, index}
+			<div class="bonus-details">
+				{#if bonus.type != "Unique"}
+					<p class="muted">{bonus.grantedAbility?.join("/")}</p>
+				{/if}
+				{#if bonus.type == "Assigned"}
+					<p class="muted">
+						<span class={{ muted: true, error: (assignedBonuses.get(index)?.size ?? 0) > calculateBonusAmount(remainingUnitCount, bonus.assignedNumber) }}
+							>{`${assignedBonuses.get(index)?.size ?? "0"}`}</span
+						>{`/${calculateBonusAmount(remainingUnitCount, bonus.assignedNumber)}`}
+					</p>
+				{/if}
+			</div>
+			<div class="bonus-container">
+				{#if bonus.type == "FormationWide" && bonus.grantedAbility.length > 1}
+					<div class="bonus-row">
+						<p class="muted">Formation Wide:</p>
+						<select bind:value={() => getSelectedValue(index.toString()), (value) => setSelectedValue(index.toString(), value)}>
 							{#each bonus.grantedAbility as ability}
 								<option value={ability}>{ability}</option>
 							{/each}
 						</select>
-						<button class="assign-button" onclick={() => applyAssignedBonus(index, id)}>{assignedBonuses.get(index)?.get(id) ? "Unassign" : "Assign"}</button>
+						<button class="assign-button" onclick={() => applyFWBonus(index)}>Assign</button>
 					</div>
-				{/each}
-			{/if}
-		</div>
-	{/each}
+				{:else if bonus.type == "Assigned"}
+					{#each formation.units as id}
+						<div class={{ "bonus-row": true, "assigned-row": assignedBonuses.get(index)?.get(id) }}>
+							<p class={{ error: destroyedUnits.includes(id) }}>{unitReferences.get(id)?.name}</p>
+							<select bind:value={() => getSelectedValue(`${index}-${id}`), (value) => setSelectedValue(`${index}-${id}`, value)}>
+								{#each bonus.grantedAbility as ability}
+									<option value={ability}>{ability}</option>
+								{/each}
+							</select>
+							<button class="assign-button" onclick={() => applyAssignedBonus(index, id)}>{assignedBonuses.get(index)?.get(id) ? "Unassign" : "Assign"}</button>
+						</div>
+					{/each}
+				{/if}
+			</div>
+		{/each}
+	</div>
 </Dialog>
 
 <style>
+	.bonus-assignment-wrapper {
+		max-width: 95dvw;
+	}
 	.bonus-details {
 		display: flex;
 		gap: 16px;
 	}
 	.bonus-container {
 		display: grid;
-		grid-template-columns: max-content max-content 1fr;
+		grid-template-columns: 1fr max-content max-content;
 		gap: 0px 16px;
 		border: 1px solid var(--border);
 		margin-bottom: 16px;
@@ -111,7 +118,13 @@
 			color: black;
 		}
 	}
+	select {
+		height: max-content;
+		align-self: center;
+	}
 	.assign-button {
 		width: max-content;
+		height: max-content;
+		align-self: center;
 	}
 </style>

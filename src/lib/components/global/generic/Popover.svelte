@@ -15,10 +15,8 @@
 
 <Popover.Root bind:open {onOpenChange}>
 	<Popover.Trigger class="generic-popover-trigger">{@render trigger?.()}</Popover.Trigger>
-	<Popover.Portal>
-		<Popover.Content class="generic-popover-content">
-			{@render title?.()}
-			{@render children?.()}
-		</Popover.Content>
-	</Popover.Portal>
+	<Popover.Content class="generic-popover-content">
+		{@render title?.()}
+		{@render children?.()}
+	</Popover.Content>
 </Popover.Root>

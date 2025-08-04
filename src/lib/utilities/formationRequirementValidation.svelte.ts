@@ -339,10 +339,6 @@ function checkTransport(units: ListUnit[], secondaryUnits: ListUnit[]) {
 		}
 	}
 
-	console.log("omni:", omniCount, "non-omni:", nonOmniCount);
-	console.log("mec:", mountedMEC, "xmec:", mountedXMEC);
-	console.log(infantry.map((unit) => unit.baseUnit.name));
-
 	const remainingInf = structuredClone($state.snapshot(infantry));
 	for (const inf of infantry) {
 		console.log(inf.baseUnit.name);

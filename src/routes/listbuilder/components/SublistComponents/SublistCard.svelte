@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { type List, type Sublist, type SublistStats, type ListUnit } from "$lib/types/list.svelte";
-	import { getRules } from "$lib/types/rulesets";
+	import { getRulesByName } from "$lib/types/rulesets";
 	import { Popover, Separator } from "$lib/components/global/";
 	import { dragHandle } from "svelte-dnd-action";
 	import { loadSublistForPlay } from "../../utilities/sublist-utilities";
@@ -63,8 +63,8 @@
 		return { pv, health, short, medium, long, size };
 	});
 
-	let sublistMaxPv = $derived(getRules(list.rules)?.sublistMaxPv);
-	let sublistMaxUnits = $derived(getRules(list.rules)?.sublistMaxUnits);
+	let sublistMaxPv = $derived(getRulesByName(list.rules)?.sublistMaxPv);
+	let sublistMaxUnits = $derived(getRulesByName(list.rules)?.sublistMaxUnits);
 </script>
 
 <div class="sublist-container" class:sublist-container-mobile={layout == "mobile"}>

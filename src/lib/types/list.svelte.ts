@@ -2,7 +2,7 @@ import type { ListUnit, MulUnit, ListCode, ListCodeUnit, SCA, ListFormation, Sub
 import { getSCAfromId, calculateListStats } from "$lib/utilities/listUtilities";
 import type { ResultList } from "./resultList.svelte";
 import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
-import { getRules } from "$lib/types/rulesets";
+import { getRulesByName } from "$lib/types/rulesets";
 import { nanoid } from "nanoid";
 import { loadMULUnit } from "$lib/utilities/loadUtilities";
 
@@ -34,7 +34,7 @@ export class List {
 		this.resultList = resultList;
 	}
 
-	options = $derived(getRules(this.rules));
+	options = $derived(getRulesByName(this.rules));
 
 	listCode = $derived.by(() => {
 		let unitList: ListCodeUnit[] = [];

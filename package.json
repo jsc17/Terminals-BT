@@ -12,7 +12,7 @@
 		"format": "prettier --write ."
 	},
 	"devDependencies": {
-		"@sveltejs/kit": "^2.21.2",
+		"@sveltejs/kit": "^2.27.0",
 		"@types/eslint": "9.6.1",
 		"@types/node": "^22.15.30",
 		"@types/nodemailer": "^6.4.17",

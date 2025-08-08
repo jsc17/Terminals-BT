@@ -11,16 +11,21 @@
 	setContext("user", user);
 </script>
 
-<main>
-	<Header {notifications}></Header>
-	{@render children()}
-	<Footer></Footer>
-</main>
+<svelte:boundary>
+	{#snippet pending()}
+		<p>Loading...</p>
+	{/snippet}
+	<div class="main">
+		<Header {notifications}></Header>
+		{@render children()}
+		<Footer></Footer>
+	</div>
 
-<Toast></Toast>
+	<Toast></Toast>
+</svelte:boundary>
 
 <style>
-	main {
+	.main {
 		position: relative;
 		display: grid;
 		grid-template-rows: 35px 1fr 30px;

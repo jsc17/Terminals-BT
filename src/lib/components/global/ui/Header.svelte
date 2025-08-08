@@ -8,6 +8,7 @@
 	import { enhance } from "$app/forms";
 	import type { List } from "$lib/types/list.svelte";
 	import type { Notification } from "$lib/types/global";
+	import { SvelteMap } from "svelte/reactivity";
 
 	type Props = {
 		notifications: Notification[];
@@ -20,6 +21,19 @@
 	let openUserButton = $state<HTMLButtonElement>();
 	let loginModal = $state<LoginModal>();
 	let userMenu = $state<HTMLMenuElement>();
+
+	const pageList = $state(
+		new SvelteMap([
+			["/", "Home"],
+			["/about", "About"],
+			["/listbuilder", "Alpha Strike Listbuilder"],
+			["/unitsearch", "Unit Search"],
+			["/changelog", "Change Log"],
+			["/settings", "Settings"],
+			["/play", "Digital List"],
+			["/validation", "List Validation"]
+		])
+	);
 
 	let user: { username: string | undefined } = getContext("user");
 	const list: List = getContext("list");
@@ -70,21 +84,7 @@
 <header>
 	<button bind:this={openNavButton} class="link-button" onclick={openNav} aria-label="Open navigation sidebar" aria-expanded="false" aria-controls="navbar">
 		<img src="/icons/menu.svg" alt="menu" />
-		{#if page.url.pathname == "/"}
-			Home
-		{:else if page.url.pathname == "/about"}
-			About
-		{:else if page.url.pathname == "/listbuilder"}
-			Alpha Strike Listbuilder
-		{:else if page.url.pathname == "/unitsearch"}
-			Unit Search
-		{:else if page.url.pathname == "/changelog"}
-			Changelog
-		{:else if page.url.pathname == "/settings"}
-			Settings
-		{:else if page.url.pathname == "/play"}
-			Digital List
-		{/if}
+		{pageList.get(page.url.pathname)}
 	</button>
 	<nav bind:this={navbar} id="navbar">
 		<button class="link-button close-menu-button" onclick={closeNav} aria-label="Close navigation sidebar"><img src="/icons/close.svg" alt="close button" /></button>
@@ -95,6 +95,7 @@
 			<li><a href="/listbuilder" aria-current={page.url.pathname === "/listbuilder"} onclick={closeNav}>Alpha Strike Listbuilder</a></li>
 			<li><a href="/unitsearch" aria-current={page.url.pathname === "/unitsearch"} onclick={closeNav}>Alpha Strike Unit Search</a></li>
 			<li><a href="/play" aria-current={page.url.pathname === "/play"} onclick={closeNav}>Alpha Strike Digital List</a></li>
+			<li><a href="/validation" aria-current={page.url.pathname === "/validation"} onclick={closeNav}>Alpha Strike Tournament List Validator</a></li>
 			<hr />
 			<li><a href="http://masterunitlist.info" target="_blank">Master Unit List</a></li>
 			<li><a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">Wolfnet 350 Rules</a></li>

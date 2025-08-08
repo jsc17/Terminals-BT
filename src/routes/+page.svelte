@@ -20,6 +20,9 @@
 	<h2>Wolfnet 350</h2>
 	<ul>
 		<li>
+			<p><a href="/validation">List Validator</a>: Tournament list validator</p>
+		</li>
+		<li>
 			<a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">Wolfnet 350 Tournament Rules</a>
 		</li>
 		<!-- <li>

@@ -42,6 +42,7 @@ type LogEntry = {
 	unitId: string;
 	unitName: string;
 	damageTaken?: number;
+	damageUndone?: number;
 	crit?: { id: string; type: string; name: string; index?: number };
 	applied: boolean;
 	undone: boolean;

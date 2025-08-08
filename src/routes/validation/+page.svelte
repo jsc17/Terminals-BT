@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getEras, getFactionsInEra, getGeneralId } from "$lib/remote/era-faction.remote";
+	import { getEras, getFactions, getFactionsInEra, getGeneralId } from "$lib/remote/era-faction.remote";
 	import { validateRules } from "$lib/rulesValidation/validateList";
 	import { ruleSets } from "$lib/types/rulesets";
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
@@ -11,8 +11,8 @@
 
 	let eraList = $derived(await getEras());
 	let selectedEra = $derived(eraList[0].id);
-	let availableFactions = $derived(await getFactionsInEra([selectedEra]));
-	let selectedFaction = $derived(availableFactions[0].factionId);
+	let availableFactions = $derived(await getFactions());
+	let selectedFaction = $derived(availableFactions[0].id);
 
 	let issues = $state<{ issueList: Map<string, Set<string>> }>();
 	async function handleValidation() {
@@ -65,7 +65,7 @@
 					>Faction:
 					<select name="selectedFaction" bind:value={selectedFaction}>
 						{#each availableFactions as faction}
-							<option value={faction.factionId}>{faction.faction.name}</option>
+							<option value={faction.id}>{faction.name}</option>
 						{/each}
 					</select>
 				</label>
@@ -179,6 +179,7 @@
 		padding: 16px;
 	}
 	table {
+		margin-top: 16px;
 		border-collapse: collapse;
 	}
 	td,

@@ -9,6 +9,10 @@ p(async () => {
   const eras = await p$1.era.findMany({ select: { id: true, name: true }, orderBy: { order: "asc" } });
   return eras;
 });
+const getFactions = q(async () => {
+  const factions = await p$1.faction.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } });
+  return factions;
+});
 const getFactionsInEra = q(z.number().array(), async (eras) => {
   const factionList = await p$1.factionInEra.findMany({
     where: {
@@ -47,7 +51,7 @@ const getFactionName = q(z.number(), async (idToFind) => {
 const getEras = p("unchecked", () => {
   throw new Error("Unexpectedly called prerender function. Did you forget to set { dynamic: true } ?");
 });
-for (const [name, fn] of Object.entries({ getEraName, getEras, getFactionName, getFactionsInEra, getGeneralId })) {
+for (const [name, fn] of Object.entries({ getEraName, getEras, getFactionName, getFactions, getFactionsInEra, getGeneralId })) {
   fn.__.id = "1dw4xl7/" + name;
   fn.__.name = name;
 }
@@ -55,6 +59,7 @@ export {
   getEraName,
   getEras,
   getFactionName,
+  getFactions,
   getFactionsInEra,
   getGeneralId
 };

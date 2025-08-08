@@ -52,7 +52,7 @@
 			List - {list.unitCount} Units - {list.pv} PV
 		{/if}
 	</button>
-	<div class:backdrop={showListbuilder}></div>
+	<div class={{ backdrop: showListbuilder, hidden: !showListbuilder }}></div>
 </main>
 
 <style>

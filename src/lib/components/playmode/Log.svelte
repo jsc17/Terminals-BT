@@ -11,8 +11,25 @@
 	};
 
 	let { open = $bindable(), currentRoundLog, fullLogs, playList }: Props = $props();
-
+	let undoDisabled = $derived.by(() => {
+		let undoDisabled = false;
+		for (const log of currentRoundLog.logs) {
+			if (log.damageUndone != undefined) undoDisabled = true;
+		}
+		if (!undoDisabled) {
+			for (const round of fullLogs) {
+				for (const log of round.logs) {
+					if (log.damageUndone != undefined) {
+						undoDisabled = true;
+					}
+				}
+			}
+		}
+		return undoDisabled;
+	});
 	function handleUndo(log: LogEntry) {
+		if (undoDisabled) return;
+
 		const unit = playList.units.find(({ id }) => {
 			return log.unitId == id;
 		});
@@ -39,6 +56,8 @@
 					});
 					unit.pending.crits.splice(log.crit.index, 1);
 				}
+			} else if (log.damageUndone) {
+				unit.current.damage += log.damageUndone;
 			}
 			log.undone = true;
 		} else {
@@ -54,6 +73,8 @@
 				} else {
 					unit.pending.crits.splice(log.crit.index ?? unit.current.crits.length - 1, 0, { id: log.crit.id, type: log.crit.type });
 				}
+			} else if (log.damageUndone) {
+				unit.current.damage -= log.damageUndone;
 			}
 			log.undone = false;
 		}
@@ -71,9 +92,10 @@
 							<p class="log-text" class:strikethrough={log.undone}>
 								<span class="muted">{log.unitName} suffered:</span>
 								{#if log.damageTaken}{log.damageTaken} damage{/if}{log.crit?.name}
+								{#if log.damageUndone}{log.damageUndone} damage removed{/if}
 								{#if !log.applied}(<span class="italic">pending</span>){/if}
 							</p>
-							<button class="undo-button" onclick={() => handleUndo(log)}>{log.undone ? "redo" : "undo"}</button>
+							{#if !undoDisabled}<button class="undo-button" onclick={() => handleUndo(log)}>{log.undone ? "redo" : "undo"}</button>{/if}
 						</div>
 					{/each}
 				{:else}
@@ -89,9 +111,10 @@
 						<p class="log-text" class:strikethrough={log.undone}>
 							<span class="muted">{log.unitName} suffered:</span>
 							{#if log.damageTaken}{log.damageTaken} damage{/if}{log.crit?.name}
+							{#if log.damageUndone}{log.damageUndone} damage removed{/if}
 							{#if !log.applied}(<span class="italic">pending</span>){/if}
 						</p>
-						<button class="undo-button" onclick={() => handleUndo(log)}>{log.undone ? "redo" : "undo"}</button>
+						{#if !undoDisabled}<button class="undo-button" onclick={() => handleUndo(log)}>{log.undone ? "redo" : "undo"}</button>{/if}
 					</div>
 				{/each}
 			{:else}

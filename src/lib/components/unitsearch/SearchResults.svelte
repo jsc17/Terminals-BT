@@ -10,6 +10,7 @@
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
 	import { Dialog, Separator, DropdownMenu } from "$lib/components/global/";
 	import { exportArrayToCSV } from "$lib/utilities/export";
+	import VirtualList from "@humanspeak/svelte-virtual-list";
 
 	type Props = {
 		list?: List;
@@ -120,9 +121,9 @@
 			<p class="loading-message">No Units found for the selected Era and Faction Combination.</p>
 		{:else}
 			<div class="virtual-list-container" bind:clientHeight={listHeight}>
-				<VList data={resultList.filteredList} style="height:{listHeight}px">
-					{#snippet children(item, index)}
-						<div class:virtual-list-row={!appWindow.isMobile} class:virtual-list-row-mobile={appWindow.isMobile}>
+				<VirtualList items={resultList.filteredList ?? []}>
+					{#snippet renderItem(item)}
+						<div class={{ "virtual-list-row": !appWindow.isMobile, "virtual-list-row-mobile": appWindow.isMobile }}>
 							{#if list}
 								<div class="align-center add-button">
 									<button onclick={() => list.addUnit(item)}>+</button>
@@ -168,14 +169,14 @@
 							<div class:abilities={!appWindow.isMobile} class:abilities-mobile={appWindow.isMobile}>
 								<p>{createAbilityLineString(item.abilities)}</p>
 							</div>
-							<p>{item.role}</p>
+							<p class="role-text">Role: <span class="muted">{item.role}</span></p>
 							<form method="post" action="/?/getUnitAvailability" use:enhance={showAvailability} class="align-center">
 								<input type="hidden" name="mulId" value={item.mulId} />
 								<button class="availability-button">Availability</button>
 							</form>
 						</div>
 					{/snippet}
-				</VList>
+				</VirtualList>
 			</div>
 		{/if}
 	{:catch}
@@ -225,6 +226,7 @@
 		display: flex;
 		position: relative;
 		flex: 1;
+		background-color: var(--card);
 	}
 	.loading-message {
 		padding-top: 24px;
@@ -273,6 +275,7 @@
 		grid-template-rows: 1fr 1fr;
 		overflow-x: hidden;
 		padding-top: 4px;
+		border-bottom: 1px solid var(--border);
 	}
 	.virtual-list-row-mobile {
 		background-color: var(--card);
@@ -280,9 +283,6 @@
 		width: 100%;
 		display: grid;
 		grid-template-columns: 25px 1fr repeat(4, 10%) 15%;
-	}
-	.virtual-list-row:not(:last-child),
-	.virtual-list-row-mobile:not(:last-child) {
 		border-bottom: 1px solid var(--border);
 	}
 	.align-center {
@@ -343,5 +343,9 @@
 		.availability-result-container {
 			overflow: scroll;
 		}
+	}
+	.role-text {
+		font-size: 0.8em;
+		align-self: center;
 	}
 </style>

@@ -36,24 +36,23 @@ export function countCrits(unit: PlayUnit) {
 	return { current, pending };
 }
 
-export function calculateArmor(unit: PlayUnit, reference?: MulUnit) {
-	const current = (reference?.armor ?? 0) - unit.current.damage;
-	const pending = current - unit.pending.damage;
-	return { current, pending };
-}
-
-export function calculateStructure(unit: PlayUnit, reference?: MulUnit) {
+export function calculateHealth(unit: PlayUnit, reference?: MulUnit) {
 	const totalArmor = reference?.armor ?? 0;
 	const totalStructure = reference?.structure ?? 0;
 
-	if (unit.current.damage + unit.pending.damage > totalArmor) {
-		const current = totalArmor + totalStructure - unit.current.damage;
-		const pending = current - unit.pending.damage;
+	let currentArmor = Math.max(totalArmor - unit.current.damage, 0);
+	let pendingArmor = Math.max(currentArmor - unit.pending.damage, 0);
 
-		return { current, pending };
-	} else {
-		return { current: totalStructure, pending: totalStructure };
-	}
+	const armorRemaining = { current: currentArmor, pending: pendingArmor };
+	const structRemaining = { current: totalStructure, pending: totalStructure };
+
+	const remainingDamage = Math.max(unit.current.damage - totalArmor, 0);
+	structRemaining.current = totalStructure - remainingDamage;
+
+	const remainingPending = Math.max(unit.pending.damage - armorRemaining.current, 0);
+	structRemaining.pending = structRemaining.current - remainingPending;
+
+	return { armorRemaining, structRemaining };
 }
 
 export function calculateFirepower(unit: PlayUnit, reference?: MulUnit) {

@@ -7,7 +7,7 @@
 	import * as automation from "$lib/utilities/playmodeAutomation";
 	import { createDamagedAbilityString, infTypes, mechTypes, typeIncludes, vTypes } from "$lib/utilities/playmodeUtilities";
 	import type { LogRound, Options, PlayUnit } from "$lib/types/playmode";
-	import { abilityReferences, type UnitAbility } from "$lib/data/abilities";
+	import { type UnitAbility } from "$lib/data/abilities";
 	import type { SvelteMap } from "svelte/reactivity";
 	import { getSPAfromId } from "$lib/utilities/listUtilities";
 
@@ -34,8 +34,9 @@
 	let expanded = getContext("expanded");
 	let critCount = $derived(automation.countCrits(unit));
 	let moveSpeeds = $derived(automation.calculateMovement(unit, reference));
-	let armorRemaining = $derived(automation.calculateArmor(unit, reference));
-	let structRemaining = $derived(automation.calculateStructure(unit, reference));
+	let { armorRemaining, structRemaining } = $derived(automation.calculateHealth(unit, reference));
+	// let armorRemaining = $derived(automation.calculateArmor(unit, reference));
+	// let structRemaining = $derived(automation.calculateStructure(unit, reference));
 	let firepowerRemaining = $derived(automation.calculateFirepower(unit, reference));
 	let currentSkill = $derived(automation.calculateSkill(unit, critCount.current, reference));
 	let physical = $derived(automation.calculatePhysical(moveSpeeds[0].tmm, firepowerRemaining.s, reference));
@@ -231,7 +232,7 @@
 					</button>
 				{/if}
 				<button class="unit-card-block unit-health-block" class:aero-health-block={typeIncludes([...aeroTypes], reference)} onclick={handleDamage}>
-					<p>A ({armorRemaining.current >= 0 ? armorRemaining.current : 0}/{reference?.armor}):</p>
+					<p>A ({armorRemaining.pending}/{reference?.armor}):</p>
 					<div class="health-pips">
 						{#each { length: reference?.armor ?? 0 }, index}
 							<div class="pip" class:pending-pip={armorRemaining.pending <= index} class:damaged-pip={armorRemaining.current <= index}></div>
@@ -241,11 +242,11 @@
 						<p class="bold">TH</p>
 					{/if}
 					<p>
-						S ({structRemaining.current}/{reference?.structure}):
+						S ({structRemaining.pending}/{reference?.structure}):
 					</p>
 					<div class="health-pips">
 						{#each { length: reference?.structure ?? 0 }, index}
-							<div class="pip" class:pending-pip={true && structRemaining.pending <= index} class:damaged-pip={structRemaining.current <= index}></div>
+							<div class="pip structure-pip" class:pending-pip={structRemaining.pending <= index} class:damaged-pip={structRemaining.current <= index}></div>
 						{/each}
 					</div>
 					{#if typeIncludes([...aeroTypes], reference)}
@@ -509,6 +510,9 @@
 		border-radius: 50%;
 		height: 3cqmax;
 		width: 3cqmax;
+	}
+	.structure-pip {
+		background-color: gray;
 	}
 	.pending-pip {
 		background-color: yellow;

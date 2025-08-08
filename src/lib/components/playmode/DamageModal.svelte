@@ -33,6 +33,18 @@
 		damageToTake = 0;
 		open = false;
 	}
+
+	function removeDamage() {
+		if (confirm(`Remove ${damageToTake} damage from this unit? \n (Removes pending damage before applied damage. Disables undoing damage from the log)`)) {
+			let damageRemaining = Math.max(damageToTake - unit.pending.damage, 0);
+			unit.pending.damage = Math.max(unit.pending.damage - damageToTake, 0);
+			unit.current.damage = Math.max(unit.current.damage - damageRemaining, 0);
+
+			currentRoundLog.logs.push({ unitId: unit.id, unitName: reference.name, damageUndone: damageToTake, applied: true, undone: false });
+			damageToTake = 0;
+			open = false;
+		}
+	}
 </script>
 
 <Dialog bind:open title={`Damage ${reference.name}`}>
@@ -72,6 +84,7 @@
 				<button onclick={pendDamage}>Apply At End of Round</button>
 			</div>
 		</div>
+		<button class="remove-button" onclick={removeDamage}>Remove Damage</button>
 	</div>
 </Dialog>
 
@@ -105,5 +118,10 @@
 			padding: 8px;
 			font-size: 18px;
 		}
+	}
+	.remove-button {
+		margin-top: 8px;
+		background-color: lightcoral;
+		align-self: end;
 	}
 </style>

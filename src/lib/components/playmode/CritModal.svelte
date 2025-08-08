@@ -98,7 +98,7 @@
 
 {#snippet critButton(value: string)}
 	<button
-		class="crit-button"
+		class={{ "crit-button": true, "selected-button": currentCritSelection == value }}
 		onclick={() => {
 			currentCritSelection = value;
 		}}>{value}</button
@@ -177,6 +177,10 @@
 		}
 	}
 	.remove-button {
+		background-color: lightcoral;
 		align-self: end;
+	}
+	.selected-button {
+		background-color: bisque;
 	}
 </style>

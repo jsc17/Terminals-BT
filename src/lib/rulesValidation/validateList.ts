@@ -42,7 +42,7 @@ export async function validateRules(unitList: { id: string; skill: number; data:
 				}
 				issueUnits.add(unit.id!);
 			}
-			if (rulesData.disallowUnique && !(await isUnique({ mulId: unit.data.mulId, era: eras[0] }))) {
+			if (rulesData.disallowUnique && (await isUnique({ mulId: unit.data.mulId, era: eras[0] }))) {
 				if (issueList.has("Unique Units")) {
 					issueList.get("Unique Units")?.add(unit.data.name);
 				} else {

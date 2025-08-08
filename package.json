@@ -12,7 +12,7 @@
 		"format": "prettier --write ."
 	},
 	"devDependencies": {
-		"@sveltejs/kit": "^2.27.0",
+		"@sveltejs/kit": "^2.27.3",
 		"@types/eslint": "9.6.1",
 		"@types/node": "^22.15.30",
 		"@types/nodemailer": "^6.4.17",
@@ -23,7 +23,7 @@
 		"eslint-plugin-svelte": "2.46.1",
 		"prettier-plugin-svelte": "^3.4.0",
 		"prisma": "^6.9.0",
-		"svelte": "^5.36.16",
+		"svelte": "^5.38.0",
 		"svelte-check": "^4.2.1",
 		"svelte-dnd-action": "^0.9.61",
 		"tslib": "^2.8.1",
@@ -57,7 +57,7 @@
 		"skia-canvas": "^2.0.2",
 		"svelty-email": "github:socketopp/svelty-email#feature/component-render",
 		"v8": "^0.1.0",
-		"virtua": "^0.40.4",
+		"virtua": "^0.41.5",
 		"zod": "^4.0.5"
 	},
 	"pnpm": {

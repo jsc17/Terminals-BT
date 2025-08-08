@@ -1,17 +1,37 @@
 <script lang="ts">
-	import { getEraName, getEras, getFactionName, getFactionsInEra } from "$lib/remote/era-faction.remote";
+	import { getEras, getFactionsInEra, getGeneralId } from "$lib/remote/era-faction.remote";
+	import { validateRules } from "$lib/rulesValidation/validateList";
 	import { ruleSets } from "$lib/types/rulesets";
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
 	import FixModal from "./FixModal.svelte";
 	import { getUnitData } from "./validate.remote";
 
-	let selectedRules = $state(ruleSets[0].name);
+	let selectedRules = $state("wn350v3");
 	let files = $state<FileList>();
 
 	let eraList = $derived(await getEras());
 	let selectedEra = $derived(eraList[0].id);
 	let availableFactions = $derived(await getFactionsInEra([selectedEra]));
 	let selectedFaction = $derived(availableFactions[0].factionId);
+
+	let issues = $state<{ issueList: Map<string, Set<string>> }>();
+	async function handleValidation() {
+		const unitList =
+			getUnitData.result
+				?.filter((res) => {
+					return res.mulData != undefined;
+				})
+				.map((data) => {
+					return { id: data.id, skill: data.skill, data: data.mulData! };
+				}) ?? [];
+		if (unitList?.length == getUnitData.result?.length) {
+			const general = (await getGeneralId({ era: selectedEra, faction: selectedFaction }))?.general;
+			const factions = general ? [selectedFaction, general] : [selectedFaction];
+			issues = await validateRules(unitList, [selectedEra], factions, selectedRules);
+		} else {
+			alert("not all units are valid");
+		}
+	}
 </script>
 
 <svelte:head>
@@ -24,7 +44,15 @@
 	{/snippet}
 	<main>
 		<div class="validation-body">
-			<form class="section" enctype="multipart/form-data" {...getUnitData}>
+			<p>Mul PDF's only for now</p>
+			<form
+				class="section"
+				enctype="multipart/form-data"
+				{...getUnitData.enhance(async ({ submit }) => {
+					issues = undefined;
+					submit();
+				})}
+			>
 				<label>
 					Era:
 					<select name="selectedEra" bind:value={selectedEra}>
@@ -48,7 +76,7 @@
 				<table>
 					<thead>
 						<tr>
-							<th>Link</th>
+							<th>MUL</th>
 							{#each ["Name", "Skill", "PV", "Rules", "Type", "Abilities", "Available", "Unique"] as header}
 								<th>{header}</th>
 							{/each}
@@ -93,7 +121,29 @@
 						{/each}
 					</select>
 				</label>
-				<button>Validate</button>
+				<button onclick={handleValidation}>Validate</button>
+				{#if issues}
+					{#if issues.issueList.size}
+						<table>
+							<thead>
+								<tr>
+									<th>Issue</th>
+									<th>Problem Units</th>
+								</tr>
+							</thead>
+							<tbody>
+								{#each issues.issueList as [issue, units]}
+									<tr>
+										<td class="error">{issue}</td>
+										<td>{Array.from(units).join(", ")}</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					{:else}
+						<p>No List issues found!!</p>
+					{/if}
+				{/if}
 			</div>
 		</div>
 	</main>

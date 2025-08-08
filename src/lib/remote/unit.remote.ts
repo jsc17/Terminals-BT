@@ -70,7 +70,7 @@ export const isUnique = query(z.object({ mulId: z.number(), era: z.number() }), 
 	return unit != null;
 });
 
-export const isAvailable = query(z.object({ mulId: z.number(), era: z.number().array(), faction: z.number().array() }), async (data) => {
-	const unit = await prisma.unit.findUnique({ where: { mulId: data.mulId, availability: { some: { era: { in: data.era }, faction: { in: data.faction } } } } });
+export const isAvailable = query(z.object({ mulId: z.number(), eras: z.number().array(), factions: z.number().array() }), async (data) => {
+	const unit = await prisma.unit.findUnique({ where: { mulId: data.mulId, availability: { some: { era: { in: data.eras }, faction: { in: data.factions } } } } });
 	return unit != null;
 });

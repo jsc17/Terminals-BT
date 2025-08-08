@@ -116,6 +116,6 @@ export const ruleSets: Ruleset[] = [
 	}
 ];
 
-export function getRules(name: string) {
+export function getRulesByName(name: string) {
 	return ruleSets.find((rules) => rules.name == name);
 }

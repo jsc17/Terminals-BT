@@ -3,7 +3,7 @@ import { prisma } from "$lib/server/prisma";
 import * as z from "zod";
 
 export const getEras = prerender(async () => {
-	const eras = await prisma.era.findMany();
+	const eras = await prisma.era.findMany({ select: { id: true, name: true }, orderBy: { order: "asc" } });
 	return eras;
 });
 

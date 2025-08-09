@@ -7,7 +7,7 @@ export const getEras = prerender(async () => {
 	return eras;
 });
 
-export const getFactions = query(async () => {
+export const getFactions = prerender(async () => {
 	const factions = await prisma.faction.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } });
 	return factions;
 });

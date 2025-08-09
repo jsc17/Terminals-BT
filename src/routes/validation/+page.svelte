@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getEras, getFactions, getFactionsInEra, getGeneralId } from "$lib/remote/era-faction.remote";
+	import { getEras, getFactions, getGeneralId } from "$lib/remote/era-faction.remote";
 	import { validateRules } from "$lib/rulesValidation/validateList";
 	import { ruleSets } from "$lib/types/rulesets";
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
@@ -9,10 +9,11 @@
 	let selectedRules = $state("wn350v3");
 	let files = $state<FileList>();
 
-	let eraList = $derived(await getEras());
-	let selectedEra = $derived(eraList[0].id);
-	let availableFactions = $derived(await getFactions());
-	let selectedFaction = $derived(availableFactions[0].id);
+	let eraList = $derived(getEras());
+	let factionList = $derived(getFactions());
+
+	let selectedEra = $state<number>(10);
+	let selectedFaction = $state<number>(102);
 
 	let issues = $state<{ issueList: Map<string, Set<string>> }>();
 	async function handleValidation() {
@@ -45,18 +46,11 @@
 	<main>
 		<div class="validation-body">
 			<p>Mul PDF's only for now</p>
-			<form
-				class="section"
-				enctype="multipart/form-data"
-				{...getUnitData.enhance(async ({ submit }) => {
-					issues = undefined;
-					submit();
-				})}
-			>
+			<form class="section" enctype="multipart/form-data">
 				<label>
 					Era:
 					<select name="selectedEra" bind:value={selectedEra}>
-						{#each eraList as era}
+						{#each await eraList as era}
 							<option value={era.id}>{era.name}</option>
 						{/each}
 					</select>
@@ -64,7 +58,7 @@
 				<label
 					>Faction:
 					<select name="selectedFaction" bind:value={selectedFaction}>
-						{#each availableFactions as faction}
+						{#each await factionList as faction}
 							<option value={faction.id}>{faction.name}</option>
 						{/each}
 					</select>

@@ -2539,8 +2539,8 @@ packages:
       utf-8-validate:
         optional: true
 
-  xmldoc@2.0.1:
-    resolution: {integrity: sha512-sOOqgsjl3PU6iBw+fBUGAkTCE+JFK+sBaOL3pnZgzqk2/yvOD7RlFmZtDRJAEBzdpOYxSXyOQH4mjubdfs3MSg==}
+  xmldoc@2.0.2:
+    resolution: {integrity: sha512-UiRwoSStEXS3R+YE8OqYv3jebza8cBBAI2y8g3B15XFkn3SbEOyyLnmPHjLBPZANrPJKEzxxB7A3XwcLikQVlQ==}
     engines: {node: '>=12.0.0'}
 
   y18n@5.0.8:
@@ -4405,7 +4405,7 @@ snapshots:
       '@foliojs-fork/linebreak': 1.1.2
       '@foliojs-fork/pdfkit': 0.15.3
       iconv-lite: 0.6.3
-      xmldoc: 2.0.1
+      xmldoc: 2.0.2
 
   peberminta@0.9.0: {}
 
@@ -4941,7 +4941,7 @@ snapshots:
 
   ws@8.18.2: {}
 
-  xmldoc@2.0.1:
+  xmldoc@2.0.2:
     dependencies:
       sax: 1.4.1
 

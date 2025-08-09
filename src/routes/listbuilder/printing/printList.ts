@@ -441,6 +441,10 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 	}
 
 	const dd: TDocumentDefinitions = {
+		info: {
+			creator: "Terminal",
+			keywords: list.style
+		},
 		pageSize: "LETTER",
 		pageMargins: 9,
 		pageBreakBefore: (currentNode, followingNodesOnPage, nodesOnNextPage, previousNodesOnPage) => {

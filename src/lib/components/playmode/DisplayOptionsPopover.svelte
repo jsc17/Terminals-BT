@@ -46,6 +46,11 @@
 		<div class="option-row">
 			<label><input type="checkbox" bind:checked={options.groupByFormation} /> Group units by formation</label>
 		</div>
+		<fieldset class="option-field">
+			<legend>Damage Pip Direction:</legend>
+			<label><input type="radio" bind:group={options.damageDirection} value="left" /> Right to Left, as Blake intended</label>
+			<label><input type="radio" bind:group={options.damageDirection} value="right" /> Left to Right, like a Nicholai Malthus Fanboy</label>
+		</fieldset>
 	</Popover.Content>
 </Popover.Root>
 
@@ -75,5 +80,10 @@
 		display: flex;
 		gap: 16px;
 		align-items: center;
+	}
+	.option-field {
+		display: flex;
+		flex-direction: column;
+		border: 1px solid var(--primary-muted);
 	}
 </style>

@@ -28,7 +28,8 @@
 			showCrippled: true,
 			showJumpTMM: true,
 			confirmEnd: true,
-			groupByFormation: true
+			groupByFormation: true,
+			damageDirection: "left"
 		},
 		{
 			serializer: {
@@ -45,7 +46,8 @@
 							showCrippled: true,
 							showJumpTMM: true,
 							confirmEnd: true,
-							groupByFormation: true
+							groupByFormation: true,
+							damageDirection: "left"
 						};
 					}
 				}

@@ -235,7 +235,13 @@
 					<p>A ({armorRemaining.pending}/{reference?.armor}):</p>
 					<div class="health-pips">
 						{#each { length: reference?.armor ?? 0 }, index}
-							<div class="pip" class:pending-pip={armorRemaining.pending <= index} class:damaged-pip={armorRemaining.current <= index}></div>
+							<div
+								class={{
+									pip: true,
+									"pending-pip": options.damageDirection == "left" ? armorRemaining.pending <= index : (reference.armor ?? 0) - armorRemaining.pending > index,
+									"damaged-pip": options.damageDirection == "left" ? armorRemaining.current <= index : (reference.armor ?? 0) - armorRemaining.current > index
+								}}
+							></div>
 						{/each}
 					</div>
 					{#if typeIncludes([...aeroTypes], reference)}
@@ -246,7 +252,14 @@
 					</p>
 					<div class="health-pips">
 						{#each { length: reference?.structure ?? 0 }, index}
-							<div class="pip structure-pip" class:pending-pip={structRemaining.pending <= index} class:damaged-pip={structRemaining.current <= index}></div>
+							<div
+								class={{
+									pip: true,
+									"structure-pip": true,
+									"pending-pip": options.damageDirection == "left" ? structRemaining.pending <= index : (reference.structure ?? 0) - structRemaining.pending > index,
+									"damaged-pip": options.damageDirection == "left" ? structRemaining.current <= index : (reference.structure ?? 0) - structRemaining.current > index
+								}}
+							></div>
 						{/each}
 					</div>
 					{#if typeIncludes([...aeroTypes], reference)}

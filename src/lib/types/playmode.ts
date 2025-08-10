@@ -57,6 +57,7 @@ type Options = {
 	showJumpTMM: boolean;
 	confirmEnd: boolean;
 	groupByFormation: boolean;
+	damageDirection: "left" | "right";
 };
 
 export type { PlayList, PlayFormation, PlayUnit, LogRound, LogEntry, Options };

@@ -8,7 +8,8 @@ const PlaymodeOptionsSchema = z.object({
 	showCrippled: z.boolean().catch(true),
 	showJumpTMM: z.boolean().catch(true),
 	confirmEnd: z.boolean().catch(true),
-	groupByFormation: z.boolean().catch(true)
+	groupByFormation: z.boolean().catch(true),
+	damageDirection: z.literal(["left", "right"]).catch("left")
 });
 
 export { PlaymodeOptionsSchema };

@@ -4,10 +4,11 @@
 	import type { List } from "$lib/types/list.svelte";
 	import { dragHandle } from "svelte-dnd-action";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import { Popover } from "$lib/components/global/";
+	import { DropdownMenu, Popover } from "$lib/components/global/";
 	import { UnitCustomizationModal } from "../index";
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
 	import { getSPAfromId } from "$lib/utilities/listUtilities";
+	import type { MenuItem } from "$lib/types/global";
 
 	type Props = {
 		unit: { id: string; bonus?: { ind: number; abil: number }[] };
@@ -28,6 +29,27 @@
 		}
 		return spas.join(", ");
 	});
+
+	const unitMenuItems = $derived.by(() => {
+		const items: MenuItem[] = [
+			{
+				type: "item",
+				label: "Add Ammo/SPA",
+				onSelect: () => {
+					unitCustomizationModal?.show(unit.id);
+				}
+			},
+			{
+				type: "item",
+				label: "Remove Unit",
+				onSelect: () => {
+					list.removeUnit(unit.id);
+					toastController.addToast(`${unitDetails?.baseUnit.name} removed from list`);
+				}
+			}
+		];
+		return items;
+	});
 </script>
 
 <div class="unit-card">
@@ -40,28 +62,11 @@
 		<div class="unit-name-row">
 			<p class="name-row-name" class:invalid-unit={list.issues.issueUnits.has(unitDetails?.id ?? "0")}>{unitDetails?.baseUnit.name}</p>
 			<p class="name-row-pv"><span class="muted">PV:</span> {unitDetails?.cost}</p>
-			<Popover>
+			<DropdownMenu items={unitMenuItems}>
 				{#snippet trigger()}
 					<div class="unit-menu-trigger"><img src="/icons/menu.svg" alt="unit menu" /></div>
 				{/snippet}
-				<div class="unit-menu-content">
-					<button
-						class="transparent-button"
-						onclick={() => {
-							unitCustomizationModal?.show(unit.id);
-						}}
-					>
-						Add Ammo/SPA
-					</button>
-					<button
-						class="transparent-button"
-						onclick={() => {
-							list.removeUnit(unit.id);
-							toastController.addToast(`${unitDetails?.baseUnit.name} removed from list`);
-						}}>Remove unit</button
-					>
-				</div>
-			</Popover>
+			</DropdownMenu>
 		</div>
 		<div class="unit-header-row">
 			<div class="unit-header">Type</div>

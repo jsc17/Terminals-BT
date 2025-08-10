@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { getEras, getFactions, getGeneralId } from "$lib/remote/era-faction.remote";
+	import { getEras, getFactions, getFactionsInEra, getGeneralId } from "$lib/remote/era-faction.remote";
 	import { validateRules } from "$lib/rulesValidation/validateList";
+	import { toastController } from "$lib/stores";
 	import { ruleSets } from "$lib/types/rulesets";
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
 	import FixModal from "./FixModal.svelte";
@@ -9,28 +10,38 @@
 	let selectedRules = $state("wn350v3");
 	let files = $state<FileList>();
 
-	let eraList = $derived(getEras());
-	let factionList = $derived(getFactions());
-
 	let selectedEra = $state<number>(10);
 	let selectedFaction = $state<number>(102);
 
+	let eraList = $derived(getEras());
+	let factionList = $derived(await getFactionsInEra([selectedEra]));
+
+	$effect(() => {
+		selectedFaction = factionList[0].factionId;
+	});
+
+	$effect(() => {
+		if (getUnitData.result?.status && getUnitData.result.status == "failed") toastController.addToast(getUnitData.result.message ?? "Error Message missing");
+	});
+
 	let issues = $state<{ issueList: Map<string, Set<string>> }>();
 	async function handleValidation() {
-		const unitList =
-			getUnitData.result
-				?.filter((res) => {
-					return res.mulData != undefined;
-				})
-				.map((data) => {
-					return { id: data.id, skill: data.skill, data: data.mulData! };
-				}) ?? [];
-		if (unitList?.length == getUnitData.result?.length) {
-			const general = (await getGeneralId({ era: selectedEra, faction: selectedFaction }))?.general;
-			const factions = general ? [selectedFaction, general] : [selectedFaction];
-			issues = await validateRules(unitList, [selectedEra], factions, selectedRules);
-		} else {
-			alert("not all units are valid");
+		if (getUnitData.result?.status == "success") {
+			const unitList =
+				getUnitData.result.data
+					?.filter((res) => {
+						return res.mulData != undefined;
+					})
+					.map((data) => {
+						return { id: data.id, skill: data.skill, data: data.mulData! };
+					}) ?? [];
+			if (unitList?.length == getUnitData.result.data?.length) {
+				const general = (await getGeneralId({ era: selectedEra, faction: selectedFaction }))?.general;
+				const factions = general ? [selectedFaction, general] : [selectedFaction];
+				issues = await validateRules(unitList, [selectedEra], factions, selectedRules);
+			} else {
+				alert("not all units are valid");
+			}
 		}
 	}
 </script>
@@ -45,8 +56,15 @@
 	{/snippet}
 	<main>
 		<div class="validation-body">
-			<p>Mul PDF's only for now</p>
-			<form class="section" enctype="multipart/form-data">
+			<p>Mul or Terminal PDF's only, others will probably error out. Doesn't support formations from terminals list.</p>
+			<form
+				class="section"
+				enctype="multipart/form-data"
+				{...getUnitData.enhance(async ({ submit }) => {
+					issues = undefined;
+					submit();
+				})}
+			>
 				<label>
 					Era:
 					<select name="selectedEra" bind:value={selectedEra}>
@@ -59,7 +77,7 @@
 					>Faction:
 					<select name="selectedFaction" bind:value={selectedFaction}>
 						{#each await factionList as faction}
-							<option value={faction.id}>{faction.name}</option>
+							<option value={faction.factionId}>{faction.faction.name}</option>
 						{/each}
 					</select>
 				</label>
@@ -78,7 +96,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each getUnitData.result ?? [] as unit, index (unit.id)}
+						{#each getUnitData.result?.data ?? [] as unit, index (unit.id)}
 							<tr>
 								<td>
 									{#if unit.link}
@@ -92,7 +110,7 @@
 								{/each}
 								<td>
 									{#if !unit.mulData}
-										<FixModal bind:unit={getUnitData.result![index]} />
+										<FixModal bind:unit={getUnitData.result!.data![index]} />
 									{:else}
 										<span style="color: green; font-weight: bold;">✔</span>
 									{/if}

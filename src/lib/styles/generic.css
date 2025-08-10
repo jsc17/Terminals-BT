@@ -108,6 +108,9 @@
 	width: 100%;
 	height: 100%;
 }
+[data-dropdown-menu-trigger]:hover {
+	cursor: pointer;
+}
 [data-dropdown-menu-content] {
 	background-color: var(--background);
 	border: 2px solid var(--border);

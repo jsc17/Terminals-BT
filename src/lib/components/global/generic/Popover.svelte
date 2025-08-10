@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Popover, Portal } from "bits-ui";
+	import { Popover } from "bits-ui";
 	import type { Snippet } from "svelte";
 
 	type Props = {

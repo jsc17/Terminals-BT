@@ -63,6 +63,7 @@
 		grid-column-end: 3;
 	}
 	.formation-info-trigger {
+		padding: 2px 4px;
 		display: flex;
 		gap: 2px;
 	}

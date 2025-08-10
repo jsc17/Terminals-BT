@@ -10,6 +10,7 @@
 	import { loadMULUnit } from "$lib/utilities/loadUtilities";
 	import { SvelteMap } from "svelte/reactivity";
 	import type { MulUnit } from "$lib/types/listTypes";
+	import { toastController } from "$lib/stores";
 
 	let logDrawerOpen = $state(false);
 	let loadModalOpen = $state(false);
@@ -105,6 +106,7 @@
 	}
 
 	async function openLoadModal() {
+		toastController.addToast("test");
 		const response: any = deserialize(await (await fetch("?/loadLists", { method: "POST", body: "" })).text());
 		lists = JSON.parse(response.data.lists);
 		loadModalOpen = true;

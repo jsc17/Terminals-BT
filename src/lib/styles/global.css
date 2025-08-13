@@ -46,3 +46,7 @@
 .primary-filter {
 	filter: var(--primary-filter);
 }
+.error-button {
+	background-color: lightcoral;
+	color: black;
+}

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Dialog, type WithoutChildren } from "bits-ui";
-	import { createEventDispatcher, type Snippet } from "svelte";
+	import { type Snippet } from "svelte";
 
 	type Props = Dialog.RootProps & {
 		title: string;
@@ -46,8 +46,6 @@
 		background-color: var(--background);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
-		display: flex;
-		flex-direction: column;
 		z-index: 50;
 	}
 	:global([data-dialog-overlay][data-state="open"]) {

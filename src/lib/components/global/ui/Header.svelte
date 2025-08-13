@@ -31,7 +31,8 @@
 			["/changelog", "Change Log"],
 			["/settings", "Settings"],
 			["/play", "Digital List"],
-			["/validation", "List Validation"]
+			["/validation", "List Validation"],
+			["/collection", "Collection Manager"]
 		])
 	);
 
@@ -95,7 +96,8 @@
 			<li><a href="/listbuilder" aria-current={page.url.pathname === "/listbuilder"} onclick={closeNav}>Alpha Strike Listbuilder</a></li>
 			<li><a href="/unitsearch" aria-current={page.url.pathname === "/unitsearch"} onclick={closeNav}>Alpha Strike Unit Search</a></li>
 			<li><a href="/play" aria-current={page.url.pathname === "/play"} onclick={closeNav}>Alpha Strike Digital List</a></li>
-			<li><a href="/validation" aria-current={page.url.pathname === "/validation"} onclick={closeNav}>Alpha Strike Tournament List Validator</a></li>
+			<li><a href="/validation" aria-current={page.url.pathname === "/validation"} onclick={closeNav}>Tournament List Validator</a></li>
+			<li><a href="/collection" aria-current={page.url.pathname === "/collection"} onclick={closeNav}>Collection Manager</a></li>
 			<hr />
 			<li><a href="http://masterunitlist.info" target="_blank">Master Unit List</a></li>
 			<li><a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">Wolfnet 350 Rules</a></li>

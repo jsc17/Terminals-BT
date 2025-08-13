@@ -185,6 +185,8 @@ from the perspective of the consumer of this component, it will be typed appropr
 		justify-content: flex-start;
 		overflow: hidden;
 		text-wrap: none;
+		color: var(--muted-foreground);
+		height: 1.25em;
 	}
 	:global([data-select-viewport]) {
 		max-height: 33vh;

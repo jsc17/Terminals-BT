@@ -517,6 +517,10 @@ export class List {
 		this.formations = listCode.formations;
 		const formationIDs = new Set();
 		this.formations.forEach((formation) => {
+			formation.units = formation.units.filter((u) => !u.id.includes("id:dnd-shadow-placeholder"));
+			for (let unit of formation.units) {
+				unit = { id: unit.id, bonus: unit.bonus };
+			}
 			while (formation.id != "unassigned" && (formationIDs.has(formation.id) || formation.id.length > 6)) {
 				formation.id = nanoid(6);
 			}

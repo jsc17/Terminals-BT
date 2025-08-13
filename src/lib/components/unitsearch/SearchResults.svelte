@@ -6,7 +6,6 @@
 	import type { List } from "$lib/types/list.svelte";
 	import DamageSortPopover from "./DamageSortPopover.svelte";
 	import { eraLookup } from "$lib/data/erasFactionLookup";
-	import { VList } from "virtua/svelte";
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
 	import { Dialog, Separator, DropdownMenu } from "$lib/components/global/";
 	import { exportArrayToCSV } from "$lib/utilities/export";
@@ -121,62 +120,79 @@
 			<p class="loading-message">No Units found for the selected Era and Faction Combination.</p>
 		{:else}
 			<div class="virtual-list-container" bind:clientHeight={listHeight}>
-				<VirtualList items={resultList.filteredList ?? []}>
-					{#snippet renderItem(item)}
-						<div class={{ "virtual-list-row": !appWindow.isMobile, "virtual-list-row-mobile": appWindow.isMobile }}>
-							{#if list}
-								<div class="align-center add-button">
-									<button onclick={() => list.addUnit(item)}>+</button>
-								</div>
-							{:else}
-								<div></div>
-							{/if}
-							<a class="unit-name" href="http://masterunitlist.info/Unit/Details/{item.mulId}" target="_blank">{item.name}</a>
-							<div class="align-center">{item.subtype}</div>
-							<div class="align-center">{item.pv}</div>
-							{#if !appWindow.isMobile}
-								<div class="align-center">{item?.size ?? "-"}</div>
-							{/if}
-							<div class="align-center">
-								{#if item?.move == undefined}
-									-
-								{:else}
-									{#each item.move as movement, index}
-										{#if index != 0}
-											{"/ "}
-										{/if}
-										{`${movement.speed}"${movement.type ?? ""}`}
-									{/each}
-								{/if}
-							</div>
-							{#if !appWindow.isMobile}
-								<div class="align-center">{item.tmm ?? "-"}</div>
-							{/if}
-							<div class="align-center">
-								{#if item.health == undefined}
-									-
-								{:else}
-									{appWindow.isMobile ? item.health : item.health + " (" + item.armor + "+" + item.structure + ")"}
-								{/if}
-							</div>
-							<div class="align-center">
-								{#if item.damageS == undefined}
-									-
-								{:else}
-									{item.damageS}{item.damageSMin ? "*" : ""}{"/" + item.damageM}{item.damageMMin ? "*" : ""}{"/" + item.damageL}{item.damageLMin ? "*" : ""}{" - " + item.overheat}
-								{/if}
-							</div>
-							<div class:abilities={!appWindow.isMobile} class:abilities-mobile={appWindow.isMobile}>
-								<p>{createAbilityLineString(item.abilities)}</p>
-							</div>
-							<p class="role-text">Role: <span class="muted">{item.role}</span></p>
-							<form method="post" action="/?/getUnitAvailability" use:enhance={showAvailability} class="align-center">
-								<input type="hidden" name="mulId" value={item.mulId} />
-								<button class="availability-button">Availability</button>
-							</form>
-						</div>
+				<svelte:boundary>
+					{#snippet failed(error, reset)}
+						<p>
+							Sorry about this, but something failed. Press the button below to reset the result list. If this happens repeatedly, please take a screenshot and create an issue on
+							my <a href="https://github.com/jsc17/Terminals-BT/issues" target="_blank">Github</a>
+						</p>
+
+						<button onclick={reset}>Reset</button>
+
+						<p>{error}</p>
 					{/snippet}
-				</VirtualList>
+					<VirtualList items={resultList.filteredList ?? []}>
+						{#snippet renderItem(item)}
+							<div class={{ "virtual-list-row": !appWindow.isMobile, "virtual-list-row-mobile": appWindow.isMobile }}>
+								{#if item}
+									{#if list}
+										<div class="align-center add-button">
+											<button onclick={() => list.addUnit(item)}>+</button>
+										</div>
+									{:else}
+										<div></div>
+									{/if}
+									<a class="unit-name" href="http://masterunitlist.info/Unit/Details/{item.mulId}" target="_blank">{item.name ?? "Not found"}</a>
+									<div class="align-center">{item.subtype ?? "-"}</div>
+									<div class="align-center">{item.pv ?? "-"}</div>
+									{#if !appWindow.isMobile}
+										<div class="align-center">{item?.size ?? "-"}</div>
+									{/if}
+									<div class="align-center">
+										{#if item?.move == undefined}
+											-
+										{:else}
+											{#each item.move as movement, index}
+												{#if index != 0}
+													{"/ "}
+												{/if}
+												{`${movement.speed}"${movement.type ?? ""}`}
+											{/each}
+										{/if}
+									</div>
+									{#if !appWindow.isMobile}
+										<div class="align-center">{item.tmm ?? "-"}</div>
+									{/if}
+									<div class="align-center">
+										{#if item.health == undefined}
+											-
+										{:else}
+											{appWindow.isMobile ? item.health : item.health + " (" + item.armor + "+" + item.structure + ")"}
+										{/if}
+									</div>
+									<div class="align-center">
+										{#if item.damageS == undefined}
+											-
+										{:else}
+											{item.damageS}{item.damageSMin ? "*" : ""}{"/" + item.damageM}{item.damageMMin ? "*" : ""}{"/" + item.damageL}{item.damageLMin ? "*" : ""}{" - " +
+												item.overheat}
+										{/if}
+									</div>
+									<div class:abilities={!appWindow.isMobile} class:abilities-mobile={appWindow.isMobile}>
+										<p>{createAbilityLineString(item.abilities ?? [])}</p>
+									</div>
+									<p class="role-text">Role: <span class="muted">{item.role}</span></p>
+									<form method="post" action="/?/getUnitAvailability" use:enhance={showAvailability} class="align-center">
+										<input type="hidden" name="mulId" value={item.mulId ?? 0} />
+										<button class="availability-button">Availability</button>
+									</form>
+								{:else}
+									<p>Unit didn't load correctly. You should probably never see this message. If you do, refresh the page</p>
+								{/if}
+							</div>
+						{/snippet}
+					</VirtualList>
+				</svelte:boundary>
 			</div>
 		{/if}
 	{:catch}

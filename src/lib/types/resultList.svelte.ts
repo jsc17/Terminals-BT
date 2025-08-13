@@ -5,6 +5,7 @@ import { deserialize } from "$app/forms";
 import { filters as filtersImport, additionalFilters as additionalFiltersImport } from "$lib/data/filters";
 import type { Ruleset } from "./rulesets";
 import { ruleSets } from "./rulesets";
+import { Debounced } from "runed";
 
 type SearchConstraint = {
 	equals?: number;
@@ -107,12 +108,21 @@ export class ResultList {
 	generalList = $state<MulUnit[]>([]);
 	uniqueList = $state<number[]>([]);
 	customUnits = $state<MulUnit[]>([]);
+	taggedUnits = $state<string[]>([]);
 
 	options = $state<Ruleset>();
 	filterByRules = $state(true);
 	availableList = $derived.by(() => {
 		let availableUnits = this.resultList.concat(this.generalList);
 		availableUnits = [...new Set(availableUnits)];
+		if (this.taggedUnits.length) {
+			availableUnits = availableUnits.filter((u) => {
+				if (u.group && u.group != "") {
+					return this.taggedUnits.includes(u.group);
+				}
+				return this.taggedUnits.includes(u.class);
+			});
+		}
 		availableUnits.sort((a, b) => {
 			return (a.tonnage ?? 0) - (b.tonnage ?? 0);
 		});
@@ -124,7 +134,8 @@ export class ResultList {
 	filters = $state<Filter[]>(filtersImport);
 	additionalFilters = $state<Filter[]>(additionalFiltersImport);
 	sort = $state<{ key: string; order: string; extra?: any }>({ key: "", order: "asc" });
-	filteredList = $derived.by(() => this.filterList());
+	dbFilterList = new Debounced(() => this.filterList(), 350);
+	filteredList = $derived(this.dbFilterList.current);
 
 	status = $state();
 	loadResults() {

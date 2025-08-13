@@ -15,14 +15,23 @@
 	{#snippet trigger()}
 		Fix
 	{/snippet}
-	<p>Parsed Name: {unit.name}</p>
-	<form {...getPossibleUnitList}>
-		<input type="text" name="searchTerm" id="searchTerm " />
-		<button>Search</button>
-	</form>
-	<select bind:value={selectedUnitId}>
-		{#each getPossibleUnitList.result ?? [] as result}
-			<option value={result.mulId}>{result.name}</option>
-		{/each}
-	</select>
+	<div class="fix-dialog-body">
+		<p>Parsed Name: {unit.name}</p>
+		<form {...getPossibleUnitList}>
+			<input type="text" name="searchTerm" id="searchTerm " />
+			<button>Search</button>
+		</form>
+		<select bind:value={selectedUnitId}>
+			{#each getPossibleUnitList.result ?? [] as result}
+				<option value={result.mulId}>{result.name}</option>
+			{/each}
+		</select>
+	</div>
 </Dialog>
+
+<style>
+	.fix-dialog-body {
+		display: flex;
+		flex-direction: column;
+	}
+</style>

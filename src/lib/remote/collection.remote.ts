@@ -1,5 +1,6 @@
 import { form, getRequestEvent, query } from "$app/server";
 import { prisma } from "$lib/server/prisma";
+import * as z from "zod";
 
 export const getTags = query(async () => {
 	const { locals } = getRequestEvent();
@@ -171,5 +172,16 @@ export const getUnitGroups = query(async () => {
 			})
 			.sort()
 	);
-	return groupList;
+	return [...groupList];
+});
+
+export const getUnitsWithTags = form(async (data) => {
+	const { locals } = getRequestEvent();
+	if (!locals.user) return { status: "failed", message: "Invalid User" };
+	const tags = data.getAll("tagId").map((v) => Number(v.toString()));
+	if (tags.length == 0) return { status: "failed", message: "No tags recieved" };
+
+	const units = await prisma.collectionModel.findMany({ where: { userId: locals.user.id, AND: tags.map((t) => ({ unitTags: { some: { tagId: t } } })) }, select: { label: true } });
+
+	return { status: "success", data: units.map((u) => u.label) };
 });

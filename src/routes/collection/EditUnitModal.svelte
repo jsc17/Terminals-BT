@@ -2,6 +2,7 @@
 	import { Dialog } from "$lib/components/global";
 	import { removeTagfromUnit, removeUnitFromCollection, getTags, addTagToUnit, updateQuantity } from "$lib/remote/collection.remote";
 	import { toastController } from "$lib/stores";
+	import { appWindow } from "$lib/stores";
 
 	type Props = {
 		unit: any;
@@ -15,7 +16,7 @@
 
 <Dialog title={`Edit ${unit.label}`} triggerClasses={"transparent-button"} bind:open>
 	{#snippet trigger()}
-		Edit Unit
+		{appWindow.isMobile ? `Edit` : "Edit Unit"}
 	{/snippet}
 	<div class="edit-unit-body">
 		<form

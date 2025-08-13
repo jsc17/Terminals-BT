@@ -6,6 +6,7 @@
 	import TagEditModal from "./TagEditModal.svelte";
 	import EditUnitModal from "./EditUnitModal.svelte";
 	import { toastController } from "$lib/stores";
+	import { appWindow } from "$lib/stores";
 
 	let user: { username: string | undefined } = getContext("user");
 
@@ -23,6 +24,11 @@
 
 	let selectedFilterTag = $derived(filterTagList[0]);
 	let selectedAddUnitTag = $derived(addTagList[0]);
+
+	let unitGroupListPromise = getUnitGroups();
+	let unitFilter = $state<string>();
+	let unitGroupList = $derived<string[]>(unitGroupListPromise.current?.filter((v) => v.toLowerCase().includes(unitFilter?.toLowerCase() ?? "")) ?? []);
+	let selectedUnit = $state<string>();
 
 	function filterUnit(item: any) {
 		if (!item.label.toLowerCase().includes(nameFilter.toLowerCase())) return false;
@@ -115,12 +121,14 @@
 				<div class="manage-bar-add-unit">
 					<p class="muted">Adds the selected model to your collection with the currently selected tags</p>
 					<div class="justify-end">
-						<select name="new-unit-name" id="new-unit-name">
-							{#each await getUnitGroups() as group}
+						<label>Filter: <input type="text" bind:value={unitFilter} style="width: 150px;" /></label>
+						<select name="new-unit-name" id="new-unit-name" style="width: 250px;">
+							{#each unitGroupList as group}
 								<option value={group}>{group}</option>
 							{/each}
 						</select>
 						<button>Add</button>
+						<input type="hidden" name="new-unit-name" value={selectedUnit} />
 					</div>
 				</div>
 				<div class="manage-tag-container">
@@ -185,7 +193,7 @@
 	}
 	.unit-list {
 		flex: 1;
-		padding: 16px 0px 16px 16px;
+		padding-right: 0px;
 	}
 	.add-message {
 		flex: 1;
@@ -283,5 +291,31 @@
 	}
 	.name-filter {
 		justify-self: end;
+	}
+	@media (max-width: 600px) {
+		section {
+			padding: 4px;
+		}
+		.collection-model-row {
+			padding: 4px;
+			gap: 2px;
+		}
+		.tagged-unit-name {
+			justify-self: start;
+			padding: 0px 4px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			width: 100%;
+		}
+		.tagged-unit-quantity {
+			padding: 0px 4px;
+		}
+		.filter-bar,
+		.manage-bar {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
 	}
 </style>

@@ -142,9 +142,17 @@ const getUnitGroups = q(async () => {
       return unit.group != "" && unit.group != null ? unit.group : unit.class;
     }).sort()
   );
-  return groupList;
+  return [...groupList];
 });
-for (const [name, fn] of Object.entries({ addTag, addTagToUnit, addUnitToCollection, getTaggedUnits, getTags, getUnitGroups, getUserTags, removeTag, removeTagfromUnit, removeUnitFromCollection, updateQuantity, updateTag })) {
+const getUnitsWithTags = f(async (data) => {
+  const { locals } = k();
+  if (!locals.user) return { status: "failed", message: "Invalid User" };
+  const tags = data.getAll("tagId").map((v) => Number(v.toString()));
+  if (tags.length == 0) return { status: "failed", message: "No tags recieved" };
+  const units = await p.collectionModel.findMany({ where: { userId: locals.user.id, AND: tags.map((t) => ({ unitTags: { some: { tagId: t } } })) }, select: { label: true } });
+  return { status: "success", data: units.map((u) => u.label) };
+});
+for (const [name, fn] of Object.entries({ addTag, addTagToUnit, addUnitToCollection, getTaggedUnits, getTags, getUnitGroups, getUnitsWithTags, getUserTags, removeTag, removeTagfromUnit, removeUnitFromCollection, updateQuantity, updateTag })) {
   fn.__.id = "1v3bh7i/" + name;
   fn.__.name = name;
 }
@@ -155,6 +163,7 @@ export {
   getTaggedUnits,
   getTags,
   getUnitGroups,
+  getUnitsWithTags,
   getUserTags,
   removeTag,
   removeTagfromUnit,

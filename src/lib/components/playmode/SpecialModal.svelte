@@ -25,14 +25,20 @@
 </script>
 
 <Dialog bind:open title={ability?.name ?? "No ability selected"}>
-	<p class="ability-reference">{abilityDetails?.name} (<span class="italic">{abilityDetails?.page}</span>)</p>
-	<div class="row">
-		<button class="disable-ability-button" onclick={disableAbility}>{disabledIndex == -1 ? `Disable Ability` : `Enable Ability`}</button>
-		<p class="muted">Disables abilities that have been used. (Ex. C3 Emergency Master that has been used and burnt out)</p>
+	<div class="special-dialog-body">
+		<p class="ability-reference">{abilityDetails?.name} (<span class="italic">{abilityDetails?.page}</span>)</p>
+		<div class="row">
+			<button class="disable-ability-button" onclick={disableAbility}>{disabledIndex == -1 ? `Disable Ability` : `Enable Ability`}</button>
+			<p class="muted">Disables abilities that have been used. (Ex. C3 Emergency Master that has been used and burnt out)</p>
+		</div>
 	</div>
 </Dialog>
 
 <style>
+	.special-dialog-body {
+		display: flex;
+		flex-direction: column;
+	}
 	.ability-reference {
 		font-size: 18px;
 		padding: 16px;

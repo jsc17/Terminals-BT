@@ -46,8 +46,6 @@
 		background-color: var(--background);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
-		display: flex;
-		flex-direction: column;
 		z-index: 50;
 	}
 	:global([data-dialog-overlay][data-state="open"]) {

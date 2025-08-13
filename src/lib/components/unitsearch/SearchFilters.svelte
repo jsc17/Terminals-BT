@@ -3,6 +3,9 @@
 	import { type Filter } from "$lib/types/filter";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { Select } from "$lib/components/global/";
+	import { getTags, getUnitsWithTags } from "$lib/remote/collection.remote";
+	import { getContext } from "svelte";
+	import { toastController } from "$lib/stores";
 
 	type Props = {
 		resultList: ResultList;
@@ -13,6 +16,12 @@
 	let showFilters = $state(false);
 	let showAdditionalFilters = $state(false);
 	let showAbilitiesDropdown = $state(false);
+
+	const tags = getTags();
+	const filterTags = $derived(tags.current?.map((t) => ({ value: t.id.toString(), label: t.label })) ?? []);
+	let selectedTags = $state<string[]>([]);
+
+	let user: { username: string | undefined } = getContext("user");
 </script>
 
 {#snippet filters(filterList: Filter[])}
@@ -91,6 +100,55 @@
 				{/if}
 			</div>
 		{/each}
+		<form
+			class="tag-container"
+			{...getUnitsWithTags.enhance(async ({ submit }) => {
+				if (resultList.taggedUnits.length == 0 && selectedTags.length) {
+					await submit();
+					resultList.taggedUnits = getUnitsWithTags.result?.data ?? [];
+					if (getUnitsWithTags.result?.data?.length == 0) {
+						toastController.addToast("No units found that match all selected tags");
+					} else if (getUnitsWithTags.result?.message == "failed") {
+						toastController.addToast(getUnitsWithTags.result?.message ?? "Invalid message recieved");
+					}
+				} else {
+					resultList.taggedUnits = [];
+					toastController.addToast("Tag filters removed");
+				}
+			})}
+		>
+			<div class="tag-header">
+				<Select bind:value={selectedTags} items={filterTags} type="multiple" placeholder="Tags" disabled={resultList.taggedUnits.length != 0} />
+				<button class="tag-filter-button" disabled={user.username == undefined || selectedTags.length == 0}
+					>{resultList.taggedUnits.length == 0 ? `Filter` : "Remove Filter"}</button
+				>
+				<a class="collection-link" href="/collection" target="_blank">Edit Collection</a>
+			</div>
+			<div class="tag-list">
+				{#if user.username}
+					{#each selectedTags as tag, index}
+						{@const currentTag = tags.current?.find((t) => t.id.toString() == tag)}
+						{@const rgb = JSON.parse(currentTag?.color ?? `{"r":"0.2","g":"0.2","b":"0.2"}`)}
+						{@const rgbString = `rgb(${Number(rgb.r) * 255} ${Number(rgb.g) * 255} ${Number(rgb.b) * 255})`}
+						<input type="hidden" name="tagId" value={tag} />
+						<button
+							type="button"
+							class="tag"
+							style={`background-color: ${rgbString}; color: hwb(from oklch(from ${rgbString} l 0 0) h calc(((b - 50) * 999)) calc(((w - 50) * 999)));`}
+							onclick={() => {
+								if (resultList.taggedUnits.length != 0) {
+									toastController.addToast("Remove the tag filter to continue editting tags");
+								} else {
+									selectedTags.splice(index, 1);
+								}
+							}}>{currentTag?.label}</button
+						>
+					{/each}
+				{:else}
+					<p class="muted">Log in to use custom tag filtering</p>
+				{/if}
+			</div>
+		</form>
 	</div>
 {/snippet}
 
@@ -119,7 +177,7 @@
 		{@render filters(resultList.filters)}
 		<div class="space-between filter-buttons">
 			<button
-				class="backgroundless-button"
+				class="transparent-button"
 				onclick={() => {
 					showAdditionalFilters = !showAdditionalFilters;
 				}}
@@ -192,11 +250,45 @@
 		-webkit-appearance: none;
 		appearance: none;
 	}
-	.backgroundless-button {
-		background-color: transparent;
-		color: var(--primary);
-	}
 	.select-filter-wrapper {
 		width: 5em;
+	}
+	.tag-container {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		max-width: 300px;
+	}
+	.tag-header {
+		display: grid;
+		grid-template-columns: 100px max-content 1fr;
+		gap: 8px;
+	}
+	.tag-filter-button {
+		width: max-content;
+		height: max-content;
+	}
+	.tag-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
+	}
+	.tag {
+		font-size: 0.9em;
+		background-color: var(--background);
+		border: 1px solid var(--border);
+		padding: 2px 4px;
+		border-radius: var(--radius);
+		display: flex;
+		gap: 8px;
+		color: var(--muted-foreground);
+		height: max-content;
+	}
+	.tag:hover {
+		cursor: pointer;
+	}
+	.collection-link {
+		font-size: 0.85em;
+		height: max-content;
 	}
 </style>

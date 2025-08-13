@@ -58,16 +58,18 @@
 	{#snippet description()}
 		Loading a list will overwrite any in progress game:
 	{/snippet}
-	{#if user.username}
-		<select bind:value={selectedList}>
-			{#each lists as list, index}
-				<option value={index}>{list.name}</option>
-			{/each}
-		</select>
-		<button onclick={loadList}>Load</button>
-	{:else}
-		<p class="load-message">Please log in to load saved list</p>
-	{/if}
+	<div class="load-dialog-body">
+		{#if user.username}
+			<select bind:value={selectedList}>
+				{#each lists as list, index}
+					<option value={index}>{list.name}</option>
+				{/each}
+			</select>
+			<button onclick={loadList}>Load</button>
+		{:else}
+			<p class="load-message">Please log in to load saved list</p>
+		{/if}
+	</div>
 </Dialog>
 
 <style>
@@ -75,5 +77,9 @@
 		align-self: center;
 		justify-self: center;
 		margin: 24px 16px;
+	}
+	.load-dialog-body {
+		display: flex;
+		flex-direction: column;
 	}
 </style>

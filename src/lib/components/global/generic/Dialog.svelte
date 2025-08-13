@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Dialog, type WithoutChildren } from "bits-ui";
-	import { createEventDispatcher, type Snippet } from "svelte";
+	import { type Snippet } from "svelte";
 
 	type Props = Dialog.RootProps & {
 		title: string;

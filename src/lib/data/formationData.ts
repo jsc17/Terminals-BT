@@ -133,7 +133,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 						abilityType: "SPA",
 						grantedAbility: ["Demoralizer", "Multi-Tasker"],
 						sameAbility: true,
-						assignedNumber: { portion: 0.5 },
+						assignedNumber: { portion: 0.5, rounding: "down" },
 						assignmentTiming: "turnStart"
 					}
 				],
@@ -181,7 +181,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 								abilityType: "SPA",
 								grantedAbility: ["Demoralizer", "Multi-Tasker"],
 								sameAbility: true,
-								assignedNumber: { portion: 0.5 },
+								assignedNumber: { portion: 0.5, rounding: "down" },
 								assignmentTiming: "turnStart"
 							},
 							{
@@ -215,7 +215,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 					{ type: "Role", description: "At least 50% of units must have the Striker or Skirmisher roles", roles: ["Striker", "Skirmisher"], amount: 0.5, flatAmount: false }
 				],
 				page: "AS:CE pg.118",
-				bonuses: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Speed Demon"], assignedNumber: { portion: 0.75 }, assignmentTiming: "playStart" }],
+				bonuses: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Speed Demon"], assignedNumber: { portion: 0.75, rounding: "normal" }, assignmentTiming: "playStart" }],
 				referencedSPAs: ["Speed Demon"],
 				variations: [
 					{
@@ -243,7 +243,9 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							{ type: "Role", description: "At least 2 units must have the Striker or Skirmisher roles", roles: ["Striker", "Skirmisher"], amount: 2, flatAmount: true }
 						],
 						page: "AS:CE pg.118",
-						bonuses: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Speed Demon"], assignedNumber: { portion: 0.75 }, assignmentTiming: "playStart" }],
+						bonuses: [
+							{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Speed Demon"], assignedNumber: { portion: 0.75, rounding: "normal" }, assignmentTiming: "playStart" }
+						],
 						referencedSPAs: ["Speed Demon"]
 					},
 					{
@@ -272,7 +274,9 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							{ type: "Role", description: "At least 2 units must have the Striker or Skirmisher roles", roles: ["Striker", "Skirmisher"], amount: 2, flatAmount: true }
 						],
 						page: "AS:CE pg.118",
-						bonuses: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Speed Demon"], assignedNumber: { portion: 0.75 }, assignmentTiming: "playStart" }],
+						bonuses: [
+							{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Speed Demon"], assignedNumber: { portion: 0.75, rounding: "normal" }, assignmentTiming: "playStart" }
+						],
 						referencedSPAs: ["Speed Demon"]
 					}
 				]
@@ -286,7 +290,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 					{ type: "Role", description: "At least 75% of units must have the Missile Boat or Sniper roles", roles: ["Missile Boat", "Sniper"], amount: 0.75, flatAmount: false }
 				],
 				page: "AS:CE pg.119",
-				bonuses: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Sniper"], assignedNumber: { portion: 0.5 }, assignmentTiming: "turnStart" }],
+				bonuses: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Sniper"], assignedNumber: { portion: 0.5, rounding: "down" }, assignmentTiming: "turnStart" }],
 				referencedSPAs: ["Sniper"],
 				variations: [
 					{
@@ -302,7 +306,9 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							}
 						],
 						page: "AS:CE pg.119",
-						bonuses: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Oblique Attacker"], assignedNumber: { portion: 0.5 }, assignmentTiming: "turnStart" }],
+						bonuses: [
+							{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Oblique Attacker"], assignedNumber: { portion: 0.5, rounding: "down" }, assignmentTiming: "turnStart" }
+						],
 						referencedSPAs: ["Oblique Attacker"]
 					},
 					{
@@ -318,7 +324,9 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							}
 						],
 						page: "AS:CE pg.119",
-						bonuses: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Oblique Artilleryman"], assignedNumber: { portion: 0.5 }, assignmentTiming: "turnStart" }],
+						bonuses: [
+							{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Oblique Artilleryman"], assignedNumber: { portion: 0.5, rounding: "down" }, assignmentTiming: "turnStart" }
+						],
 						referencedSPAs: ["Oblique Artilleryman"]
 					},
 					{
@@ -337,7 +345,9 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							}
 						],
 						page: "AS:CE pg.119",
-						bonuses: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Weapon Specialist"], assignedNumber: { portion: 0.5 }, assignmentTiming: "turnStart" }],
+						bonuses: [
+							{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Weapon Specialist"], assignedNumber: { portion: 0.5, rounding: "down" }, assignmentTiming: "turnStart" }
+						],
 						referencedSPAs: ["Weapon Specialist"]
 					},
 					{
@@ -360,7 +370,15 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							}
 						],
 						page: "AS:CE pg.119",
-						bonuses: [{ type: "Assigned", abilityType: "SCA", grantedAbility: ["Anti-Aircraft Specialist SCA"], assignedNumber: { portion: 0.5 }, assignmentTiming: "turnStart" }],
+						bonuses: [
+							{
+								type: "Assigned",
+								abilityType: "SCA",
+								grantedAbility: ["Anti-Aircraft Specialist SCA"],
+								assignedNumber: { portion: 0.5, rounding: "down" },
+								assignmentTiming: "turnStart"
+							}
+						],
 						referencedSCAs: ["Anti-Aircraft Specialist"]
 					},
 					{
@@ -471,7 +489,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 								type: "Assigned",
 								abilityType: "SPA",
 								grantedAbility: ["Eagle's Eyes", "Forward Observer", "Maneuvering Ace"],
-								assignedNumber: { portion: 0.5 },
+								assignedNumber: { portion: 0.5, rounding: "up" },
 								assignmentTiming: "playStart",
 								sameAbility: true
 							}
@@ -510,7 +528,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 						type: "Assigned",
 						abilityType: "SPA",
 						grantedAbility: ["Blood Stalker"],
-						assignedNumber: { portion: 0.75 },
+						assignedNumber: { portion: 0.75, rounding: "normal" },
 						assignmentTiming: "playStart"
 					}
 				],
@@ -545,7 +563,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 								type: "Assigned",
 								abilityType: "SPA",
 								grantedAbility: ["Blood Stalker"],
-								assignedNumber: { portion: 0.75 },
+								assignedNumber: { portion: 0.75, rounding: "normal" },
 								assignmentTiming: "playStart"
 							}
 						],
@@ -580,7 +598,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 								type: "Assigned",
 								abilityType: "SPA",
 								grantedAbility: ["Blood Stalker"],
-								assignedNumber: { portion: 0.75 },
+								assignedNumber: { portion: 0.75, rounding: "normal" },
 								assignmentTiming: "playStart"
 							}
 						],
@@ -614,7 +632,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 						type: "Assigned",
 						abilityType: "SPA",
 						grantedAbility: ["Antagonizer", "Blood Stalker", "Combat Intuition", "Eagle's Eyes", "Marksman", "Multi-Tasker"],
-						assignedNumber: { portion: 0.5 },
+						assignedNumber: { portion: 0.5, rounding: "up" },
 						assignmentTiming: "playStart"
 					},
 					{
@@ -646,7 +664,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 								type: "Assigned",
 								abilityType: "SPA",
 								grantedAbility: ["Antagonizer", "Blood Stalker", "Combat Intuition", "Eagle's Eyes", "Marksman", "Multi-Tasker"],
-								assignedNumber: { portion: 0.5 },
+								assignedNumber: { portion: 0.5, rounding: "up" },
 								assignmentTiming: "playStart"
 							},
 							{

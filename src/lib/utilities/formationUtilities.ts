@@ -69,13 +69,20 @@ export function getFormationStats(formation: ListFormation, list: List) {
 	};
 }
 
-export function calculateBonusAmount(unitCount: number, amount: { flat?: number; plus?: number; portion?: number }): number {
+export function calculateBonusAmount(unitCount: number, amount: { flat?: number; plus?: number; portion?: number; rounding?: "down" | "up" | "normal" }): number {
 	if (amount.flat) {
 		return amount.flat;
 	} else if (amount.plus) {
 		return unitCount + amount.plus;
 	} else if (amount.portion) {
-		return Math.floor(unitCount * amount.portion);
+		switch (amount.rounding) {
+			case "down":
+				return Math.floor(unitCount * amount.portion);
+			case "up":
+				return Math.ceil(unitCount * amount.portion);
+			default:
+				return Math.round(unitCount * amount.portion);
+		}
 	} else {
 		return 0;
 	}

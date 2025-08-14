@@ -105,7 +105,7 @@ export type AssignedBonus = {
 	abilityType: "SPA" | "SCA" | "Unique";
 	grantedAbility: string[];
 	sameAbility?: boolean;
-	assignedNumber: { flat?: number; plus?: number; portion?: number };
+	assignedNumber: { flat?: number; plus?: number; portion?: number; rounding?: "up" | "down" | "normal" };
 	assignmentTiming?: "playStart" | "turnStart";
 };
 

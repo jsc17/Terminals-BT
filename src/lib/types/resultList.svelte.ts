@@ -5,7 +5,6 @@ import { deserialize } from "$app/forms";
 import { filters as filtersImport, additionalFilters as additionalFiltersImport } from "$lib/data/filters";
 import type { Ruleset } from "./rulesets";
 import { ruleSets } from "./rulesets";
-import { Debounced } from "runed";
 
 type SearchConstraint = {
 	equals?: number;
@@ -134,8 +133,7 @@ export class ResultList {
 	filters = $state<Filter[]>(filtersImport);
 	additionalFilters = $state<Filter[]>(additionalFiltersImport);
 	sort = $state<{ key: string; order: string; extra?: any }>({ key: "", order: "asc" });
-	dbFilterList = new Debounced(() => this.filterList(), 350);
-	filteredList = $derived(this.dbFilterList.current);
+	filteredList = $derived(this.filterList(this.filters, this.additionalFilters));
 
 	status = $state();
 	loadResults() {
@@ -308,9 +306,9 @@ export class ResultList {
 		}
 		return tempRestrictedList;
 	}
-	filterList() {
+	filterList(filters: Filter[], additionalFilters: Filter[]) {
 		let tempResultList = [...this.restrictedList];
-		this.filters.concat(this.additionalFilters).forEach((filter) => {
+		filters.concat(additionalFilters).forEach((filter) => {
 			switch (filter.type) {
 				case "string":
 					if (filter.value && filter.value != "any") {

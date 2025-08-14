@@ -32,8 +32,6 @@ export const addTag = form(async (data) => {
 		data: { label: newTag, color, user: { connect: { id: locals.user.id } } }
 	});
 
-	await getTags().refresh();
-	await getUserTags().refresh();
 	return { status: "success", message: "Tag Added" };
 });
 
@@ -43,10 +41,8 @@ export const removeTag = form(async (data) => {
 
 	const tagToRemove = data.get("tagToRemove")?.toString();
 	if (tagToRemove == undefined) return { status: "failed", message: "Invalid Tag Id" };
-	console.log(tagToRemove);
 	await prisma.collectionTag.delete({ where: { id: Number(tagToRemove) } });
-	await getTags().refresh();
-	await getUserTags().refresh();
+
 	return { status: "success", message: "Tag removed" };
 });
 
@@ -66,9 +62,7 @@ export const updateTag = form(async (data) => {
 	if (existing != null && existing.id != Number(tagId)) return { status: "failed", message: "Tag already exists" };
 
 	await prisma.collectionTag.update({ where: { id: Number(tagId) }, data: { label: newName, color: newColor } });
-	await getTags().refresh();
-	await getUserTags().refresh();
-	await getTaggedUnits().refresh();
+
 	return { status: "success", message: "Tag updated successfully" };
 });
 
@@ -134,6 +128,8 @@ export const removeUnitFromCollection = form(async (data) => {
 	if (id == undefined) return { status: "failed", message: "Invalid unit" };
 
 	await prisma.collectionModel.delete({ where: { id: Number(id) } });
+	await getTaggedUnits().refresh();
+
 	return { status: "success", message: "Unit removed from collection" };
 });
 

@@ -26,8 +26,6 @@ const addTag = f(async (data) => {
   await p.collectionTag.create({
     data: { label: newTag, color, user: { connect: { id: locals.user.id } } }
   });
-  await getTags().refresh();
-  await getUserTags().refresh();
   return { status: "success", message: "Tag Added" };
 });
 const removeTag = f(async (data) => {
@@ -36,10 +34,7 @@ const removeTag = f(async (data) => {
   if (!locals.user) return { status: "failed", message: "Invalid User" };
   const tagToRemove = (_a = data.get("tagToRemove")) == null ? void 0 : _a.toString();
   if (tagToRemove == void 0) return { status: "failed", message: "Invalid Tag Id" };
-  console.log(tagToRemove);
   await p.collectionTag.delete({ where: { id: Number(tagToRemove) } });
-  await getTags().refresh();
-  await getUserTags().refresh();
   return { status: "success", message: "Tag removed" };
 });
 const updateTag = f(async (data) => {
@@ -56,9 +51,6 @@ const updateTag = f(async (data) => {
   console.log(existing == null ? void 0 : existing.id, Number(tagId));
   if (existing != null && existing.id != Number(tagId)) return { status: "failed", message: "Tag already exists" };
   await p.collectionTag.update({ where: { id: Number(tagId) }, data: { label: newName, color: newColor } });
-  await getTags().refresh();
-  await getUserTags().refresh();
-  await getTaggedUnits().refresh();
   return { status: "success", message: "Tag updated successfully" };
 });
 const addTagToUnit = f(async (data) => {
@@ -112,6 +104,7 @@ const removeUnitFromCollection = f(async (data) => {
   const id = (_a = data.get("idToRemove")) == null ? void 0 : _a.toString();
   if (id == void 0) return { status: "failed", message: "Invalid unit" };
   await p.collectionModel.delete({ where: { id: Number(id) } });
+  await getTaggedUnits().refresh();
   return { status: "success", message: "Unit removed from collection" };
 });
 const updateQuantity = f(async (data) => {

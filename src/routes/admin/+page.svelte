@@ -3,6 +3,7 @@
 	import { calculateTMM } from "$lib/utilities/genericBattletechUtilities";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import SendNotification from "./SendNotification.svelte";
+	import { testEmail } from "$lib/remote/email.remote";
 
 	async function loadUnits() {
 		const links: { type: string; link: string }[] = [];
@@ -129,6 +130,11 @@
 	</div>
 
 	<SendNotification />
+
+	<form class="card" {...testEmail}>
+		<p>Send Test email</p>
+		<button>Send</button>
+	</form>
 </main>
 
 <style>

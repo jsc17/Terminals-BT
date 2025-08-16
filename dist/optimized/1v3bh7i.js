@@ -3,6 +3,7 @@ import "@sveltejs/kit";
 import { f } from "../chunks/form.js";
 import { q } from "../chunks/query.js";
 import { p } from "../chunks/prisma.js";
+import "../chunks/shared.js";
 import "../chunks/prerender.js";
 const getTags = q(async () => {
   const { locals } = k();

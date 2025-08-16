@@ -5,6 +5,7 @@ import { q } from "../chunks/query.js";
 import { getGeneralId } from "./1dw4xl7.js";
 import { getMULDataFromName, isUnique, isAvailable } from "./1bh77am.js";
 import { getDocument } from "pdfjs-dist";
+import "../chunks/shared.js";
 import "../chunks/prerender.js";
 import "../chunks/prisma.js";
 import "zod";

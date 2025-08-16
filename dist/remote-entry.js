@@ -1,8 +1,8 @@
 import { k, f } from "./chunks/event-state.js";
-import { c, r } from "./chunks/query.js";
-import { q } from "./chunks/query.js";
+import { c, r } from "./chunks/shared.js";
 import { f as f2 } from "./chunks/form.js";
 import { p } from "./chunks/prerender.js";
+import { q } from "./chunks/query.js";
 // @__NO_SIDE_EFFECTS__
 function command(validate_or_fn, maybe_fn) {
   const fn = maybe_fn ?? validate_or_fn;

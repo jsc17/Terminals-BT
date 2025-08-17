@@ -7,6 +7,13 @@ const fonts: TFontDictionary = {
 		bold: "Helvetica-Bold",
 		italics: "Helvetica-Oblique",
 		bolditalics: "Helvetica-BoldOblique"
+	},
+	NotoSansSymbols: {
+		normal: "./files/fonts/NotoSansSymbols/NotoSansSymbols-Regular.ttf",
+		bold: "./files/fonts/NotoSansSymbols/NotoSansSymbols-Bold.ttf"
+	},
+	NotoSansSymbols2: {
+		normal: "./files/fonts/NotoSansSymbols2/NotoSansSymbols2-Regular.ttf"
 	}
 };
 

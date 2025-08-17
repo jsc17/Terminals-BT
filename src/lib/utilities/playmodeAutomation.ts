@@ -125,7 +125,7 @@ export function calculateSkill(unit: PlayUnit, critCount: CritList, reference?: 
 	};
 }
 
-export function calculateMovement(unit: PlayUnit, reference?: MulUnit) {
+export function calculateMovement(unit: PlayUnit, measurementUnits: "inches" | "hexes", reference?: MulUnit) {
 	if (unit.current.heat >= 4) {
 		return [{ speed: 0, type: "I", tmm: -4, damaged: true }];
 	}
@@ -179,6 +179,10 @@ export function calculateMovement(unit: PlayUnit, reference?: MulUnit) {
 		}
 		if (newTMM < 0) {
 			newTMM = 0;
+		}
+
+		if (measurementUnits == "hexes") {
+			newSpeed = newSpeed / 2;
 		}
 		moveSpeeds.push({ speed: newSpeed, type, tmm: newTMM, damaged });
 	}

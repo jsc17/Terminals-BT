@@ -8,7 +8,15 @@
 	import { getListCodeFromString, loadExistingListsFromLocalStorage } from "$lib/utilities/listImport";
 
 	let settings = new PersistedState<Settings>("listbuilderSettings", {
-		print: { printingStyle: "detailed", printFormations: true, printCardsByFormation: false, printFormationBonuses: true, cardStyle: "generated", formationHeaderStyle: "inline" },
+		print: {
+			printingStyle: "detailed",
+			printFormations: true,
+			printCardsByFormation: false,
+			printFormationBonuses: true,
+			cardStyle: "generated",
+			formationHeaderStyle: "inline",
+			measurementUnits: "inches"
+		},
 		sublistUI: {
 			sublistOrientation: "vertical",
 			sublistSortOrder: "pv",
@@ -18,7 +26,8 @@
 				printCardsByFormation: false,
 				printFormationBonuses: true,
 				cardStyle: "generated",
-				formationHeaderStyle: "inline"
+				formationHeaderStyle: "inline",
+				measurementUnits: "inches"
 			},
 			sublistPrintAllOrientation: "vertical",
 			sublistPrintAllGroupByScenario: false

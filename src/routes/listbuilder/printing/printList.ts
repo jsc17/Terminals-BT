@@ -25,7 +25,7 @@ type PrintableList = {
 	bs: number[];
 };
 
-function createUnitLine(unit: ListUnit, listStyle: string, indent: boolean) {
+function createUnitLine(unit: ListUnit, listStyle: string, indent: boolean, measurementUnits: "inches" | "hexes") {
 	let unitLine: TableCell[] = [];
 	const style = indent ? "cellIndented" : "cell";
 	if (listStyle == "mul") {
@@ -36,19 +36,21 @@ function createUnitLine(unit: ListUnit, listStyle: string, indent: boolean) {
 			{ text: `${unit.cost} (${Math.round(unit.cost / 2)})`, style: "cellCentered" }
 		];
 	} else {
-		let moveString = "-";
+		let moveString: Content[] = ["-"];
 		if (unit.baseUnit.move) {
-			moveString = "";
-			for (const movement of unit.baseUnit.move) {
-				moveString += `${movement.speed}"${movement.type ?? ""}/`;
-			}
-			moveString = moveString.replace(/\/$/gm, "");
+			moveString = [];
+			unit.baseUnit.move.forEach((movement, i) => {
+				if (measurementUnits == "inches") moveString.push(`${movement.speed}"${movement.type ?? ""}`);
+				else moveString = moveString.concat([`${movement.speed / 2}`, { text: `⬢`, font: "NotoSansSymbols2", fontSize: 6 }, `${movement.type ?? ""}`]);
+				if (i != unit.baseUnit.move!.length - 1) moveString.push("/");
+			});
 		}
 		let damageString =
 			unit.baseUnit.damageS == undefined
 				? "-"
 				: `${unit.baseUnit.damageS}${unit.baseUnit.damageSMin ? "*" : ""}/${unit.baseUnit.damageM}${unit.baseUnit.damageMMin ? "*" : ""}/${unit.baseUnit.damageL}${unit.baseUnit.damageLMin ? "*" : ""}`;
 		let healthString = unit.baseUnit.health == undefined ? "-" : `${unit.baseUnit.health} (${unit.baseUnit.armor}a+${unit.baseUnit.structure}s)`;
+		console.log(moveString);
 		unitLine = [
 			{ text: unit.baseUnit.name, style: style },
 			{ text: unit.baseUnit.subtype, style: "cellCentered" },
@@ -62,7 +64,7 @@ function createUnitLine(unit: ListUnit, listStyle: string, indent: boolean) {
 	return unitLine;
 }
 
-function createUnitTable(listStyle: string, unitList: ListUnit[], formations: ListFormation[], drawFormations: boolean): TableCell[][] {
+function createUnitTable(listStyle: string, unitList: ListUnit[], formations: ListFormation[], drawFormations: boolean, measurementUnits: "inches" | "hexes"): TableCell[][] {
 	let unitTable: TableCell[][] = [];
 	let unitCount = 0;
 	let totalPV = 0;
@@ -78,7 +80,7 @@ function createUnitTable(listStyle: string, unitList: ListUnit[], formations: Li
 			unitCount++;
 			totalPV += unit.cost;
 			formationPV += unit.cost;
-			formationUnitLines.push(createUnitLine(unit, listStyle, drawFormations));
+			formationUnitLines.push(createUnitLine(unit, listStyle, drawFormations, measurementUnits));
 		}
 		if (drawFormations && formation.id != "unassigned") {
 			unitTable.push([
@@ -100,7 +102,7 @@ function createUnitTable(listStyle: string, unitList: ListUnit[], formations: Li
 				unitCount++;
 				totalPV += unit.cost;
 				secondaryPv += unit.cost;
-				secondaryUnitLines.push(createUnitLine(unit, listStyle, drawFormations));
+				secondaryUnitLines.push(createUnitLine(unit, listStyle, drawFormations, measurementUnits));
 			}
 			unitTable.push([
 				{
@@ -284,7 +286,14 @@ function createReferenceList(units: ListUnit[], formations: ListFormation[]) {
 	return referenceColumns;
 }
 
-async function loadUnitFormation(formation: ListFormation, units: ListUnit[], cardStyle: string, browser: Browser, printFormationBonuses: boolean) {
+async function loadUnitFormation(
+	formation: ListFormation,
+	units: ListUnit[],
+	cardStyle: string,
+	browser: Browser,
+	printFormationBonuses: boolean,
+	measurementUnits: "inches" | "hexes"
+) {
 	let unitPromises: Promise<string>[] = [];
 	let formationData: { name: string; type: string; pv: number; unitcards: string[] } = { name: formation.name, type: formation.type, pv: 0, unitcards: [] };
 
@@ -298,7 +307,7 @@ async function loadUnitFormation(formation: ListFormation, units: ListUnit[], ca
 	} else {
 		for (const unit of formationUnits) {
 			const assignedBonuses = printFormationBonuses ? (formation.units.find(({ id }) => unit.id == id)?.bonus?.map((bonus) => bonus.abil) ?? []) : [];
-			unitPromises.push(generateUnitCard(unit, browser, assignedBonuses));
+			unitPromises.push(generateUnitCard(unit, browser, assignedBonuses, measurementUnits));
 			formationData.pv += unit.cost;
 		}
 	}
@@ -313,17 +322,18 @@ async function createUnitCardColumns(
 	printByFormation: boolean,
 	cardStyle: string,
 	formationHeaderStyle: "inline" | "side",
-	printFormationBonuses: boolean
+	printFormationBonuses: boolean,
+	measurementUnits: "inches" | "hexes"
 ) {
 	let formationPromises: Promise<{ name: string; type: string; pv: number; unitcards: string[] }>[] = [];
 
 	const browser = await playwright.chromium.launch({ headless: true });
 
 	for (const formation of formationList) {
-		formationPromises.push(loadUnitFormation(formation, unitList, cardStyle, browser, printFormationBonuses));
+		formationPromises.push(loadUnitFormation(formation, unitList, cardStyle, browser, printFormationBonuses, measurementUnits));
 		if (formation.secondary) {
 			const secondaryFormation = { id: "", name: `${formation.name} ${formation.secondary.type}`, type: formation.secondary.type, units: formation.secondary.units };
-			formationPromises.push(loadUnitFormation(secondaryFormation, unitList, cardStyle, browser, printFormationBonuses));
+			formationPromises.push(loadUnitFormation(secondaryFormation, unitList, cardStyle, browser, printFormationBonuses, measurementUnits));
 		}
 	}
 
@@ -415,7 +425,13 @@ function createSCAColumns(scas: SCA[]) {
 	return referenceColumns;
 }
 
-export async function printList(list: PrintableList, drawFormations: boolean, printUnitsByFormation: boolean, printFormationBonuses: boolean): Promise<Blob> {
+export async function printList(
+	list: PrintableList,
+	drawFormations: boolean,
+	printUnitsByFormation: boolean,
+	printFormationBonuses: boolean,
+	measurementUnits: "inches" | "hexes"
+): Promise<Blob> {
 	const tableheaders: TableCell[] =
 		list.style == "mul"
 			? [{ text: "Unit", style: "cellHeader" }].concat(
@@ -429,9 +445,17 @@ export async function printList(list: PrintableList, drawFormations: boolean, pr
 					})
 				);
 	const tableWidths = list.style == "mul" ? ["*", "auto", "auto", "auto"] : ["*", "auto", "auto", "auto", "auto", "auto", "auto"];
-	const unitTable = createUnitTable(list.style, list.units, list.formations, drawFormations);
+	const unitTable = createUnitTable(list.style, list.units, list.formations, drawFormations, measurementUnits);
 	const referenceColumns = createReferenceList(list.units, list.formations);
-	const unitCardColumns = await createUnitCardColumns(list.units, list.formations, printUnitsByFormation, list.cardStyle, list.formationHeaderStyle, printFormationBonuses);
+	const unitCardColumns = await createUnitCardColumns(
+		list.units,
+		list.formations,
+		printUnitsByFormation,
+		list.cardStyle,
+		list.formationHeaderStyle,
+		printFormationBonuses,
+		measurementUnits
+	);
 	const bsTable = createBattlefieldSupportTable(list.bs);
 
 	let scaSection: Content[] = [];

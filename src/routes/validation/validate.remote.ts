@@ -1,9 +1,12 @@
 import { form, query } from "$app/server";
 import { getGeneralId } from "$lib/remote/era-faction.remote";
-import { getMULDataFromName, isAvailable, isUnique } from "$lib/remote/unit.remote";
+import { getMULDataFromId, getMULDataFromName, isAvailable, isUnique } from "$lib/remote/unit.remote";
 import type { MulUnit } from "$lib/types/listTypes";
 import { getDocument } from "pdfjs-dist";
 import { getUnitDataFromPDF } from "./parse";
+import { prisma } from "$lib/server/prisma";
+import { nanoid } from "nanoid";
+import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 
 export type ValidationUnitData = {
 	id: string;
@@ -66,6 +69,36 @@ export const getPossibleUnitList = form(async (data) => {
 
 	await nothing().refresh();
 	return results;
+});
+
+export const fixUnitData = form(async (data) => {
+	const mulId = Number(data.get("selectedUnitId")?.toString());
+	const mulData = await getMULDataFromId(mulId);
+
+	const skill = Number(data.get("unitSkill")?.toString());
+	const era = Number(data.get("era")?.toString());
+	const faction = Number(data.get("faction")?.toString());
+
+	await nothing().refresh();
+	if (mulData == undefined) {
+		return { status: "failed", message: "Invalid Unit Id" };
+	} else {
+		const unique = await isUnique({ mulId: mulId, era });
+		const general = (await getGeneralId({ era, faction }))?.general;
+		const available = await isAvailable({ mulId: mulId, eras: [era], factions: [faction, general ?? 0] });
+
+		let unitData: ValidationUnitData = {
+			id: crypto.randomUUID(),
+			name: mulData.name,
+			skill,
+			pv: getNewSkillCost(skill, mulData.pv),
+			mulData: mulData,
+			link: `http://masterunitlist.info/Unit/Details/${mulData.mulId}`,
+			unique,
+			available
+		};
+		return { status: "success", data: unitData };
+	}
 });
 
 export const nothing = query(async () => {});

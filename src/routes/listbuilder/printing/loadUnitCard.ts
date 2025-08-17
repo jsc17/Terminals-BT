@@ -37,10 +37,10 @@ export async function loadUnitCardImage(mulId: number, skill?: number): Promise<
 }
 
 //puppeteer for card generation
-export async function renderHTMLfromUnit(unit: ListUnit, formationSPAs: number[]) {
+export async function renderHTMLfromUnit(unit: ListUnit, formationSPAs: number[], measurementUnits: "inches" | "hexes") {
 	let image = await loadImage(unit.baseUnit.mulId.toString(), unit.baseUnit.imageLink ?? "");
 	const renderedComponent = render(Wrapper, {
-		props: { unit, image, formationSPAs }
+		props: { unit, image, formationSPAs, measurementUnits }
 	});
 
 	return renderedComponent.head + renderedComponent.body;
@@ -66,12 +66,12 @@ export async function loadImage(mulId: string, unitImageLink: string) {
 	}
 }
 
-export async function generateUnitCard(unit: ListUnit, browser: Browser, formationSPAs: number[]) {
+export async function generateUnitCard(unit: ListUnit, browser: Browser, formationSPAs: number[], measurementUnits: "inches" | "hexes") {
 	if (unit.baseUnit.mulId < 0) {
 		return loadUnitCardImage(unit.baseUnit.mulId);
 	}
 	const page = await browser.newPage();
-	const html = await renderHTMLfromUnit(unit, formationSPAs);
+	const html = await renderHTMLfromUnit(unit, formationSPAs, measurementUnits);
 	await page.setContent(html);
 
 	const content = await page.$("body");

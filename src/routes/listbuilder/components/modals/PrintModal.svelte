@@ -88,6 +88,11 @@
 				</div>
 			</fieldset>
 			<fieldset>
+				<legend>Measurement Units</legend>
+				<label><input type="radio" name="measurementUnits" value="inches" bind:group={settings.print.measurementUnits} /> Inches</label>
+				<label><input type="radio" name="measurementUnits" value="hexes" bind:group={settings.print.measurementUnits} /> Hexes</label>
+			</fieldset>
+			<fieldset>
 				<legend>Formation Options</legend>
 				<div class="field-row">
 					<input type="checkbox" name="drawFormations" id="formations" bind:checked={settings.print.printFormations} />

@@ -5,6 +5,7 @@ type PrintSettings = {
 	printFormationBonuses: boolean;
 	cardStyle: "mul" | "generated";
 	formationHeaderStyle: "inline" | "side";
+	measurementUnits: "inches" | "hexes";
 };
 
 type SublistUISettings = {

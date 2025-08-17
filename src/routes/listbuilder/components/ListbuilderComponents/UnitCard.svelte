@@ -238,12 +238,6 @@
 			height: 15px;
 		}
 	}
-	.unit-menu-content {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-		padding: 16px;
-	}
 	.muted-foreground {
 		color: var(--muted-foreground);
 	}

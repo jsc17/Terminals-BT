@@ -9,7 +9,8 @@ const PlaymodeOptionsSchema = z.object({
 	showJumpTMM: z.boolean().catch(true),
 	confirmEnd: z.boolean().catch(true),
 	groupByFormation: z.boolean().catch(true),
-	damageDirection: z.literal(["left", "right"]).catch("left")
+	damageDirection: z.literal(["left", "right"]).catch("left"),
+	measurementUnits: z.literal(["inches", "hexes"]).catch("inches")
 });
 
 export { PlaymodeOptionsSchema };

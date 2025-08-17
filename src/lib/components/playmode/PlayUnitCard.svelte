@@ -33,10 +33,8 @@
 
 	let expanded = getContext("expanded");
 	let critCount = $derived(automation.countCrits(unit));
-	let moveSpeeds = $derived(automation.calculateMovement(unit, reference));
+	let moveSpeeds = $derived(automation.calculateMovement(unit, options.measurementUnits, reference));
 	let { armorRemaining, structRemaining } = $derived(automation.calculateHealth(unit, reference));
-	// let armorRemaining = $derived(automation.calculateArmor(unit, reference));
-	// let structRemaining = $derived(automation.calculateStructure(unit, reference));
 	let firepowerRemaining = $derived(automation.calculateFirepower(unit, reference));
 	let currentSkill = $derived(automation.calculateSkill(unit, critCount.current, reference));
 	let physical = $derived(automation.calculatePhysical(moveSpeeds[0].tmm, firepowerRemaining.s, reference));
@@ -126,7 +124,9 @@
 							</p>
 							<p>
 								MV: {#if moveSpeeds[0].type == "I"}<span class="damaged-stat">Immobile</span>{:else}{#each moveSpeeds as { speed, type, damaged }, index}
-										<span class="bold" class:damaged-stat={damaged}>{speed}"{type}</span>{#if index + 1 != moveSpeeds.length}/{/if}
+										<span class="bold" class:damaged-stat={damaged}
+											>{speed}{#if options.measurementUnits == "inches"}"{:else}<span class="hex-symbol">⬢</span>{/if}{type}</span
+										>{#if index + 1 != moveSpeeds.length}/{/if}
 									{/each}
 								{/if}
 							</p>
@@ -574,5 +574,8 @@
 			1px -1px 0 black,
 			-1px 1px 0 black,
 			1px 1px 0 black;
+	}
+	.hex-symbol {
+		font-size: 0.8em;
 	}
 </style>

@@ -14,8 +14,9 @@
 		unit: ListUnit;
 		image: string;
 		formationSPAs: number[];
+		measurementUnits: "inches" | "hexes";
 	};
-	let { unit, image, formationSPAs }: Props = $props();
+	let { unit, image, formationSPAs, measurementUnits }: Props = $props();
 
 	let formationBonuses = $derived.by(() => {
 		const bonusAbilities: string[] = [];
@@ -55,7 +56,9 @@
 						</p>
 						<p>
 							MV: {#each unit.baseUnit.move ?? [] as { speed, type }, index}
-								<span class="bold">{speed}"{type}</span>{#if index + 1 != unit.baseUnit.move?.length}/{/if}
+								<span class="bold"
+									>{speed}{#if measurementUnits == "inches"}"{:else}<span class="hex-symbol">⬢</span>{/if}{type}</span
+								>{#if index + 1 != unit.baseUnit.move?.length}/{/if}
 							{/each}
 						</p>
 					{/if}
@@ -361,5 +364,8 @@
 		font-size: 4cqh;
 		align-self: center;
 		justify-self: center;
+	}
+	.hex-symbol {
+		font-size: 0.8em;
 	}
 </style>

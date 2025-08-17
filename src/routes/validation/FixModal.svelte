@@ -1,31 +1,59 @@
 <script lang="ts">
 	import { Dialog } from "$lib/components/global";
-	import { type ValidationUnitData, getPossibleUnitList } from "./validate.remote";
+	import { toastController } from "$lib/stores";
+	import { type ValidationUnitData, fixUnitData, getPossibleUnitList } from "./validate.remote";
 
 	type Props = {
 		unit: ValidationUnitData;
+		era: number;
+		faction: number;
 	};
 
-	let { unit = $bindable() }: Props = $props();
+	let { unit = $bindable(), era, faction }: Props = $props();
 
-	let selectedUnitId = $derived(getPossibleUnitList.result?.[0].mulId);
+	let open = $state(false);
 </script>
 
-<Dialog title={`Fix ${unit.name}`}>
+<Dialog title={`Fix ${unit.name}`} bind:open>
 	{#snippet trigger()}
 		Fix
 	{/snippet}
 	<div class="fix-dialog-body">
-		<p>Parsed Name: {unit.name}</p>
+		<p>Name parsed from pdf: <input type="text" value={unit.name} disabled /></p>
 		<form {...getPossibleUnitList}>
-			<input type="text" name="searchTerm" id="searchTerm " />
+			<label>Filter: <input type="text" name="searchTerm" id="searchTerm " /></label>
 			<button>Search</button>
 		</form>
-		<select bind:value={selectedUnitId}>
-			{#each getPossibleUnitList.result ?? [] as result}
-				<option value={result.mulId}>{result.name}</option>
-			{/each}
-		</select>
+		<form
+			class="flex-column"
+			{...fixUnitData.enhance(async ({ submit }) => {
+				await submit();
+				if (fixUnitData.result?.status == "failed") {
+					toastController.addToast(fixUnitData.result.message ?? "Invalid Message recieved");
+				} else {
+					unit = fixUnitData.result!.data!;
+					open = false;
+				}
+			})}
+		>
+			{#if getPossibleUnitList.result == undefined}
+				<p class="muted">Use the search above to</p>
+			{/if}
+			<label
+				>Corrected Unit:
+				<select name="selectedUnitId" class="unit-select" disabled={getPossibleUnitList.result == undefined}>
+					{#each getPossibleUnitList.result ?? [] as result}
+						<option value={result.mulId}>{result.name}</option>
+					{/each}
+				</select>
+			</label>
+			<div class="inline">
+				<label>Skill: <input name="unitSkill" type="number" min="0" max="7" defaultValue="4" /></label>
+				<button>Fix</button>
+			</div>
+			<input type="hidden" name="era" value={era} />
+			<input type="hidden" name="faction" value={faction} />
+		</form>
 	</div>
 </Dialog>
 
@@ -33,5 +61,9 @@
 	.fix-dialog-body {
 		display: flex;
 		flex-direction: column;
+		gap: 6px;
+	}
+	.unit-select {
+		min-width: 200px;
 	}
 </style>

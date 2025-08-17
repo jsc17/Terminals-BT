@@ -3,6 +3,7 @@ import { prisma } from "$lib/server/prisma.js";
 import { printList } from "./printing/printList.js";
 import { type ListCode } from "$lib/types/listTypes";
 import { createSublistsPdf } from "./printing/printSublists.js";
+import * as z from "zod";
 
 export const load = async ({ url }) => {
 	let sharedList;
@@ -129,7 +130,11 @@ export const actions = {
 		const printFormations = formData.get("drawFormations")?.toString() == "on";
 		const printUnitsByFormation = formData.get("printUnitsByFormation")?.toString() == "on";
 		const printFormationBonuses = formData.get("printFormationBonuses")?.toString() == "on";
-		const blob = await printList(list, printFormations, printUnitsByFormation, printFormationBonuses);
+		const measurementUnitsData = formData.get("measurementUnits")?.toString() ?? "inches";
+		const measurementSchema = z.literal(["inches", "hexes"]).catch("inches");
+		const measurementUnits = measurementSchema.parse(measurementUnitsData);
+
+		const blob = await printList(list, printFormations, printUnitsByFormation, printFormationBonuses, measurementUnits);
 		const bytes = await blob.bytes();
 		return { pdf: JSON.stringify(bytes) };
 	},

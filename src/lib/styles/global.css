@@ -19,6 +19,7 @@
 .flex-column {
 	display: flex;
 	flex-direction: column;
+	gap: 4px;
 }
 .flex-between {
 	display: flex;

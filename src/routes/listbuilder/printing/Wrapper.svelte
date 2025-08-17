@@ -8,12 +8,13 @@
 		unit: ListUnit;
 		image: string;
 		formationSPAs: number[];
+		measurementUnits: "inches" | "hexes";
 	};
-	let { unit, image, formationSPAs }: Props = $props();
+	let { unit, image, formationSPAs, measurementUnits }: Props = $props();
 </script>
 
 <body>
-	<PrintUnitCard {unit} {image} {formationSPAs}></PrintUnitCard>
+	<PrintUnitCard {unit} {image} {formationSPAs} {measurementUnits}></PrintUnitCard>
 </body>
 
 <style>

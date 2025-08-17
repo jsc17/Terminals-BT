@@ -29,7 +29,8 @@
 			showJumpTMM: true,
 			confirmEnd: true,
 			groupByFormation: true,
-			damageDirection: "left"
+			damageDirection: "left",
+			measurementUnits: "inches"
 		},
 		{
 			serializer: {
@@ -47,7 +48,8 @@
 							showJumpTMM: true,
 							confirmEnd: true,
 							groupByFormation: true,
-							damageDirection: "left"
+							damageDirection: "left",
+							measurementUnits: "inches"
 						};
 					}
 				}

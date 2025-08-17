@@ -126,7 +126,7 @@
 								{/each}
 								<td>
 									{#if !unit.mulData}
-										<FixModal bind:unit={unitData![index]} />
+										<FixModal bind:unit={unitData![index]} era={selectedEra} faction={selectedFaction} />
 									{:else}
 										<span style="color: green; font-weight: bold;">✔</span>
 									{/if}

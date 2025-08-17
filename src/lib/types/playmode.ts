@@ -58,6 +58,7 @@ type Options = {
 	confirmEnd: boolean;
 	groupByFormation: boolean;
 	damageDirection: "left" | "right";
+	measurementUnits: "inches" | "hexes";
 };
 
 export type { PlayList, PlayFormation, PlayUnit, LogRound, LogEntry, Options };

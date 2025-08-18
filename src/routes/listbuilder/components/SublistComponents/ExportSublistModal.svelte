@@ -3,7 +3,7 @@
 	import { exportToJeff } from "../../utilities/export.svelte";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { enhance } from "$app/forms";
-	import { Dialog } from "$lib/components/global/";
+	import { Dialog } from "$lib/generic";
 	import { getContext } from "svelte";
 
 	type Props = {

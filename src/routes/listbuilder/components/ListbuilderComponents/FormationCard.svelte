@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { dndzone, dragHandleZone, type DndEvent, dragHandle } from "svelte-dnd-action";
 	import { appWindow } from "$lib/stores";
-	import { Collapsible, Popover } from "$lib/components/global/";
+	import { Collapsible, Popover } from "$lib/generic";
 	import { List, type ListFormation } from "$lib/types/list.svelte";
 	import { getFormationStats } from "$lib/utilities/formationUtilities";
 	import { UnitCard, UnitCustomizationModal, EditFormationModal, FormationInfoPopover, FormationMenu, FindUnitAvailabilityModal } from "../";

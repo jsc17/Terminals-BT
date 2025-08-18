@@ -1,10 +1,9 @@
 <script lang="ts">
 	import type { ListUnit } from "$lib/types/listTypes";
-	import spaList from "$lib/data/spas.json";
+	import spaList from "$lib/spa/spas.json";
 	import ammoList from "$lib/data/ammoTypes.json";
 	import type { List } from "$lib/types/list.svelte";
-	import { getContext } from "svelte";
-	import { Dialog } from "$lib/components/global/";
+	import { Dialog } from "$lib/generic";
 
 	type Props = {
 		list: List;

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { ListUnit, List, Sublist } from "$lib/types/list.svelte";
-	import { Dialog, Collapsible, Separator, RadioGroup, Popover } from "$lib/components/global/";
+	import { Dialog, Collapsible, Separator, RadioGroup, Popover } from "$lib/generic";
 	import { nanoid } from "nanoid";
 	import { appWindow } from "$lib/stores";
 	import { watch } from "runed";

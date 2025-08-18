@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Dialog } from "$lib/components/global/";
+	import { Dialog } from "$lib/generic";
 	import type { AssignedBonus } from "$lib/types/formationData";
 	import type { List } from "$lib/types/list.svelte";
 	import type { ListFormation } from "$lib/types/listTypes";

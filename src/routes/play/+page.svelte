@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { PlayList } from "$lib/types/playmode";
-	import { PlayFormations, DisplayOptionsPopover, LoadModal, Log, PlayFullList } from "$lib/components/playmode/";
+	import type { PlayList } from "$lib/playmode/types";
+	import { PlayFormations, DisplayOptionsPopover, LoadModal, Log, PlayFullList } from "$lib/playmode";
 	import { PersistedState } from "runed";
-	import type { LogRound, Options } from "../../lib/types/playmode";
+	import type { LogRound, Options } from "../../lib/playmode/types";
 	import { deserialize } from "$app/forms";
-	import { Popover } from "$lib/components/global/";
-	import { PlaymodeOptionsSchema } from "$lib/schemas/playmode";
+	import { Popover } from "$lib/generic";
+	import { PlaymodeOptionsSchema } from "$lib/playmode/schema/playmode";
 	import { isJson } from "$lib/utilities/utilities";
 	import { loadMULUnit } from "$lib/utilities/loadUtilities";
 	import { SvelteMap } from "svelte/reactivity";

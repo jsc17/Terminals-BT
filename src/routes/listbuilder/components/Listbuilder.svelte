@@ -14,13 +14,13 @@
 	import { type ListFormation, List } from "$lib/types/list.svelte";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { ruleSets } from "$lib/types/rulesets";
-	import { sendListToPlay } from "$lib/utilities/playmodeUtilities";
+	import { sendListToPlay } from "$lib/playmode/utilities/playmodeUtilities";
 	import { getContext } from "svelte";
 	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
 	import { appWindow, toastController } from "$lib/stores";
-	import { Separator, Menu, Dialog } from "$lib/components/global/";
+	import { Separator, Menu, Dialog } from "$lib/generic";
 	import { deserialize } from "$app/forms";
-	import { Collapsible, DropdownMenu } from "$lib/components/global/";
+	import { Collapsible, DropdownMenu } from "$lib/generic";
 	import { getBSCbyId } from "$lib/data/battlefieldSupport";
 
 	type Props = {

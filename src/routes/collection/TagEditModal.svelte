@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Dialog, Popover } from "$lib/components/global";
+	import { Dialog, Popover } from "$lib/generic";
 	import { getUserTags, addTag, removeTag, updateTag } from "$lib/remote/collection.remote";
 	import { toastController } from "$lib/stores";
 	import ColorSelect, { type RGB } from "svelte-color-select";

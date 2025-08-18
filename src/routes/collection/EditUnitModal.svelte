@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Dialog } from "$lib/components/global";
+	import { Dialog } from "$lib/generic";
 	import { removeTagfromUnit, removeUnitFromCollection, getTags, addTagToUnit, updateQuantity } from "$lib/remote/collection.remote";
 	import { toastController } from "$lib/stores";
 	import { appWindow } from "$lib/stores";

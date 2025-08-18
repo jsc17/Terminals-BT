@@ -4,7 +4,7 @@
 	import type { List } from "$lib/types/list.svelte";
 	import { dragHandle } from "svelte-dnd-action";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import { DropdownMenu, Popover } from "$lib/components/global/";
+	import { DropdownMenu, Popover } from "$lib/generic";
 	import { UnitCustomizationModal } from "../index";
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
 	import { getSPAfromId } from "$lib/utilities/listUtilities";

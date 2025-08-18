@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Dialog } from "$lib/components/global";
+	import { Dialog } from "$lib/generic";
 	import { toastController } from "$lib/stores";
 	import { type ValidationUnitData, fixUnitData, getPossibleUnitList } from "./validate.remote";
 

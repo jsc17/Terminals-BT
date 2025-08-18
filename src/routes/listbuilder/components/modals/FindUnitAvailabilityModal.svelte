@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { deserialize } from "$app/forms";
-	import { Dialog, Separator } from "$lib/components/global/";
+	import { Dialog, Separator } from "$lib/generic";
 	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
 	import type { ListFormation, List } from "$lib/types/list.svelte";
 

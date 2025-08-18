@@ -1,7 +1,7 @@
 <svelte:options css="injected" />
 
 <script lang="ts">
-	import { aeroTypes, infTypes, mechTypes, typeIncludes, vTypes } from "$lib/utilities/playmodeUtilities";
+	import { aeroTypes, infTypes, mechTypes, typeIncludes, vTypes } from "$lib/playmode/utilities/playmodeUtilities";
 	import type { ListUnit } from "$lib/types/list.svelte";
 	import { createSingleAbilityString } from "$lib/utilities/abilityUtilities";
 	import AeroCritBox from "./critboxes/AeroCritBox.svelte";

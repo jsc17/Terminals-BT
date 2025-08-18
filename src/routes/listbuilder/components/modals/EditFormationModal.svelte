@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { List, type ListFormation } from "$lib/types/list.svelte";
-	import { Select, Dialog } from "$lib/components/global/";
+	import { Select, Dialog } from "$lib/generic";
 	import { formationDataList } from "$lib/data/formationData";
 	import type { FormationData } from "$lib/types/formationData";
 	import { calculateBonusAmount, getFormationDataFromName } from "$lib/utilities/formationUtilities";

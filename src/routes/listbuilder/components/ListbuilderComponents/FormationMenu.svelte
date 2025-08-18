@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { toastController } from "$lib/stores";
 	import { List, type ListFormation } from "$lib/types/list.svelte";
-	import { sendListToPlay } from "$lib/utilities/playmodeUtilities";
+	import { sendListToPlay } from "$lib/playmode/utilities/playmodeUtilities";
 	import { exportToJeff } from "../../utilities/export.svelte";
 	import FindUnitAvailabilityModal from "../modals/FindUnitAvailabilityModal.svelte";
-	import { DropdownMenu } from "$lib/components/global";
+	import { DropdownMenu } from "$lib/generic";
 	import type { MenuItem } from "$lib/types/global";
 
 	type Props = {

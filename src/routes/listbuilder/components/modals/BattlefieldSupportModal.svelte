@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Dialog, Select } from "$lib/components/global/";
+	import { Dialog, Select } from "$lib/generic";
 	import { List } from "$lib/types/list.svelte";
 	import type { Item } from "$lib/types/global";
 	import { battlefieldSupport, battlefieldSupportGroups } from "$lib/data/battlefieldSupport";

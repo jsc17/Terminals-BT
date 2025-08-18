@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { List, Sublist } from "$lib/types/list.svelte";
-	import { Dialog } from "$lib/components/global/";
+	import { Dialog } from "$lib/generic";
 
 	type Props = {
 		list: List;

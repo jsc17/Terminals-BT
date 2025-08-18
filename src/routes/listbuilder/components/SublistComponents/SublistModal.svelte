@@ -7,7 +7,7 @@
 	import SublistCard from "./SublistCard.svelte";
 	import EditSublistModal from "./EditSublistModal.svelte";
 	import AutogenerationModal from "./AutogenerationModal.svelte";
-	import { Dialog, Popover } from "$lib/components/global/";
+	import { Dialog, Popover } from "$lib/generic";
 
 	type Props = {
 		list: List;

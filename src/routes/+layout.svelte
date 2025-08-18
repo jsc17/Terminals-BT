@@ -2,7 +2,7 @@
 	import { setContext } from "svelte";
 	import "$lib/styles/global.css";
 	import "$lib/styles/generic.css";
-	import { Footer, Header, Toast } from "$lib/components/global/index";
+	import { Footer, Header, Toast } from "$lib/ui";
 	import { type Notification } from "$lib/types/global";
 
 	const { data, children } = $props();

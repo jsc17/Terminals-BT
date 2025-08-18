@@ -2,7 +2,7 @@
 	import { enhance } from "$app/forms";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { type List } from "$lib/types/list.svelte";
-	import { Dialog } from "$lib/components/global/";
+	import { Dialog } from "$lib/generic";
 	import { getContext } from "svelte";
 
 	type Props = {

@@ -1,10 +1,11 @@
 import { query, form } from "$app/server";
 import { prisma } from "$lib/server/prisma";
-import { tournamentEmailTransporter, transporterTest } from "$lib/server/emails/mailer.server";
+import { tournamentEmailTransporter } from "$lib/server/emails/mailer.server";
 import { ListSubmission } from "$lib/server/emails/templates";
 import { render } from "svelty-email";
 import { getEraName, getFactionName } from "$lib/remote/era-faction.remote";
 import { getRulesByName } from "$lib/types/rulesets";
+import * as fs from "fs/promises";
 
 export const getTournamentList = query(async () => {
 	const data = await prisma.tournament.findMany({
@@ -17,7 +18,10 @@ export const getTournamentList = query(async () => {
 export const submitList = form(async (data) => {
 	const tournamentId = data.get("tournamentId");
 	const playerName = data.get("playerName")?.toString();
+	if (!playerName) return { status: "failed", message: "Error with player name. Please try submitting your list again" };
 	const playerEmail = data.get("playerEmail")?.toString();
+	if (!playerEmail) return { status: "failed", message: "Error with player name. Please try submitting your list again" };
+
 	const pdf = data.get("listFile") as File;
 	const era = await getEraName(Number(data.get("era")?.toString()));
 	const faction = await getFactionName(Number(data.get("faction")?.toString()));
@@ -32,6 +36,9 @@ export const submitList = form(async (data) => {
 		}
 	});
 	if (tournament) {
+		const filename = `./files/tournament-lists/${crypto.randomUUID()}.pdf`;
+		await fs.writeFile(filename, buffer);
+		await prisma.tournament.update({ where: { id: Number(tournamentId) }, data: { participants: { create: { name: playerName, email: playerEmail, listName: filename } } } });
 		const emailHTML = render({
 			//@ts-ignore
 			template: ListSubmission,

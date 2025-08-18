@@ -11,15 +11,6 @@ export const transporter = nodemailer.createTransport({
 	}
 });
 
-export const transporterTest = nodemailer.createTransport({
-	host: "smtp.ethereal.email",
-	port: 587,
-	auth: {
-		user: "kaitlyn.glover57@ethereal.email",
-		pass: "w4bE4cMZ5n69X63y9C"
-	}
-});
-
 export const tournamentEmailTransporter = nodemailer.createTransport({
 	host: process.env.TOURNAMENT_EMAIL_HOST,
 	port: 587,

@@ -25,6 +25,13 @@
 
 	let issues = $state<{ issueList: Map<string, Set<string>> }>();
 
+	let submitApproval = $state(false);
+	const selectedEraMatchesTournament = $derived.by(() => {
+		if (selectedTournament.era == null) return true;
+		if (selectedTournament.era == selectedEra) return true;
+		return false;
+	});
+
 	async function handleValidation() {
 		if (getUnitData.result?.status == "success") {
 			const unitList =
@@ -215,16 +222,17 @@
 						</div>
 						<label>Player Name: <input type="text" name="playerName" required /></label>
 						<label>Email address: <input type="email" name="playerEmail" required /></label>
-						<p class="submit-instructions">
-							Please double-check the info above, and then press submit. Your tournament organizer will recieve the list, your name, and email address.
-						</p>
+						<label
+							><input type="checkbox" name="permission" bind:checked={submitApproval} required /> By submitting this list, you acknowledge your email address and name will be provided
+							to the tournament organizer. Any stored data will be removed after the tournament has completed.</label
+						>
 						{#if selectedTournament.era != null && selectedTournament.era != selectedEra}
 							<p class="error">Selected era does not match the tournaments era. Please select the appropriate Era to submit</p>
 						{/if}
 						{#if selectedTournament.tournamentRules != selectedRules}
 							<p class="error">Selected rules do not match the tournaments rules. Please select the appropriate rules and revalidate to submit</p>
 						{/if}
-						<button class="submit" disabled={selectedTournament.era != null && selectedTournament.era != selectedEra}>Submit</button>
+						<button class="submit" disabled={!selectedEraMatchesTournament || !submitApproval}>Submit</button>
 						<input type="hidden" name="tournamentId" value={selectedTournament.id} />
 						<input type="hidden" name="era" value={selectedEra} />
 						<input type="hidden" name="faction" value={selectedFaction} />

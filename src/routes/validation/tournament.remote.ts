@@ -23,8 +23,8 @@ export const submitList = form(async (data) => {
 	if (!playerEmail) return { status: "failed", message: "Error with player name. Please try submitting your list again" };
 
 	const pdf = data.get("listFile") as File;
-	const era = await getEraName(Number(data.get("era")?.toString()));
-	const faction = await getFactionName(Number(data.get("faction")?.toString()));
+	const era = Number(data.get("era")?.toString());
+	const faction = Number(data.get("faction")?.toString());
 
 	const pdfData = await pdf.arrayBuffer();
 	const buffer = Buffer.from(pdfData);
@@ -38,11 +38,21 @@ export const submitList = form(async (data) => {
 	if (tournament) {
 		const filename = `./files/tournament-lists/${crypto.randomUUID()}.pdf`;
 		await fs.writeFile(filename, buffer);
-		await prisma.tournament.update({ where: { id: Number(tournamentId) }, data: { participants: { create: { name: playerName, email: playerEmail, listName: filename } } } });
+		await prisma.tournament.update({
+			where: { id: Number(tournamentId) },
+			data: { participants: { create: { name: playerName, email: playerEmail, listName: filename, era, faction } } }
+		});
 		const emailHTML = render({
 			//@ts-ignore
 			template: ListSubmission,
-			props: { tournamentName: tournament.name, playerName, playerEmail, era, faction, tournamentRules: getRulesByName(tournament.tournamentRules)?.display ?? "Not Found" }
+			props: {
+				tournamentName: tournament.name,
+				playerName,
+				playerEmail,
+				era: await getEraName(era),
+				faction: await getFactionName(faction),
+				tournamentRules: getRulesByName(tournament.tournamentRules)?.display ?? "Not Found"
+			}
 		});
 		console.log("email sending");
 		const info = await tournamentEmailTransporter.sendMail({

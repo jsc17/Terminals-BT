@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { getEraName, getEras, getFactionsInEra, getGeneralId } from "$lib/remote/era-faction.remote";
-	import { getTournamentList, submitList } from "./tournament.remote";
+	import { getApprovedTournamentList, submitList } from "../../lib/remote/tournament.remote";
 	import { validateRules } from "$lib/rulesValidation/validateList";
 	import { toastController } from "$lib/stores";
 	import { getRulesByName, ruleSets } from "$lib/types/rulesets";
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
 	import FixModal from "./FixModal.svelte";
 	import { getUnitData, type ValidationUnitData } from "./validate.remote";
+	import { Checkbox, DropdownMenu } from "bits-ui";
 
 	let selectedRules = $state("wn350v3");
 	let files = $state<FileList>();
@@ -17,7 +18,7 @@
 	let eraList = $derived(getEras());
 	let factionList = $derived(await getFactionsInEra([selectedEra]));
 
-	let tournamentListPromise = getTournamentList();
+	let tournamentListPromise = getApprovedTournamentList();
 	let tournamentList = $derived(tournamentListPromise.current?.data ?? []);
 	let selectedTournament = $derived(tournamentList[0]);
 
@@ -195,14 +196,17 @@
 					})}
 				>
 					<p class="muted">If you will be submitting this list to a tournament organizer, please validate the list above and then select the correct tournament</p>
-					<label
-						>Tournament <select bind:value={selectedTournament}>
-							{#each tournamentList as tournament}
-								<option value={tournament}>{tournament.name}</option>
-							{/each}
-						</select></label
-					>
-
+					{#if tournamentList.length == 0}
+						<h2>No currently active tournaments</h2>
+					{:else}
+						<label
+							>Tournament <select bind:value={selectedTournament}>
+								{#each tournamentList as tournament}
+									<option value={tournament}>{tournament.name}</option>
+								{/each}
+							</select></label
+						>
+					{/if}
 					{#if selectedTournament}
 						<div class="tournament-details">
 							<p>Tournament Date:</p>

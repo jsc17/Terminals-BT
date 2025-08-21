@@ -18,7 +18,7 @@
 	import { getContext } from "svelte";
 	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
 	import { appWindow, toastController } from "$lib/stores";
-	import { Separator, Menu, Dialog } from "$lib/generic";
+	import { Dialog } from "$lib/generic";
 	import { deserialize } from "$app/forms";
 	import { Collapsible, DropdownMenu } from "$lib/generic";
 	import { getBSCbyId } from "$lib/data/battlefieldSupport";
@@ -41,6 +41,7 @@
 	let scaModalOpen = $state(false);
 	let scaListOpen = $state(true);
 	let bsListOpen = $state(true);
+	let sublistModalOpen = $state(false);
 
 	let dropTargetStyle = { outline: "solid var(--primary)" };
 	let flipDurationMs = 100;
@@ -74,6 +75,24 @@
 			toastController.addToast("Shareable list link saved to clipboard");
 		} else {
 			toastController.addToast("Failed to create shareable link. Please try again");
+		}
+	}
+
+	async function clearList() {
+		if (confirm("Remove all units and formations from the list?")) {
+			list.clear();
+		}
+	}
+
+	async function resetList() {
+		if (confirm("Clear all units,formations and faction/era selection, and start a new list?")) {
+			resultList.eras = [];
+			resultList.factions = [];
+			resultList.loadResults();
+			list.clear();
+			list.details = { name: "New List", eras: [], factions: [], general: -1 };
+			list.id = crypto.randomUUID();
+			list.rules = "noRes";
 		}
 	}
 </script>
@@ -138,84 +157,30 @@
 					]}
 				>
 					{#snippet trigger()}
-						+
+						<div class="dropdown-menu-wrapper"><img src="/icons/add.svg" alt="Add Menu Button" /></div>
 					{/snippet}
 				</DropdownMenu>
 
-				<Menu img={"/icons/menu.svg"}>
-					<button
-						class="transparent-button"
-						onclick={() => {
-							loadModal?.show();
-						}}
-					>
-						Load / Import List
-					</button>
-					<button
-						class="transparent-button"
-						onclick={() => {
-							saveModal?.show();
-						}}
-					>
-						Save / Export List
-					</button>
-					<button
-						class="transparent-button"
-						onclick={() => {
-							printModal?.open();
-						}}
-					>
-						Print List
-					</button>
-					<button
-						class="transparent-button"
-						onclick={() => {
-							shareList();
-						}}
-					>
-						Share List Link
-					</button>
-					<Separator orientation={"horizontal"} classes={"separator-border"} />
-					<button
-						class="transparent-button"
-						onclick={() => {
-							availabilityModal?.show();
-						}}>Check List Availability</button
-					>
-					<SublistModal bind:list />
-					<button
-						class="transparent-button"
-						onclick={() => {
-							sendListToPlay(list.formations, list.units);
-						}}>Play List</button
-					>
-					<Separator orientation={"horizontal"} classes={"separator-border"} />
-					<button
-						class="transparent-button"
-						onclick={() => {
-							if (confirm("Remove all units and formations from the list?")) {
-								list.clear();
-							}
-						}}
-					>
-						Clear Units/Formations
-					</button>
-					<button
-						class="transparent-button"
-						onclick={() => {
-							if (confirm("Clear all units,formations and faction/era selection, and start a new list?")) {
-								resultList.eras = [];
-								resultList.factions = [];
-								resultList.loadResults();
-								list.clear();
-								list.details = { name: "New List", eras: [], factions: [], general: -1 };
-								list.id = crypto.randomUUID();
-								list.rules = "noRes";
-							}
-						}}>Reset List</button
-					>
-					<button class="transparent-button" onclick={() => listCloseCallback(list.id)}>Close List</button>
-				</Menu>
+				<DropdownMenu
+					items={[
+						{ type: "item", label: "Load / Import List", onSelect: () => loadModal?.show() },
+						{ type: "item", label: "Save / Export List", onSelect: () => saveModal?.show() },
+						{ type: "item", label: "Print List", onSelect: () => printModal?.open() },
+						{ type: "item", label: "Share List Link", onSelect: () => shareList() },
+						{ type: "separator" },
+						{ type: "item", label: "Check List Availability", onSelect: () => availabilityModal?.show() },
+						{ type: "item", label: "Generate Sublists", onSelect: () => (sublistModalOpen = true) },
+						{ type: "item", label: "Play List", onSelect: () => sendListToPlay(list.formations, list.units) },
+						{ type: "separator" },
+						{ type: "item", label: "Clear Units/Formations", onSelect: () => clearList() },
+						{ type: "item", label: "Reset List", onSelect: () => resetList() },
+						{ type: "item", label: "Close List", onSelect: () => listCloseCallback(list.id) }
+					]}
+				>
+					{#snippet trigger()}
+						<div class="dropdown-menu-wrapper"><img src="/icons/menu.svg" alt="Menu Button" /></div>
+					{/snippet}
+				</DropdownMenu>
 			</div>
 		</div>
 	</div>
@@ -367,6 +332,7 @@
 <ScaModal bind:open={scaModalOpen} bind:list></ScaModal>
 <PrintModal bind:this={printModal} bind:list></PrintModal>
 <FindUnitAvailabilityModal bind:this={availabilityModal} bind:list />
+<SublistModal bind:list bind:open={sublistModalOpen} />
 <BattlefieldSupportModal bind:this={battlefieldSupportModal} bind:list />
 
 <style>
@@ -496,5 +462,15 @@
 	}
 	:global(.drop-target-zone) {
 		outline: solid green;
+	}
+	.dropdown-menu-wrapper {
+		width: max-content;
+		padding: 0px 16px;
+		height: 25px;
+
+		& img {
+			width: 20px;
+			height: 20px;
+		}
 	}
 </style>

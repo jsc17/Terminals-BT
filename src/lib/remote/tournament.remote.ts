@@ -1,4 +1,4 @@
-import { query, form } from "$app/server";
+import { query, form, getRequestEvent } from "$app/server";
 import { prisma } from "$lib/server/prisma";
 import { tournamentEmailTransporter } from "$lib/server/emails/mailer.server";
 import { ListSubmission } from "$lib/server/emails/templates";
@@ -7,9 +7,20 @@ import { getEraName, getFactionName } from "$lib/remote/era-faction.remote";
 import { getRulesByName } from "$lib/types/rulesets";
 import * as fs from "fs/promises";
 
-export const getTournamentList = query(async () => {
+export const getUsersTournamentList = query(async () => {
+	const { locals } = getRequestEvent();
+	if (!locals.user) return { status: "failed", message: "User not logged in" };
+
 	const data = await prisma.tournament.findMany({
-		where: { tournament_date: { gte: new Date() } },
+		where: { userId: locals.user.id, tournament_date: { gte: new Date() } },
+		select: { id: true, name: true, location: true, era: true, tournament_date: true, tournamentRules: true }
+	});
+	return { status: "success", data };
+});
+
+export const getApprovedTournamentList = query(async () => {
+	const data = await prisma.tournament.findMany({
+		where: { tournament_date: { gte: new Date() }, approved: true },
 		select: { id: true, name: true, location: true, era: true, tournament_date: true, tournamentRules: true }
 	});
 	return { status: "success", data };

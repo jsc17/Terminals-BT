@@ -1,6 +1,5 @@
 import Select from "./components/Select.svelte";
 import Dialog from "./components/Dialog.svelte";
-import Menu from "./components/Menu.svelte";
 import Combobox from "./components/Combobox.svelte";
 import Collapsible from "./components/Collapsible.svelte";
 import Slider from "./components/Slider.svelte";
@@ -10,4 +9,4 @@ import Separator from "./components/Separator.svelte";
 import RadioGroup from "./components/RadioGroup.svelte";
 import DropdownMenu from "./components/DropdownMenu.svelte";
 
-export { Select, Dialog, Menu, Combobox, Collapsible, Slider, Drawer, Popover, Separator, RadioGroup, DropdownMenu };
+export { Select, Dialog, Combobox, Collapsible, Slider, Drawer, Popover, Separator, RadioGroup, DropdownMenu };

@@ -11,9 +11,10 @@
 
 	type Props = {
 		list: List;
+		open: boolean;
 	};
 
-	let { list = $bindable() }: Props = $props();
+	let { list = $bindable(), open = $bindable() }: Props = $props();
 	let settings: Settings = getContext("listbuilderSettings");
 
 	let scenarioFilter = $state<string>("All");
@@ -59,10 +60,7 @@
 	</div>
 {/snippet}
 
-<Dialog title="Sublists" triggerClasses="transparent-button">
-	{#snippet trigger()}
-		Generate Sublists
-	{/snippet}
+<Dialog title="Sublists" triggerClasses="transparent-button" bind:open>
 	{#snippet description()}
 		<div class="space-between">
 			<div>

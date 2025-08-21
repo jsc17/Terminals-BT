@@ -54,8 +54,8 @@ export const getMULDataFromId = query(z.number(), async (id: number) => {
 			availability: undefined,
 			threshold: mulData.threshold
 		};
-		return reference;
-	} else return undefined;
+		return { status: "success", data: reference };
+	} else return { status: "failed", message: "Unit not found" };
 });
 
 export const getMULDataFromName = query(z.string(), async (name) => {

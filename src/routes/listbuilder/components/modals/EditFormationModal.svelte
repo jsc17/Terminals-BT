@@ -82,14 +82,13 @@
 	}
 </script>
 
-{#snippet description()}
-	<span class="edit-formation-description">
-		Vehicle formations should have matched pairs of combat vehicles, but that is not currently validated. All requirements appear to be validating correctly, but there are possibly
-		still bugs.
-	</span>
-{/snippet}
-
-<Dialog bind:open title={`Edit ${formation?.name}`} {description}>
+<Dialog bind:open title={`Edit ${formation?.name}`}>
+	{#snippet description()}
+		<span class="edit-formation-description">
+			Vehicle formations should have matched pairs of combat vehicles, but that is not currently validated. All requirements appear to be validating correctly, but there are
+			possibly still bugs.
+		</span>
+	{/snippet}
 	<div class="edit-formation-body">
 		<label>Formation Name: <input class="edit-formation-name-input" type="text" name="formation-name" id="formation-id" bind:value={formation.name} /></label>
 		<div class="formation">

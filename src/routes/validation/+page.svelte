@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { getEraName, getEras, getFactionsInEra, getGeneralId } from "$lib/remote/era-faction.remote";
-	import { getApprovedTournamentList, submitList } from "../../lib/remote/tournament.remote";
-	import { validateRules } from "$lib/rulesValidation/validateList";
+	import { getApprovedTournamentList, submitList } from "$lib/remote/tournament.remote";
+	import { validateRules } from "$lib/rules/validateList";
 	import { toastController } from "$lib/stores";
 	import { getRulesByName, ruleSets } from "$lib/types/rulesets";
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
 	import FixModal from "./FixModal.svelte";
 	import { getUnitData, type ValidationUnitData } from "./validate.remote";
-	import { Checkbox, DropdownMenu } from "bits-ui";
 
 	let selectedRules = $state("wn350v3");
 	let files = $state<FileList>();

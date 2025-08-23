@@ -5,7 +5,7 @@
 	import { exportToJeff } from "../../utilities/export.svelte";
 	import FindUnitAvailabilityModal from "../modals/FindUnitAvailabilityModal.svelte";
 	import { DropdownMenu } from "$lib/generic";
-	import type { MenuItem } from "$lib/types/global";
+	import type { MenuItem } from "$lib/generic/types";
 
 	type Props = {
 		formation: ListFormation;

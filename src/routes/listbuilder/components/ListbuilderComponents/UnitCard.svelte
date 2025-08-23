@@ -8,7 +8,7 @@
 	import { UnitCustomizationModal } from "../index";
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
 	import { getSPAfromId } from "$lib/utilities/listUtilities";
-	import type { MenuItem } from "$lib/types/global";
+	import type { MenuItem } from "$lib/generic/types";
 
 	type Props = {
 		unit: { id: string; bonus?: { ind: number; abil: number }[] };

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Dialog, Select } from "$lib/generic";
 	import { List } from "$lib/types/list.svelte";
-	import type { Item } from "$lib/types/global";
+	import type { Item } from "$lib/generic/types";
 	import { battlefieldSupport, battlefieldSupportGroups } from "$lib/data/battlefieldSupport";
 
 	type Props = {

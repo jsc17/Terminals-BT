@@ -6,7 +6,7 @@
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { onMount } from "svelte";
 	import { Combobox } from "$lib/generic";
-	import type { Item } from "$lib/types/global";
+	import type { Item } from "$lib/generic/types";
 	import { EraFactionInfoPopover } from "$lib/unitsearch";
 
 	type Props = {

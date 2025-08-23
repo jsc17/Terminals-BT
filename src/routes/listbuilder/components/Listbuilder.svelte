@@ -465,8 +465,7 @@
 	}
 	.dropdown-menu-wrapper {
 		width: max-content;
-		padding: 0px 16px;
-		height: 25px;
+		padding: 0px 8px;
 
 		& img {
 			width: 20px;

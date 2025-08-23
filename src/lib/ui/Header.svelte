@@ -7,7 +7,7 @@
 	import { page } from "$app/state";
 	import { enhance } from "$app/forms";
 	import type { List } from "$lib/types/list.svelte";
-	import type { Notification } from "$lib/types/global";
+	import type { Notification } from "$lib/generic/types";
 	import { SvelteMap } from "svelte/reactivity";
 
 	type Props = {

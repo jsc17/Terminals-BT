@@ -2,7 +2,7 @@
 	import type { PlayList } from "$lib/playmode/types";
 	import { PlayFormations, DisplayOptionsPopover, LoadModal, Log, PlayFullList } from "$lib/playmode";
 	import { PersistedState } from "runed";
-	import type { LogRound, Options } from "../../lib/playmode/types";
+	import type { LogRound, Options } from "$lib/playmode/types";
 	import { deserialize } from "$app/forms";
 	import { Popover } from "$lib/generic";
 	import { PlaymodeOptionsSchema } from "$lib/playmode/schema/playmode";
@@ -10,7 +10,8 @@
 	import { loadMULUnit } from "$lib/utilities/loadUtilities";
 	import { SvelteMap } from "svelte/reactivity";
 	import type { MulUnit } from "$lib/types/listTypes";
-	import { toastController } from "$lib/stores";
+	import DropdownMenu from "$lib/generic/components/DropdownMenu.svelte";
+	import type { MenuItem } from "$lib/generic/types";
 
 	let logDrawerOpen = $state(false);
 	let loadModalOpen = $state(false);
@@ -110,7 +111,6 @@
 	}
 
 	async function openLoadModal() {
-		toastController.addToast("test");
 		const response: any = deserialize(await (await fetch("?/loadLists", { method: "POST", body: "" })).text());
 		lists = JSON.parse(response.data.lists);
 		loadModalOpen = true;

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Popover } from "$lib/generic";
-	import type { Notification } from "$lib/types/global";
+	import type { Notification } from "$lib/generic/types";
 
 	type Props = {
 		notifications: Notification[];

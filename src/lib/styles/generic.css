@@ -122,6 +122,7 @@
 [data-dropdown-menu-item] {
 	font-size: 0.9em;
 }
+
 [data-dropdown-menu-item].dropdown-button {
 	color: var(--primary);
 	padding: 8px 24px;
@@ -132,6 +133,11 @@
 	color: var(--primary);
 	background-color: var(--muted);
 }
+[data-dropdown-menu-checkbox-item] {
+	color: var(--primary);
+	padding: 8px 12px;
+	text-align: center;
+}
 [data-dropdown-menu-separator] {
 	width: 80%;
 	justify-self: center;
@@ -139,4 +145,43 @@
 }
 [data-dropdown-menu-separator].muted {
 	border-color: var(--muted);
+}
+[data-dropdown-menu-content] .checkbox {
+	width: 15px;
+	height: 15px;
+	background-color: transparent;
+	border: 1px solid var(--border);
+	border-radius: 25%;
+}
+[data-dropdown-menu-content] .checkbox-checked {
+	background-color: var(--primary);
+}
+[data-dropdown-menu-radio-group] fieldset {
+	border: 1px solid var(--primary-muted);
+}
+[data-dropdown-menu-radio-group] legend {
+	color: var(--muted-foreground);
+}
+
+[data-dropdown-menu-radio-group] {
+	padding: 8px;
+}
+[data-dropdown-menu-radio-item] {
+	border: 1px solid transparent;
+	box-sizing: border-box;
+	padding: 4px;
+}
+[data-dropdown-menu-radio-item]:hover {
+	cursor: pointer;
+	border: 1px solid var(--muted);
+}
+[data-dropdown-menu-radio-group] .radio-check {
+	border: 1px solid var(--border);
+	width: 15px;
+	height: 15px;
+	border-radius: 50%;
+	box-sizing: border-box;
+}
+[data-dropdown-menu-radio-item][data-state="checked"] .radio-check {
+	border: 5px solid var(--primary);
 }

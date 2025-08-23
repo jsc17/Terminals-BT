@@ -4,8 +4,9 @@
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { Select } from "$lib/generic";
 	import { getTags, getUnitsWithTags } from "$lib/remote/collection.remote";
-	import { getContext } from "svelte";
+	import { getContext, untrack } from "svelte";
 	import { toastController } from "$lib/stores";
+	import { Debounced, watch } from "runed";
 
 	type Props = {
 		resultList: ResultList;
@@ -22,6 +23,19 @@
 	let selectedTags = $state<string[]>([]);
 
 	let user: { username: string | undefined } = getContext("user");
+
+	let tempFilters = $state<Filter[]>($state.snapshot(resultList.filters));
+	let tempAdditionalFilters = $state<Filter[]>($state.snapshot(resultList.additionalFilters));
+
+	let debounceTimeout: ReturnType<typeof setTimeout> | undefined;
+
+	watch([() => $state.snapshot(tempFilters), () => $state.snapshot(tempAdditionalFilters)], () => {
+		if (debounceTimeout) clearTimeout(debounceTimeout);
+		debounceTimeout = setTimeout(() => {
+			resultList.filters = $state.snapshot(tempFilters);
+			resultList.additionalFilters = $state.snapshot(tempAdditionalFilters);
+		}, 350);
+	});
 </script>
 
 {#snippet filters(filterList: Filter[])}
@@ -174,7 +188,7 @@
 	>
 
 	<div class="card" class:hidden={appWindow.isNarrow && !showFilters}>
-		{@render filters(resultList.filters)}
+		{@render filters(tempFilters)}
 		<div class="space-between filter-buttons">
 			<button
 				class="transparent-button"
@@ -195,7 +209,7 @@
 			<button class="clear" onclick={() => resultList.resetFilters()}>Clear Filters</button>
 		</div>
 		{#if showAdditionalFilters}
-			{@render filters(resultList.additionalFilters)}
+			{@render filters(tempAdditionalFilters)}
 		{/if}
 	</div>
 </main>

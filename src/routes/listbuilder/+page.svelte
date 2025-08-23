@@ -6,6 +6,7 @@
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { Tabs, ContextMenu } from "bits-ui";
 	import { getListCodeFromString, loadExistingListsFromLocalStorage } from "$lib/utilities/listImport";
+	import { toastController } from "$lib/stores";
 
 	let settings = new PersistedState<Settings>("listbuilderSettings", {
 		print: {
@@ -58,7 +59,7 @@
 		if (data.sharedList) {
 			let list = new List(new ResultList());
 			let listCode: ListCode = {
-				id: data.sharedList.id,
+				id: crypto.randomUUID(),
 				lcVersion: data.sharedList.lcVersion,
 				name: data.sharedList.name,
 				eras: JSON.parse(data.sharedList.eras),
@@ -79,8 +80,12 @@
 	});
 
 	function handleAddListButton() {
-		activeLists.push(new List(new ResultList()));
-		selectedList = (activeLists.length - 1).toString();
+		if (activeLists.length < 5) {
+			activeLists.push(new List(new ResultList()));
+			selectedList = (activeLists.length - 1).toString();
+		} else {
+			toastController.addToast("For performance reasons, active lists tabs have been limited to 5. Please save and close a list to open a new one.");
+		}
 	}
 	function listCloseCallback(id: string) {
 		const list = activeLists.find((list) => list.id == id);

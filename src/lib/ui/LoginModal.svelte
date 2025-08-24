@@ -2,14 +2,15 @@
 	import { enhance } from "$app/forms";
 	import { getContext } from "svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
+	import { Dialog } from "$lib/generic/";
 
-	let loginDialog: HTMLDialogElement;
 	let usernameElement = $state<HTMLInputElement>();
 	let loginDisplay = $state<"login" | "register">("login");
 
 	export function show() {
-		loginDialog.showModal();
+		open = true;
 		usernameElement?.focus();
+		console.log("Test");
 	}
 
 	let user: { username: string | undefined } = getContext("user");
@@ -17,7 +18,7 @@
 	function handleSignUp({ formData, cancel, submitter }: any) {
 		const { username, password, email } = Object.fromEntries(formData) as Record<string, string>;
 		if (submitter.innerText == "Cancel") {
-			loginDialog.close();
+			open = false;
 			cancel();
 		} else if (!password) {
 			alert("Password is required");
@@ -34,7 +35,7 @@
 				alert(result.data.message);
 			} else {
 				user.username = result.data.username;
-				loginDialog.close();
+				open = false;
 				update();
 			}
 		};
@@ -42,7 +43,7 @@
 	function handleLogin({ formData, cancel, submitter }: any) {
 		const { username, password } = Object.fromEntries(formData);
 		if (submitter.innerText == "Cancel") {
-			loginDialog.close();
+			open = false;
 			cancel();
 		} else if (!username) {
 			alert("Username is required");
@@ -57,21 +58,17 @@
 				alert(result.data.message);
 			} else {
 				user.username = result.data.username;
-				loginDialog.close();
+				open = false;
 				update();
 			}
 		};
 	}
+	let open = $state(false);
 </script>
 
-<!-- svelte-ignore non_reactive_update -->
-<dialog bind:this={loginDialog} class:dialog-wide={appWindow.isNarrow}>
+<Dialog title={loginDisplay == "login" ? "Log in" : "Register"} bind:open>
 	{#if loginDisplay == "login"}
 		<div class="dialog-body">
-			<div class="space-between">
-				<h2>Login</h2>
-				<button onclick={() => loginDialog.close()}>Close</button>
-			</div>
 			<form method="post" action="/auth/?/login" class="login-form" use:enhance={handleLogin}>
 				<label for="username">Username <span class="muted">or</span> Email address</label>
 				<input name="username" id="username" bind:this={usernameElement} />
@@ -135,10 +132,6 @@
 		</div>
 	{:else if loginDisplay == "register"}
 		<div class="dialog-body">
-			<div class="space-between">
-				<h2>Register</h2>
-				<button onclick={() => loginDialog.close()}>Close</button>
-			</div>
 			<form method="post" action="/auth/?/register" class="login-form" use:enhance={handleSignUp}>
 				<div class="register-fields">
 					<label for="username">Username</label>
@@ -202,7 +195,7 @@
 			</form>
 		</div>
 	{/if}
-</dialog>
+</Dialog>
 
 <style>
 	@import "$lib/styles/google.css";

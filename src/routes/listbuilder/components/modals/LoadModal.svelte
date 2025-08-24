@@ -4,6 +4,7 @@
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { List, type ListCode } from "$lib/types/list.svelte";
 	import { getListCodeFromString } from "$lib/utilities/listImport";
+	import { Dialog } from "$lib/generic";
 
 	let user: any = getContext("user");
 	type Props = {
@@ -20,7 +21,7 @@
 	let localLists = $state<string[]>([]);
 
 	export function show() {
-		dialogElement.showModal();
+		open = true;
 		importCode = "";
 		getLists();
 	}
@@ -94,7 +95,7 @@
 		if (listCode) {
 			list.loadList(listCode);
 			toastController.addToast("List imported");
-			dialogElement.close();
+			open = false;
 		} else {
 			toastController.addToast("Invalid list code. Import failed.");
 		}
@@ -102,42 +103,25 @@
 
 	async function loadList() {
 		await list.loadList(savedLists[selectedListIndex]);
-		dialogElement?.close();
+		open = false;
 	}
+	let open = $state(false);
 </script>
 
-<dialog bind:this={dialogElement}>
-	<div class="dialog-body">
-		<div class="space-between">
-			{#if user.username}
-				<div></div>
-			{:else}
-				<p>Login to load lists saved to account</p>
-			{/if}
-			<button
-				onclick={() => {
-					dialogElement?.close();
-				}}>Close</button
-			>
-		</div>
+<Dialog title="Load List" bind:open>
+	{#snippet description()}
+		{#if !user.username}
+			<p class="muted">Login to load lists saved to account</p>
+		{/if}
+	{/snippet}
+
+	<div class="load-modal-body">
 		<div class="table-container">
 			<table class="saved-lists">
 				<colgroup>
 					<col />
-					<!-- <col style="width:15%" />
-					<col style="width:15%" />
-					<col style="width:20%" /> -->
 					<col style="width:20px" />
 				</colgroup>
-				<!-- <thead>
-					<tr>
-						<th>List name</th>
-						<th>Era</th>
-						<th>Faction</th>
-						<th>Rules</th>
-						<th></th>
-					</tr>
-				</thead> -->
 				<tbody>
 					{#each savedLists as savedList, index}
 						<tr
@@ -157,14 +141,12 @@
 				</tbody>
 			</table>
 		</div>
-
 		<button
 			class="load-button"
 			onclick={() => {
 				loadList();
 			}}>Load</button
 		>
-
 		{#if localListsExist}
 			<p>Lists with red names are saved to local device storage . Please consider creating an account to sync them between devices.</p>
 		{/if}
@@ -175,9 +157,14 @@
 			<button onclick={importList}> Import </button>
 		</div>
 	</div>
-</dialog>
+</Dialog>
 
 <style>
+	.load-modal-body {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
 	input[type="text"] {
 		width: 75%;
 	}

@@ -7,6 +7,7 @@
 	import { deserialize } from "$app/forms";
 	import { exportToJeff } from "../../utilities/export.svelte";
 	import type { List } from "$lib/types/list.svelte";
+	import { Dialog } from "$lib/generic";
 
 	let user: any = getContext("user");
 	type Props = {
@@ -15,14 +16,13 @@
 
 	let { list = $bindable() }: Props = $props();
 
-	let saveDialog = $state<HTMLDialogElement>();
 	let existingListNames = $state<{ id: string; name: string }[]>([]);
 
 	let ttsCode = $state("");
 	let listCode = $state("");
 
 	export function show() {
-		saveDialog?.showModal();
+		open = true;
 		getListNames();
 		ttsCode = list.createTTSCode();
 		listCode = list.getListCode();
@@ -53,14 +53,14 @@
 			if (listNameExists) {
 				if (confirm("A list with that name already exists. Overwrite it?")) {
 					formData.append("body", list.getListCode());
-					saveDialog?.close();
+					open = false;
 				} else {
 					cancel();
 				}
 			} else {
 				list.id = crypto.randomUUID();
 				formData.append("body", list.getListCode());
-				saveDialog?.close();
+				open = false;
 			}
 		} else {
 			let listNames = JSON.parse(localStorage.getItem("lists") ?? "[]");
@@ -77,7 +77,7 @@
 			}
 			cancel();
 			toastController.addToast(`${list.details.name} saved successfully to this device. Consider creating an account to sync lists between devices.`);
-			saveDialog?.close();
+			open = false;
 		}
 		return async ({ result }: { result: ActionResult }) => {
 			if (result.status == 200) {
@@ -87,24 +87,17 @@
 			}
 		};
 	}
+
+	let open = $state(false);
 </script>
 
-<dialog bind:this={saveDialog} class:dialog-wide={appWindow.isNarrow}>
+<Dialog title="Save List" bind:open>
+	{#snippet description()}
+		{#if !user.username}
+			<p class="error">Login to save lists to account and sync lists between devices</p>
+		{/if}
+	{/snippet}
 	<div class="dialog-body">
-		<div class="space-between">
-			{#if user.username}
-				<div></div>
-			{:else}
-				<p>Login to save lists to account and sync lists between devices</p>
-			{/if}
-			<button
-				class="close-button"
-				onclick={() => {
-					saveDialog?.close();
-				}}>X</button
-			>
-		</div>
-
 		<form method="post" action="?/saveList" use:enhance={handleSaveList}>
 			<div class="inline gap8">
 				{#if user.username}
@@ -134,7 +127,7 @@
 					const text = new ClipboardItem({ "text/plain": list.getListCode() });
 					navigator.clipboard.write([text]);
 					toastController.addToast("List code copied to clipboard", 1500);
-					saveDialog?.close();
+					open = false;
 				}}
 			>
 				<img src="/icons/content-copy.svg" alt="copy to clipboard" class="button-icon" />
@@ -147,7 +140,7 @@
 					const text = new ClipboardItem({ "text/plain": ttsCode });
 					navigator.clipboard.write([text]);
 					toastController.addToast("code copied to clipboard", 1500);
-					saveDialog?.close();
+					open = false;
 				}}
 			>
 				<img src="/icons/content-copy.svg" alt="copy to clipboard" class="button-icon" />
@@ -167,12 +160,8 @@
 				<img src="/icons/download.svg" alt="download to Jeff's Tools" class="button-icon" />
 			</button>
 		</div>
-		<p>
-			Note: Everything seems to work from what I've tested, but I can't guarantee they won't change it on their end. I'll try to keep an eye on it, but please let me know if an
-			import fails.
-		</p>
 	</div>
-</dialog>
+</Dialog>
 
 <style>
 	.export-bar {

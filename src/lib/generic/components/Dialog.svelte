@@ -40,7 +40,9 @@
 		left: 50%;
 		top: 50%;
 		transform: translate(-50%, -50%);
-		width: clamp(400px, max-content, 99dvw);
+		min-width: min(400px, 99dvw);
+		width: max-content;
+		max-width: 99dvw;
 		max-height: 95dvh;
 		background-color: var(--background);
 		border: 1px solid var(--border);

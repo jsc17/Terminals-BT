@@ -325,15 +325,14 @@
 	{/if}
 </div>
 
-<SaveModal bind:this={saveModal} bind:list></SaveModal>
-<LoadModal bind:this={loadModal} bind:list></LoadModal>
-<UnitCustomizationModal bind:this={unitCustomizationModal} bind:list></UnitCustomizationModal>
-<!-- Updated to use generic dialog element -->
 <ScaModal bind:open={scaModalOpen} bind:list></ScaModal>
 <PrintModal bind:this={printModal} bind:list></PrintModal>
 <FindUnitAvailabilityModal bind:this={availabilityModal} bind:list />
 <SublistModal bind:list bind:open={sublistModalOpen} />
 <BattlefieldSupportModal bind:this={battlefieldSupportModal} bind:list />
+<LoadModal bind:this={loadModal} bind:list></LoadModal>
+<SaveModal bind:this={saveModal} bind:list></SaveModal>
+<UnitCustomizationModal bind:this={unitCustomizationModal} bind:list></UnitCustomizationModal>
 
 <style>
 	.listbuilder {

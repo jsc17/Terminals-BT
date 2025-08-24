@@ -158,7 +158,7 @@
 	.sublist-modal-content {
 		width: calc(99dvw - 32px);
 		display: flex;
-		height: 85dvh;
+		height: 80dvh;
 	}
 	.sublist-modal-sublist-container {
 		display: flex;

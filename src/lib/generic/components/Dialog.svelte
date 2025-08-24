@@ -40,8 +40,7 @@
 		left: 50%;
 		top: 50%;
 		transform: translate(-50%, -50%);
-		min-width: 400px;
-		max-width: 99dvw;
+		width: clamp(400px, max-content, 99dvw);
 		max-height: 95dvh;
 		background-color: var(--background);
 		border: 1px solid var(--border);
@@ -68,17 +67,12 @@
 	}
 
 	:global([data-dialog-description], .dialog-children-wrapper) {
-		padding: 8px 16px;
+		padding: clamp(4px, 1dvh, 8px) clamp(4px, 1dvw, 16px);
 	}
-	@media (max-width: 500px) {
-		:global([data-dialog-title], [data-dialog-description], .dialog-children-wrapper) {
-			padding: 4px;
-		}
-	}
+
 	.dialog-children-wrapper {
 		display: flex;
 		flex-direction: column;
-		height: max-content;
 		overflow: auto;
 	}
 	.close-button {

@@ -23,10 +23,10 @@ _Describe how you tested the changes and how others can replicate the testing st
 **Screenshots (if applicable)**  
 _Add screenshots or GIFs that help illustrate the changes, especially if they affect the UI or user-facing aspects of the system._
 
-**Checklist:**  
+**Checklist:**
+
 - [ ] Testing of all relevent features completed (saving/loading lists, printing, etc)
 - [ ] No new warnings/errors added to project
-      
+
 **Additional context**  
 _Add any other context or information here that would be useful for reviewers._
-

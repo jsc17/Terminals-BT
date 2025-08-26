@@ -39,8 +39,12 @@ export class List {
 	listCode = $derived.by(() => {
 		let unitList: ListCodeUnit[] = [];
 		this.units.forEach((unit) => {
-			if (unit.customization && Object.keys(unit.customization).length == 0) unit.customization = undefined;
-			unitList.push({ id: unit.id, mulId: unit.baseUnit.mulId, skill: unit.skill, customization: unit.customization });
+			unitList.push({
+				id: unit.id,
+				mulId: unit.baseUnit.mulId,
+				skill: unit.skill,
+				customization: Object.keys(unit.customization ?? {}).length == 0 ? undefined : unit.customization
+			});
 		});
 
 		const newListCode: ListCode = {
@@ -60,7 +64,7 @@ export class List {
 				return id;
 			});
 		}
-		return JSON.stringify(newListCode);
+		return newListCode;
 	});
 
 	issues = $derived.by(() => {

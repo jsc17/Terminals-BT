@@ -2,8 +2,9 @@ import { nanoid } from "nanoid";
 import type { ListFormation, ListCode, ListCodeUnit, Sublist } from "$lib/types/listTypes";
 import { List } from "$lib/types/list.svelte";
 import { ResultList } from "$lib/types/resultList.svelte";
+import { db } from "$lib/offline/db";
 
-export function loadExistingListsFromLocalStorage(): List[] {
+export async function loadExistingListsFromLocalStorage(): Promise<List[]> {
 	const activeLists: List[] = [];
 	//load list if still using localstorage from before tabs update
 	const lastList = localStorage.getItem("last-list");
@@ -19,16 +20,28 @@ export function loadExistingListsFromLocalStorage(): List[] {
 		localStorage.removeItem("last-list");
 	}
 	//load all localstorage previous list into tabs
-	const lastLists = JSON.parse(localStorage.getItem("last-lists") ?? "[]");
-	for (const existingListTab of lastLists ?? []) {
-		let list = new List(new ResultList());
-		const parsedCode = getListCodeFromString(existingListTab);
-		if (parsedCode) {
-			list.loadList(parsedCode);
-		} else {
-			console.log("failed to import list");
+	const lastListString = localStorage.getItem("last-lists");
+	if (lastListString) {
+		const lastLists = JSON.parse(lastListString);
+		for (const existingListTab of lastLists ?? []) {
+			let list = new List(new ResultList());
+			const parsedCode = getListCodeFromString(existingListTab);
+			if (parsedCode) {
+				list.loadList(parsedCode);
+			} else {
+				console.log("failed to import list");
+			}
+			activeLists.push(list);
 		}
-		activeLists.push(list);
+		localStorage.removeItem("last-lists");
+	}
+	const lastLists = await db.previousLists.toArray();
+	if (lastLists.length != 0) {
+		for (const listCode of lastLists) {
+			let list = new List(new ResultList());
+			list.loadList(listCode);
+			activeLists.push(list);
+		}
 	}
 	return activeLists;
 }

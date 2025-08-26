@@ -25,7 +25,7 @@
 		open = true;
 		getListNames();
 		ttsCode = list.createTTSCode();
-		listCode = list.getListCode();
+		listCode = JSON.stringify(list.getListCode());
 	}
 
 	async function getListNames() {
@@ -52,14 +52,14 @@
 
 			if (listNameExists) {
 				if (confirm("A list with that name already exists. Overwrite it?")) {
-					formData.append("body", list.getListCode());
+					formData.append("body", JSON.stringify(list.getListCode()));
 					open = false;
 				} else {
 					cancel();
 				}
 			} else {
 				list.id = crypto.randomUUID();
-				formData.append("body", list.getListCode());
+				formData.append("body", JSON.stringify(list.getListCode()));
 				open = false;
 			}
 		} else {
@@ -67,13 +67,13 @@
 			const listNameExists = listNames.includes(list.details.name.toLowerCase());
 			if (listNameExists) {
 				if (confirm("List with that name already exists in local storage. Overwrite it?")) {
-					localStorage.setItem(list.details.name.toLowerCase(), list.getListCode());
+					localStorage.setItem(list.details.name.toLowerCase(), JSON.stringify(list.getListCode()));
 				}
 			} else {
 				list.id = crypto.randomUUID();
 				listNames.push(list.details.name.toLowerCase());
 				localStorage.setItem("lists", JSON.stringify(listNames));
-				localStorage.setItem(list.details.name.toLowerCase(), list.getListCode());
+				localStorage.setItem(list.details.name.toLowerCase(), JSON.stringify(list.getListCode()));
 			}
 			cancel();
 			toastController.addToast(`${list.details.name} saved successfully to this device. Consider creating an account to sync lists between devices.`);
@@ -124,7 +124,7 @@
 			<label for="list-code">List Code: </label><input type="text" name="list-code" id="list-code" disabled value={listCode} />
 			<button
 				onclick={() => {
-					const text = new ClipboardItem({ "text/plain": list.getListCode() });
+					const text = new ClipboardItem({ "text/plain": JSON.stringify(list.getListCode()) });
 					navigator.clipboard.write([text]);
 					toastController.addToast("List code copied to clipboard", 1500);
 					open = false;

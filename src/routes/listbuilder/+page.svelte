@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { PersistedState, watch } from "runed";
 	import ListTab from "./components/ListTab.svelte";
-	import { onMount, setContext } from "svelte";
+	import { onMount, setContext, untrack } from "svelte";
 	import { type ListCode, List } from "$lib/types/list.svelte";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { Tabs, ContextMenu } from "bits-ui";
-	import { getListCodeFromString, loadExistingListsFromLocalStorage } from "$lib/utilities/listImport";
+	import { loadExistingListsFromLocalStorage } from "$lib/utilities/listImport";
 	import { toastController } from "$lib/stores";
+	import { db } from "$lib/offline/db";
 
 	let settings = new PersistedState<Settings>("listbuilderSettings", {
 		print: {
@@ -36,8 +37,6 @@
 	});
 	setContext("listbuilderSettings", settings.current);
 
-	let lastLists = new PersistedState<string[]>("last-lists", []);
-
 	let activeLists = $state<List[]>([]);
 	let selectedList = $state<string>("");
 
@@ -47,15 +46,23 @@
 		() => listCodes,
 		() => {
 			if (listCodes.length != 0) {
-				lastLists.current = listCodes;
+				Promise.all(
+					$state.snapshot(listCodes).map(async (lc) => {
+						try {
+							const id = await db.previousLists.put(lc);
+						} catch (error) {
+							console.log(`Failed to add previous list (${lc.id}) ${lc.name}: ${error}`);
+						}
+					})
+				);
 			}
 		}
 	);
 
 	let { data } = $props();
 
-	onMount(() => {
-		activeLists = loadExistingListsFromLocalStorage();
+	onMount(async () => {
+		activeLists = await loadExistingListsFromLocalStorage();
 		if (data.sharedList) {
 			let list = new List(new ResultList());
 			let listCode: ListCode = {
@@ -72,6 +79,9 @@
 			};
 			list.loadList(listCode);
 			activeLists.push(list);
+			const newUrl = new URL(window.location.href);
+			newUrl.searchParams.delete("share");
+			window.history.replaceState({}, "", newUrl);
 		}
 		if (activeLists.length == 0) {
 			activeLists.push(new List(new ResultList()));
@@ -89,14 +99,19 @@
 	}
 	function listCloseCallback(id: string) {
 		const list = activeLists.find((list) => list.id == id);
-		if (!list?.units.length || confirm("Are you sure you wish to close this list? Any unsaved changes will be lost.")) {
+		if (list && (!list?.units.length || confirm("Are you sure you wish to close this list? Any unsaved changes will be lost."))) {
 			activeLists = activeLists.filter((list) => list.id != id);
+			db.previousLists.delete(list.id);
+			selectedList = (activeLists.length - 1).toString();
+		}
+		if (activeLists.length == 0) {
+			activeLists.push(new List(new ResultList()));
 			selectedList = (activeLists.length - 1).toString();
 		}
 	}
 	function duplicateList(list: List) {
 		const newList = new List(new ResultList());
-		const copiedData = JSON.parse(list.getListCode());
+		const copiedData = $state.snapshot(list.getListCode());
 
 		const parsedCode: ListCode = {
 			id: crypto.randomUUID(),
@@ -115,16 +130,6 @@
 		newList.loadList(parsedCode);
 		activeLists.push(newList);
 	}
-
-	watch(
-		() => activeLists,
-		() => {
-			if (activeLists.length == 0) {
-				activeLists.push(new List(new ResultList()));
-				selectedList = (activeLists.length - 1).toString();
-			}
-		}
-	);
 </script>
 
 <svelte:head>

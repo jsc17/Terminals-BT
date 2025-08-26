@@ -22,6 +22,7 @@
 	import { deserialize } from "$app/forms";
 	import { Collapsible, DropdownMenu } from "$lib/generic";
 	import { getBSCbyId } from "$lib/data/battlefieldSupport";
+	import { dev } from "$app/environment";
 
 	type Props = {
 		listCloseCallback: (id: string) => void;
@@ -65,10 +66,14 @@
 
 	async function shareList() {
 		const formData = new FormData();
-		formData.append("list", list.getListCode());
+		formData.append("list", JSON.stringify(list.getListCode()));
 		const id: string = crypto.randomUUID();
 		formData.append("id", id);
-		navigator.clipboard.writeText(`https://terminal.tools/listbuilder?share=${id}`);
+		let sharedUrl = `https://terminal.tools/listbuilder?share=${id}`;
+		if (dev) {
+			sharedUrl = `https://localhost:5173/listbuilder?share=${id}`;
+		}
+		navigator.clipboard.writeText(sharedUrl);
 
 		const response: any = deserialize(await (await fetch("?/shareList", { method: "POST", body: formData })).text());
 		if (response.type == "success") {

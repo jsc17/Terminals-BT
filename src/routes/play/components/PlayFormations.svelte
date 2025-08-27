@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Collapsible } from "$lib/generic";
 	import type { PlayUnit, PlayFormation, LogRound, Options } from "$lib/playmode/types";
-	import { PlayUnitCard } from "$lib/playmode";
+	import { PlayUnitCard } from "../";
 	import { SvelteMap } from "svelte/reactivity";
 	import type { MulUnit } from "$lib/types/listTypes";
 	import PlayFormationBonuses from "./PlayFormationBonuses.svelte";

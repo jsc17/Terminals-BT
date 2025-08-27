@@ -1,6 +1,6 @@
 import { toastController } from "$lib/stores";
 import { type ListFormation, type List, type Sublist } from "$lib/types/list.svelte";
-import { sendListToPlay } from "$lib/playmode/utilities/playmodeUtilities";
+import { sendListToPlay } from "$lib/playmode/playmode";
 import { nanoid } from "nanoid";
 
 export function loadSublistForPlay(sublist: Sublist, list: List) {

@@ -14,7 +14,7 @@
 	import { type ListFormation, List } from "$lib/types/list.svelte";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { ruleSets } from "$lib/types/rulesets";
-	import { sendListToPlay } from "$lib/playmode/utilities/playmodeUtilities";
+	import { sendListToPlay } from "$lib/playmode/playmode";
 	import { getContext } from "svelte";
 	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
 	import { appWindow, toastController } from "$lib/stores";

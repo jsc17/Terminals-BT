@@ -2,7 +2,7 @@
 	import { Dialog } from "$lib/generic";
 	import type { MulUnit } from "$lib/types/listTypes";
 	import { setContext } from "svelte";
-	import { PlayUnitCard } from "$lib/playmode";
+	import { PlayUnitCard } from "../";
 	import type { LogRound, Options, PlayUnit } from "$lib/playmode/types";
 
 	type Props = {

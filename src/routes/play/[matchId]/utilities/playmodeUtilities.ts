@@ -1,7 +1,7 @@
 import { weaponAbilityReference, type UnitAbility } from "$lib/data/abilities";
 import type { MulUnit, ListFormation, ListUnit } from "$lib/types/listTypes";
-import type { PlayFormation, PlayUnit, PlayList } from "../../../lib/playmode/types";
-import { calculateBonusAmount, getFormationDataFromName } from "../../../lib/utilities/formationUtilities";
+import type { PlayFormation, PlayUnit, PlayList } from "../../../../lib/playmode/types";
+import { calculateBonusAmount, getFormationDataFromName } from "../../../../lib/utilities/formationUtilities";
 
 export function createDamagedAbilityString(ability: UnitAbility, currentCriticals: string[], disabledAbilities: string[], reference: MulUnit) {
 	let string = "";

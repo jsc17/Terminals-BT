@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { MulUnit } from "$lib/types/listTypes";
 	import { getContext, onMount } from "svelte";
-	import { CritBoxAero, CritBoxCv, CritBoxMech, CritBoxProto } from "../";
-	import { DamageModal, HeatModal, CritModal, ExpandModal, SpecialModal } from "../";
+	import { CritBoxAero, CritBoxCv, CritBoxMech, CritBoxProto } from "./";
+	import { DamageModal, HeatModal, CritModal, ExpandModal, SpecialModal } from "./";
 	import { loadMULUnit } from "$lib/utilities/loadUtilities";
 	import * as automation from "../utilities/playmodeAutomation";
 	import { createDamagedAbilityString } from "../utilities/playmodeUtilities";

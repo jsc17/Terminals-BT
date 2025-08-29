@@ -30,6 +30,9 @@ type PlayFormation = {
 };
 
 type PlayList = {
+	id: string;
+	name: string;
+	date: string;
 	formations: PlayFormation[];
 	units: PlayUnit[];
 };

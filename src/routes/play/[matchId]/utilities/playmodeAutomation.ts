@@ -1,5 +1,5 @@
 import type { MulUnit } from "$lib/types/listTypes";
-import type { PlayUnit } from "../../../lib/playmode/types";
+import type { PlayUnit } from "../../../../lib/playmode/types";
 import { mechTypes, typeIncludes, vTypes } from "$lib/playmode/unitTypeUtilities";
 
 export type CritList = { [key: string]: any; engine: number; firecontrol: number; mp: number; weapon: number; destroyed: number; mhit: number; mhalf: number; mimm: number };

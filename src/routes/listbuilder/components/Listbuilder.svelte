@@ -175,7 +175,7 @@
 						{ type: "separator" },
 						{ type: "item", label: "Check List Availability", onSelect: () => availabilityModal?.show() },
 						{ type: "item", label: "Generate Sublists", onSelect: () => (sublistModalOpen = true) },
-						{ type: "item", label: "Play List", onSelect: () => sendListToPlay(list.formations, list.units) },
+						{ type: "item", label: "Play List", onSelect: () => sendListToPlay(list.details.name, list.formations, list.units) },
 						{ type: "separator" },
 						{ type: "item", label: "Clear Units/Formations", onSelect: () => clearList() },
 						{ type: "item", label: "Reset List", onSelect: () => resetList() },

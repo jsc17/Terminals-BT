@@ -16,7 +16,7 @@ export function loadSublistForPlay(sublist: Sublist, list: List) {
 			type: "none",
 			units
 		};
-		sendListToPlay([sublistFormation], list.units);
+		sendListToPlay(list.details.name, [sublistFormation], list.units);
 	} else {
 		toastController.addToast("Cannot play an empty sublist");
 	}

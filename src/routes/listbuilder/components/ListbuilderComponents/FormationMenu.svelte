@@ -45,7 +45,7 @@
 		}
 		items.push({ type: "item", label: "Check Formation Availability", onSelect: availabilityModal.show });
 		items.push({ type: "separator", classes: "muted" });
-		items.push({ type: "item", label: "Play Formation", onSelect: () => sendListToPlay([formation], list.units) });
+		items.push({ type: "item", label: "Play Formation", onSelect: () => sendListToPlay(list.details.name, [formation], list.units) });
 		items.push({ type: "item", label: "Export Formation", onSelect: exportFormationToJeff });
 		items.push({ type: "separator", classes: "muted" });
 		items.push({ type: "item", label: "Clear Formation", onSelect: clearFormation });

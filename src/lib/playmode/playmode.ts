@@ -1,8 +1,10 @@
 import type { ListFormation, ListUnit } from "$lib/types/listTypes";
 import { getFormationDataFromName } from "$lib/utilities/formationUtilities";
+import { nanoid } from "nanoid";
 import type { PlayFormation, PlayList, PlayUnit } from "./types";
+import { db } from "$lib/offline/db";
 
-export function sendListToPlay(formations: ListFormation[], units: ListUnit[]) {
+export function sendListToPlay(name: string, formations: ListFormation[], units: ListUnit[]) {
 	const playUnits: PlayUnit[] = [];
 	for (const unit of units) {
 		if (
@@ -43,25 +45,16 @@ export function sendListToPlay(formations: ListFormation[], units: ListUnit[]) {
 				bonuses: formationDetails?.bonuses
 			};
 		});
+
+	const newMatchId = nanoid().toLowerCase();
 	const playList: PlayList = {
+		id: newMatchId,
+		name,
 		formations: playFormations,
-		units: playUnits
+		units: playUnits,
+		date: new Date().toDateString()
 	};
 
-	if (localStorage.getItem("playList")) {
-		let overwrite = confirm("Game already in progress, do you wish to overwrite the existing list?");
-		if (overwrite) {
-			localStorage.setItem("playList", JSON.stringify(playList));
-			localStorage.removeItem("playCurrentRound");
-			window.open("/play", "_blank")?.focus();
-		} else {
-			let loadGame = confirm("Do you wish to load the game in progress?");
-			if (loadGame) {
-				window.open("/play", "_blank")?.focus();
-			}
-		}
-	} else {
-		localStorage.setItem("playList", JSON.stringify(playList));
-		window.open("/play", "_blank")?.focus();
-	}
+	db.localMatches.add(playList);
+	window.open(`/play/${newMatchId}`, "_blank")?.focus();
 }

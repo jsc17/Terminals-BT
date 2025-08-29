@@ -10,7 +10,6 @@
 	export function show() {
 		open = true;
 		usernameElement?.focus();
-		console.log("Test");
 	}
 
 	let user: { username: string | undefined } = getContext("user");

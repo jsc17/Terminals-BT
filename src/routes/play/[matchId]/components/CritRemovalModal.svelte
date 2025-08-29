@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PlayUnit } from "$lib/playmode/types";
-	import { getCritNameFromCode } from "$lib/playmode/utilities/playmodeUtilities";
+	import { getCritNameFromCode } from "../utilities/playmodeUtilities";
 	import { Dialog } from "$lib/generic/";
 
 	type Props = {

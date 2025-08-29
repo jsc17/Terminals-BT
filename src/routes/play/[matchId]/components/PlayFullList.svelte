@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PlayUnit, LogRound, Options } from "$lib/playmode/types";
-	import { PlayUnitCard } from "$lib/playmode/";
+	import { PlayUnitCard } from "./";
 
 	type Props = {
 		units: PlayUnit[];

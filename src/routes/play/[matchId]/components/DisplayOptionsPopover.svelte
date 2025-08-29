@@ -24,13 +24,6 @@
 			{options.cardsPerRow}
 			<button class="card-button" onclick={() => options.cardsPerRow++}>+</button>
 		</div>
-		<!-- <div class="option-row">
-			UI Scale:
-			<div class="slider-container">
-				<Slider bind:value={options.uiScale} type="single"></Slider>
-			</div>
-			<p>x{(options.uiScale + 50) / 100}</p>
-		</div> -->
 		<div class="option-row">
 			<label><input type="checkbox" bind:checked={options.renderOriginal} /> Display Original Values when damaged</label>
 		</div>
@@ -61,11 +54,11 @@
 
 <style>
 	:global(.popover-play-toolbar-button) {
-		padding: 12px;
-		font-size: 16px;
+		height: 100%;
+		width: 100%;
 		background-color: transparent;
 		border-radius: 0;
-		color: var(--card-foreground);
+		color: var(--primary);
 	}
 	:global(.popover-play-toolbar-button:hover) {
 		background-color: var(--muted);

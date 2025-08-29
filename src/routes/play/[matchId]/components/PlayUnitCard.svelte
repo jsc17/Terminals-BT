@@ -1,11 +1,12 @@
 <script lang="ts">
 	import type { MulUnit } from "$lib/types/listTypes";
 	import { getContext, onMount } from "svelte";
-	import { CritBoxAero, CritBoxCv, CritBoxMech, CritBoxProto } from "$lib/playmode";
-	import { DamageModal, HeatModal, CritModal, ExpandModal, SpecialModal } from "$lib/playmode";
+	import { CritBoxAero, CritBoxCv, CritBoxMech, CritBoxProto } from "./";
+	import { DamageModal, HeatModal, CritModal, ExpandModal, SpecialModal } from "./";
 	import { loadMULUnit } from "$lib/utilities/loadUtilities";
-	import * as automation from "$lib/playmode/utilities/playmodeAutomation";
-	import { createDamagedAbilityString, infTypes, mechTypes, typeIncludes, vTypes } from "$lib/playmode/utilities/playmodeUtilities";
+	import * as automation from "../utilities/playmodeAutomation";
+	import { createDamagedAbilityString } from "../utilities/playmodeUtilities";
+	import { infTypes, mechTypes, typeIncludes, vTypes } from "$lib/playmode/unitTypeUtilities";
 	import type { LogRound, Options, PlayUnit } from "$lib/playmode/types";
 	import { type UnitAbility } from "$lib/data/abilities";
 	import type { SvelteMap } from "svelte/reactivity";

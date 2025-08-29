@@ -51,3 +51,8 @@
 	background-color: lightcoral;
 	color: black;
 }
+section.card {
+	padding: 16px;
+	background-color: var(--card);
+	border: 1px solid var(--border);
+}

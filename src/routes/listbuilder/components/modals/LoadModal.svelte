@@ -17,7 +17,6 @@
 	let savedLists = $state<ListCode[]>([]);
 	let selectedListIndex = $state(-1);
 	let localListsExist = $state(false);
-	let dialogElement: HTMLDialogElement;
 	let localLists = $state<string[]>([]);
 
 	export function show() {

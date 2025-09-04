@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { getEraName, getEras, getFactionsInEra, getGeneralId } from "$lib/remote/era-faction.remote";
-	import { getApprovedTournamentList, submitList } from "$lib/remote/tournament.remote";
+	import { getApprovedTournamentList, submitList } from "./tournament.remote";
 	import { validateRules } from "$lib/rules/validateList";
 	import { toastController } from "$lib/stores";
 	import { getRulesByName, ruleSets } from "$lib/types/rulesets";
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
 	import FixModal from "./FixModal.svelte";
-	import { getUnitData, type ValidationUnitData } from "./validate.remote";
+	import type { ValidationUnitData } from "./types";
+	import { getUnitData } from "./validate.remote";
 
 	let selectedRules = $state("wn350v3");
 	let files = $state<FileList>();
@@ -22,6 +23,7 @@
 	let selectedTournament = $derived(tournamentList[0]);
 
 	let unitData = $state<ValidationUnitData[]>([]);
+	let fixedData = $state(false);
 
 	let issues = $state<{ issueList: Map<string, Set<string>> }>();
 
@@ -71,6 +73,7 @@
 					await submit();
 					if (getUnitData.result?.status == "success") {
 						unitData = getUnitData.result.data ?? [];
+						console.log(getUnitData.result.data);
 					} else {
 						toastController.addToast(getUnitData.result?.message ?? "Invalid message recieved");
 					}
@@ -133,7 +136,7 @@
 								{/each}
 								<td>
 									{#if !unit.mulData}
-										<FixModal bind:unit={unitData![index]} era={selectedEra} faction={selectedFaction} />
+										<FixModal bind:unit={unitData![index]} era={selectedEra} faction={selectedFaction} bind:fixedData />
 									{:else}
 										<span style="color: green; font-weight: bold;">✔</span>
 									{/if}
@@ -239,6 +242,10 @@
 						<input type="hidden" name="tournamentId" value={selectedTournament.id} />
 						<input type="hidden" name="era" value={selectedEra} />
 						<input type="hidden" name="faction" value={selectedFaction} />
+						<input type="hidden" name="fixedData" value={fixedData} />
+						{#each unitData as unit}
+							<input type="hidden" name="unit" value={JSON.stringify({ id: unit.mulData?.mulId, sk: unit.skill })} />
+						{/each}
 					{/if}
 				</form>
 			{/if}

@@ -70,13 +70,13 @@
 		--error: lightcoral;
 		--error-filter: invert(20%) sepia(40%) saturate(6999%) hue-rotate(353deg) brightness(87%) contrast(108%);
 		--error-foreground: black;
+		--warning: hsl(44, 80%, 47%);
 		--warning-filter: invert(83%) sepia(74%) saturate(475%) hue-rotate(2deg) brightness(88%) contrast(97%);
 		--responsive-padding: clamp(4px, 1dvh, 16px) clamp(4px, 1dvw, 16px);
 	}
 	:global(body) {
 		margin: 0;
 		padding: 0;
-		/* padding-right: 15px; */
 		width: 100dvw;
 		min-height: 100dvh;
 		overflow-x: hidden;

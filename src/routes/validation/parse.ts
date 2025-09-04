@@ -2,7 +2,6 @@ import type { TextContent, TextItem } from "pdfjs-dist/types/src/display/api";
 import { writeJsonToFile } from "$lib/utilities/utilities";
 
 export function getUnitDataFromPDF(content: TextContent, metadata: any) {
-	// writeJsonToFile(JSON.stringify(content));
 	if ((content.items[0] as TextItem).str == "Master Unit List - Forces") {
 		return { status: "success", data: parseMul(content) };
 	} else if (metadata.Creator && metadata.Creator == "Terminal") {
@@ -54,7 +53,6 @@ function parseTerminal(content: TextContent, style: "mul" | "detailed") {
 		return (value as TextItem).hasEOL;
 	});
 	const unitLines: TextItem[][] = [];
-
 	while (nextIndex != endingIndex && nextIndex != -1) {
 		const nextLine = unitItems.splice(0, nextIndex + 1);
 		unitLines.push(nextLine);

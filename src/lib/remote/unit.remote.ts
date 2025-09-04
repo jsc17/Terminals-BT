@@ -1,5 +1,6 @@
 import { query } from "$app/server";
 import * as z from "zod";
+import * as v from "valibot";
 import { prisma } from "$lib/server/prisma";
 import type { MulUnit } from "$lib/types/listTypes";
 import { handleParse } from "$lib/utilities/abilityUtilities";
@@ -73,4 +74,9 @@ export const isUnique = query(z.object({ mulId: z.number(), era: z.number() }), 
 export const isAvailable = query(z.object({ mulId: z.number(), eras: z.number().array(), factions: z.number().array() }), async (data) => {
 	const unit = await prisma.unit.findUnique({ where: { mulId: data.mulId, availability: { some: { era: { in: data.eras }, faction: { in: data.factions } } } } });
 	return unit != null;
+});
+
+export const getUnitNamesFromIds = query(v.array(v.number()), async (ids) => {
+	const results = await prisma.unit.findMany({ where: { mulId: { in: ids } }, select: { name: true, mulId: true } });
+	return new Map(results.map((o) => [o.mulId, o.name]));
 });

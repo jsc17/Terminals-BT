@@ -30,14 +30,17 @@
 			["/unitsearch", "Unit Search"],
 			["/changelog", "Change Log"],
 			["/settings", "Settings"],
-			["/play", "Digital List"],
+			["/play", "Matches"],
 			["/validation", "List Validation"],
-			["/collection", "Collection Manager"]
+			["/collection", "Collection Manager"],
+			["/todashboard", "T.O. Dashboard"]
 		])
 	);
 
 	let user: { username: string | undefined } = getContext("user");
 	const list: List = getContext("list");
+
+	let basePath = $derived(`/${page.url.pathname.split("/")[1]}`);
 
 	function openNav() {
 		navbar?.classList.add("show");
@@ -85,24 +88,25 @@
 <header>
 	<button bind:this={openNavButton} class="link-button" onclick={openNav} aria-label="Open navigation sidebar" aria-expanded="false" aria-controls="navbar">
 		<img src="/icons/menu.svg" alt="menu" />
-		{pageList.get(page.url.pathname)}
+		{pageList.get(basePath)}
 	</button>
 	<nav bind:this={navbar} id="navbar">
 		<button class="link-button close-menu-button" onclick={closeNav} aria-label="Close navigation sidebar"><img src="/icons/close.svg" alt="close button" /></button>
 		<ul>
-			<li><a href="/" aria-current={page.url.pathname === "/"} onclick={closeNav}>Home</a></li>
-			<li><a href="/about" aria-current={page.url.pathname === "/"} onclick={closeNav}>About</a></li>
+			<li><a href="/" aria-current={basePath === "/"} onclick={closeNav}>Home</a></li>
+			<li><a href="/about" aria-current={basePath === "/"} onclick={closeNav}>About</a></li>
 			<hr />
-			<li><a href="/listbuilder" aria-current={page.url.pathname === "/listbuilder"} onclick={closeNav}>Alpha Strike Listbuilder</a></li>
-			<li><a href="/unitsearch" aria-current={page.url.pathname === "/unitsearch"} onclick={closeNav}>Alpha Strike Unit Search</a></li>
-			<li><a href="/play" aria-current={page.url.pathname === "/play"} onclick={closeNav}>Alpha Strike Digital List</a></li>
-			<li><a href="/validation" aria-current={page.url.pathname === "/validation"} onclick={closeNav}>Tournament List Validator</a></li>
-			<li><a href="/collection" aria-current={page.url.pathname === "/collection"} onclick={closeNav}>Collection Manager</a></li>
+			<li><a href="/listbuilder" aria-current={basePath === "/listbuilder"} onclick={closeNav}>Alpha Strike Listbuilder</a></li>
+			<li><a href="/unitsearch" aria-current={basePath === "/unitsearch"} onclick={closeNav}>Alpha Strike Unit Search</a></li>
+			<li><a href="/play" aria-current={basePath === "/play"} onclick={closeNav}>Alpha Strike Matches</a></li>
+			<li><a href="/validation" aria-current={basePath === "/validation"} onclick={closeNav}>Tournament List Validator</a></li>
+			<li><a href="/todashboard" aria-current={basePath === "/todashboard"} onclick={closeNav}>T.O. Dashboard</a></li>
+			<li><a href="/collection" aria-current={basePath === "/collection"} onclick={closeNav}>Collection Manager</a></li>
 			<hr />
 			<li><a href="http://masterunitlist.info" target="_blank">Master Unit List</a></li>
 			<li><a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">Wolfnet 350 Rules</a></li>
 			<hr />
-			<li><a href="/changelog" aria-current={page.url.pathname === "/changelog"} onclick={closeNav}>Changelog</a></li>
+			<li><a href="/changelog" aria-current={basePath === "/changelog"} onclick={closeNav}>Changelog</a></li>
 			<li><a href="https://github.com/jsc17/Terminals-BT" target="_blank">Page Source Code: Github</a></li>
 		</ul>
 	</nav>

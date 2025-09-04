@@ -38,6 +38,9 @@
 	border: none;
 	background-color: transparent;
 }
+.generic-popover-trigger:hover {
+	cursor: pointer;
+}
 .generic-popover-content {
 	background-color: var(--background);
 	border: 1px solid var(--border);

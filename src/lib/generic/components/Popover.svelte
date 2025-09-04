@@ -15,7 +15,7 @@
 
 <Popover.Root bind:open {onOpenChange}>
 	<Popover.Trigger class="generic-popover-trigger">{@render trigger?.()}</Popover.Trigger>
-	<Popover.Content class="generic-popover-content">
+	<Popover.Content class="generic-popover-content" interactOutsideBehavior="ignore">
 		{@render title?.()}
 		{@render children?.()}
 	</Popover.Content>

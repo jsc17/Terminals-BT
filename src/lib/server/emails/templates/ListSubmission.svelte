@@ -8,8 +8,9 @@
 		era: string;
 		faction: string;
 		tournamentRules: string;
+		fixed: boolean;
 	};
-	const { tournamentName, playerName, playerEmail, era, faction, tournamentRules }: Props = $props();
+	const { tournamentName, playerName, playerEmail, era, faction, tournamentRules, fixed }: Props = $props();
 </script>
 
 <Html>
@@ -20,5 +21,8 @@
 		<Text>Era: {era}</Text>
 		<Text>Faction: {faction}</Text>
 		<Text>The attached list has passed all validation checks for {tournamentRules}</Text>
+		{#if fixed}
+			<Text>Units were manually fixed.</Text>
+		{/if}
 	</Section>
 </Html>

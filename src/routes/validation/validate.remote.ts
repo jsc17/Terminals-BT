@@ -1,22 +1,12 @@
 import { form, query } from "$app/server";
 import { getGeneralId } from "$lib/remote/era-faction.remote";
 import { getMULDataFromId, getMULDataFromName, isAvailable, isUnique } from "$lib/remote/unit.remote";
-import type { MulUnit } from "$lib/types/listTypes";
 import { getDocument } from "pdfjs-dist";
 import { getUnitDataFromPDF } from "./parse";
 import { prisma } from "$lib/server/prisma";
 import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
-
-export type ValidationUnitData = {
-	id: string;
-	name: string;
-	mulData?: MulUnit;
-	available?: boolean;
-	unique?: boolean;
-	skill: number;
-	pv: number;
-	link?: string;
-};
+import type { ValidationUnitData } from "./types";
+import { nanoid } from "nanoid";
 
 export const getUnitData = form(async (data) => {
 	const fileData = data.get("listFile") as File;
@@ -56,6 +46,13 @@ export const getUnitData = form(async (data) => {
 				link: unit ? `http://masterunitlist.info/Unit/Details/${unit.data!.mulId}` : undefined,
 				unique: unique,
 				available: available
+			});
+		} else {
+			unitData.push({
+				id: nanoid(),
+				name: parsedUnit.name,
+				skill: parsedUnit.skill,
+				pv: parsedUnit.pv
 			});
 		}
 	}

@@ -1,22 +1,10 @@
-import { query, form, getRequestEvent } from "$app/server";
-import { prisma } from "$lib/server/prisma";
+import { query, form } from "$app/server";
 import { tournamentEmailTransporter } from "$lib/server/emails/mailer.server";
 import { ListSubmission } from "$lib/server/emails/templates";
 import { render } from "svelty-email";
 import { getEraName, getFactionName } from "$lib/remote/era-faction.remote";
 import { getRulesByName } from "$lib/types/rulesets";
 import * as fs from "fs/promises";
-
-export const getUsersTournamentList = query(async () => {
-	const { locals } = getRequestEvent();
-	if (!locals.user) return { status: "failed", message: "User not logged in" };
-
-	const data = await prisma.tournament.findMany({
-		where: { userId: locals.user.id, tournament_date: { gte: new Date() } },
-		select: { id: true, name: true, location: true, era: true, tournament_date: true, tournamentRules: true }
-	});
-	return { status: "success", data };
-});
 
 export const getApprovedTournamentList = query(async () => {
 	const data = await prisma.tournament.findMany({
@@ -36,6 +24,8 @@ export const submitList = form(async (data) => {
 	const pdf = data.get("listFile") as File;
 	const era = Number(data.get("era")?.toString());
 	const faction = Number(data.get("faction")?.toString());
+	const fixed = data.get("fixedData")?.toString() == "true";
+	const unitList = data.getAll("unit").map((u) => u.toString());
 
 	const pdfData = await pdf.arrayBuffer();
 	const buffer = Buffer.from(pdfData);
@@ -51,7 +41,7 @@ export const submitList = form(async (data) => {
 		await fs.writeFile(filename, buffer);
 		await prisma.tournament.update({
 			where: { id: Number(tournamentId) },
-			data: { participants: { create: { name: playerName, email: playerEmail, listName: filename, era, faction } } }
+			data: { participants: { create: { name: playerName, email: playerEmail, listName: filename, era, faction, fixed, units: JSON.stringify(unitList) } } }
 		});
 		const emailHTML = render({
 			//@ts-ignore
@@ -62,7 +52,8 @@ export const submitList = form(async (data) => {
 				playerEmail,
 				era: await getEraName(era),
 				faction: await getFactionName(faction),
-				tournamentRules: getRulesByName(tournament.tournamentRules)?.display ?? "Not Found"
+				tournamentRules: getRulesByName(tournament.tournamentRules)?.display ?? "Not Found",
+				fixed
 			}
 		});
 		console.log("email sending");

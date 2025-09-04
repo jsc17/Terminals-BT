@@ -1,15 +1,17 @@
 <script lang="ts">
 	import { Dialog } from "$lib/generic";
 	import { toastController } from "$lib/stores";
-	import { type ValidationUnitData, fixUnitData, getPossibleUnitList } from "./validate.remote";
+	import type { ValidationUnitData } from "./types";
+	import { fixUnitData, getPossibleUnitList } from "./validate.remote";
 
 	type Props = {
 		unit: ValidationUnitData;
 		era: number;
 		faction: number;
+		fixedData: boolean;
 	};
 
-	let { unit = $bindable(), era, faction }: Props = $props();
+	let { unit = $bindable(), era, faction, fixedData = $bindable() }: Props = $props();
 
 	let open = $state(false);
 </script>
@@ -32,6 +34,7 @@
 					toastController.addToast(fixUnitData.result.message ?? "Invalid Message recieved");
 				} else {
 					unit = fixUnitData.result!.data!;
+					fixedData = true;
 					open = false;
 				}
 			})}

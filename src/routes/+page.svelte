@@ -14,7 +14,7 @@
 			<p><a href="/unitsearch">Alpha Strike Unit Lookup</a>: Detailed unit search.</p>
 		</li>
 		<li>
-			<p><a href="/play">Alpha Strike Digital List</a>: Digital card list to play Alpha Strike without wasting paper</p>
+			<p><a href="/play">Alpha Strike Matches</a>: Online matches to play Alpha Strike without wasting paper</p>
 		</li>
 		<li>
 			<p><a href="/collection">Collection Manager</a>: List and Tag owned units for list building</p>
@@ -26,14 +26,11 @@
 			<p><a href="/validation">List Validator</a>: Tournament list validator</p>
 		</li>
 		<li>
-			<a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">Wolfnet 350 Tournament Rules</a>
-		</li>
-		<!-- <li>
-			<p><a href="/350validation">AS350 List Validator</a> (Alpha): List validator for wolfnet 350 rules</p>
+			<p><a href="/todashboard">Tournament Organizer Dashboard</a>: Dashboard for T.O.'s to create and manage tournaments</p>
 		</li>
 		<li>
-			<p><a href="/tournament">AS350 Tournament Dashboard</a> (Alpha): 350 Tournament manager to handle player list validation</p>
-		</li> -->
+			<a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">Wolfnet 350 Tournament Rules</a>
+		</li>
 	</ul>
 	<h2>Other Stuff:</h2>
 	<ul>

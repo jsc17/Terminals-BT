@@ -221,7 +221,8 @@
 								<p>Required Era:</p>
 								<p>{await getEraName(selectedTournament.era)}</p>
 							{:else}
-								<p>Era: Any Era</p>
+								<p>Era:</p>
+								<p>Any Era</p>
 							{/if}
 							<p>Rules:</p>
 							<p>{getRulesByName(selectedTournament.tournamentRules)?.display}</p>

@@ -5,6 +5,7 @@ import { render } from "svelty-email";
 import { getEraName, getFactionName } from "$lib/remote/era-faction.remote";
 import { getRulesByName } from "$lib/types/rulesets";
 import * as fs from "fs/promises";
+import { prisma } from "$lib/server/prisma";
 
 export const getApprovedTournamentList = query(async () => {
 	const data = await prisma.tournament.findMany({

@@ -1,17 +1,22 @@
-type Achievement<T> = {
-	first?: T[];
-	second?: T[];
-	third?: T[];
+type Achievements = {
+	highestPVUnit: [string, { player: string; unit: string; skill: number; pv: number }[]][];
+	lowestPVList: [string, { player: string; pv: number; unitCount: number }[]][];
+	mostCommonUnit: [string, { unit: string; count: number }[]][];
 };
 
-type Achievements = {
-	highestPVUnit: Achievement<{ unit: string; skill: number; pv: number; player: string }>;
-	lowestPVList: Achievement<{ player: string; pv: number; unitCount: number }>;
+type BreakDown = {
+	group: string;
+	value: number;
+	percent: number;
+};
+
+type Breakdowns = {
+	eraList: BreakDown[];
+	factionList: BreakDown[];
+	unitTypes: BreakDown[];
 };
 
 export type TournamentStatistics = {
 	achievements: Achievements;
-
-	//statistics
-	// mostCommonUnit: { unit: string; count: number }[];
+	breakdowns: Breakdowns;
 };

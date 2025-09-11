@@ -7,6 +7,9 @@
 </script>
 
 <main>
+	<section class="card">
+		<p class="error">This is an example page. It is available to everyone and none of the data here is real. No changes made to this page will persist past refreshing it.</p>
+	</section>
 	<svelte:boundary>
 		{#snippet pending()}
 			Loading tournament data

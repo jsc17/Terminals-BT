@@ -120,7 +120,7 @@
 	padding: 10px 2px;
 	border-radius: var(--radius);
 	margin-right: 4px;
-	z-index: 40;
+	z-index: 100;
 }
 [data-dropdown-menu-item] {
 	font-size: 0.9em;

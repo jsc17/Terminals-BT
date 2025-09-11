@@ -23,8 +23,8 @@ export const submitList = form(async (data) => {
 	if (!playerEmail) return { status: "failed", message: "Error with player name. Please try submitting your list again" };
 
 	const pdf = data.get("listFile") as File;
-	const era = Number(data.get("era")?.toString());
-	const faction = Number(data.get("faction")?.toString());
+	const era = await getEraName(Number(data.get("era")?.toString()));
+	const faction = await getFactionName(Number(data.get("faction")?.toString()));
 	const fixed = data.get("fixedData")?.toString() == "true";
 	const unitList = data.getAll("unit").map((u) => u.toString());
 
@@ -51,8 +51,8 @@ export const submitList = form(async (data) => {
 				tournamentName: tournament.name,
 				playerName,
 				playerEmail,
-				era: await getEraName(era),
-				faction: await getFactionName(faction),
+				era,
+				faction,
 				tournamentRules: getRulesByName(tournament.tournamentRules)?.display ?? "Not Found",
 				fixed
 			}

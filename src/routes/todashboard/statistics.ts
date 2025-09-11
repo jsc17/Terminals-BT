@@ -1,9 +1,10 @@
+import { getFactionName } from "$lib/remote/era-faction.remote";
 import { getMULDataFromId } from "$lib/remote/unit.remote";
 import type { MulUnit } from "$lib/types/listTypes";
 import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 import { type TournamentStatistics } from "./types";
 
-export async function calculateTournamentStatistics(participants: { name: string; units: string; era: number; faction: number }[]): Promise<TournamentStatistics> {
+export async function calculateTournamentStatistics(participants: { name: string; units: string; era: string; faction: string }[]): Promise<TournamentStatistics> {
 	let unitData: { player: string; data: MulUnit; skill: number; pv: number }[] = [];
 	let listCosts: { player: string; pv: number; unitCount: number }[] = [];
 	for (const participant of participants) {
@@ -19,29 +20,49 @@ export async function calculateTournamentStatistics(participants: { name: string
 	}
 
 	//group units by pv, then sort the groups
-	const highestCostUnit = Object.entries(
+	const highestPVUnit = Object.entries(
 		Object.groupBy(
 			unitData.map((u) => ({ player: u.player, unit: u.data.name, skill: u.skill, pv: u.pv })),
 			(u) => u.pv
 		)
-	)
-		.sort((a, b) => {
-			return Number(b[0]) - Number(a[0]);
-		})
-		.map((g) => g[1]);
+	).sort((a, b) => {
+		return Number(b[0]) - Number(a[0]);
+	});
 
-	const lowestCostList = Object.entries(Object.groupBy(listCosts, (l) => l.pv))
-		.sort((a, b) => {
-			return Number(b[0]) - Number(a[0]);
-		})
-		.map((g) => g[1]);
+	//lowest cost list
+	const lowestPVList = Object.entries(Object.groupBy(listCosts, (l) => l.pv)).sort((a, b) => {
+		return Number(a[0]) - Number(b[0]);
+	});
+
+	let unitCounts = new Map<string, number>();
+	for (const unit of unitData) {
+		unitCounts.set(unit.data.name, (unitCounts.get(unit.data.name) ?? 0) + 1);
+	}
+	const mostCommonUnit = Object.entries(
+		Object.groupBy(
+			[...unitCounts].map((c) => ({ unit: c[0], count: c[1] })),
+			(u) => u.count
+		)
+	).sort((a, b) => {
+		return Number(b[0]) - Number(a[0]);
+	});
+
+	const factionList = Object.entries(Object.groupBy(participants, (p) => p.faction)).map((e) => ({ group: e[0], count: e[1]?.length ?? 0 }));
+	const eraList = Object.entries(Object.groupBy(participants, (p) => p.era)).map((e) => ({ group: e[0], count: e[1]?.length ?? 0 }));
+	const unitTypes = Object.entries(Object.groupBy(unitData, (u) => u.data.type)).map((e) => ({ group: e[0], count: e[1]?.length ?? 0 }));
 
 	let statistics: TournamentStatistics = {
 		achievements: {
-			highestPVUnit: { first: highestCostUnit[0], second: highestCostUnit[1], third: highestCostUnit[2] },
-			lowestPVList: { first: lowestCostList[0], second: lowestCostList[1], third: lowestCostList[2] }
+			highestPVUnit: highestPVUnit.map((g) => [g[0], g[1] ?? []]),
+			lowestPVList: lowestPVList.map((g) => [g[0], g[1] ?? []]),
+			mostCommonUnit: mostCommonUnit.map((g) => [g[0], g[1] ?? []])
+		},
+		breakdowns: {
+			eraList: eraList.map((d) => ({ group: d.group, value: d.count, percent: d.count / eraList.length })),
+			factionList: factionList.map((d) => ({ group: d.group, value: d.count, percent: d.count / factionList.length })),
+			unitTypes: unitTypes.map((d) => ({ group: d.group, value: d.count, percent: d.count / unitTypes.length }))
 		}
 	};
-	console.log(statistics);
+
 	return statistics;
 }

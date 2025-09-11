@@ -9,9 +9,10 @@
 		open?: boolean;
 		trigger?: Snippet;
 		triggerClasses?: string;
+		onOpenChange?: () => void;
 	};
 
-	let { items = $bindable(), open = $bindable(false), trigger, triggerClasses }: Props = $props();
+	let { items = $bindable(), open = $bindable(false), trigger, triggerClasses, onOpenChange }: Props = $props();
 </script>
 
 {#snippet renderItem(item: MenuItem)}
@@ -60,7 +61,7 @@
 	{/if}
 {/snippet}
 
-<DropdownMenu.Root>
+<DropdownMenu.Root {onOpenChange}>
 	{#if trigger}
 		<DropdownMenu.Trigger class={triggerClasses}>
 			{@render trigger()}

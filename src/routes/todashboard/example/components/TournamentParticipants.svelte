@@ -76,7 +76,7 @@
 									type: "item",
 									label: "Delete Participant",
 									onSelect: () => {
-										deleteParticipant(participant.id);
+										toastController.addToast("Can't delete participant from the demo page for the moment");
 									}
 								}
 							]}

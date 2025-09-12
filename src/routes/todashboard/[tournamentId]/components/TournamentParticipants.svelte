@@ -57,10 +57,10 @@
 				<tr>
 					<td>{participant.name}</td>
 					<td>{participant.email}</td>
+					<td>{participant.dateSubmitted.toDateString()}</td>
 					{#if !fixedEra}
 						<td>{participant.era}</td>
 					{/if}
-					<td>{participant.dateSubmitted.toDateString()}</td>
 					<td>{participant.faction}</td>
 					<td>
 						<DropdownMenu

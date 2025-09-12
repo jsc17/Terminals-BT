@@ -9,6 +9,7 @@
 <main>
 	<section class="card">
 		<p class="error">This is an example page. It is available to everyone and none of the data here is real. No changes made to this page will persist past refreshing it.</p>
+		<p>The sample tournament is open era, but if an era was selected the column wouldn't be included in the player table or in the statistics below</p>
 	</section>
 	<svelte:boundary>
 		{#snippet pending()}

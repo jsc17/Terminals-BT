@@ -50,7 +50,6 @@ function createUnitLine(unit: ListUnit, listStyle: string, indent: boolean, meas
 				? "-"
 				: `${unit.baseUnit.damageS}${unit.baseUnit.damageSMin ? "*" : ""}/${unit.baseUnit.damageM}${unit.baseUnit.damageMMin ? "*" : ""}/${unit.baseUnit.damageL}${unit.baseUnit.damageLMin ? "*" : ""}`;
 		let healthString = unit.baseUnit.health == undefined ? "-" : `${unit.baseUnit.health} (${unit.baseUnit.armor}a+${unit.baseUnit.structure}s)`;
-		console.log(moveString);
 		unitLine = [
 			{ text: unit.baseUnit.name, style: style },
 			{ text: unit.baseUnit.subtype, style: "cellCentered" },
@@ -356,7 +355,7 @@ async function createUnitCardColumns(
 	}
 
 	const unitCardColumns: Column[] = [];
-	formationsToPrint.forEach((formation) => {
+	formationsToPrint.forEach((formation, index, arr) => {
 		if (formation.unitcards.length == 0) return;
 		const unitCards: { image: any; width: number; style: string }[] = [];
 		for (const unitCard of formation.unitcards) {
@@ -402,7 +401,8 @@ async function createUnitCardColumns(
 				}
 			],
 			columnGap: 2,
-			marginTop: 5
+			marginTop: 5,
+			pageBreak: formation.unitcards.length > 4 && index != arr.length - 1 ? "after" : undefined
 		});
 	});
 	return unitCardColumns;

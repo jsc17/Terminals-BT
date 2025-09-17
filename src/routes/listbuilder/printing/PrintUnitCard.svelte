@@ -31,7 +31,7 @@
 	<div class="name-container">
 		<div class="flex-between">
 			<p class="unit-variant">{unit.baseUnit.variant}</p>
-			<p class="unit-pv bold">PV: {unit.baseUnit.pv}</p>
+			<p class="unit-pv bold">PV: {unit.cost}</p>
 		</div>
 		<div class="flex-between">
 			<p class="unit-name bold">{unit.baseUnit.class}</p>

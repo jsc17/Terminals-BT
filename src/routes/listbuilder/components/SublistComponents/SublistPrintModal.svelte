@@ -65,6 +65,9 @@
 					>Horizontal</label
 				>
 			</div>
+			<div class="inline gap8">
+				<input type="radio" name="sublistPrintLayout" id="card" value="card" bind:group={settings.sublistUI.sublistPrintAllOrientation} /><label for="horizontal">Card</label>
+			</div>
 		</fieldset>
 
 		<div class="inline gap8">

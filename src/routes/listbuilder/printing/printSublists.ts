@@ -1,6 +1,6 @@
 import type { ListUnit } from "$lib/types/listTypes";
 import { printer } from "$lib/server/printer";
-import type { Column, Content, ContentColumns, TDocumentDefinitions } from "pdfmake/interfaces";
+import type { Column, Content, ContentColumns, ContentStack, ContentTable, Table, TDocumentDefinitions } from "pdfmake/interfaces";
 import BlobStream, { type IBlobStream } from "blob-stream";
 
 type PrintableSublist = {
@@ -24,49 +24,90 @@ const scenarios = [
 ];
 
 /**
- * @param layout should be horizontal or vertical
+ * @param layout should be horizontal, vertical, or card
  * @param grouped on/off
  */
 
 export function createSublistsPdf(sublists: PrintableSublist[], layout: string, grouped: boolean, name: string): Promise<Blob> {
-	const dd: TDocumentDefinitions = {
-		pageSize: "LETTER",
-		content: [{ text: `${name} sublists:`, style: "header" }, createSublistsBody(sublists, layout, grouped)],
-		footer: {
-			columns: [{ text: "https://Terminal.tools/listbuilder", fontSize: 8, margin: [25, 0, 0, 25] }]
-		},
-		defaultStyle: {
-			font: "Helvetica",
-			fontSize: 8
-		},
-		styles: {
-			header: {
-				fontSize: 16,
-				bold: true,
-				margin: [0, 0, 0, 16]
+	let dd: TDocumentDefinitions;
+
+	if (layout != "card") {
+		dd = {
+			pageSize: "LETTER",
+			content: [{ text: `${name} sublists:`, style: "header" }, createSublistsBody(sublists, layout, grouped)],
+			footer: {
+				columns: [{ text: "https://Terminal.tools/listbuilder", fontSize: 8, margin: [25, 0, 0, 25] }]
 			},
-			verticalRow: {
-				marginBottom: 16
+			defaultStyle: {
+				font: "Helvetica",
+				fontSize: 8
 			},
-			columnHeader: {
-				margin: [0, 2, 0, 2],
-				bold: true
-			},
-			unitRow: {
-				margin: [0, 1, 0, 1]
-			},
-			horizontalHeader: {
-				margin: [0, 2, 0, 2],
-				bold: true,
-				fontSize: 10
-			},
-			horizontalRow: {
-				margin: [0, 2, 0, 8],
-				lineHeight: 1.25,
-				fontSize: 10
+			styles: {
+				header: {
+					fontSize: 16,
+					bold: true,
+					margin: [0, 0, 0, 16]
+				},
+				verticalRow: {
+					marginBottom: 16
+				},
+				columnHeader: {
+					margin: [0, 2, 0, 2],
+					bold: true
+				},
+				unitRow: {
+					margin: [0, 1, 0, 1]
+				},
+				horizontalHeader: {
+					margin: [0, 2, 0, 2],
+					bold: true,
+					fontSize: 10
+				},
+				horizontalRow: {
+					margin: [0, 2, 0, 8],
+					lineHeight: 1.25,
+					fontSize: 10
+				}
 			}
-		}
-	};
+		};
+	} else {
+		dd = {
+			pageSize: "LETTER",
+			pageMargins: 9,
+			content: [createSublistsBody(sublists, layout, grouped)],
+			defaultStyle: {
+				font: "Helvetica",
+				fontSize: 8
+			},
+			styles: {
+				header: {
+					fontSize: 16,
+					bold: true,
+					margin: [0, 0, 0, 16]
+				},
+				verticalRow: {
+					marginBottom: 16
+				},
+				columnHeader: {
+					margin: [0, 2, 0, 2],
+					bold: true
+				},
+				unitRow: {
+					margin: [0, 1, 0, 1]
+				},
+				horizontalHeader: {
+					margin: [0, 2, 0, 2],
+					bold: true,
+					fontSize: 10
+				},
+				horizontalRow: {
+					margin: [0, 2, 0, 8],
+					lineHeight: 1.25,
+					fontSize: 10
+				}
+			}
+		};
+	}
 	return new Promise((resolve, reject) => {
 		const pdfDoc = printer.createPdfKitDocument(dd);
 		pdfDoc
@@ -85,23 +126,21 @@ export function createSublistsPdf(sublists: PrintableSublist[], layout: string, 
 function createSublistsBody(sublists: PrintableSublist[], layout: string, grouped: boolean): Content {
 	let content: Content[] = [];
 
-	if (grouped) {
-		const sortedSublists = sublists.sort((a, b) => {
-			return scenarios.indexOf(a.scenario) - scenarios.indexOf(b.scenario);
-		});
-		if (layout == "vertical") {
-			createVerticalBody(sortedSublists, content);
-		} else {
-			createHorizontalBody(sortedSublists, content);
-		}
-	} else {
-		if (layout == "vertical") {
-			createVerticalBody(sublists, content);
-		} else {
-			createHorizontalBody(sublists, content);
-		}
-	}
+	const sortedSublists = sublists.sort((a, b) => {
+		return scenarios.indexOf(a.scenario) - scenarios.indexOf(b.scenario);
+	});
 
+	switch (layout) {
+		case "vertical":
+			createVerticalBody(grouped ? sortedSublists : sublists, content);
+			break;
+		case "horizontal":
+			createHorizontalBody(grouped ? sortedSublists : sublists, content);
+			break;
+		case "card":
+			createCardBody(grouped ? sortedSublists : sublists, content);
+			break;
+	}
 	return content;
 }
 
@@ -166,4 +205,29 @@ function createHorizontalBody(sublists: PrintableSublist[], content: Content[]) 
 			style: "horizontalRow"
 		});
 	}
+}
+
+function createCardBody(sublists: PrintableSublist[], content: Content[]) {
+	const sublistArray: ContentTable[] = [];
+
+	sublists.forEach((s) => {
+		const sublistItem = {
+			table: {
+				headerRows: 0,
+				body: [["Test"]],
+				widths: [180],
+				heights: [252]
+			}
+		};
+
+		sublistArray.push(sublistItem);
+	});
+
+	content.push({
+		columns: [
+			{ width: "33%", stack: sublistArray.filter((v, i) => i % 3 == 0) },
+			{ width: "33%", stack: sublistArray.filter((v, i) => i % 3 == 1) },
+			{ width: "33%", stack: sublistArray.filter((v, i) => i % 3 == 2) }
+		]
+	});
 }

@@ -9,6 +9,7 @@
 	import MechCritBox from "./critboxes/MechCritBox.svelte";
 	import ProtoCritBox from "./critboxes/ProtoCritBox.svelte";
 	import { getSPAfromId } from "$lib/utilities/listUtilities";
+	import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 
 	type Props = {
 		unit: ListUnit;

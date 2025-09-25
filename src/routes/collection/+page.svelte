@@ -1,12 +1,11 @@
 <script lang="ts">
 	import VirtualList from "@humanspeak/svelte-virtual-list";
-	import { getTags, getTaggedUnits, getUnitGroups, addUnitToCollection, updateQuantity, addTagToUnit } from "$lib/remote/collection.remote";
+	import { getTags, getTaggedUnits, getUnitGroups, addUnitToCollection, addTagToUnit } from "$lib/remote/collection.remote";
 	import { getContext } from "svelte";
 	import { SvelteMap, SvelteSet } from "svelte/reactivity";
 	import TagEditModal from "./TagEditModal.svelte";
 	import EditUnitModal from "./EditUnitModal.svelte";
 	import { toastController } from "$lib/stores";
-	import { appWindow } from "$lib/stores";
 
 	let user: { username: string | undefined } = getContext("user");
 
@@ -28,7 +27,6 @@
 	let unitGroupListPromise = getUnitGroups();
 	let unitFilter = $state<string>();
 	let unitGroupList = $derived<string[]>(unitGroupListPromise.current?.filter((v) => v.toLowerCase().includes(unitFilter?.toLowerCase() ?? "")) ?? []);
-	let selectedUnit = $state<string>();
 
 	function filterUnit(item: any) {
 		if (!item.label.toLowerCase().includes(nameFilter.toLowerCase())) return false;
@@ -83,7 +81,7 @@
 						<VirtualList items={filteredUnits} itemsClass="test-collection">
 							{#snippet renderItem(item)}
 								<div class="collection-model-row">
-									<input type="checkbox" name="unitId" value={item.id} form="unit-management" />
+									<input type="checkbox" name="unitId[]" value={item.id} form="unit-management" />
 									<p class="tagged-unit-name">{item.label}</p>
 									<p class="tagged-unit-quantity">x{item.quantity}</p>
 									<div class="selected-tags">
@@ -122,19 +120,18 @@
 					<p class="muted">Adds the selected model to your collection with the currently selected tags</p>
 					<div class="justify-end">
 						<label>Filter: <input type="text" bind:value={unitFilter} style="width: 150px;" /></label>
-						<select name="new-unit-name" id="new-unit-name" style="width: 250px;">
+						<select name="newUnitName" id="new-unit-name" style="width: 250px;">
 							{#each unitGroupList as group}
 								<option value={group}>{group}</option>
 							{/each}
 						</select>
 						<button>Add</button>
-						<input type="hidden" name="new-unit-name" value={selectedUnit} />
 					</div>
 				</div>
 				<div class="manage-tag-container">
 					<div class="manage-tag-header">
-						<label for="tag-filter">
-							<select name="tag-filter" id="tag-filter" bind:value={selectedAddUnitTag}>
+						<label>
+							<select id="tagFilter" bind:value={selectedAddUnitTag}>
 								{#each addTagList as tag}
 									<option value={tag}>{tag.label}</option>
 								{/each}
@@ -148,7 +145,7 @@
 								<span class="primary">x</span>
 								{tagLabel}
 							</button>
-							<input type="hidden" name="tag" value={tagId} />
+							<input type="hidden" name="tag[]" value={tagId} />
 						{/each}
 					</div>
 				</div>

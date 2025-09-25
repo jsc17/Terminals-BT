@@ -6,6 +6,8 @@ import { getEraName, getFactionName } from "$lib/remote/era-faction.remote";
 import { getRulesByName } from "$lib/types/rulesets";
 import * as fs from "fs/promises";
 import { prisma } from "$lib/server/prisma";
+import * as v from "valibot";
+import { permission } from "process";
 
 export const getApprovedTournamentList = query(async () => {
 	const data = await prisma.tournament.findMany({
@@ -15,60 +17,64 @@ export const getApprovedTournamentList = query(async () => {
 	return { status: "success", data };
 });
 
-export const submitList = form(async (data) => {
-	const tournamentId = data.get("tournamentId");
-	const playerName = data.get("playerName")?.toString();
-	if (!playerName) return { status: "failed", message: "Error with player name. Please try submitting your list again" };
-	const playerEmail = data.get("playerEmail")?.toString();
-	if (!playerEmail) return { status: "failed", message: "Error with player name. Please try submitting your list again" };
+export const submitList = form(
+	v.object({
+		tournamentId: v.string(),
+		playerName: v.string(),
+		playerEmail: v.string(),
+		listFile: v.file(),
+		eraId: v.string(),
+		factionId: v.string(),
+		fixedData: v.string(),
+		unit: v.array(v.string())
+	}),
+	async ({ tournamentId, playerName, playerEmail, listFile, eraId, factionId, fixedData, unit }) => {
+		console.log();
+		const era = await getEraName(Number(eraId));
+		const faction = await getFactionName(Number(factionId));
 
-	const pdf = data.get("listFile") as File;
-	const era = await getEraName(Number(data.get("era")?.toString()));
-	const faction = await getFactionName(Number(data.get("faction")?.toString()));
-	const fixed = data.get("fixedData")?.toString() == "true";
-	const unitList = data.getAll("unit").map((u) => u.toString());
+		const pdfData = await listFile.arrayBuffer();
+		const buffer = Buffer.from(pdfData);
+		const base64String = buffer.toString("base64");
 
-	const pdfData = await pdf.arrayBuffer();
-	const buffer = Buffer.from(pdfData);
-	const base64String = buffer.toString("base64");
-
-	const tournament = await prisma.tournament.findUnique({
-		where: {
-			id: Number(tournamentId)
-		}
-	});
-	if (tournament) {
-		const filename = `./files/tournament-lists/${crypto.randomUUID()}.pdf`;
-		await fs.writeFile(filename, buffer);
-		await prisma.tournament.update({
-			where: { id: Number(tournamentId) },
-			data: { participants: { create: { name: playerName, email: playerEmail, listName: filename, era, faction, fixed, units: JSON.stringify(unitList) } } }
-		});
-		const emailHTML = render({
-			//@ts-ignore
-			template: ListSubmission,
-			props: {
-				tournamentName: tournament.name,
-				playerName,
-				playerEmail,
-				era,
-				faction,
-				tournamentRules: getRulesByName(tournament.tournamentRules)?.display ?? "Not Found",
-				fixed
+		const tournament = await prisma.tournament.findUnique({
+			where: {
+				id: Number(tournamentId)
 			}
 		});
-		console.log("email sending");
-		const info = await tournamentEmailTransporter.sendMail({
-			from: process.env.TOURNAMENT_EMAIL_SENDER, // sender address
-			to: tournament.email, // list of receivers
-			subject: tournament.emailSubject ?? `${tournament.name} submission`, // Subject line
-			html: emailHTML,
-			attachments: [{ filename: pdf.name, content: base64String, encoding: "base64" }]
-		});
-		console.log("Message sent: %s", info.messageId);
-		return { status: "success", message: "Email sent to tournament organizer" };
-	} else {
-		console.log("tournament not found");
-		return { status: "failed", message: "Please try submitting your list again" };
+		if (tournament) {
+			const filename = `./files/tournament-lists/${crypto.randomUUID()}.pdf`;
+			await fs.writeFile(filename, buffer);
+			await prisma.tournament.update({
+				where: { id: Number(tournamentId) },
+				data: { participants: { create: { name: playerName, email: playerEmail, listName: filename, era, faction, fixed: fixedData == "true", units: JSON.stringify(unit) } } }
+			});
+			const emailHTML = render({
+				//@ts-ignore
+				template: ListSubmission,
+				props: {
+					tournamentName: tournament.name,
+					playerName,
+					playerEmail,
+					era,
+					faction,
+					tournamentRules: getRulesByName(tournament.tournamentRules)?.display ?? "Not Found",
+					fixedData
+				}
+			});
+			console.log("email sending");
+			const info = await tournamentEmailTransporter.sendMail({
+				from: process.env.TOURNAMENT_EMAIL_SENDER, // sender address
+				to: tournament.email, // list of receivers
+				subject: tournament.emailSubject ?? `${tournament.name} submission`, // Subject line
+				html: emailHTML,
+				attachments: [{ filename: listFile.name, content: base64String, encoding: "base64" }]
+			});
+			console.log("Message sent: %s", info.messageId);
+			return { status: "success", message: "Email sent to tournament organizer" };
+		} else {
+			console.log("tournament not found");
+			return { status: "failed", message: "Please try submitting your list again" };
+		}
 	}
-});
+);

@@ -7,14 +7,15 @@ import { prisma } from "$lib/server/prisma";
 import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 import type { ValidationUnitData } from "./types";
 import { nanoid } from "nanoid";
+import * as v from "valibot";
 
-export const getUnitData = form(async (data) => {
-	const fileData = data.get("listFile") as File;
-	const era = Number(data.get("selectedEra")?.toString());
-	const faction = Number(data.get("selectedFaction")?.toString());
+export const getUnitData = form(v.object({ listFile: v.file(), selectedEra: v.string(), selectedFaction: v.string() }), async ({ listFile, selectedEra, selectedFaction }) => {
+	console.log("validating");
+	const era = Number(selectedEra);
+	const faction = Number(selectedFaction);
 	let unitData: ValidationUnitData[] = [];
 
-	const buffer = await fileData.arrayBuffer();
+	const buffer = await listFile.arrayBuffer();
 	const pdf = await getDocument(buffer).promise;
 	const metadata = (await pdf.getMetadata()).info;
 	const page = await pdf.getPage(1);
@@ -60,43 +61,45 @@ export const getUnitData = form(async (data) => {
 	return { status: "success", data: unitData };
 });
 
-export const getPossibleUnitList = form(async (data) => {
-	const searchTerm = data.get("searchTerm")?.toString();
+export const getPossibleUnitList = form(v.object({ searchTerm: v.string() }), async ({ searchTerm }) => {
 	const results = await prisma.unit.findMany({ where: { name: { contains: searchTerm } }, select: { mulId: true, name: true } });
 
 	await nothing().refresh();
 	return results;
 });
 
-export const fixUnitData = form(async (data) => {
-	const mulId = Number(data.get("selectedUnitId")?.toString());
-	const mulData = await getMULDataFromId(mulId);
-	if (mulData.status == "failed") return { status: "failed", message: "Unit data not found" };
+export const fixUnitData = form(
+	v.object({ selectedUnitId: v.string(), unitSkill: v.string(), eraId: v.string(), factionId: v.string() }),
+	async ({ selectedUnitId, unitSkill, eraId, factionId }) => {
+		const mulId = Number(selectedUnitId);
+		const mulData = await getMULDataFromId(mulId);
+		if (mulData.status == "failed") return { status: "failed", message: "Unit data not found" };
 
-	const skill = Number(data.get("unitSkill")?.toString());
-	const era = Number(data.get("era")?.toString());
-	const faction = Number(data.get("faction")?.toString());
+		const skill = Number(unitSkill);
+		const era = Number(eraId);
+		const faction = Number(factionId);
 
-	await nothing().refresh();
-	if (mulData == undefined) {
-		return { status: "failed", message: "Invalid Unit Id" };
-	} else {
-		const unique = await isUnique({ mulId: mulId, era });
-		const general = (await getGeneralId({ era, faction }))?.general;
-		const available = await isAvailable({ mulId: mulId, eras: [era], factions: [faction, general ?? 0] });
+		await nothing().refresh();
+		if (mulData == undefined) {
+			return { status: "failed", message: "Invalid Unit Id" };
+		} else {
+			const unique = await isUnique({ mulId: mulId, era });
+			const general = (await getGeneralId({ era, faction }))?.general;
+			const available = await isAvailable({ mulId: mulId, eras: [era], factions: [faction, general ?? 0] });
 
-		let unitData: ValidationUnitData = {
-			id: crypto.randomUUID(),
-			name: mulData.data!.name,
-			skill,
-			pv: getNewSkillCost(skill, mulData.data!.pv),
-			mulData: mulData.data,
-			link: `http://masterunitlist.info/Unit/Details/${mulData.data!.mulId}`,
-			unique,
-			available
-		};
-		return { status: "success", data: unitData };
+			let unitData: ValidationUnitData = {
+				id: crypto.randomUUID(),
+				name: mulData.data!.name,
+				skill,
+				pv: getNewSkillCost(skill, mulData.data!.pv),
+				mulData: mulData.data,
+				link: `http://masterunitlist.info/Unit/Details/${mulData.data!.mulId}`,
+				unique,
+				available
+			};
+			return { status: "success", data: unitData };
+		}
 	}
-});
+);
 
 export const nothing = query(async () => {});

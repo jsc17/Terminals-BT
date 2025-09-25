@@ -54,8 +54,8 @@
 				<label>Skill: <input name="unitSkill" type="number" min="0" max="7" defaultValue="4" /></label>
 				<button>Fix</button>
 			</div>
-			<input type="hidden" name="era" value={era} />
-			<input type="hidden" name="faction" value={faction} />
+			<input type="hidden" name="eraId" value={era} />
+			<input type="hidden" name="factionId" value={faction} />
 		</form>
 	</div>
 </Dialog>

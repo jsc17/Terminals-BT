@@ -73,7 +73,6 @@
 					await submit();
 					if (getUnitData.result?.status == "success") {
 						unitData = getUnitData.result.data ?? [];
-						console.log(getUnitData.result.data);
 					} else {
 						toastController.addToast(getUnitData.result?.message ?? "Invalid message recieved");
 					}
@@ -190,9 +189,11 @@
 					class="section"
 					enctype="multipart/form-data"
 					{...submitList.enhance(async ({ data, submit }) => {
+						console.log("submitting");
+
 						if (files) {
-							data.append("listFile", files[0]);
 							await submit();
+							console.log(submitList.result);
 							toastController.addToast(submitList.result?.message ?? "Invalid Message Received");
 						}
 					})}
@@ -240,12 +241,13 @@
 							<p class="error">Selected rules do not match the tournaments rules. Please select the appropriate rules and revalidate to submit</p>
 						{/if}
 						<button class="submit" disabled={!selectedEraMatchesTournament || !submitApproval}>Submit</button>
+						<input type="file" name="listFile" bind:files class="hidden" aria-hidden="true" />
 						<input type="hidden" name="tournamentId" value={selectedTournament.id} />
-						<input type="hidden" name="era" value={selectedEra} />
-						<input type="hidden" name="faction" value={selectedFaction} />
+						<input type="hidden" name="eraId" value={selectedEra} />
+						<input type="hidden" name="factionId" value={selectedFaction} />
 						<input type="hidden" name="fixedData" value={fixedData} />
 						{#each unitData as unit}
-							<input type="hidden" name="unit" value={JSON.stringify({ id: unit.mulData?.mulId, sk: unit.skill })} />
+							<input type="hidden" name="unit[]" value={JSON.stringify({ id: unit.mulData?.mulId, sk: unit.skill })} />
 						{/each}
 					{/if}
 				</form>

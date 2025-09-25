@@ -39,44 +39,46 @@
 		<section class="card">
 			<h2 class="section-header">Create new tournament</h2>
 			<form
-				{...createTournament.enhance(async ({ submit }) => {
+				{...createTournament.enhance(async ({ submit, data }) => {
+					console.log(data);
 					await submit();
+					console.log(createTournament.result?.status);
 					if (createTournament.result?.status == "success") {
 						toastController.addToast("Tournament created");
 						window.location.href = `/todashboard/${createTournament.result.data}`;
 					}
 				})}
 			>
-				<label for="tournament-name">Tournament Name: <span class="description">Name that will be displayed to participants when they are selecting the tournament</span> </label>
-				<input type="text" name="tournament-name" id="tournament-name" required />
-				<label for="tournament-date">Tournament Date: <span class="description">Tournaments date. Submissions will no longer be allowed after this date.</span></label>
-				<input type="date" name="tournament-date" id="tournament-date" required />
-				<label for="tournament-email">T.O. Email Address: <span class="description">Email address where you would like to recieve tournament list submissions</span> </label>
-				<input type="text" name="tournament-email" id="tournament-email" required />
-				<label for="tournament-era">Tournament Era: <span class="description">Era that list submissions will be validated against. Select any for open era.</span> </label>
-				<select name="tournament-era" id="tournament-era">
+				<label for="tournamentName">Tournament Name: <span class="description">Name that will be displayed to participants when they are selecting the tournament</span> </label>
+				<input type="text" name="tournamentName" id="tournamentName" required />
+				<label for="tournamentDate">Tournament Date: <span class="description">Tournaments date. Submissions will no longer be allowed after this date.</span></label>
+				<input type="date" name="tournamentDate" id="tournamentDate" required />
+				<label for="tournamentEmail">T.O. Email Address: <span class="description">Email address where you would like to recieve tournament list submissions</span> </label>
+				<input type="text" name="tournamentEmail" id="tournamentEmail" required />
+				<label for="tournamentEra">Tournament Era: <span class="description">Era that list submissions will be validated against. Select any for open era.</span> </label>
+				<select name="tournamentEra" id="tournamentEra">
 					<option>Any</option>
 					{#each eraList as era}
 						<option value={era.id}>{era.name}</option>
 					{/each}
 				</select>
-				<label for="tournament-rules">Tournament Rules: </label>
-				<select name="tournament-rules" id="tournament-rule">
+				<label for="tournamentrules">Tournament Rules: </label>
+				<select name="tournamentRules" id="tournamentrule">
 					{#each ruleSets as set}
 						<option value={set.name}>{set.display}</option>
 					{/each}
 				</select>
-				<label for="tournament-email-subject">T.O. Email Subject (optional): <span class="description">Subject line for list submission emails you will recieve.</span> </label>
-				<input type="text" name="tournament-email-subject" id="tournament-email-subject" />
-				<label for="tournament-location">Tournament Location (optional): </label>
-				<input type="text" name="tournament-location" id="tournament-location" />
-				<label for="tournament-message"
+				<label for="tournamentemailsubject">T.O. Email Subject (optional): <span class="description">Subject line for list submission emails you will recieve.</span> </label>
+				<input type="text" name="tournamentEmailSubject" id="tournamentemailsubject" />
+				<label for="tournamentlocation">Tournament Location (optional): </label>
+				<input type="text" name="tournamentLocation" id="tournamentlocation" />
+				<label for="tournamentmessage"
 					>Message for me: <span class="description">
 						For right now, since players names and emails are collected, I am manually approving tournaments. Please send a short description of your tournament. As long as you
 						aren't trying to create a dozen a week, I'll approve it.
 					</span></label
 				>
-				<textarea name="tournament-message" id="tournament-message" required></textarea>
+				<textarea name="tournamentMessage" id="tournamentmessage" required></textarea>
 				<button class="submit-button">Create</button>
 			</form>
 		</section>

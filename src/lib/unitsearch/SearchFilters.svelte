@@ -36,6 +36,27 @@
 			resultList.additionalFilters = $state.snapshot(tempAdditionalFilters);
 		}, 350);
 	});
+
+	function resetFilters() {
+		tempFilters.concat(tempAdditionalFilters).forEach((filter) => {
+			if (filter.type == "number") {
+				filter.valueMin = undefined;
+				filter.valueMax = undefined;
+			} else if (filter.type == "numberGroup") {
+				filter.values!.forEach((value, index, values) => {
+					values[index] = {};
+				});
+			} else if (filter.type == "select") {
+				filter.value = [];
+			} else if (filter.type == "movement") {
+				filter.speedMaxValue = undefined;
+				filter.speedMinValue = undefined;
+				filter.typeValue = [];
+			} else if (filter.type != "unique") {
+				filter.value = "";
+			}
+		});
+	}
 </script>
 
 {#snippet filters(filterList: Filter[])}
@@ -206,7 +227,7 @@
 			{#if resultList.options?.name != "noRes"}
 				<label><input type="checkbox" bind:checked={resultList.filterByRules} /> Filter Results to Selected Ruleset</label>
 			{/if}
-			<button class="clear" onclick={() => resultList.resetFilters()}>Clear Filters</button>
+			<button class="clear" onclick={() => resetFilters()}>Clear Filters</button>
 		</div>
 		{#if showAdditionalFilters}
 			{@render filters(tempAdditionalFilters)}

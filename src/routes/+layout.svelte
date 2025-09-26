@@ -11,18 +11,13 @@
 	setContext("user", user);
 </script>
 
-<svelte:boundary>
-	{#snippet pending()}
-		<p>Loading...</p>
-	{/snippet}
-	<div class="main">
-		<Header {notifications}></Header>
-		{@render children()}
-		<Footer></Footer>
-	</div>
+<div class="main">
+	<Header {notifications}></Header>
+	{@render children()}
+	<Footer></Footer>
+</div>
 
-	<Toast></Toast>
-</svelte:boundary>
+<Toast></Toast>
 
 <style>
 	.main {

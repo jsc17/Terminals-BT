@@ -4,9 +4,10 @@
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { Select } from "$lib/generic";
 	import { getTags, getUnitsWithTags } from "$lib/remote/collection.remote";
-	import { getContext, untrack } from "svelte";
+	import { getContext } from "svelte";
 	import { toastController } from "$lib/stores";
-	import { Debounced, watch } from "runed";
+	import { watch } from "runed";
+	import { nanoid } from "nanoid";
 
 	type Props = {
 		resultList: ResultList;
@@ -14,6 +15,8 @@
 
 	let { resultList = $bindable() }: Props = $props();
 
+	let tabId = $state(nanoid());
+	$inspect(tabId);
 	let showFilters = $state(false);
 	let showAdditionalFilters = $state(false);
 	let showAbilitiesDropdown = $state(false);
@@ -137,14 +140,14 @@
 		{/each}
 		<form
 			class="tag-container"
-			{...getUnitsWithTags.enhance(async ({ submit }) => {
+			{...getUnitsWithTags.for(tabId).enhance(async ({ submit }) => {
 				if (resultList.taggedUnits.length == 0 && selectedTags.length) {
 					await submit();
-					resultList.taggedUnits = getUnitsWithTags.result?.data ?? [];
-					if (getUnitsWithTags.result?.data?.length == 0) {
+					resultList.taggedUnits = getUnitsWithTags.for(tabId).result?.data ?? [];
+					if (getUnitsWithTags.for(tabId).result?.data?.length == 0) {
 						toastController.addToast("No units found that match all selected tags");
-					} else if (getUnitsWithTags.result?.message == "failed") {
-						toastController.addToast(getUnitsWithTags.result?.message ?? "Invalid message recieved");
+					} else if (getUnitsWithTags.for(tabId).result?.message == "failed") {
+						toastController.addToast(getUnitsWithTags.for(tabId).result?.message ?? "Invalid message recieved");
 					}
 				} else {
 					resultList.taggedUnits = [];
@@ -165,7 +168,7 @@
 						{@const currentTag = tags.current?.find((t) => t.id.toString() == tag)}
 						{@const rgb = JSON.parse(currentTag?.color ?? `{"r":"0.2","g":"0.2","b":"0.2"}`)}
 						{@const rgbString = `rgb(${Number(rgb.r) * 255} ${Number(rgb.g) * 255} ${Number(rgb.b) * 255})`}
-						<input type="hidden" name="tagId" value={tag} />
+						<input type="hidden" name="tagId[]" value={tag} />
 						<button
 							type="button"
 							class="tag"

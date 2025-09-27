@@ -5,6 +5,7 @@
 	import { SearchFilters, SearchParameters, SearchResults } from "$lib/unitsearch";
 	import { slide } from "svelte/transition";
 	import { List } from "$lib/types/list.svelte";
+	import { nanoid } from "nanoid";
 
 	type Props = {
 		list: List;
@@ -18,14 +19,6 @@
 	setContext("list", list);
 
 	let showListbuilder = $state(false);
-	let recentChanges: string[] = [
-		"Multiple Era and faction selection!",
-		`You can also now turn off the automatic "Official" general list to only see units that are in the era/faction combination you selected.`
-	];
-	let description: string[] = [
-		"An Alpha Strike list builder I've created to help filter the data from the amazing work the Master Unit List team has done.",
-		"Feedback will always be welcome. If you found your way here, you probably know me on facebook or through the wolfnet discord, so feel free to ping me. (Discord - Jonathan 'Terminal' Colton)"
-	];
 </script>
 
 <main>

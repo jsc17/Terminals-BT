@@ -8,5 +8,6 @@ import Popover from "./components/Popover.svelte";
 import Separator from "./components/Separator.svelte";
 import RadioGroup from "./components/RadioGroup.svelte";
 import DropdownMenu from "./components/DropdownMenu.svelte";
+import ScrollArea from "./components/ScrollArea.svelte";
 
-export { Select, Dialog, Combobox, Collapsible, Slider, Drawer, Popover, Separator, RadioGroup, DropdownMenu };
+export { Select, Dialog, Combobox, Collapsible, Slider, Drawer, Popover, Separator, RadioGroup, DropdownMenu, ScrollArea };

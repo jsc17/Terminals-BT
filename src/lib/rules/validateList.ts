@@ -261,7 +261,7 @@ export async function validateRules(unitList: { id: string; skill: number; data:
 			issueList.set("Max unitList", new Set([`${unitList.length}/${rulesData.maxUnits}`]));
 		}
 		const nonGeneralfactionList = factions.filter((faction) => {
-			const generalLists = [55, 56, 57, 85, 90];
+			const generalLists = [-1, 55, 56, 57, 85, 90];
 			return generalLists.includes(faction);
 		});
 		if (rulesData.singleEraFaction && (eras.length != 1 || nonGeneralfactionList.length != 1 || factions.length > 2)) {

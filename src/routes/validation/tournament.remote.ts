@@ -7,7 +7,6 @@ import { getRulesByName } from "$lib/types/rulesets";
 import * as fs from "fs/promises";
 import { prisma } from "$lib/server/prisma";
 import * as v from "valibot";
-import { permission } from "process";
 
 export const getApprovedTournamentList = query(async () => {
 	const data = await prisma.tournament.findMany({

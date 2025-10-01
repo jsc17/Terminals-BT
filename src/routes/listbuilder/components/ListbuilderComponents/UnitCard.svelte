@@ -113,7 +113,7 @@
 				</div>
 				<div class="unit-stat">{unitDetails?.baseUnit.health + " (" + unitDetails?.baseUnit.armor + "+" + unitDetails?.baseUnit.structure + ")"}</div>
 				<div class="unit-stat">{unitDetails?.baseUnit.size}</div>
-				<div class="unit-stat">{unitDetails?.baseUnit.role}</div>
+				<div class="unit-stat unit-role">{unitDetails?.baseUnit.role}</div>
 			{/if}
 		</div>
 		<div class="unit-ability-row">
@@ -186,8 +186,11 @@
 	}
 	.unit-stat {
 		font-size: 0.75em;
+		max-width: 100%;
 		align-self: center;
 		justify-self: safe center;
+	}
+	.unit-role {
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}

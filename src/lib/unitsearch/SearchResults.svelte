@@ -178,14 +178,16 @@
 												item.overheat}
 										{/if}
 									</div>
-									<div class:abilities={!appWindow.isMobile} class:abilities-mobile={appWindow.isMobile}>
-										<p>{createAbilityLineString(item.abilities ?? [])}</p>
+									<div class="search-result-stat-row">
+										<div class:abilities={!appWindow.isMobile} class:abilities-mobile={appWindow.isMobile}>
+											<p>{createAbilityLineString(item.abilities ?? [])}</p>
+										</div>
+										<p class="role-text">Role: <span class="muted">{item.role}</span></p>
+										<form method="post" action="/?/getUnitAvailability" use:enhance={showAvailability} class="align-center">
+											<input type="hidden" name="mulId" value={item.mulId ?? 0} />
+											<button class="availability-button">Availability</button>
+										</form>
 									</div>
-									<p class="role-text">Role: <span class="muted">{item.role}</span></p>
-									<form method="post" action="/?/getUnitAvailability" use:enhance={showAvailability} class="align-center">
-										<input type="hidden" name="mulId" value={item.mulId ?? 0} />
-										<button class="availability-button">Availability</button>
-									</form>
 								{:else}
 									<p>Unit didn't load correctly. You should probably never see this message. If you do, refresh the page</p>
 								{/if}
@@ -301,6 +303,11 @@
 		grid-template-columns: 25px 1fr repeat(4, 10%) 15%;
 		border-bottom: 1px solid var(--border);
 	}
+	.search-result-stat-row {
+		display: grid;
+		grid-template-columns: 1fr max-content max-content;
+		grid-column: 2 / -1;
+	}
 	.align-center {
 		display: flex;
 		align-items: center;
@@ -318,16 +325,12 @@
 		font-size: 0.75rem;
 		display: flex;
 		align-items: center;
-		grid-column-start: 2;
-		grid-column-end: -3;
 	}
 	.abilities-mobile {
 		padding-left: 16px;
 		font-size: 0.75rem;
 		display: flex;
 		align-items: center;
-		grid-column-start: 2;
-		grid-column-end: -3;
 	}
 	.availability-button {
 		padding: 4px 16px;

@@ -216,15 +216,14 @@ export const actions = {
 		} catch (error) {
 			return fail(400, { message: "Failed to load units" });
 		}
-		if (unitList.length) {
+		if (unitList.length || generalList.length) {
 			unitList.forEach((unit) => {
 				unit.abilities = unit.abilities ? JSON.stringify(handleParse(unit.abilities)) : "-";
 			});
-			if (generalList.length) {
-				generalList.forEach((unit) => {
-					unit.abilities = unit.abilities ? JSON.stringify(handleParse(unit.abilities)) : "-";
-				});
-			}
+			generalList.forEach((unit) => {
+				unit.abilities = unit.abilities ? JSON.stringify(handleParse(unit.abilities)) : "-";
+			});
+
 			return { message: "Units Loaded", unitList, uniqueList, generalList };
 		} else {
 			return { message: "No Units Found" };

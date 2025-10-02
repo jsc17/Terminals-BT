@@ -16,7 +16,6 @@
 	let { resultList = $bindable() }: Props = $props();
 
 	let tabId = $state(nanoid());
-	$inspect(tabId);
 	let showFilters = $state(false);
 	let showAdditionalFilters = $state(false);
 	let showAbilitiesDropdown = $state(false);

@@ -20,7 +20,6 @@
 		if (page.params.matchId) playList = await db.localMatches.get(page.params.matchId);
 	});
 
-	$inspect(playList);
 	const options = new PersistedState<Options>(
 		"playOptions",
 		{

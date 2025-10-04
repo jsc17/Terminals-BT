@@ -35,7 +35,8 @@
 			<input type="hidden" name="unitId" value={unit.id} />
 		</form>
 		<form
-			{...addTagToUnit.enhance(async ({ submit }) => {
+			{...addTagToUnit.enhance(async ({ submit, data }) => {
+				console.log(data);
 				try {
 					await submit();
 					toastController.addToast(addTagToUnit.result?.message ?? "Invalid message recieved");
@@ -46,7 +47,7 @@
 			class="add-tag-form"
 		>
 			<label class="muted" for="tag"> Add Tag </label>
-			<select name="tag" id="tag">
+			<select name="tag[]" id="tag">
 				{#each userTags.current?.filter((value) => {
 					return unit.unitTags.find(({ tag }: { tag: { id: number } }) => {
 							return value.id == tag.id;
@@ -56,7 +57,7 @@
 				{/each}
 			</select>
 			<button>Add</button>
-			<input type="hidden" name="unitId" value={unit.id} />
+			<input type="hidden" name="unitId[]" value={unit.id} />
 		</form>
 
 		<div class="tag-container">
@@ -64,10 +65,12 @@
 			{#each unit.unitTags as { tag }}
 				<form
 					class="tag-line"
-					{...removeTagfromUnit.enhance(async ({ submit }) => {
+					{...removeTagfromUnit.for(tag).enhance(async ({ submit }) => {
 						try {
 							await submit();
-							toastController.addToast(removeTagfromUnit.result?.message ?? "Invalid message recieved");
+							console.log(removeTagfromUnit.for(tag).result);
+
+							toastController.addToast(removeTagfromUnit.for(tag).result?.message ?? "Invalid message recieved");
 						} catch (error) {
 							console.log(error);
 						}

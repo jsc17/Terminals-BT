@@ -477,8 +477,8 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 								description: 'At least 2 units must have a minimum Movement of 10"',
 								speed: 10,
 								jumpException: 10,
-								amount: 1,
-								flatAmount: false
+								amount: 2,
+								flatAmount: true
 							},
 							{ type: "Size", description: "At least 1 unit must be Size 3 or greater", size: 3, limit: "equalOrGreater", amount: 1, flatAmount: true },
 							{ type: "Role", description: "At least 2 units must have the Scout role", roles: ["Scout"], amount: 2, flatAmount: true }

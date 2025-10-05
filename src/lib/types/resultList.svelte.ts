@@ -70,6 +70,13 @@ export class ResultList {
 	eraSearchType = $state<"any" | "every">("any");
 	factionSearchType = $state<"any" | "every">("any");
 
+	constructor(initEras: number[], initFactions: number[]) {
+		this.#eras = initEras;
+		this.selectedEras = initEras.map((e) => e.toString());
+		this.#factions = initFactions;
+		this.selectedFactions = initFactions.map((f) => f.toString());
+	}
+
 	get eras(): number[] {
 		return this.#eras;
 	}

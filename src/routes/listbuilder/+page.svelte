@@ -64,7 +64,7 @@
 	onMount(async () => {
 		activeLists = await loadExistingListsFromLocalStorage();
 		if (data.sharedList) {
-			let list = new List(new ResultList());
+			let list = new List();
 			let listCode: ListCode = {
 				id: crypto.randomUUID(),
 				lcVersion: data.sharedList.lcVersion,
@@ -84,14 +84,14 @@
 			window.history.replaceState({}, "", newUrl);
 		}
 		if (activeLists.length == 0) {
-			activeLists.push(new List(new ResultList()));
+			activeLists.push(new List());
 		}
 		selectedList = (activeLists.length - 1).toString();
 	});
 
 	function handleAddListButton() {
 		if (activeLists.length < 5) {
-			activeLists.push(new List(new ResultList()));
+			activeLists.push(new List());
 			selectedList = (activeLists.length - 1).toString();
 		} else {
 			toastController.addToast("For performance reasons, active lists tabs have been limited to 5. Please save and close a list to open a new one.");
@@ -105,12 +105,12 @@
 			selectedList = (activeLists.length - 1).toString();
 		}
 		if (activeLists.length == 0) {
-			activeLists.push(new List(new ResultList()));
+			activeLists.push(new List());
 			selectedList = (activeLists.length - 1).toString();
 		}
 	}
 	function duplicateList(list: List) {
-		const newList = new List(new ResultList());
+		const newList = new List();
 		const copiedData = $state.snapshot(list.getListCode());
 
 		const parsedCode: ListCode = {
@@ -161,7 +161,7 @@
 	</Tabs.List>
 	{#each activeLists as list, index}
 		<Tabs.Content value={index.toString()} class="listbuilder-tabs-content">
-			<ListTab {list} resultList={list.resultList!} {listCloseCallback}></ListTab>
+			<ListTab {list} {listCloseCallback}></ListTab>
 		</Tabs.Content>
 	{/each}
 </Tabs.Root>

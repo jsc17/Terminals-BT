@@ -5,58 +5,62 @@ import { prisma } from "$lib/server/prisma";
 import type { MulUnit } from "$lib/types/listTypes";
 import { handleParse } from "$lib/utilities/abilityUtilities";
 
-export const getMULDataFromId = query(z.number(), async (id: number) => {
-	const mulData = await prisma.unit.findUnique({ where: { mulId: id } });
+export const getMULDataFromId = query.batch(z.number(), async (ids) => {
+	const mulData = await prisma.unit.findMany({ where: { mulId: { in: ids } } });
+	const lookup = new Map(mulData.map((d) => [d.mulId, d]));
 
-	if (mulData) {
-		let tempMovement: { speed: number; type: string }[] = [];
-		mulData.move.split("/").forEach((movement: string) => {
-			let moveSpeed = movement.replaceAll('"', "").match(/\d+/) ?? "0";
-			let moveType = movement.replaceAll('"', "").match(/\D+/) ?? "";
-			tempMovement.push({ speed: parseInt(moveSpeed[0]), type: moveType[0] });
-		});
-		if (tempMovement[0].type == "j" && tempMovement.length == 1) {
-			tempMovement[0].type = "";
-			tempMovement.push({ type: "j", speed: tempMovement[0].speed });
-		}
-		const reference: MulUnit = {
-			id: mulData.id,
-			mulId: mulData.mulId,
-			name: mulData.name,
-			group: mulData.group ?? "",
-			class: mulData.class,
-			variant: mulData.variant ?? "",
-			type: mulData.type,
-			subtype: mulData.subtype?.toUpperCase() ?? "",
-			pv: mulData.pv,
-			cost: mulData.pv,
-			skill: 4,
-			size: mulData.size,
-			move: tempMovement,
-			tmm: mulData.tmm,
-			health: mulData.armor + mulData.structure,
-			armor: mulData.armor,
-			structure: mulData.structure,
-			damageS: mulData.damage_s,
-			damageSMin: mulData.damage_s_min,
-			damageM: mulData.damage_m,
-			damageMMin: mulData.damage_m_min,
-			damageL: mulData.damage_l,
-			damageLMin: mulData.damage_l_min,
-			damageE: mulData.damage_e,
-			damageEMin: mulData.damage_e_min,
-			overheat: mulData.overheat,
-			abilities: mulData.abilities ? handleParse(mulData.abilities) : [],
-			imageLink: mulData.image_url ?? undefined,
-			rulesLevel: mulData.rules ?? "",
-			tonnage: mulData.tonnage ?? 0,
-			date: mulData.date_introduced ?? 0,
-			role: mulData.role ?? "",
-			availability: undefined,
-			threshold: mulData.threshold
-		};
-		return { status: "success", data: reference };
-	} else return { status: "failed", message: "Unit not found" };
+	return (id) => {
+		const mulData = lookup.get(id);
+		if (mulData) {
+			let tempMovement: { speed: number; type: string }[] = [];
+			mulData.move.split("/").forEach((movement: string) => {
+				let moveSpeed = movement.replaceAll('"', "").match(/\d+/) ?? "0";
+				let moveType = movement.replaceAll('"', "").match(/\D+/) ?? "";
+				tempMovement.push({ speed: parseInt(moveSpeed[0]), type: moveType[0] });
+			});
+			if (tempMovement[0].type == "j" && tempMovement.length == 1) {
+				tempMovement[0].type = "";
+				tempMovement.push({ type: "j", speed: tempMovement[0].speed });
+			}
+			const reference: MulUnit = {
+				id: mulData.id,
+				mulId: mulData.mulId,
+				name: mulData.name,
+				group: mulData.group ?? "",
+				class: mulData.class,
+				variant: mulData.variant ?? "",
+				type: mulData.type,
+				subtype: mulData.subtype?.toUpperCase() ?? "",
+				pv: mulData.pv,
+				cost: mulData.pv,
+				skill: 4,
+				size: mulData.size,
+				move: tempMovement,
+				tmm: mulData.tmm,
+				health: mulData.armor + mulData.structure,
+				armor: mulData.armor,
+				structure: mulData.structure,
+				damageS: mulData.damage_s,
+				damageSMin: mulData.damage_s_min,
+				damageM: mulData.damage_m,
+				damageMMin: mulData.damage_m_min,
+				damageL: mulData.damage_l,
+				damageLMin: mulData.damage_l_min,
+				damageE: mulData.damage_e,
+				damageEMin: mulData.damage_e_min,
+				overheat: mulData.overheat,
+				abilities: mulData.abilities ? handleParse(mulData.abilities) : [],
+				imageLink: mulData.image_url ?? undefined,
+				rulesLevel: mulData.rules ?? "",
+				tonnage: mulData.tonnage ?? 0,
+				date: mulData.date_introduced ?? 0,
+				role: mulData.role ?? "",
+				availability: undefined,
+				threshold: mulData.threshold
+			};
+			return { status: "success", data: reference };
+		} else return { status: "failed", message: "Unit not found" };
+	};
 });
 
 export const getMULDataFromName = query(z.string(), async (name) => {
@@ -79,4 +83,25 @@ export const isAvailable = query(z.object({ mulId: z.number(), eras: z.number().
 export const getUnitNamesFromIds = query(v.array(v.number()), async (ids) => {
 	const results = await prisma.unit.findMany({ where: { mulId: { in: ids } }, select: { name: true, mulId: true } });
 	return new Map(results.map((o) => [o.mulId, o.name]));
+});
+
+export const getListAvailability = query(v.object({ units: v.array(v.number()), eras: v.array(v.number()), factions: v.array(v.number()) }), async (data) => {
+	console.log(data.factions);
+	const promises = data.units.map(async (id) => {
+		const exists = await prisma.unit.findUnique({
+			where: { mulId: id, availability: { some: { era: { in: data.eras.length ? data.eras : undefined }, faction: { in: data.factions.length ? data.factions : undefined } } } }
+		});
+		return { id, exists: exists !== null };
+	});
+
+	const responseData = new Map<number, boolean>();
+	await Promise.allSettled(promises).then((results) => {
+		results.forEach((result) => {
+			if (result.status == "fulfilled") {
+				responseData.set(result.value.id, result.value.exists);
+			}
+		});
+	});
+
+	return responseData;
 });

@@ -5,17 +5,15 @@
 	import { SearchFilters, SearchParameters, SearchResults } from "$lib/unitsearch";
 	import { slide } from "svelte/transition";
 	import { List } from "$lib/types/list.svelte";
-	import { nanoid } from "nanoid";
 
 	type Props = {
 		list: List;
-		resultList: ResultList;
 		listCloseCallback: (id: string) => void;
 	};
 
-	let { list, resultList, listCloseCallback }: Props = $props();
+	let { list, listCloseCallback }: Props = $props();
 
-	setContext("resultList", resultList);
+	let resultList = $state<ResultList>(new ResultList(list.details.eras, list.details.factions));
 	setContext("list", list);
 
 	let showListbuilder = $state(false);
@@ -31,7 +29,7 @@
 		<SearchResults bind:list bind:resultList />
 	</div>
 	<div class="list-drawer-wrapper" class:show-listbuilder={showListbuilder} transition:slide>
-		<Listbuilder {listCloseCallback} bind:list />
+		<Listbuilder {listCloseCallback} bind:resultList bind:list />
 	</div>
 	<button
 		onclick={() => {

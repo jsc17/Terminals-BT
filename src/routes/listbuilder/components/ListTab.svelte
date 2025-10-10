@@ -5,6 +5,7 @@
 	import { SearchFilters, SearchParameters, SearchResults } from "$lib/unitsearch";
 	import { slide } from "svelte/transition";
 	import { List } from "$lib/types/list.svelte";
+	import { watch } from "runed";
 
 	type Props = {
 		list: List;
@@ -17,6 +18,10 @@
 	setContext("list", list);
 
 	let showListbuilder = $state(false);
+
+	watch([() => list.details.eras, () => list.details.factions], () => {
+		resultList.setParameters(list.details.eras, list.details.factions);
+	});
 </script>
 
 <main>

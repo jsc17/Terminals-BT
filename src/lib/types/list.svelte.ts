@@ -5,7 +5,8 @@ import { getGeneralList, getNewSkillCost } from "$lib/utilities/genericBattletec
 import { getRulesByName } from "$lib/types/rulesets";
 import { nanoid } from "nanoid";
 import { loadMULUnit } from "$lib/utilities/loadUtilities";
-import { getListAvailability, getMULDataFromId } from "$lib/remote/unit.remote";
+import { getListAvailability, getMULDataFromId, getUnitAvailability } from "$lib/remote/unit.remote";
+import { db } from "$lib/offline/db";
 
 export type { ListCode, ListCodeUnit, ListUnit, ListFormation, SCA, MulUnit, Sublist, SublistStats };
 
@@ -29,10 +30,7 @@ export class List {
 
 	stats = $derived(calculateListStats(this.units));
 
-	availabilityPromise = $derived(
-		getListAvailability({ units: this.units.map((unit) => unit.baseUnit.mulId), eras: this.details.eras, factions: this.details.factions.concat([this.details.general]) })
-	);
-	unitAvailability = $derived(this.availabilityPromise.current);
+	unitAvailability = $derived(getUnitAvailability(this.units.map((u) => u.baseUnit.mulId)));
 
 	options = $derived(getRulesByName(this.rules));
 
@@ -83,7 +81,11 @@ export class List {
 				issueList.set("Era/Faction", new Set(["Must select a single era and faction"]));
 			}
 			for (const unit of this.units) {
-				if (this.options.eraFactionRestriction && this.unitAvailability && !this.unitAvailability.get(unit.baseUnit.mulId)) {
+				const availability = this.unitAvailability.current?.get(unit.baseUnit.mulId)?.availability;
+				const available = availability?.find(({ era, faction }) => this.details.eras.includes(era) && (this.details.factions.includes(faction) || this.details.general == faction))
+					? true
+					: false;
+				if (this.options.eraFactionRestriction && !available) {
 					if (unit.baseUnit.mulId < 0) {
 						issueMessage = "If a battlefield support unit is showing as unavailable, it might have been added using a different rules selection. Remove and re-add the unit";
 					}
@@ -471,6 +473,8 @@ export class List {
 	}
 	async loadList(data: ListCode) {
 		const listCode: ListCode = data;
+
+		db.previousLists.delete(this.id);
 		this.id = listCode.id;
 		this.details.name = listCode.name;
 		this.details.eras = listCode.eras;

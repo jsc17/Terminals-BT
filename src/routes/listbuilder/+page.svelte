@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { PersistedState, watch } from "runed";
 	import ListTab from "./components/ListTab.svelte";
-	import { onMount, setContext, untrack } from "svelte";
+	import { onMount, setContext } from "svelte";
 	import { type ListCode, List } from "$lib/types/list.svelte";
-	import { ResultList } from "$lib/types/resultList.svelte";
 	import { Tabs, ContextMenu } from "bits-ui";
 	import { loadExistingListsFromLocalStorage } from "$lib/utilities/listImport";
 	import { toastController } from "$lib/stores";
@@ -46,6 +45,7 @@
 		() => listCodes,
 		() => {
 			if (listCodes.length != 0) {
+				// db.previousLists.clear();
 				Promise.all(
 					$state.snapshot(listCodes).map(async (lc) => {
 						try {

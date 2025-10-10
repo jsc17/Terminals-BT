@@ -274,7 +274,12 @@ export class ResultList {
 			}
 		}
 	}
-
+	setParameters(eras: number[], factions: number[]) {
+		this.#eras = eras;
+		this.selectedEras = eras.map((e) => e.toString());
+		this.#factions = factions;
+		this.selectedFactions = factions.map((f) => f.toString());
+	}
 	applyOptions() {
 		let tempRestrictedList: MulUnit[] = [];
 		if (this.options && this.filterByRules) {
@@ -627,7 +632,6 @@ export class ResultList {
 		}
 		return tempResultList;
 	}
-
 	async resetFilters() {
 		this.filters.concat(this.additionalFilters).forEach((filter) => {
 			if (filter.type == "number") {
@@ -648,7 +652,6 @@ export class ResultList {
 			}
 		});
 	}
-
 	clear() {
 		this.resultList = [];
 		this.generalList = [];

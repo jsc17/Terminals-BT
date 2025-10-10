@@ -105,3 +105,8 @@ export const getListAvailability = query(v.object({ units: v.array(v.number()), 
 
 	return responseData;
 });
+
+export const getUnitAvailability = query(v.array(v.number()), async (ids) => {
+	const units = await prisma.unit.findMany({ where: { mulId: { in: ids } }, select: { mulId: true, availability: true } });
+	return new Map(units.map((u) => [u.mulId, u]));
+});

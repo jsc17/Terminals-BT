@@ -22,7 +22,7 @@
 	let lockSelections = $state(false);
 
 	let unitData = $state<ValidationUnitData[]>([]);
-	let unfoundUnits = $derived(unitData.filter((u) => u.mulData).length);
+	let unfoundUnits = $derived(unitData.filter((u) => !u.mulData).length);
 	let fixedData = $state(false);
 
 	let issues = $state<{ issueList: Map<string, Set<string>> }>();
@@ -147,9 +147,9 @@
 						<tr>
 							<td>
 								{#if unit.mulData}
-									<span style="color: green; font-weight: bold;">✔</span>
+									<span class="center" style="color: green; font-weight: bold;">✔</span>
 								{:else}
-									<span style="color: red; font-weight: bold;">X</span>
+									<span class="center" style="color: red; font-weight: bold;">X</span>
 								{/if}
 							</td>
 							<td>
@@ -194,7 +194,11 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#if issues?.issueList.size}
+					{#if issues == undefined}
+						<tr>
+							<td colspan="2">Validate list to show any potential issues</td>
+						</tr>
+					{:else if issues?.issueList.size}
 						{#each issues.issueList as [issue, units]}
 							<tr>
 								<td class="error">{issue}</td>
@@ -225,13 +229,13 @@
 		>
 			<h2>5. Submit your list to the T.O.</h2>
 
-			<label>Player Name: <input type="text" name="playerName" required /></label>
-			<label>Email address: <input type="email" name="playerEmail" required /></label>
+			<label>Player Name: <input type="text" name="playerName" required disabled={issues == undefined || issues?.issueList.size > 0} /></label>
+			<label>Email address: <input type="email" name="playerEmail" required disabled={issues == undefined || issues?.issueList.size > 0} /></label>
 			<label
-				><input type="checkbox" name="permission" bind:checked={submitApproval} required /> By submitting this list, you acknowledge your email address and name will be provided to
-				the tournament organizer. Any stored personal data will be removed after the tournament has completed.</label
+				><input type="checkbox" name="permission" bind:checked={submitApproval} required disabled={issues == undefined || issues?.issueList.size > 0} /> By submitting this list, you
+				acknowledge your email address and name will be provided to the tournament organizer. Any stored personal data will be removed after the tournament has completed.</label
 			>
-			<button class="submit" disabled={!selectedTournament || !submitApproval}>Submit</button>
+			<button class="submit" disabled={!selectedTournament || !submitApproval || issues == undefined || issues?.issueList.size > 0}>Submit</button>
 			<input type="file" name="listFile" bind:files class="hidden" aria-hidden="true" />
 			<input type="hidden" name="tournamentId" value={selectedTournament?.id} />
 			<input type="hidden" name="eraId" value={selectedEra} />

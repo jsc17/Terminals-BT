@@ -20,7 +20,6 @@ export const createTournament = form(
 		let { locals } = getRequestEvent();
 		if (!locals.user) return { status: "failed", message: "user is not logged in" };
 
-		console.log(data);
 		try {
 			const tournament = await prisma.tournament.create({
 				data: {

@@ -2,6 +2,25 @@ import { query, prerender } from "$app/server";
 import { prisma } from "$lib/server/prisma";
 import * as z from "zod";
 
+export const getErasAndFactions = query(async () => {
+	const results = await prisma.factionInEra.findMany({ select: { eraId: true, faction: true }, orderBy: [{ era: { order: "asc" } }, { faction: { name: "asc" } }] });
+	const groupedResults = new Map<number, { id: number; name: string }[]>();
+	results.forEach((r) => {
+		if (groupedResults.has(r.eraId)) {
+			groupedResults.set(r.eraId, groupedResults.get(r.eraId)!.concat([r.faction]));
+		} else {
+			groupedResults.set(r.eraId, [r.faction]);
+		}
+	});
+	return groupedResults;
+});
+
+export const getEraNames = query(async () => {
+	const eraNames = await prisma.era.findMany({ select: { id: true, name: true } });
+	const eraNameLookup = new Map(eraNames.map((r) => [r.id, r.name]));
+	return eraNameLookup;
+});
+
 export const getEras = prerender(async () => {
 	const eras = await prisma.era.findMany({ select: { id: true, name: true }, orderBy: { order: "asc" } });
 	return eras;

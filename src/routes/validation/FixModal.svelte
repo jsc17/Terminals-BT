@@ -18,7 +18,7 @@
 
 <Dialog title={`Fix ${unit.name}`} bind:open>
 	{#snippet trigger()}
-		Fix
+		Edit
 	{/snippet}
 	<div class="fix-dialog-body">
 		<p>Name parsed from pdf: <input type="text" value={unit.name} disabled /></p>

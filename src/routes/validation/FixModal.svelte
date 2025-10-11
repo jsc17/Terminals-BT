@@ -18,10 +18,10 @@
 
 <Dialog title={`Fix ${unit.name}`} bind:open>
 	{#snippet trigger()}
-		Fix
+		Edit
 	{/snippet}
 	<div class="fix-dialog-body">
-		<p>Name parsed from pdf: <input type="text" value={unit.name} disabled /></p>
+		<p>Name parsed from pdf: <span class="muted">{unit.name}</span></p>
 		<form {...getPossibleUnitList}>
 			<label>Filter: <input type="text" name="searchTerm" id="searchTerm " /></label>
 			<button>Search</button>
@@ -40,18 +40,18 @@
 			})}
 		>
 			{#if getPossibleUnitList.result == undefined}
-				<p class="muted">Use the search above to</p>
+				<p class="muted">Use the search above to find possible units</p>
 			{/if}
 			<label
 				>Corrected Unit:
-				<select name="selectedUnitId" class="unit-select" disabled={getPossibleUnitList.result == undefined}>
+				<select name="selectedUnitId" class="unit-select" required>
 					{#each getPossibleUnitList.result ?? [] as result}
 						<option value={result.mulId}>{result.name}</option>
 					{/each}
 				</select>
 			</label>
 			<div class="inline">
-				<label>Skill: <input name="unitSkill" type="number" min="0" max="7" defaultValue="4" /></label>
+				<label>Skill: <input name="unitSkill" type="number" min="0" max="7" defaultValue="4" required /></label>
 				<button>Fix</button>
 			</div>
 			<input type="hidden" name="eraId" value={era} />

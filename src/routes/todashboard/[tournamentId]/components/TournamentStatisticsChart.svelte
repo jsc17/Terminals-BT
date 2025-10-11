@@ -30,7 +30,6 @@
 					scale: null,
 					value: (d) => (!hovered || hovered === d.group ? 1 : 0.3)
 				}}
-				onmouseenter={(event) => console.log(event)}
 				onmouseleave={(event) => (hovered = undefined)}
 			/>
 			<RuleX data={[0]} />

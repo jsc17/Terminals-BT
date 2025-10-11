@@ -71,6 +71,7 @@ export class List {
 		let issueMessage = "";
 
 		if (this.options && this.options.name != "noRes") {
+			let uniquesInList = [];
 			if (this.options.maxPv && this.pv > this.options.maxPv) {
 				issueList.set("Max PV", new Set([`${this.pv}/${this.options.maxPv}`]));
 			}
@@ -85,6 +86,8 @@ export class List {
 				const available = availability?.find(({ era, faction }) => this.details.eras.includes(era) && (this.details.factions.includes(faction) || this.details.general == faction))
 					? true
 					: false;
+				const unique = availability?.find(({ era, faction }) => this.details.eras.includes(era) && faction == 4) ? true : false;
+				if (unique) uniquesInList.push(unit);
 				if (this.options.eraFactionRestriction && !available) {
 					if (unit.baseUnit.mulId < 0) {
 						issueMessage = "If a battlefield support unit is showing as unavailable, it might have been added using a different rules selection. Remove and re-add the unit";
@@ -112,14 +115,14 @@ export class List {
 					}
 					issueUnits.add(unit.id!);
 				}
-				// if (this.options.disallowUnique && this.resultList!.uniqueList.includes(unit.baseUnit.mulId)) {
-				// 	if (issueList.has("Unique units")) {
-				// 		issueList.get("Unique units")?.add(unit.baseUnit.name);
-				// 	} else {
-				// 		issueList.set("Unique units", new Set([unit.baseUnit.name]));
-				// 	}
-				// 	issueUnits.add(unit.id!);
-				// }
+				if (this.options.disallowUnique && unique) {
+					if (issueList.has("Unique units")) {
+						issueList.get("Unique units")?.add(unit.baseUnit.name);
+					} else {
+						issueList.set("Unique units", new Set([unit.baseUnit.name]));
+					}
+					issueUnits.add(unit.id!);
+				}
 				if (this.options.disallowedAbilities) {
 					let prohibittedAbility = false;
 					for (const ability of unit.baseUnit.abilities) {
@@ -311,19 +314,16 @@ export class List {
 					}
 				}
 			}
-			// if (this.options.uniqueMaxLimit) {
-			// 	let uniquesInList = this.units.filter((unit) => this.resultList!.uniqueList.includes(unit.baseUnit.mulId));
-			// 	if (uniquesInList.length > 1) {
-			// 		for (const unit of uniquesInList) {
-			// 			if (issueList.has("Unique units limit")) {
-			// 				issueList.get("Unique units limit")?.add(unit.baseUnit.name);
-			// 			} else {
-			// 				issueList.set("Unique units limit", new Set([unit.baseUnit.name]));
-			// 			}
-			// 			issueUnits.add(unit.id!);
-			// 		}
-			// 	}
-			// }
+			if (this.options.uniqueMaxLimit && uniquesInList.length > this.options.uniqueMaxLimit) {
+				for (const unit of uniquesInList) {
+					if (issueList.has("Unique units limit")) {
+						issueList.get("Unique units limit")?.add(unit.baseUnit.name);
+					} else {
+						issueList.set("Unique units limit", new Set([unit.baseUnit.name]));
+					}
+					issueUnits.add(unit.id!);
+				}
+			}
 		}
 		return { issueList, issueUnits, issueMessage };
 	});

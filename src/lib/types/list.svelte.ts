@@ -1,10 +1,12 @@
 import type { ListUnit, MulUnit, ListCode, ListCodeUnit, SCA, ListFormation, Sublist, SublistStats } from "$lib/types/listTypes";
 import { getSCAfromId, calculateListStats } from "$lib/utilities/listUtilities";
 import type { ResultList } from "./resultList.svelte";
-import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
+import { getGeneralList, getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 import { getRulesByName } from "$lib/types/rulesets";
 import { nanoid } from "nanoid";
 import { loadMULUnit } from "$lib/utilities/loadUtilities";
+import { getListAvailability, getMULDataFromId, getUnitAvailability } from "$lib/remote/unit.remote";
+import { db } from "$lib/offline/db";
 
 export type { ListCode, ListCodeUnit, ListUnit, ListFormation, SCA, MulUnit, Sublist, SublistStats };
 
@@ -28,11 +30,7 @@ export class List {
 
 	stats = $derived(calculateListStats(this.units));
 
-	resultList = $state<ResultList>();
-
-	constructor(resultList: ResultList) {
-		this.resultList = resultList;
-	}
+	unitAvailability = $derived(getUnitAvailability(this.units.map((u) => u.baseUnit.mulId)));
 
 	options = $derived(getRulesByName(this.rules));
 
@@ -72,7 +70,8 @@ export class List {
 		const issueUnits = new Set<string>();
 		let issueMessage = "";
 
-		if (this.options) {
+		if (this.options && this.options.name != "noRes") {
+			let uniquesInList = [];
 			if (this.options.maxPv && this.pv > this.options.maxPv) {
 				issueList.set("Max PV", new Set([`${this.pv}/${this.options.maxPv}`]));
 			}
@@ -83,12 +82,13 @@ export class List {
 				issueList.set("Era/Faction", new Set(["Must select a single era and faction"]));
 			}
 			for (const unit of this.units) {
-				if (
-					this.options.eraFactionRestriction &&
-					!this.resultList!.restrictedList.find((result) => {
-						return result.mulId == unit.baseUnit.mulId;
-					})
-				) {
+				const availability = this.unitAvailability.current?.get(unit.baseUnit.mulId)?.availability;
+				const available = availability?.find(({ era, faction }) => this.details.eras.includes(era) && (this.details.factions.includes(faction) || this.details.general == faction))
+					? true
+					: false;
+				const unique = availability?.find(({ era, faction }) => this.details.eras.includes(era) && faction == 4) ? true : false;
+				if (unique) uniquesInList.push(unit);
+				if (this.options.eraFactionRestriction && !available) {
 					if (unit.baseUnit.mulId < 0) {
 						issueMessage = "If a battlefield support unit is showing as unavailable, it might have been added using a different rules selection. Remove and re-add the unit";
 					}
@@ -115,7 +115,7 @@ export class List {
 					}
 					issueUnits.add(unit.id!);
 				}
-				if (this.options.disallowUnique && this.resultList!.uniqueList.includes(unit.baseUnit.mulId)) {
+				if (this.options.disallowUnique && unique) {
 					if (issueList.has("Unique units")) {
 						issueList.get("Unique units")?.add(unit.baseUnit.name);
 					} else {
@@ -314,17 +314,14 @@ export class List {
 					}
 				}
 			}
-			if (this.options.uniqueMaxLimit) {
-				let uniquesInList = this.units.filter((unit) => this.resultList!.uniqueList.includes(unit.baseUnit.mulId));
-				if (uniquesInList.length > 1) {
-					for (const unit of uniquesInList) {
-						if (issueList.has("Unique units limit")) {
-							issueList.get("Unique units limit")?.add(unit.baseUnit.name);
-						} else {
-							issueList.set("Unique units limit", new Set([unit.baseUnit.name]));
-						}
-						issueUnits.add(unit.id!);
+			if (this.options.uniqueMaxLimit && uniquesInList.length > this.options.uniqueMaxLimit) {
+				for (const unit of uniquesInList) {
+					if (issueList.has("Unique units limit")) {
+						issueList.get("Unique units limit")?.add(unit.baseUnit.name);
+					} else {
+						issueList.set("Unique units limit", new Set([unit.baseUnit.name]));
 					}
+					issueUnits.add(unit.id!);
 				}
 			}
 		}
@@ -476,16 +473,14 @@ export class List {
 	}
 	async loadList(data: ListCode) {
 		const listCode: ListCode = data;
+
+		db.previousLists.delete(this.id);
 		this.id = listCode.id;
 		this.details.name = listCode.name;
 		this.details.eras = listCode.eras;
 		this.details.factions = listCode.factions;
+		if (this.details.eras.length == 1 && this.details.factions.length == 1) this.details.general = getGeneralList(this.details.eras[0], this.details.factions[0]);
 		this.rules = listCode.rules;
-
-		this.resultList!.eras = this.details.eras;
-		this.resultList!.factions = this.details.factions;
-		this.resultList!.setOptions(this.rules);
-		this.resultList!.loadResults();
 
 		this.clear();
 		this.sublists = listCode.sublists;
@@ -497,6 +492,16 @@ export class List {
 			sublistIds.add(sublist.id);
 		});
 
+		const unitPromises = (await Promise.allSettled(listCode.units.map((u) => getMULDataFromId(u.mulId))))
+			.map((p) => {
+				if (p.status == "fulfilled" && p.value.data) {
+					return { mulId: p.value.data?.mulId, data: p.value.data };
+				}
+			})
+			.filter((p) => p != undefined);
+
+		const unitData = new Map(unitPromises.map((p) => [p.mulId, p.data]));
+
 		for (const unit of listCode.units) {
 			while (
 				this.units.find((existingUnit) => {
@@ -505,10 +510,9 @@ export class List {
 			) {
 				unit.id = nanoid(6);
 			}
-			let baseUnit: MulUnit =
-				this.resultList!.resultList.find((result: MulUnit) => {
-					return result.mulId == unit.mulId;
-				}) ?? (await this.loadUnit(unit.mulId));
+			let baseUnit: MulUnit | undefined = unitData.get(unit.mulId);
+			if (!baseUnit) continue;
+
 			//@ts-ignore
 			if (unit.skill === undefined || unit.skill == "undefined") {
 				unit.skill = 4;

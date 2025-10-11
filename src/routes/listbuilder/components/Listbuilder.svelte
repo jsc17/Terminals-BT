@@ -15,7 +15,6 @@
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { ruleSets } from "$lib/types/rulesets";
 	import { sendListToPlay } from "$lib/playmode/playmode";
-	import { getContext } from "svelte";
 	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
 	import { appWindow, toastController } from "$lib/stores";
 	import { Dialog } from "$lib/generic";
@@ -26,12 +25,11 @@
 
 	type Props = {
 		listCloseCallback: (id: string) => void;
+		resultList: ResultList;
 		list: List;
 	};
 
-	const resultList: ResultList = getContext("resultList");
-
-	let { listCloseCallback, list = $bindable() }: Props = $props();
+	let { listCloseCallback, resultList = $bindable(), list = $bindable() }: Props = $props();
 	let printModal = $state<PrintModal>();
 	let saveModal = $state<SaveModal>();
 	let loadModal = $state<LoadModal>();
@@ -91,9 +89,7 @@
 
 	async function resetList() {
 		if (confirm("Clear all units,formations and faction/era selection, and start a new list?")) {
-			resultList.eras = [];
-			resultList.factions = [];
-			resultList.loadResults();
+			resultList.clear();
 			list.clear();
 			list.details = { name: "New List", eras: [], factions: [], general: -1 };
 			list.id = crypto.randomUUID();
@@ -111,7 +107,7 @@
 				<select
 					bind:value={list.rules}
 					onchange={() => {
-						resultList.setOptions(list.rules ?? "noRes");
+						resultList.setOptions(list.rules);
 					}}
 				>
 					{#each ruleSets as rules}

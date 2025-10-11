@@ -1,7 +1,6 @@
 import { nanoid } from "nanoid";
 import type { ListFormation, ListCode, ListCodeUnit, Sublist } from "$lib/types/listTypes";
 import { List } from "$lib/types/list.svelte";
-import { ResultList } from "$lib/types/resultList.svelte";
 import { db } from "$lib/offline/db";
 
 export async function loadExistingListsFromLocalStorage(): Promise<List[]> {
@@ -9,7 +8,7 @@ export async function loadExistingListsFromLocalStorage(): Promise<List[]> {
 	//load list if still using localstorage from before tabs update
 	const lastList = localStorage.getItem("last-list");
 	if (lastList) {
-		let list = new List(new ResultList());
+		let list = new List();
 		const parsedCode = getListCodeFromString(lastList);
 		if (parsedCode) {
 			list.loadList(parsedCode);
@@ -24,7 +23,7 @@ export async function loadExistingListsFromLocalStorage(): Promise<List[]> {
 	if (lastListString) {
 		const lastLists = JSON.parse(lastListString);
 		for (const existingListTab of lastLists ?? []) {
-			let list = new List(new ResultList());
+			let list = new List();
 			const parsedCode = getListCodeFromString(existingListTab);
 			if (parsedCode) {
 				list.loadList(parsedCode);
@@ -38,7 +37,7 @@ export async function loadExistingListsFromLocalStorage(): Promise<List[]> {
 	const lastLists = await db.previousLists.toArray();
 	if (lastLists.length != 0) {
 		for (const listCode of lastLists) {
-			let list = new List(new ResultList());
+			let list = new List();
 			list.loadList(listCode);
 			activeLists.push(list);
 		}

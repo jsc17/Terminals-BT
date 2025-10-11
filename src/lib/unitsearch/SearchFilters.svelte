@@ -61,7 +61,7 @@
 	}
 </script>
 
-{#snippet filters(filterList: Filter[])}
+{#snippet filters(filterList: Filter[], showTags: boolean)}
 	<div class="filter-list">
 		{#each filterList as filter}
 			<div class="filter">
@@ -137,55 +137,57 @@
 				{/if}
 			</div>
 		{/each}
-		<form
-			class="tag-container"
-			{...getUnitsWithTags.for(tabId).enhance(async ({ submit }) => {
-				if (resultList.taggedUnits.length == 0 && selectedTags.length) {
-					await submit();
-					resultList.taggedUnits = getUnitsWithTags.for(tabId).result?.data ?? [];
-					if (getUnitsWithTags.for(tabId).result?.data?.length == 0) {
-						toastController.addToast("No units found that match all selected tags");
-					} else if (getUnitsWithTags.for(tabId).result?.message == "failed") {
-						toastController.addToast(getUnitsWithTags.for(tabId).result?.message ?? "Invalid message recieved");
+		{#if showTags}
+			<form
+				class="tag-container"
+				{...getUnitsWithTags.for(tabId).enhance(async ({ submit }) => {
+					if (resultList.taggedUnits.length == 0 && selectedTags.length) {
+						await submit();
+						resultList.taggedUnits = getUnitsWithTags.for(tabId).result?.data ?? [];
+						if (getUnitsWithTags.for(tabId).result?.data?.length == 0) {
+							toastController.addToast("No units found that match all selected tags");
+						} else if (getUnitsWithTags.for(tabId).result?.message == "failed") {
+							toastController.addToast(getUnitsWithTags.for(tabId).result?.message ?? "Invalid message recieved");
+						}
+					} else {
+						resultList.taggedUnits = [];
+						toastController.addToast("Tag filters removed");
 					}
-				} else {
-					resultList.taggedUnits = [];
-					toastController.addToast("Tag filters removed");
-				}
-			})}
-		>
-			<div class="tag-header">
-				<Select bind:value={selectedTags} items={filterTags} type="multiple" placeholder="Tags" disabled={resultList.taggedUnits.length != 0} />
-				<button class="tag-filter-button" disabled={user.username == undefined || selectedTags.length == 0}
-					>{resultList.taggedUnits.length == 0 ? `Filter` : "Remove Filter"}</button
-				>
-				<a class="collection-link" href="/collection" target="_blank">Edit Collection</a>
-			</div>
-			<div class="tag-list">
-				{#if user.username}
-					{#each selectedTags as tag, index}
-						{@const currentTag = tags.current?.find((t) => t.id.toString() == tag)}
-						{@const rgb = JSON.parse(currentTag?.color ?? `{"r":"0.2","g":"0.2","b":"0.2"}`)}
-						{@const rgbString = `rgb(${Number(rgb.r) * 255} ${Number(rgb.g) * 255} ${Number(rgb.b) * 255})`}
-						<input type="hidden" name="tagId[]" value={tag} />
-						<button
-							type="button"
-							class="tag"
-							style={`background-color: ${rgbString}; color: hwb(from oklch(from ${rgbString} l 0 0) h calc(((b - 50) * 999)) calc(((w - 50) * 999)));`}
-							onclick={() => {
-								if (resultList.taggedUnits.length != 0) {
-									toastController.addToast("Remove the tag filter to continue editting tags");
-								} else {
-									selectedTags.splice(index, 1);
-								}
-							}}>{currentTag?.label}</button
-						>
-					{/each}
-				{:else}
-					<p class="muted">Log in to use custom tag filtering</p>
-				{/if}
-			</div>
-		</form>
+				})}
+			>
+				<div class="tag-header">
+					<Select bind:value={selectedTags} items={filterTags} type="multiple" placeholder="Tags" disabled={resultList.taggedUnits.length != 0} />
+					<button class="tag-filter-button" disabled={user.username == undefined || selectedTags.length == 0}
+						>{resultList.taggedUnits.length == 0 ? `Filter` : "Remove Filter"}</button
+					>
+					<a class="collection-link" href="/collection" target="_blank">Edit Collection</a>
+				</div>
+				<div class="tag-list">
+					{#if user.username}
+						{#each selectedTags as tag, index}
+							{@const currentTag = tags.current?.find((t) => t.id.toString() == tag)}
+							{@const rgb = JSON.parse(currentTag?.color ?? `{"r":"0.2","g":"0.2","b":"0.2"}`)}
+							{@const rgbString = `rgb(${Number(rgb.r) * 255} ${Number(rgb.g) * 255} ${Number(rgb.b) * 255})`}
+							<input type="hidden" name="tagId[]" value={tag} />
+							<button
+								type="button"
+								class="tag"
+								style={`background-color: ${rgbString}; color: hwb(from oklch(from ${rgbString} l 0 0) h calc(((b - 50) * 999)) calc(((w - 50) * 999)));`}
+								onclick={() => {
+									if (resultList.taggedUnits.length != 0) {
+										toastController.addToast("Remove the tag filter to continue editting tags");
+									} else {
+										selectedTags.splice(index, 1);
+									}
+								}}>{currentTag?.label}</button
+							>
+						{/each}
+					{:else}
+						<p class="muted">Log in to use custom tag filtering</p>
+					{/if}
+				</div>
+			</form>
+		{/if}
 	</div>
 {/snippet}
 
@@ -211,7 +213,7 @@
 	>
 
 	<div class="card" class:hidden={appWindow.isNarrow && !showFilters}>
-		{@render filters(tempFilters)}
+		{@render filters(tempFilters, true)}
 		<div class="space-between filter-buttons">
 			<button
 				class="transparent-button"
@@ -232,7 +234,7 @@
 			<button class="clear" onclick={() => resetFilters()}>Clear Filters</button>
 		</div>
 		{#if showAdditionalFilters}
-			{@render filters(tempAdditionalFilters)}
+			{@render filters(tempAdditionalFilters, false)}
 		{/if}
 	</div>
 </main>

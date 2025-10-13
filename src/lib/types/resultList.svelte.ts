@@ -120,7 +120,8 @@ export class ResultList {
 	filterByRules = $state(true);
 	availableList = $derived.by(() => {
 		let availableUnits = this.resultList.concat(this.generalList);
-		availableUnits = [...new Set(availableUnits)];
+		availableUnits = [...new Map(availableUnits.map((u) => [u.id, u]))].map((v) => v[1]);
+
 		if (this.taggedUnits.length) {
 			availableUnits = availableUnits.filter((u) => {
 				if (u.group && u.group != "") {

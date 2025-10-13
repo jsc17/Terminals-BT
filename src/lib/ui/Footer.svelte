@@ -15,4 +15,10 @@
 		position: fixed;
 		bottom: 0;
 	}
+	@media print {
+		footer,
+		footer * {
+			display: none !important;
+		}
+	}
 </style>

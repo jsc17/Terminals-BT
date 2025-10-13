@@ -535,10 +535,8 @@ export class List {
 				tempUnit = { id: tempUnit.id, bonus: tempUnit.bonus };
 				tempUnits.push(tempUnit);
 				existingIds.add(tempUnit.id);
-				console.log(tempUnit.id);
 			}
 			formation.units = tempUnits;
-			console.log(formation.units);
 			while (formation.id != "unassigned" && (formationIDs.has(formation.id) || formation.id.length > 6)) {
 				formation.id = nanoid(6);
 			}

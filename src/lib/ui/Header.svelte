@@ -269,4 +269,10 @@
 		align-items: center;
 		gap: 16px;
 	}
+	@media print {
+		header,
+		header * {
+			display: none !important;
+		}
+	}
 </style>

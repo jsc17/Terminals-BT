@@ -73,7 +73,7 @@ export const fixUnitData = form(
 	async ({ selectedUnitId, unitSkill, eraId, factionId }) => {
 		const mulId = Number(selectedUnitId);
 		const mulData = await getMULDataFromId(mulId);
-		if (mulData.status == "failed") return { status: "failed", message: "Unit data not found" };
+		if (mulData?.status == "failed") return { status: "failed", message: "Unit data not found" };
 
 		const skill = Number(unitSkill);
 		const era = Number(eraId);

@@ -198,9 +198,6 @@
 
 <style>
 	@import "$lib/styles/google.css";
-	h2 {
-		margin: 0;
-	}
 	.dialog-body {
 		gap: 16px;
 	}

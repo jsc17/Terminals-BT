@@ -36,7 +36,7 @@ export async function loadUnitCardImage(mulId: number, skill?: number): Promise<
 	});
 }
 
-//puppeteer for card generation
+//playwright for card generation
 export async function renderHTMLfromUnit(unit: ListUnit, formationSPAs: number[], measurementUnits: "inches" | "hexes") {
 	let image = await loadImage(unit.baseUnit.mulId.toString(), unit.baseUnit.imageLink ?? "");
 	const renderedComponent = render(Wrapper, {

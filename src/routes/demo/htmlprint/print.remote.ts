@@ -1,0 +1,56 @@
+import { query } from "$app/server";
+import * as v from "valibot";
+import { PrintListSchema, PrintOptionsSchema } from "./types";
+import playwright from "playwright";
+import { render } from "svelte/server";
+import ListTemplate from "./ListTemplate.svelte";
+import { getAmmoByName } from "$lib/remote/ammo.remote";
+import { getMULDataFromId } from "$lib/remote/unit.remote";
+import { getMulCard, getMulImage } from "./mulImages.remote";
+import { PDFDocument } from "pdf-lib";
+
+export const printList = query(
+	v.object({
+		listData: PrintListSchema,
+		printOptions: PrintOptionsSchema
+	}),
+	async ({ listData, printOptions }) => {
+		const mulUnitData = new Map(
+			(await Promise.allSettled(listData.units.map(async (u) => getMULDataFromId(u.mulId)))).filter((u) => u.status == "fulfilled").map((u) => [u.value!.mulId, u.value!])
+		);
+
+		const ammoReferenceList = (
+			await Promise.allSettled(
+				listData.units
+					.flatMap((u) => u.customization?.ammo)
+					.filter((v) => v != undefined)
+					.map(async (v) => getAmmoByName(v))
+			)
+		)
+			.filter((r) => r.status == "fulfilled")
+			.map((r) => `${r.value!.name} (${r.value!.page})`);
+
+		const unitImages = new Map(
+			(await Promise.allSettled(mulUnitData.values().map(async (u) => getMulImage({ mulId: u.mulId, unitImageLink: u.imageLink ?? "" }))))
+				.filter((r) => r.status == "fulfilled")
+				.map((r) => [r.value.mulId, r.value.image ?? ""])
+		);
+
+		const unitCardImages = new Map(
+			(await Promise.allSettled(listData.units.map(async (u) => getMulCard({ mulId: u.mulId, skill: u.skill }))))
+				.filter((r) => r.status == "fulfilled")
+				.map((r) => [r.value.mulId, r.value.image ?? ""])
+		);
+
+		const browser = await playwright.chromium.launch({ headless: true });
+
+		const page = await browser.newPage();
+		const html = render(ListTemplate, { props: { listData, printOptions, mulUnitData, ammoReferenceList, unitImages, unitCardImages } });
+		await page.setContent(html.head + html.body);
+		const pdf = await page.pdf({ format: "Letter", printBackground: true, margin: { top: "12px", bottom: "12px", left: "12px", right: "12px" } });
+		const doc = await PDFDocument.load(new Uint8Array(pdf));
+		doc.setCreator("Terminal");
+		doc.setKeywords([printOptions.printStyle, "v2"]);
+		return await doc.save();
+	}
+);

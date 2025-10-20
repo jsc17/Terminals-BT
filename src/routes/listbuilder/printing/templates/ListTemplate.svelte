@@ -153,7 +153,7 @@
 				{#if ammoReferenceList.length != 0}
 					{@render referenceList("Alternate Munitions:", ammoReferenceList)}
 				{/if}
-				{#if printOptions.printFormations}
+				{#if printOptions.printFormations && formationReferenceList.length}
 					{@render referenceList("Formations:", formationReferenceList)}
 				{/if}
 			{/if}

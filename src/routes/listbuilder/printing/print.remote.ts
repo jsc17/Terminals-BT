@@ -43,8 +43,6 @@ export const printList = query(
 		);
 		const bsList = Map.groupBy(listData.bs ?? [], (v) => v);
 
-		console.log(bsList);
-
 		const browser = await playwright.chromium.launch({ headless: true });
 
 		const page = await browser.newPage();

@@ -2,11 +2,12 @@
 
 <script lang="ts">
 	import type { MulUnit } from "$lib/types/listTypes";
-	import type { PrintListOutput, PrintOptionsOutput } from "./types";
+	import type { PrintListOutput, PrintOptionsOutput } from "../types";
 	import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 	import PrintUnitCard from "./PrintUnitCard.svelte";
 	import { abilityReferences, spaReferences } from "$lib/data";
 	import { getFormationDataFromName } from "$lib/utilities/formationUtilities";
+	import { getBSCbyId } from "$lib/data/battlefieldSupport";
 
 	type Props = {
 		listData: PrintListOutput;
@@ -15,13 +16,15 @@
 		ammoReferenceList: string[];
 		unitImages?: Map<number, string>;
 		unitCardImages?: Map<number, string>;
+		bsList: Map<number, number[]>;
+		scaList: number[];
 	};
 
-	let { listData, printOptions, mulUnitData, ammoReferenceList, unitImages, unitCardImages }: Props = $props();
+	let { listData, printOptions, mulUnitData, ammoReferenceList, unitImages, unitCardImages, bsList, scaList }: Props = $props();
 
 	const unitData = new Map(listData.units.map((u) => [u.id, u]));
 
-	let tableHeaders = $derived(printOptions.printStyle == "simple" ? ["Unit", "Type", "Skill", "PV"] : ["Unit", "Type", "Move", "Damage", "Health", "Skill", "PV"]);
+	let tableHeaders = $derived(printOptions.printStyle == "simple" ? ["Unit", "Type", "Skill", "PV (Half)"] : ["Unit", "Type", "Move", "Damage", "Health", "Skill", "PV (Half)"]);
 
 	let abilityReferenceList = $derived.by(() => {
 		const referenceList: string[] = [];
@@ -29,12 +32,13 @@
 			for (const unit of mulUnitData.values()) {
 				if (unit.abilities.find((ua) => ua.name == a.abbr)) {
 					referenceList.push(`${a.abbr} (${a.name}, ${a.page})`);
+					return;
 				}
 			}
 		});
 		return referenceList;
 	});
-	let formationReferenceList = $derived(listData.formations.filter((f) => f.type != "none").map((f) => `${f.type} (${getFormationDataFromName(f.type)?.page})`));
+	let formationReferenceList = $derived([...new Set(listData.formations.filter((f) => f.type != "none").map((f) => `${f.type} (${getFormationDataFromName(f.type)?.page})`))]);
 	let spaReferenceList = $derived.by(() => {
 		const spaList = new Set<string>();
 		unitData.values().forEach((u) => u.customization?.spa?.forEach((v) => spaList.add(v)));
@@ -59,79 +63,102 @@
 {/snippet}
 
 <div class="body">
-	<h1>{listData.name}</h1>
-	<table>
-		<colgroup>
-			<col />
-			{#each { length: tableHeaders.length - 1 }}
-				<col class={{ simple: printOptions.printStyle == "simple", detailed: printOptions.printStyle == "detailed" }} />
-			{/each}
-		</colgroup>
-		<thead>
-			<tr>
-				{#each tableHeaders as header}
-					<th>{header}</th>
+	<div class="reference-page">
+		<h1>{listData.name}</h1>
+		<table>
+			<thead>
+				<tr>
+					{#each tableHeaders as header}
+						<th>{header}</th>
+					{/each}
+				</tr>
+			</thead>
+			<tbody>
+				{#each listData.formations as formation}
+					{@const formationPv = formation.units.reduce((a, v) => (a += getNewSkillCost(unitData.get(v)!.skill, mulUnitData.get(unitData.get(v)!.mulId)!.pv)), 0)}
+					{#if printOptions.printFormations && formation.type != "none"}
+						<tr>
+							<td class="formation-line" colspan={printOptions.printStyle == "simple" ? 4 : 7}>
+								{`${formation.name} - ${formation.type} - ${formation.units.length} Units - ${formationPv} PV`}
+							</td>
+						</tr>
+					{/if}
+					{#each formation.units as unitId}
+						{@const unit = unitData.get(unitId)}
+						{@const mulData = mulUnitData.get(unit!.mulId)}
+						{@const unitCost = getNewSkillCost(unit!.skill, mulData!.pv)}
+						{@const stats =
+							printOptions.printStyle == "simple"
+								? [mulData!.name, mulData!.subtype, unit!.skill, getNewSkillCost(unit!.skill, mulData!.pv)]
+								: [
+										mulData!.name,
+										mulData!.subtype,
+										`${mulData!.move?.map((m) => (printOptions.measurementUnits == "inches" ? `${m.speed}"${m.type ?? ""}` : `${m.speed / 2}⬢${m.type ?? ""}`)).join("/")}`,
+										`${mulData!.damageS}/${mulData!.damageM}/${mulData!.damageL}`,
+										`${mulData!.health} (${mulData!.armor}a+${mulData?.structure}s)`,
+										unit!.skill,
+										`${unitCost} (${unitCost / 2})`
+									]}
+						<tr>
+							{#each stats as stat}
+								<td class="unit-stat">{stat}</td>
+							{/each}
+						</tr>
+					{/each}
 				{/each}
-			</tr>
-		</thead>
-		<tbody>
-			{#each listData.formations as formation}
-				{@const formationPv = formation.units.reduce((a, v) => (a += getNewSkillCost(unitData.get(v)!.skill, mulUnitData.get(unitData.get(v)!.mulId)!.pv)), 0)}
-				{#if printOptions.printFormations && formation.type != "none"}
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan={printOptions.printStyle == "simple" ? 3 : 6}>{listData.units.length} Units</td>
+					<td>{listData.units.reduce((a, v) => a + getNewSkillCost(v.skill, mulUnitData.get(v.mulId)!.pv), 0)}</td>
+				</tr>
+			</tfoot>
+		</table>
+		{#if bsList.size > 0}
+			<table class="bs-container">
+				<thead>
 					<tr>
-						<td class="formation-line" colspan={printOptions.printStyle == "simple" ? 4 : 7}>
-							{`${formation.name} - ${formation.type} - ${formation.units.length} Units - ${formationPv} PV`}
-						</td>
+						<th>Battlefield Support</th>
+						<th>Uses</th>
+						<th>Total BSP Cost</th>
 					</tr>
+				</thead>
+				<tbody>
+					{#each bsList.entries() as [key, value]}
+						{@const bspData = getBSCbyId(key)}
+						<tr>
+							<td>{bspData?.name} ({bspData?.source})</td>
+							<td>
+								<div class="inline">
+									{#each { length: value.length }}
+										<div class="pip"></div>
+									{/each}
+								</div>
+							</td>
+							<td>{(bspData?.bspCost ?? 0) * value.length}</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		{/if}
+		<div>
+			{#if printOptions.printReferences}
+				<h2>References:</h2>
+				{#if printOptions.printReferences}
+					{@render referenceList("Abilities:", abilityReferenceList)}
 				{/if}
-				{#each formation.units as unitId}
-					{@const unit = unitData.get(unitId)}
-					{@const mulData = mulUnitData.get(unit!.mulId)}
-					{@const unitCost = getNewSkillCost(unit!.skill, mulData!.pv)}
-					{@const stats =
-						printOptions.printStyle == "simple"
-							? [mulData!.name, mulData!.subtype, unit!.skill, getNewSkillCost(unit!.skill, mulData!.pv)]
-							: [
-									mulData!.name,
-									mulData!.subtype,
-									`${mulData!.move?.map((m) => (printOptions.measurementUnits == "inches" ? `${m.speed}"${m.type ?? ""}` : `${m.speed / 2}⬢${m.type ?? ""}`)).join("/")}`,
-									`${mulData!.damageS}/${mulData!.damageM}/${mulData!.damageL}`,
-									`${mulData!.health} (${mulData!.armor}a+${mulData?.structure}s)`,
-									unit!.skill,
-									`${unitCost} (${unitCost / 2})`
-								]}
-					<tr>
-						{#each stats as stat}
-							<td class="unit-stat">{stat}</td>
-						{/each}
-					</tr>
-				{/each}
-			{/each}
-		</tbody>
-		<tfoot>
-			<tr>
-				<td colspan={printOptions.printStyle == "simple" ? 3 : 6}>{listData.units.length} Units</td>
-				<td>{listData.units.reduce((a, v) => a + getNewSkillCost(v.skill, mulUnitData.get(v.mulId)!.pv), 0)}</td>
-			</tr>
-		</tfoot>
-	</table>
-	{#if printOptions.printReferences}
-		<h2>References:</h2>
-		{#if printOptions.printReferences}
-			{@render referenceList("Abilities:", abilityReferenceList)}
-		{/if}
-		{#if spaReferenceList.length != 0}
-			{@render referenceList("SPAs:", spaReferenceList)}
-		{/if}
-		{#if ammoReferenceList.length != 0}
-			{@render referenceList("Alternate Munitions:", ammoReferenceList)}
-		{/if}
-		{#if printOptions.printFormations}
-			{@render referenceList("Formations:", formationReferenceList)}
-		{/if}
-	{/if}
-
-	<div class="break"></div>
+				{#if spaReferenceList.length != 0}
+					{@render referenceList("SPAs:", spaReferenceList)}
+				{/if}
+				{#if ammoReferenceList.length != 0}
+					{@render referenceList("Alternate Munitions:", ammoReferenceList)}
+				{/if}
+				{#if printOptions.printFormations}
+					{@render referenceList("Formations:", formationReferenceList)}
+				{/if}
+			{/if}
+		</div>
+	</div>
 	<div class="formation-container">
 		{#if printOptions.printCardsByFormation}
 			{#each listData.formations as formation}
@@ -143,7 +170,10 @@
 						</h2>
 					{:else if formation.type != "none"}
 						<div>
-							<h2 class="formation-header-side">{`${formation.name} - ${formation.type} Formation`} <br /> {`${formation.units.length} Units - ${formationPv}pv`}</h2>
+							<h2 class="formation-header-side">
+								{`${formation.name} - ${formation.type} Formation`} <br />
+								{`${formation.units.length} Units - ${formationPv}pv`}
+							</h2>
 						</div>
 					{:else}
 						<div></div>
@@ -217,17 +247,11 @@
 	}
 	.body {
 		background-color: white;
-		width: 8.5in;
+		width: 612pt;
 	}
 	table {
 		border-collapse: collapse;
 		width: 100%;
-	}
-	col.simple {
-		width: 15%;
-	}
-	col.detailed {
-		width: 8%;
 	}
 	th {
 		border: 1px solid black;
@@ -263,8 +287,12 @@
 		text-align: start;
 		padding-left: 4px;
 	}
-	.break {
+	.reference-page {
+		padding: 0pt 30pt;
 		break-after: page;
+		display: flex;
+		flex-direction: column;
+		gap: 8pt;
 	}
 	.formation-container {
 		display: flex;
@@ -276,7 +304,7 @@
 	}
 	.formation-side {
 		display: grid;
-		grid-template-columns: 1fr 527pt;
+		grid-template-columns: 0.95in 7.05in;
 		margin-bottom: 15pt;
 	}
 	.formation-line {
@@ -285,10 +313,11 @@
 	.unit-card-container {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 2pt;
+		gap: 0.05in;
 	}
 	.unit-card {
-		width: 262pt;
+		aspect-ratio: 7/ 5;
+		width: 271pt;
 	}
 	ul {
 		margin: 2pt;
@@ -303,5 +332,22 @@
 	.reference {
 		color: black;
 		font-size: 8pt;
+	}
+	.bs-container td:first-child {
+		text-align: start;
+		padding-left: 4px;
+	}
+	.inline {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 3pt;
+	}
+	.pip {
+		background-color: white;
+		border: 1pt solid black;
+		border-radius: 50%;
+		height: 7pt;
+		aspect-ratio: 1/1;
 	}
 </style>

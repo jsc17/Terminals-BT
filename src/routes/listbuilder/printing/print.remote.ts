@@ -3,7 +3,7 @@ import * as v from "valibot";
 import { PrintListSchema, PrintOptionsSchema } from "./types";
 import playwright from "playwright";
 import { render } from "svelte/server";
-import ListTemplate from "./ListTemplate.svelte";
+import ListTemplate from "./templates/ListTemplate.svelte";
 import { getAmmoByName } from "$lib/remote/ammo.remote";
 import { getMULDataFromId } from "$lib/remote/unit.remote";
 import { getMulCard, getMulImage } from "./mulImages.remote";
@@ -41,13 +41,16 @@ export const printList = query(
 				.filter((r) => r.status == "fulfilled")
 				.map((r) => [r.value.mulId, r.value.image ?? ""])
 		);
+		const bsList = Map.groupBy(listData.bs ?? [], (v) => v);
+
+		console.log(bsList);
 
 		const browser = await playwright.chromium.launch({ headless: true });
 
 		const page = await browser.newPage();
-		const html = render(ListTemplate, { props: { listData, printOptions, mulUnitData, ammoReferenceList, unitImages, unitCardImages } });
+		const html = render(ListTemplate, { props: { listData, printOptions, mulUnitData, ammoReferenceList, unitImages, unitCardImages, bsList, scaList: listData.scas ?? [] } });
 		await page.setContent(html.head + html.body);
-		const pdf = await page.pdf({ format: "Letter", printBackground: true, margin: { top: "12px", bottom: "12px", left: "12px", right: "12px" } });
+		const pdf = await page.pdf({ format: "Letter", printBackground: true, margin: { top: "0.125in", bottom: "0.125in", left: "0.125in", right: "0.125in" } });
 		const doc = await PDFDocument.load(new Uint8Array(pdf));
 		doc.setCreator("Terminal");
 		doc.setKeywords([printOptions.printStyle, "v2"]);

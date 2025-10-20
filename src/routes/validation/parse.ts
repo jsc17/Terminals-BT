@@ -5,6 +5,9 @@ export function getUnitDataFromPDF(content: TextContent, metadata: any) {
 	if ((content.items[0] as TextItem).str == "Master Unit List - Forces") {
 		return { status: "success", data: parseMul(content) };
 	} else if (metadata.Creator && metadata.Creator == "Terminal") {
+		if (metadata.Keywords.includes("v2")) {
+			return { status: "success", data: parseTerminalV2(content, metadata.Keywords) };
+		}
 		return { status: "success", data: parseTerminal(content, metadata.Keywords) };
 	} else {
 		return { status: "failed" };
@@ -71,4 +74,28 @@ function parseTerminal(content: TextContent, style: "mul" | "detailed") {
 		unitData.push({ name, pv, skill });
 	}
 	return unitData;
+}
+
+function parseTerminalV2(content: TextContent, keywords: string) {
+	let startingIndex, stepCount, upperlimit;
+
+	startingIndex = 16;
+	stepCount = keywords.includes("simple") ? 8 : 14;
+	upperlimit = content.items.findIndex((i) => /^\d+ Units$/.test((i as TextItem).str));
+
+	const parsedData: { name: string; pv: number; skill: number }[] = [];
+
+	for (let currIndex = startingIndex; currIndex < upperlimit; currIndex += stepCount) {
+		if ((content.items[currIndex] as TextItem).fontName.includes("f1")) currIndex += 2;
+		console.log(content.items[currIndex]);
+		let name = (content.items[currIndex] as TextItem).str;
+		if ((content.items[currIndex + 1] as TextItem).str != " ") {
+			name += " " + (content.items[currIndex + 1] as TextItem).str;
+			currIndex++;
+		}
+		const pv = Number((content.items[currIndex + 12] as TextItem).str.split(" ")[0]);
+		const skill = Number((content.items[currIndex + 10] as TextItem).str);
+		parsedData.push({ name, pv, skill });
+	}
+	return parsedData;
 }

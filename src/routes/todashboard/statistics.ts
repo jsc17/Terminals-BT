@@ -11,7 +11,7 @@ export async function calculateTournamentStatistics(participants: { name: string
 		const unitIds = JSON.parse(participant.units).map((s: string) => JSON.parse(s));
 		let listPV = 0;
 		for (const unit of unitIds) {
-			const data = (await getMULDataFromId(unit.id))?.data;
+			const data = (await getMULDataFromId(unit.id));
 			const cost = getNewSkillCost(unit.sk, data!.pv);
 			unitData.push({ player: participant.name, data: data!, skill: unit.sk, pv: cost });
 			listPV += cost;

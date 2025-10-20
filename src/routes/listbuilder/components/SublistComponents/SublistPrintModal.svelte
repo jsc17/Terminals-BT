@@ -4,6 +4,7 @@
 	import type { ListUnit, List } from "$lib/types/list.svelte";
 	import { Dialog } from "$lib/generic";
 	import { getContext } from "svelte";
+	import type { SettingsOutput } from "../../types/settings";
 
 	type Props = {
 		open: boolean;
@@ -12,7 +13,7 @@
 
 	let { open = $bindable(), list }: Props = $props();
 
-	let settings: Settings = getContext("listbuilderSettings");
+	let settings: SettingsOutput = getContext("listbuilderSettings");
 
 	function handlePrintForm({ formData, cancel, submitter }: any) {
 		if (submitter.innerText == "Cancel") {

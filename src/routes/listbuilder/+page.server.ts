@@ -1,9 +1,7 @@
 import { fail } from "@sveltejs/kit";
 import { prisma } from "$lib/server/prisma.js";
-import { printList } from "./printing/printList.js";
 import { type ListCode } from "$lib/types/listTypes";
 import { createSublistsPdf } from "./printing/printSublists.js";
-import * as z from "zod";
 
 export const load = async ({ url }) => {
 	let sharedList;
@@ -120,23 +118,6 @@ export const actions = {
 			console.error(error);
 			return fail(400, { message: "Failed to delete list" });
 		}
-	},
-	printList: async ({ request }) => {
-		const formData = await request.formData();
-		const list = JSON.parse(formData.get("body")!.toString());
-		list.style = formData.get("printStyle")?.toString() ?? "detailed";
-		list.cardStyle = formData.get("cardStyle")?.toString() ?? "mul";
-		list.formationHeaderStyle = formData.get("formationHeaderStyle")?.toString() ?? "inline";
-		const printFormations = formData.get("drawFormations")?.toString() == "on";
-		const printUnitsByFormation = formData.get("printUnitsByFormation")?.toString() == "on";
-		const printFormationBonuses = formData.get("printFormationBonuses")?.toString() == "on";
-		const measurementUnitsData = formData.get("measurementUnits")?.toString() ?? "inches";
-		const measurementSchema = z.literal(["inches", "hexes"]).catch("inches");
-		const measurementUnits = measurementSchema.parse(measurementUnitsData);
-
-		const blob = await printList(list, printFormations, printUnitsByFormation, printFormationBonuses, measurementUnits);
-		const bytes = await blob.bytes();
-		return { pdf: JSON.stringify(bytes) };
 	},
 	printSublists: async ({ request }) => {
 		const formData = await request.formData();

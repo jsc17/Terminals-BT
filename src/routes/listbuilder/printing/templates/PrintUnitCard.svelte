@@ -171,8 +171,8 @@
 
 <style>
 	.wrapper {
-		height: 187pt;
-		width: 262pt;
+		aspect-ratio: 7 / 5;
+		width: 271pt;
 		container: unit-card / size;
 		font-family: Arial, Helvetica, sans-serif;
 		padding: 0;
@@ -195,10 +195,10 @@
 		padding: 1cqh 1cqw;
 		display: grid;
 		grid-template-rows: 14.2cqh 63.3cqh 12.5cqh;
-		gap: 2cqh;
+		gap: 1.5cqh;
 		max-height: 100%;
 		max-width: 100%;
-		border: 2cqh solid black;
+		border: 3cqh solid black;
 		background-color: white;
 	}
 	p,

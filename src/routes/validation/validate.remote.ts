@@ -30,21 +30,18 @@ export const getUnitData = form(v.object({ listFile: v.file(), selectedEra: v.st
 
 	for (const parsedUnit of parsedData.data ?? []) {
 		const unit = await getMULDataFromName(parsedUnit.name);
-		if (unit?.status == "success") {
-			let unique: boolean | undefined, available: boolean | undefined;
-			if (unit) {
-				unique = await isUnique({ mulId: unit.data!.mulId, era });
-				const general = (await getGeneralId({ era, faction }))?.general;
-				available = await isAvailable({ mulId: unit.data!.mulId, eras: [era], factions: [faction, general ?? 0] });
-			}
+		if (unit) {
+			let unique: boolean | undefined = await isUnique({ mulId: unit.mulId, era });
+			const general = (await getGeneralId({ era, faction }))?.general;
+			let available: boolean | undefined = await isAvailable({ mulId: unit.mulId, eras: [era], factions: [faction, general ?? 0] });
 
 			unitData.push({
 				id: crypto.randomUUID(),
 				name: parsedUnit.name,
 				skill: parsedUnit.skill,
 				pv: parsedUnit.pv,
-				mulData: unit.data,
-				link: unit ? `http://masterunitlist.info/Unit/Details/${unit.data!.mulId}` : undefined,
+				mulData: unit,
+				link: unit ? `http://masterunitlist.info/Unit/Details/${unit.mulId}` : undefined,
 				unique: unique,
 				available: available
 			});
@@ -73,7 +70,6 @@ export const fixUnitData = form(
 	async ({ selectedUnitId, unitSkill, eraId, factionId }) => {
 		const mulId = Number(selectedUnitId);
 		const mulData = await getMULDataFromId(mulId);
-		if (mulData?.status == "failed") return { status: "failed", message: "Unit data not found" };
 
 		const skill = Number(unitSkill);
 		const era = Number(eraId);

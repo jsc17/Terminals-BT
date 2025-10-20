@@ -1,15 +1,14 @@
-import type { MulUnit } from "$lib/types/listTypes";
 import * as v from "valibot";
 
 export const PrintOptionsSchema = v.object({
-	printStyle: v.picklist(["simple", "detailed"]),
-	printFormations: v.boolean(),
-	printCardsByFormation: v.boolean(),
-	printFormationBonuses: v.boolean(),
-	cardStyle: v.picklist(["mul", "generated"]),
-	formationHeaderStyle: v.picklist(["inline", "side"]),
-	measurementUnits: v.picklist(["inches", "hexes"]),
-	printReferences: v.boolean()
+	printStyle: v.fallback(v.picklist(["simple", "detailed"]), "detailed"),
+	printFormations: v.fallback(v.boolean(), true),
+	printCardsByFormation: v.fallback(v.boolean(), true),
+	printFormationBonuses: v.fallback(v.boolean(), true),
+	cardStyle: v.fallback(v.picklist(["mul", "generated"]), "generated"),
+	formationHeaderStyle: v.fallback(v.picklist(["inline", "side"]), "inline"),
+	measurementUnits: v.fallback(v.picklist(["inches", "hexes"]), "inches"),
+	printReferences: v.fallback(v.boolean(), true)
 });
 
 export type PrintOptionsOutput = v.InferOutput<typeof PrintOptionsSchema>;

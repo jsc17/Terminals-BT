@@ -58,3 +58,6 @@ section.card {
 	border-radius: var(--radius);
 	flex-shrink: 0;
 }
+.strikethrough {
+	text-decoration: line-through;
+}

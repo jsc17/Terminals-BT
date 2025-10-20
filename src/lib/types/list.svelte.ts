@@ -494,8 +494,8 @@ export class List {
 
 		const unitPromises = (await Promise.allSettled(listCode.units.map((u) => getMULDataFromId(u.mulId))))
 			.map((p) => {
-				if (p.status == "fulfilled" && p.value?.data) {
-					return { mulId: p.value.data?.mulId, data: p.value.data };
+				if (p.status == "fulfilled" && p.value) {
+					return { mulId: p.value.mulId, data: p.value };
 				}
 			})
 			.filter((p) => p != undefined);

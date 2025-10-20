@@ -5,6 +5,7 @@
 	import { enhance } from "$app/forms";
 	import { Dialog } from "$lib/generic";
 	import { getContext } from "svelte";
+	import type { SettingsOutput } from "../../types/settings";
 
 	type Props = {
 		open: boolean;
@@ -14,7 +15,7 @@
 
 	let { open = $bindable(), sublist, list }: Props = $props();
 
-	let settings: Settings = getContext("listbuilderSettings");
+	let settings: SettingsOutput = getContext("listbuilderSettings");
 
 	let exportName = $state("");
 	let playerName = $state("");
@@ -97,19 +98,14 @@
 					<legend>Printing Style</legend>
 					<div>
 						<label for="print-list-style-mul"
-							><input type="radio" name="printStyle" id="print-list-style-mul" value="mul" bind:group={settings.sublistUI.sublistPrintListSettings.printingStyle} />MUL style -
+							><input type="radio" name="printStyle" id="print-list-style-mul" value="mul" bind:group={settings.sublistUI.sublistPrintListSettings.printStyle} />MUL style -
 							Generates a summary page similar to the MUL printout.</label
 						>
 					</div>
 					<div>
 						<label for="print-list-style-detailed"
-							><input
-								type="radio"
-								name="printStyle"
-								id="print-list-style-detailed"
-								value="detailed"
-								bind:group={settings.sublistUI.sublistPrintListSettings.printingStyle}
-							/>Detailed - Generates a summary page with more details for quick reference.</label
+							><input type="radio" name="printStyle" id="print-list-style-detailed" value="detailed" bind:group={settings.sublistUI.sublistPrintListSettings.printStyle} />Detailed
+							- Generates a summary page with more details for quick reference.</label
 						>
 					</div>
 				</fieldset>

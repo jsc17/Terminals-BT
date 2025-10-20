@@ -8,6 +8,7 @@
 	import EditSublistModal from "./EditSublistModal.svelte";
 	import AutogenerationModal from "./AutogenerationModal.svelte";
 	import { Dialog, Popover } from "$lib/generic";
+	import type { SettingsOutput } from "../../types/settings";
 
 	type Props = {
 		list: List;
@@ -15,7 +16,7 @@
 	};
 
 	let { list = $bindable(), open = $bindable() }: Props = $props();
-	let settings: Settings = getContext("listbuilderSettings");
+	let settings: SettingsOutput = getContext("listbuilderSettings");
 
 	let scenarioFilter = $state<string>("All");
 	let flipDurationMs = 300;

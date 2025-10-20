@@ -31,6 +31,7 @@
 			bs: list.bsList
 		};
 		toastController.addToast("Generating Pdf for download");
+		console.log(settings.print);
 		printList({ listData, printOptions: settings.print }).then((pdf) => {
 			const blob = new Blob([new Uint8Array(pdf)], { type: "application/pdf" });
 			const downloadElement = document.createElement("a");
@@ -53,7 +54,7 @@
 				<legend>Printing Style</legend>
 				<div>
 					<label for="print-list-style-mul"
-						><input type="radio" name="printStyle" id="print-list-style-mul" value="mul" bind:group={settings.print.printStyle} />MUL style - Generates a summary page similar to
+						><input type="radio" name="printStyle" id="print-list-style-mul" value="simple" bind:group={settings.print.printStyle} />MUL style - Generates a summary page similar to
 						the MUL printout.</label
 					>
 				</div>

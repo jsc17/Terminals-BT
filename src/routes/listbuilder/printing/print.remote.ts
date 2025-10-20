@@ -15,6 +15,7 @@ export const printList = query(
 		printOptions: PrintOptionsSchema
 	}),
 	async ({ listData, printOptions }) => {
+		console.log(printOptions.printStyle);
 		const mulUnitData = new Map(
 			(await Promise.allSettled(listData.units.map(async (u) => getMULDataFromId(u.mulId)))).filter((u) => u.status == "fulfilled").map((u) => [u.value!.mulId, u.value!])
 		);

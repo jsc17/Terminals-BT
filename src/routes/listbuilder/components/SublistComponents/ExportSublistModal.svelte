@@ -80,7 +80,7 @@
 					<legend>Printing Style</legend>
 					<div>
 						<label for="print-list-style-mul"
-							><input type="radio" name="printStyle" id="print-list-style-mul" value="mul" bind:group={settings.sublistUI.sublistPrintListSettings.printStyle} />MUL style -
+							><input type="radio" name="printStyle" id="print-list-style-mul" value="simple" bind:group={settings.sublistUI.sublistPrintListSettings.printStyle} />MUL style -
 							Generates a summary page similar to the MUL printout.</label
 						>
 					</div>
@@ -111,41 +111,6 @@
 				</fieldset>
 				<div><button onclick={() => handlePrint()}>Print</button></div>
 			</div>
-			<!-- <form action="?/printList" method="post" use:enhance={handleForm} class="print-form">
-				<div><label for="print-listname">List Name</label><input id="print-listname" bind:value={printName} /></div>
-				<div><label for="print-playername">Player Name (optional)</label><input id="print-playername" bind:value={playerName} /></div>
-				<fieldset>
-					<legend>Printing Style</legend>
-					<div>
-						<label for="print-list-style-mul"
-							><input type="radio" name="printStyle" id="print-list-style-mul" value="mul" bind:group={settings.sublistUI.sublistPrintListsettings.sublistUI.sublistPrintListSettingsStyle} />MUL style -
-							Generates a summary page similar to the MUL printout.</label
-						>
-					</div>
-					<div>
-						<label for="print-list-style-detailed"
-							><input type="radio" name="printStyle" id="print-list-style-detailed" value="detailed" bind:group={settings.sublistUI.sublistPrintListsettings.sublistUI.sublistPrintListSettingsStyle} />Detailed
-							- Generates a summary page with more details for quick reference.</label
-						>
-					</div>
-				</fieldset>
-				<fieldset>
-					<legend>Card Options</legend>
-					<div>
-						<input type="radio" name="cardStyle" id="card-type-mul" value="mul" bind:group={settings.sublistUI.sublistPrintListSettings.cardStyle} /><label for="card-type-mul"
-							>Print cards downloaded from the MUL</label
-						>
-					</div>
-					<div>
-						<input type="radio" name="cardStyle" id="card-type-generated" value="generated" bind:group={settings.sublistUI.sublistPrintListSettings.cardStyle} /><label
-							for="card-type-generated">Print generated cards. Required for printing SCA's and Alt. Ammo. May take a few seconds to print.</label
-						>
-					</div>
-				</fieldset>
-				<div class="print-buttons">
-					<button>Print</button>
-				</div>
-			</form> -->
 		</fieldset>
 		<fieldset>
 			<legend>Export Sublist:</legend>

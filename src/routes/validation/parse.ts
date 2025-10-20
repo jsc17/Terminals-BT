@@ -77,25 +77,30 @@ function parseTerminal(content: TextContent, style: "mul" | "detailed") {
 }
 
 function parseTerminalV2(content: TextContent, keywords: string) {
-	let startingIndex, stepCount, upperlimit;
-
-	startingIndex = 16;
-	stepCount = keywords.includes("simple") ? 8 : 14;
-	upperlimit = content.items.findIndex((i) => /^\d+ Units$/.test((i as TextItem).str));
+	const startingIndex = keywords.includes("simple") ? 9 : 16;
+	const stepCount = keywords.includes("simple") ? 7 : 13;
+	const pvStep = keywords.includes("simple") ? 6 : 12;
+	const skillStep = keywords.includes("simple") ? 4 : 10;
+	const upperlimit = content.items.findIndex((i) => /^\d+ Units$/.test((i as TextItem).str)) - 1;
 
 	const parsedData: { name: string; pv: number; skill: number }[] = [];
 
 	for (let currIndex = startingIndex; currIndex < upperlimit; currIndex += stepCount) {
-		if ((content.items[currIndex] as TextItem).fontName.includes("f1")) currIndex += 2;
-		console.log(content.items[currIndex]);
+		if ((content.items[currIndex] as TextItem).fontName.includes("f1")) {
+			currIndex += 2;
+		}
 		let name = (content.items[currIndex] as TextItem).str;
+		while (name == "" || name == " ") {
+			currIndex++;
+			name = (content.items[currIndex] as TextItem).str;
+		}
 		if ((content.items[currIndex + 1] as TextItem).str != " ") {
 			name += " " + (content.items[currIndex + 1] as TextItem).str;
 			currIndex++;
 		}
-		const pv = Number((content.items[currIndex + 12] as TextItem).str.split(" ")[0]);
-		const skill = Number((content.items[currIndex + 10] as TextItem).str);
-		parsedData.push({ name, pv, skill });
+		const pv = Number((content.items[currIndex + pvStep] as TextItem).str.split(" ")[0]);
+		const skill = Number((content.items[currIndex + skillStep] as TextItem).str);
+		parsedData.push({ name: name.trim(), pv, skill });
 	}
 	return parsedData;
 }

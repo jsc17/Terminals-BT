@@ -3,6 +3,7 @@
 	import { calculateTMM } from "$lib/utilities/genericBattletechUtilities";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import SendNotification from "./SendNotification.svelte";
+	import { uploadAmmo } from "./admin.remote";
 
 	async function loadUnits() {
 		const links: { type: string; link: string }[] = [];
@@ -96,49 +97,6 @@
 	async function uploadCustomUnits() {
 		const result: any = deserialize(await (await fetch("?/uploadCustom", { method: "POST", body: "" })).text());
 	}
-
-	const data = [
-		{
-			group: "2V2N 9KYPM version 1",
-			value: 20000
-		},
-		{
-			group: "L22I P66EP L22I P66EP L22I P66EP",
-			value: 65000
-		},
-		{
-			group: "JQAI 2M4L1",
-			value: 75000
-		},
-		{
-			group: "J9DZ F37AP",
-			value: 1200
-		},
-		{
-			group: "YEL48 Q6XK YEL48",
-			value: 10000
-		},
-		{
-			group: "Misc",
-			value: 25000
-		}
-	];
-
-	let options = {
-		title: "Donut",
-		resizable: false,
-		legend: {
-			position: "left"
-		},
-		donut: {
-			center: {
-				label: "Browsers"
-			}
-		},
-		width: "400px",
-		height: "400px",
-		theme: "g90"
-	};
 </script>
 
 <main>
@@ -172,6 +130,8 @@
 	</div>
 
 	<SendNotification />
+
+	<button onclick={() => uploadAmmo()}>Upload Ammo</button>
 </main>
 
 <style>

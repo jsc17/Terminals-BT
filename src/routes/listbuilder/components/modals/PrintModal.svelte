@@ -1,9 +1,11 @@
 <script lang="ts">
-	import { enhance } from "$app/forms";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { type List } from "$lib/types/list.svelte";
 	import { Dialog } from "$lib/generic";
 	import { getContext } from "svelte";
+	import { printList } from "../../printing/print.remote";
+	import type { SettingsOutput } from "../../types/settings";
+	import type { PrintListOutput } from "../../printing/types";
 
 	type Props = {
 		list: List;
@@ -11,66 +13,55 @@
 
 	let { list = $bindable() }: Props = $props();
 
-	let settings: Settings = getContext("listbuilderSettings");
+	let settings: SettingsOutput = getContext("listbuilderSettings");
 
 	let openState = $state(false);
-	let playerName = $state("");
-	let printName = $state("");
+	let printName = $derived(list.details.name);
 
 	export function open() {
-		printName = list.details.name;
 		openState = true;
 	}
 
-	async function handleForm({ formData, cancel, submitter }: any) {
-		openState = false;
-		if (submitter.innerText == "Cancel") {
-			cancel();
-		} else {
-			let body = JSON.stringify({
-				units: list.units,
-				formations: list.formations,
-				scas: list.scaList,
-				playername: playerName,
-				listname: printName,
-				eras: list.details.eras,
-				factions: list.details.factions,
-				general: list.details.general,
-				bs: list.bsList,
-				condense: false
-			});
-
-			formData.append("body", body);
-
-			toastController.addToast("Generating PDF. Your download should start momentarily");
-		}
-		return async ({ result }: any) => {
-			const blob = new Blob([new Uint8Array(Object.values(JSON.parse(result.data.pdf)))], { type: "application/pdf" });
+	async function handlePrint() {
+		let listData: PrintListOutput = {
+			name: printName,
+			units: list.units.map((u) => ({ id: u.id, mulId: u.baseUnit.mulId, skill: u.skill ?? 4, customization: u.customization })),
+			formations: list.formations.map((f) => ({ name: f.name, type: f.type, units: f.units.map((u) => u.id) })),
+			scas: list.scaList.map((v) => v.id),
+			bs: list.bsList
+		};
+		toastController.addToast("Generating Pdf for download");
+		console.log(settings.print);
+		printList({ listData, printOptions: settings.print }).then((pdf) => {
+			const blob = new Blob([new Uint8Array(pdf)], { type: "application/pdf" });
 			const downloadElement = document.createElement("a");
-			downloadElement.download = list.details.name;
+			downloadElement.download = listData.name;
 			downloadElement.href = URL.createObjectURL(blob);
 			downloadElement.click();
-		};
+			toastController.addToast("PDF Generation Complete");
+		});
+
+		openState = false;
 	}
 </script>
 
 <Dialog bind:open={openState} title="Print">
 	<div class="dialog-body">
-		<form action="?/printList" method="post" use:enhance={handleForm} class="print-form">
-			<div><label for="print-listname">List Name</label><input id="print-listname" bind:value={printName} /></div>
-			<div><label for="print-playername">Player Name (optional)</label><input id="print-playername" bind:value={playerName} /></div>
+		<div class="print-form">
+			<label>List Name <input bind:value={printName} /></label>
+			<!-- <div><label for="print-playername">Player Name (optional)</label><input id="print-playername" bind:value={playerName} /></div> -->
 			<fieldset>
 				<legend>Printing Style</legend>
 				<div>
 					<label for="print-list-style-mul"
-						><input type="radio" name="printStyle" id="print-list-style-mul" value="mul" bind:group={settings.print.printingStyle} />MUL style - Generates a summary page similar to
+						><input type="radio" name="printStyle" id="print-list-style-mul" value="simple" bind:group={settings.print.printStyle} />MUL style - Generates a summary page similar to
 						the MUL printout.</label
 					>
 				</div>
 				<div>
 					<label for="print-list-style-detailed"
-						><input type="radio" name="printStyle" id="print-list-style-detailed" value="detailed" bind:group={settings.print.printingStyle} />Detailed - Generates a summary page
-						with more details for quick reference.</label
+						><input type="radio" name="printStyle" id="print-list-style-detailed" value="detailed" bind:group={settings.print.printStyle} />Detailed - Generates a summary page with
+						more details for quick reference.</label
 					>
 				</div>
 			</fieldset>
@@ -108,9 +99,9 @@
 						name="printFormationBonuses"
 						id="printFormationBonuses"
 						bind:checked={settings.print.printFormationBonuses}
-						disabled={settings.print.cardStyle != "generated"}
+						disabled={settings.print.cardStyle != "generated" || true}
 					/>
-					<label for="printFormationBonuses">Print formation Bonuses</label>
+					<label for="printFormationBonuses"><span class="strikethrough">Print formation Bonuses</span> Temporarily disabled while working on an issue</label>
 				</div>
 				<fieldset class="formation-header-style-group">
 					<legend>Formation Header Style:</legend>
@@ -123,10 +114,10 @@
 				</fieldset>
 			</fieldset>
 			<div class="print-buttons">
-				<button>Cancel</button>
-				<button>Print</button>
+				<button onclick={() => (openState = false)}>Cancel</button>
+				<button onclick={() => handlePrint()}>Print</button>
 			</div>
-		</form>
+		</div>
 	</div>
 </Dialog>
 

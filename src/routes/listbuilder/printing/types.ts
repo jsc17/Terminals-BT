@@ -13,19 +13,25 @@ export const PrintOptionsSchema = v.object({
 
 export type PrintOptionsOutput = v.InferOutput<typeof PrintOptionsSchema>;
 
-export const SublistOptionsSchema = v.object({
-	sublistOrientation: v.fallback(v.picklist(["vertical", "horizontal"]), "vertical"),
-	sublistSortOrder: v.fallback(v.picklist(["pv", "name"]), "pv"),
-	sublistPrintListSettings: PrintOptionsSchema,
-	sublistPrintAllOrientation: v.fallback(v.picklist(["vertical", "horizontal", "card"]), "vertical"),
-	sublistPrintAllGroupByScenario: v.fallback(v.boolean(), false)
+export const PrintListSchema = v.object({
+	name: v.string(),
+	units: v.array(
+		v.object({
+			id: v.string(),
+			mulId: v.number(),
+			skill: v.number(),
+			customization: v.optional(v.object({ spa: v.optional(v.array(v.string())), ammo: v.optional(v.array(v.string())) }))
+		})
+	),
+	formations: v.array(
+		v.object({
+			name: v.string(),
+			type: v.string(),
+			units: v.array(v.string())
+		})
+	),
+	scas: v.optional(v.array(v.number())),
+	bs: v.optional(v.array(v.number()))
 });
 
-export type SublistOptionsOutput = v.InferOutput<typeof SublistOptionsSchema>;
-
-export const SettingsSchema = v.object({
-	print: PrintOptionsSchema,
-	sublistUI: SublistOptionsSchema
-});
-
-export type SettingsOutput = v.InferOutput<typeof SettingsSchema>;
+export type PrintListOutput = v.InferOutput<typeof PrintListSchema>;

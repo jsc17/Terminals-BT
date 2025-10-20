@@ -58,8 +58,8 @@ export const getMULDataFromId = query.batch(z.number(), async (ids) => {
 				availability: undefined,
 				threshold: mulData.threshold
 			};
-			return { status: "success", data: reference };
-		} else return { status: "failed", message: "Unit not found" };
+			return reference;
+		} else return undefined;
 	};
 });
 

@@ -88,7 +88,7 @@
 	.match-link:hover {
 		background-color: var(--popover);
 	}
-	.end-match {
+	/* .end-match {
 		background-color: rgb(240, 90, 90);
 		border-radius: 50%;
 		position: absolute;
@@ -98,5 +98,5 @@
 	.end-match:hover {
 		cursor: pointer;
 		background-color: lightcoral;
-	}
+	} */
 </style>

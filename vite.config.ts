@@ -10,5 +10,13 @@ export default defineConfig({
 		fs: {
 			strict: false
 		}
+	},
+	build: {
+		rollupOptions: {
+			external: ["playwright-core"]
+		}
+	},
+	optimizeDeps: {
+		exclude: ["chromium-bidi"]
 	}
 });

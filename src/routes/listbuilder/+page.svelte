@@ -7,34 +7,39 @@
 	import { loadExistingListsFromLocalStorage } from "$lib/utilities/listImport";
 	import { toastController } from "$lib/stores";
 	import { db } from "$lib/offline/db";
+	import { SettingsSchema, type SettingsOutput } from "./types/settings";
+	import { parse } from "valibot";
 
-	let settings = new PersistedState<Settings>("listbuilderSettings", {
+	let settings = new PersistedState<SettingsOutput>("listbuilderSettings", {
 		print: {
-			printingStyle: "detailed",
+			printStyle: "detailed",
 			printFormations: true,
 			printCardsByFormation: false,
 			printFormationBonuses: true,
 			cardStyle: "generated",
 			formationHeaderStyle: "inline",
-			measurementUnits: "inches"
+			measurementUnits: "inches",
+			printReferences: true
 		},
 		sublistUI: {
 			sublistOrientation: "vertical",
 			sublistSortOrder: "pv",
 			sublistPrintListSettings: {
-				printingStyle: "detailed",
+				printStyle: "detailed",
 				printFormations: true,
 				printCardsByFormation: false,
 				printFormationBonuses: true,
 				cardStyle: "generated",
 				formationHeaderStyle: "inline",
-				measurementUnits: "inches"
+				measurementUnits: "inches",
+				printReferences: true
 			},
 			sublistPrintAllOrientation: "vertical",
 			sublistPrintAllGroupByScenario: false
 		}
 	});
-	setContext("listbuilderSettings", settings.current);
+	settings.current = parse(SettingsSchema, settings.current);
+	settings.current = setContext("listbuilderSettings", settings.current);
 
 	let activeLists = $state<List[]>([]);
 	let selectedList = $state<string>("");

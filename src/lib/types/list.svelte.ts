@@ -1,11 +1,10 @@
 import type { ListUnit, MulUnit, ListCode, ListCodeUnit, SCA, ListFormation, Sublist, SublistStats } from "$lib/types/listTypes";
 import { getSCAfromId, calculateListStats } from "$lib/utilities/listUtilities";
-import type { ResultList } from "./resultList.svelte";
 import { getGeneralList, getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 import { getRulesByName } from "$lib/types/rulesets";
 import { nanoid } from "nanoid";
 import { loadMULUnit } from "$lib/utilities/loadUtilities";
-import { getListAvailability, getMULDataFromId, getUnitAvailability } from "$lib/remote/unit.remote";
+import { getCustomUnitData, getMULDataFromId, getUnitAvailability } from "$lib/remote/unit.remote";
 import { db } from "$lib/offline/db";
 
 export type { ListCode, ListCodeUnit, ListUnit, ListFormation, SCA, MulUnit, Sublist, SublistStats };
@@ -83,9 +82,10 @@ export class List {
 			}
 			for (const unit of this.units) {
 				const availability = this.unitAvailability.current?.get(unit.baseUnit.mulId)?.availability;
-				const available = availability?.find(({ era, faction }) => this.details.eras.includes(era) && (this.details.factions.includes(faction) || this.details.general == faction))
-					? true
-					: false;
+				const available =
+					(availability?.find(({ era, faction }) => this.details.eras.includes(era) && (this.details.factions.includes(faction) || this.details.general == faction))
+						? true
+						: false) || unit.baseUnit.mulId < 0;
 				const unique = availability?.find(({ era, faction }) => this.details.eras.includes(era) && faction == 4) ? true : false;
 				if (unique) uniquesInList.push(unit);
 				if (this.options.eraFactionRestriction && !available) {
@@ -492,7 +492,17 @@ export class List {
 			sublistIds.add(sublist.id);
 		});
 
-		const unitPromises = (await Promise.allSettled(listCode.units.map((u) => getMULDataFromId(u.mulId))))
+		const unitPromises = (
+			await Promise.allSettled(
+				listCode.units.map((u) => {
+					if (u.mulId >= 0) {
+						return getMULDataFromId(u.mulId);
+					} else {
+						return getCustomUnitData(u.mulId);
+					}
+				})
+			)
+		)
 			.map((p) => {
 				if (p.status == "fulfilled" && p.value) {
 					return { mulId: p.value.mulId, data: p.value };

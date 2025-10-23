@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { setContext } from "svelte";
+	import { onMount, setContext } from "svelte";
 	import { Listbuilder } from "./index";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { SearchFilters, SearchParameters, SearchResults } from "$lib/unitsearch";
@@ -21,6 +21,10 @@
 
 	watch([() => list.details.eras, () => list.details.factions], () => {
 		resultList.setParameters(list.details.eras, list.details.factions);
+	});
+
+	onMount(() => {
+		resultList.setOptions(list.rules);
 	});
 </script>
 

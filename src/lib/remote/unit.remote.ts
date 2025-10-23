@@ -63,6 +63,31 @@ export const getMULDataFromId = query.batch(z.number(), async (ids) => {
 	};
 });
 
+export const getCustomUnitData = query.batch(v.number(), async (ids) => {
+	const customMulData = await prisma.customCard.findMany({ where: { mulId: { in: ids } } });
+	const lookup = new Map(customMulData.map((d) => [d.mulId, d]));
+
+	return (id) => {
+		const data = lookup.get(id);
+		if (data) {
+			return {
+				id: data.mulId,
+				mulId: data.mulId,
+				type: data.type,
+				subtype: data.type,
+				name: data.name,
+				group: "",
+				class: data.class,
+				variant: data.variant,
+				pv: data.pv,
+				cost: data.pv,
+				abilities: data.abilities ? handleParse(data.abilities) : [],
+				rulesLevel: "Standard"
+			};
+		}
+	};
+});
+
 export const getMULDataFromName = query(z.string(), async (name) => {
 	const unit = await prisma.unit.findFirst({ where: { name }, select: { mulId: true } });
 	if (unit) return getMULDataFromId(unit.mulId);

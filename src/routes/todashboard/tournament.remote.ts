@@ -60,14 +60,14 @@ export const getUsersTournamentList = query(async () => {
 	return { status: "success", data };
 });
 
-export const deleteParticipant = command(v.number(), async (participantId) => {
+export const deleteParticipant = command(v.string(), async (participantId) => {
 	await prisma.participant.delete({ where: { id: participantId } });
 });
 
-export const getParticipantsGameList = query(v.number(), async (participantId) => {
+export const getParticipantsGameList = query(v.string(), async (participantId) => {
 	const participant = await prisma.participant.findUnique({ where: { id: participantId } });
 	if (participant) {
-		const file = await fs.readFile(participant?.listName);
+		const file = await fs.readFile(`./files/tournament-lists/${participant.id}.pdf`);
 		return { status: "success", data: file };
 	}
 	return { status: "failed", message: "List not found" };

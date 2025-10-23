@@ -7,10 +7,9 @@
 	type Props = {
 		fixedEra: boolean;
 		participants: {
-			id: number;
+			id: string;
 			name: string;
 			email: string;
-			listName: string;
 			era: string;
 			faction: string;
 			dateSubmitted: Date;
@@ -21,7 +20,7 @@
 
 	let { participants, fixedEra }: Props = $props();
 
-	async function downloadList(id: number) {
+	async function downloadList(id: string) {
 		const result = await getParticipantsGameList(id);
 		if (result.status == "success") {
 			const blob = new Blob([result.data! as BlobPart], { type: "application/pdf" });

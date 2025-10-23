@@ -4,11 +4,14 @@
 	import type { List } from "$lib/types/list.svelte";
 	import { dragHandle } from "svelte-dnd-action";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import { DropdownMenu, Popover } from "$lib/generic";
+	import { Dialog, DropdownMenu, Separator } from "$lib/generic";
 	import { UnitCustomizationModal } from "../index";
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
 	import { getSPAfromId } from "$lib/utilities/listUtilities";
 	import type { MenuItem } from "$lib/generic/types";
+	import { getSingleUnitAvailability } from "$lib/remote/unit.remote";
+	import { getEraName, getFactionName } from "$lib/remote/era-faction.remote";
+	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
 
 	type Props = {
 		unit: { id: string; bonus?: { ind: number; abil: number }[] };
@@ -41,6 +44,13 @@
 			},
 			{
 				type: "item",
+				label: "Check Availability",
+				onSelect: () => {
+					availabilityOpen = true;
+				}
+			},
+			{
+				type: "item",
 				label: "Remove Unit",
 				onSelect: () => {
 					list.removeUnit(unit.id);
@@ -50,6 +60,8 @@
 		];
 		return items;
 	});
+
+	let availabilityOpen = $state(false);
 </script>
 
 <div class="unit-card">
@@ -138,6 +150,22 @@
 		{/if}
 	</div>
 </div>
+
+<Dialog title="Unit Availability" bind:open={availabilityOpen}>
+	{#await getSingleUnitAvailability(unitDetails?.baseUnit.mulId ?? 0)}
+		<p>Getting Unit Availability</p>
+	{:then availabilityResults}
+		<div class="availability-result-container">
+			{#each availabilityResults?.entries() as [era, factionList]}
+				<p class="availability-result-era">{eraLookup.get(era)}:</p>
+				<p>{factionList.map((f) => factionLookup.get(f)).join(", ")}</p>
+				<div class="availability-separator-container">
+					<Separator classes={"separator-border"} />
+				</div>
+			{/each}
+		</div>
+	{/await}
+</Dialog>
 
 <style>
 	.unit-card {
@@ -243,5 +271,25 @@
 	}
 	.muted-foreground {
 		color: var(--muted-foreground);
+	}
+	.availability-result-container {
+		padding: 16px;
+		row-gap: 8px;
+		column-gap: 24px;
+		display: grid;
+		grid-template-columns: max-content 1fr;
+		max-height: 90dvh;
+		overflow: auto;
+	}
+	.availability-result-era {
+		display: flex;
+		justify-content: end;
+		color: var(--primary);
+	}
+	.availability-separator-container {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		grid-column: span 2;
 	}
 </style>

@@ -106,6 +106,21 @@ export const getListAvailability = query(v.object({ units: v.array(v.number()), 
 	return responseData;
 });
 
+export const getSingleUnitAvailability = query.batch(v.number(), async (mulIds) => {
+	const units = await prisma.unit.findMany({ where: { mulId: { in: mulIds } }, select: { mulId: true, availability: { orderBy: { factionAndEra: { era: { order: "asc" } } } } } });
+	const lookup = new Map(
+		units.map((u) => [
+			u.mulId,
+			u.availability.reduce((map, { era, faction }) => {
+				if (!map.has(era)) map.set(era, []);
+				map.get(era)!.push(faction);
+				return map;
+			}, new Map<number, number[]>())
+		])
+	);
+	return (mulId) => lookup.get(mulId);
+});
+
 export const getUnitAvailability = query(v.array(v.number()), async (ids) => {
 	const units = await prisma.unit.findMany({ where: { mulId: { in: ids } }, select: { mulId: true, availability: true } });
 	return new Map(units.map((u) => [u.mulId, u]));

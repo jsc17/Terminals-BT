@@ -10,7 +10,6 @@ import { nanoid } from "nanoid";
 import * as v from "valibot";
 
 export const getUnitData = form(v.object({ listFile: v.file(), selectedEra: v.string(), selectedFaction: v.string() }), async ({ listFile, selectedEra, selectedFaction }) => {
-	console.log("validating");
 	const era = Number(selectedEra);
 	const faction = Number(selectedFaction);
 	let unitData: ValidationUnitData[] = [];

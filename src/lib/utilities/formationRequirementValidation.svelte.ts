@@ -341,10 +341,8 @@ function checkTransport(units: ListUnit[], secondaryUnits: ListUnit[]) {
 
 	const remainingInf = structuredClone($state.snapshot(infantry));
 	for (const inf of infantry) {
-		console.log(inf.baseUnit.name);
 		let carReq = inf.baseUnit.abilities.find((ability) => ability.name == "CAR")?.v ?? 0;
 		for (const transport of transports) {
-			console.log(`${transport.transported}/${transport.capacity}`);
 			if (transport.capacity - transport.transported >= carReq) {
 				transport.transported += carReq;
 				const unitIndex = remainingInf.findIndex((unit) => unit.id == inf.id);
@@ -355,6 +353,5 @@ function checkTransport(units: ListUnit[], secondaryUnits: ListUnit[]) {
 		}
 	}
 
-	console.log(remainingInf.map((unit) => unit.baseUnit.name));
 	return remainingInf.length > 0 ? -1 : 1;
 }

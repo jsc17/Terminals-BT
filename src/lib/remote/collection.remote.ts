@@ -47,7 +47,6 @@ export const updateTag = form(v.object({ tagToUpdate: v.string(), newName: v.str
 	if (!locals.user) return { status: "failed", message: "Invalid User" };
 
 	const existing = await prisma.collectionTag.findFirst({ where: { userId: locals.user.id, label: newName } });
-	console.log(existing?.id, Number(tagToUpdate));
 	if (existing != null && existing.id != Number(tagToUpdate)) return { status: "failed", message: "Tag already exists" };
 
 	await prisma.collectionTag.update({ where: { id: Number(tagToUpdate) }, data: { label: newName, color: tagColor } });

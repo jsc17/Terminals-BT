@@ -111,7 +111,6 @@ export const getUnitNamesFromIds = query(v.array(v.number()), async (ids) => {
 });
 
 export const getListAvailability = query(v.object({ units: v.array(v.number()), eras: v.array(v.number()), factions: v.array(v.number()) }), async (data) => {
-	console.log(data.factions);
 	const promises = data.units.map(async (id) => {
 		const exists = await prisma.unit.findUnique({
 			where: { mulId: id, availability: { some: { era: { in: data.eras.length ? data.eras : undefined }, faction: { in: data.factions.length ? data.factions : undefined } } } }

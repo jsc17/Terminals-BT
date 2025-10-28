@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getEraName, getEraNames, getEras, getErasAndFactions, getFactionsInEra, getGeneralId } from "$lib/remote/era-faction.remote";
+	import { getEraName, getEraNames, getErasAndFactions, getGeneralId } from "$lib/remote/era-faction.remote";
 	import { getApprovedTournamentList, submitList } from "./tournament.remote";
 	import { validateRules } from "$lib/rules/validateList";
 	import { toastController } from "$lib/stores";
@@ -8,6 +8,11 @@
 	import FixModal from "./FixModal.svelte";
 	import type { ValidationUnitData, TournamentData } from "./types";
 	import { getUnitData } from "./validate.remote";
+	import { onMount } from "svelte";
+	import { page } from "$app/state";
+	import { submittedList } from "$lib/stores/listSubmission.svelte";
+	import { nanoid } from "nanoid";
+	import { afterNavigate } from "$app/navigation";
 
 	let files = $state<FileList>();
 
@@ -47,6 +52,13 @@
 				alert("not all units are valid");
 			}
 		}
+	}
+
+	if (page.url.searchParams.has("redirect") && submittedList.data) {
+		console.log("search params working");
+		const dataTransfer = new DataTransfer();
+		dataTransfer.items.add(new File([submittedList.data], submittedList.name ? `${submittedList.name}.pdf` : `${nanoid(6)}.pdf`));
+		files = dataTransfer.files;
 	}
 </script>
 

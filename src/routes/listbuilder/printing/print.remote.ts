@@ -5,9 +5,10 @@ import playwright from "playwright";
 import { render } from "svelte/server";
 import ListTemplate from "./templates/ListTemplate.svelte";
 import { getAmmoByName } from "$lib/remote/ammo.remote";
-import { getMULDataFromId } from "$lib/remote/unit.remote";
+import { getCustomUnitData, getMULDataFromId } from "$lib/remote/unit.remote";
 import { getMulCard, getMulImage } from "./mulImages.remote";
 import { PDFDocument } from "pdf-lib";
+import { type MulUnit } from "$lib/types/listTypes";
 
 export const printList = query(
 	v.object({
@@ -16,7 +17,9 @@ export const printList = query(
 	}),
 	async ({ listData, printOptions }) => {
 		const mulUnitData = new Map(
-			(await Promise.allSettled(listData.units.map(async (u) => getMULDataFromId(u.mulId)))).filter((u) => u.status == "fulfilled").map((u) => [u.value!.mulId, u.value!])
+			(await Promise.allSettled(listData.units.map(async (u) => (u.mulId >= 0 ? getMULDataFromId(u.mulId) : getCustomUnitData(u.mulId)))))
+				.filter((u) => u.status == "fulfilled")
+				.map((u) => [u.value!.mulId, u.value!])
 		);
 
 		const ammoReferenceList = (
@@ -31,7 +34,15 @@ export const printList = query(
 			.map((r) => `${r.value!.name} (${r.value!.page})`);
 
 		const unitImages = new Map(
-			(await Promise.allSettled(mulUnitData.values().map(async (u) => getMulImage({ mulId: u.mulId, unitImageLink: u.imageLink ?? "" }))))
+			(
+				await Promise.allSettled(
+					mulUnitData
+						.values()
+						.filter((u) => u.mulId >= 0)
+						//@ts-ignore ignores custom cards not having an imagelink
+						.map(async (u) => getMulImage({ mulId: u.mulId, unitImageLink: u.imageLink ?? "" }))
+				)
+			)
 				.filter((r) => r.status == "fulfilled")
 				.map((r) => [r.value.mulId, r.value.image ?? ""])
 		);

@@ -93,9 +93,9 @@
 								: [
 										mulData!.name,
 										mulData!.subtype,
-										`${mulData!.move?.map((m) => (printOptions.measurementUnits == "inches" ? `${m.speed}"${m.type ?? ""}` : `${m.speed / 2}⬢${m.type ?? ""}`)).join("/")}`,
-										`${mulData!.damageS}/${mulData!.damageM}/${mulData!.damageL}`,
-										`${mulData!.health} (${mulData!.armor}a+${mulData?.structure}s)`,
+										`${mulData!.move?.map((m) => (printOptions.measurementUnits == "inches" ? `${m.speed}"${m.type ?? ""}` : `${m.speed / 2}⬢${m.type ?? ""}`)).join("/") ?? "-"} `,
+										`${mulData!.damageS == undefined ? "-" : `${mulData!.damageS}/${mulData!.damageM}/${mulData!.damageL}`}`,
+										`${mulData!.health == undefined ? "-" : `${mulData!.health} (${mulData!.armor}a+${mulData?.structure}s)`}`,
 										unit!.skill,
 										`${unitCost} (${unitCost / 2})`
 									]}
@@ -201,7 +201,7 @@
 				{#each listData.formations.flatMap((f) => f.units) as unitId}
 					{@const unit = unitData.get(unitId)}
 					{@const mulData = mulUnitData.get(unit!.mulId)}
-					{#if printOptions.cardStyle == "mul"}
+					{#if printOptions.cardStyle == "mul" || unit!.mulId < 0}
 						<img src={unitCardImages?.get(unit!.mulId)} class="unit-card" alt="unit card" />
 					{:else}
 						<PrintUnitCard

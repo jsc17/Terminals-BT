@@ -182,7 +182,7 @@
 						{#each formation.units as unitId}
 							{@const unit = unitData.get(unitId)}
 							{@const mulData = mulUnitData.get(unit!.mulId)}
-							{#if printOptions.cardStyle == "mul"}
+							{#if printOptions.cardStyle == "mul" || unit!.mulId < 0}
 								<img src={unitCardImages?.get(unit!.mulId)} class="unit-card" alt="unit card" />
 							{:else}
 								<PrintUnitCard

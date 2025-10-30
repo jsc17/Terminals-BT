@@ -1,0 +1,47 @@
+@keyframes tilt-shake {
+	0% {
+		transform: rotate(0deg);
+	}
+	5% {
+		transform: rotate(15deg);
+	}
+	6% {
+		transform: rotate(0);
+	}
+	7% {
+		transform: rotate(-15deg);
+	}
+	8% {
+		transform: rotate(0deg);
+	}
+	9% {
+		transform: rotate(15deg);
+	}
+	10% {
+		transform: rotate(0deg);
+	}
+	11% {
+		transform: rotate(-15deg);
+	}
+	12% {
+		transform: rotate(0deg);
+	}
+	13% {
+		transform: rotate(15deg);
+	}
+	14% {
+		transform: rotate(-15deg);
+	}
+	15% {
+		transform: rotate(0deg);
+	}
+	16% {
+		transform: rotate(15deg);
+	}
+	17% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(0deg);
+	}
+}

@@ -52,7 +52,7 @@
 	}
 	.toast {
 		border: 1px solid var(--text-color);
-		color: var(--text-color);
+		color: black;
 		/* background-color: var(--primary); stlye set inline for animation. Probably a more correct way to do it, but I'll look into it later if I don't forget */
 		padding: 16px;
 		border-radius: var(--radius);

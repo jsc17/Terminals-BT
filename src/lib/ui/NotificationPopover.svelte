@@ -45,7 +45,7 @@
 
 <Popover {onOpenChange} bind:open>
 	{#snippet trigger()}
-		<div class="relative">
+		<div class={{ "notification-trigger": true, "notification-shake": unreadCount }}>
 			<Bell />
 			{#if unreadCount}
 				<div class="notification-unread"></div>
@@ -63,9 +63,6 @@
 </Popover>
 
 <style>
-	.notification-button {
-		filter: var(--primary-filter);
-	}
 	.notification-popover-title {
 		padding: 16px;
 		border-bottom: 1px solid var(--border);
@@ -89,9 +86,13 @@
 		overflow: auto;
 		scrollbar-gutter: stable;
 	}
-	.relative {
+	.notification-trigger {
 		position: relative;
 	}
+	.notification-shake {
+		animation: tilt-shake 10s ease-out infinite;
+	}
+
 	.notification-line-body {
 		display: flex;
 		flex-direction: column;

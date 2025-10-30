@@ -8,7 +8,6 @@
 	--text-color: black;
 	--surface-color-light-text-color: black;
 	--table-border: hsl(240, 4%, 28%);
-	--primary: oklch(0.457 0.191 261);
 	--button-text-color: black;
 	--button-dark-text-color: hsl(0, 0%, 80%);
 	--error: red;
@@ -44,7 +43,6 @@
 	--surface-color-light-text-color: hsl(240 5% 64.9%);
 	--border: hsl(240, 3.7%, 15.9%);
 	--table-border: hsl(240, 4%, 28%);
-	--primary: hsl(142, 69%, 44%);
 	--button-text-color: black;
 	--button-dark-text-color: hsl(0, 0%, 80%);
 	--input: hsl(240, 3.7%, 15.9%);
@@ -68,4 +66,23 @@
 	--button-dark: oklch(from var(--button) calc(l * 0.7) c h);
 	--ring: oklch(from var(--surface-color) calc(l * 0.6) c h);
 	--scrollbar: black;
+}
+
+:root[data-theme="green"] {
+	--primary: hsl(142, 67%, 30%);
+}
+:root.dark[data-theme="green"] {
+	--primary: hsl(142, 69%, 44%);
+}
+:root[data-theme="blue"] {
+	--primary: oklch(0.457 0.191 261);
+}
+:root.dark[data-theme="blue"] {
+	--primary: oklch(0.6 0.191 261);
+}
+:root[data-theme="brown"] {
+	--primary: oklch(0.6 0.1603 48.07);
+}
+:root.dark[data-theme="brown"] {
+	--primary: oklch(0.7003 0.1603 48.07);
 }

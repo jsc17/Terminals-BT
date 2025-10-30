@@ -3,6 +3,8 @@
 	import "$lib/styles/global.css";
 	import "$lib/styles/generic.css";
 	import "$lib/styles/theme.css";
+	import "$lib/styles/animations.css";
+
 	import { Footer, Header, Toast } from "$lib/ui";
 	import { type Notification } from "$lib/generic/types.js";
 	import { ModeWatcher } from "mode-watcher";
@@ -23,7 +25,7 @@
 </div>
 
 <Toast></Toast>
-<ModeWatcher />
+<ModeWatcher defaultTheme="green" />
 
 <style>
 	.main {

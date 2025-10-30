@@ -192,6 +192,7 @@
 /* Switch */
 [data-switch-root] {
 	background-color: var(--input);
+	border: 1px solid var(--border);
 	height: 36px;
 	width: 60px;
 	border-radius: calc(infinity * 1px);
@@ -202,8 +203,8 @@
 	width: 30px;
 	height: 30px;
 	border-radius: 50%;
+	transition: transform 0.3s;
 }
 [data-switch-thumb][data-state="checked"] {
-	align-self: flex-end;
-	justify-self: end;
+	transform: translateX(60%);
 }

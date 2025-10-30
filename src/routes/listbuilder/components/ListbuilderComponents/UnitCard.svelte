@@ -77,7 +77,7 @@
 			<DropdownMenu items={unitMenuItems}>
 				{#snippet trigger()}
 					<div class="unit-menu-trigger">
-						<ListButton color="var(--text-color)" size="15" />
+						<ListButton color="black" size="15" />
 					</div>
 				{/snippet}
 			</DropdownMenu>

@@ -143,7 +143,7 @@
 <style>
 	p {
 		margin: 0;
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 	}
 	.print-form {
 		div {
@@ -161,6 +161,6 @@
 		margin: 0px 4px;
 	}
 	fieldset {
-		border: 1px solid var(--muted);
+		border: 1px solid var(--surface-color-light);
 	}
 </style>

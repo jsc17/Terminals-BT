@@ -10,6 +10,7 @@
 	import { Dialog, Separator, DropdownMenu } from "$lib/generic";
 	import { exportArrayToCSV } from "$lib/utilities/export";
 	import VirtualList from "@humanspeak/svelte-virtual-list";
+	import { GearSix } from "phosphor-svelte";
 
 	type Props = {
 		list?: List;
@@ -73,7 +74,10 @@
 	}
 </script>
 
-<div class="search-results">
+<div class="search-results card">
+	{#if list && list.rules != "noRes"}
+		<p class="rules-notice">Some units may be filtered out due to the selected ruleset</p>
+	{/if}
 	<div class:result-list-header={!appWindow.isMobile} class:result-list-header-mobile={appWindow.isMobile}>
 		<div class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile}>
 			<DropdownMenu
@@ -89,7 +93,7 @@
 				triggerClasses="transparent-button"
 			>
 				{#snippet trigger()}
-					<img class="result-list-menu-button button-icon" src="/icons/settings.svg" alt="Results list menu" />
+					<GearSix weight="fill" size="20" />
 				{/snippet}
 			</DropdownMenu>
 		</div>
@@ -244,7 +248,7 @@
 		display: flex;
 		position: relative;
 		flex: 1;
-		background-color: var(--card);
+		background-color: var(--surface-color);
 	}
 	.loading-message {
 		padding-top: 24px;
@@ -253,15 +257,12 @@
 		display: flex;
 		font-size: x-large;
 	}
-	.result-list-menu-button {
-		filter: var(--primary-filter);
-	}
 	:global(.sort-header-button, .sort-header-button-mobile) {
-		background-color: var(--card);
+		background-color: var(--surface-color);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: var(--foreground);
+		color: var(--text-color);
 		height: 100%;
 		width: 100%;
 		gap: 4px;
@@ -279,7 +280,7 @@
 	}
 
 	:global(.sort) {
-		filter: var(--muted-filter);
+		filter: var(--surface-color-light-filter);
 	}
 	:global(.sort-selected) {
 		filter: var(--primary-filter);
@@ -288,20 +289,22 @@
 		display: grid;
 		height: 100%;
 		width: 100%;
-		background-color: var(--card);
 		grid-template-columns: 5% 1fr repeat(5, 7%) 12% 15%;
 		grid-template-rows: 1fr 1fr;
 		overflow-x: hidden;
 		padding-top: 4px;
 		border-bottom: 1px solid var(--border);
+		border-left: 1px solid var(--border);
 	}
 	.virtual-list-row-mobile {
-		background-color: var(--card);
 		height: 100%;
 		width: 100%;
 		display: grid;
 		grid-template-columns: 25px 1fr repeat(4, 10%) 15%;
 		border-bottom: 1px solid var(--border);
+	}
+	:global(.virtual-list-items > div:nth-child(even)) {
+		background-color: var(--table-secondary);
 	}
 	.search-result-stat-row {
 		display: grid;
@@ -366,5 +369,10 @@
 	.role-text {
 		font-size: 0.8em;
 		align-self: center;
+	}
+	.rules-notice {
+		align-self: center;
+		justify-self: center;
+		margin-bottom: 4px;
 	}
 </style>

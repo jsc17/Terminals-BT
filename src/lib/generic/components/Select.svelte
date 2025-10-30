@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Select, type WithoutChildren } from "bits-ui";
+	import { CaretUpDown, CaretUp, CaretDown, Check } from "phosphor-svelte";
 
 	type Item = {
 		value: string;
@@ -87,19 +88,19 @@ from the perspective of the consumer of this component, it will be typed appropr
 	<Select.Trigger>
 		<div class="select-trigger">
 			<p class="select-trigger-text">{valueString}</p>
-			<img src="./icons/chevron-updown.svg" alt="expand" />
+			<CaretUpDown color="var(--text-color)" size="15" />
 		</div>
 	</Select.Trigger>
 	<Select.Portal>
 		<Select.Content {...contentProps}>
-			<Select.ScrollUpButton><img class="select-scroll-img" src="/icons/chevron-up.svg" alt="scroll up" /></Select.ScrollUpButton>
+			<Select.ScrollUpButton><CaretUp size="15" color="var(--text-color)" /></Select.ScrollUpButton>
 			<Select.Viewport>
 				{#each items ?? [] as { value, label, disabled, subitems } (value)}
 					<Select.Item {value} {label} {disabled}>
 						{#snippet children({ selected })}
 							<div class="select-item">
 								{#if selected}
-									<img src="/icons/check.svg" alt="checkmark" />
+									<Check size="15" color="var(--text-color)" />
 								{:else}
 									<div></div>
 								{/if}
@@ -112,7 +113,7 @@ from the perspective of the consumer of this component, it will be typed appropr
 							{#snippet children({ selected })}
 								<div class="select-subitem">
 									{#if selected}
-										<img src="/icons/check.svg" alt="checkmark" />
+										<Check size="15" color="var(--text-color)" />
 									{:else}
 										<div></div>
 									{/if}
@@ -132,7 +133,7 @@ from the perspective of the consumer of this component, it will be typed appropr
 								{#snippet children({ selected })}
 									<div class="select-item">
 										{#if selected}
-											<img src="/icons/check.svg" alt="checkmark" />
+											<Check size="15" color="var(--text-color)" />
 										{:else}
 											<div></div>
 										{/if}
@@ -145,7 +146,7 @@ from the perspective of the consumer of this component, it will be typed appropr
 									{#snippet children({ selected })}
 										<div class="select-subitem">
 											{#if selected}
-												<img src="/icons/check.svg" alt="checkmark" />
+												<Check size="15" color="var(--text-color)" />
 											{:else}
 												<div></div>
 											{/if}
@@ -158,7 +159,7 @@ from the perspective of the consumer of this component, it will be typed appropr
 					</Select.Group>
 				{/each}
 			</Select.Viewport>
-			<Select.ScrollDownButton><img class="select-scroll-img" src="/icons/chevron-down.svg" alt="scroll down" /></Select.ScrollDownButton>
+			<Select.ScrollDownButton><CaretDown size="15" color="var(--text-color)" /></Select.ScrollDownButton>
 		</Select.Content>
 	</Select.Portal>
 </Select.Root>
@@ -167,17 +168,13 @@ from the perspective of the consumer of this component, it will be typed appropr
 	:global([data-select-trigger]) {
 		height: fit-content;
 		width: 100%;
-		background-color: var(--muted);
-		color: var(--muted-foreground);
+		background-color: var(--input);
+		color: var(--surface-color-light-text-color);
 	}
 	:global(.select-trigger) {
 		display: grid;
 		align-items: center;
 		grid-template-columns: 1fr 1.05em;
-		img {
-			height: 1em;
-			width: 1em;
-		}
 	}
 	:global(.select-trigger-text) {
 		padding: 0px 4px;
@@ -185,7 +182,7 @@ from the perspective of the consumer of this component, it will be typed appropr
 		justify-content: flex-start;
 		overflow: hidden;
 		text-wrap: none;
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 		height: 1.25em;
 	}
 	:global([data-select-viewport]) {
@@ -199,12 +196,12 @@ from the perspective of the consumer of this component, it will be typed appropr
 		z-index: 60;
 	}
 	:global([data-select-group-label]) {
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 		margin-top: 4px;
 		margin-bottom: 2px;
 	}
 	:global([data-highlighted][data-select-item]) {
-		background-color: var(--muted);
+		background-color: var(--surface-color-light);
 	}
 	:global([data-select-item]) {
 		border-radius: var(--radius);
@@ -215,10 +212,6 @@ from the perspective of the consumer of this component, it will be typed appropr
 		align-items: center;
 		gap: 4px;
 		font-size: 0.95em;
-
-		img {
-			width: 15px;
-		}
 	}
 	:global(.select-subitem) {
 		display: grid;
@@ -226,21 +219,12 @@ from the perspective of the consumer of this component, it will be typed appropr
 		align-items: center;
 		gap: 16px;
 		font-size: 0.85em;
-		color: var(--muted-foreground);
-
-		img {
-			width: 15px;
-		}
+		color: var(--surface-color-light-text-color);
 	}
 	:global([data-select-scroll-up-button], [data-select-scroll-down-button]) {
 		height: 1.05em;
 		display: flex;
 		justify-content: center;
 		align-items: center;
-	}
-	:global(.select-scroll-img) {
-		height: 1em;
-		width: 1em;
-		filter: var(--muted-filter);
 	}
 </style>

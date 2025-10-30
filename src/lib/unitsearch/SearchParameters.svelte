@@ -8,6 +8,7 @@
 	import { Combobox } from "$lib/generic";
 	import type { Item } from "$lib/generic/types";
 	import { EraFactionInfoPopover } from "$lib/unitsearch";
+	import { X } from "phosphor-svelte";
 
 	type Props = {
 		list?: List;
@@ -108,7 +109,7 @@
 								return text != selected;
 							});
 						}}
-						><img src="/icons/close.svg" alt="close" />
+						><X size="10" color="var(--text-color)" />
 						{eraLookup.get(Number(selected)) ?? `${selected} not found`}</button
 					>
 				{/each}
@@ -141,7 +142,7 @@
 								return text != selected;
 							});
 						}}
-						><img src="/icons/close.svg" alt="close" />
+						><X size="10" color="var(--text-color)" />
 						{allowedFactions.find((faction) => {
 							return faction.value == selected;
 						})?.label}</button
@@ -225,10 +226,10 @@
 	.accordian {
 		height: 35px;
 		width: 100%;
-		background-color: var(--card);
+		background-color: var(--surface-color);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
-		color: var(--card-foreground);
+		color: var(--text-color);
 		padding: 8px;
 	}
 	.selected-container {
@@ -237,26 +238,21 @@
 		flex-wrap: wrap;
 	}
 	.selected-block {
-		background-color: var(--muted);
-		color: var(--muted-foreground);
-		border-radius: 0;
+		background-color: var(--input);
+		color: var(--surface-color-light-text-color);
+		border-radius: var(--radius);
 		display: flex;
 		gap: 4px;
 		align-items: center;
 		width: fit-content;
-		padding: 2px;
+		padding: 2px 4px;
 		margin: 2px;
 		font-size: 0.75em;
 		height: 1.25em;
-
-		img {
-			height: 1em;
-			width: 1em;
-		}
 	}
 	.general-notice {
 		font-size: 0.75em;
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 	}
 
 	.warning-icon {

@@ -55,6 +55,7 @@
 		"dexie": "^4.2.0",
 		"dotenv": "^16.5.0",
 		"handlebars": "^4.7.8",
+		"mode-watcher": "^1.1.0",
 		"nanoid": "^5.1.5",
 		"nodemailer": "^6.10.1",
 		"pdf-lib": "^1.17.1",

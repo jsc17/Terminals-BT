@@ -207,7 +207,7 @@
 	}
 	.muted {
 		font-size: 0.8rem;
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 	}
 	.login-form {
 		display: flex;
@@ -222,7 +222,7 @@
 	.login-button {
 		height: 2rem;
 		background-color: var(--button-dark);
-		color: var(--button-dark-foreground);
+		color: var(--button-dark-text-color);
 		border-radius: 3px;
 		margin: 4px 16px 0px;
 	}

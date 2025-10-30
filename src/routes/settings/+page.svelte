@@ -4,6 +4,7 @@
 	import { type ActionResult } from "@sveltejs/kit";
 	import { goto } from "$app/navigation";
 	import { getContext } from "svelte";
+	import { DiscordLogo } from "phosphor-svelte";
 
 	const { data } = $props();
 	let allowDelete = $state(false);
@@ -140,7 +141,7 @@
 						<div class="gsi-material-button-state"></div>
 						<div class="gsi-material-button-content-wrapper">
 							<div class="gsi-material-button-icon">
-								<img class="login-icon" src="/discord.png" alt="discord" />
+								<DiscordLogo />
 							</div>
 							<span class="gsi-material-button-contents">Sign in with Discord</span>
 							<span style="display: none;">Sign in with Discord</span>
@@ -176,8 +177,8 @@
 		flex-direction: column;
 		padding: 16px;
 		gap: 8px;
-		background-color: var(--card);
-		color: var(--card-foreground);
+		background-color: var(--surface-color);
+		color: var(--text-color);
 	}
 	.link-button {
 		background-color: transparent;
@@ -209,19 +210,15 @@
 	button {
 		height: 2rem;
 		background-color: var(--button-dark);
-		color: var(--button-dark-foreground);
+		color: var(--button-dark-text-color);
 		border-radius: 3px;
 		margin: 4px 16px 0px;
-	}
-	.login-icon {
-		height: 20px;
-		width: 20px;
 	}
 	.warning {
 		color: var(--error);
 	}
 	button:disabled {
-		background-color: var(--muted);
-		color: var(--muted-foreground);
+		background-color: var(--surface-color-light);
+		color: var(--surface-color-light-text-color);
 	}
 </style>

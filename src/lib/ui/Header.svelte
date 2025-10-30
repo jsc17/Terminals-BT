@@ -9,6 +9,9 @@
 	import type { List } from "$lib/types/list.svelte";
 	import type { Notification } from "$lib/generic/types";
 	import { SvelteMap } from "svelte/reactivity";
+	import { toggleMode, mode, setTheme } from "mode-watcher";
+	import { List as ListIcon, GearSix, X, Sun, Moon } from "phosphor-svelte";
+	import { Switch } from "$lib/generic";
 
 	type Props = {
 		notifications: Notification[];
@@ -87,11 +90,11 @@
 
 <header>
 	<button bind:this={openNavButton} class="link-button" onclick={openNav} aria-label="Open navigation sidebar" aria-expanded="false" aria-controls="navbar">
-		<img src="/icons/menu.svg" alt="menu" />
+		<ListIcon />
 		{pageList.get(basePath)}
 	</button>
 	<nav bind:this={navbar} id="navbar">
-		<button class="link-button close-menu-button" onclick={closeNav} aria-label="Close navigation sidebar"><img src="/icons/close.svg" alt="close button" /></button>
+		<button class="link-button close-menu-button" onclick={closeNav} aria-label="Close navigation sidebar"><X /></button>
 		<ul>
 			<li><a href="/" aria-current={basePath === "/"} onclick={closeNav}>Home</a></li>
 			<li><a href="/about" aria-current={basePath === "/"} onclick={closeNav}>About</a></li>
@@ -113,33 +116,83 @@
 	{#if !appWindow.isNarrow}
 		<h1>Terminal's 'Tech Tools</h1>
 	{/if}
-	{#if user.username}
-		<div class="user-buttons">
+	<div class="user-buttons">
+		{#if user.username}
 			<NotificationPopover {notifications} />
-			<button class="link-button" onclick={openUserMenu}>
-				{user.username}
-				<img src="/icons/settings.svg" alt="settings" />
-			</button>
-		</div>
+			{user.username}
+		{:else}
+			<button
+				class="link-button"
+				onclick={() => {
+					loginModal?.show();
+				}}>Login/Register</button
+			>
+		{/if}
+		<button class="link-button" onclick={openUserMenu}>
+			<GearSix weight="fill" />
+		</button>
 		<menu bind:this={userMenu} id="usermenu">
-			<button class="link-button close-user-button" onclick={closeUserMenu} aria-label="Close user menu sidebar"><img src="/icons/close.svg" alt="close button" /></button>
+			<button class="link-button close-user-button" onclick={closeUserMenu} aria-label="Close user menu sidebar"><X /></button>
 			<ul>
-				<li><a href="/settings" onclick={closeUserMenu}>User Settings</a></li>
-				<li>
-					<form method="post" action="/auth/?/logout" use:enhance={handleLogout} class="inline user-logout">
-						<button class="link-button" onclick={closeUserMenu}>Log out</button>
-					</form>
+				{#if user.username}
+					<li><a href="/settings" onclick={closeUserMenu}>User Settings</a></li>
+					<hr />
+				{/if}
+				<li class="switch">Site colors:</li>
+				<li class="switch">
+					<Switch
+						checked={mode.current == "light"}
+						onCheckedChange={() => {
+							toggleMode();
+						}}
+					>
+						{#snippet leftValue()}
+							<Moon color={mode.current == "dark" ? "gold" : "var(--text-color)"} weight={mode.current == "dark" ? "fill" : "regular"} />
+						{/snippet}
+						{#snippet rightValue()}
+							<Sun color={mode.current == "light" ? "gold" : "var(--text-color)"} weight={mode.current == "light" ? "fill" : "regular"} />
+						{/snippet}
+					</Switch>
 				</li>
+				<li class="theme-buttons">
+					<button
+						class="theme-button"
+						style="background-color: green"
+						aria-label="Green Theme"
+						onclick={() => {
+							setTheme("green");
+						}}
+					></button>
+					<button
+						class="theme-button"
+						style="background-color: blue"
+						aria-label="Blue Theme"
+						onclick={() => {
+							setTheme("blue");
+						}}
+					></button>
+					<button
+						class="theme-button"
+						style="background-color: oklch(0.7003 0.1603 48.07)"
+						aria-label="Brown Theme"
+						onclick={() => {
+							setTheme("brown");
+						}}
+					></button>
+				</li>
+				<li class="switch">Colors are still a work in progress and need fine tuning, especially in light mode</li>
+				{#if user.username}
+					<hr />
+					<li>
+						<form method="post" action="/auth/?/logout" use:enhance={handleLogout} class="inline user-logout">
+							<button class="link-button" onclick={closeUserMenu}>Log out</button>
+						</form>
+					</li>
+				{/if}
 			</ul>
 		</menu>
-	{:else}
-		<button
-			class="link-button"
-			onclick={() => {
-				loginModal?.show();
-			}}>Login/Register</button
-		>
-	{/if}
+	</div>
+
 	<div
 		class="overlay"
 		onclick={() => {
@@ -166,13 +219,9 @@
 		top: 0;
 		flex-shrink: 0;
 		z-index: 10;
+		box-shadow: 0px 2px 2px var(--surface-color-shadow);
 	}
 	.link-button {
-		& img {
-			height: 30px;
-			width: 30px;
-			filter: var(--primary-filter);
-		}
 		background-color: transparent;
 		display: flex;
 		align-items: center;
@@ -187,7 +236,7 @@
 	menu {
 		position: fixed;
 		top: 0;
-		background-color: var(--background);
+		background-color: var(--surface-color);
 		height: 100dvh;
 		width: min(20em, 90%);
 		z-index: 11;
@@ -226,7 +275,7 @@
 	nav a:hover,
 	menu a:hover,
 	.user-logout:hover {
-		background-color: var(--muted);
+		background-color: var(--surface-color-light);
 		cursor: pointer;
 	}
 	.user-logout button {
@@ -245,12 +294,6 @@
 	}
 	.close-user-button {
 		align-self: flex-start;
-	}
-	.close-menu-button img,
-	.close-user-button img {
-		height: 35px;
-		width: 35px;
-		filter: var(--primary-filter);
 	}
 	.overlay {
 		display: none;
@@ -274,5 +317,19 @@
 		header * {
 			display: none !important;
 		}
+	}
+	.switch {
+		padding: 1em 2em;
+	}
+	.theme-buttons {
+		padding: 1em 2em;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+	.theme-button {
+		width: 20px;
+		height: 20px;
+		border-radius: 3px;
 	}
 </style>

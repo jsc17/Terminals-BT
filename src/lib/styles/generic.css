@@ -66,13 +66,13 @@
 	background-color: var(--primary);
 }
 .separator-muted {
-	background-color: var(--muted);
+	background-color: var(--surface-color-light);
 }
 .separator-border {
 	background-color: var(--border);
 }
 .separator-card {
-	background-color: var(--card-foreground);
+	background-color: var(--text-color);
 }
 [data-separator-root][data-orientation="vertical"] {
 	width: 1px;
@@ -103,7 +103,7 @@
 }
 [data-context-menu-item].context-button:hover {
 	color: var(--primary);
-	background-color: var(--muted);
+	background-color: var(--surface-color-light);
 }
 
 /* Dropdown Menu */
@@ -134,7 +134,7 @@
 }
 [data-dropdown-menu-item].dropdown-button:hover {
 	color: var(--primary);
-	background-color: var(--muted);
+	background-color: var(--surface-color-light);
 }
 [data-dropdown-menu-checkbox-item] {
 	color: var(--primary);
@@ -147,7 +147,7 @@
 	border-top: 1px solid var(--primary);
 }
 [data-dropdown-menu-separator].muted {
-	border-color: var(--muted);
+	border-color: var(--surface-color-light);
 }
 [data-dropdown-menu-content] .checkbox {
 	width: 15px;
@@ -160,10 +160,10 @@
 	background-color: var(--primary);
 }
 [data-dropdown-menu-radio-group] fieldset {
-	border: 1px solid var(--primary-muted);
+	border: 1px solid var(--primary-dark);
 }
 [data-dropdown-menu-radio-group] legend {
-	color: var(--muted-foreground);
+	color: var(--surface-color-light-text-color);
 }
 
 [data-dropdown-menu-radio-group] {
@@ -176,7 +176,7 @@
 }
 [data-dropdown-menu-radio-item]:hover {
 	cursor: pointer;
-	border: 1px solid var(--muted);
+	border: 1px solid var(--surface-color-light);
 }
 [data-dropdown-menu-radio-group] .radio-check {
 	border: 1px solid var(--border);
@@ -187,4 +187,24 @@
 }
 [data-dropdown-menu-radio-item][data-state="checked"] .radio-check {
 	border: 5px solid var(--primary);
+}
+
+/* Switch */
+[data-switch-root] {
+	background-color: var(--input);
+	border: 1px solid var(--border);
+	height: 36px;
+	width: 60px;
+	border-radius: calc(infinity * 1px);
+}
+[data-switch-thumb] {
+	display: block;
+	background-color: var(--primary);
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	transition: transform 0.3s;
+}
+[data-switch-thumb][data-state="checked"] {
+	transform: translateX(60%);
 }

@@ -57,7 +57,7 @@
 		line-height: 2rem;
 	}
 	p {
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 	}
 	h2 {
 		margin-bottom: 0px;

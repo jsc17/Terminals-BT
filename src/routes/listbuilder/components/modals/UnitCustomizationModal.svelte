@@ -155,7 +155,7 @@
 		flex-direction: column;
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
-		background-color: var(--card);
+		background-color: var(--surface-color);
 		min-height: 250px;
 		padding: 4px 8px;
 		gap: 4px;
@@ -194,7 +194,7 @@
 		align-items: center;
 	}
 	.filterWeapons {
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 		font-size: 0.85em;
 	}
 </style>

@@ -19,7 +19,7 @@
 		{#each toastController.toasts.entries() as [id, toast]}
 			<div
 				class="toast"
-				style={`background: linear-gradient(to left, var(--primary) ${toast.background - 3}%, var(--primary-pale) ${toast.background + 3}%)`}
+				style={`background: linear-gradient(to left, var(--primary) ${toast.background - 3}%, var(--primary-light) ${toast.background + 3}%)`}
 				transition:fade={{ duration: 300 }}
 			>
 				{toast.message}
@@ -51,8 +51,8 @@
 		gap: 16px;
 	}
 	.toast {
-		border: 1px solid var(--primary-foreground);
-		color: var(--primary-foreground);
+		border: 1px solid var(--text-color);
+		color: black;
 		/* background-color: var(--primary); stlye set inline for animation. Probably a more correct way to do it, but I'll look into it later if I don't forget */
 		padding: 16px;
 		border-radius: var(--radius);

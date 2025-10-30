@@ -197,8 +197,8 @@
 		flex-shrink: 0;
 		font-size: 10vmin;
 		border: 1px solid var(--border);
-		background-color: var(--card);
-		color: var(--card-foreground);
+		background-color: var(--surface-color);
+		color: var(--text-color);
 		height: 100%;
 		width: 100%;
 	}
@@ -219,9 +219,9 @@
 		flex-direction: column;
 	}
 	legend {
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 	}
 	fieldset label {
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 	}
 </style>

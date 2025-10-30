@@ -107,7 +107,7 @@
 					<label for="LocalSave">Save to local device storage</label>
 				{:else}
 					<input type="radio" name="saveLocation" id="accountSave" value="accountSave" disabled />
-					<label for="accountSave" style:color="var(--muted)">Save to account</label>
+					<label for="accountSave" style:color="var(--surface-color-light)">Save to account</label>
 					<input type="radio" name="saveLocation" id="localSave" value="localSave" checked />
 					<label for="LocalSave">Save to local device storage</label>
 				{/if}

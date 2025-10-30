@@ -9,6 +9,7 @@
 	import { db } from "$lib/offline/db";
 	import { SettingsSchema, type SettingsOutput } from "./types/settings";
 	import { parse } from "valibot";
+	import { FilePlus } from "phosphor-svelte";
 
 	let settings = new PersistedState<SettingsOutput>("listbuilderSettings", {
 		print: {
@@ -162,7 +163,7 @@
 				</ContextMenu.Portal>
 			</ContextMenu.Root>
 		{/each}
-		<button class="listbuilder-tabs-add-button" onclick={handleAddListButton}>+</button>
+		<button class="listbuilder-tabs-add-button" onclick={handleAddListButton}><FilePlus /></button>
 	</Tabs.List>
 	{#each activeLists as list, index}
 		<Tabs.Content value={index.toString()} class="listbuilder-tabs-content">
@@ -181,36 +182,36 @@
 		height: 100%;
 	}
 	:global(.listbuilder-tabs-list) {
-		padding: 0 2px;
+		padding: 2px 2px;
 		display: grid;
 		grid-template-rows: max-content;
 		grid-auto-columns: max-content;
 		grid-auto-flow: column;
 		gap: 4px;
-		border-bottom: 1px solid var(--border);
 		overflow-x: auto;
-		margin-bottom: 2px;
 	}
 	:global(.listbuilder-tabs-trigger) {
 		padding: 8px 24px;
-		background-color: var(--card);
-		color: var(--card-foreground);
-		border-radius: var(--radius) var(--radius) 0 0;
+		background-color: var(--surface-color);
+		color: var(--text-color);
+		border-radius: var(--radius);
 		border: 1px solid var(--border);
 		display: flex;
+		box-shadow: 1px 3px 3px var(--surface-color-shadow);
 	}
 	:global(.listbuilder-tabs-add-button) {
-		padding: 8px 24px;
-		background-color: var(--card);
-		color: var(--card-foreground);
-		border-radius: var(--radius) var(--radius) 0 0;
+		/* padding: 8px 24px; */
+		background-color: var(--surface-color);
+		color: var(--text-color);
+		border-radius: var(--radius);
 		border: 1px solid var(--border);
+		box-shadow: 1px 3px 3px var(--surface-color-shadow);
 	}
 	:global(.listbuilder-tabs-trigger[data-state="active"]) {
 		border: 1px solid var(--primary);
 	}
 	:global(.listbuilder-tabs-trigger:hover, .listbuilder-tabs-add-button:hover) {
-		background-color: var(--muted);
+		background-color: var(--surface-color-light);
 	}
 	:global(.listbuilder-tabs-content) {
 		width: 100%;

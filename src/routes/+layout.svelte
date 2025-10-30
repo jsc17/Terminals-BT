@@ -2,8 +2,13 @@
 	import { setContext } from "svelte";
 	import "$lib/styles/global.css";
 	import "$lib/styles/generic.css";
+	import "$lib/styles/theme.css";
+	import "$lib/styles/animations.css";
+
 	import { Footer, Header, Toast } from "$lib/ui";
 	import { type Notification } from "$lib/generic/types.js";
+	import { ModeWatcher } from "mode-watcher";
+	import { IconContext } from "phosphor-svelte";
 
 	const { data, children } = $props();
 	let user = $state({ username: data.username });
@@ -12,12 +17,15 @@
 </script>
 
 <div class="main">
-	<Header {notifications}></Header>
-	{@render children()}
-	<Footer></Footer>
+	<IconContext values={{ size: 25, color: `var(--primary)` }}>
+		<Header {notifications}></Header>
+		{@render children()}
+		<Footer></Footer>
+	</IconContext>
 </div>
 
 <Toast></Toast>
+<ModeWatcher defaultTheme="green" />
 
 <style>
 	.main {
@@ -29,45 +37,12 @@
 	}
 	:global(*) {
 		box-sizing: border-box;
-		color: var(--foreground);
+		color: var(--text-color);
 		min-width: 0;
 		min-height: 0;
-		scrollbar-color: var(--primary-muted) black;
+		scrollbar-color: var(--scrollbar-slide) var(--scrollbar-background);
 		scrollbar-width: thin;
 		overscroll-behavior: contain;
-	}
-	:global(:root) {
-		--radius: 0.5rem;
-		--background: hsl(20, 14.3%, 4.1%);
-		--background-light: hsl(15, 17%, 5%);
-		--foreground: hsl(0, 0%, 83%);
-		--card: hsl(24, 9.8%, 10%);
-		--card-foreground: hsl(0, 0%, 95%);
-		--popover: hsl(24, 10%, 20%);
-		--muted: hsl(0 0% 15%);
-		--muted-foreground: hsl(240 5% 64.9%);
-		--border: hsl(240, 3.7%, 15.9%);
-		--table-border: hsl(240, 4%, 28%);
-		--primary: hsl(142, 70%, 48%);
-		--primary-foreground: hsl(144.9, 80.4%, 10%);
-		--primary-muted: hsl(142, 84%, 25%);
-		--primary-pale: hsl(142, 62%, 67%);
-		--secondary: hsl(198, 100%, 50%);
-		--secondary-foreground: hsla(198, 89%, 22%, 1);
-		--button: hsl(142.1, 70.6%, 45.3%);
-		--button-foreground: hsl(144.9, 80.4%, 10%);
-		--button-dark: hsl(142, 84%, 25%);
-		--button-dark-foreground: hsl(0, 0%, 83%);
-		--input: hsl(240, 3.7%, 15.9%);
-		--ring: hsl(142.4, 71.8%, 29.2%);
-		--muted-filter: invert(73%) sepia(9%) saturate(208%) hue-rotate(201deg) brightness(87%) contrast(89%);
-		--primary-filter: invert(64%) sepia(37%) saturate(6772%) hue-rotate(105deg) brightness(111%) contrast(73%);
-		--error: lightcoral;
-		--error-filter: invert(20%) sepia(40%) saturate(6999%) hue-rotate(353deg) brightness(87%) contrast(108%);
-		--error-foreground: black;
-		--warning: hsl(44, 80%, 47%);
-		--warning-filter: invert(83%) sepia(74%) saturate(475%) hue-rotate(2deg) brightness(88%) contrast(97%);
-		--responsive-padding: clamp(4px, 1dvh, 16px) clamp(4px, 1dvw, 16px);
 	}
 	:global(body) {
 		margin: 0;
@@ -90,7 +65,7 @@
 	}
 	:global(button) {
 		background-color: var(--button);
-		color: var(--button-foreground);
+		color: var(--button-text-color);
 		border: none;
 		border-radius: var(--radius);
 	}
@@ -106,25 +81,16 @@
 	}
 	:global(select) {
 		background-color: var(--input);
-		color: var(--foreground);
+		color: var(--text-color);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		padding-left: 4px;
-	}
-	:global(.card) {
-		background-color: var(--card);
-		color: var(--card-foreground);
-		border: 1px solid var(--border);
-		padding: 8px;
-		border-radius: var(--radius);
-		width: 100%;
-		box-shadow: 2px 2px rgb(0 0 0 / 0.1);
 	}
 	:global(dialog) {
 		padding: 0;
 		width: 30%;
 		background-color: var(--background);
-		color: var(--foreground);
+		color: var(--text-color);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		min-height: fit-content;
@@ -196,8 +162,8 @@
 		position: relative;
 	}
 	:global(button:disabled) {
-		background-color: var(--muted);
-		color: var(--muted-foreground);
+		background-color: var(--surface-color-light);
+		color: var(--surface-color-light-text-color);
 	}
 	:global(.hidden) {
 		display: none;
@@ -282,7 +248,7 @@
 		color: var(--primary);
 	}
 	:global(.info-text) {
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 		font-size: 0.85rem;
 	}
 </style>

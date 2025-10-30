@@ -152,7 +152,7 @@
 				{#each filteredUnits as unit}
 					<p>{unit.name}</p>
 					<RadioGroup
-						items={[{ value: "excluded", selectedColor: "error" }, { value: "allowed", selectedColor: "muted-foreground" }, { value: "required" }]}
+						items={[{ value: "excluded", selectedColor: "error" }, { value: "allowed", selectedColor: "muted-text-color" }, { value: "required" }]}
 						bind:value={unit.included}
 						orientation={"horizontal"}
 					/>
@@ -241,7 +241,7 @@
 		height: 30px;
 		width: 100%;
 		margin-bottom: 4px;
-		background-color: var(--card);
+		background-color: var(--surface-color);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		display: flex;
@@ -252,8 +252,8 @@
 		padding: 8px;
 		height: 100%;
 		width: 100%;
-		background-color: var(--card);
-		color: var(--card-foreground);
+		background-color: var(--surface-color);
+		color: var(--text-color);
 		border: 1px solid var(--border);
 		display: flex;
 		flex-direction: column;
@@ -306,7 +306,7 @@
 		background-color: var(--error);
 	}
 	.auto-sublist-filter-legend.legend-allowed {
-		background-color: var(--muted-foreground);
+		background-color: var(--surface-color-light-text-color);
 	}
 	.auto-sublist-filter-legend.legend-required {
 		background-color: var(--primary);

@@ -61,11 +61,11 @@
 		color: var(--primary);
 	}
 	:global(.popover-play-toolbar-button:hover) {
-		background-color: var(--muted);
-		color: var(--muted-foreground);
+		background-color: var(--surface-color-light);
+		color: var(--surface-color-light-text-color);
 	}
 	:global(.popover-play-toolbar-display-body) {
-		background-color: var(--card);
+		background-color: var(--surface-color);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		display: flex;
@@ -82,6 +82,6 @@
 	.option-field {
 		display: flex;
 		flex-direction: column;
-		border: 1px solid var(--primary-muted);
+		border: 1px solid var(--primary-dark);
 	}
 </style>

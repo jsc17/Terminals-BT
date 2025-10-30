@@ -104,7 +104,7 @@
 <style>
 	.play-formation-container {
 		width: 100%;
-		border: 1px solid var(--primary-muted);
+		border: 1px solid var(--primary-dark);
 		border-radius: var(--radius);
 	}
 	.play-formation-header,
@@ -115,7 +115,7 @@
 		justify-content: space-between;
 		align-items: center;
 		border-bottom: 1px solid var(--border);
-		background-color: var(--card);
+		background-color: var(--surface-color);
 	}
 	.play-formation-header {
 		padding: 4px 16px;

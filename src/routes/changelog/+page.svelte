@@ -66,7 +66,7 @@
 	h3 {
 		padding-left: 16px;
 		font-size: 1rem;
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 		margin: 0px;
 	}
 	ul {

@@ -237,7 +237,7 @@
 	.formation-card {
 		position: relative;
 		width: 100%;
-		background-color: var(--card);
+		background-color: var(--surface-color);
 		flex-shrink: 0;
 		border: 1px solid var(--border);
 	}
@@ -280,7 +280,7 @@
 		border: 2px solid var(--error);
 		border-radius: var(--radius);
 		& p {
-			color: var(--muted-foreground);
+			color: var(--surface-color-light-text-color);
 		}
 	}
 	.formation-header-buttons {
@@ -301,7 +301,7 @@
 		grid-template-columns: 1fr max-content max-content max-content;
 		gap: 12px;
 		padding: 2px 16px;
-		background-color: var(--background-light);
+		background-color: var(--background);
 		align-items: center;
 		width: 100%;
 		border: 1px solid var(--border);

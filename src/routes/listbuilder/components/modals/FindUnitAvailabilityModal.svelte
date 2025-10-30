@@ -68,7 +68,7 @@
 
 <style>
 	.muted-text {
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 	}
 	.description-body {
 		display: flex;

@@ -232,7 +232,7 @@
 <style>
 	.edit-formation-description {
 		font-size: 0.85em;
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 	}
 	.edit-formation-body {
 		display: flex;
@@ -303,10 +303,10 @@
 		padding: 4px 8px;
 	}
 	.formation-bonus-row:hover {
-		background-color: var(--muted);
+		background-color: var(--surface-color-light);
 	}
 	input {
-		background-color: var(--muted);
+		background-color: var(--surface-color-light);
 	}
 	input:hover {
 		border: 1px solid var(--primary);

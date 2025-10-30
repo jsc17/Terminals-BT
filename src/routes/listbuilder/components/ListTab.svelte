@@ -32,9 +32,6 @@
 	<div class="search">
 		<SearchParameters bind:list bind:resultList />
 		<SearchFilters bind:resultList />
-		{#if list.rules != "noRes"}
-			<p class="rules-notice">Some units may be filtered out due to the selected ruleset</p>
-		{/if}
 		<SearchResults bind:list bind:resultList />
 	</div>
 	<div class="list-drawer-wrapper" class:show-listbuilder={showListbuilder} transition:slide>
@@ -63,6 +60,8 @@
 		height: 100%;
 		display: flex;
 		flex-direction: column;
+		padding: 6px;
+		padding-top: 2px;
 	}
 	.list-drawer-wrapper {
 		height: 100%;
@@ -112,7 +111,7 @@
 		position: relative;
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
+		gap: 10px;
 		width: 100%;
 		flex: 1;
 	}
@@ -120,16 +119,13 @@
 		height: min(30px, 90%);
 	}
 	.list-button {
-		background-color: var(--secondary);
-		color: var(--secondary-foreground);
+		background-color: var(--button);
+		color: var(--text-color);
 		position: fixed;
 		bottom: 34px;
 		right: 5px;
 		height: 30px;
 		font-size: 1.25em;
 		width: max-content;
-	}
-	.rules-notice {
-		align-self: center;
 	}
 </style>

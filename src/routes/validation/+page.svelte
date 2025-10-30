@@ -271,7 +271,7 @@
 		gap: 4px;
 	}
 	.section {
-		background-color: var(--card);
+		background-color: var(--surface-color);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		padding: 16px;

@@ -104,7 +104,7 @@
 		border-collapse: collapse;
 	}
 	th {
-		background-color: var(--background-light);
+		background-color: var(--background);
 		border: 1px solid var(--table-border);
 		padding: 2px 6px;
 		color: var(--);
@@ -112,8 +112,8 @@
 	td {
 		border: 1px solid var(--table-border);
 		padding: 4px 8px;
-		background-color: var(--card);
-		color: var(--muted-foreground);
+		background-color: var(--surface-color);
+		color: var(--surface-color-light-text-color);
 		text-align: center;
 	}
 	td.last {

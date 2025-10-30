@@ -178,7 +178,7 @@
 		min-height: 200px;
 		max-height: 30em;
 		overflow-y: auto;
-		background-color: var(--card);
+		background-color: var(--surface-color);
 	}
 	table,
 	tbody {
@@ -188,7 +188,7 @@
 	}
 
 	tbody tr:nth-child(even) {
-		background-color: var(--muted);
+		background-color: var(--surface-color-light);
 	}
 	.selected {
 		box-shadow: 5px 0px 5px var(--primary) inset;

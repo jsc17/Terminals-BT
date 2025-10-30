@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Popover } from "$lib/generic";
 	import type { Notification } from "$lib/generic/types";
+	import { Bell } from "phosphor-svelte";
 
 	type Props = {
 		notifications: Notification[];
@@ -44,8 +45,8 @@
 
 <Popover {onOpenChange} bind:open>
 	{#snippet trigger()}
-		<div class="relative">
-			<img class="notification-button" src="/icons/notifications.svg" alt="notifications" />
+		<div class={{ "notification-trigger": true, "notification-shake": unreadCount }}>
+			<Bell />
 			{#if unreadCount}
 				<div class="notification-unread"></div>
 			{/if}
@@ -62,9 +63,6 @@
 </Popover>
 
 <style>
-	.notification-button {
-		filter: var(--primary-filter);
-	}
 	.notification-popover-title {
 		padding: 16px;
 		border-bottom: 1px solid var(--border);
@@ -88,9 +86,13 @@
 		overflow: auto;
 		scrollbar-gutter: stable;
 	}
-	.relative {
+	.notification-trigger {
 		position: relative;
 	}
+	.notification-shake {
+		animation: tilt-shake 10s ease-out infinite;
+	}
+
 	.notification-line-body {
 		display: flex;
 		flex-direction: column;
@@ -101,7 +103,7 @@
 	.notification-summary-line {
 		display: flex;
 		justify-content: space-between;
-		border-bottom: 1px solid var(--muted-border);
+		border-bottom: 1px solid var(--surface-color-light-border);
 	}
 	.notification-summary-text {
 		font-size: 1.1em;
@@ -112,7 +114,7 @@
 	}
 	.notification-message-line {
 		& p {
-			color: var(--muted-foreground);
+			color: var(--surface-color-light-text-color);
 			font-size: 0.95em;
 		}
 	}

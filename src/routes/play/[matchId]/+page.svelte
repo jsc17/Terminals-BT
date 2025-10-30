@@ -179,7 +179,7 @@
 		overflow: auto;
 	}
 	.toolbar {
-		background-color: var(--card);
+		background-color: var(--surface-color);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		position: sticky;
@@ -207,29 +207,29 @@
 		font-size: 16px;
 		background-color: transparent;
 		border-radius: 0;
-		color: var(--card-foreground);
+		color: var(--text-color);
 		min-width: min(25dvw, 100px);
 	}
 	.toolbar-button:hover {
-		background-color: var(--muted);
-		color: var(--muted-foreground);
+		background-color: var(--surface-color-light);
+		color: var(--surface-color-light-text-color);
 	}
 	.announcement {
 		padding: 4px 16px;
 		align-self: center;
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 		box-sizing: border-box;
 		margin: 4px 0px;
 	}
 	.play-log-button {
 		color: var(--primary);
-		background-color: var(--card);
+		background-color: var(--surface-color);
 		height: 100%;
 		padding: 4px 16px;
 		width: max-content;
 	}
 	.play-log-button:hover {
 		cursor: pointer;
-		background-color: var(--muted);
+		background-color: var(--surface-color-light);
 	}
 </style>

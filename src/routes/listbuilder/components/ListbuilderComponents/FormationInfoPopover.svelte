@@ -68,6 +68,6 @@
 		gap: 2px;
 	}
 	.formation-info-trigger-text {
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 	}
 </style>

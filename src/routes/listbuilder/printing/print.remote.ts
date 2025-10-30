@@ -8,7 +8,6 @@ import { getAmmoByName } from "$lib/remote/ammo.remote";
 import { getCustomUnitData, getMULDataFromId } from "$lib/remote/unit.remote";
 import { getMulCard, getMulImage } from "./mulImages.remote";
 import { PDFDocument } from "pdf-lib";
-import { type MulUnit } from "$lib/types/listTypes";
 
 export const printList = query(
 	v.object({
@@ -52,6 +51,7 @@ export const printList = query(
 				.filter((r) => r.status == "fulfilled")
 				.map((r) => [r.value.mulId, r.value.image ?? ""])
 		);
+		console.log(unitCardImages.size);
 		const bsList = Map.groupBy(listData.bs ?? [], (v) => v);
 
 		const browser = await playwright.chromium.launch({ headless: true });

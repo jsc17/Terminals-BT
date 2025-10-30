@@ -275,10 +275,10 @@
 	}
 	.accordian {
 		width: 100%;
-		background-color: var(--card);
+		background-color: var(--surface-color);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
-		color: var(--card-foreground);
+		color: var(--text-color);
 		padding: 8px;
 	}
 	li {
@@ -320,7 +320,7 @@
 		border-radius: var(--radius);
 		display: flex;
 		gap: 8px;
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 		height: max-content;
 	}
 	.tag:hover {

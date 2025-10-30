@@ -8,7 +8,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-around;
-		background-color: var(--card);
+		background-color: var(--surface-color);
 		border-top: 1px solid var(--border);
 		height: 30px;
 		width: 100%;

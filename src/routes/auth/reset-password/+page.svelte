@@ -78,7 +78,7 @@
 	}
 	.info-text {
 		font-size: 0.85rem;
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 	}
 	.text-line {
 		display: flex;

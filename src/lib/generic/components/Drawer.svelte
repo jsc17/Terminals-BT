@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { X } from "phosphor-svelte";
 	import { onClickOutside, watch } from "runed";
 	import type { Snippet } from "svelte";
 
@@ -37,9 +38,7 @@
 	class:drawer-right={side == "right"}
 	class:show-drawer-right={side == "right" && open}
 >
-	<button class="transparent-button" onclick={() => (open = false)} aria-label="Close user menu sidebar"
-		><img class="close-button" src="/icons/close.svg" alt="close button" /></button
-	>
+	<button class="transparent-button" onclick={() => (open = false)} aria-label="Close user menu sidebar"><X /></button>
 	{@render children()}
 </div>
 
@@ -69,12 +68,6 @@
 	}
 	.show-drawer-right {
 		right: 0;
-	}
-	.close-button {
-		width: 30px;
-		height: 30px;
-		filter: var(--primary-filter);
-		align-self: flex-end;
 	}
 	.transparent-button {
 		width: fit-content;

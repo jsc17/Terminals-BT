@@ -31,7 +31,6 @@
 			bs: list.bsList
 		};
 		toastController.addToast("Generating Pdf for download");
-		console.log(settings.print);
 		printList({ listData, printOptions: settings.print }).then((pdf) => {
 			const blob = new Blob([new Uint8Array(pdf)], { type: "application/pdf" });
 			const downloadElement = document.createElement("a");

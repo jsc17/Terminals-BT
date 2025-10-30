@@ -22,6 +22,12 @@
 	import { Collapsible, DropdownMenu } from "$lib/generic";
 	import { getBSCbyId } from "$lib/data/battlefieldSupport";
 	import { dev } from "$app/environment";
+	import { submittedList } from "$lib/stores/listSubmission.svelte";
+	import type { PrintListOutput } from "../printing/types";
+	import { printList } from "../printing/print.remote";
+	import type { SettingsOutput } from "../types/settings";
+	import { getContext } from "svelte";
+	import { goto } from "$app/navigation";
 
 	type Props = {
 		listCloseCallback: (id: string) => void;
@@ -95,6 +101,25 @@
 			list.id = crypto.randomUUID();
 			list.rules = "noRes";
 		}
+	}
+
+	let settings: SettingsOutput = getContext("listbuilderSettings");
+
+	async function submitList() {
+		let listData: PrintListOutput = {
+			name: list.details.name,
+			units: list.units.map((u) => ({ id: u.id, mulId: u.baseUnit.mulId, skill: u.skill ?? 4, customization: u.customization })),
+			formations: list.formations.map((f) => ({ name: f.name, type: f.type, units: f.units.map((u) => u.id) })),
+			scas: list.scaList.map((v) => v.id),
+			bs: list.bsList
+		};
+		toastController.addToast("Preparing list for submission. Please wait until you are redirected.");
+		printList({ listData, printOptions: settings.print }).then((pdf) => {
+			const blob = new Blob([new Uint8Array(pdf)], { type: "application/pdf" });
+			submittedList.name = list.details.name;
+			submittedList.data = blob;
+			goto(`/validation?redirect`);
+		});
 	}
 </script>
 
@@ -172,6 +197,7 @@
 						{ type: "item", label: "Check List Availability", onSelect: () => availabilityModal?.show() },
 						{ type: "item", label: "Generate Sublists", onSelect: () => (sublistModalOpen = true) },
 						{ type: "item", label: "Play List", onSelect: () => sendListToPlay(list.details.name, list.formations, list.units) },
+						{ type: "item", label: "Submit List to Tournament", onSelect: () => submitList() },
 						{ type: "separator" },
 						{ type: "item", label: "Clear Units/Formations", onSelect: () => clearList() },
 						{ type: "item", label: "Reset List", onSelect: () => resetList() },

@@ -5,6 +5,8 @@
 	import "$lib/styles/theme.css";
 	import { Footer, Header, Toast } from "$lib/ui";
 	import { type Notification } from "$lib/generic/types.js";
+	import { ModeWatcher } from "mode-watcher";
+	import { IconContext } from "phosphor-svelte";
 
 	const { data, children } = $props();
 	let user = $state({ username: data.username });
@@ -13,12 +15,15 @@
 </script>
 
 <div class="main">
-	<Header {notifications}></Header>
-	{@render children()}
-	<Footer></Footer>
+	<IconContext values={{ size: 25, color: `var(--primary)` }}>
+		<Header {notifications}></Header>
+		{@render children()}
+		<Footer></Footer>
+	</IconContext>
 </div>
 
 <Toast></Toast>
+<ModeWatcher />
 
 <style>
 	.main {
@@ -30,16 +35,12 @@
 	}
 	:global(*) {
 		box-sizing: border-box;
-		color: var(--foreground);
+		color: var(--text-color);
 		min-width: 0;
 		min-height: 0;
-		scrollbar-color: var(--primary-muted) black;
+		scrollbar-color: var(--scrollbar-slide) var(--scrollbar-background);
 		scrollbar-width: thin;
 		overscroll-behavior: contain;
-	}
-	:global(:root) {
-		--radius: 0.5rem;
-		--responsive-padding: clamp(4px, 1dvh, 16px) clamp(4px, 1dvw, 16px);
 	}
 	:global(body) {
 		margin: 0;
@@ -62,7 +63,7 @@
 	}
 	:global(button) {
 		background-color: var(--button);
-		color: var(--button-foreground);
+		color: var(--button-text-color);
 		border: none;
 		border-radius: var(--radius);
 	}
@@ -78,25 +79,16 @@
 	}
 	:global(select) {
 		background-color: var(--input);
-		color: var(--foreground);
+		color: var(--text-color);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		padding-left: 4px;
-	}
-	:global(.card) {
-		background-color: var(--card);
-		color: var(--card-foreground);
-		border: 1px solid var(--border);
-		padding: 8px;
-		border-radius: var(--radius);
-		width: 100%;
-		box-shadow: 2px 2px rgb(0 0 0 / 0.1);
 	}
 	:global(dialog) {
 		padding: 0;
 		width: 30%;
 		background-color: var(--background);
-		color: var(--foreground);
+		color: var(--text-color);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		min-height: fit-content;
@@ -168,8 +160,8 @@
 		position: relative;
 	}
 	:global(button:disabled) {
-		background-color: var(--muted);
-		color: var(--muted-foreground);
+		background-color: var(--surface-color-light);
+		color: var(--surface-color-light-text-color);
 	}
 	:global(.hidden) {
 		display: none;
@@ -254,7 +246,7 @@
 		color: var(--primary);
 	}
 	:global(.info-text) {
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 		font-size: 0.85rem;
 	}
 </style>

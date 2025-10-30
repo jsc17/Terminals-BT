@@ -100,7 +100,7 @@
 		gap: 8px;
 	}
 	.section-header {
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 		margin: 0;
 	}
 	form {
@@ -122,10 +122,10 @@
 		margin-bottom: 12px;
 	}
 	textarea {
-		background-color: var(--muted);
+		background-color: var(--surface-color-light);
 	}
 	.description {
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 		font-size: 0.9rem;
 		margin-left: 4px;
 	}

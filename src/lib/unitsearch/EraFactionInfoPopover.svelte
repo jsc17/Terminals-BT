@@ -44,7 +44,7 @@
 		justify-content: center;
 	}
 	:global(.info-button-icon) {
-		filter: var(--muted-filter);
+		filter: var(--surface-color-light-filter);
 		height: 1em;
 		width: 1em;
 	}

@@ -113,7 +113,7 @@
 		flex-shrink: 0;
 	}
 	:global(.combobox-item:hover) {
-		background-color: var(--muted);
+		background-color: var(--surface-color-light);
 		cursor: default;
 	}
 	:global(.combobox-scroll-button) {
@@ -125,6 +125,6 @@
 	:global(.combobox-scroll-img) {
 		height: 1em;
 		width: 1em;
-		filter: var(--muted-filter);
+		filter: var(--surface-color-light-filter);
 	}
 </style>

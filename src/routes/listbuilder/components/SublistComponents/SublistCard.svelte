@@ -154,7 +154,7 @@
 	.sublist-container {
 		height: 100%;
 		width: 100%;
-		background-color: var(--card);
+		background-color: var(--surface-color);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		display: grid;

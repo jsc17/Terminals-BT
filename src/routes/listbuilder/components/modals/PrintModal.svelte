@@ -154,10 +154,10 @@
 		align-items: center;
 	}
 	legend {
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 	}
 	fieldset label {
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 	}
 	.formation-header-style-group {
 		margin-top: 6px;

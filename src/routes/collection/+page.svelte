@@ -185,7 +185,7 @@
 	}
 	section {
 		padding: 16px;
-		background-color: var(--card);
+		background-color: var(--surface-color);
 		border: 1px solid var(--border);
 	}
 	.unit-list {
@@ -204,7 +204,7 @@
 		align-self: center;
 	}
 	.filter-header {
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 		font-size: 0.95em;
 	}
 	.selected-tags {
@@ -215,12 +215,12 @@
 	.tag,
 	.tag-button {
 		font-size: 0.9em;
-		background-color: var(--muted);
+		background-color: var(--surface-color-light);
 		padding: 4px 8px;
 		border-radius: var(--radius);
 		display: flex;
 		gap: 8px;
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 		height: max-content;
 	}
 	.tag-button:hover {
@@ -249,14 +249,14 @@
 		}
 	}
 	.collection-model-row:hover {
-		background-color: var(--muted);
+		background-color: var(--surface-color-light);
 	}
 	.tagged-unit-name {
 		padding: 0px 16px;
 		justify-self: center;
 	}
 	.tagged-unit-quantity {
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 		padding: 0px 16px;
 	}
 	.manage-bar-add-unit {

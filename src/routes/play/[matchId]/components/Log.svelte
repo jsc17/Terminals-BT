@@ -133,12 +133,12 @@
 		gap: 6px;
 	}
 	.log-round {
-		background-color: var(--card);
+		background-color: var(--surface-color);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
 	}
 	.log-header {
-		background-color: var(--muted);
+		background-color: var(--surface-color-light);
 		border-bottom: 1px solid var(--border);
 		padding: 8px;
 	}
@@ -152,27 +152,27 @@
 		padding: 8px 0px;
 	}
 	.log-entry:hover {
-		background-color: var(--muted);
+		background-color: var(--surface-color-light);
 
 		p {
-			color: var(--muted-foreground);
+			color: var(--surface-color-light-text-color);
 		}
 	}
 	.log-text {
 		font-size: 0.9em;
 	}
 	.strikethrough {
-		text-decoration: line-through solid var(--muted-foreground);
+		text-decoration: line-through solid var(--surface-color-light-text-color);
 		font-style: italic;
 	}
 	.undo-button {
 		background-color: transparent;
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 	}
 	.undo-button:hover {
 		cursor: pointer;
 	}
 	.muted {
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 	}
 </style>

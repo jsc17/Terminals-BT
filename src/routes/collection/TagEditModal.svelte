@@ -134,7 +134,7 @@
 		gap: 16px;
 	}
 	fieldset {
-		border: 1px solid var(--muted);
+		border: 1px solid var(--surface-color-light);
 		display: flex;
 		flex-direction: column;
 		gap: 8px;

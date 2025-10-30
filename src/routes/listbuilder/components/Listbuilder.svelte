@@ -408,7 +408,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
-		padding: 4px 0px 16px 0px;
 		flex: 1;
 		overflow: auto;
 		scrollbar-gutter: stable;

@@ -31,7 +31,7 @@
 	color: var(--primary);
 }
 .muted {
-	color: var(--muted-foreground);
+	color: var(--surface-color-light-text-color);
 }
 .error {
 	color: var(--error);
@@ -51,13 +51,17 @@
 	background-color: lightcoral;
 	color: black;
 }
-section.card {
-	padding: var(--responsive-padding);
-	background-color: var(--card);
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	flex-shrink: 0;
-}
+
 .strikethrough {
 	text-decoration: line-through;
+}
+
+.card {
+	background-color: var(--surface-color);
+	color: var(--text-color);
+	border: 1px solid var(--surface-color-light);
+	padding: var(--responsive-padding);
+	border-radius: var(--radius);
+	width: 100%;
+	box-shadow: 1px 3px 3px var(--surface-color-shadow);
 }

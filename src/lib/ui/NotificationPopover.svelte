@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Popover } from "$lib/generic";
 	import type { Notification } from "$lib/generic/types";
+	import { Bell } from "phosphor-svelte";
 
 	type Props = {
 		notifications: Notification[];
@@ -45,7 +46,7 @@
 <Popover {onOpenChange} bind:open>
 	{#snippet trigger()}
 		<div class="relative">
-			<img class="notification-button" src="/icons/notifications.svg" alt="notifications" />
+			<Bell />
 			{#if unreadCount}
 				<div class="notification-unread"></div>
 			{/if}
@@ -101,7 +102,7 @@
 	.notification-summary-line {
 		display: flex;
 		justify-content: space-between;
-		border-bottom: 1px solid var(--muted-border);
+		border-bottom: 1px solid var(--surface-color-light-border);
 	}
 	.notification-summary-text {
 		font-size: 1.1em;
@@ -112,7 +113,7 @@
 	}
 	.notification-message-line {
 		& p {
-			color: var(--muted-foreground);
+			color: var(--surface-color-light-text-color);
 			font-size: 0.95em;
 		}
 	}

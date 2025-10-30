@@ -126,11 +126,11 @@
 	.tag-line {
 		display: flex;
 		justify-content: space-between;
-		background-color: var(--card);
+		background-color: var(--surface-color);
 		padding: 4px 16px;
 		border-bottom: 2px solid var(--border);
 	}
 	.tag-line:hover {
-		background-color: var(--muted);
+		background-color: var(--surface-color-light);
 	}
 </style>

@@ -38,11 +38,11 @@
 		flex-grow: 1;
 		position: absolute;
 		height: 100%;
-		background-color: var(--muted-foreground);
+		background-color: var(--surface-color-light-text-color);
 	}
 	:global([data-slider-thumb]) {
-		border: 1px solid var(--muted-foreground);
-		background-color: var(--muted-foreground);
+		border: 1px solid var(--surface-color-light-text-color);
+		background-color: var(--surface-color-light-text-color);
 		width: 15px;
 		height: 15px;
 		cursor: pointer;
@@ -52,6 +52,6 @@
 		width: 100%;
 		height: 5px;
 		border-radius: var(--radius);
-		background-color: var(--muted);
+		background-color: var(--surface-color-light);
 	}
 </style>

@@ -94,6 +94,6 @@
 		gap: 16px;
 	}
 	legend {
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 	}
 </style>

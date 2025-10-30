@@ -10,8 +10,8 @@
 	import { getSPAfromId } from "$lib/utilities/listUtilities";
 	import type { MenuItem } from "$lib/generic/types";
 	import { getSingleUnitAvailability } from "$lib/remote/unit.remote";
-	import { getEraName, getFactionName } from "$lib/remote/era-faction.remote";
 	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
+	import { List as ListButton } from "phosphor-svelte";
 
 	type Props = {
 		unit: { id: string; bonus?: { ind: number; abil: number }[] };
@@ -76,7 +76,9 @@
 			<p class="name-row-pv"><span class="muted">PV:</span> {unitDetails?.cost}</p>
 			<DropdownMenu items={unitMenuItems}>
 				{#snippet trigger()}
-					<div class="unit-menu-trigger"><img src="/icons/menu.svg" alt="unit menu" /></div>
+					<div class="unit-menu-trigger">
+						<ListButton color="var(--text-color)" size="15" />
+					</div>
 				{/snippet}
 			</DropdownMenu>
 		</div>
@@ -138,11 +140,11 @@
 		{#if unitDetails?.customization?.ammo || unitSpas.length}
 			<div class="unit-custom-row">
 				{#if unitDetails?.customization?.ammo?.length}
-					<p class="unit-abilities"><span class="muted-foreground">Alt. Ammo:</span> {unitDetails.customization.ammo?.join(", ")}</p>
+					<p class="unit-abilities"><span class="muted-text-color">Alt. Ammo:</span> {unitDetails.customization.ammo?.join(", ")}</p>
 				{/if}
 				{#if unitSpas.length}
 					<p class="unit-abilities">
-						<span class="muted-foreground">SPA:</span>
+						<span class="muted-text-color">SPA:</span>
 						{unitSpas}
 					</p>
 				{/if}
@@ -170,13 +172,18 @@
 <style>
 	.unit-card {
 		width: 100%;
-		border-bottom: 1px solid var(--border);
 		flex: 1;
 		min-height: fit-content;
-		background-color: var(--card);
+		background-color: var(--surface-color);
 		display: flex;
 		flex-shrink: 0;
 		padding: 0px 4px;
+	}
+	.unit-card:nth-child(odd) {
+		background-color: var(--surface-color-light);
+	}
+	.unit-card:not(:last-of-type) {
+		border-bottom: 1px solid var(--border);
 	}
 	.unit-card:hover {
 		box-shadow: 3px 0px 3px var(--primary) inset;
@@ -208,7 +215,7 @@
 	}
 	.unit-header {
 		font-size: 0.75em;
-		color: var(--muted-foreground);
+		color: var(--surface-color-light-text-color);
 		align-self: center;
 		justify-self: safe center;
 	}
@@ -260,17 +267,11 @@
 		justify-content: center;
 		height: 100%;
 		width: 100%;
-		background-color: var(--primary);
 		padding: 0px 16px;
 		border-radius: var(--radius);
-
-		& img {
-			width: 15px;
-			height: 15px;
-		}
 	}
-	.muted-foreground {
-		color: var(--muted-foreground);
+	.muted-text-color {
+		color: var(--surface-color-light-text-color);
 	}
 	.availability-result-container {
 		padding: 16px;

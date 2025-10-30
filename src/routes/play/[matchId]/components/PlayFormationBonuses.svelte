@@ -134,7 +134,7 @@
 	.pip {
 		width: 20px;
 		height: 20px;
-		background-color: var(--popover);
+		background-color: var(--surface-color-extra-light);
 		border: 1px solid var(--border);
 		border-radius: 50%;
 	}

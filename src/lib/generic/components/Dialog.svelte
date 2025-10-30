@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Dialog, type WithoutChildren } from "bits-ui";
 	import { type Snippet } from "svelte";
+	import { X } from "phosphor-svelte";
 
 	type Props = Dialog.RootProps & {
 		title: string;
@@ -24,7 +25,7 @@
 		<Dialog.Content>
 			<Dialog.Title>
 				{title}
-				<Dialog.Close><img src="/icons/close.svg" alt="close button" class="close-button" /></Dialog.Close>
+				<Dialog.Close><X /></Dialog.Close>
 			</Dialog.Title>
 			{#if description}
 				<Dialog.Description>{@render description()}</Dialog.Description>
@@ -76,10 +77,5 @@
 		display: flex;
 		flex-direction: column;
 		overflow: auto;
-	}
-	.close-button {
-		width: 25px;
-		height: 25px;
-		filter: var(--primary-filter);
 	}
 </style>

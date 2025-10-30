@@ -148,6 +148,6 @@
 		gap: 16px;
 	}
 	.unit-row:hover {
-		background-color: var(--muted);
+		background-color: var(--surface-color-light);
 	}
 </style>

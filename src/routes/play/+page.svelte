@@ -81,22 +81,11 @@
 		flex-direction: column;
 		padding: var(--responsive-padding);
 		gap: 4px;
-		background-color: var(--muted);
+		background-color: var(--surface-color-light);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
 	}
 	.match-link:hover {
-		background-color: var(--popover);
+		background-color: var(--surface-color-extra-light);
 	}
-	/* .end-match {
-		background-color: rgb(240, 90, 90);
-		border-radius: 50%;
-		position: absolute;
-		right: -10px;
-		bottom: -10px;
-	}
-	.end-match:hover {
-		cursor: pointer;
-		background-color: lightcoral;
-	} */
 </style>

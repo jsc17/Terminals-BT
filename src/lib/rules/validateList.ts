@@ -15,7 +15,7 @@ export async function validateRules(unitList: { id: string; skill: number; data:
 		for (const unit of unitList) {
 			const cost = getNewSkillCost(unit.skill, unit.data.pv);
 			listTotalPv += cost;
-			if (rulesData.eraFactionRestriction && !(await isAvailable({ mulId: unit.data.mulId, eras, factions }))) {
+			if (rulesData.eraFactionRestriction && unit.data.mulId > 0 && !(await isAvailable({ mulId: unit.data.mulId, eras, factions }))) {
 				if (unit.data.mulId < 0) {
 					issueMessage = "If a battlefield support unit is showing as unavailable, it might have been added using a different rules selection. Remove and re-add the unit";
 				}

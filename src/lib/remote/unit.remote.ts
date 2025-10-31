@@ -89,6 +89,8 @@ export const getCustomUnitData = query.batch(v.number(), async (ids) => {
 });
 
 export const getMULDataFromName = query(z.string(), async (name) => {
+	const custom = await prisma.customCard.findFirst({ where: { name }, select: { mulId: true } });
+	if (custom) return getCustomUnitData(custom.mulId);
 	const unit = await prisma.unit.findFirst({ where: { name }, select: { mulId: true } });
 	if (unit) return getMULDataFromId(unit.mulId);
 

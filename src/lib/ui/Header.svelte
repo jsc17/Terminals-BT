@@ -142,6 +142,7 @@
 				<li class="switch">
 					<Switch
 						checked={mode.current == "light"}
+						height={30}
 						onCheckedChange={() => {
 							toggleMode();
 						}}

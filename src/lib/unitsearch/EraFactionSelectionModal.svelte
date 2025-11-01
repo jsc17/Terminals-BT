@@ -109,6 +109,7 @@
 
 				<Switch
 					checked={eraSelectMode == "every"}
+					height={20}
 					onCheckedChange={() => {
 						if (eraSelectMode == "any") {
 							eraSelectMode = "every";
@@ -163,6 +164,7 @@
 			>
 			<Switch
 				checked={factionSelectMode == "every"}
+				height={20}
 				onCheckedChange={() => {
 					if (factionSelectMode == "any") {
 						factionSelectMode = "every";

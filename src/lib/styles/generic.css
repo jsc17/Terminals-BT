@@ -191,20 +191,22 @@
 
 /* Switch */
 [data-switch-root] {
+	box-sizing: border-box;
 	background-color: var(--input);
-	border: 1px solid var(--border);
-	height: 36px;
-	width: 60px;
+	height: 100cqh;
+	width: 100cqw;
 	border-radius: calc(infinity * 1px);
+	padding: 4cqh 4cqw;
 }
 [data-switch-thumb] {
 	display: block;
 	background-color: var(--primary);
-	width: 30px;
-	height: 30px;
+	width: 90cqh;
+	height: 90cqh;
 	border-radius: 50%;
 	transition: transform 0.3s;
+	align-self: center;
 }
 [data-switch-thumb][data-state="checked"] {
-	transform: translateX(60%);
+	transform: translateX(calc(92cqw - 90cqh));
 }

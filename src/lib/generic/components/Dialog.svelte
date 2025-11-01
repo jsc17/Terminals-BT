@@ -72,6 +72,10 @@
 	:global([data-dialog-description], .dialog-children-wrapper) {
 		padding: clamp(4px, 1dvh, 8px) clamp(4px, 1dvw, 16px);
 	}
+	:global([data-dialog-description]) {
+		text-wrap: wrap;
+		width: fit-content;
+	}
 
 	.dialog-children-wrapper {
 		display: flex;

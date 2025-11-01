@@ -14,13 +14,13 @@
 
 	let { list, listCloseCallback }: Props = $props();
 
-	let resultList = $state<ResultList>(new ResultList(list.details.eras, list.details.factions));
+	let resultList = $state<ResultList>(new ResultList(list.details.eras, list.details.factions, list.details.general));
 	setContext("list", list);
 
 	let showListbuilder = $state(false);
 
-	watch([() => list.details.eras, () => list.details.factions], () => {
-		resultList.setParameters(list.details.eras, list.details.factions);
+	watch([() => list.details.eras, () => list.details.factions, () => list.details.general], () => {
+		resultList.loadResults(list.details.eras, list.details.factions, list.details.general);
 	});
 
 	onMount(() => {

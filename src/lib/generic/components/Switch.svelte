@@ -7,23 +7,30 @@
 		leftValue: Snippet;
 		rightValue: Snippet;
 		onCheckedChange?: () => void;
+		height?: number;
 	};
 
-	let { checked, leftValue, rightValue, onCheckedChange }: Props = $props();
+	let { checked, leftValue, rightValue, onCheckedChange, height = 15 }: Props = $props();
 </script>
 
-<div class="slider-container">
+<div class="switch-body">
 	{@render leftValue()}
-	<Switch.Root {checked} {onCheckedChange}>
-		<Switch.Thumb></Switch.Thumb>
-	</Switch.Root>
+	<div class="switch-container" style={`height: ${height}px`}>
+		<Switch.Root {checked} {onCheckedChange}>
+			<Switch.Thumb></Switch.Thumb>
+		</Switch.Root>
+	</div>
 	{@render rightValue()}
 </div>
 
 <style>
-	.slider-container {
+	.switch-body {
 		display: flex;
 		gap: 4px;
 		align-items: center;
+	}
+	.switch-container {
+		container: switch / size;
+		aspect-ratio: 2 / 1;
 	}
 </style>

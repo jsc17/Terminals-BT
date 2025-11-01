@@ -1,14 +1,9 @@
 <script lang="ts">
-	import eraLists from "$lib/data/erasFactionsList.json";
-	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup.js";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { List } from "$lib/types/list.svelte";
 	import { ResultList } from "$lib/types/resultList.svelte";
-	import { onMount } from "svelte";
-	import { Combobox } from "$lib/generic";
-	import type { Item } from "$lib/generic/types";
-	import { EraFactionInfoPopover } from "$lib/unitsearch";
-	import { X } from "phosphor-svelte";
+	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
+	import EraFactionSelectionModal from "./EraFactionSelectionModal.svelte";
 
 	type Props = {
 		list?: List;
@@ -18,50 +13,6 @@
 	let { list = $bindable(), resultList = $bindable() }: Props = $props();
 
 	let showParameters = $state(false);
-
-	let allowedEras: Item[] = eraLists
-		.filter((era) => {
-			return era.id != 0;
-		})
-		.map((era) => {
-			return {
-				value: era.id.toString(),
-				label: eraLookup.get(era.id) ?? "Not Found"
-			};
-		});
-
-	let allowedFactions = $derived.by(() => {
-		let allowed: number[] = [];
-		if (!resultList.selectedEras.length) {
-			allowed = eraLists[0].lists[0].factions;
-		} else {
-			eraLists
-				.filter((era) => {
-					return resultList.selectedEras.includes(era.id.toString());
-				})
-				.forEach((era) => {
-					era.lists.forEach((eraList) => {
-						allowed = allowed.concat(eraList.factions);
-					});
-				});
-		}
-		allowed = [...new Set(allowed)];
-		allowed.sort((a, b) => {
-			return (factionLookup.get(a)?.toString() ?? "Not found") < (factionLookup.get(b)?.toString() ?? "Not Found") ? -1 : 1;
-		});
-		return allowed.map((faction) => {
-			return {
-				value: faction.toString(),
-				label: factionLookup.get(faction)?.toString() ?? "Not found"
-			};
-		});
-	});
-
-	onMount(() => {
-		if (!list || localStorage.getItem("last-list") === null) {
-			resultList.loadResults();
-		}
-	});
 </script>
 
 <div class="parameter-container">
@@ -86,109 +37,29 @@
 	</button>
 	<div class="card" class:hidden={appWindow.isNarrow && !showParameters}>
 		<div class={appWindow.isMobile ? "parameters-mobile" : "parameters"}>
-			<div class="parameter">
-				<p>Era:</p>
-				<Combobox items={allowedEras} bind:value={resultList.selectedEras} inputProps={{ clearOnDeselect: true, placeholder: "Any" }} type="multiple"></Combobox>
+			<p>Unit must be available in <span class="primary">{resultList.eraSearchType == "any" ? "ANY" : "EVERY"}</span> below Era:</p>
+			<p>Unit must be available in <span class="primary">{resultList.eraSearchType == "any" ? "ANY" : "EVERY"}</span> below Faction:</p>
+			<EraFactionSelectionModal {resultList} {list} />
+			<div class="selected-container">
+				{#each resultList.eras.length ? resultList.eras : [0] as era}
+					<div class="selected-block">
+						{eraLookup.get(Number(era))}
+					</div>
+				{/each}
 			</div>
 			<div class="selected-container">
-				{#if resultList.selectedEras.length == 0}
-					<div class="selected-block">Any - choose an era to narrow down options</div>
-				{/if}
-				{#if resultList.selectedEras.length >= 2}
-					<select bind:value={resultList.eraSearchType}>
-						<option value="any">Any</option>
-						<option value="every">Every</option>
-					</select>
-					<EraFactionInfoPopover></EraFactionInfoPopover>:
-				{/if}
-				{#each resultList.selectedEras.slice(0, 4) as selected}
-					<button
-						class="selected-block"
-						onclick={() => {
-							resultList.selectedEras = resultList.selectedEras.filter((text) => {
-								return text != selected;
-							});
-						}}
-						><X size="10" color="var(--text-color)" />
-						{eraLookup.get(Number(selected)) ?? `${selected} not found`}</button
-					>
-				{/each}
-				{#if resultList.selectedEras.length > 4}
+				{#each resultList.factions.length ? resultList.factions : [0] as faction}
 					<div class="selected-block">
-						+{resultList.selectedEras.length - 4} more selections
+						{factionLookup.get(Number(faction))}
+					</div>
+				{/each}
+				{#if resultList.general != -1}
+					<div class="selected-block">
+						{factionLookup.get(resultList.general)}
 					</div>
 				{/if}
 			</div>
-			<div class="parameter">
-				<p>Faction:</p>
-				<Combobox items={allowedFactions} bind:value={resultList.selectedFactions} inputProps={{ clearOnDeselect: true, placeholder: "Any" }} type="multiple"></Combobox>
-			</div>
-			<div class="selected-container">
-				{#if resultList.selectedFactions.length == 0}
-					<div class="selected-block">Any - choose a faction to narrow down options</div>
-				{/if}
-				{#if resultList.selectedFactions.length >= 2}
-					<select bind:value={resultList.factionSearchType}>
-						<option value="any">Any</option>
-						<option value="every">Every</option>
-					</select>
-					<EraFactionInfoPopover></EraFactionInfoPopover>:
-				{/if}
-				{#each resultList.selectedFactions.slice(0, 4) as selected}
-					<button
-						class="selected-block"
-						onclick={() => {
-							resultList.selectedFactions = resultList.selectedFactions.filter((text) => {
-								return text != selected;
-							});
-						}}
-						><X size="10" color="var(--text-color)" />
-						{allowedFactions.find((faction) => {
-							return faction.value == selected;
-						})?.label}</button
-					>
-				{/each}
-				{#if resultList.selectedFactions.length > 4}
-					<div class="selected-block">
-						+{resultList.selectedFactions.length - 4} more selections
-					</div>
-				{/if}
-			</div>
-			<div class="inline">
-				<input
-					type="checkbox"
-					name="include-general-list"
-					id="include-general-list"
-					bind:checked={resultList.includeGeneral}
-					disabled={resultList.selectedEras.length != 1 || resultList.selectedFactions.length != 1}
-				/>
-				<label for="include-general-list">Official General:</label>
-				{#if resultList.selectedEras.length == 1 && resultList.selectedFactions.length == 1}
-					<a href={`http://masterunitlist.info/Era/FactionEraDetails?FactionId=${resultList.factions[0]}&EraId=${resultList.eras[0]}`}>{factionLookup.get(resultList.general)}</a>
-				{:else}
-					<p class="general-notice">Select a single Era and Faction</p>
-				{/if}
-			</div>
-			<div class="general-notice">You can select additional general lists from the faction dropdown</div>
-			<button
-				id="getData"
-				onclick={() => {
-					resultList.loadResults();
-					if (list) {
-						list.details.eras = resultList.eras;
-						list.details.factions = resultList.factions;
-						list.details.general = resultList.general;
-					}
-				}}>Search</button
-			>
 		</div>
-
-		{#if resultList.selectedEras.length != resultList.eras.length || !resultList.eras.every( (era) => resultList.selectedEras.includes(era.toString()) ) || resultList.selectedFactions.length != resultList.factions.length || !resultList.factions.every( (faction) => resultList.selectedFactions.includes(faction.toString()) )}
-			<div class="center">
-				<img class="warning-icon" src="/icons/alert-outline.svg" alt="close" />
-				<p class="general-notice">Faction or Era selection changed. Press search to get updated results</p>
-			</div>
-		{/if}
 	</div>
 </div>
 
@@ -196,29 +67,17 @@
 	.parameter-container {
 		width: 100%;
 	}
-	.parameter {
-		display: flex;
-		gap: 8px;
-		align-items: center;
-	}
+
 	.parameters {
-		position: relative;
 		display: grid;
-		grid-auto-flow: column;
-		grid-template-columns: 1fr 1fr 1fr max-content;
-		grid-template-rows: min-content min-content;
-		column-gap: 16px;
-		row-gap: 2px;
+		grid-template-columns: 1fr 1fr max-content;
 		width: 100%;
-		align-items: start;
+		column-gap: 10%;
 	}
 	.parameters-mobile {
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
-	}
-	a {
-		overflow: hidden;
 	}
 	p {
 		margin: 0;
@@ -236,28 +95,15 @@
 		width: 100%;
 		display: flex;
 		flex-wrap: wrap;
+		gap: 6px;
+		padding: 4px 0px;
 	}
 	.selected-block {
 		background-color: var(--input);
 		color: var(--surface-color-light-text-color);
-		border-radius: var(--radius);
-		display: flex;
-		gap: 4px;
-		align-items: center;
-		width: fit-content;
-		padding: 2px 4px;
-		margin: 2px;
-		font-size: 0.75em;
-		height: 1.25em;
-	}
-	.general-notice {
-		font-size: 0.75em;
-		color: var(--surface-color-light-text-color);
-	}
-
-	.warning-icon {
-		height: 1em;
-		width: 1em;
-		filter: var(--warning-filter);
+		border-radius: 1px;
+		padding: 4px 8px;
+		font-size: 0.85em;
+		height: max-content;
 	}
 </style>

@@ -63,27 +63,20 @@ function compareValues(searchTerm?: SearchConstraint, unitAbilityValue?: number)
 export class ResultList {
 	#eras = $state<number[]>([]);
 	#factions = $state<number[]>([]);
-
-	selectedEras = $state<string[]>([]);
-	selectedFactions = $state<string[]>([]);
+	general = $state<number>(-1);
 
 	eraSearchType = $state<"any" | "every">("any");
 	factionSearchType = $state<"any" | "every">("any");
 
-	constructor(initEras: number[], initFactions: number[]) {
+	constructor(initEras: number[], initFactions: number[], general: number = -1) {
 		this.#eras = initEras;
-		this.selectedEras = initEras.map((e) => e.toString());
 		this.#factions = initFactions;
-		this.selectedFactions = initFactions.map((f) => f.toString());
 	}
 
 	get eras(): number[] {
 		return this.#eras;
 	}
 	set eras(newValue: string[] | number[]) {
-		this.selectedEras = newValue.map((value) => {
-			return value.toString();
-		});
 		this.#eras = newValue.map((value) => {
 			return Number(value);
 		});
@@ -92,26 +85,12 @@ export class ResultList {
 		return this.#factions;
 	}
 	set factions(newValue: string[] | number[]) {
-		this.selectedFactions = newValue.map((value) => {
-			return value.toString();
-		});
 		this.#factions = newValue.map((value) => {
 			return Number(value);
 		});
 	}
 
-	general = $derived.by(() => {
-		if (this.selectedEras.length == 1 && this.selectedFactions.length == 1) {
-			return getGeneralList(Number(this.selectedEras[0]), Number(this.selectedFactions[0]));
-		} else {
-			return -1;
-		}
-	});
-
-	includeGeneral = $state(true);
-
 	resultList = $state<MulUnit[]>([]);
-	generalList = $state<MulUnit[]>([]);
 	uniqueList = $state<number[]>([]);
 	customUnits = $state<MulUnit[]>([]);
 	taggedUnits = $state<string[]>([]);
@@ -119,7 +98,7 @@ export class ResultList {
 	options = $state<Ruleset>();
 	filterByRules = $state(true);
 	availableList = $derived.by(() => {
-		let availableUnits = this.resultList.concat(this.generalList);
+		let availableUnits = this.resultList;
 		availableUnits = [...new Map(availableUnits.map((u) => [u.id, u]))].map((v) => v[1]);
 
 		if (this.taggedUnits.length) {
@@ -144,13 +123,15 @@ export class ResultList {
 	filteredList = $derived(this.filterList(this.filters, this.additionalFilters));
 
 	status = $state();
-	loadResults() {
-		this.#eras = this.selectedEras.map((era) => {
+	loadResults(selectedEras: number[], selectedFactions: number[], general: number = -1) {
+		this.#eras = selectedEras.map((era) => {
 			return Number(era);
 		});
-		this.#factions = this.selectedFactions.map((faction) => {
+		this.#factions = selectedFactions.map((faction) => {
 			return Number(faction);
 		});
+		this.general = general;
+
 		this.status = new Promise((resolve, reject) => {
 			this.loadUnits().then((message) => {
 				if (message == "Units Loaded") {
@@ -223,18 +204,23 @@ export class ResultList {
 	}
 
 	async loadUnits() {
+		console.log($state.snapshot(this.#eras), $state.snapshot(this.#factions), $state.snapshot(this.general));
 		const response: any = deserialize(
 			await (
 				await fetch("/?/getUnits", {
 					method: "POST",
-					body: JSON.stringify({ eras: this.#eras, factions: this.#factions, general: this.general, eraSearchType: this.eraSearchType, factionSearchType: this.factionSearchType })
+					body: JSON.stringify({
+						eras: this.#eras,
+						factions: this.#factions.concat([this.general]),
+						eraSearchType: this.eraSearchType,
+						factionSearchType: this.factionSearchType
+					})
 				})
 			).text()
 		);
 
 		this.resultList = [];
 		this.uniqueList = [];
-		this.generalList = [];
 
 		if (response.data.message == "Units Loaded") {
 			const unitList = response.data.unitList;
@@ -244,9 +230,6 @@ export class ResultList {
 			const generalList = response.data.generalList;
 
 			this.resultList = this.loadUnitsFromResponse(unitList);
-			if (this.includeGeneral) {
-				this.generalList = this.loadUnitsFromResponse(generalList);
-			}
 		}
 
 		return response.data.message;
@@ -274,12 +257,6 @@ export class ResultList {
 				});
 			}
 		}
-	}
-	setParameters(eras: number[], factions: number[]) {
-		this.#eras = eras;
-		this.selectedEras = eras.map((e) => e.toString());
-		this.#factions = factions;
-		this.selectedFactions = factions.map((f) => f.toString());
 	}
 	applyOptions() {
 		let tempRestrictedList: MulUnit[] = [];
@@ -655,11 +632,8 @@ export class ResultList {
 	}
 	clear() {
 		this.resultList = [];
-		this.generalList = [];
 		this.uniqueList = [];
 		this.#eras = [];
 		this.#factions = [];
-		this.selectedEras = [];
-		this.selectedFactions = [];
 	}
 }

@@ -8,11 +8,9 @@
 	import FixModal from "./FixModal.svelte";
 	import type { ValidationUnitData, TournamentData } from "./types";
 	import { getUnitData } from "./validate.remote";
-	import { onMount } from "svelte";
 	import { page } from "$app/state";
 	import { submittedList } from "$lib/stores/listSubmission.svelte";
 	import { nanoid } from "nanoid";
-	import { afterNavigate } from "$app/navigation";
 
 	let files = $state<FileList>();
 

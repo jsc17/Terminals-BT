@@ -206,7 +206,7 @@
 			<p class="loading-message">Failed to load units. Please wait a moment, and try again</p>
 			<button
 				onclick={() => {
-					resultList.loadResults();
+					resultList.loadResults([], []);
 				}}>Reload</button
 			>
 		</div>

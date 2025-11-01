@@ -42,7 +42,7 @@
 		top: 50%;
 		transform: translate(-50%, -50%);
 		min-width: min(400px, 99dvw);
-		width: max-content;
+		width: fit-content;
 		max-width: 99dvw;
 		max-height: 95dvh;
 		background-color: var(--background);
@@ -71,6 +71,10 @@
 
 	:global([data-dialog-description], .dialog-children-wrapper) {
 		padding: clamp(4px, 1dvh, 8px) clamp(4px, 1dvw, 16px);
+	}
+	:global([data-dialog-description]) {
+		text-wrap: wrap;
+		width: fit-content;
 	}
 
 	.dialog-children-wrapper {

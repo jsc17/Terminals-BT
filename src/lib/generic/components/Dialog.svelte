@@ -42,7 +42,7 @@
 		top: 50%;
 		transform: translate(-50%, -50%);
 		min-width: min(400px, 99dvw);
-		width: fit-content;
+		width: max-content;
 		max-width: 99dvw;
 		max-height: 95dvh;
 		background-color: var(--background);

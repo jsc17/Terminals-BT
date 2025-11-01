@@ -79,10 +79,11 @@ export const actions = {
 		return { customUnits };
 	},
 	getUnits: async ({ request }) => {
-		let { eras, factions, eraSearchType, factionSearchType } = await request.json();
+		let { eras, factions, general, eraSearchType, factionSearchType } = await request.json();
 
 		let unitList: any[] = [];
 		let uniqueList: any[] = [];
+		let generalList: any[] = [];
 
 		let searchConditions: any;
 		let uniqueConditions: any;
@@ -198,16 +199,32 @@ export const actions = {
 					where: uniqueConditions,
 					select: { mulId: true }
 				});
+				if (general != -1) {
+					generalList = await prisma.unit.findMany({
+						where: {
+							availability: {
+								some: {
+									era: { in: eras },
+									faction: general
+								}
+							}
+						},
+						orderBy: { tonnage: "asc" }
+					});
+				}
 			}
 		} catch (error) {
 			return fail(400, { message: "Failed to load units" });
 		}
-		if (unitList.length) {
+		if (unitList.length || generalList.length) {
 			unitList.forEach((unit) => {
 				unit.abilities = unit.abilities ? JSON.stringify(handleParse(unit.abilities)) : "-";
 			});
+			generalList.forEach((unit) => {
+				unit.abilities = unit.abilities ? JSON.stringify(handleParse(unit.abilities)) : "-";
+			});
 
-			return { message: "Units Loaded", unitList, uniqueList };
+			return { message: "Units Loaded", unitList, uniqueList, generalList };
 		} else {
 			return { message: "No Units Found" };
 		}

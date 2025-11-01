@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Dialog, Select } from "$lib/generic";
+	import { Dialog, Select, Switch } from "$lib/generic";
 	import { getErasAndFactions } from "$lib/remote/era-faction.remote";
 	import type { ResultList } from "$lib/types/resultList.svelte";
 	import { X } from "phosphor-svelte";
@@ -21,6 +21,8 @@
 	let selectedEras = new SvelteSet<number>();
 	let selectedFaction = $state<string>();
 	let selectedFactions = new SvelteSet<number>();
+	let eraSelectMode = $state<"any" | "every">("any");
+	let factionSelectMode = $state<"any" | "every">("any");
 
 	let availableFactions = $derived.by(() => {
 		let factions = new Set<number>();
@@ -61,6 +63,9 @@
 			resultList.factions = [...selectedFactions];
 			resultList.general = includeGeneral ? general : -1;
 		}
+		resultList.eraSearchType = eraSelectMode;
+		resultList.factionSearchType = factionSelectMode;
+
 		open = false;
 	}
 
@@ -81,13 +86,10 @@
 
 <Dialog title="Select Era/Faction" {onOpenChange} bind:open>
 	{#snippet trigger()}
-		<p>Edit Era/Faction Selection</p>
-	{/snippet}
-	{#snippet description()}
-		Leaving Era or Faction with no selections will return results for all eras or factions
+		Edit Era/Faction Selection
 	{/snippet}
 	<div class="selection-body">
-		<div class="selection-row">
+		<div class="selection-row inline">
 			{#if eraList.current}
 				<label for="eraSelect">Era: </label>
 				<div class="select-container">
@@ -96,7 +98,7 @@
 						bind:value={selectedEra}
 						items={[...eraList.current.keys()].map((v) => ({ value: v.toString(), label: eraLookup.get(v) ?? "" }))}
 						type="single"
-						placeholder="Era"
+						placeholder="Select era"
 					/>
 				</div>
 				<button
@@ -104,6 +106,24 @@
 						if (selectedEra) selectedEras.add(Number(selectedEra));
 					}}>Add</button
 				>
+
+				<Switch
+					checked={eraSelectMode == "every"}
+					onCheckedChange={() => {
+						if (eraSelectMode == "any") {
+							eraSelectMode = "every";
+						} else {
+							eraSelectMode = "any";
+						}
+					}}
+				>
+					{#snippet leftValue()}
+						<p>Any</p>
+					{/snippet}
+					{#snippet rightValue()}
+						<p>Every</p>
+					{/snippet}
+				</Switch>
 			{/if}
 		</div>
 		<div class="selection-box">
@@ -117,15 +137,15 @@
 					>
 						<X size="15" />
 					</button>
-					<p style="color: var(--text-color)">{eraLookup.get(era)}</p>
+					<p>{eraLookup.get(era)}</p>
 				</div>
 			{:else}
 				<div class="selection-box-row">
-					<p style="color: var(--text-color); margin-left: 16px">Any - Select an era above to restrict results</p>
+					<p style="margin-left: 16px">Any - Select an era above to restrict results</p>
 				</div>
 			{/each}
 		</div>
-		<div class="selection-row">
+		<div class="selection-row inline">
 			<label for="factionSelect">Faction:</label>
 			<div class="select-container">
 				<Select
@@ -133,7 +153,7 @@
 					bind:value={selectedFaction}
 					items={[...availableFactions].map((f) => ({ value: f.toString(), label: factionLookup.get(f) ?? "" })).sort((a, b) => a.label.localeCompare(b.label))}
 					type="single"
-					placeholder="Faction"
+					placeholder="Select faction"
 				/>
 			</div>
 			<button
@@ -141,6 +161,23 @@
 					if (selectedFaction) selectedFactions.add(Number(selectedFaction));
 				}}>Add</button
 			>
+			<Switch
+				checked={factionSelectMode == "every"}
+				onCheckedChange={() => {
+					if (factionSelectMode == "any") {
+						factionSelectMode = "every";
+					} else {
+						factionSelectMode = "any";
+					}
+				}}
+			>
+				{#snippet leftValue()}
+					<p>Any</p>
+				{/snippet}
+				{#snippet rightValue()}
+					<p>Every</p>
+				{/snippet}
+			</Switch>
 		</div>
 		<div class="selection-box">
 			{#each selectedFactions as faction}
@@ -153,11 +190,11 @@
 					>
 						<X size="15" />
 					</button>
-					<p style="color: var(--text-color)">{factionLookup.get(faction)}</p>
+					<p>{factionLookup.get(faction)}</p>
 				</div>
 			{:else}
 				<div class="selection-box-row">
-					<p style="color: var(--text-color); margin-left: 16px">Any - Select a faction above to restrict results</p>
+					<p style="margin-left: 16px">Any - Select a faction above to restrict results</p>
 				</div>
 			{/each}
 		</div>
@@ -190,9 +227,6 @@
 </Dialog>
 
 <style>
-	p {
-		color: var(--button-text-color);
-	}
 	.selection-body {
 		display: grid;
 		gap: 6px;
@@ -231,8 +265,5 @@
 	.selection-button {
 		padding: var(--responsive-padding);
 		border-radius: 5px;
-	}
-	.general-notice {
-		color: var(--text-color);
 	}
 </style>

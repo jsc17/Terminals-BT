@@ -211,7 +211,8 @@ export class ResultList {
 					method: "POST",
 					body: JSON.stringify({
 						eras: this.#eras,
-						factions: this.#factions.concat([this.general]),
+						factions: this.#factions,
+						general: this.general,
 						eraSearchType: this.eraSearchType,
 						factionSearchType: this.factionSearchType
 					})
@@ -229,7 +230,8 @@ export class ResultList {
 			});
 			const generalList = response.data.generalList;
 
-			this.resultList = this.loadUnitsFromResponse(unitList);
+			const availableUnits = this.loadUnitsFromResponse(unitList).concat(this.loadUnitsFromResponse(generalList));
+			this.resultList = [...new Map(availableUnits.map((u) => [u.id, u]))].map((v) => v[1]);
 		}
 
 		return response.data.message;

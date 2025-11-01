@@ -38,7 +38,7 @@
 	<div class="card" class:hidden={appWindow.isNarrow && !showParameters}>
 		<div class={appWindow.isMobile ? "parameters-mobile" : "parameters"}>
 			<p>Unit must be available in <span class="primary">{resultList.eraSearchType == "any" ? "ANY" : "EVERY"}</span> below Era:</p>
-			<p>Unit must be available in <span class="primary">{resultList.eraSearchType == "any" ? "ANY" : "EVERY"}</span> below Faction:</p>
+			<p>Unit must be available in <span class="primary">{resultList.factionSearchType == "any" ? "ANY" : "EVERY"}</span> below Faction:</p>
 			<EraFactionSelectionModal {resultList} {list} />
 			<div class="selected-container">
 				{#each resultList.eras.length ? resultList.eras : [0] as era}

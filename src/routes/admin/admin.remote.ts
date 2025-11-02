@@ -1,7 +1,7 @@
 import { query, command, form } from "$app/server";
 import { prisma } from "$lib/server/prisma";
 import { ammoReferences } from "$lib/data";
-import { getMulImage } from "../../lib/remote/mulImages.remote";
+import { getMulImage } from "$lib/remote/mulImages.remote";
 import * as v from "valibot";
 import { getMULDataFromId } from "$lib/remote/unit.remote";
 

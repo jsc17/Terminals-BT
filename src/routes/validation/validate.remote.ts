@@ -32,7 +32,7 @@ export const getUnitData = form(v.object({ listFile: v.file(), selectedEra: v.st
 		if (unit) {
 			let unique: boolean | undefined = await isUnique({ mulId: unit.mulId, era });
 			const general = (await getGeneralId({ era, faction }))?.general;
-			let available: boolean | undefined = await isAvailable({ mulId: unit.mulId, eras: [era], factions: [faction, general ?? 0] });
+			let available: boolean | undefined = (await isAvailable({ mulId: unit.mulId, eras: [era], factions: [faction, general ?? 0] })) || unit.mulId < 0;
 
 			unitData.push({
 				id: crypto.randomUUID(),

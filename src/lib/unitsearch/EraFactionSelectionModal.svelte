@@ -54,16 +54,15 @@
 	});
 
 	function handleApply() {
-				resultList.eraSearchType = eraSelectMode;
+		resultList.eraSearchType = eraSelectMode;
 		resultList.factionSearchType = factionSelectMode;
 		if (list) {
 			list.details.eras = [...selectedEras];
 			list.details.factions = [...selectedFactions];
 			list.details.general = includeGeneral ? general : -1;
 		} else {
-			resultList.loadResults([...selectedEras], [...selectedFactions],  includeGeneral ? general : -1)
+			resultList.loadResults([...selectedEras], [...selectedFactions], includeGeneral ? general : -1);
 		}
-
 
 		open = false;
 	}

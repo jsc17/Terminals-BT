@@ -67,7 +67,8 @@
 <main>
 	<div class="validation-body">
 		<p class="muted">
-			MUL or Terminal PDF's only, others will probably error out, but at the very least will not read correctly. Formations printed in the unit table will break the parsing
+			MUL or Terminal PDF's only, others will probably error out, but at the very least will not read correctly. I recently (10-17-25) updated list printing. If you have a list
+			older than that and it doesn't read correctly, please try reprinting the list.
 		</p>
 		<form
 			enctype="multipart/form-data"
@@ -243,7 +244,7 @@
 			<label>Email address: <input type="email" name="playerEmail" required disabled={issues == undefined || issues?.issueList.size > 0} /></label>
 			<label
 				><input type="checkbox" name="permission" bind:checked={submitApproval} required disabled={issues == undefined || issues?.issueList.size > 0} /> By submitting this list, you
-				acknowledge your email address and name will be provided to the tournament organizer. Any stored personal data will be removed after the tournament has completed.</label
+				acknowledge your email address and name will be provided to the tournament organizer. Any personal data stored Terminal.tools will be removed after the tournament has completed.</label
 			>
 			<button class="submit" disabled={!selectedTournament || !submitApproval || issues == undefined || issues?.issueList.size > 0}>Submit</button>
 			<input type="file" name="listFile" bind:files class="hidden" aria-hidden="true" />

@@ -14,7 +14,7 @@
 		printOptions: PrintOptionsOutput;
 		mulUnitData: Map<number, MulUnit>;
 		ammoReferenceList: string[];
-		unitImages?: Map<number, string>;
+		unitImages?: Map<string, string>;
 		unitCardImages?: Map<number, string>;
 		bsList: Map<number, number[]>;
 		scaList: number[];
@@ -187,7 +187,7 @@
 							{:else}
 								<PrintUnitCard
 									unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
-									image={unitImages?.get(mulData!.mulId) ?? ""}
+									image={unitImages?.get(mulData!.imageLink ?? "") ?? ""}
 									formationSPAs={[]}
 									measurementUnits={printOptions.measurementUnits}
 								/>
@@ -206,7 +206,7 @@
 					{:else}
 						<PrintUnitCard
 							unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
-							image={unitImages?.get(mulData!.mulId) ?? ""}
+							image={unitImages?.get(mulData!.imageLink ?? "") ?? ""}
 							formationSPAs={[]}
 							measurementUnits={printOptions.measurementUnits}
 						/>

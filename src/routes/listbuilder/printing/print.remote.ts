@@ -39,11 +39,11 @@ export const printList = query(
 						.values()
 						.filter((u) => u.mulId >= 0)
 						//@ts-ignore ignores custom cards not having an imagelink
-						.map(async (u) => getMulImage({ mulId: u.mulId, unitImageLink: u.imageLink ?? "" }))
+						.map(async (u) => getMulImage(u.imageLink ?? ""))
 				)
 			)
 				.filter((r) => r.status == "fulfilled")
-				.map((r) => [r.value.mulId, r.value.image ?? ""])
+				.map((r) => [r.value.link, r.value.image ?? ""])
 		);
 
 		const unitCardImages = new Map(

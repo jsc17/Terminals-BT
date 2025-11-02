@@ -46,10 +46,8 @@ export const getMulImage = query.batch(v.string(), async (data) => {
 			const imageId = await prisma.unitImage.findFirst({ where: { link } });
 			if (imageId != null) {
 				const localPath = `./files/unit-images/${imageId.id}.png`;
-				if (existsSync(localPath)) {
-					const data = await fs.readFile(localPath, { encoding: "base64" });
-					lookup.set(link, "data:image/png;base64," + data);
-				}
+				const data = await fs.readFile(localPath, { encoding: "base64" });
+				lookup.set(link, "data:image/png;base64," + data);
 			} else {
 				try {
 					console.log("Downloading new png from MUL");

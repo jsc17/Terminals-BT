@@ -3,7 +3,7 @@
 	import { calculateTMM } from "$lib/utilities/genericBattletechUtilities";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import SendNotification from "./SendNotification.svelte";
-	import { cacheImages, uploadAmmo } from "./admin.remote";
+	import { cacheImages, uploadAmmo, getImage } from "./admin.remote";
 
 	async function loadUnits() {
 		const links: { type: string; link: string }[] = [];
@@ -97,6 +97,8 @@
 	async function uploadCustomUnits() {
 		const result: any = deserialize(await (await fetch("?/uploadCustom", { method: "POST", body: "" })).text());
 	}
+
+	let imageData = $derived(getImage.result?.image);
 </script>
 
 <main>
@@ -134,6 +136,14 @@
 	<button onclick={() => uploadAmmo()}>Upload Ammo</button>
 
 	<button onclick={() => cacheImages()}>Cache Images</button>
+
+	<form {...getImage}>
+		<input type="text" name="mulId" id="mulId" />
+		<button>Get</button>
+	</form>
+	{#if imageData}
+		<img src={imageData} />
+	{/if}
 </main>
 
 <style>

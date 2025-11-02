@@ -6,7 +6,7 @@ import { render } from "svelte/server";
 import ListTemplate from "./templates/ListTemplate.svelte";
 import { getAmmoByName } from "$lib/remote/ammo.remote";
 import { getCustomUnitData, getMULDataFromId } from "$lib/remote/unit.remote";
-import { getMulCard, getMulImage } from "./mulImages.remote";
+import { getMulCard, getMulImage } from "../../../lib/remote/mulImages.remote";
 import { PDFDocument } from "pdf-lib";
 
 export const printList = query(

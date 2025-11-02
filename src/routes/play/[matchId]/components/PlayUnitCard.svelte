@@ -11,6 +11,7 @@
 	import { type UnitAbility } from "$lib/data/abilities";
 	import type { SvelteMap } from "svelte/reactivity";
 	import { getSPAfromId } from "$lib/utilities/listUtilities";
+	import { getMulImage } from "$lib/remote/mulImages.remote";
 
 	type Props = {
 		unit: PlayUnit;
@@ -287,7 +288,8 @@
 			</div>
 			<div class="unit-card-right">
 				<div class="unit-image-block" class:unit-crippled={options.showCrippled && reference.structure && structRemaining.current < reference.structure / 2}>
-					<img src={reference?.imageLink} alt="unit" class="unit-image" />
+					<img src={(await getMulImage(reference?.imageLink ?? "")).image} alt="unit" class="unit-image" />
+
 					{#if structRemaining.current <= 0 || critCount.current.engine >= 2 || critCount.current.destroyed}
 						<img src="/icons/close.svg" alt="Destroyed" class="destroyed" />
 					{/if}

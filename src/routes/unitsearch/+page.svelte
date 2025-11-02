@@ -1,8 +1,13 @@
 <script lang="ts">
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { SearchFilters, SearchParameters, SearchResults } from "$lib/unitsearch";
+	import { onMount } from "svelte";
 
-	let resultList = $state(new ResultList([], []));
+	let resultList = $state(new ResultList());
+
+	onMount(() => {
+		resultList.loadResults([], [], -1);
+	});
 </script>
 
 <main>

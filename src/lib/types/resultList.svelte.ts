@@ -68,11 +68,6 @@ export class ResultList {
 	eraSearchType = $state<"any" | "every">("any");
 	factionSearchType = $state<"any" | "every">("any");
 
-	constructor(initEras: number[], initFactions: number[], general: number = -1) {
-		this.#eras = initEras;
-		this.#factions = initFactions;
-	}
-
 	get eras(): number[] {
 		return this.#eras;
 	}

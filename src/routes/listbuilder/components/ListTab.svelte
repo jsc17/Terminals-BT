@@ -14,7 +14,7 @@
 
 	let { list, listCloseCallback }: Props = $props();
 
-	let resultList = $state<ResultList>(new ResultList(list.details.eras, list.details.factions, list.details.general));
+	let resultList = $state<ResultList>(new ResultList());
 	setContext("list", list);
 
 	let showListbuilder = $state(false);

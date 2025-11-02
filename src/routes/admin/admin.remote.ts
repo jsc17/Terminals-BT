@@ -37,8 +37,6 @@ export const cacheImages = command(async () => {
 
 export const getImage = form(v.object({ mulId: v.string() }), async (data) => {
 	const unit = await getMULDataFromId(Number(data.mulId));
-	console.log(unit?.imageLink);
 	const image = await getMulImage(unit?.imageLink ?? "");
-	console.log(image.image ? "Image found" : "Image not found");
 	return image;
 });

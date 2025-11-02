@@ -1,7 +1,9 @@
-import { query, command } from "$app/server";
+import { query, command, form } from "$app/server";
 import { prisma } from "$lib/server/prisma";
 import { ammoReferences } from "$lib/data";
-import { getMulImage } from "../listbuilder/printing/mulImages.remote";
+import { getMulImage } from "$lib/remote/mulImages.remote";
+import * as v from "valibot";
+import { getMULDataFromId } from "$lib/remote/unit.remote";
 
 export const uploadAmmo = query(async () => {
 	for (const group of ammoReferences) {
@@ -30,4 +32,11 @@ export const cacheImages = command(async () => {
 
 		await getMulImage(image_url);
 	}
+	console.log("complete");
+});
+
+export const getImage = form(v.object({ mulId: v.string() }), async (data) => {
+	const unit = await getMULDataFromId(Number(data.mulId));
+	const image = await getMulImage(unit?.imageLink ?? "");
+	return image;
 });

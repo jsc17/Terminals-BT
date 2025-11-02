@@ -2,6 +2,7 @@ import { query } from "$app/server";
 import { existsSync } from "fs";
 import * as v from "valibot";
 import fs from "fs/promises";
+import { prisma } from "$lib/server/prisma";
 
 //gets entire unit card from the mul when provided with an id and a skill level. Attempts to access cached card first.
 export const getMulCard = query.batch(v.object({ mulId: v.number(), skill: v.number() }), async (data) => {
@@ -44,12 +45,10 @@ export const getMulImage = query.batch(v.string(), async (data) => {
 	await Promise.allSettled(
 		data.map(async (link) => {
 			const imageId = await prisma.unitImage.findFirst({ where: { link } });
-			if (imageId != null) {
+			if (imageId != null && existsSync(`./files/unit-images/${imageId.id}.png`)) {
 				const localPath = `./files/unit-images/${imageId.id}.png`;
-				if (existsSync(localPath)) {
-					const data = await fs.readFile(localPath, { encoding: "base64" });
-					lookup.set(link, "data:image/png;base64," + data);
-				}
+				const data = await fs.readFile(localPath, { encoding: "base64" });
+				lookup.set(link, "data:image/png;base64," + data);
 			} else {
 				try {
 					console.log("Downloading new png from MUL");

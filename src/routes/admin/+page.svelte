@@ -3,7 +3,7 @@
 	import { calculateTMM } from "$lib/utilities/genericBattletechUtilities";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import SendNotification from "./SendNotification.svelte";
-	import { uploadAmmo } from "./admin.remote";
+	import { cacheImages, uploadAmmo } from "./admin.remote";
 
 	async function loadUnits() {
 		const links: { type: string; link: string }[] = [];
@@ -132,6 +132,8 @@
 	<SendNotification />
 
 	<button onclick={() => uploadAmmo()}>Upload Ammo</button>
+
+	<button onclick={() => cacheImages()}>Cache Images</button>
 </main>
 
 <style>

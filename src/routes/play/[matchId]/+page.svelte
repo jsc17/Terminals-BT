@@ -32,7 +32,8 @@
 			confirmEnd: true,
 			groupByFormation: true,
 			damageDirection: "left",
-			measurementUnits: "inches"
+			measurementUnits: "inches",
+			duplicateUnitMarkings: "numbers"
 		},
 		{
 			serializer: {
@@ -51,7 +52,8 @@
 							confirmEnd: true,
 							groupByFormation: true,
 							damageDirection: "left",
-							measurementUnits: "inches"
+							measurementUnits: "inches",
+							duplicateUnitMarkings: "numbers"
 						};
 					}
 				}

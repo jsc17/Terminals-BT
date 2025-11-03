@@ -4,20 +4,30 @@ import { nanoid } from "nanoid";
 import type { PlayFormation, PlayList, PlayUnit } from "./types";
 import { db } from "$lib/offline/db";
 
-export function sendListToPlay(name: string, formations: ListFormation[], units: ListUnit[]) {
+export async function sendListToPlay(name: string, formations: ListFormation[], units: ListUnit[]) {
 	const playUnits: PlayUnit[] = [];
+	const totalCounts = Map.groupBy(units, ({ baseUnit }) => baseUnit.mulId);
+	const count = new Map<number, ListUnit[]>();
+
 	for (const unit of units) {
 		if (
 			formations.find((formation) => {
 				return formation.units.find(({ id }) => id == unit.id) || formation.secondary?.units.find(({ id }) => id == unit.id);
 			})
 		) {
+			const mulId = unit.baseUnit.mulId;
+			let number: number = 0;
+			if ((totalCounts.get(mulId)?.length ?? 0) > 1) {
+				if (!count.has(mulId)) count.set(mulId, []);
+				number = count.get(mulId)!.push(unit);
+			}
 			playUnits.push({
 				id: unit.id,
-				mulId: unit.baseUnit.mulId.toString(),
+				mulId: mulId.toString(),
 				skill: unit.skill,
 				cost: unit.cost,
 				customization: unit.customization,
+				number: number != 0 ? number : undefined,
 				current: { damage: 0, heat: 0, crits: [], disabledAbilities: [] },
 				pending: { damage: 0, heat: 0, crits: [] }
 			});
@@ -55,6 +65,6 @@ export function sendListToPlay(name: string, formations: ListFormation[], units:
 		date: new Date().toDateString()
 	};
 
-	db.localMatches.add(playList);
-	window.open(`/play/${newMatchId}`, "_blank")?.focus();
+	await db.localMatches.add(playList);
+	window.open(`/play/${newMatchId}`)?.focus();
 }

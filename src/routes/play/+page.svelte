@@ -37,9 +37,9 @@
 							<p class="primary">{list.name}</p>
 							<p class="muted">{list.date}</p>
 						</a>
-						<!-- <button class="end-match" onclick={() => endMatch(list)}>
-							<Trash color="black" width="15px" height="15px" />
-						</button> -->
+						<button class="end-match" onclick={() => endMatch(list)}>
+							<Trash color="black" width="20px" height="20px" />
+						</button>
 					</div>
 				{:else}
 					<p class="muted">You have no currently active matches</p>
@@ -75,17 +75,23 @@
 		position: relative;
 		width: max-content;
 		height: max-content;
+		grid-template-columns: max-content max-content;
+		background-color: var(--surface-color-light);
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
 	}
 	.match-link {
 		display: flex;
 		flex-direction: column;
 		padding: var(--responsive-padding);
 		gap: 4px;
-		background-color: var(--surface-color-light);
-		border: 1px solid var(--border);
-		border-radius: var(--radius);
 	}
 	.match-link:hover {
 		background-color: var(--surface-color-extra-light);
+	}
+	.end-match {
+		height: max-content;
+		padding: 4px;
+		background-color: var(--error);
 	}
 </style>

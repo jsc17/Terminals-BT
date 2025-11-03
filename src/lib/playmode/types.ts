@@ -7,6 +7,7 @@ type PlayUnit = {
 	skill?: number;
 	cost: number;
 	customization?: UnitCustomization;
+	number?: number;
 	pending: {
 		damage: number;
 		heat: number;
@@ -62,6 +63,7 @@ type Options = {
 	groupByFormation: boolean;
 	damageDirection: "left" | "right";
 	measurementUnits: "inches" | "hexes";
+	duplicateUnitMarkings: "numbers" | "letters" | "roman";
 };
 
 export type { PlayList, PlayFormation, PlayUnit, LogRound, LogEntry, Options };

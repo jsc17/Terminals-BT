@@ -10,7 +10,8 @@ const PlaymodeOptionsSchema = z.object({
 	confirmEnd: z.boolean().catch(true),
 	groupByFormation: z.boolean().catch(true),
 	damageDirection: z.literal(["left", "right"]).catch("left"),
-	measurementUnits: z.literal(["inches", "hexes"]).catch("inches")
+	measurementUnits: z.literal(["inches", "hexes"]).catch("inches"),
+	duplicateUnitMarkings: z.literal(["numbers", "letters", "roman"]).catch("numbers")
 });
 
 export { PlaymodeOptionsSchema };

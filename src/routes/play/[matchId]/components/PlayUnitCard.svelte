@@ -12,6 +12,7 @@
 	import type { SvelteMap } from "svelte/reactivity";
 	import { getSPAfromId } from "$lib/utilities/listUtilities";
 	import { getMulImage } from "$lib/remote/mulImages.remote";
+	import { numberToRomanNumeral } from "$lib/utilities/utilities";
 
 	type Props = {
 		unit: PlayUnit;
@@ -67,6 +68,17 @@
 	function handleSpecial(ability: UnitAbility) {
 		abilityReference = ability;
 		openSpecialModal = true;
+	}
+
+	function createMarking() {
+		switch (options.duplicateUnitMarkings) {
+			case "numbers":
+				return unit.number;
+			case "letters":
+				return String.fromCharCode(unit.number! - 1 + "A".charCodeAt(0));
+			case "roman":
+				return numberToRomanNumeral(unit.number!);
+		}
 	}
 
 	onMount(() => {
@@ -310,6 +322,9 @@
 						{/if}
 					</button>
 				{/if}
+				{#if unit.number}
+					<p class={{ numbering: true, "numbering-roman": options.duplicateUnitMarkings == "roman" }}>{createMarking()}</p>
+				{/if}
 			</div>
 		</div>
 		{#if unit.customization?.spa || unit.customization?.ammo || formationBonuses.length}
@@ -384,6 +399,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 2cqh;
+		position: relative;
 	}
 
 	.unit-image-block {
@@ -580,5 +596,21 @@
 	}
 	.hex-symbol {
 		font-size: 0.8em;
+	}
+	.numbering {
+		background-color: white;
+		position: absolute;
+		color: black;
+		border: 1cqmax solid rgb(36, 36, 36);
+		padding: 2cqmin;
+		font-size: 32px;
+		top: 0;
+		right: 0;
+		min-width: 12cqw;
+		text-align: center;
+		border-radius: 1cqmax;
+	}
+	.numbering-roman {
+		font-family: "Times New Roman", Times, serif;
 	}
 </style>

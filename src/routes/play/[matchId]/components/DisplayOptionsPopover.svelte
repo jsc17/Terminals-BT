@@ -49,6 +49,14 @@
 			<label><input type="radio" bind:group={options.damageDirection} value="left" /> Right to Left, as Blake intended</label>
 			<label><input type="radio" bind:group={options.damageDirection} value="right" /> Left to Right, like a Nicholai Malthus Fanboy</label>
 		</fieldset>
+		<label
+			>Duplicate Unit Markings
+			<select bind:value={options.duplicateUnitMarkings}>
+				<option value="numbers">Numbers</option>
+				<option value="letters">Letters</option>
+				<option value="roman">Roman Numerals</option>
+			</select>
+		</label>
 	</Popover.Content>
 </Popover.Root>
 

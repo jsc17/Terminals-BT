@@ -1,18 +1,5 @@
 import * as v from "valibot";
 
-export const PrintOptionsSchema = v.object({
-	printStyle: v.fallback(v.picklist(["simple", "detailed"]), "detailed"),
-	printFormations: v.fallback(v.boolean(), true),
-	printCardsByFormation: v.fallback(v.boolean(), true),
-	printFormationBonuses: v.fallback(v.boolean(), true),
-	cardStyle: v.fallback(v.picklist(["mul", "generated"]), "generated"),
-	formationHeaderStyle: v.fallback(v.picklist(["inline", "side"]), "inline"),
-	measurementUnits: v.fallback(v.picklist(["inches", "hexes"]), "inches"),
-	printReferences: v.fallback(v.boolean(), true)
-});
-
-export type PrintOptionsOutput = v.InferOutput<typeof PrintOptionsSchema>;
-
 export const PrintListSchema = v.object({
 	name: v.string(),
 	units: v.array(

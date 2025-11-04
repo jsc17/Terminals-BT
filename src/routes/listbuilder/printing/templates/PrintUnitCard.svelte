@@ -9,14 +9,17 @@
 	import MechCritBox from "./critboxes/MechCritBox.svelte";
 	import ProtoCritBox from "./critboxes/ProtoCritBox.svelte";
 	import { getSPAfromId } from "$lib/utilities/listUtilities";
+	import { numberToRomanNumeral } from "$lib/utilities/utilities";
 
 	type Props = {
 		unit: ListUnit;
 		image: string;
 		formationSPAs: number[];
 		measurementUnits: "inches" | "hexes";
+		numbering?: number;
+		numberingType: "none" | "numbers" | "letters" | "roman";
 	};
-	let { unit, image, formationSPAs, measurementUnits }: Props = $props();
+	let { unit, image, formationSPAs, measurementUnits, numbering, numberingType }: Props = $props();
 
 	let formationBonuses = $derived.by(() => {
 		const bonusAbilities: string[] = [];
@@ -25,6 +28,18 @@
 		});
 		return bonusAbilities;
 	});
+
+	function createMarking() {
+		if (numbering == undefined) return "";
+		switch (numberingType) {
+			case "numbers":
+				return numbering + 1;
+			case "letters":
+				return String.fromCharCode(numbering + "A".charCodeAt(0));
+			case "roman":
+				return numberToRomanNumeral(numbering + 1);
+		}
+	}
 </script>
 
 <div class="wrapper">
@@ -153,6 +168,9 @@
 						{/if}
 					</div>
 				{/if}
+				{#if numberingType != "none" && numbering != -1}
+					<p class={{ numbering: true, "numbering-roman": numberingType == "roman" }}>{createMarking()}</p>
+				{/if}
 			</div>
 		</div>
 		<div class="unit-card-block unit-custom-block">
@@ -247,6 +265,7 @@
 	.unit-card-right {
 		display: grid;
 		grid-template-rows: 1fr max-content;
+		position: relative;
 	}
 	.unit-card-right-inf {
 		grid-template-rows: 63.3cqh;
@@ -378,5 +397,21 @@
 	}
 	.hex-symbol {
 		font-size: 0.8em;
+	}
+	.numbering {
+		background-color: white;
+		position: absolute;
+		color: black;
+		border: 1cqmax solid rgb(36, 36, 36);
+		padding: 2cqmin;
+		font-size: 32px;
+		top: 0;
+		right: 0;
+		min-width: 12cqw;
+		text-align: center;
+		border-radius: 1cqmax;
+	}
+	.numbering-roman {
+		font-family: "Times New Roman", Times, serif;
 	}
 </style>

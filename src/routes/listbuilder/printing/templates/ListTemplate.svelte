@@ -2,12 +2,13 @@
 
 <script lang="ts">
 	import type { MulUnit } from "$lib/types/listTypes";
-	import type { PrintListOutput, PrintOptionsOutput } from "../types";
+	import type { PrintListOutput } from "../types";
 	import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 	import PrintUnitCard from "./PrintUnitCard.svelte";
 	import { abilityReferences, spaReferences } from "$lib/data";
 	import { getFormationDataFromName } from "$lib/utilities/formationUtilities";
 	import { getBSCbyId } from "$lib/data/battlefieldSupport";
+	import { type PrintOptionsOutput } from "../../types/settings";
 
 	type Props = {
 		listData: PrintListOutput;
@@ -18,9 +19,10 @@
 		unitCardImages?: Map<number, string>;
 		bsList: Map<number, number[]>;
 		scaList: number[];
+		counts: Map<number, string[]>;
 	};
 
-	let { listData, printOptions, mulUnitData, ammoReferenceList, unitImages, unitCardImages, bsList, scaList }: Props = $props();
+	let { listData, printOptions, mulUnitData, ammoReferenceList, unitImages, unitCardImages, bsList, scaList, counts }: Props = $props();
 
 	const unitData = new Map(listData.units.map((u) => [u.id, u]));
 
@@ -190,6 +192,8 @@
 									image={unitImages?.get(mulData!.imageLink ?? "") ?? ""}
 									formationSPAs={[]}
 									measurementUnits={printOptions.measurementUnits}
+									numbering={counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) ?? -1}
+									numberingType={printOptions.printDuplicateMarkingsType}
 								/>
 							{/if}
 						{/each}
@@ -209,6 +213,8 @@
 							image={unitImages?.get(mulData!.imageLink ?? "") ?? ""}
 							formationSPAs={[]}
 							measurementUnits={printOptions.measurementUnits}
+							numbering={counts.has(unit!.mulId) ? counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) : undefined}
+							numberingType={printOptions.printDuplicateMarkingsType}
 						/>
 					{/if}
 				{/each}

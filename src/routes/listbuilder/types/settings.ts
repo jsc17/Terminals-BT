@@ -8,7 +8,9 @@ export const PrintOptionsSchema = v.object({
 	cardStyle: v.fallback(v.picklist(["mul", "generated"]), "generated"),
 	formationHeaderStyle: v.fallback(v.picklist(["inline", "side"]), "inline"),
 	measurementUnits: v.fallback(v.picklist(["inches", "hexes"]), "inches"),
-	printReferences: v.fallback(v.boolean(), true)
+	printReferences: v.fallback(v.boolean(), true),
+	printDuplicateMarkings: v.fallback(v.boolean(), true),
+	printDuplicateMarkingsType: v.fallback(v.picklist(["none", "numbers", "letters", "roman"]), "numbers")
 });
 
 export type PrintOptionsOutput = v.InferOutput<typeof PrintOptionsSchema>;

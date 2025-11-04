@@ -105,10 +105,22 @@
 					</div>
 				</fieldset>
 				<fieldset>
+					<legend>Unit Markings</legend>
+					<div class="inline">
+						<label><input type="checkbox" bind:checked={settings.sublistUI.sublistPrintListSettings.printDuplicateMarkings} /> Print markings on duplicate units </label>
+						<select bind:value={settings.sublistUI.sublistPrintListSettings.printDuplicateMarkingsType}>
+							<option value="numbers">Numbers</option>
+							<option value="letters">Letters</option>
+							<option value="roman">Roman Numerals</option>
+						</select>
+					</div>
+				</fieldset>
+				<fieldset>
 					<legend>Measurement Units</legend>
 					<label><input type="radio" name="measurementUnits" value="inches" bind:group={settings.sublistUI.sublistPrintListSettings.measurementUnits} /> Inches</label>
 					<label><input type="radio" name="measurementUnits" value="hexes" bind:group={settings.sublistUI.sublistPrintListSettings.measurementUnits} /> Hexes</label>
 				</fieldset>
+
 				<div><button onclick={() => handlePrint()}>Print</button></div>
 			</div>
 		</fieldset>

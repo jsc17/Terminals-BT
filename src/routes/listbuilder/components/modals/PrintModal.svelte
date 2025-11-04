@@ -50,7 +50,7 @@
 			<label>List Name <input bind:value={printName} /></label>
 			<!-- <div><label for="print-playername">Player Name (optional)</label><input id="print-playername" bind:value={playerName} /></div> -->
 			<fieldset>
-				<legend>Printing Style</legend>
+				<legend>List Summary Print Style</legend>
 				<div>
 					<label for="print-list-style-mul"
 						><input type="radio" name="printStyle" id="print-list-style-mul" value="simple" bind:group={settings.print.printStyle} />MUL style - Generates a summary page similar to
@@ -65,22 +65,36 @@
 				</div>
 			</fieldset>
 			<fieldset>
-				<legend>Card Options</legend>
-				<div>
-					<input type="radio" name="cardStyle" id="card-type-mul" value="mul" bind:group={settings.print.cardStyle} /><label for="card-type-mul"
-						>Print cards downloaded from the MUL</label
-					>
-				</div>
-				<div>
-					<input type="radio" name="cardStyle" id="card-type-generated" value="generated" bind:group={settings.print.cardStyle} /><label for="card-type-generated"
-						>Print generated cards. Required for printing SPA's and Alt. Ammo. May take a few seconds to print.</label
-					>
-				</div>
-			</fieldset>
-			<fieldset>
-				<legend>Measurement Units</legend>
-				<label><input type="radio" name="measurementUnits" value="inches" bind:group={settings.print.measurementUnits} /> Inches</label>
-				<label><input type="radio" name="measurementUnits" value="hexes" bind:group={settings.print.measurementUnits} /> Hexes</label>
+				<legend>Unit Options</legend>
+				<fieldset>
+					<legend>Card Print Style</legend>
+					<div>
+						<input type="radio" name="cardStyle" id="card-type-mul" value="mul" bind:group={settings.print.cardStyle} /><label for="card-type-mul"
+							>Print cards downloaded from the MUL</label
+						>
+					</div>
+					<div>
+						<input type="radio" name="cardStyle" id="card-type-generated" value="generated" bind:group={settings.print.cardStyle} /><label for="card-type-generated"
+							>Print generated cards. Required for printing SPA's and Alt. Ammo. May take a few seconds to print.</label
+						>
+					</div>
+				</fieldset>
+				<fieldset>
+					<legend>Unit Markings</legend>
+					<div class="inline">
+						<label><input type="checkbox" bind:checked={settings.print.printDuplicateMarkings} /> Print markings on duplicate units </label>
+						<select bind:value={settings.print.printDuplicateMarkingsType}>
+							<option value="numbers">Numbers</option>
+							<option value="letters">Letters</option>
+							<option value="roman">Roman Numerals</option>
+						</select>
+					</div>
+				</fieldset>
+				<fieldset>
+					<legend>Measurement Units</legend>
+					<label><input type="radio" name="measurementUnits" value="inches" bind:group={settings.print.measurementUnits} /> Inches</label>
+					<label><input type="radio" name="measurementUnits" value="hexes" bind:group={settings.print.measurementUnits} /> Hexes</label>
+				</fieldset>
 			</fieldset>
 			<fieldset>
 				<legend>Formation Options</legend>
@@ -129,10 +143,6 @@
 		flex-direction: column;
 		gap: 12px;
 	}
-	label,
-	input {
-		height: 1.25em;
-	}
 	label {
 		margin: 0px 4px;
 	}
@@ -147,6 +157,7 @@
 		border: 2px solid var(--border);
 		display: flex;
 		flex-direction: column;
+		gap: 2px;
 	}
 	.field-row {
 		display: flex;

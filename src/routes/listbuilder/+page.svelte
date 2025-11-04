@@ -20,7 +20,9 @@
 			cardStyle: "generated",
 			formationHeaderStyle: "inline",
 			measurementUnits: "inches",
-			printReferences: true
+			printReferences: true,
+			printDuplicateMarkings: true,
+			printDuplicateMarkingsType: "numbers"
 		},
 		sublistUI: {
 			sublistOrientation: "vertical",
@@ -33,7 +35,9 @@
 				cardStyle: "generated",
 				formationHeaderStyle: "inline",
 				measurementUnits: "inches",
-				printReferences: true
+				printReferences: true,
+				printDuplicateMarkings: true,
+				printDuplicateMarkingsType: "numbers"
 			},
 			sublistPrintAllOrientation: "vertical",
 			sublistPrintAllGroupByScenario: false

@@ -58,6 +58,8 @@
 		dataTransfer.items.add(new File([submittedList.data], submittedList.name ? `${submittedList.name}.pdf` : `${nanoid(6)}.pdf`));
 		files = dataTransfer.files;
 	}
+
+	$inspect(selectedTournament?.tournament_date);
 </script>
 
 <svelte:head>
@@ -96,7 +98,9 @@
 				>
 				<div class="tournament-details">
 					<p class="muted tournament-detail">Date:</p>
-					<p class="tournament-detail">{selectedTournament?.tournament_date.toDateString() ?? "-"}</p>
+					<p class="tournament-detail">
+						{selectedTournament?.tournament_date.toLocaleDateString("en-US", { timeZone: "UTC", weekday: "long", month: "long", day: "numeric", year: "numeric" }) ?? "-"}
+					</p>
 					<p class="muted tournament-detail">Location:</p>
 					<p class="tournament-detail">{selectedTournament?.location ?? "-"}</p>
 					<p class="muted tournament-detail">Era:</p>

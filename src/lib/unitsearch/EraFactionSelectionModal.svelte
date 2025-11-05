@@ -53,6 +53,8 @@
 		}
 	});
 
+	let changed = $state(false);
+
 	function handleApply() {
 		resultList.eraSearchType = eraSelectMode;
 		resultList.factionSearchType = factionSelectMode;
@@ -63,7 +65,7 @@
 		} else {
 			resultList.loadResults([...selectedEras], [...selectedFactions], includeGeneral ? general : -1);
 		}
-
+		changed = false;
 		open = false;
 	}
 
@@ -79,10 +81,16 @@
 				selectedFactions.add(faction);
 			}
 		}
+		changed = false;
+	}
+
+	function cancelClose() {
+		if (!changed) return false;
+		return !confirm("Unsaved Changes, are you sure you want to cancel?");
 	}
 </script>
 
-<Dialog title="Select Era/Faction" {onOpenChange} bind:open>
+<Dialog title="Select Era/Faction" {onOpenChange} bind:open {cancelClose}>
 	{#snippet trigger()}
 		Edit Era/Faction Selection
 	{/snippet}
@@ -101,7 +109,10 @@
 				</div>
 				<button
 					onclick={() => {
-						if (selectedEra) selectedEras.add(Number(selectedEra));
+						if (selectedEra) {
+							selectedEras.add(Number(selectedEra));
+							changed = true;
+						}
 					}}>Add</button
 				>
 
@@ -132,6 +143,7 @@
 						class="transparent-button"
 						onclick={() => {
 							selectedEras.delete(era);
+							changed = true;
 						}}
 					>
 						<X size="15" />
@@ -157,7 +169,10 @@
 			</div>
 			<button
 				onclick={() => {
-					if (selectedFaction) selectedFactions.add(Number(selectedFaction));
+					if (selectedFaction) {
+						selectedFactions.add(Number(selectedFaction));
+						changed = true;
+					}
 				}}>Add</button
 			>
 			<Switch
@@ -186,6 +201,7 @@
 						class="transparent-button"
 						onclick={() => {
 							selectedFactions.delete(faction);
+							changed = true;
 						}}
 					>
 						<X size="15" />
@@ -213,7 +229,7 @@
 			<button
 				class="selection-button"
 				onclick={() => {
-					open = false;
+					if (!cancelClose()) open = false;
 				}}>Cancel</button
 			>
 			<button

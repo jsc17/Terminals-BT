@@ -2,6 +2,7 @@
 	import { Dialog, type WithoutChildren } from "bits-ui";
 	import { type Snippet } from "svelte";
 	import { X } from "phosphor-svelte";
+	import { preventDefault } from "svelte/legacy";
 
 	type Props = Dialog.RootProps & {
 		title: string;
@@ -9,9 +10,10 @@
 		contentProps?: WithoutChildren<Dialog.ContentProps>;
 		trigger?: Snippet;
 		triggerClasses?: string;
+		cancelClose: () => boolean;
 	};
 
-	let { open = $bindable(false), children, title, description, contentProps, trigger, triggerClasses, onOpenChange, ...restProps }: Props = $props();
+	let { open = $bindable(false), children, title, description, contentProps, trigger, triggerClasses, onOpenChange, cancelClose, ...restProps }: Props = $props();
 </script>
 
 <Dialog.Root bind:open {...restProps} {onOpenChange}>
@@ -25,7 +27,11 @@
 		<Dialog.Content>
 			<Dialog.Title>
 				{title}
-				<Dialog.Close><X /></Dialog.Close>
+				<Dialog.Close
+					onclick={(event) => {
+						if (cancelClose()) event.preventDefault();
+					}}><X /></Dialog.Close
+				>
 			</Dialog.Title>
 			{#if description}
 				<Dialog.Description>{@render description()}</Dialog.Description>

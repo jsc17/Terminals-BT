@@ -119,8 +119,6 @@
 		height: min(30px, 90%);
 	}
 	.list-button {
-		background-color: var(--button);
-		color: var(--text-color);
 		position: fixed;
 		bottom: 34px;
 		right: 5px;

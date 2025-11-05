@@ -100,7 +100,6 @@
 		height: 100%;
 		display: flex;
 		flex-direction: column;
-
 		gap: 8px;
 	}
 	@media (min-width: 1000px) {

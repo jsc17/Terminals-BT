@@ -9,6 +9,7 @@
 	import { type Notification } from "$lib/generic/types.js";
 	import { ModeWatcher } from "mode-watcher";
 	import { IconContext } from "phosphor-svelte";
+	import { innerWidth } from "svelte/reactivity/window";
 
 	const { data, children } = $props();
 	let user = $state({ username: data.username });
@@ -16,24 +17,29 @@
 	setContext("user", user);
 </script>
 
-<div class="main">
-	<IconContext values={{ size: 25, color: `var(--primary)` }}>
-		<Header {notifications}></Header>
-		{@render children()}
-		<Footer></Footer>
-	</IconContext>
-</div>
-
 <Toast></Toast>
 <ModeWatcher defaultTheme="green" />
+<IconContext values={{ size: 25, color: `var(--primary)` }}>
+	<div class="main">
+		<Header {notifications} />
+		<div class="child-wrapper">{@render children()}</div>
+		{#if innerWidth.current && innerWidth.current >= 1000}
+			<Footer />
+		{/if}
+	</div>
+</IconContext>
 
 <style>
 	.main {
-		position: relative;
-		display: grid;
-		grid-template-rows: 35px 1fr 30px;
+		display: flex;
+		flex-direction: column;
 		height: 100dvh;
-		gap: 4px;
+	}
+	.child-wrapper {
+		flex: 1;
+	}
+	.child-wrapper:not(:last-child) {
+		margin-bottom: 10px;
 	}
 	:global(*) {
 		box-sizing: border-box;

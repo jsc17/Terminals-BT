@@ -16,7 +16,7 @@
 	let { resultList = $bindable() }: Props = $props();
 
 	let tabId = $state(nanoid());
-	let showFilters = $state(false);
+	// let showFilters = $state(false);
 	let showAdditionalFilters = $state(false);
 	let showAbilitiesDropdown = $state(false);
 
@@ -192,27 +192,7 @@
 {/snippet}
 
 <main>
-	<button
-		class="accordian"
-		class:hidden={!appWindow.isNarrow}
-		onclick={() => {
-			showFilters = !showFilters;
-		}}
-	>
-		<div class="space-between">
-			<div></div>
-			<div>Filters - {resultList.filteredList.length}/{resultList.restrictedList.length}</div>
-			<div>
-				{#if showFilters}
-					-
-				{:else}
-					+
-				{/if}
-			</div>
-		</div></button
-	>
-
-	<div class="card" class:hidden={appWindow.isNarrow && !showFilters}>
+	<div class="card">
 		{@render filters(tempFilters, true)}
 		<div class="space-between filter-buttons">
 			<button

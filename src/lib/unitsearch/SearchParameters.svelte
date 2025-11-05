@@ -11,35 +11,12 @@
 	};
 
 	let { list = $bindable(), resultList = $bindable() }: Props = $props();
-
-	let showParameters = $state(false);
 </script>
 
 <div class="parameter-container">
-	<button
-		class="accordian"
-		class:hidden={!appWindow.isNarrow}
-		onclick={() => {
-			showParameters = !showParameters;
-		}}
-	>
-		<div class="space-between">
-			<div></div>
-			<div>Era/Faction Selection</div>
-			<div>
-				{#if showParameters}
-					-
-				{:else}
-					+
-				{/if}
-			</div>
-		</div>
-	</button>
-	<div class="card" class:hidden={appWindow.isNarrow && !showParameters}>
+	<div class="card">
 		<div class={appWindow.isMobile ? "parameters-mobile" : "parameters"}>
 			<p>Unit must be available in <span class="primary">{resultList.eraSearchType == "any" ? "ANY" : "EVERY"}</span> below Era:</p>
-			<p>Unit must be available in <span class="primary">{resultList.factionSearchType == "any" ? "ANY" : "EVERY"}</span> below Faction:</p>
-			<EraFactionSelectionModal {resultList} {list} />
 			<div class="selected-container">
 				{#each resultList.eras.length ? resultList.eras : [0] as era}
 					<div class="selected-block">
@@ -47,6 +24,7 @@
 					</div>
 				{/each}
 			</div>
+			<p>Unit must be available in <span class="primary">{resultList.factionSearchType == "any" ? "ANY" : "EVERY"}</span> below Faction:</p>
 			<div class="selected-container">
 				{#each resultList.factions.length ? resultList.factions : [0] as faction}
 					<div class="selected-block">
@@ -59,6 +37,9 @@
 					</div>
 				{/if}
 			</div>
+			<div>
+				<EraFactionSelectionModal {resultList} {list} />
+			</div>
 		</div>
 	</div>
 </div>
@@ -67,10 +48,11 @@
 	.parameter-container {
 		width: 100%;
 	}
-
 	.parameters {
 		display: grid;
 		grid-template-columns: 1fr 1fr max-content;
+		grid-template-rows: max-content 1fr;
+		grid-auto-flow: column;
 		width: 100%;
 		column-gap: 10%;
 	}
@@ -81,15 +63,6 @@
 	}
 	p {
 		margin: 0;
-	}
-	.accordian {
-		height: 35px;
-		width: 100%;
-		background-color: var(--surface-color);
-		border: 1px solid var(--border);
-		border-radius: var(--radius);
-		color: var(--text-color);
-		padding: 8px;
 	}
 	.selected-container {
 		width: 100%;

@@ -47,11 +47,10 @@
 <style>
 	main {
 		width: 100%;
-		display: flex;
-		flex-direction: column;
 		gap: 4px;
 		padding: 32px;
 		height: fit-content;
+		overflow: hidden;
 	}
 	ul {
 		line-height: 2rem;

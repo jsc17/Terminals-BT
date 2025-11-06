@@ -9,6 +9,7 @@ import { prisma } from "$lib/server/prisma";
 import * as v from "valibot";
 import { nanoid } from "nanoid";
 import ListApproval from "$lib/server/emails/templates/ListApproval.svelte";
+import ListSubmissionConfirmation from "$lib/server/emails/templates/ListSubmissionConfirmation.svelte";
 
 export const getApprovedTournamentList = query(async () => {
 	const data = await prisma.tournament.findMany({
@@ -69,12 +70,30 @@ export const submitList = form(
 					fixedData
 				}
 			});
-			console.log("email sending");
 			const info = await tournamentEmailTransporter.sendMail({
 				from: process.env.TOURNAMENT_EMAIL_SENDER, // sender address
 				to: tournament.email, // list of receivers
 				subject: tournament.emailSubject ?? `${tournament.name} submission`, // Subject line
 				html: emailHTML,
+				attachments: [{ filename: listFile.name, content: base64String, encoding: "base64" }]
+			});
+			const confirmationHTML = render({
+				//@ts-ignore
+				template: ListSubmissionConfirmation,
+				props: {
+					tournamentName: tournament.name,
+					playerName,
+					playerEmail,
+					era,
+					faction,
+					tournamentRules: getRulesByName(tournament.tournamentRules)?.display ?? "Not Found"
+				}
+			});
+			await tournamentEmailTransporter.sendMail({
+				from: process.env.TOURNAMENT_EMAIL_SENDER, // sender address
+				to: playerEmail, // list of receivers
+				subject: `${tournament.name} submission confirmation`, // Subject line
+				html: confirmationHTML,
 				attachments: [{ filename: listFile.name, content: base64String, encoding: "base64" }]
 			});
 			console.log("Message sent: %s", info.messageId);

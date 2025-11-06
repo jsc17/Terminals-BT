@@ -1,0 +1,32 @@
+model Faction {
+  id Int @id
+  name String
+  eras FactionInEra[]
+}
+
+model Era {
+  id Int @id
+  name String
+  factions FactionInEra[]
+  order Int @default(0)
+}
+
+model FactionInEra {
+  era Era @relation(fields: [eraId], references: [id])
+  eraId Int
+  faction Faction @relation(fields: [factionId], references: [id])
+  factionId Int
+  general Int
+  updated DateTime @default(now())
+  units Availability[]
+  @@id([eraId, factionId])
+}
+
+model Availability {
+  unit Unit @relation(fields: [unitId], references: [id])
+  unitId Int
+  factionAndEra FactionInEra @relation(fields: [era, faction], references: [eraId, factionId])
+  faction Int
+  era Int
+  @@id([unitId, faction, era])
+}

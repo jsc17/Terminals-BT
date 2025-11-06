@@ -1,0 +1,28 @@
+model Tournament {
+  id Int @id @default(autoincrement())
+  userId String
+  user User @relation(references: [id], fields: [userId], onDelete: Cascade)
+  name String
+  location String?
+  email String
+  emailSubject String?
+  era Int?
+  tournament_date DateTime @db.Date 
+  tournamentRules String
+  participants Participant[]
+  approved Boolean @default(false)
+  approvalMessage String?
+}
+
+model Participant {
+  id String @id @default(uuid())
+  name String
+  email String
+  tournamentId Int
+  era String
+  faction String
+  dateSubmitted DateTime @default(now())
+  tournament Tournament @relation(references: [id], fields: [tournamentId], onDelete: Cascade)
+  fixed Boolean
+  units String @db.Text
+}

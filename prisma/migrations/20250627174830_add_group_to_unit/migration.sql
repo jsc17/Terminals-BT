@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Unit` ADD COLUMN `group` VARCHAR(191) NULL;

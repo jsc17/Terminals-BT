@@ -1,0 +1,30 @@
+model ListV3 {
+  id String @id
+  userId String
+  user User @relation(references: [id], fields: [userId], onDelete: Cascade)
+  lcVersion Int
+  name String
+  eras String
+  factions String
+  units String @db.MediumText
+  formations String @db.Text
+  sublists String? @db.Text
+  rules String?
+  scas String?
+  bs String?
+}
+ 
+model SharedList {
+  id String @id
+  lcVersion Int
+  name String
+  eras String
+  factions String
+  units String @db.MediumText
+  formations String @db.Text
+  sublists String @db.Text
+  rules String
+  sharedDate DateTime @default(now())
+  scas String?
+  bs String?
+}

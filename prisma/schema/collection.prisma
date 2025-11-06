@@ -1,0 +1,25 @@
+model CollectionTag {
+    id Int @id @default(autoincrement())
+    label String
+    user User? @relation(fields: [userId], references: [id])
+    userId String? 
+    color String 
+    taggedUnits CollectionTagsToModels[]
+}
+
+model CollectionTagsToModels {
+    @@id([modelId, tagId])
+    model CollectionModel @relation(fields: [modelId], references: [id], onDelete: Cascade)
+    modelId Int
+    tag CollectionTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+    tagId Int
+}
+
+model CollectionModel {
+    id Int @id @default(autoincrement())
+    user User @relation(fields: [userId], references: [id])
+    userId String
+    label String
+    quantity Int @default(1)
+    unitTags CollectionTagsToModels[]
+}

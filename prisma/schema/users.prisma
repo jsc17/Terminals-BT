@@ -1,0 +1,43 @@
+model User {
+  id       String    @id
+  sessions Session[]
+  listsV3 ListV3[]
+  tournamentsOrganized Tournament[]
+  resetTokens ResetToken[]
+  username String @unique
+  email String @unique
+  hashedPassword String?
+  google_id String? @unique
+  discord_id String? @unique
+  account_created DateTime @default(now())
+  last_login DateTime?
+  notifications Notification[]
+  tags CollectionTag[]
+  models CollectionModel[]
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+  expiresAt DateTime
+}
+
+model ResetToken {
+  id String @id
+  userId String
+  user User @relation(references: [id], fields: [userId], onDelete: Cascade)
+  expiresAt DateTime
+  valid Boolean @default(true)
+}
+
+model Notification {
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id])
+  userId String
+  date DateTime @default(now())
+  read Boolean
+  summary String
+  message String @db.Text
+  type String
+}

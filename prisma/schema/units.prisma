@@ -1,0 +1,67 @@
+model Unit {
+  id Int @id @default(autoincrement())
+  mulId Int @unique
+  name String
+  group String?
+  class String
+  variant String?
+  technology String?
+  rules String?
+  date_introduced Int?
+  role String?
+  type String
+  subtype String?
+  size Int
+  move String
+  tmm Int
+  armor Int
+  structure Int
+  threshold Int
+  damage_s Int
+  damage_s_min Boolean
+  damage_m Int
+  damage_m_min Boolean
+  damage_l Int
+  damage_l_min Boolean
+  damage_e Int
+  damage_e_min Boolean
+  overheat Int
+  pv Int
+  abilities String?
+  tonnage Int? @default(0)
+  image_url String?
+  availability Availability[]
+}
+
+model SPA {
+  id Int @id @default(autoincrement())
+  name String
+  cost Int
+  page String
+  max Int?
+}
+
+model Ammo {
+  id Int @id @default(autoincrement())
+  name String
+  requiredSpecial String
+  group String
+  page String
+}
+
+model CustomCard {
+  id Int @id @default(autoincrement())
+  pack String
+  mulId Int @unique
+  name String
+  class String
+  variant String
+  type String
+  pv Int
+  abilities String
+}
+
+model UnitImage {
+  id Int @id @default(autoincrement())
+  link String
+}

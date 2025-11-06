@@ -12,6 +12,7 @@
 	import { submittedList } from "$lib/stores/listSubmission.svelte";
 	import { nanoid } from "nanoid";
 	import { watch } from "runed";
+	import { innerWidth } from "svelte/reactivity/window";
 
 	let files = $state<FileList>();
 
@@ -163,7 +164,7 @@
 				<thead>
 					<tr>
 						<th></th>
-						{#each ["Name", "Skill", "PV", "Rules", "Type", "Abilities", "Available", "Unique"] as header}
+						{#each innerWidth.current! >= 600 ? ["Name", "Skill", "PV", "Rules", "Type", "Abilities", "Available", "Unique"] : ["Name", "Skill"] as header}
 							<th>{header}</th>
 						{/each}
 						<th></th>
@@ -186,7 +187,7 @@
 									{unit.name}
 								{/if}
 							</td>
-							{#each [unit.skill, unit.pv, unit.mulData?.rulesLevel, unit.mulData?.subtype, createAbilityLineString(unit.mulData?.abilities ?? []), unit.available, unit.unique] as data}
+							{#each innerWidth.current! >= 600 ? [unit.skill, unit.pv, unit.mulData?.rulesLevel, unit.mulData?.subtype, createAbilityLineString(unit.mulData?.abilities ?? []), unit.available, unit.unique] : [unit.skill] as data}
 								<td>{data ?? "-"}</td>
 							{/each}
 							<td>

@@ -37,6 +37,7 @@
 	}
 	.child-wrapper {
 		flex: 1;
+		overflow: auto;
 	}
 	.child-wrapper:not(:last-child) {
 		margin-bottom: 10px;

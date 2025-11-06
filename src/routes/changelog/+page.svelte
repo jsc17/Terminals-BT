@@ -31,7 +31,6 @@
 		<h2>Road Map:</h2>
 		<h3>Priority updates: Things I really want to get done</h3>
 		<ul>
-			<li class="complete"><span class="strikethrough">Formation validation</span> (Complete)</li>
 			<li>Formation Bonuses in play feature</li>
 			<li>Collection manager</li>
 			<li>Customizable rules in the list builder</li>

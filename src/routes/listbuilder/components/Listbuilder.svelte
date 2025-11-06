@@ -116,8 +116,12 @@
 		toastController.addToast("Preparing list for submission. Please wait until you are redirected.");
 		printList({ listData, printOptions: settings.print }).then((pdf) => {
 			const blob = new Blob([new Uint8Array(pdf)], { type: "application/pdf" });
+
 			submittedList.name = list.details.name;
 			submittedList.data = blob;
+			submittedList.era = list.details.eras.length == 1 ? list.details.eras[0] : undefined;
+			submittedList.faction = list.details.factions.length == 1 ? list.details.factions[0] : undefined;
+
 			goto(`/validation?redirect`);
 		});
 	}

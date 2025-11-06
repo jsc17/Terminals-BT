@@ -11,6 +11,7 @@
 	import { page } from "$app/state";
 	import { submittedList } from "$lib/stores/listSubmission.svelte";
 	import { nanoid } from "nanoid";
+	import { watch } from "runed";
 
 	let files = $state<FileList>();
 
@@ -20,7 +21,7 @@
 
 	let selectedTournament = $state<TournamentData | undefined>();
 	let selectedEra = $derived(selectedTournament?.era ?? 10);
-	let selectedFaction = $derived(eraList.get(selectedEra)![0].id);
+	let selectedFaction = $state<number>();
 	let selectedRules = $derived(selectedTournament?.tournamentRules ?? "wn350v3");
 	let lockSelections = $state(false);
 
@@ -43,23 +44,34 @@
 						return { id: data.id, skill: data.skill, data: data.mulData! };
 					}) ?? [];
 			if (unitList?.length == unitData?.length) {
-				const general = (await getGeneralId({ era: selectedEra, faction: selectedFaction }))?.general;
+				const general = (await getGeneralId({ era: selectedEra, faction: selectedFaction! }))?.general;
 				const factions = general ? [selectedFaction, general] : [selectedFaction];
-				issues = await validateRules(unitList, [selectedEra], factions, selectedRules);
+				issues = await validateRules(
+					unitList,
+					[selectedEra],
+					factions.filter((f) => f != undefined),
+					selectedRules
+				);
 			} else {
 				alert("not all units are valid");
 			}
 		}
 	}
 
+	watch(
+		() => selectedEra,
+		() => {
+			if (!page.url.searchParams.has("redirect") || !submittedList.faction) selectedFaction = eraList.get(selectedEra)![0].id;
+		}
+	);
+
 	if (page.url.searchParams.has("redirect") && submittedList.data) {
-		console.log("search params working");
 		const dataTransfer = new DataTransfer();
 		dataTransfer.items.add(new File([submittedList.data], submittedList.name ? `${submittedList.name}.pdf` : `${nanoid(6)}.pdf`));
 		files = dataTransfer.files;
+		if (submittedList.era) selectedEra = submittedList.era;
+		if (submittedList.faction) selectedFaction = submittedList.faction;
 	}
-
-	$inspect(selectedTournament?.tournament_date);
 </script>
 
 <svelte:head>
@@ -178,7 +190,7 @@
 								<td>{data ?? "-"}</td>
 							{/each}
 							<td>
-								<FixModal bind:unit={unitData![index]} era={selectedEra} faction={selectedFaction} bind:fixedData />
+								<FixModal bind:unit={unitData![index]} era={selectedEra} faction={selectedFaction!} bind:fixedData />
 							</td>
 						</tr>
 					{:else}

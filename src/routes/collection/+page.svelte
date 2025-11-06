@@ -182,6 +182,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 16px;
+		height: 100%;
 	}
 	section {
 		padding: 16px;
@@ -191,6 +192,7 @@
 	.unit-list {
 		flex: 1;
 		padding-right: 0px;
+		overflow: auto;
 	}
 	.add-message {
 		flex: 1;

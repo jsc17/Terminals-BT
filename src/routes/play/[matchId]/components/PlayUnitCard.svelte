@@ -7,16 +7,17 @@
 	import * as automation from "../utilities/playmodeAutomation";
 	import { createDamagedAbilityString } from "../utilities/playmodeUtilities";
 	import { infTypes, mechTypes, typeIncludes, vTypes } from "$lib/playmode/unitTypeUtilities";
-	import type { LogRound, Options, PlayUnit } from "$lib/playmode/types";
+	import type { LogRound, PlayUnit } from "$lib/playmode/types";
 	import { type UnitAbility } from "$lib/data/abilities";
 	import type { SvelteMap } from "svelte/reactivity";
 	import { getSPAfromId } from "$lib/utilities/listUtilities";
 	import { getMulImage } from "$lib/remote/mulImages.remote";
 	import { numberToRomanNumeral } from "$lib/utilities/utilities";
+	import type { PlaymodeOptionsOutput } from "../schema/playmode";
 
 	type Props = {
 		unit: PlayUnit;
-		options: Options;
+		options: PlaymodeOptionsOutput;
 		currentRoundLog: LogRound;
 		assignedBonuses?: SvelteMap<number, SvelteMap<string, number>>;
 	};

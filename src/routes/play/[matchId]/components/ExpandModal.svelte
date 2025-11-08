@@ -3,13 +3,14 @@
 	import type { MulUnit } from "$lib/types/listTypes";
 	import { setContext } from "svelte";
 	import { PlayUnitCard } from "./";
-	import type { LogRound, Options, PlayUnit } from "$lib/playmode/types";
+	import type { LogRound, PlayUnit } from "$lib/playmode/types";
+	import type { PlaymodeOptionsOutput } from "../schema/playmode";
 
 	type Props = {
 		unit: PlayUnit;
 		open: boolean;
 		reference: MulUnit;
-		options: Options;
+		options: PlaymodeOptionsOutput;
 		currentRoundLog: LogRound;
 	};
 	let { unit, open = $bindable(false), reference, options, currentRoundLog }: Props = $props();

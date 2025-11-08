@@ -1,12 +1,12 @@
 import fs from "fs/promises";
 
-export function isJson(input: string): boolean {
+export function safeParseJSON(input: string) {
 	try {
-		JSON.parse(input);
+		return JSON.parse(input);
 	} catch (error) {
-		return false;
+		console.log(error);
+		return undefined;
 	}
-	return true;
 }
 
 export function writeJsonToFile(data: string) {

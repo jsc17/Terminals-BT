@@ -52,18 +52,4 @@ type LogEntry = {
 	undone: boolean;
 };
 
-type Options = {
-	cardsPerRow: number;
-	uiScale: number;
-	renderOriginal: boolean;
-	showPhysical: boolean;
-	showCrippled: boolean;
-	showJumpTMM: boolean;
-	confirmEnd: boolean;
-	groupByFormation: boolean;
-	damageDirection: "left" | "right";
-	measurementUnits: "inches" | "hexes";
-	duplicateUnitMarkings: "numbers" | "letters" | "roman";
-};
-
-export type { PlayList, PlayFormation, PlayUnit, LogRound, LogEntry, Options };
+export type { PlayList, PlayFormation, PlayUnit, LogRound, LogEntry };

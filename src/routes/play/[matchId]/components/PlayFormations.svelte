@@ -1,17 +1,18 @@
 <script lang="ts">
 	import { Collapsible } from "$lib/generic";
-	import type { PlayUnit, PlayFormation, LogRound, Options } from "$lib/playmode/types";
+	import type { PlayUnit, PlayFormation, LogRound } from "$lib/playmode/types";
 	import { PlayUnitCard } from "./";
 	import { SvelteMap } from "svelte/reactivity";
 	import type { MulUnit } from "$lib/types/listTypes";
 	import PlayFormationBonuses from "./PlayFormationBonuses.svelte";
 	import { innerWidth } from "svelte/reactivity/window";
 	import { Popover } from "$lib/generic";
+	import type { PlaymodeOptionsOutput } from "../schema/playmode";
 
 	type Props = {
 		formation: PlayFormation;
 		units: PlayUnit[];
-		options: Options;
+		options: PlaymodeOptionsOutput;
 		currentRoundLog: LogRound;
 		unitReferences: SvelteMap<string, MulUnit>;
 	};

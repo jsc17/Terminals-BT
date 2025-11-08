@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { PlayFormations, DisplayOptionsPopover, Log, PlayFullList } from "./components/";
 	import { PersistedState } from "runed";
-	import { type PlayList, type LogRound, type Options } from "$lib/playmode/types";
-	import { PlaymodeOptionsSchema } from "./schema/playmode";
-	import { isJson } from "$lib/utilities/utilities";
+	import { type PlayList, type LogRound } from "$lib/playmode/types";
+	import { PlaymodeOptionsSchema, type PlaymodeOptionsOutput } from "./schema/playmode";
 	import { loadMULUnit } from "$lib/utilities/loadUtilities";
 	import { SvelteMap } from "svelte/reactivity";
 	import type { MulUnit } from "$lib/types/listTypes";
@@ -11,6 +10,8 @@
 	import { page } from "$app/state";
 	import { onMount } from "svelte";
 	import DropdownMenu from "$lib/generic/components/DropdownMenu.svelte";
+	import * as v from "valibot";
+	import { safeParseJSON } from "$lib/utilities/utilities";
 
 	let logDrawerOpen = $state(false);
 
@@ -20,46 +21,12 @@
 		if (page.params.matchId) playList = await db.localMatches.get(page.params.matchId);
 	});
 
-	const options = new PersistedState<Options>(
-		"playOptions",
-		{
-			renderOriginal: true,
-			cardsPerRow: 3,
-			uiScale: 50,
-			showPhysical: false,
-			showCrippled: true,
-			showJumpTMM: true,
-			confirmEnd: true,
-			groupByFormation: true,
-			damageDirection: "left",
-			measurementUnits: "inches",
-			duplicateUnitMarkings: "numbers"
-		},
-		{
-			serializer: {
-				serialize: JSON.stringify,
-				deserialize: (savedData) => {
-					if (isJson(savedData)) {
-						return PlaymodeOptionsSchema.parse(JSON.parse(savedData));
-					} else {
-						return {
-							renderOriginal: true,
-							cardsPerRow: 3,
-							uiScale: 50,
-							showPhysical: false,
-							showCrippled: true,
-							showJumpTMM: true,
-							confirmEnd: true,
-							groupByFormation: true,
-							damageDirection: "left",
-							measurementUnits: "inches",
-							duplicateUnitMarkings: "numbers"
-						};
-					}
-				}
-			}
+	const options = new PersistedState<PlaymodeOptionsOutput>("playOptions", v.parse(PlaymodeOptionsSchema, {}), {
+		serializer: {
+			serialize: JSON.stringify,
+			deserialize: (savedData) => v.parse(PlaymodeOptionsSchema, safeParseJSON(savedData) ?? {})
 		}
-	);
+	});
 
 	let unitReferences = $derived.by(() => {
 		let references: SvelteMap<string, MulUnit> = new SvelteMap();

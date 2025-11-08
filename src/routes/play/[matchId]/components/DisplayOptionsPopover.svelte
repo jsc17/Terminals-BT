@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { Popover } from "bits-ui";
-	import type { Options } from "$lib/playmode/types";
+	import type { PlaymodeOptionsOutput } from "../schema/playmode";
 
 	type Props = {
-		options: Options;
+		options: PlaymodeOptionsOutput;
 	};
 
 	let { options = $bindable() }: Props = $props();

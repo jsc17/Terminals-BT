@@ -1,17 +1,17 @@
-import * as z from "zod";
+import * as v from "valibot";
 
-const PlaymodeOptionsSchema = z.object({
-	cardsPerRow: z.number().catch(3),
-	uiScale: z.number().catch(50),
-	renderOriginal: z.boolean().catch(true),
-	showPhysical: z.boolean().catch(false),
-	showCrippled: z.boolean().catch(true),
-	showJumpTMM: z.boolean().catch(true),
-	confirmEnd: z.boolean().catch(true),
-	groupByFormation: z.boolean().catch(true),
-	damageDirection: z.literal(["left", "right"]).catch("left"),
-	measurementUnits: z.literal(["inches", "hexes"]).catch("inches"),
-	duplicateUnitMarkings: z.literal(["numbers", "letters", "roman"]).catch("numbers")
+export const PlaymodeOptionsSchema = v.object({
+	cardsPerRow: v.fallback(v.number(), 3),
+	uiScale: v.fallback(v.number(), 50),
+	renderOriginal: v.fallback(v.boolean(), true),
+	showPhysical: v.fallback(v.boolean(), false),
+	showCrippled: v.fallback(v.boolean(), true),
+	showJumpTMM: v.fallback(v.boolean(), true),
+	confirmEnd: v.fallback(v.boolean(), true),
+	groupByFormation: v.fallback(v.boolean(), true),
+	damageDirection: v.fallback(v.picklist(["left", "right"]), "left"),
+	measurementUnits: v.fallback(v.picklist(["inches", "hexes"]), "inches"),
+	duplicateUnitMarkings: v.fallback(v.picklist(["numbers", "letters", "roman"]), "numbers")
 });
 
-export { PlaymodeOptionsSchema };
+export type PlaymodeOptionsOutput = v.InferOutput<typeof PlaymodeOptionsSchema>;

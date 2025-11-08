@@ -53,6 +53,14 @@ export const getUsersTournamentList = query(async () => {
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failed", message: "User not logged in" };
 
+	if (locals.user.id == process.env.ADMIN_USER_ID) {
+		const data = await prisma.tournament.findMany({
+			where: { tournament_date: { gte: new Date() } },
+			select: { id: true, name: true, location: true, era: true, tournament_date: true, tournamentRules: true }
+		});
+		return { status: "success", data };
+	}
+
 	const data = await prisma.tournament.findMany({
 		where: { userId: locals.user.id, tournament_date: { gte: new Date() } },
 		select: { id: true, name: true, location: true, era: true, tournament_date: true, tournamentRules: true }

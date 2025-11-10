@@ -4,7 +4,7 @@
 	import { setContext } from "svelte";
 	import { PlayUnitCard } from "./";
 	import type { LogRound, PlayUnit } from "$lib/playmode/types";
-	import type { PlaymodeOptionsOutput } from "../schema/playmode";
+	import type { PlaymodeOptionsOutput } from "../../schema/playmode";
 
 	type Props = {
 		unit: PlayUnit;

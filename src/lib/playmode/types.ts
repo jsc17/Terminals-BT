@@ -52,4 +52,10 @@ type LogEntry = {
 	undone: boolean;
 };
 
-export type { PlayList, PlayFormation, PlayUnit, LogRound, LogEntry };
+type PlayMatch = {
+	id: number;
+	name: string;
+	createdAt: Date;
+};
+
+export type { PlayMatch, PlayList, PlayFormation, PlayUnit, LogRound, LogEntry };

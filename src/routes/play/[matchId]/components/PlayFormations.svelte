@@ -7,7 +7,7 @@
 	import PlayFormationBonuses from "./PlayFormationBonuses.svelte";
 	import { innerWidth } from "svelte/reactivity/window";
 	import { Popover } from "$lib/generic";
-	import type { PlaymodeOptionsOutput } from "../schema/playmode";
+	import type { PlaymodeOptionsOutput } from "../../schema/playmode";
 
 	type Props = {
 		formation: PlayFormation;

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Popover } from "bits-ui";
-	import type { PlaymodeOptionsOutput } from "../schema/playmode";
+	import type { PlaymodeOptionsOutput } from "../../schema/playmode";
 
 	type Props = {
 		options: PlaymodeOptionsOutput;

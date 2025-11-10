@@ -13,7 +13,7 @@
 	import { getSPAfromId } from "$lib/utilities/listUtilities";
 	import { getMulImage } from "$lib/remote/mulImages.remote";
 	import { numberToRomanNumeral } from "$lib/utilities/utilities";
-	import type { PlaymodeOptionsOutput } from "../schema/playmode";
+	import type { PlaymodeOptionsOutput } from "../../schema/playmode";
 
 	type Props = {
 		unit: PlayUnit;

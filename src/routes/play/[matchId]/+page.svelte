@@ -2,7 +2,7 @@
 	import { PlayFormations, DisplayOptionsPopover, Log, PlayFullList } from "./components/";
 	import { PersistedState } from "runed";
 	import { type PlayList, type LogRound } from "$lib/playmode/types";
-	import { PlaymodeOptionsSchema, type PlaymodeOptionsOutput } from "./schema/playmode";
+	import { PlaymodeOptionsSchema, type PlaymodeOptionsOutput } from "../schema/playmode";
 	import { loadMULUnit } from "$lib/utilities/loadUtilities";
 	import { SvelteMap } from "svelte/reactivity";
 	import type { MulUnit } from "$lib/types/listTypes";

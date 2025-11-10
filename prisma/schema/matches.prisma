@@ -1,0 +1,68 @@
+model Match {
+    id Int @id @default(autoincrement())
+    name String? @unique
+    private Boolean
+    joinCode String? @unique
+    players UsersInMatch[]
+    createdAt DateTime @default(now())
+    logEntries MatchLog[]
+    currentRound Int @default(0)
+    gameCompleted Boolean @default(false)
+}
+
+model UsersInMatch {
+    match Match @relation(references: [id], fields: [matchId], onDelete: Cascade)
+    matchId Int
+    player User @relation(references: [id], fields: [playerId], onDelete: Cascade)
+    playerId String
+    playerNickname String
+    playerRole PlayerRole
+    formations MatchFormation[]
+
+    @@id([matchId, playerId])
+}
+
+model MatchFormation {
+    id Int @id @default(autoincrement())
+    name String
+    type String
+    secondaryType String?
+    units MatchUnit[]
+    player UsersInMatch @relation(references: [matchId, playerId], fields: [matchId, playerId], onDelete: Cascade)
+    matchId Int
+    playerId String 
+}
+
+model MatchUnit {
+    id Int @id @default(autoincrement())
+    mulId Int
+    skill Int
+    secondary Boolean
+    logEntries MatchLog[]
+    formation MatchFormation @relation(references: [id], fields: [formationId], onDelete: Cascade)
+    formationId Int
+    spas String
+    ammo String
+}
+
+model MatchLog {
+    id Int @id @default(autoincrement())
+    match Match @relation(references: [id], fields: [matchId], onDelete: Cascade)
+    matchId Int
+    unit MatchUnit @relation(references: [id], fields: [unitId], onDelete: Cascade)
+    unitId Int
+
+    round Int
+    applied Boolean
+    rolledBack Boolean
+    type String
+    damage Int?
+    heat Int?
+    critical String?
+}
+
+enum PlayerRole {
+    HOST
+    MODERATOR
+    PLAYER
+}

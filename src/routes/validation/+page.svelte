@@ -13,6 +13,8 @@
 	import { nanoid } from "nanoid";
 	import { watch } from "runed";
 	import { innerWidth } from "svelte/reactivity/window";
+	import { SubmitListSchema } from "./schema/submitList";
+	import { logError } from "$lib/remote/error";
 
 	let files = $state<FileList>();
 
@@ -245,12 +247,10 @@
 		<form
 			class="section"
 			enctype="multipart/form-data"
-			{...submitList.enhance(async ({ data, submit }) => {
-				console.log("submitting");
-
+			{...submitList.preflight(SubmitListSchema).enhance(async ({ submit }) => {
 				if (files) {
 					await submit();
-					console.log(submitList.result);
+					if (submitList.fields.allIssues()?.length) logError(JSON.stringify(submitList.fields.allIssues()?.map((i) => i.message)));
 					toastController.addToast(submitList.result?.message ?? "Invalid Message Received");
 				}
 			})}

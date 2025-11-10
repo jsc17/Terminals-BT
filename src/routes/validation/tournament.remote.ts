@@ -10,6 +10,7 @@ import * as v from "valibot";
 import { nanoid } from "nanoid";
 import ListApproval from "$lib/server/emails/templates/ListApproval.svelte";
 import ListSubmissionConfirmation from "$lib/server/emails/templates/ListSubmissionConfirmation.svelte";
+import { SubmitListSchema } from "./schema/submitList";
 
 export const getApprovedTournamentList = query(async () => {
 	const data = await prisma.tournament.findMany({
@@ -19,91 +20,79 @@ export const getApprovedTournamentList = query(async () => {
 	return { status: "success", data };
 });
 
-export const submitList = form(
-	v.object({
-		tournamentId: v.string(),
-		playerName: v.string(),
-		playerEmail: v.string(),
-		listFile: v.file(),
-		eraId: v.string(),
-		factionId: v.string(),
-		fixedData: v.string(),
-		unit: v.array(v.string())
-	}),
-	async ({ tournamentId, playerName, playerEmail, listFile, eraId, factionId, fixedData, unit }) => {
-		const tournament = await prisma.tournament.findUnique({
-			where: {
-				id: Number(tournamentId)
+export const submitList = form(SubmitListSchema, async ({ tournamentId, playerName, playerEmail, listFile, eraId, factionId, fixedData, unit }) => {
+	const tournament = await prisma.tournament.findUnique({
+		where: {
+			id: Number(tournamentId)
+		}
+	});
+	if (tournament) {
+		const era = await getEraName(Number(eraId));
+		const faction = await getFactionName(Number(factionId));
+
+		const pdfData = await listFile.arrayBuffer();
+		const buffer = Buffer.from(pdfData);
+		const base64String = buffer.toString("base64");
+
+		const id = nanoid();
+		console.log(id);
+		const filename = `./files/tournament-lists/${id}.pdf`;
+		await fs.writeFile(filename, buffer);
+		await prisma.tournament.update({
+			where: { id: Number(tournamentId) },
+			data: {
+				participants: {
+					create: { id, name: playerName, email: playerEmail, era, faction, fixed: fixedData == "true", units: JSON.stringify(unit) }
+				}
 			}
 		});
-		if (tournament) {
-			const era = await getEraName(Number(eraId));
-			const faction = await getFactionName(Number(factionId));
-
-			const pdfData = await listFile.arrayBuffer();
-			const buffer = Buffer.from(pdfData);
-			const base64String = buffer.toString("base64");
-
-			const id = nanoid();
-			console.log(id);
-			const filename = `./files/tournament-lists/${id}.pdf`;
-			await fs.writeFile(filename, buffer);
-			await prisma.tournament.update({
-				where: { id: Number(tournamentId) },
-				data: {
-					participants: {
-						create: { id, name: playerName, email: playerEmail, era, faction, fixed: fixedData == "true", units: JSON.stringify(unit) }
-					}
-				}
-			});
-			const emailHTML = render({
-				//@ts-ignore
-				template: ListSubmission,
-				props: {
-					id,
-					tournamentName: tournament.name,
-					playerName,
-					playerEmail,
-					era,
-					faction,
-					tournamentRules: getRulesByName(tournament.tournamentRules)?.display ?? "Not Found",
-					fixedData
-				}
-			});
-			const info = await tournamentEmailTransporter.sendMail({
-				from: process.env.TOURNAMENT_EMAIL_SENDER, // sender address
-				to: tournament.email, // list of receivers
-				subject: tournament.emailSubject ?? `${tournament.name} submission`, // Subject line
-				html: emailHTML,
-				attachments: [{ filename: listFile.name, content: base64String, encoding: "base64" }]
-			});
-			const confirmationHTML = render({
-				//@ts-ignore
-				template: ListSubmissionConfirmation,
-				props: {
-					tournamentName: tournament.name,
-					playerName,
-					playerEmail,
-					era,
-					faction,
-					tournamentRules: getRulesByName(tournament.tournamentRules)?.display ?? "Not Found"
-				}
-			});
-			await tournamentEmailTransporter.sendMail({
-				from: process.env.TOURNAMENT_EMAIL_SENDER, // sender address
-				to: playerEmail, // list of receivers
-				subject: `${tournament.name} submission confirmation`, // Subject line
-				html: confirmationHTML,
-				attachments: [{ filename: listFile.name, content: base64String, encoding: "base64" }]
-			});
-			console.log("Message sent: %s", info.messageId);
-			return { status: "success", message: "Email sent to tournament organizer" };
-		} else {
-			console.log("tournament not found");
-			return { status: "failed", message: "Please try submitting your list again" };
-		}
+		const emailHTML = render({
+			//@ts-ignore
+			template: ListSubmission,
+			props: {
+				id,
+				tournamentName: tournament.name,
+				playerName,
+				playerEmail,
+				era,
+				faction,
+				tournamentRules: getRulesByName(tournament.tournamentRules)?.display ?? "Not Found",
+				fixedData
+			}
+		});
+		const info = await tournamentEmailTransporter.sendMail({
+			from: process.env.TOURNAMENT_EMAIL_SENDER, // sender address
+			to: tournament.email, // list of receivers
+			subject: tournament.emailSubject ?? `${tournament.name} submission`, // Subject line
+			html: emailHTML,
+			attachments: [{ filename: listFile.name, content: base64String, encoding: "base64" }]
+		});
+		const confirmationHTML = render({
+			//@ts-ignore
+			template: ListSubmissionConfirmation,
+			props: {
+				tournamentName: tournament.name,
+				playerName,
+				playerEmail,
+				era,
+				faction,
+				tournamentRules: getRulesByName(tournament.tournamentRules)?.display ?? "Not Found"
+			}
+		});
+		await tournamentEmailTransporter.sendMail({
+			from: process.env.TOURNAMENT_EMAIL_SENDER, // sender address
+			to: playerEmail, // list of receivers
+			subject: `${tournament.name} submission confirmation`, // Subject line
+			html: confirmationHTML,
+			attachments: [{ filename: listFile.name, content: base64String, encoding: "base64" }]
+		});
+		console.log("Message sent: %s", info.messageId);
+		return { status: "success", message: "Email sent to tournament organizer" };
+	} else {
+		console.log("tournament not found");
+		return { status: "failed", message: "Please try submitting your list again" };
 	}
-);
+});
 
 export const sendApproval = query(v.string(), async (id) => {
 	const participant = await prisma.participant.findUnique({ where: { id }, include: { tournament: true } });

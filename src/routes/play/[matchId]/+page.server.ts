@@ -1,5 +1,5 @@
 export const load = async ({ params }) => {
-	let matchId = params.matchId;
+	let matchId = Number(params.matchId);
 
 	return { matchId };
 };

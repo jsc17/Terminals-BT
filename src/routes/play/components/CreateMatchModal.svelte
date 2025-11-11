@@ -13,7 +13,7 @@
 
 	function onOpenChange() {
 		if (open) {
-			createMatch.fields.set({ joinCode: nanoid(6).replaceAll("_", "Z"), private: true, name: "", hostNickname: nickname });
+			createMatch.fields.set({ joinCode: nanoid(6).replaceAll("_", "Z"), private: true, name: "", hostNickname: nickname, teamNames: ["Red", "Blue"] });
 		}
 	}
 
@@ -51,6 +51,14 @@
 			<label><input {...createMatch.fields.private.as("checkbox")} /> Private Game?</label>
 			<p class="muted">Private games will not show up in the games list, and will require a join code for other players to join</p>
 		</div>
+		<div>
+			<label>Team 1 Name: <input {...createMatch.fields.teamNames[0].as("text")} /></label>
+			<label>Team 2 Name: <input {...createMatch.fields.teamNames[1].as("text")} /></label>
+
+			{#each createMatch.fields.hostNickname.issues() as issue}
+				<p class="error">{issue.message}</p>
+			{/each}
+		</div>
 		<hr />
 		<div>
 			<label>Host Nickname: <input {...createMatch.fields.hostNickname.as("text")} /></label>
@@ -58,6 +66,7 @@
 				<p class="error">{issue.message}</p>
 			{/each}
 		</div>
+
 		<div class="center"><button>Submit</button></div>
 	</form>
 </Dialog>

@@ -37,6 +37,7 @@
 	border-radius: 0;
 	border: none;
 	background-color: transparent;
+	color: var(--button-dark-text-color);
 }
 .generic-popover-trigger:hover {
 	cursor: pointer;

@@ -12,7 +12,8 @@
 	import { safeParseJSON } from "$lib/utilities/utilities";
 	import { type Source } from "sveltekit-sse";
 	import { getContext } from "svelte";
-	import { Popover } from "$lib/generic";
+	import { Popover, Separator } from "$lib/generic";
+	import { getPlayerList, getTeamList, getRole } from "../remote/match.remote";
 
 	let { data } = $props();
 
@@ -23,7 +24,6 @@
 	matchChannel.subscribe((message: string) => {
 		messages.push(message);
 	});
-	let playList = $state<PlayList>();
 
 	const options = new PersistedState<PlaymodeOptionsOutput>("playOptions", v.parse(PlaymodeOptionsSchema, {}), {
 		serializer: {
@@ -31,65 +31,9 @@
 			deserialize: (savedData) => v.parse(PlaymodeOptionsSchema, safeParseJSON(savedData) ?? {})
 		}
 	});
-
-	let unitReferences = $derived.by(() => {
-		let references: SvelteMap<string, MulUnit> = new SvelteMap();
-		for (const unit of playList?.units ?? []) {
-			loadMULUnit(unit.mulId).then((result) => {
-				references.set(unit.id, result);
-			});
-		}
-		return references;
-	});
-	let logDrawerOpen = $state(false);
-	const currentRoundLog = new PersistedState<LogRound>("playCurrentRound", { round: 1, logs: [] });
-	let fullLogs: LogRound[] = $state([]);
-
-	function resetList() {
-		if (playList) {
-			const reset = confirm("Are you sure you wish to reset all units to default? This cannot be undone.");
-			if (reset) {
-				for (const unit of playList?.units) {
-					unit.current = { damage: 0, heat: 0, crits: [], disabledAbilities: [] };
-					unit.pending = { damage: 0, heat: 0, crits: [] };
-				}
-				fullLogs = [];
-				currentRoundLog.current = { round: 1, logs: [] };
-			}
-		}
-	}
-
-	function endRound() {
-		if (playList) {
-			const end = confirm("End round and apply all pending damage, heat, and critical effects?");
-			if (end) {
-				for (const unit of playList?.units) {
-					unit.current.damage = unit.current.damage + unit.pending.damage;
-					unit.current.heat = unit.pending.heat;
-					unit.current.crits = unit.current.crits.concat(unit.pending.crits);
-
-					unit.pending.damage = 0;
-					unit.pending.crits = [];
-				}
-				for (const log of currentRoundLog.current.logs) {
-					log.applied = true;
-				}
-				fullLogs.push({ round: currentRoundLog.current.round, logs: currentRoundLog.current.logs });
-				currentRoundLog.current = { round: currentRoundLog.current.round + 1, logs: [] };
-			}
-		}
-	}
-
-	function endMatch() {
-		if (confirm("End match and remove it from active matches?")) {
-			if (playList?.id) db.localMatches.delete(playList?.id);
-			window.location.href = "/play";
-		}
-	}
-
-	function openLog() {
-		logDrawerOpen = !logDrawerOpen;
-	}
+	const role = $derived(getRole(data.matchId).current);
+	const teamList = $derived(getTeamList(data.matchId).current);
+	const playerList = $derived(getPlayerList(data.matchId).current);
 </script>
 
 <svelte:head>
@@ -98,12 +42,14 @@
 
 <div class="play-body">
 	<div class="match-bars">
-		<div class="toolbar">
-			<div class="toolbar-section">
-				<button class="toolbar-button" onclick={endRound}>End Round</button>
-			</div>
-			<div class="toolbar-item">Round: {currentRoundLog.current.round}</div>
-			<div class="toolbar-section">
+		<div class="match-header">
+			<div class="toolbar-item">Red</div>
+			<div class="toolbar-item">1</div>
+			<div class="toolbar-item">Round: 0</div>
+			<div class="toolbar-item">3</div>
+			<div class="toolbar-item">Blue</div>
+
+			<!-- <div class="toolbar-section">
 				<DropdownMenu
 					items={[
 						{ type: "item", label: "Reset List", onSelect: resetList },
@@ -116,28 +62,47 @@
 						Menu
 					{/snippet}
 				</DropdownMenu>
-			</div>
+			</div> -->
 		</div>
 		<div class="toolbar">
 			<div class="toolbar-section">
-				<Popover>
-					{#snippet trigger()}
-						Player List
-					{/snippet}
-					<p>Hello</p>
-					<p>Hi</p>
-				</Popover>
+				<div class="toolbar-item">
+					<Popover>
+						{#snippet trigger()}
+							Player List
+						{/snippet}
+						<div class="player-list">
+							<p class="team-name">Neutral</p>
+							<Separator />
+							{#each playerList?.filter((p) => p.teamId == null) as player}
+								<p class="player-name">{player.playerNickname} - {player.playerRole}</p>
+							{/each}
+							{#each teamList as team}
+								<p class="team-name">{team.name}</p>
+								<Separator />
+								{#each playerList?.filter((p) => p.teamId == team.id) as player}
+									<p class="player-name">{player.playerNickname} - {player.playerRole}</p>
+								{:else}
+									<p class="player-name">No Players</p>
+								{/each}
+							{/each}
+						</div>
+					</Popover>
+				</div>
+				<DisplayOptionsPopover bind:options={options.current} />
 			</div>
 			<div class="toolbar-section">
-				<DisplayOptionsPopover bind:options={options.current} />
+				<button class="toolbar-button">End Round</button>
 			</div>
 		</div>
 	</div>
 
+	<p>{role ?? "observer"}</p>
 	<!-- <div class="flex-between">
 		<button class="play-log-button" onclick={openLog}>Match Log</button>
 	</div> -->
-	{#if playList}
+
+	<!-- {#if playList}
 		{#if playList?.units.length}
 			{#if options.current.groupByFormation}
 				{#each playList?.formations as formation}
@@ -151,18 +116,12 @@
 				<h2>No list loaded. Please try loading a list from the <a href="/listbuilder">list builder</a></h2>
 			</div>
 		{/if}
-	{/if}
+	{/if} -->
 </div>
 
 <!-- <Log bind:open={logDrawerOpen} currentRoundLog={currentRoundLog.current} {fullLogs} {playList}></Log> -->
 
 <style>
-	.list-load-error-body {
-		margin-top: 20dvh;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
 	.play-body {
 		position: relative;
 		overflow: auto;
@@ -177,26 +136,33 @@
 		flex-direction: column;
 		gap: 4px;
 	}
-	.toolbar {
-		background-color: var(--surface-color);
+	.match-header {
+		padding: 0px 5dvw;
+		display: grid;
+		grid-template-columns: repeat(5, 1fr);
+		gap: 16px;
 		border: 1px solid var(--border);
+		background-image: linear-gradient(to right, red 30%, red 35%, var(--surface-color) 45%, var(--surface-color) 55%, blue 65%, blue 70%);
+	}
+	.toolbar {
 		display: flex;
 		justify-content: space-between;
-		height: min-content;
+		background-color: var(--surface-color);
+		border: 1px solid var(--border);
 	}
 	.toolbar-section {
 		display: flex;
 		gap: 8px;
 		align-items: center;
 		padding: 0px 16px;
-		justify-content: flex-end;
 	}
 	.toolbar-item {
-		display: flex;
-		align-items: center;
+		align-self: center;
+		justify-self: center;
 		padding: 0px 16px;
 		font-size: 24px;
 		text-align: center;
+		width: max-content;
 	}
 	.toolbar-button {
 		padding: 12px;
@@ -209,6 +175,19 @@
 	.toolbar-button:hover {
 		background-color: var(--surface-color-light);
 		color: var(--surface-color-light-text-color);
+	}
+	.player-list {
+		display: flex;
+		flex-direction: column;
+		padding: 4px 12px;
+	}
+	.player-name {
+		font-size: 16px;
+	}
+	.team-name {
+		color: var(--surface-color-light-text-color);
+		font-size: 20px;
+		margin-top: 8px;
 	}
 	.announcement {
 		padding: 4px 16px;

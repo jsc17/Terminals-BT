@@ -7,7 +7,7 @@ export const typeValues = [
 	{ value: "BA", label: "Battle Armor" },
 	{ value: "BS", label: "Battlefield Support" },
 	{ value: "BM", label: "Battlemech" },
-	{ value: "CI", label: "Combat Infantry" },
+	{ value: "CI", label: "Conventional Infantry" },
 	{ value: "CV", label: "Combat Vehicle" },
 	{ value: "IM", label: "Industrial Mech" },
 	{ value: "PM", label: "Protomech" },
@@ -45,7 +45,7 @@ const roles = [
 ];
 
 const movementTypes = [
-	{ value: "st", label: "Standard" },
+	{ value: "st", label: "Standard Only" },
 	{ value: "j", label: "Jump" },
 	{ value: "h", label: "Hover" },
 	{ value: "t", label: "Tracked" },

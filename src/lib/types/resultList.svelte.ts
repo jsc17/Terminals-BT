@@ -371,6 +371,7 @@ export class ResultList {
 										meetsMaxSpeed = true;
 									}
 								}
+								if (filter.typeValue.includes("st") && move.type) return false;
 							}
 
 							return meetsType && meetsMinSpeed && meetsMaxSpeed;

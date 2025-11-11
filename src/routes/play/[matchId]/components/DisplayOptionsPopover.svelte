@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Popover } from "bits-ui";
 	import type { PlaymodeOptionsOutput } from "../../schema/playmode";
+	import { GearSix } from "phosphor-svelte";
 
 	type Props = {
 		options: PlaymodeOptionsOutput;

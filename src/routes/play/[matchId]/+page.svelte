@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PlayFormations, DisplayOptionsPopover, Log, PlayFullList } from "./components/";
+	import { PlayFormations, DisplayOptionsPopover, Log, PlayFullList } from "./components";
 	import { PersistedState } from "runed";
 	import { type PlayList, type LogRound } from "$lib/playmode/types";
 	import { PlaymodeOptionsSchema, type PlaymodeOptionsOutput } from "../schema/playmode";
@@ -7,19 +7,23 @@
 	import { SvelteMap } from "svelte/reactivity";
 	import type { MulUnit } from "$lib/types/listTypes";
 	import { db } from "$lib/offline/db";
-	import { page } from "$app/state";
-	import { onMount } from "svelte";
 	import DropdownMenu from "$lib/generic/components/DropdownMenu.svelte";
 	import * as v from "valibot";
 	import { safeParseJSON } from "$lib/utilities/utilities";
+	import { type Source } from "sveltekit-sse";
+	import { getContext } from "svelte";
+	import { Popover } from "$lib/generic";
 
-	let logDrawerOpen = $state(false);
+	let { data } = $props();
 
-	let playList = $state<PlayList>();
+	let messages = $state<string[]>([]);
+	let connection: Source = getContext("connection");
 
-	onMount(async () => {
-		if (page.params.matchId) playList = await db.localMatches.get(page.params.matchId);
+	const matchChannel = connection.select(`${data.matchId}`);
+	matchChannel.subscribe((message: string) => {
+		messages.push(message);
 	});
+	let playList = $state<PlayList>();
 
 	const options = new PersistedState<PlaymodeOptionsOutput>("playOptions", v.parse(PlaymodeOptionsSchema, {}), {
 		serializer: {
@@ -37,7 +41,7 @@
 		}
 		return references;
 	});
-
+	let logDrawerOpen = $state(false);
 	const currentRoundLog = new PersistedState<LogRound>("playCurrentRound", { round: 1, logs: [] });
 	let fullLogs: LogRound[] = $state([]);
 
@@ -92,8 +96,8 @@
 	<title>Terminal's Play Mode</title>
 </svelte:head>
 
-{#if playList}
-	<div class="play-body">
+<div class="play-body">
+	<div class="match-bars">
 		<div class="toolbar">
 			<div class="toolbar-section">
 				<button class="toolbar-button" onclick={endRound}>End Round</button>
@@ -112,13 +116,28 @@
 						Menu
 					{/snippet}
 				</DropdownMenu>
-				<DisplayOptionsPopover bind:options={options.current}></DisplayOptionsPopover>
 			</div>
 		</div>
-		<div class="flex-between">
-			<p class="announcement">Some minor tweaks still to go, but pretty close to being done. Click on a units name to expand its card.</p>
-			<button class="play-log-button" onclick={openLog}>Match Log</button>
+		<div class="toolbar">
+			<div class="toolbar-section">
+				<Popover>
+					{#snippet trigger()}
+						Player List
+					{/snippet}
+					<p>Hello</p>
+					<p>Hi</p>
+				</Popover>
+			</div>
+			<div class="toolbar-section">
+				<DisplayOptionsPopover bind:options={options.current} />
+			</div>
 		</div>
+	</div>
+
+	<!-- <div class="flex-between">
+		<button class="play-log-button" onclick={openLog}>Match Log</button>
+	</div> -->
+	{#if playList}
 		{#if playList?.units.length}
 			{#if options.current.groupByFormation}
 				{#each playList?.formations as formation}
@@ -132,9 +151,10 @@
 				<h2>No list loaded. Please try loading a list from the <a href="/listbuilder">list builder</a></h2>
 			</div>
 		{/if}
-	</div>
-	<Log bind:open={logDrawerOpen} currentRoundLog={currentRoundLog.current} {fullLogs} {playList}></Log>
-{/if}
+	{/if}
+</div>
+
+<!-- <Log bind:open={logDrawerOpen} currentRoundLog={currentRoundLog.current} {fullLogs} {playList}></Log> -->
 
 <style>
 	.list-load-error-body {
@@ -146,16 +166,23 @@
 	.play-body {
 		position: relative;
 		overflow: auto;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+	.match-bars {
+		position: sticky;
+		top: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
 	}
 	.toolbar {
 		background-color: var(--surface-color);
 		border: 1px solid var(--border);
-		border-radius: var(--radius);
-		position: sticky;
-		top: 0;
 		display: flex;
 		justify-content: space-between;
-		z-index: 5;
+		height: min-content;
 	}
 	.toolbar-section {
 		display: flex;

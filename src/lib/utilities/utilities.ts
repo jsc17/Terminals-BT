@@ -42,3 +42,9 @@ export function numberToRomanNumeral(num: number) {
 	}
 	return romanNumeral;
 }
+
+function delay(milliseconds: number) {
+	return new Promise(function run(resolve) {
+		setTimeout(resolve, milliseconds);
+	});
+}

@@ -1,6 +1,5 @@
-import { fail, redirect } from "@sveltejs/kit";
 import { validateSessionToken, setSessionTokenCookie, deleteSessionTokenCookie, sessionCookieName } from "$lib/server/auth/auth";
-import { prisma } from "$lib/server/prisma";
+import { nanoid } from "nanoid";
 
 export const handle = async ({ event, resolve }) => {
 	const sessionToken = event.cookies.get(sessionCookieName) ?? null;
@@ -21,6 +20,7 @@ export const handle = async ({ event, resolve }) => {
 
 	event.locals.user = user;
 	event.locals.session = session;
+	event.locals.instance = nanoid();
 
 	return resolve(event);
 };

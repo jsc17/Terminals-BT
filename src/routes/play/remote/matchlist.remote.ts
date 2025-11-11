@@ -47,7 +47,9 @@ export const createMatch = form(CreateMatchSchema, async (data) => {
 				name: data.name,
 				joinCode: data.joinCode,
 				private: data.private,
-				players: { create: { player: { connect: { id: locals.user.id } }, playerNickname: data.hostNickname, playerRole: "HOST" } }
+				players: { create: { player: { connect: { id: locals.user.id } }, playerNickname: data.hostNickname, playerRole: "HOST" } },
+				team1Name: data.team1Name,
+				team2Name: data.team2Name
 			}
 		});
 		await getMatches().refresh();

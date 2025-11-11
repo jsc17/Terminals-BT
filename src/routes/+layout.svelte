@@ -10,11 +10,15 @@
 	import { ModeWatcher } from "mode-watcher";
 	import { IconContext } from "phosphor-svelte";
 	import { innerWidth } from "svelte/reactivity/window";
+	import { source } from "sveltekit-sse";
 
 	const { data, children } = $props();
 	let user = $state({ username: data.username });
 	let notifications: Notification[] = $derived(data.notifications ?? []);
 	setContext("user", user);
+
+	let connection = source(`/sse`);
+	setContext("connection", connection);
 </script>
 
 <Toast></Toast>

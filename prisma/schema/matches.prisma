@@ -8,6 +8,10 @@ model Match {
     logEntries MatchLog[]
     currentRound Int @default(0)
     gameCompleted Boolean @default(false)
+    team1Name String
+    team2Name String
+    team1ObjectivePoints Int @default(0)
+    team2ObjectivePoints Int @default(0)
 }
 
 model UsersInMatch {
@@ -16,8 +20,10 @@ model UsersInMatch {
     player User @relation(references: [id], fields: [playerId], onDelete: Cascade)
     playerId String
     playerNickname String
+    playerFaction String?
     playerRole PlayerRole
     formations MatchFormation[]
+    team Int?
 
     @@id([matchId, playerId])
 }

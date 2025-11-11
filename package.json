@@ -68,6 +68,7 @@
 		"runed": "^0.28.0",
 		"skia-canvas": "^2.0.2",
 		"svelte-color-select": "^0.0.14",
+		"sveltekit-sse": "^0.14.3",
 		"svelteplot": "^0.4.10",
 		"svelty-email": "github:socketopp/svelty-email#feature/component-render",
 		"v8": "^0.1.0",

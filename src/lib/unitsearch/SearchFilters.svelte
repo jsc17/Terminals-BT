@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { appWindow } from "$lib/stores/appWindow.svelte.js";
 	import { type Filter } from "$lib/types/filter";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { Select } from "$lib/generic";
@@ -107,6 +106,7 @@
 									abilities)
 								</li>
 								<li>Add an = before the ability to only search for an exact match. (AM will return units with AM and AMS, =AM will return only units that have AM)</li>
+								<li>Add an ! before the ability to only search for units that don't have that ability. (!LRM will return only units without LRM)</li>
 								<li>
 									Enter abilities followed by numbers to search for values, using + or - at the end for greater than/less than (ex. jmps2 will return all units with jmpw2, and
 									car4- will return all units with car4 or below)

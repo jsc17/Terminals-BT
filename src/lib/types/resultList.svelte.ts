@@ -20,6 +20,7 @@ type SearchTerm = {
 	long?: SearchConstraint;
 	extreme?: SearchConstraint;
 	exactMatch?: boolean;
+	excludeMatch?: boolean;
 };
 
 function parseSearchConstraint(constraintString?: string) {
@@ -361,7 +362,7 @@ export class ResultList {
 								meetsMinSpeed = false,
 								meetsMaxSpeed = false;
 							for (const move of unit.move) {
-								if (filter.typeValue.includes(move.type) || !filter.typeValue.length) {
+								if (filter.typeValue.includes(move.type) || !filter.typeValue.length || (filter.typeValue.includes("st") && move.type == undefined)) {
 									meetsType = true;
 									if (!filter.speedMinValue || move.speed >= filter.speedMinValue) {
 										meetsMinSpeed = true;
@@ -389,7 +390,8 @@ export class ResultList {
 
 						for (let rawSearchTerm of rawSearchArray) {
 							const exactMatch = rawSearchTerm[0] == "=";
-							if (exactMatch) {
+							const excludeMatch = rawSearchTerm[0] == "!";
+							if (exactMatch || excludeMatch) {
 								rawSearchTerm = rawSearchTerm.slice(1);
 							}
 							let searchTerm: SearchTerm;
@@ -425,6 +427,7 @@ export class ResultList {
 								}
 							}
 							searchTerm.exactMatch = exactMatch;
+							searchTerm.excludeMatch = excludeMatch;
 							searchTermArray.push(searchTerm);
 						}
 						for (const bracket of rawSearchBrackets) {
@@ -476,8 +479,13 @@ export class ResultList {
 									}
 								});
 								if (!unitAbility) {
-									allFound = false;
+									if (!searchTerm.excludeMatch) {
+										allFound = false;
+									}
 								} else {
+									if (searchTerm.excludeMatch) {
+										allFound = false;
+									}
 									if (searchTerm.extraType !== undefined && unitAbility.name == "ART" && !unitAbility.artType?.toLowerCase().includes(searchTerm.extraType.toLowerCase())) {
 										allFound = false;
 									}

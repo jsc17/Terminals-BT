@@ -45,6 +45,7 @@ const roles = [
 ];
 
 const movementTypes = [
+	{ value: "st", label: "Standard" },
 	{ value: "j", label: "Jump" },
 	{ value: "h", label: "Hover" },
 	{ value: "t", label: "Tracked" },

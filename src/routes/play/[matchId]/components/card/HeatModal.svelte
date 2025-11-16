@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Dialog } from "$lib/generic";
 	import type { MulUnit } from "$lib/types/list.svelte";
-	import type { PlayUnit } from "$lib/playmode/types";
+	import type { PlayUnit } from "../../../types/types";
 
 	type Props = {
 		unit: PlayUnit;

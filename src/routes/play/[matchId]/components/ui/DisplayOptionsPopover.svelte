@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Popover } from "bits-ui";
-	import type { PlaymodeOptionsOutput } from "../../schema/playmode";
-	import { GearSix } from "phosphor-svelte";
+	import type { PlaymodeOptionsOutput } from "../../../schema/playmode";
 
 	type Props = {
 		options: PlaymodeOptionsOutput;
@@ -63,11 +62,12 @@
 
 <style>
 	:global(.popover-play-toolbar-button) {
-		height: 100%;
-		width: 100%;
+		padding: 12px;
+		font-size: 16px;
 		background-color: transparent;
 		border-radius: 0;
-		color: var(--primary);
+		color: var(--text-color);
+		min-width: min(25dvw, 100px);
 	}
 	:global(.popover-play-toolbar-button:hover) {
 		background-color: var(--surface-color-light);
@@ -82,6 +82,7 @@
 		gap: 16px;
 		margin-top: 8px;
 		padding: 16px;
+		z-index: 10;
 	}
 	.option-row {
 		display: flex;

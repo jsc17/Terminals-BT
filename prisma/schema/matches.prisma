@@ -54,11 +54,24 @@ model MatchUnit {
     mulId Int
     skill Int
     secondary Boolean
+    pendingDamage Int @default(0)
+    pendingHeat Int @default(0)
+    currentDamage Int @default(0)
+    currentHeat Int @default(0)
+    criticals MatchCrit[]
     logEntries MatchLog[]
     formation MatchFormation @relation(references: [id], fields: [formationId], onDelete: Cascade)
     formationId Int
-    spas String
-    ammo String
+    spas String?
+    ammo String?
+}
+ 
+model MatchCrit {
+    id Int @id @default(autoincrement())
+    unit MatchUnit @relation(references: [id], fields: [unitId], onDelete: Cascade)
+    unitId Int
+    pending Boolean
+    type String
 }
 
 model MatchLog {
@@ -67,7 +80,6 @@ model MatchLog {
     matchId Int
     unit MatchUnit @relation(references: [id], fields: [unitId], onDelete: Cascade)
     unitId Int
-
     round Int
     applied Boolean
     rolledBack Boolean

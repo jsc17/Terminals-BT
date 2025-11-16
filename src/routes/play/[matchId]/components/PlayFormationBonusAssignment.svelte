@@ -1,5 +1,5 @@
-<script lang="ts">
-	import type { PlayFormation } from "$lib/playmode/types";
+<!-- <script lang="ts">
+	import type { PlayFormation } from "../../types/types";
 	import { SvelteMap } from "svelte/reactivity";
 	import { Dialog } from "$lib/generic/";
 	import type { MulUnit } from "$lib/types/listTypes";
@@ -127,4 +127,4 @@
 		height: max-content;
 		align-self: center;
 	}
-</style>
+</style> -->

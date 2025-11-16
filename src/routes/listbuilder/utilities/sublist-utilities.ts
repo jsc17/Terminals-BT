@@ -1,6 +1,5 @@
 import { toastController } from "$lib/stores";
 import { type ListFormation, type List, type Sublist } from "$lib/types/list.svelte";
-import { sendListToPlay } from "$lib/playmode/playmode";
 import { nanoid } from "nanoid";
 
 export function loadSublistForPlay(sublist: Sublist, list: List) {
@@ -16,7 +15,7 @@ export function loadSublistForPlay(sublist: Sublist, list: List) {
 			type: "none",
 			units
 		};
-		sendListToPlay(list.details.name, [sublistFormation], list.units);
+		// sendListToPlay(list.details.name, [sublistFormation], list.units);
 	} else {
 		toastController.addToast("Cannot play an empty sublist");
 	}

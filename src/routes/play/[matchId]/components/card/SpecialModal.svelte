@@ -2,7 +2,7 @@
 	import { Dialog } from "$lib/generic";
 	import { abilityReferences } from "$lib/data";
 	import type { UnitAbility } from "$lib/data/abilities";
-	import type { PlayUnit } from "$lib/playmode/types";
+	import type { PlayUnit } from "../../../types/types";
 
 	type Props = {
 		ability?: UnitAbility;

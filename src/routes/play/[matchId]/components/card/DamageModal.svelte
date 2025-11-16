@@ -1,16 +1,15 @@
 <script lang="ts">
 	import { Dialog } from "$lib/generic";
 	import type { MulUnit } from "$lib/types/list.svelte";
-	import type { LogRound, PlayUnit } from "$lib/playmode/types";
+	import type { LogRound, PlayUnit } from "../../../types/types";
 
 	type Props = {
 		unit: PlayUnit;
 		open: boolean;
 		reference: MulUnit;
-		currentRoundLog: LogRound;
 	};
 
-	let { unit, open = $bindable(false), reference, currentRoundLog }: Props = $props();
+	let { unit, open = $bindable(false), reference }: Props = $props();
 	let damageToTake = $state(0);
 
 	function modifyDamage(amount: number) {
@@ -22,14 +21,12 @@
 
 	function applyDamage() {
 		unit.current.damage += damageToTake;
-		currentRoundLog.logs.push({ unitId: unit.id, unitName: reference.name, damageTaken: damageToTake, applied: true, undone: false });
 		damageToTake = 0;
 		open = false;
 	}
 
 	function pendDamage() {
 		unit.pending.damage += damageToTake;
-		currentRoundLog.logs.push({ unitId: unit.id, unitName: reference.name, damageTaken: damageToTake, applied: false, undone: false });
 		damageToTake = 0;
 		open = false;
 	}
@@ -39,8 +36,6 @@
 			let damageRemaining = Math.max(damageToTake - unit.pending.damage, 0);
 			unit.pending.damage = Math.max(unit.pending.damage - damageToTake, 0);
 			unit.current.damage = Math.max(unit.current.damage - damageRemaining, 0);
-
-			currentRoundLog.logs.push({ unitId: unit.id, unitName: reference.name, damageUndone: damageToTake, applied: true, undone: false });
 			damageToTake = 0;
 			open = false;
 		}

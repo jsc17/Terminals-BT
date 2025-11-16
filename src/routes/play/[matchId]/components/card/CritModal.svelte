@@ -2,17 +2,16 @@
 	import { Dialog } from "$lib/generic";
 	import type { MulUnit } from "$lib/types/listTypes";
 	import { nanoid } from "nanoid";
-	import type { LogRound, PlayUnit } from "$lib/playmode/types";
+	import type { LogRound, PlayUnit } from "../../../types/types";
 	import CritRemovalModal from "./CritRemovalModal.svelte";
 
 	type Props = {
 		unit: PlayUnit;
 		reference: MulUnit;
 		open: boolean;
-		currentRoundLog: LogRound;
 	};
 
-	let { unit, open = $bindable(false), reference, currentRoundLog }: Props = $props();
+	let { unit, open = $bindable(false), reference }: Props = $props();
 
 	let currentCritSelection = $state<string>("");
 
@@ -52,13 +51,6 @@
 			const critId = nanoid(6);
 			const newCrit = { id: critId, type: critType.toLowerCase().replaceAll(" ", "") };
 			unit.current.crits.push(newCrit);
-			currentRoundLog.logs.push({
-				unitId: unit.id,
-				unitName: reference.name,
-				crit: { id: critId, type: critType.toLowerCase().replaceAll(" ", ""), name: currentCritSelection },
-				applied: true,
-				undone: false
-			});
 			currentCritSelection = "";
 			open = false;
 		}
@@ -82,14 +74,6 @@
 			const critId = nanoid(6);
 			const newCrit = { id: critId, type: critType.toLowerCase().replaceAll(" ", "") };
 			unit.pending.crits.push(newCrit);
-			currentRoundLog.logs.push({
-				unitId: unit.id,
-				unitName: reference.name,
-				crit: { id: critId, type: critType.toLowerCase().replaceAll(" ", ""), name: currentCritSelection },
-				applied: false,
-				undone: false
-			});
-
 			currentCritSelection = "";
 			open = false;
 		}

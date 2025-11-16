@@ -225,7 +225,7 @@ function checkRoles(units: ListUnit[], roles: string[], amount: number, alternat
 		: -1;
 }
 function checkArmor(units: ListUnit[], armor: number, amount: number) {
-	return units.length != 0 && units.filter((unit) => (unit.baseUnit.armor ?? 0) > armor).length >= amount ? 1 : -1;
+	return units.length != 0 && units.filter((unit) => (unit.baseUnit.armor ?? 0) >= armor).length >= amount ? 1 : -1;
 }
 function checkDamage(units: ListUnit[], damage: number, range: string, limit: "equal" | "equalOrGreater" | "equalOrLess", amount: number) {
 	if (limit == "equalOrGreater") {

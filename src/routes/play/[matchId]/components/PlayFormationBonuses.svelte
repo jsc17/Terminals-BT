@@ -1,9 +1,9 @@
-<script lang="ts">
-	import type { PlayFormation, PlayUnit } from "$lib/playmode/types";
+<!-- <script lang="ts">
+	import type { PlayFormation, PlayUnit } from "../../types/types";
 	import { calculateBonusAmount } from "$lib/utilities/formationUtilities";
 	import { onMount } from "svelte";
 	import { SvelteMap } from "svelte/reactivity";
-	import PlayFormationBonusAssignment from "./PlayFormationBonusAssignment.svelte";
+	// import PlayFormationBonusAssignment from "./PlayFormationBonusAssignment.svelte";
 	import type { MulUnit } from "$lib/types/listTypes";
 
 	type Props = {
@@ -141,4 +141,4 @@
 	.used-pip {
 		background-color: var(--primary);
 	}
-</style>
+</style> -->

@@ -1,0 +1,18 @@
+-- AlterTable
+ALTER TABLE `MatchUnit` ADD COLUMN `currentDamage` INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN `currentHeat` INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN `pendingDamage` INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN `pendingHeat` INTEGER NOT NULL DEFAULT 0;
+
+-- CreateTable
+CREATE TABLE `MatchCrit` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `unitId` INTEGER NOT NULL,
+    `pending` BOOLEAN NOT NULL,
+    `type` VARCHAR(191) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `MatchCrit` ADD CONSTRAINT `MatchCrit_unitId_fkey` FOREIGN KEY (`unitId`) REFERENCES `MatchUnit`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

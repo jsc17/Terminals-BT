@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { toastController } from "$lib/stores";
 	import { List, type ListFormation } from "$lib/types/list.svelte";
-	import { sendListToPlay } from "$lib/playmode/playmode";
+	// import { sendListToPlay } from "../../../play/[matchId]/utilities/playmode";
 	import { exportToJeff } from "../../utilities/export.svelte";
 	import FindUnitAvailabilityModal from "../modals/FindUnitAvailabilityModal.svelte";
 	import { DropdownMenu } from "$lib/generic";
@@ -45,7 +45,7 @@
 		}
 		items.push({ type: "item", label: "Check Formation Availability", onSelect: availabilityModal.show });
 		items.push({ type: "separator", classes: "muted" });
-		items.push({ type: "item", label: "Play Formation", onSelect: () => sendListToPlay(list.details.name, [formation], list.units) });
+		// items.push({ type: "item", label: "Play Formation", onSelect: () => sendListToPlay(list.details.name, [formation], list.units) });
 		items.push({ type: "item", label: "Export Formation", onSelect: exportFormationToJeff });
 		items.push({ type: "separator", classes: "muted" });
 		items.push({ type: "item", label: "Clear Formation", onSelect: clearFormation });

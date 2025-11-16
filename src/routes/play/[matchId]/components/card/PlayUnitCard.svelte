@@ -1,28 +1,27 @@
 <script lang="ts">
 	import type { MulUnit } from "$lib/types/listTypes";
 	import { getContext, onMount } from "svelte";
-	import { CritBoxAero, CritBoxCv, CritBoxMech, CritBoxProto } from "./";
-	import { DamageModal, HeatModal, CritModal, ExpandModal, SpecialModal } from "./";
+	import { CritBoxAero, CritBoxCv, CritBoxMech, CritBoxProto } from "..";
+	import { DamageModal, HeatModal, CritModal, ExpandModal, SpecialModal } from "..";
 	import { loadMULUnit } from "$lib/utilities/loadUtilities";
-	import * as automation from "../utilities/playmodeAutomation";
-	import { createDamagedAbilityString } from "../utilities/playmodeUtilities";
-	import { infTypes, mechTypes, typeIncludes, vTypes } from "$lib/playmode/unitTypeUtilities";
-	import type { LogRound, PlayUnit } from "$lib/playmode/types";
+	import * as automation from "../../utilities/playmodeAutomation";
+	import { createDamagedAbilityString } from "../../utilities/playmodeUtilities";
+	import { infTypes, mechTypes, typeIncludes, vTypes } from "$lib/cardgeneration/unitTypeUtilities";
+	import type { LogRound, PlayUnit } from "../../../types/types";
 	import { type UnitAbility } from "$lib/data/abilities";
 	import type { SvelteMap } from "svelte/reactivity";
 	import { getSPAfromId } from "$lib/utilities/listUtilities";
 	import { getMulImage } from "$lib/remote/mulImages.remote";
 	import { numberToRomanNumeral } from "$lib/utilities/utilities";
-	import type { PlaymodeOptionsOutput } from "../../schema/playmode";
+	import type { PlaymodeOptionsOutput } from "../../../schema/playmode";
 
 	type Props = {
 		unit: PlayUnit;
 		options: PlaymodeOptionsOutput;
-		currentRoundLog: LogRound;
 		assignedBonuses?: SvelteMap<number, SvelteMap<string, number>>;
 	};
 
-	let { unit, options, currentRoundLog, assignedBonuses }: Props = $props();
+	let { unit, options, assignedBonuses }: Props = $props();
 
 	let openDamageModal = $state(false),
 		openHeatModal = $state(false),
@@ -43,14 +42,15 @@
 	let currentSkill = $derived(automation.calculateSkill(unit, critCount.current, reference));
 	let physical = $derived(automation.calculatePhysical(moveSpeeds[0].tmm, firepowerRemaining.s, reference));
 	let formationBonuses = $derived.by(() => {
-		const bonusAbilities: string[] = [];
-		assignedBonuses?.forEach((value) => {
-			const existing = value.get(unit.id);
-			if (existing) {
-				bonusAbilities.push(`${getSPAfromId(existing)?.name} (Frmn)`);
-			}
-		});
-		return bonusAbilities;
+		return [];
+		// const bonusAbilities: string[] = [];
+		// assignedBonuses?.forEach((value) => {
+		// 	const existing = value.get(unit.id);
+		// 	if (existing) {
+		// 		bonusAbilities.push(`${getSPAfromId(existing)?.name} (Frmn)`);
+		// 	}
+		// });
+		// return bonusAbilities;
 	});
 	function handleHeat() {
 		openHeatModal = true;
@@ -83,7 +83,7 @@
 	}
 
 	onMount(() => {
-		loadMULUnit(unit.mulId).then((value) => {
+		loadMULUnit(unit.mulId.toString()).then((value) => {
 			reference = value;
 		});
 	});
@@ -345,11 +345,11 @@
 		{/if}
 	</div>
 
-	<DamageModal {unit} bind:open={openDamageModal} {reference} {currentRoundLog}></DamageModal>
-	<HeatModal {unit} bind:open={openHeatModal} {reference}></HeatModal>
-	<CritModal {unit} bind:open={openCritModal} {reference} {currentRoundLog}></CritModal>
-	<ExpandModal {unit} bind:open={openExpandModal} {reference} {options} {currentRoundLog}></ExpandModal>
-	<SpecialModal ability={abilityReference} bind:open={openSpecialModal} {unit}></SpecialModal>
+	<DamageModal {unit} bind:open={openDamageModal} {reference} />
+	<HeatModal {unit} bind:open={openHeatModal} {reference} />
+	<CritModal {unit} bind:open={openCritModal} {reference} />
+	<ExpandModal {unit} bind:open={openExpandModal} {reference} {options} />
+	<SpecialModal ability={abilityReference} bind:open={openSpecialModal} {unit} />
 {:else}
 	<p>Loading unit card</p>
 {/if}
@@ -394,6 +394,7 @@
 		border: 0.25cqw solid black;
 		border-radius: var(--radius);
 		padding: 0.5cqmax 1cqmax;
+		z-index: 0;
 	}
 	.unit-card-left,
 	.unit-card-right {

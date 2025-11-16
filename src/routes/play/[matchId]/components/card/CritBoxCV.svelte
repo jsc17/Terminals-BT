@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { PlayUnit } from "$lib/playmode/types";
-	import type { CritList } from "../utilities/playmodeAutomation";
+	import type { PlayUnit } from "../../../types/types";
+	import type { CritList } from "../../utilities/playmodeAutomation";
 
 	type Props = {
 		unit: PlayUnit;

@@ -1,28 +1,25 @@
 <script lang="ts">
 	import { PlayFormations, DisplayOptionsPopover, Log, PlayFullList } from "./components";
-	import { PersistedState } from "runed";
-	import { type PlayList, type LogRound } from "$lib/playmode/types";
+	import { PersistedState, watch } from "runed";
+	import { type PlayList, type LogRound, type PlayFormation, type PlayUnit } from "../types/types";
 	import { PlaymodeOptionsSchema, type PlaymodeOptionsOutput } from "../schema/playmode";
-	import { loadMULUnit } from "$lib/utilities/loadUtilities";
-	import { SvelteMap } from "svelte/reactivity";
-	import type { MulUnit } from "$lib/types/listTypes";
-	import { db } from "$lib/offline/db";
 	import DropdownMenu from "$lib/generic/components/DropdownMenu.svelte";
 	import * as v from "valibot";
 	import { safeParseJSON } from "$lib/utilities/utilities";
 	import { type Source } from "sveltekit-sse";
 	import { getContext } from "svelte";
-	import { Popover, Separator } from "$lib/generic";
-	import { getPlayerList, getTeamList, getRole } from "../remote/match.remote";
+	import { Dialog, Popover, Separator } from "$lib/generic";
+	import { getPlayerData, getTeamData, getMyData, getMatchDetails } from "../remote/match.remote";
+	import { nanoid } from "nanoid";
+	import MatchJoinModal from "./components/ui/MatchJoinModal.svelte";
 
 	let { data } = $props();
 
-	let messages = $state<string[]>([]);
 	let connection: Source = getContext("connection");
 
 	const matchChannel = connection.select(`${data.matchId}`);
 	matchChannel.subscribe((message: string) => {
-		messages.push(message);
+		console.log(message);
 	});
 
 	const options = new PersistedState<PlaymodeOptionsOutput>("playOptions", v.parse(PlaymodeOptionsSchema, {}), {
@@ -31,9 +28,47 @@
 			deserialize: (savedData) => v.parse(PlaymodeOptionsSchema, safeParseJSON(savedData) ?? {})
 		}
 	});
-	const role = $derived(getRole(data.matchId).current);
-	const teamList = $derived(getTeamList(data.matchId).current);
-	const playerList = $derived(getPlayerList(data.matchId).current);
+	const matchData = $derived(await getMatchDetails(data.matchId));
+	const myData = $derived(await getMyData(data.matchId));
+	const teamData = $derived(await getTeamData(data.matchId));
+	const playerData = $derived(await getPlayerData(data.matchId));
+
+	const playerLists = $derived(
+		playerData
+			?.filter((p) => p.teamId != null && p.formations.length != 0)
+			.sort((a, b) => {
+				return a.teamId! - b.teamId!;
+			})
+			.map((p) => {
+				const playerFormationList: PlayFormation[] = [];
+				for (const formation of p.formations) {
+					const units: PlayUnit[] = formation.units
+						.filter((u) => !u.secondary)
+						.map((u) => ({
+							id: u.id.toString(),
+							mulId: u.mulId,
+							skill: u.skill,
+							cost: 10,
+							pending: { damage: u.pendingDamage, heat: u.pendingHeat, crits: [] },
+							current: { damage: u.currentDamage, heat: u.currentHeat, crits: [], disabledAbilities: [] }
+						}));
+					const secondaryUnits: PlayUnit[] = formation.units
+						.filter((u) => u.secondary)
+						.map((u) => ({
+							id: u.id.toString(),
+							mulId: u.mulId,
+							skill: u.skill,
+							cost: 10,
+							pending: { damage: u.pendingDamage, heat: u.pendingHeat, crits: [] },
+							current: { damage: u.currentDamage, heat: u.currentHeat, crits: [], disabledAbilities: [] }
+						}));
+					playerFormationList.push({ id: nanoid(6), name: formation.name, type: formation.type, units });
+				}
+				return { id: nanoid(10), owner: p.playerNickname, team: p.teamId, formations: playerFormationList } as PlayList;
+			})
+	);
+
+	let joinModalOpen = $state(false);
 </script>
 
 <svelte:head>
@@ -41,93 +76,112 @@
 </svelte:head>
 
 <div class="play-body">
+	<div class="space-between">
+		<p>{matchData?.name}</p>
+		<p>
+			Join Code: <Dialog title="Join Code">
+				{#snippet trigger()}
+					Reveal
+				{/snippet}
+				{#snippet description()}
+					This code will allow players to join the game
+				{/snippet}
+				<div style="padding: 4px 10px">{matchData?.joinCode}</div>
+			</Dialog>
+		</p>
+		<a href="/play">Return to match selection</a>
+	</div>
 	<div class="match-bars">
 		<div class="match-header">
-			<div class="toolbar-item">Red</div>
-			<div class="toolbar-item">1</div>
-			<div class="toolbar-item">Round: 0</div>
-			<div class="toolbar-item">3</div>
-			<div class="toolbar-item">Blue</div>
-
-			<!-- <div class="toolbar-section">
-				<DropdownMenu
-					items={[
-						{ type: "item", label: "Reset List", onSelect: resetList },
-						{ type: "item", label: "End Match", onSelect: endMatch },
-						{ type: "item", label: "Exit Match", onSelect: () => (window.location.href = "/play") }
-					]}
-					triggerClasses="transparent-button"
-				>
-					{#snippet trigger()}
-						Menu
-					{/snippet}
-				</DropdownMenu>
-			</div> -->
+			<div class="toolbar-item">{teamData?.[0].name}</div>
+			<div class="toolbar-item">{teamData?.[0].objectivePoints}</div>
+			<div class="toolbar-item">Round: {matchData?.currentRound}</div>
+			<div class="toolbar-item">{teamData?.[1].objectivePoints}</div>
+			<div class="toolbar-item">{teamData?.[1].name}</div>
 		</div>
 		<div class="toolbar">
 			<div class="toolbar-section">
-				<div class="toolbar-item">
-					<Popover>
-						{#snippet trigger()}
-							Player List
-						{/snippet}
-						<div class="player-list">
-							<p class="team-name">Neutral</p>
-							<Separator />
-							{#each playerList?.filter((p) => p.teamId == null) as player}
-								<p class="player-name">{player.playerNickname} - {player.playerRole}</p>
-							{/each}
-							{#each teamList as team}
-								<p class="team-name">{team.name}</p>
-								<Separator />
-								{#each playerList?.filter((p) => p.teamId == team.id) as player}
-									<p class="player-name">{player.playerNickname} - {player.playerRole}</p>
-								{:else}
-									<p class="player-name">No Players</p>
-								{/each}
-							{/each}
-						</div>
-					</Popover>
-				</div>
-				<DisplayOptionsPopover bind:options={options.current} />
+				{#if data.username}
+					{#if !myData}
+						<button
+							class="toolbar-button"
+							onclick={() => {
+								joinModalOpen = true;
+							}}>Join Match</button
+						>
+					{:else if myData.playerRole == "HOST"}
+						<DropdownMenu
+							items={[
+								{
+									type: "item",
+									label: "Join Match as Player",
+									onSelect: () => {
+										joinModalOpen = true;
+									}
+								},
+								{ type: "item", label: "Player List", onSelect: () => {} },
+								{ type: "item", label: "Manage Teams", onSelect: () => {} },
+								{ type: "item", label: "End Match", onSelect: () => {} }
+							]}
+							triggerClasses="transparent-button"
+						>
+							{#snippet trigger()}
+								<div class="toolbar-button">Host Menu</div>
+							{/snippet}
+						</DropdownMenu>
+					{/if}
+				{:else}
+					<div class="toolbar-item">Login to Join</div>
+				{/if}
 			</div>
+			{#if myData?.playerRole == "HOST"}
+				<div class="toolbar-section">
+					<button class="toolbar-button">End Round</button>
+				</div>
+			{/if}
 			<div class="toolbar-section">
-				<button class="toolbar-button">End Round</button>
+				<div>
+					<DisplayOptionsPopover bind:options={options.current} />
+				</div>
+				<button class="toolbar-button">Match Log</button>
 			</div>
 		</div>
 	</div>
-
-	<p>{role ?? "observer"}</p>
-	<!-- <div class="flex-between">
-		<button class="play-log-button" onclick={openLog}>Match Log</button>
-	</div> -->
-
-	<!-- {#if playList}
-		{#if playList?.units.length}
-			{#if options.current.groupByFormation}
-				{#each playList?.formations as formation}
-					<PlayFormations {formation} units={playList?.units} options={options.current} currentRoundLog={currentRoundLog.current} {unitReferences}></PlayFormations>
-				{/each}
-			{:else}
-				<PlayFullList units={playList?.units} options={options.current} currentRoundLog={currentRoundLog.current}></PlayFullList>
-			{/if}
-		{:else}
-			<div class="list-load-error-body">
-				<h2>No list loaded. Please try loading a list from the <a href="/listbuilder">list builder</a></h2>
-			</div>
-		{/if}
-	{/if} -->
+	<div class="list-selector">
+		{#each playerLists as list (list.id)}
+			<a class="list-scroll-button" data-team={teamData.findIndex((t) => t.id == list.team)} href={`#${list.id}`}>
+				{list.owner}
+			</a>
+		{/each}
+	</div>
+	<div>
+		<div class="list-scroll-container">
+			{#each playerLists as list (list.id)}
+				<div class="list" id={list.id}>
+					{#each list.formations as formation}
+						<PlayFormations {formation} options={options.current} />
+					{/each}
+				</div>
+			{/each}
+		</div>
+	</div>
 </div>
 
-<!-- <Log bind:open={logDrawerOpen} currentRoundLog={currentRoundLog.current} {fullLogs} {playList}></Log> -->
+<MatchJoinModal
+	bind:open={joinModalOpen}
+	joinCode={matchData?.joinCode ?? ""}
+	matchId={matchData?.id.toString() ?? ""}
+	teams={teamData.map((t) => ({ id: t.id, name: t.name }))}
+	host={myData?.playerRole == "HOST"}
+/>
 
 <style>
 	.play-body {
 		position: relative;
-		overflow: auto;
-		display: flex;
-		flex-direction: column;
+		display: grid;
+		grid-template-rows: repeat(3, max-content) 1fr;
 		gap: 4px;
+		height: 100%;
 	}
 	.match-bars {
 		position: sticky;
@@ -135,6 +189,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 4px;
+		background-color: var(--background);
 	}
 	.match-header {
 		padding: 0px 5dvw;
@@ -142,7 +197,7 @@
 		grid-template-columns: repeat(5, 1fr);
 		gap: 16px;
 		border: 1px solid var(--border);
-		background-image: linear-gradient(to right, red 30%, red 35%, var(--surface-color) 45%, var(--surface-color) 55%, blue 65%, blue 70%);
+		background-image: linear-gradient(to right, rgb(180, 0, 0) 30%, rgb(180, 0, 0) 35%, var(--surface-color) 45%, var(--surface-color) 55%, blue 65%, blue 70%);
 	}
 	.toolbar {
 		display: flex;
@@ -176,6 +231,35 @@
 		background-color: var(--surface-color-light);
 		color: var(--surface-color-light-text-color);
 	}
+	.list-selector {
+		padding: var(--responsive-padding);
+		display: flex;
+		justify-content: center;
+		gap: 16px;
+	}
+	.list-scroll-button {
+		padding: 4px 6px;
+		border: 1px solid var(--border);
+	}
+	.list-scroll-button[data-team="0"] {
+		background-color: rgb(180, 0, 0);
+	}
+	.list-scroll-button[data-team="1"] {
+		background-color: blue;
+	}
+	.list-scroll-container {
+		display: flex;
+		overflow: auto;
+		scroll-snap-type: x mandatory;
+		scroll-behavior: smooth;
+		height: 100%;
+	}
+	.list {
+		width: 100%;
+		padding: 0 3%;
+		flex-shrink: 0;
+		scroll-snap-align: start;
+	}
 	.player-list {
 		display: flex;
 		flex-direction: column;
@@ -188,6 +272,9 @@
 		color: var(--surface-color-light-text-color);
 		font-size: 20px;
 		margin-top: 8px;
+	}
+	.popover-body {
+		padding: var(--responsive-padding);
 	}
 	.announcement {
 		padding: 4px 16px;

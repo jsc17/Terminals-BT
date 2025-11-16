@@ -14,7 +14,7 @@
 	import { type ListFormation, List } from "$lib/types/list.svelte";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { ruleSets } from "$lib/types/rulesets";
-	import { sendListToPlay } from "$lib/playmode/playmode";
+	// import { sendListToPlay } from "../../play/[matchId]/utilities/playmode";
 	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
 	import { appWindow, toastController } from "$lib/stores";
 	import { Dialog } from "$lib/generic";
@@ -200,7 +200,7 @@
 						{ type: "separator" },
 						{ type: "item", label: "Check List Availability", onSelect: () => availabilityModal?.show() },
 						{ type: "item", label: "Generate Sublists", onSelect: () => (sublistModalOpen = true) },
-						{ type: "item", label: "Play List", onSelect: () => sendListToPlay(list.details.name, list.formations, list.units) },
+						// { type: "item", label: "Play List", onSelect: () => sendListToPlay(list.details.name, list.formations, list.units) },
 						{ type: "item", label: "Submit List to Tournament", onSelect: () => submitList() },
 						{ type: "separator" },
 						{ type: "item", label: "Clear Units/Formations", onSelect: () => clearList() },

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { PlayUnit, LogRound } from "$lib/playmode/types";
+	import type { PlayUnit, LogRound } from "../../types/types";
 	import { PlayUnitCard } from "./";
 	import type { PlaymodeOptionsOutput } from "../../schema/playmode";
 

@@ -3,7 +3,7 @@ import type { UnitCustomization } from "$lib/types/listTypes";
 
 type PlayUnit = {
 	id: string;
-	mulId: string;
+	mulId: number;
 	skill?: number;
 	cost: number;
 	customization?: UnitCustomization;
@@ -25,17 +25,16 @@ type PlayFormation = {
 	id: string;
 	name: string;
 	type: string;
-	units: string[];
-	secondary?: { type?: string; units?: string[] };
+	units: PlayUnit[];
+	secondary?: { type?: string; units?: PlayUnit[] };
 	bonuses?: FormationBonus[];
 };
 
 type PlayList = {
 	id: string;
-	name: string;
-	date: string;
+	owner: string;
+	team: number;
 	formations: PlayFormation[];
-	units: PlayUnit[];
 };
 type LogRound = {
 	round: number;

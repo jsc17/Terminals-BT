@@ -3,7 +3,7 @@
 	import { Dialog } from "$lib/generic";
 	import { getUsersLists } from "$lib/remote/list.remote";
 	import { watch } from "runed";
-	import { joinMatch } from "../../../remote/match.remote";
+	import { joinMatch } from "../../../remote/matchData.remote";
 	import { getNickname } from "../../../remote/matchlist.remote";
 
 	type Props = {
@@ -30,22 +30,45 @@
 </script>
 
 <Dialog title="Join Match" bind:open>
-	<form {...joinMatch}>
+	<form
+		{...joinMatch.enhance(async ({ submit }) => {
+			await submit();
+			if (joinMatch.result) {
+				open = false;
+			}
+		})}
+	>
 		<input {...joinMatch.fields.matchId.as("hidden", matchId)} />
+		<label>Nickname: <input {...joinMatch.fields.nickname.as("text")} /></label>
 		{#if !host}
-			<input {...joinMatch.fields.nickname.as("text")} />
-			<input {...joinMatch.fields.joinCode.as("text")} />
+			<label>Join Code:<input {...joinMatch.fields.joinCode.as("text")} /></label>
 		{/if}
-		<select {...joinMatch.fields.teamId.as("select")}>
-			{#each teams as team}
-				<option value={team.id.toString()}>{team.name}</option>
-			{/each}
-		</select>
-		<select {...joinMatch.fields.listId.as("select")}>
-			{#each lists.data as list}
-				<option value={list.id}>{list.name}</option>
-			{/each}
-		</select>
+		<label>
+			Team:
+			<select {...joinMatch.fields.teamId.as("select")}>
+				{#each teams as team}
+					<option value={team.id.toString()}>{team.name}</option>
+				{/each}
+			</select>
+		</label>
+		<label
+			>List
+			<select {...joinMatch.fields.listId.as("select")}>
+				{#each lists.data as list}
+					<option value={list.id}>{list.name}</option>
+				{/each}
+			</select>
+		</label>
 		<button>Submit</button>
 	</form>
 </Dialog>
+
+<style>
+	form {
+		padding: var(--responsive-padding);
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		align-items: start;
+	}
+</style>

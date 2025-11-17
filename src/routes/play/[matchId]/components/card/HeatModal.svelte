@@ -2,6 +2,7 @@
 	import { Dialog } from "$lib/generic";
 	import type { MulUnit } from "$lib/types/list.svelte";
 	import type { PlayUnit } from "../../../types/types";
+	import { setHeat } from "../../../remote/matchUpdates.remote";
 
 	type Props = {
 		unit: PlayUnit;
@@ -19,15 +20,10 @@
 		}
 	}
 
-	function applyHeat() {
+	function applyHeat(pending: boolean) {
 		if (newHeatLevel < 0) newHeatLevel = 0;
 		if (newHeatLevel > 4) newHeatLevel = 4;
-		unit.pending.heat = newHeatLevel;
-		unit.current.heat = newHeatLevel;
-		open = false;
-	}
-	function pendHeat() {
-		unit.pending.heat = newHeatLevel;
+		setHeat({ unitId: unit.id, heatLevel: newHeatLevel, pending });
 		open = false;
 	}
 </script>
@@ -108,9 +104,9 @@
 			>
 		</div>
 		<div class="apply-buttons">
-			<button onclick={applyHeat}>Apply Now</button>
+			<button onclick={() => applyHeat(false)}>Apply Now</button>
 			<div class="temp-div">
-				<button onclick={pendHeat}>Apply At End of Round</button>
+				<button onclick={() => applyHeat(true)}>Apply At End of Round</button>
 			</div>
 		</div>
 	</div>

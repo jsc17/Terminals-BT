@@ -2,10 +2,9 @@ import type { FormationBonus } from "$lib/types/formationData";
 import type { UnitCustomization } from "$lib/types/listTypes";
 
 type PlayUnit = {
-	id: string;
+	id: number;
 	mulId: number;
 	skill?: number;
-	cost: number;
 	customization?: UnitCustomization;
 	number?: number;
 	pending: {

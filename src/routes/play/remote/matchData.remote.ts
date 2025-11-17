@@ -1,7 +1,7 @@
 import { query, command, getRequestEvent, form } from "$app/server";
 import * as v from "valibot";
 import { prisma } from "$lib/server/prisma";
-import type { ListUnit } from "$lib/types/listTypes";
+import { clients } from "$lib/server/sseClients";
 
 export const getMatchDetails = query(v.number(), async (matchId) => {
 	const match = await prisma.match.findUnique({ where: { id: matchId } });
@@ -17,7 +17,12 @@ export const getMyData = query(v.number(), async (matchId) => {
 	return userData;
 });
 
-export const getPlayerData = query(v.number(), async (matchId) => {
+export const getPlayerData = query(v.object({ playerId: v.string(), matchId: v.number() }), async ({ playerId, matchId }) => {
+	const results = await prisma.usersInMatch.findUnique({ where: { matchId_playerId: { playerId, matchId } }, include: { formations: { include: { units: true } } } });
+	return results != null ? results : undefined;
+});
+
+export const getAllPlayerData = query(v.number(), async (matchId) => {
 	const results = await prisma.usersInMatch.findMany({ where: { matchId }, include: { formations: { include: { units: true } } } });
 	return results != null ? results : [];
 });
@@ -40,7 +45,7 @@ export const joinMatch = form(
 		joinCode: v.optional(v.string()),
 		listId: v.optional(v.string()),
 		listCode: v.optional(v.string()),
-		nickname: v.optional(v.string())
+		nickname: v.string()
 	}),
 	async (data, invalid) => {
 		const { locals } = getRequestEvent();
@@ -50,7 +55,10 @@ export const joinMatch = form(
 		const host = match?.players.find((p) => p.playerRole == "HOST");
 
 		if (host?.playerId == locals.user.id) {
-			await prisma.usersInMatch.update({ where: { matchId_playerId: { playerId: locals.user.id, matchId: data.matchId } }, data: { team: { connect: { id: data.teamId } } } });
+			await prisma.usersInMatch.update({
+				where: { matchId_playerId: { playerId: locals.user.id, matchId: data.matchId } },
+				data: { playerNickname: data.nickname, team: { connect: { id: data.teamId } } }
+			});
 		} else {
 			if (!data.joinCode || data.joinCode != match?.joinCode) throw invalid(invalid.joinCode("Invalid join code for this match"));
 			if (!data.nickname) throw invalid("Player nickname is required");
@@ -67,6 +75,7 @@ export const joinMatch = form(
 
 		const units = JSON.parse(list.units);
 		for (const formation of JSON.parse(list.formations)) {
+			if (formation.units.length == 0) continue;
 			await prisma.usersInMatch.update({
 				where: { matchId_playerId: { playerId: locals.user.id, matchId: data.matchId } },
 				data: {
@@ -88,9 +97,12 @@ export const joinMatch = form(
 			});
 		}
 
-		await getPlayerData(data.matchId).refresh();
+		clients.forEach((c) => {
+			c.emit(`${data.matchId}`, JSON.stringify({ type: "playerJoined", data: JSON.stringify({ nickname: data.nickname, teamId: data.teamId, playerId: locals.user?.id }) }));
+		});
+
 		await getMyData(data.matchId).refresh();
 
-		// return result;
+		return "Success";
 	}
 );

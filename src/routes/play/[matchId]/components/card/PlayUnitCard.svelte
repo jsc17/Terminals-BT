@@ -14,6 +14,7 @@
 	import { getMulImage } from "$lib/remote/mulImages.remote";
 	import { numberToRomanNumeral } from "$lib/utilities/utilities";
 	import type { PlaymodeOptionsOutput } from "../../../schema/playmode";
+	import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 
 	type Props = {
 		unit: PlayUnit;
@@ -106,13 +107,13 @@
 	<div class="play-unit-card-container">
 		<button class="expand-button" onclick={handleExpand}>
 			<div class="flex-between">
-				<p class="unit-variant">{reference?.variant}</p>
-				<p class="unit-pv bold">PV: {unit.cost}</p>
+				<p class="unit-variant bold">{reference?.variant}</p>
+				<p class="unit-pv bold">PV: {getNewSkillCost(unit.skill, reference.pv)}</p>
 			</div>
 			<div class="flex-between">
 				<p class="unit-name bold">{reference?.class}</p>
 				{#if structRemaining.current < (reference?.structure ?? 0) / 2}
-					<p class="unit-half-pv">Half: {Math.round(unit.cost / 2)}</p>
+					<p class="unit-half-pv">Half: {Math.round(getNewSkillCost(unit.skill, reference.pv) / 2)}</p>
 				{/if}
 			</div>
 		</button>

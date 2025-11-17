@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { Dialog } from "$lib/generic";
 	import type { MulUnit } from "$lib/types/list.svelte";
+	import { getContext } from "svelte";
 	import type { LogRound, PlayUnit } from "../../../types/types";
+	import { takeDamage } from "../../../remote/matchUpdates.remote";
 
 	type Props = {
 		unit: PlayUnit;
@@ -10,6 +12,7 @@
 	};
 
 	let { unit, open = $bindable(false), reference }: Props = $props();
+
 	let damageToTake = $state(0);
 
 	function modifyDamage(amount: number) {
@@ -19,18 +22,11 @@
 		}
 	}
 
-	function applyDamage() {
-		unit.current.damage += damageToTake;
+	function applyDamage(pending: boolean) {
+		takeDamage({ unitId: unit.id, damage: damageToTake, pending });
 		damageToTake = 0;
 		open = false;
 	}
-
-	function pendDamage() {
-		unit.pending.damage += damageToTake;
-		damageToTake = 0;
-		open = false;
-	}
-
 	function removeDamage() {
 		if (confirm(`Remove ${damageToTake} damage from this unit? \n (Removes pending damage before applied damage. Disables undoing damage from the log)`)) {
 			let damageRemaining = Math.max(damageToTake - unit.pending.damage, 0);
@@ -74,9 +70,9 @@
 			>
 		</div>
 		<div class="apply-buttons">
-			<button onclick={applyDamage}>Apply Now</button>
+			<button onclick={() => applyDamage(false)}>Apply Now</button>
 			<div class="temp-div">
-				<button onclick={pendDamage}>Apply At End of Round</button>
+				<button onclick={() => applyDamage(true)}>Apply At End of Round</button>
 			</div>
 		</div>
 		<button class="remove-button" onclick={removeDamage}>Remove Damage</button>

@@ -11,7 +11,6 @@
 
 	onMount(() => {
 		setInterval(() => {
-			console.log("refreshing match list");
 			refreshMatches();
 		}, 10000);
 	});

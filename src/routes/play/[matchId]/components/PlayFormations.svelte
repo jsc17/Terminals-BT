@@ -3,10 +3,6 @@
 	import type { PlayUnit, PlayFormation, LogRound } from "../../types/types";
 	import { PlayUnitCard } from "./";
 	import { SvelteMap } from "svelte/reactivity";
-	import type { MulUnit } from "$lib/types/listTypes";
-	// import PlayFormationBonuses from "./PlayFormationBonuses.svelte";
-	import { innerWidth } from "svelte/reactivity/window";
-	import { Popover } from "$lib/generic";
 	import type { PlaymodeOptionsOutput } from "../../schema/playmode";
 
 	type Props = {
@@ -126,6 +122,7 @@
 	}
 	.unit-card-container {
 		container: unit-card / size;
+		scroll-snap-align: start;
 	}
 	.bonus-wrapper {
 		padding: 16px;

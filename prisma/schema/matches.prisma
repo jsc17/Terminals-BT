@@ -70,8 +70,10 @@ model MatchCrit {
     id Int @id @default(autoincrement())
     unit MatchUnit @relation(references: [id], fields: [unitId], onDelete: Cascade)
     unitId Int
+    round Int
     pending Boolean
     type String
+    roundsRemaining Int?
 }
 
 model MatchLog {

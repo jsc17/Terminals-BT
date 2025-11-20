@@ -10,12 +10,12 @@ type PlayUnit = {
 	pending: {
 		damage: number;
 		heat: number;
-		crits: { id: string; type: string }[];
+		crits: { id: number; round: number; type: string; roundsRemaining?: number }[];
 	};
 	current: {
 		damage: number;
 		heat: number;
-		crits: { id: string; type: string }[];
+		crits: { id: number; round: number; type: string; roundsRemaining?: number }[];
 		disabledAbilities: string[];
 	};
 };

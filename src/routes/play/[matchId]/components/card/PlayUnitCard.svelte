@@ -216,7 +216,7 @@
 								class="heat-level heat-level-first"
 								class:heat-level-1={unit.current.heat >= 1}
 								class:pending-heat={unit.pending.heat >= 1 && unit.current.heat < 1}
-								class:pending-cooldown={unit.pending.heat <= 1 && unit.current.heat > 1}
+								class:pending-cooldown={unit.pending.heat < 1 && unit.current.heat >= 1}
 							>
 								1
 							</div>
@@ -224,7 +224,7 @@
 								class="heat-level"
 								class:heat-level-2={unit.current.heat >= 2}
 								class:pending-heat={unit.pending.heat >= 2 && unit.current.heat < 2}
-								class:pending-cooldown={unit.pending.heat <= 1 && unit.current.heat > 1}
+								class:pending-cooldown={unit.pending.heat < 2 && unit.current.heat >= 2}
 							>
 								2
 							</div>
@@ -232,7 +232,7 @@
 								class="heat-level"
 								class:heat-level-3={unit.current.heat >= 3}
 								class:pending-heat={unit.pending.heat >= 3 && unit.current.heat < 3}
-								class:pending-cooldown={unit.pending.heat <= 1 && unit.current.heat > 1}
+								class:pending-cooldown={unit.pending.heat < 3 && unit.current.heat >= 3}
 							>
 								3
 							</div>
@@ -240,7 +240,7 @@
 								class="heat-level heat-level-last"
 								class:heat-level-4={unit.current.heat >= 4}
 								class:pending-heat={unit.pending.heat >= 4 && unit.current.heat < 4}
-								class:pending-cooldown={unit.pending.heat <= 1 && unit.current.heat > 1}
+								class:pending-cooldown={unit.pending.heat < 4 && unit.current.heat >= 4}
 							>
 								S
 							</div>

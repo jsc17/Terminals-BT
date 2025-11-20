@@ -18,12 +18,15 @@ export const getMyData = query(v.number(), async (matchId) => {
 });
 
 export const getPlayerData = query(v.object({ playerId: v.string(), matchId: v.number() }), async ({ playerId, matchId }) => {
-	const results = await prisma.usersInMatch.findUnique({ where: { matchId_playerId: { playerId, matchId } }, include: { formations: { include: { units: true } } } });
+	const results = await prisma.usersInMatch.findUnique({
+		where: { matchId_playerId: { playerId, matchId } },
+		include: { formations: { include: { units: { include: { criticals: true } } } } }
+	});
 	return results != null ? results : undefined;
 });
 
 export const getAllPlayerData = query(v.number(), async (matchId) => {
-	const results = await prisma.usersInMatch.findMany({ where: { matchId }, include: { formations: { include: { units: true } } } });
+	const results = await prisma.usersInMatch.findMany({ where: { matchId }, include: { formations: { include: { units: { include: { criticals: true } } } } } });
 	return results != null ? results : [];
 });
 
@@ -106,3 +109,10 @@ export const joinMatch = form(
 		return "Success";
 	}
 );
+
+export const startGame = command(v.number(), async (matchId) => {
+	await prisma.match.update({ where: { id: matchId }, data: { currentRound: 1 } });
+	clients.forEach((c) => {
+		c.emit(`${matchId}`, JSON.stringify({ type: "matchStart", data: "" }));
+	});
+});

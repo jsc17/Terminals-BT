@@ -1,10 +1,9 @@
 import DisplayOptionsPopover from "./ui/DisplayOptionsPopover.svelte";
 import Log from "./Log.svelte";
 import PlayFormations from "./PlayFormations.svelte";
-import PlayFullList from "./PlayFullList.svelte";
 import PlayUnitCard from "./card/PlayUnitCard.svelte";
 
-export { DisplayOptionsPopover, Log, PlayFormations, PlayFullList, PlayUnitCard };
+export { DisplayOptionsPopover, Log, PlayFormations, PlayUnitCard };
 
 import CritModal from "./card/CritModal.svelte";
 import HeatModal from "./card/HeatModal.svelte";

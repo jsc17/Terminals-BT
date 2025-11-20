@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PlayFormations, DisplayOptionsPopover, Log, PlayFullList } from "./components";
+	import { PlayFormations, DisplayOptionsPopover } from "./components";
 	import { PersistedState, watch } from "runed";
 	import { type PlayList, type LogRound, type PlayFormation, type PlayUnit } from "../types/types";
 	import { PlaymodeOptionsSchema, type PlaymodeOptionsOutput } from "../schema/playmode";
@@ -9,13 +9,16 @@
 	import { type Source } from "sveltekit-sse";
 	import { getContext, setContext } from "svelte";
 	import { Dialog, Popover, Separator } from "$lib/generic";
-	import { getAllPlayerData, getTeamData, getMyData, getMatchDetails, getPlayerData } from "../remote/matchData.remote";
+	import { getAllPlayerData, getTeamData, getMyData, getMatchDetails, startGame } from "../remote/matchData.remote";
 	import { nanoid } from "nanoid";
 	import MatchJoinModal from "./components/ui/MatchJoinModal.svelte";
 	import { CaretLeft, CaretRight } from "phosphor-svelte";
-	import { toastController } from "$lib/stores";
+	import { handlePlayerJoined, handleRemoveCritical, handleRoundEnd, handleSetDamage, handleSetHeat, handleTakeCritical } from "./utilities/handleMatchEvents";
+	import EndRoundModal from "./components/ui/EndRoundModal.svelte";
 
 	let { data } = $props();
+
+	setContext("matchId", data.matchId);
 
 	let connection: Source = getContext("connection");
 	const matchChannel = connection.select(`${data.matchId}`);
@@ -26,63 +29,25 @@
 		if (event) {
 			switch (event.type) {
 				case "playerJoined":
-					const newPlayerData: { nickname: string; teamId: number; playerId: string } = safeParseJSON(event.data);
-					toastController.addToast(`${newPlayerData.nickname} has joined the match on team ${newPlayerData.teamId}`);
-					getPlayerData({ playerId: newPlayerData.playerId, matchId: data.matchId }).then((result) => {
-						if (result && result.teamId) {
-							const playerFormationList: PlayFormation[] = [];
-							for (const formation of result.formations) {
-								const units: PlayUnit[] = formation.units
-									.filter((u) => !u.secondary)
-									.map((u) => ({
-										id: u.id,
-										mulId: u.mulId,
-										skill: u.skill,
-										pending: { damage: u.pendingDamage, heat: u.pendingHeat, crits: [] },
-										current: { damage: u.currentDamage, heat: u.currentHeat, crits: [], disabledAbilities: [] }
-									}));
-								const secondaryUnits: PlayUnit[] = formation.units
-									.filter((u) => u.secondary)
-									.map((u) => ({
-										id: u.id,
-										mulId: u.mulId,
-										skill: u.skill,
-										pending: { damage: u.pendingDamage, heat: u.pendingHeat, crits: [] },
-										current: { damage: u.currentDamage, heat: u.currentHeat, crits: [], disabledAbilities: [] }
-									}));
-								playerFormationList.push({ id: nanoid(6), name: formation.name, type: formation.type, units });
-							}
-							playerLists.push({ id: nanoid(10), owner: result.playerNickname, team: result.teamId, formations: playerFormationList });
-						}
-					});
+					handlePlayerJoined(data.matchId, event.data, playerLists);
 					break;
-				case "damageTaken":
-					const damageData: { unitId: number; pendingDamage: number; currentDamage: number } = safeParseJSON(event.data);
-					for (const list of playerLists) {
-						for (const formation of list.formations) {
-							for (const unit of formation.units) {
-								if (unit.id == damageData.unitId) {
-									unit.current.damage = damageData.currentDamage;
-									unit.pending.damage = damageData.pendingDamage;
-									break;
-								}
-							}
-						}
-					}
+				case "matchStart":
+					getMatchDetails(data.matchId).refresh();
 					break;
-				case "heatChanged":
-					const heatData: { unitId: number; pendingHeat: number; currentHeat: number } = safeParseJSON(event.data);
-					for (const list of playerLists) {
-						for (const formation of list.formations) {
-							for (const unit of formation.units) {
-								if (unit.id == heatData.unitId) {
-									unit.current.heat = heatData.currentHeat;
-									unit.pending.heat = heatData.pendingHeat;
-									break;
-								}
-							}
-						}
-					}
+				case "setDamage":
+					handleSetDamage(event.data, playerLists);
+					break;
+				case "setHeat":
+					handleSetHeat(event.data, playerLists);
+					break;
+				case "takeCritical":
+					handleTakeCritical(event.data, playerLists, matchData?.currentRound ?? 0);
+					break;
+				case "removeCritical":
+					handleRemoveCritical(event.data, playerLists);
+					break;
+				case "roundEnd":
+					handleRoundEnd();
 					break;
 				default:
 					console.log("Unhandled Event");
@@ -122,8 +87,25 @@
 								id: u.id,
 								mulId: u.mulId,
 								skill: u.skill,
-								pending: { damage: u.pendingDamage, heat: u.pendingHeat, crits: [] },
-								current: { damage: u.currentDamage, heat: u.currentHeat, crits: [], disabledAbilities: [] }
+								pending: {
+									damage: u.pendingDamage,
+									heat: u.pendingHeat,
+									crits: u.criticals
+										.filter((c) => c.pending)
+										.map((c) => {
+											return { id: c.id, round: c.round, type: c.type, roundsRemaining: c.roundsRemaining ?? undefined };
+										})
+								},
+								current: {
+									damage: u.currentDamage,
+									heat: u.currentHeat,
+									crits: u.criticals
+										.filter((c) => !c.pending)
+										.map((c) => {
+											return { id: c.id, round: c.round, type: c.type, roundsRemaining: c.roundsRemaining ?? undefined };
+										}),
+									disabledAbilities: []
+								}
 							}));
 						const secondaryUnits: PlayUnit[] = formation.units
 							.filter((u) => u.secondary)
@@ -131,8 +113,25 @@
 								id: u.id,
 								mulId: u.mulId,
 								skill: u.skill,
-								pending: { damage: u.pendingDamage, heat: u.pendingHeat, crits: [] },
-								current: { damage: u.currentDamage, heat: u.currentHeat, crits: [], disabledAbilities: [] }
+								pending: {
+									damage: u.pendingDamage,
+									heat: u.pendingHeat,
+									crits: u.criticals
+										.filter((c) => c.pending)
+										.map((c) => {
+											return { id: c.id, round: c.round, type: c.type, roundsRemaining: c.roundsRemaining ?? undefined };
+										})
+								},
+								current: {
+									damage: u.currentDamage,
+									heat: u.currentHeat,
+									crits: u.criticals
+										.filter((c) => !c.pending)
+										.map((c) => {
+											return { id: c.id, round: c.round, type: c.type, roundsRemaining: c.roundsRemaining ?? undefined };
+										}),
+									disabledAbilities: []
+								}
 							}));
 						playerFormationList.push({ id: nanoid(6), name: formation.name, type: formation.type, units });
 					}
@@ -142,6 +141,7 @@
 	);
 
 	let joinModalOpen = $state(false);
+	let roundOpenModel = $state(false);
 </script>
 
 <svelte:head>
@@ -209,7 +209,16 @@
 			</div>
 			{#if myData?.playerRole == "HOST"}
 				<div class="toolbar-section">
-					<button class="toolbar-button">End Round</button>
+					{#if matchData?.currentRound == 0}
+						<button
+							class="toolbar-button"
+							onclick={() => {
+								startGame(data.matchId);
+							}}>Start Game</button
+						>
+					{:else}
+						<EndRoundModal open={roundOpenModel} matchData={matchData!} teams={teamData} />
+					{/if}
 				</div>
 			{/if}
 			<div class="toolbar-section">

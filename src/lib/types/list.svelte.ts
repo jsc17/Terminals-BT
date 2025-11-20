@@ -20,7 +20,7 @@ export class List {
 	rules = $state<string>("noRes");
 	id: string = $state(crypto.randomUUID());
 
-	unitCount = $derived(this.units.length);
+	unitCount = $derived(this.units.filter((u) => u.baseUnit.mulId >= 0).length);
 	pv = $derived(
 		Array.from(this.units.values()).reduce((total, current) => {
 			return total + current.cost;

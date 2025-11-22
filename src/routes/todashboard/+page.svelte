@@ -3,6 +3,7 @@
 	import { createTournament, getUsersTournamentList } from "./tournament.remote.js";
 	import { ruleSets } from "$lib/types/rulesets";
 	import { toastController } from "$lib/stores/toastController.svelte.js";
+	import { FormCreationSchema } from "./schema.js";
 
 	let { data } = $props();
 
@@ -39,7 +40,7 @@
 		<section class="card">
 			<h2 class="section-header">Create new tournament</h2>
 			<form
-				{...createTournament.enhance(async ({ submit, data }) => {
+				{...createTournament.preflight(FormCreationSchema).enhance(async ({ submit, data }) => {
 					console.log(data);
 					await submit();
 					console.log(createTournament.result?.status);

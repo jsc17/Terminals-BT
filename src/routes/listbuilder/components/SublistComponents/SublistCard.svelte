@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { type List, type Sublist, type SublistStats, type ListUnit } from "$lib/types/list.svelte";
 	import { getRulesByName } from "$lib/types/rulesets";
-	import { Popover, Separator } from "$lib/generic";
+	import { DropdownMenu, Popover, Separator } from "$lib/generic";
 	import { dragHandle } from "svelte-dnd-action";
 	import { loadSublistForPlay } from "../../utilities/sublist-utilities";
 	import ExportSublistModal from "./ExportSublistModal.svelte";
+	import type { MenuItem } from "$lib/generic/types";
+	import { List as MenuIcon } from "phosphor-svelte";
 
 	type Props = {
 		sublist: Sublist;
@@ -65,6 +67,52 @@
 
 	let sublistMaxPv = $derived(getRulesByName(list.rules)?.sublistMaxPv);
 	let sublistMaxUnits = $derived(getRulesByName(list.rules)?.sublistMaxUnits);
+
+	const dropdownOptions: MenuItem[] = [
+		{
+			type: "item",
+			label: "Edit Sublist",
+			onSelect: () => {
+				openSublistEditModal(sublist.id, false);
+			}
+		},
+		{
+			type: "separator",
+			classes: "center"
+		},
+		{
+			type: "item",
+			label: "Export / Print Sublist",
+			onSelect: () => {
+				exportSublistModalOpen = true;
+			}
+		},
+		{
+			type: "item",
+			label: "Play Sublist",
+			onSelect: () => {
+				loadSublistForPlay(sublist, list);
+			}
+		},
+		{
+			type: "separator",
+			classes: "center"
+		},
+		{
+			type: "item",
+			label: "Copy Sublist",
+			onSelect: () => {
+				list.copySublist(sublist.id);
+			}
+		},
+		{
+			type: "item",
+			label: "Delete Sublist",
+			onSelect: () => {
+				list.deleteSublist(sublist.id);
+			}
+		}
+	];
 </script>
 
 <div class="sublist-container" class:sublist-container-mobile={layout == "mobile"}>
@@ -87,28 +135,15 @@
 					<p><span class="muted">Units:</span> {`${sublist.checked?.length ?? 0}`}{sublistMaxUnits ? `/${sublistMaxUnits}` : ""}</p>
 				</div>
 			{/if}
-			<Popover>
-				{#snippet trigger()}
-					<div class="sublist-menu-button">
-						<img src="/icons/menu.svg" alt="sublist menu" />
-					</div>
-				{/snippet}
-
-				<div class="sublist-menu-body">
-					<button
-						class="transparent-button"
-						onclick={() => {
-							openSublistEditModal(sublist.id, false);
-						}}>Edit Sublist</button
-					>
-					<Separator classes="separator-border" />
-					<button class="transparent-button" onclick={() => (exportSublistModalOpen = true)}>Export / Print Sublist</button>
-					<button class="transparent-button" onclick={() => loadSublistForPlay(sublist, list)}>Play Sublist</button>
-					<Separator classes="separator-border" />
-					<button class="transparent-button" onclick={() => list.copySublist(sublist.id)}>Copy Sublist</button>
-					<button class="transparent-button" onclick={() => list.deleteSublist(sublist.id)}>Delete Sublist</button>
-				</div>
-			</Popover>
+			<div>
+				<DropdownMenu items={dropdownOptions}>
+					{#snippet trigger()}
+						<div class="sublist-menu-button">
+							<MenuIcon fill="var(--button-text)" size="16"></MenuIcon>
+						</div>
+					{/snippet}
+				</DropdownMenu>
+			</div>
 		</div>
 
 		{#if layout == "vertical"}

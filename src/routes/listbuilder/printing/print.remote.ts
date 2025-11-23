@@ -75,7 +75,7 @@ export const printList = query(
 		const doc = await PDFDocument.load(new Uint8Array(pdf));
 		doc.setCreator("Terminal");
 		doc.setKeywords([printOptions.printStyle, "v2"]);
-		browser.close()
+		browser.close();
 		return await doc.save();
 	}
 );

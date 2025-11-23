@@ -257,7 +257,8 @@ export async function validateRules(unitList: { id: string; skill: number; data:
 		if (rulesData.maxPv && listTotalPv > rulesData.maxPv) {
 			issueList.set("Max PV", new Set([`${listTotalPv}/${rulesData.maxPv}`]));
 		}
-		if (rulesData.maxUnits && unitList.length > rulesData.maxUnits) {
+
+		if (rulesData.maxUnits && unitList.filter((u) => u.data.mulId >= 0).length > rulesData.maxUnits) {
 			issueList.set("Max unitList", new Set([`${unitList.length}/${rulesData.maxUnits}`]));
 		}
 		const nonGeneralfactionList = factions.filter((faction) => {

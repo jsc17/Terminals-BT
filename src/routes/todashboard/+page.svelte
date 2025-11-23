@@ -3,6 +3,7 @@
 	import { createTournament, getUsersTournamentList } from "./tournament.remote.js";
 	import { ruleSets } from "$lib/types/rulesets";
 	import { toastController } from "$lib/stores/toastController.svelte.js";
+	import { FormCreationSchema } from "./schema.js";
 
 	let { data } = $props();
 
@@ -39,7 +40,7 @@
 		<section class="card">
 			<h2 class="section-header">Create new tournament</h2>
 			<form
-				{...createTournament.enhance(async ({ submit, data }) => {
+				{...createTournament.preflight(FormCreationSchema).enhance(async ({ submit, data }) => {
 					console.log(data);
 					await submit();
 					console.log(createTournament.result?.status);
@@ -50,35 +51,35 @@
 				})}
 			>
 				<label for="tournamentName">Tournament Name: <span class="description">Name that will be displayed to participants when they are selecting the tournament</span> </label>
-				<input type="text" name="tournamentName" id="tournamentName" required />
+				<input {...createTournament.fields.tournamentName.as("text")} id="tournamentName" required />
 				<label for="tournamentDate">Tournament Date: <span class="description">Tournaments date. Submissions will no longer be allowed after this date.</span></label>
-				<input type="date" name="tournamentDate" id="tournamentDate" required />
+				<input {...createTournament.fields.tournamentDate.as("date")} id="tournamentDate" required />
 				<label for="tournamentEmail">T.O. Email Address: <span class="description">Email address where you would like to recieve tournament list submissions</span> </label>
-				<input type="text" name="tournamentEmail" id="tournamentEmail" required />
+				<input {...createTournament.fields.tournamentEmail.as("email")} id="tournamentEmail" required />
 				<label for="tournamentEra">Tournament Era: <span class="description">Era that list submissions will be validated against. Select any for open era.</span> </label>
-				<select name="tournamentEra" id="tournamentEra">
+				<select {...createTournament.fields.tournamentEra.as("select")} id="tournamentEra">
 					<option>Any</option>
 					{#each eraList as era}
-						<option value={era.id}>{era.name}</option>
+						<option value={era.id.toString()}>{era.name}</option>
 					{/each}
 				</select>
 				<label for="tournamentrules">Tournament Rules: </label>
-				<select name="tournamentRules" id="tournamentrule">
+				<select {...createTournament.fields.tournamentRules.as("select")} id="tournamentrule">
 					{#each ruleSets as set}
 						<option value={set.name}>{set.display}</option>
 					{/each}
 				</select>
 				<label for="tournamentemailsubject">T.O. Email Subject (optional): <span class="description">Subject line for list submission emails you will recieve.</span> </label>
-				<input type="text" name="tournamentEmailSubject" id="tournamentemailsubject" />
+				<input {...createTournament.fields.tournamentEmailSubject.as("text")} id="tournamentemailsubject" />
 				<label for="tournamentlocation">Tournament Location (optional): </label>
 				<input type="text" name="tournamentLocation" id="tournamentlocation" />
-				<label for="tournamentmessage"
-					>Message for me: <span class="description">
+				<label for="tournamentmessage">
+					Message for me: <span class="description">
 						For right now, since players names and emails are collected, I am manually approving tournaments. Please send a short description of your tournament. As long as you
 						aren't trying to create a dozen a week, I'll approve it.
-					</span></label
-				>
-				<textarea name="tournamentMessage" id="tournamentmessage" required></textarea>
+					</span>
+				</label>
+				<textarea {...createTournament.fields.tournamentMessage.as("text")} id="tournamentmessage" required></textarea>
 				<button class="submit-button">Create</button>
 			</form>
 		</section>

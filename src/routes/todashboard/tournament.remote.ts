@@ -4,50 +4,39 @@ import * as fs from "fs/promises";
 import * as v from "valibot";
 import { calculateTournamentStatistics } from "./statistics";
 import { tournamentEmailTransporter } from "$lib/server/emails/mailer.server";
+import { FormCreationSchema } from "./schema";
 
-export const createTournament = form(
-	v.object({
-		tournamentName: v.string(),
-		tournamentDate: v.string(),
-		tournamentEmail: v.string(),
-		tournamentEra: v.optional(v.string()),
-		tournamentRules: v.string(),
-		tournamentEmailSubject: v.optional(v.string()),
-		tournamentLocation: v.optional(v.string()),
-		tournamentMessage: v.string()
-	}),
-	async (data) => {
-		let { locals } = getRequestEvent();
-		if (!locals.user) return { status: "failed", message: "user is not logged in" };
+export const createTournament = form(FormCreationSchema, async (data) => {
+	let { locals } = getRequestEvent();
+	if (!locals.user) return { status: "failed", message: "user is not logged in" };
 
-		try {
-			const tournament = await prisma.tournament.create({
-				data: {
-					user: { connect: { id: locals.user.id } },
-					name: data.tournamentName,
-					email: data.tournamentEmail,
-					location: data.tournamentLocation,
-					emailSubject: data.tournamentEmailSubject,
-					tournament_date: new Date(data.tournamentDate),
-					era: data.tournamentEra ? Number(data.tournamentEra) : undefined,
-					tournamentRules: data.tournamentRules,
-					approvalMessage: data.tournamentMessage
-				}
-			});
+	try {
+		const tournament = await prisma.tournament.create({
+			data: {
+				user: { connect: { id: locals.user.id } },
+				name: data.tournamentName,
+				email: data.tournamentEmail,
+				location: data.tournamentLocation,
+				emailSubject: data.tournamentEmailSubject,
+				tournament_date: new Date(data.tournamentDate),
+				era: data.tournamentEra ? Number(data.tournamentEra) : undefined,
+				tournamentRules: data.tournamentRules,
+				approvalMessage: data.tournamentMessage
+			}
+		});
 
-			await tournamentEmailTransporter.sendMail({
-				from: process.env.TOURNAMENT_EMAIL_SENDER, // sender address
-				to: "jonathan.colton@yahoo.com", // list of receivers
-				subject: `New Tournament pending approval`, // Subject line
-				html: `<p>A new tournament has been created: ${tournament.id}</p>`
-			});
+		await tournamentEmailTransporter.sendMail({
+			from: process.env.TOURNAMENT_EMAIL_SENDER, // sender address
+			to: "jonathan.colton@yahoo.com", // list of receivers
+			subject: `New Tournament pending approval`, // Subject line
+			html: `<p>A new tournament has been created: ${tournament.id}</p>`
+		});
 
-			return { status: "success", data: tournament.id };
-		} catch (error) {
-			return { status: "failed", message: error };
-		}
+		return { status: "success", data: tournament.id };
+	} catch (error) {
+		return { status: "failed", message: error };
 	}
-);
+});
 
 export const getUsersTournamentList = query(async () => {
 	const { locals } = getRequestEvent();

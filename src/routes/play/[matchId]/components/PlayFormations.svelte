@@ -4,13 +4,15 @@
 	import { PlayUnitCard } from "./";
 	import { SvelteMap } from "svelte/reactivity";
 	import type { PlaymodeOptionsOutput } from "../../schema/playmode";
+	import type { MulUnit } from "$lib/types/listTypes";
 
 	type Props = {
 		formation: PlayFormation;
 		options: PlaymodeOptionsOutput;
+		matchUnits: SvelteMap<number, { data: PlayUnit; reference?: MulUnit; image?: string }>;
 	};
 
-	let { formation, options }: Props = $props();
+	let { formation, options, matchUnits }: Props = $props();
 	let openPrimary = $state(true),
 		openSecondary = $state(true);
 	let formationWidth = $state<number>();
@@ -19,11 +21,15 @@
 	let assignedBonuses = $state<SvelteMap<number, SvelteMap<string, number>>>(new SvelteMap());
 </script>
 
-{#snippet drawFormationUnits(formationUnits: PlayUnit[])}
+{#snippet drawFormationUnits(formationUnits: number[])}
 	<div class="play-formation-unit-list" bind:clientWidth={formationWidth}>
-		{#each formationUnits as unit}
+		{#each formationUnits as unitId}
 			<div class="unit-card-container" style="width: {cardWidth}px; height:{(cardWidth * 5) / 7}px">
-				<PlayUnitCard {unit} {options} {assignedBonuses}></PlayUnitCard>
+				{#if matchUnits.has(unitId)}
+					<PlayUnitCard unit={matchUnits.get(unitId)!} {options} {assignedBonuses}></PlayUnitCard>
+				{:else}
+					<p>Unit Loading</p>
+				{/if}
 			</div>
 		{/each}
 	</div>
@@ -95,10 +101,10 @@
 		border-top-left-radius: var(--radius);
 		border-top-right-radius: var(--radius);
 	}
-	.play-formation-header-bonus {
+	/* .play-formation-header-bonus {
 		display: flex;
 		justify-content: center;
-	}
+	} */
 	.secondary-header {
 		padding: 2px 16px;
 	}
@@ -124,7 +130,7 @@
 		container: unit-card / size;
 		scroll-snap-align: start;
 	}
-	.bonus-wrapper {
+	/* .bonus-wrapper {
 		padding: 16px;
-	}
+	} */
 </style>

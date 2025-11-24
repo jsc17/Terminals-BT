@@ -1,22 +1,33 @@
 <script lang="ts">
 	import { Dialog } from "$lib/generic";
-	import type { Match, MatchTeam } from "@prisma/client";
+	import type { Match, MatchTeam } from "$lib/generated/prisma/browser";
+	import type { Snippet } from "svelte";
+	import { endRound } from "../../remote/matchUpdates.remote";
+
 	type Props = {
 		open: boolean;
 		matchData: Match;
 		teams: MatchTeam[];
+		trigger: Snippet;
 	};
 
-	let { open = $bindable(), matchData, teams }: Props = $props();
+	let { open = $bindable(), matchData, teams, trigger }: Props = $props();
 
-	let teamPoints = $state<number[]>([]);
+	endRound.fields.teamScores.set(teams.map(() => 0));
 </script>
 
-<Dialog title="End Round {matchData.currentRound}" bind:open>
+<Dialog title="End Round {matchData.currentRound}" bind:open {trigger} triggerClasses="transparent-button">
 	{#snippet description()}
-		End of the round. All pending damage and effects will be applied.
+		End of the round. Scores will be updated and all pending damage and effects will be applied.
 	{/snippet}
-	<div class="dialog-body">
+	<form
+		{...endRound.enhance(async ({ submit }) => {
+			await submit();
+			open = false;
+		})}
+		class="dialog-body"
+	>
+		<input {...endRound.fields.matchId.as("hidden", matchData.id.toString())} />
 		<fieldset>
 			<legend>Scoring</legend>
 			<table>
@@ -32,13 +43,14 @@
 						<tr>
 							<td>{team.name}</td>
 							<td>{team.objectivePoints}</td>
-							<td><input type="number" bind:value={teamPoints[index]} defaultValue="0" /></td>
+							<td><input {...endRound.fields.teamScores[index].as("number")} /></td>
 						</tr>
 					{/each}
 				</tbody>
 			</table>
 		</fieldset>
-	</div>
+		<button>Submit</button>
+	</form>
 </Dialog>
 
 <style>
@@ -47,5 +59,13 @@
 	}
 	table {
 		border-collapse: collapse;
+	}
+	th,
+	td {
+		padding: 4px 8px;
+	}
+	td {
+		border: 1px solid var(--table-border);
+		text-align: center;
 	}
 </style>

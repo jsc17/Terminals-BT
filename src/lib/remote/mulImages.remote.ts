@@ -41,9 +41,12 @@ export const getMulCard = query.batch(v.object({ mulId: v.number(), skill: v.num
 //gets the unit image when provided with an mulId and a unit image link. Attempts to access cached image first, before downloading it from the mul and caching it for future use.
 export const getMulImage = query.batch(v.string(), async (data) => {
 	const lookup = new Map<string, string>();
-
 	await Promise.allSettled(
 		data.map(async (link) => {
+			if (link == "") {
+				lookup.set(link, "");
+				return;
+			}
 			const imageId = await prisma.unitImage.findFirst({ where: { link } });
 			if (imageId != null && existsSync(`./files/unit-images/${imageId.id}.png`)) {
 				const localPath = `./files/unit-images/${imageId.id}.png`;

@@ -3,7 +3,7 @@
 	import type { MulUnit } from "$lib/types/list.svelte";
 	import { getContext } from "svelte";
 	import type { LogRound, PlayUnit } from "../../../types/types";
-	import { takeDamage } from "../../../remote/matchUpdates.remote";
+	import { takeDamage } from "../../remote/matchUpdates.remote";
 
 	type Props = {
 		unit: PlayUnit;

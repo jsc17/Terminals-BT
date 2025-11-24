@@ -1,9 +1,8 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "$lib/generated/prisma/client";
+import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 
-const prisma = global.prisma || new PrismaClient();
+const adapter = new PrismaMariaDb({ host: process.env.DATABASE_HOST, port: Number(process.env.DATABASE_PORT) });
 
-if (process.env.NODE_ENV === "development") {
-	global.prisma = prisma;
-}
+const prisma = new PrismaClient({ adapter });
 
 export { prisma };

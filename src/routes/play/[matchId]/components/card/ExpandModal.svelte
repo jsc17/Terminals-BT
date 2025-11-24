@@ -7,17 +7,16 @@
 	import type { PlaymodeOptionsOutput } from "../../../schema/playmode";
 
 	type Props = {
-		unit: PlayUnit;
+		unit: { data: PlayUnit; reference?: MulUnit; image?: string };
 		open: boolean;
-		reference: MulUnit;
 		options: PlaymodeOptionsOutput;
 	};
-	let { unit, open = $bindable(false), reference, options }: Props = $props();
+	let { unit, open = $bindable(false), options }: Props = $props();
 
 	setContext("expanded", true);
 </script>
 
-<Dialog title={reference.name} bind:open>
+<Dialog title={unit.reference?.name ?? "Unknown Unit"} bind:open>
 	<div class="expanded-container">
 		<PlayUnitCard {unit} {options} />
 	</div>

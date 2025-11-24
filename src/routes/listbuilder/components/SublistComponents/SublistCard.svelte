@@ -211,17 +211,6 @@
 		background-color: var(--primary);
 		border-radius: var(--radius);
 		padding: 0px 12px;
-
-		& img {
-			height: 20px;
-			width: 20px;
-		}
-	}
-	.sublist-menu-body {
-		display: flex;
-		flex-direction: column;
-		padding: 16px;
-		gap: 8px;
 	}
 	.sublist-body {
 		display: grid;

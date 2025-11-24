@@ -2,7 +2,7 @@
 	import { Dialog } from "$lib/generic";
 	import type { MulUnit } from "$lib/types/list.svelte";
 	import type { PlayUnit } from "../../../types/types";
-	import { setHeat } from "../../../remote/matchUpdates.remote";
+	import { setHeat } from "../../remote/matchUpdates.remote";
 
 	type Props = {
 		unit: PlayUnit;

@@ -2,6 +2,7 @@ import { query, command, getRequestEvent, form } from "$app/server";
 import * as v from "valibot";
 import { prisma } from "$lib/server/prisma";
 import { clients } from "$lib/server/sseClients";
+import type { MatchUnit, MatchCrit } from "$lib/generated/prisma/browser";
 
 export const getMatchDetails = query(v.number(), async (matchId) => {
 	const match = await prisma.match.findUnique({ where: { id: matchId } });
@@ -33,6 +34,19 @@ export const getAllPlayerData = query(v.number(), async (matchId) => {
 export const getTeamData = query(v.number(), async (matchId) => {
 	const results = await prisma.matchTeam.findMany({ where: { matchId } });
 	return results != null ? results : [];
+});
+
+export const getMatchUnitData = query.batch(v.number(), async (data) => {
+	const lookup = new Map<number, ({ criticals: MatchCrit[] } & MatchUnit) | undefined>();
+
+	await Promise.all(
+		data.map(async (id) => {
+			const unit = await prisma.matchUnit.findUnique({ where: { id }, include: { criticals: true } });
+			lookup.set(id, unit ?? undefined);
+		})
+	);
+
+	return (id) => lookup.get(id);
 });
 
 export const joinMatch = form(

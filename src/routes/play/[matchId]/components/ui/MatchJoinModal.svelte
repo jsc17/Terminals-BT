@@ -3,7 +3,7 @@
 	import { Dialog } from "$lib/generic";
 	import { getUsersLists } from "$lib/remote/list.remote";
 	import { watch } from "runed";
-	import { joinMatch } from "../../../remote/matchData.remote";
+	import { joinMatch } from "../../remote/matchData.remote";
 	import { getNickname } from "../../../remote/matchlist.remote";
 
 	type Props = {
@@ -17,8 +17,7 @@
 	let { open = $bindable(), joinCode, matchId, teams, host }: Props = $props();
 
 	let lists = $derived(await getUsersLists());
-	let nickname = $derived(await getNickname());
-	joinMatch.fields.nickname.set(nickname);
+	joinMatch.fields.nickname.set(await getNickname());
 	watch(
 		() => open,
 		() => {

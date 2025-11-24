@@ -17,12 +17,14 @@
 	import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 
 	type Props = {
-		unit: PlayUnit;
+		unit: { data: PlayUnit; reference?: MulUnit; image?: string };
 		options: PlaymodeOptionsOutput;
 		assignedBonuses?: SvelteMap<number, SvelteMap<string, number>>;
 	};
 
 	let { unit, options, assignedBonuses }: Props = $props();
+
+	const { data, reference, image } = $derived(unit);
 
 	let openDamageModal = $state(false),
 		openHeatModal = $state(false),
@@ -32,21 +34,20 @@
 
 	let aeroTypes = ["AF", "CF"];
 
-	let reference = $state<MulUnit>();
 	let abilityReference = $state<UnitAbility>();
 
 	let expanded = getContext("expanded");
-	let critCount = $derived(automation.countCrits(unit));
-	let moveSpeeds = $derived(automation.calculateMovement(unit, options.measurementUnits, reference));
-	let { armorRemaining, structRemaining } = $derived(automation.calculateHealth(unit, reference));
-	let firepowerRemaining = $derived(automation.calculateFirepower(unit, reference));
-	let currentSkill = $derived(automation.calculateSkill(unit, critCount.current, reference));
+	let critCount = $derived(automation.countCrits(data));
+	let moveSpeeds = $derived(automation.calculateMovement(data, options.measurementUnits, reference));
+	let { armorRemaining, structRemaining } = $derived(automation.calculateHealth(data, reference));
+	let firepowerRemaining = $derived(automation.calculateFirepower(data, reference));
+	let currentSkill = $derived(automation.calculateSkill(data, critCount.current, reference));
 	let physical = $derived(automation.calculatePhysical(moveSpeeds[0].tmm, firepowerRemaining.s, reference));
 	let formationBonuses = $derived.by(() => {
 		return [];
 		// const bonusAbilities: string[] = [];
 		// assignedBonuses?.forEach((value) => {
-		// 	const existing = value.get(unit.id);
+		// 	const existing = value.get(data.id);
 		// 	if (existing) {
 		// 		bonusAbilities.push(`${getSPAfromId(existing)?.name} (Frmn)`);
 		// 	}
@@ -75,19 +76,13 @@
 	function createMarking() {
 		switch (options.duplicateUnitMarkings) {
 			case "numbers":
-				return unit.number;
+				return data.number;
 			case "letters":
-				return String.fromCharCode(unit.number! - 1 + "A".charCodeAt(0));
+				return String.fromCharCode(data.number! - 1 + "A".charCodeAt(0));
 			case "roman":
-				return numberToRomanNumeral(unit.number!);
+				return numberToRomanNumeral(data.number!);
 		}
 	}
-
-	onMount(() => {
-		loadMULUnit(unit.mulId.toString()).then((value) => {
-			reference = value;
-		});
-	});
 </script>
 
 {#snippet damageValue(original: number, min: boolean, current: number)}
@@ -108,12 +103,12 @@
 		<button class="expand-button" onclick={handleExpand}>
 			<div class="flex-between">
 				<p class="unit-variant bold">{reference?.variant}</p>
-				<p class="unit-pv bold">PV: {getNewSkillCost(unit.skill, reference.pv)}</p>
+				<p class="unit-pv bold">PV: {getNewSkillCost(data.skill, reference.pv)}</p>
 			</div>
 			<div class="flex-between">
 				<p class="unit-name bold">{reference?.class}</p>
 				{#if structRemaining.current < (reference?.structure ?? 0) / 2}
-					<p class="unit-half-pv">Half: {Math.round(getNewSkillCost(unit.skill, reference.pv) / 2)}</p>
+					<p class="unit-half-pv">Half: {Math.round(getNewSkillCost(data.skill, reference.pv) / 2)}</p>
 				{/if}
 			</div>
 		</button>
@@ -151,8 +146,8 @@
 					<div class="stat-block-second-row">
 						<p>Role: <span class="bold">{reference?.role}</span></p>
 						<p>
-							Skill: <span class="bold">{unit.skill}</span>
-							{#if (unit.skill && Number(currentSkill.ranged) > unit.skill) || currentSkill.ranged == "S"}
+							Skill: <span class="bold">{data.skill}</span>
+							{#if (data.skill && Number(currentSkill.ranged) > data.skill) || currentSkill.ranged == "S"}
 								(<span class="damaged-stat">{currentSkill.ranged}</span>)
 							{/if}
 						</p>
@@ -214,33 +209,33 @@
 							<p>Heat Scale:</p>
 							<div
 								class="heat-level heat-level-first"
-								class:heat-level-1={unit.current.heat >= 1}
-								class:pending-heat={unit.pending.heat >= 1 && unit.current.heat < 1}
-								class:pending-cooldown={unit.pending.heat < 1 && unit.current.heat >= 1}
+								class:heat-level-1={data.current.heat >= 1}
+								class:pending-heat={data.pending.heat >= 1 && data.current.heat < 1}
+								class:pending-cooldown={data.pending.heat < 1 && data.current.heat >= 1}
 							>
 								1
 							</div>
 							<div
 								class="heat-level"
-								class:heat-level-2={unit.current.heat >= 2}
-								class:pending-heat={unit.pending.heat >= 2 && unit.current.heat < 2}
-								class:pending-cooldown={unit.pending.heat < 2 && unit.current.heat >= 2}
+								class:heat-level-2={data.current.heat >= 2}
+								class:pending-heat={data.pending.heat >= 2 && data.current.heat < 2}
+								class:pending-cooldown={data.pending.heat < 2 && data.current.heat >= 2}
 							>
 								2
 							</div>
 							<div
 								class="heat-level"
-								class:heat-level-3={unit.current.heat >= 3}
-								class:pending-heat={unit.pending.heat >= 3 && unit.current.heat < 3}
-								class:pending-cooldown={unit.pending.heat < 3 && unit.current.heat >= 3}
+								class:heat-level-3={data.current.heat >= 3}
+								class:pending-heat={data.pending.heat >= 3 && data.current.heat < 3}
+								class:pending-cooldown={data.pending.heat < 3 && data.current.heat >= 3}
 							>
 								3
 							</div>
 							<div
 								class="heat-level heat-level-last"
-								class:heat-level-4={unit.current.heat >= 4}
-								class:pending-heat={unit.pending.heat >= 4 && unit.current.heat < 4}
-								class:pending-cooldown={unit.pending.heat < 4 && unit.current.heat >= 4}
+								class:heat-level-4={data.current.heat >= 4}
+								class:pending-heat={data.pending.heat >= 4 && data.current.heat < 4}
+								class:pending-cooldown={data.pending.heat < 4 && data.current.heat >= 4}
 							>
 								S
 							</div>
@@ -287,8 +282,8 @@
 						{#each reference.abilities ?? [] as referenceAbility, index}
 							{@const abilityString = createDamagedAbilityString(
 								$state.snapshot(referenceAbility),
-								unit.current.crits.map((crit) => crit.type),
-								unit.current.disabledAbilities,
+								data.current.crits.map((crit) => crit.type),
+								data.current.disabledAbilities,
 								reference
 							)}
 							<button class="ability-reference-button" onclick={() => handleSpecial(referenceAbility)}>
@@ -302,43 +297,43 @@
 			</div>
 			<div class="unit-card-right">
 				<div class="unit-image-block" class:unit-crippled={options.showCrippled && reference.structure && structRemaining.current < reference.structure / 2}>
-					<img src={(await getMulImage(reference?.imageLink ?? "")).image} alt="unit" class="unit-image" />
+					<img src={image} alt="unit" class="unit-image" />
 
 					{#if structRemaining.current <= 0 || critCount.current.engine >= 2 || critCount.current.destroyed}
 						<img src="/icons/close.svg" alt="Destroyed" class="destroyed" />
 					{/if}
-					{#if unit.current.heat >= 4}
+					{#if data.current.heat >= 4}
 						<p class="shutdown-message">Shutdown</p>
 					{/if}
 				</div>
 				{#if !typeIncludes([...infTypes], reference)}
 					<button onclick={handleCrit} class="unit-card-block">
 						{#if typeIncludes([...mechTypes], reference)}
-							<CritBoxMech {unit} {critCount}></CritBoxMech>
+							<CritBoxMech unit={data} {critCount}></CritBoxMech>
 						{:else if typeIncludes([...aeroTypes], reference)}
-							<CritBoxAero {unit} {critCount}></CritBoxAero>
+							<CritBoxAero unit={data} {critCount}></CritBoxAero>
 						{:else if typeIncludes([...vTypes], reference)}
-							<CritBoxCv {unit} {critCount}></CritBoxCv>
+							<CritBoxCv unit={data} {critCount}></CritBoxCv>
 						{:else if reference?.subtype == "PM"}
-							<CritBoxProto {unit} {critCount}></CritBoxProto>
+							<CritBoxProto unit={data} {critCount}></CritBoxProto>
 						{/if}
 					</button>
 				{/if}
-				{#if unit.number}
+				{#if data.number}
 					<p class={{ numbering: true, "numbering-roman": options.duplicateUnitMarkings == "roman" }}>{createMarking()}</p>
 				{/if}
 			</div>
 		</div>
-		{#if unit.customization?.spa || unit.customization?.ammo || formationBonuses.length}
+		{#if data.customization?.spa || data.customization?.ammo || formationBonuses.length}
 			<div class="unit-card-block unit-custom-block">
-				{#if unit.customization?.spa?.length || formationBonuses.length}
+				{#if data.customization?.spa?.length || formationBonuses.length}
 					<p>
 						<span class="bold">SPA:</span>
-						{unit.customization?.spa?.join(", ")}{`${formationBonuses.length && unit.customization?.spa?.length ? ", " : ""}`}{formationBonuses.join(", ")}
+						{data.customization?.spa?.join(", ")}{`${formationBonuses.length && data.customization?.spa?.length ? ", " : ""}`}{formationBonuses.join(", ")}
 					</p>
 				{/if}
-				{#if unit.customization?.ammo && unit.customization.ammo.length}
-					<p><span class="bold">Alt. ammo:</span> {unit.customization.ammo.join(", ")}</p>
+				{#if data.customization?.ammo && data.customization.ammo.length}
+					<p><span class="bold">Alt. ammo:</span> {data.customization.ammo.join(", ")}</p>
 				{/if}
 			</div>
 		{:else}
@@ -346,13 +341,13 @@
 		{/if}
 	</div>
 
-	<DamageModal {unit} bind:open={openDamageModal} {reference} />
-	<HeatModal {unit} bind:open={openHeatModal} {reference} />
-	<CritModal {unit} bind:open={openCritModal} {reference} />
-	<ExpandModal {unit} bind:open={openExpandModal} {reference} {options} />
-	<SpecialModal ability={abilityReference} bind:open={openSpecialModal} {unit} />
+	<DamageModal unit={data} bind:open={openDamageModal} {reference} />
+	<HeatModal unit={data} bind:open={openHeatModal} {reference} />
+	<CritModal unit={data} bind:open={openCritModal} {reference} />
+	<ExpandModal {unit} bind:open={openExpandModal} {options} />
+	<SpecialModal ability={abilityReference} bind:open={openSpecialModal} unit={data} />
 {:else}
-	<p>Loading unit card</p>
+	<p>Failed to get unit data from server.</p>
 {/if}
 
 <style>

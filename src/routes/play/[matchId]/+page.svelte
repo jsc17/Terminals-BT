@@ -8,13 +8,14 @@
 	import { safeParseJSON } from "$lib/utilities/utilities";
 	import { type Source } from "sveltekit-sse";
 	import { getContext, setContext } from "svelte";
-	import { Dialog, Popover, Separator } from "$lib/generic";
-	import { getAllPlayerData, getTeamData, getMyData, getMatchDetails, startGame } from "../remote/matchData.remote";
-	import { nanoid } from "nanoid";
+	import { Dialog } from "$lib/generic";
+	import { getAllPlayerData, getTeamData, getMyData, getMatchDetails, startGame, getMatchUnitData } from "./remote/matchData.remote";
 	import MatchJoinModal from "./components/ui/MatchJoinModal.svelte";
 	import { CaretLeft, CaretRight } from "phosphor-svelte";
-	import { handlePlayerJoined, handleRemoveCritical, handleRoundEnd, handleSetDamage, handleSetHeat, handleTakeCritical } from "./utilities/handleMatchEvents";
 	import EndRoundModal from "./components/ui/EndRoundModal.svelte";
+	import { SvelteMap } from "svelte/reactivity";
+	import type { MulUnit } from "$lib/types/listTypes";
+	import { handleUnitUpdate, handlePlayerJoined, initializePlayerLists } from "./utilities/handleMatchEvents";
 
 	let { data } = $props();
 
@@ -23,31 +24,29 @@
 	let connection: Source = getContext("connection");
 	const matchChannel = connection.select(`${data.matchId}`);
 	matchChannel.subscribe((message: string) => {
-		console.log("Message Received", message);
 		if (message == "") return;
 		const event: { type: string; data: string } = safeParseJSON(message);
 		if (event) {
 			switch (event.type) {
 				case "playerJoined":
-					handlePlayerJoined(data.matchId, event.data, playerLists);
+					handlePlayerJoined(data.matchId, event.data, playerLists, matchUnits);
 					break;
 				case "matchStart":
 					getMatchDetails(data.matchId).refresh();
 					break;
-				case "setDamage":
-					handleSetDamage(event.data, playerLists);
+				case "updateUnit": {
+					const unitId = Number(event.data);
+					if (isNaN(unitId)) console.log("Received update with invalid unit id");
+					if (!matchUnits.has(unitId)) console.log("Id not found in existing units");
+					handleUnitUpdate(unitId, matchUnits);
 					break;
-				case "setHeat":
-					handleSetHeat(event.data, playerLists);
-					break;
-				case "takeCritical":
-					handleTakeCritical(event.data, playerLists, matchData?.currentRound ?? 0);
-					break;
-				case "removeCritical":
-					handleRemoveCritical(event.data, playerLists);
-					break;
+				}
 				case "roundEnd":
-					handleRoundEnd();
+					getMatchDetails(data.matchId).refresh();
+					getTeamData(data.matchId).refresh();
+					matchUnits.forEach((u) => {
+						handleUnitUpdate(u.data.id, matchUnits);
+					});
 					break;
 				default:
 					console.log("Unhandled Event");
@@ -69,74 +68,12 @@
 	const playerData = $derived(await getAllPlayerData(data.matchId));
 
 	let playerLists = $state<PlayList[]>([]);
+	let matchUnits = new SvelteMap<number, { data: PlayUnit; reference?: MulUnit; image?: string }>();
 
 	watch(
 		() => playerData,
 		() => {
-			playerLists = playerData
-				?.filter((p) => p.teamId != null && p.formations.length != 0)
-				.sort((a, b) => {
-					return a.teamId! - b.teamId!;
-				})
-				.map((p) => {
-					const playerFormationList: PlayFormation[] = [];
-					for (const formation of p.formations) {
-						const units: PlayUnit[] = formation.units
-							.filter((u) => !u.secondary)
-							.map((u) => ({
-								id: u.id,
-								mulId: u.mulId,
-								skill: u.skill,
-								pending: {
-									damage: u.pendingDamage,
-									heat: u.pendingHeat,
-									crits: u.criticals
-										.filter((c) => c.pending)
-										.map((c) => {
-											return { id: c.id, round: c.round, type: c.type, roundsRemaining: c.roundsRemaining ?? undefined };
-										})
-								},
-								current: {
-									damage: u.currentDamage,
-									heat: u.currentHeat,
-									crits: u.criticals
-										.filter((c) => !c.pending)
-										.map((c) => {
-											return { id: c.id, round: c.round, type: c.type, roundsRemaining: c.roundsRemaining ?? undefined };
-										}),
-									disabledAbilities: []
-								}
-							}));
-						const secondaryUnits: PlayUnit[] = formation.units
-							.filter((u) => u.secondary)
-							.map((u) => ({
-								id: u.id,
-								mulId: u.mulId,
-								skill: u.skill,
-								pending: {
-									damage: u.pendingDamage,
-									heat: u.pendingHeat,
-									crits: u.criticals
-										.filter((c) => c.pending)
-										.map((c) => {
-											return { id: c.id, round: c.round, type: c.type, roundsRemaining: c.roundsRemaining ?? undefined };
-										})
-								},
-								current: {
-									damage: u.currentDamage,
-									heat: u.currentHeat,
-									crits: u.criticals
-										.filter((c) => !c.pending)
-										.map((c) => {
-											return { id: c.id, round: c.round, type: c.type, roundsRemaining: c.roundsRemaining ?? undefined };
-										}),
-									disabledAbilities: []
-								}
-							}));
-						playerFormationList.push({ id: nanoid(6), name: formation.name, type: formation.type, units });
-					}
-					return { id: nanoid(10), owner: p.playerNickname, team: p.teamId, formations: playerFormationList } as PlayList;
-				});
+			playerLists = initializePlayerLists(playerData, matchUnits);
 		}
 	);
 
@@ -217,7 +154,11 @@
 							}}>Start Game</button
 						>
 					{:else}
-						<EndRoundModal open={roundOpenModel} matchData={matchData!} teams={teamData} />
+						<EndRoundModal open={roundOpenModel} matchData={matchData!} teams={teamData}>
+							{#snippet trigger()}
+								<div class="toolbar-button">End Round</div>
+							{/snippet}
+						</EndRoundModal>
 					{/if}
 				</div>
 			{/if}
@@ -249,7 +190,7 @@
 					>
 					<div class="list" id={list.id}>
 						{#each list.formations as formation}
-							<PlayFormations {formation} options={options.current} />
+							<PlayFormations {formation} {matchUnits} options={options.current} />
 						{/each}
 					</div>
 					<a

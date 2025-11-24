@@ -1,4 +1,4 @@
-import type { User, Session } from "@prisma/client";
+import type { User, Session } from "$lib/generated/prisma/browser";
 import { encodeBase32LowerCase, encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from "@oslojs/encoding";
 import { sha256 } from "@oslojs/crypto/sha2";
 import { prisma } from "../prisma";

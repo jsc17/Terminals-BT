@@ -24,8 +24,8 @@ type PlayFormation = {
 	id: string;
 	name: string;
 	type: string;
-	units: PlayUnit[];
-	secondary?: { type?: string; units?: PlayUnit[] };
+	units: number[];
+	secondary?: { type?: string; units?: number[] };
 	bonuses?: FormationBonus[];
 };
 
@@ -35,6 +35,7 @@ type PlayList = {
 	team: number;
 	formations: PlayFormation[];
 };
+
 type LogRound = {
 	round: number;
 	logs: LogEntry[];

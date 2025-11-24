@@ -1,7 +1,7 @@
 import { query, form, command, getRequestEvent } from "$app/server";
 import { prisma } from "$lib/server/prisma";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 import { CreateMatchSchema, NicknameSchema } from "../schema/matchlistSchema";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 export const getNickname = query(async () => {
 	const { locals } = getRequestEvent();

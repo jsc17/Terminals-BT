@@ -1,6 +1,6 @@
 // import { nanoid } from "nanoid";
 // import type { PlayFormation, PlayUnit, PlayList } from "../../types/types";
-// import { type MatchFormation, type MatchUnit } from "@prisma/client";
+// import { type MatchFormation, type MatchUnit } from "$lib/generated/prisma/browser";
 
 // type PlayListData = {
 //     formations: {units: MatchUnit[]}

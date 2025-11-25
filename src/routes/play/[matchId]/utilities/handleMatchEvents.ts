@@ -4,56 +4,74 @@ import { nanoid } from "nanoid";
 import { getPlayerData, getMatchUnitData } from "../remote/matchData.remote";
 import type { PlayFormation, PlayList, PlayUnit } from "../../types/types";
 import type { MulUnit } from "$lib/types/listTypes";
-import type { SvelteMap } from "svelte/reactivity";
+import { SvelteMap } from "svelte/reactivity";
 import { getMulImage } from "$lib/remote/mulImages.remote";
 import { getMULDataFromId } from "$lib/remote/unit.remote";
 import type { MatchCrit, MatchFormation, MatchUnit, UsersInMatch } from "$lib/generated/prisma/browser";
 
-export function initializePlayerLists(
+export async function initializePlayerLists(
 	playerData: (UsersInMatch & { formations: (MatchFormation & { units: (MatchUnit & { criticals: MatchCrit[] })[] })[] })[],
 	matchUnits: SvelteMap<number, { data: PlayUnit; reference?: MulUnit; image?: string }>
 ) {
-	return playerData
-		?.filter((p) => p.teamId != null && p.formations.length != 0)
-		.sort((a, b) => {
-			return a.teamId! - b.teamId!;
-		})
-		.map((p) => {
-			const playerFormationList: PlayFormation[] = [];
-			for (const formation of p.formations) {
-				formation.units.forEach(async (u) => {
-					const unitData = {
-						id: u.id,
-						mulId: u.mulId,
-						skill: u.skill,
-						pending: {
-							damage: u.pendingDamage,
-							heat: u.pendingHeat,
-							crits: u.criticals
-								.filter((c) => c.pending)
-								.map((c) => {
-									return { id: c.id, round: c.round, type: c.type, roundsRemaining: c.roundsRemaining ?? undefined };
-								})
-						},
-						current: {
-							damage: u.currentDamage,
-							heat: u.currentHeat,
-							crits: u.criticals
-								.filter((c) => !c.pending)
-								.map((c) => {
-									return { id: c.id, round: c.round, type: c.type, roundsRemaining: c.roundsRemaining ?? undefined };
-								}),
-							disabledAbilities: []
-						}
-					};
-					const reference = await getMULDataFromId(u.mulId);
-					const image = await getMulImage(reference?.imageLink ?? "");
-					matchUnits.set(u.id, { data: unitData, reference, image: image.image });
+	return await Promise.all(
+		playerData
+			?.filter((p) => p.teamId != null && p.formations.length != 0)
+			.sort((a, b) => {
+				return a.teamId! - b.teamId!;
+			})
+			.map(async (p) => {
+				const playerFormationList: PlayFormation[] = [];
+				const duplicateMap = new SvelteMap<string, number[]>();
+				for (const formation of p.formations) {
+					await Promise.all(
+						formation.units.map(async (u) => {
+							const unitData = {
+								id: u.id,
+								mulId: u.mulId,
+								skill: u.skill,
+								pending: {
+									damage: u.pendingDamage,
+									heat: u.pendingHeat,
+									crits: u.criticals
+										.filter((c) => c.pending)
+										.map((c) => {
+											return { id: c.id, round: c.round, type: c.type, roundsRemaining: c.roundsRemaining ?? undefined };
+										})
+								},
+								current: {
+									damage: u.currentDamage,
+									heat: u.currentHeat,
+									crits: u.criticals
+										.filter((c) => !c.pending)
+										.map((c) => {
+											return { id: c.id, round: c.round, type: c.type, roundsRemaining: c.roundsRemaining ?? undefined };
+										}),
+									disabledAbilities: []
+								}
+							};
+							const reference = await getMULDataFromId(u.mulId);
+							const image = await getMulImage(reference?.imageLink ?? "");
+							matchUnits.set(u.id, { data: unitData, reference, image: image.image });
+
+							if (reference) {
+								const key = reference.group != "" ? reference.group : reference.class;
+								if (!duplicateMap.has(key)) duplicateMap.set(key, []);
+								duplicateMap.get(key)?.push(u.id);
+							}
+						})
+					);
+
+					playerFormationList.push({ id: nanoid(6), name: formation.name, type: formation.type, units: formation.units.map((u) => u.id) });
+				}
+				duplicateMap.forEach((value) => {
+					value.forEach((id, index) => {
+						if (value.length > 1) matchUnits.get(id)!.data.number = index + 1;
+					});
 				});
-				playerFormationList.push({ id: nanoid(6), name: formation.name, type: formation.type, units: formation.units.map((u) => u.id) });
-			}
-			return { id: nanoid(10), owner: p.playerNickname, team: p.teamId, formations: playerFormationList } as PlayList;
-		});
+
+				return { id: nanoid(10), owner: p.playerNickname, team: p.teamId, formations: playerFormationList } as PlayList;
+			})
+	);
 }
 
 export function handlePlayerJoined(matchId: number, data: string, playerLists: PlayList[], matchUnits: SvelteMap<number, { data: PlayUnit; reference?: MulUnit; image?: string }>) {

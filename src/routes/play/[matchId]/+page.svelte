@@ -73,7 +73,9 @@
 	watch(
 		() => playerData,
 		() => {
-			playerLists = initializePlayerLists(playerData, matchUnits);
+			initializePlayerLists(playerData, matchUnits).then((results) => {
+				playerLists = results;
+			});
 		}
 	);
 

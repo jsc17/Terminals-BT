@@ -36,7 +36,8 @@
 {/snippet}
 <div class="play-formation-container">
 	<div class="play-formation-header">
-		<p>{formation.name}{formation.type != "none" ? `- ${formation.type}` : ""}</p>
+		<p>{formation.name != "Unassigned units" ? formation.name : ""}{formation.type != "none" ? `- ${formation.type}` : ""}</p>
+		<div></div>
 		<button
 			onclick={() => {
 				openPrimary = !openPrimary;
@@ -90,7 +91,6 @@
 		width: 100%;
 		display: grid;
 		grid-template-columns: 1fr 1fr 1fr;
-		justify-content: space-between;
 		align-items: center;
 		border-bottom: 1px solid var(--border);
 		background-color: var(--surface-color);

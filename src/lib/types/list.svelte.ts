@@ -10,7 +10,7 @@ export type { ListCode, ListCodeUnit, ListUnit, ListFormation, SCA, MulUnit, Sub
 
 export class List {
 	units: ListUnit[] = $state([]);
-	formations: ListFormation[] = $state([{ id: "unassigned", name: "Unassigned units", type: "none", units: [] }]);
+	formations = $state<ListFormation[]>([{ id: "unassigned", name: "Unassigned units", type: "none", units: [] }]);
 	sublists: Sublist[] = $state([]);
 	scaList: SCA[] = $state([]);
 	bsList = $state<number[]>([]);
@@ -46,14 +46,14 @@ export class List {
 		const newListCode: ListCode = {
 			id: this.id,
 			lcVersion: 2,
-			name: this.details.name,
-			eras: this.details.eras,
-			factions: this.details.factions,
-			rules: this.rules,
+			name: $state.snapshot(this.details.name),
+			eras: $state.snapshot(this.details.eras),
+			factions: $state.snapshot(this.details.factions),
+			rules: $state.snapshot(this.rules),
 			units: unitList,
-			formations: this.formations,
-			sublists: this.sublists,
-			bs: this.bsList
+			formations: $state.snapshot(this.formations),
+			sublists: $state.snapshot(this.sublists),
+			bs: $state.snapshot(this.bsList)
 		};
 		if (this.scaList.length) {
 			newListCode.scas = this.scaList.map(({ id }) => {

@@ -101,11 +101,19 @@ export const joinMatch = form(
 							{
 								name: formation.name,
 								type: formation.type,
+								secondaryType: formation.secondary ? formation.secondary.type : undefined,
 								units: {
-									create: formation.units.map((f: { id: string }) => {
-										const unit = units.find((u: { id: string }) => u.id == f.id);
-										return { mulId: unit.mulId, skill: unit.skill ?? 4, secondary: false };
-									})
+									create: formation.units
+										.map((f: { id: string }) => {
+											const unit = units.find((u: { id: string }) => u.id == f.id);
+											return { mulId: unit.mulId, skill: unit.skill ?? 4, secondary: false };
+										})
+										.concat(
+											(formation.secondary?.units ?? []).map((f: { id: string }) => {
+												const unit = units.find((u: { id: string }) => u.id == f.id);
+												return { mulId: unit.mulId, skill: unit.skill ?? 4, secondary: true };
+											})
+										)
 								}
 							}
 						]

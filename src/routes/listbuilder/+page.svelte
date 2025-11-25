@@ -58,10 +58,12 @@
 				// db.previousLists.clear();
 				Promise.all(
 					$state.snapshot(listCodes).map(async (lc) => {
-						try {
-							const id = await db.previousLists.put(lc);
-						} catch (error) {
-							console.log(`Failed to add previous list (${lc.id}) ${lc.name}: ${error}`);
+						if (lc) {
+							try {
+								await db.previousLists.put(lc);
+							} catch (error) {
+								console.log(`Failed to add previous list (${lc.id}) ${lc.name}: ${error}`);
+							}
 						}
 					})
 				);

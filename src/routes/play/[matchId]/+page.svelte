@@ -16,6 +16,9 @@
 	import { SvelteMap } from "svelte/reactivity";
 	import type { MulUnit } from "$lib/types/listTypes";
 	import { handleUnitUpdate, handlePlayerJoined, initializePlayerLists } from "./utilities/handleMatchEvents";
+	import { deleteMatch } from "../remote/matchlist.remote";
+	import { toastController } from "$lib/stores";
+	import { goto } from "$app/navigation";
 
 	let { data } = $props();
 
@@ -47,6 +50,10 @@
 					matchUnits.forEach((u) => {
 						handleUnitUpdate(u.data.id, matchUnits);
 					});
+					break;
+				case "matchDelete":
+					toastController.addToast("Host deleted the match. Redirecting you to match selection.");
+					goto("/play");
 					break;
 				default:
 					console.log("Unhandled Event");
@@ -133,7 +140,14 @@
 								},
 								{ type: "item", label: "Player List", onSelect: () => {} },
 								{ type: "item", label: "Manage Teams", onSelect: () => {} },
-								{ type: "item", label: "End Match", onSelect: () => {} }
+								{ type: "item", label: "End Match", onSelect: () => {} },
+								{
+									type: "item",
+									label: "Delete Match",
+									onSelect: () => {
+										if (confirm("Delete match immediately and end without showing summary screen?")) deleteMatch(data.matchId);
+									}
+								}
 							]}
 							triggerClasses="transparent-button"
 						>

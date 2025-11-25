@@ -2,6 +2,8 @@ import { query, form, command, getRequestEvent } from "$app/server";
 import { prisma } from "$lib/server/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 import { CreateMatchSchema, NicknameSchema } from "../schema/matchlistSchema";
+import * as v from "valibot";
+import { clients } from "$lib/server/sseClients";
 
 export const getNickname = query(async () => {
 	const { locals } = getRequestEvent();
@@ -68,4 +70,16 @@ export const createMatch = form(CreateMatchSchema, async (data) => {
 			return { status: "failure", message: "Match name already exists. Please choose a different name." };
 		}
 	}
+});
+
+export const deleteMatch = command(v.number(), async (matchId) => {
+	const { locals } = getRequestEvent();
+	if (!locals.user) return { status: "failure", message: "User is not logged in" };
+
+	const matchData = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { playerRole: "HOST" } } } });
+	if (matchData != null && matchData.players[0].playerId == locals.user.id) await prisma.match.delete({ where: { id: matchId } });
+
+	clients.forEach((c) => {
+		c.emit(`${matchId}`, JSON.stringify({ type: "matchDelete", data: {} }));
+	});
 });

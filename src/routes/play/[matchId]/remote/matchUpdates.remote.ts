@@ -22,6 +22,9 @@ export const removeDamage = command(v.object({ unitId: v.number(), damage: v.num
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
 
+	const existingUnit = prisma.matchUnit.findUnique({ where: { id: unitId }, select: { pendingDamage: true, currentDamage: true } });
+	if(existingUnit == null) return;
+
 	const result = await prisma.matchUnit.update({
 		where: { id: unitId },
 		data: pending ? { pendingDamage: { decrement: damage } } : { currentDamage: { decrement: damage } },

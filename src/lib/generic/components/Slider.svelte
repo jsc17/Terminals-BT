@@ -2,9 +2,9 @@
 	import type { ComponentProps } from "svelte";
 	import { Slider, type WithoutChildren } from "bits-ui";
 
-	type Props = WithoutChildren<ComponentProps<typeof Slider.Root>>;
+	type Props = WithoutChildren<ComponentProps<typeof Slider.Root>> & { position: "top" | "bottom" | "left" | "right" };
 
-	let { value = $bindable(), ref = $bindable(null), ...restProps }: Props = $props();
+	let { position, value = $bindable(), ref = $bindable(null), ...restProps }: Props = $props();
 </script>
 
 <!--
@@ -13,15 +13,16 @@
  (an unfortunate consequence of having to destructure bindable values)
   -->
 <Slider.Root bind:value bind:ref {...restProps as any}>
-	{#snippet children({ thumbs, ticks })}
+	{#snippet children({ thumbItems, tickItems })}
 		<div class="bar"><Slider.Range /></div>
 
-		{#each thumbs as index}
+		{#each thumbItems as { index, value }}
 			<Slider.Thumb {index} />
 		{/each}
 
-		{#each ticks as index}
+		{#each tickItems as { index, value }}
 			<Slider.Tick {index} />
+			<Slider.TickLabel {index} {position}>{value}</Slider.TickLabel>
 		{/each}
 	{/snippet}
 </Slider.Root>
@@ -47,6 +48,18 @@
 		height: 15px;
 		cursor: pointer;
 		border-radius: 50%;
+	}
+	:global([data-slider-tick]) {
+		width: 1px;
+		height: 100%;
+		background-color: var(--surface-color);
+	}
+	:global([data-slider-tick][data-selected]) {
+		background-color: transparent;
+	}
+	:global([data-slider-tick-label]) {
+		margin-top: 6px;
+		font-size: 0.93rem;
 	}
 	.bar {
 		width: 100%;

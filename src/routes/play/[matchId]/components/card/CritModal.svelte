@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { Dialog } from "$lib/generic";
+	import { Dialog, Switch } from "$lib/generic";
 	import type { MulUnit } from "$lib/types/listTypes";
-	import { nanoid } from "nanoid";
 	import type { PlayUnit } from "../../../types/types";
 	import { criticalLists } from "../../utilities/criticalList";
 	import { Tabs } from "bits-ui";
@@ -22,13 +21,15 @@
 	let criticalType = $derived(
 		criticalLists.get(reference.subtype)?.crits.find((c) => c.id == selectedCritical) ?? criticalLists.get(reference.subtype)?.motive?.find((m) => m.id == selectedCritical)
 	);
+	let takePending = $state(true);
 
-	function applyCrit(pending: boolean) {
+	function applyCrit() {
 		if (!criticalType) return;
 
-		takeCritical({ matchId, unitId: unit.id, type: criticalType.value, pending, rounds: criticalType.value == "crewstunned" ? 1 : undefined });
+		takeCritical({ matchId, unitId: unit.id, type: criticalType.value, pending: takePending, rounds: criticalType.value == "crewstunned" ? 1 : undefined });
 
 		selectedCritical = -1;
+		takePending = true;
 		open = false;
 	}
 	function undoCrit(criticalId: number) {
@@ -72,9 +73,16 @@
 					</fieldset>
 				{/if}
 				<div class="apply-buttons">
-					<button onclick={() => applyCrit(false)} disabled={criticalType?.value == "none"}>Apply Now</button>
+					<Switch bind:checked={takePending} height={25}>
+						{#snippet leftValue()}
+							<p class={{ "switch-activated": takePending }}>Immediately</p>
+						{/snippet}
+						{#snippet rightValue()}
+							<p class={{ "switch-activated": !takePending }}>End of Round</p>
+						{/snippet}
+					</Switch>
 					<div class="temp-div">
-						<button onclick={() => applyCrit(true)} disabled={criticalType?.value == "none"}>Apply At End of Round</button>
+						<button onclick={applyCrit} disabled={criticalType?.value == "none"}>Apply Critical</button>
 					</div>
 				</div>
 			</div>
@@ -82,10 +90,11 @@
 		<Tabs.Content value="remove">
 			<div class="crit-modal-body">
 				<div class="current-critical-list">
-					{#if unit.current.crits.length}
+					{#if unit.current.crits.length || unit.pending.crits.length}
 						<div class="current-critical-row">
 							<p class="bold">Round Taken</p>
 							<p class="bold">Critical Hit</p>
+							<p class="bold">Status</p>
 						</div>
 
 						{#each unit.current.crits as critical}
@@ -95,6 +104,18 @@
 							<div class="current-critical-row">
 								<p class="center">{critical.round}</p>
 								<p>{label?.label ?? critical.type}</p>
+								<p>Applied</p>
+								<button class="remove-button" onclick={() => undoCrit(critical.id)}>Remove</button>
+							</div>
+						{/each}
+						{#each unit.pending.crits as critical}
+							{@const label =
+								criticalLists.get(reference.subtype)?.crits.find((c) => c.value == critical.type) ??
+								criticalLists.get(reference.subtype)?.motive?.find((m) => m.value == critical.type)}
+							<div class="current-critical-row">
+								<p class="center">{critical.round}</p>
+								<p>{label?.label ?? critical.type}</p>
+								<p>Pending</p>
 								<button class="remove-button" onclick={() => undoCrit(critical.id)}>Remove</button>
 							</div>
 						{/each}
@@ -161,7 +182,7 @@
 
 	.apply-buttons {
 		display: flex;
-		justify-content: center;
+		justify-content: space-evenly;
 		align-items: center;
 		gap: 24px;
 
@@ -172,14 +193,14 @@
 	}
 	.current-critical-list {
 		display: grid;
-		grid-template-columns: max-content 1fr max-content;
+		grid-template-columns: max-content 1fr max-content max-content;
 		column-gap: 24px;
 		border: 1px solid var(--border);
 	}
 	.current-critical-row {
 		display: grid;
 		grid-template-columns: subgrid;
-		grid-column: span 3;
+		grid-column: span 4;
 		border-bottom: 1px solid var(--border);
 		padding: 8px 24px;
 		width: 100%;
@@ -188,5 +209,8 @@
 		color: black;
 		background-color: lightcoral;
 		width: max-content;
+	}
+	.switch-activated {
+		color: var(--surface-color-light-text-color);
 	}
 </style>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Dialog } from "$lib/generic";
+	import { Dialog, Switch } from "$lib/generic";
 	import type { MulUnit } from "$lib/types/list.svelte";
 	import type { PlayUnit } from "../../../types/types";
 	import { setHeat } from "../../remote/matchUpdates.remote";
@@ -13,6 +13,7 @@
 	let { unit, open = $bindable(false), reference }: Props = $props();
 
 	let newHeatLevel = $derived(unit.pending.heat);
+	let takePending = $state(true);
 
 	function setNewLevel(newLevel: number) {
 		if (newLevel >= 0 && 4 >= newLevel) {
@@ -20,10 +21,10 @@
 		}
 	}
 
-	function applyHeat(pending: boolean) {
+	function applyHeat() {
 		if (newHeatLevel < 0) newHeatLevel = 0;
 		if (newHeatLevel > 4) newHeatLevel = 4;
-		setHeat({ unitId: unit.id, heatLevel: newHeatLevel, pending });
+		setHeat({ unitId: unit.id, heatLevel: newHeatLevel, pending: takePending });
 		open = false;
 	}
 </script>
@@ -104,10 +105,15 @@
 			>
 		</div>
 		<div class="apply-buttons">
-			<button onclick={() => applyHeat(false)}>Apply Now</button>
-			<div class="temp-div">
-				<button onclick={() => applyHeat(true)}>Apply At End of Round</button>
-			</div>
+			<Switch bind:checked={takePending} height={25}>
+				{#snippet leftValue()}
+					<p class={{ "switch-activated": takePending }}>Immediately</p>
+				{/snippet}
+				{#snippet rightValue()}
+					<p class={{ "switch-activated": !takePending }}>End of Round</p>
+				{/snippet}
+			</Switch>
+			<button onclick={applyHeat}>Apply Heat</button>
 		</div>
 	</div>
 </Dialog>
@@ -132,7 +138,7 @@
 	}
 	.apply-buttons {
 		display: flex;
-		justify-content: center;
+		justify-content: space-evenly;
 		align-items: center;
 		gap: 24px;
 		margin-top: 16px;
@@ -219,5 +225,8 @@
 
 	.pending-cooldown {
 		animation: glowingCool 2000ms infinite;
+	}
+	.switch-activated {
+		color: var(--surface-color-light-text-color);
 	}
 </style>

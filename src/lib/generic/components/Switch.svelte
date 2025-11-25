@@ -10,13 +10,13 @@
 		height?: number;
 	};
 
-	let { checked, leftValue, rightValue, onCheckedChange, height = 15 }: Props = $props();
+	let { checked = $bindable(), leftValue, rightValue, onCheckedChange, height = 15 }: Props = $props();
 </script>
 
 <div class="switch-body">
 	{@render leftValue()}
 	<div class="switch-container" style={`height: ${height}px`}>
-		<Switch.Root {checked} {onCheckedChange}>
+		<Switch.Root bind:checked {onCheckedChange}>
 			<Switch.Thumb></Switch.Thumb>
 		</Switch.Root>
 	</div>

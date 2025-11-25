@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Dialog } from "$lib/generic";
+	import { Dialog, Slider, Switch } from "$lib/generic";
 	import type { MulUnit } from "$lib/types/list.svelte";
-	import { getContext } from "svelte";
+	import { Tabs } from "bits-ui";
 	import type { LogRound, PlayUnit } from "../../../types/types";
-	import { takeDamage } from "../../remote/matchUpdates.remote";
+	import { removeDamage, takeDamage } from "../../remote/matchUpdates.remote";
 
 	type Props = {
 		unit: PlayUnit;
@@ -14,69 +14,84 @@
 	let { unit, open = $bindable(false), reference }: Props = $props();
 
 	let damageToTake = $state(0);
+	let takePending = $state(true);
+	let damageToRemove = $state(0);
+	let removePending = $derived(unit.pending.damage != 0);
 
-	function modifyDamage(amount: number) {
-		damageToTake += amount;
-		if (damageToTake < 0) {
-			damageToTake = 0;
-		}
-	}
-
-	function applyDamage(pending: boolean) {
-		takeDamage({ unitId: unit.id, damage: damageToTake, pending });
+	function applyDamage() {
+		takeDamage({ unitId: unit.id, damage: damageToTake, pending: takePending });
 		damageToTake = 0;
+		takePending = true;
 		open = false;
 	}
-	function removeDamage() {
-		if (confirm(`Remove ${damageToTake} damage from this unit? \n (Removes pending damage before applied damage. Disables undoing damage from the log)`)) {
-			let damageRemaining = Math.max(damageToTake - unit.pending.damage, 0);
-			unit.pending.damage = Math.max(unit.pending.damage - damageToTake, 0);
-			unit.current.damage = Math.max(unit.current.damage - damageRemaining, 0);
-			damageToTake = 0;
+	function healDamage() {
+		if (confirm(`Remove ${damageToRemove} ${removePending ? "pending" : "applied"} damage from this unit?`)) {
+			removeDamage({ unitId: unit.id, damage: damageToRemove, pending: removePending });
+			damageToRemove = 0;
 			open = false;
 		}
 	}
 </script>
 
 <Dialog bind:open title={`Damage ${reference.name}`}>
-	<div class="damage-modal-body">
-		<div class="input-row">
-			<button
-				class="damage-amount-button"
-				onclick={() => {
-					modifyDamage(-5);
-				}}>-5</button
-			>
-			<button
-				class="damage-amount-button"
-				onclick={() => {
-					modifyDamage(-1);
-				}}>-1</button
-			>
-			<p class="damage-amount">{damageToTake}</p>
-			<button
-				class="damage-amount-button"
-				onclick={() => {
-					modifyDamage(1);
-				}}
-			>
-				+1</button
-			>
-			<button
-				class="damage-amount-button"
-				onclick={() => {
-					modifyDamage(5);
-				}}>+5</button
-			>
-		</div>
-		<div class="apply-buttons">
-			<button onclick={() => applyDamage(false)}>Apply Now</button>
-			<div class="temp-div">
-				<button onclick={() => applyDamage(true)}>Apply At End of Round</button>
+	<Tabs.Root value="add">
+		<Tabs.List class="matchUnitTabs">
+			<Tabs.Trigger class="matchUnitTrigger" value="add">Add Damage</Tabs.Trigger>
+			<Tabs.Trigger class="matchUnitTrigger" value="remove">Remove Damage</Tabs.Trigger>
+		</Tabs.List>
+		<Tabs.Content value="add">
+			<div class="damage-modal-body">
+				<div class="slider-wrapper">
+					<Slider bind:value={damageToTake} type="single" min={0} max={16} step={1} position="bottom" />
+				</div>
+				<div class="input-row">
+					<button class="damage-amount-button" onclick={() => (damageToTake -= 5)}>-5</button>
+					<button class="damage-amount-button" onclick={() => (damageToTake -= 1)}>-1</button>
+					<input type="number" class="damage-amount" bind:value={damageToTake} min={0} max={16} />
+					<button class="damage-amount-button" onclick={() => (damageToTake += 1)}>+1</button>
+					<button class="damage-amount-button" onclick={() => (damageToTake += 5)}>+5</button>
+				</div>
+				<div class="apply-buttons">
+					<Switch bind:checked={takePending} height={25}>
+						{#snippet leftValue()}
+							<p class={{ "switch-activated": takePending }}>Immediately</p>
+						{/snippet}
+						{#snippet rightValue()}
+							<p class={{ "switch-activated": !takePending }}>End of Round</p>
+						{/snippet}
+					</Switch>
+					<button onclick={applyDamage}>Apply Damage</button>
+				</div>
 			</div>
-		</div>
-		<button class="remove-button" onclick={removeDamage}>Remove Damage</button>
-	</div>
+		</Tabs.Content>
+		<Tabs.Content value="remove">
+			<div class="damage-modal-body">
+				<Switch bind:checked={removePending} height={25}>
+					{#snippet leftValue()}
+						<p class={{ "switch-activated": takePending }}>Applied</p>
+					{/snippet}
+					{#snippet rightValue()}
+						<p class={{ "switch-activated": !takePending }}>Pending</p>
+					{/snippet}
+				</Switch>
+
+				<div class="removal-wrapper">
+					<p>Current Damage ({removePending ? "Pending" : "Applied"}):</p>
+					<p>{removePending ? unit.pending.damage : unit.current.damage}</p>
+					<p>Damage to remove:</p>
+					<input type="number" bind:value={damageToRemove} min={0} max={removePending ? unit.pending.damage : unit.current.damage} />
+				</div>
+				<div class="slider-wrapper">
+					<Slider bind:value={damageToRemove} type="single" min={0} max={removePending ? unit.pending.damage : unit.current.damage} step={1} position="bottom" />
+				</div>
+
+				<div class="apply-buttons">
+					<div></div>
+					<button onclick={healDamage}>Remove Damage</button>
+				</div>
+			</div>
+		</Tabs.Content>
+	</Tabs.Root>
 </Dialog>
 
 <style>
@@ -95,13 +110,15 @@
 	.damage-amount {
 		font-size: 36px;
 		margin: 0px 6px;
+		width: 75px;
 	}
 	.damage-amount-button {
 		font-size: 30px;
 	}
 	.apply-buttons {
+		margin-top: 16px;
 		display: flex;
-		justify-content: center;
+		justify-content: space-evenly;
 		align-items: center;
 		gap: 24px;
 
@@ -110,9 +127,20 @@
 			font-size: 18px;
 		}
 	}
-	.remove-button {
-		margin-top: 8px;
-		background-color: lightcoral;
-		align-self: end;
+	.slider-wrapper {
+		width: 95%;
+		align-self: center;
+		margin-bottom: 20px;
+	}
+	.switch-activated {
+		color: var(--surface-color-light-text-color);
+	}
+	.removal-wrapper {
+		display: grid;
+		grid-template-columns: max-content 1fr;
+		gap: 8px 12px;
+	}
+	.removal-wrapper p:nth-child(odd) {
+		text-align: end;
 	}
 </style>

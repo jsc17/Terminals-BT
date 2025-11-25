@@ -1,9 +1,8 @@
 <script lang="ts">
 	import type { MulUnit } from "$lib/types/listTypes";
-	import { getContext, onMount } from "svelte";
+	import { getContext } from "svelte";
 	import { CritBoxAero, CritBoxCv, CritBoxMech, CritBoxProto } from "..";
 	import { DamageModal, HeatModal, CritModal, ExpandModal, SpecialModal } from "..";
-	import { loadMULUnit } from "$lib/utilities/loadUtilities";
 	import * as automation from "../../utilities/playmodeAutomation";
 	import { createDamagedAbilityString } from "../../utilities/playmodeUtilities";
 	import { infTypes, mechTypes, typeIncludes, vTypes } from "$lib/cardgeneration/unitTypeUtilities";
@@ -11,7 +10,6 @@
 	import { type UnitAbility } from "$lib/data/abilities";
 	import type { SvelteMap } from "svelte/reactivity";
 	import { getSPAfromId } from "$lib/utilities/listUtilities";
-	import { getMulImage } from "$lib/remote/mulImages.remote";
 	import { numberToRomanNumeral } from "$lib/utilities/utilities";
 	import type { PlaymodeOptionsOutput } from "../../../schema/playmode";
 	import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";

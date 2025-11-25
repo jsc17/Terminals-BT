@@ -3,7 +3,6 @@ import { getSCAfromId, calculateListStats } from "$lib/utilities/listUtilities";
 import { getGeneralList, getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 import { getRulesByName } from "$lib/types/rulesets";
 import { nanoid } from "nanoid";
-import { loadMULUnit } from "$lib/utilities/loadUtilities";
 import { getCustomUnitData, getMULDataFromId, getUnitAvailability } from "$lib/remote/unit.remote";
 import { db } from "$lib/offline/db";
 
@@ -462,14 +461,6 @@ export class List {
 			tempUnitArray.push();
 		});
 		return `{${tempUnitArray.join(",")}}`;
-	}
-	async loadUnit(mulId: number) {
-		let unitToAdd!: MulUnit;
-
-		unitToAdd = await loadMULUnit(mulId.toString());
-		unitToAdd.rulesLevel = "Standard";
-
-		return unitToAdd;
 	}
 	async loadList(data: ListCode) {
 		const listCode: ListCode = data;

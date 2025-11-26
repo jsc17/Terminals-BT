@@ -5,6 +5,7 @@ import { clients } from "$lib/server/sseClients";
 import type { MatchUnit, MatchCrit } from "$lib/generated/prisma/browser";
 import { UpdateMatchSchema } from "../../schema/matchlistSchema";
 import { nothing } from "../../../validation/validate.remote";
+import { invalid } from "@sveltejs/kit";
 
 export const getMatchDetails = query(v.number(), async (matchId) => {
 	const match = await prisma.match.findUnique({ where: { id: matchId } });
@@ -66,7 +67,7 @@ export const joinMatch = form(
 		listCode: v.optional(v.string()),
 		nickname: v.string()
 	}),
-	async (data, invalid) => {
+	async (data, issue) => {
 		const { locals } = getRequestEvent();
 		if (!locals.user) return undefined;
 
@@ -79,7 +80,7 @@ export const joinMatch = form(
 				data: { playerNickname: data.nickname, team: { connect: { id: data.teamId } } }
 			});
 		} else {
-			if (!data.joinCode || data.joinCode != match?.joinCode) throw invalid(invalid.joinCode("Invalid join code for this match"));
+			if (!data.joinCode || data.joinCode != match?.joinCode) throw invalid(issue.joinCode("Invalid join code for this match"));
 			if (!data.nickname) throw invalid("Player nickname is required");
 			await prisma.match.update({
 				where: { id: data.matchId },
@@ -90,7 +91,7 @@ export const joinMatch = form(
 		}
 
 		const list = await prisma.listV3.findUnique({ where: { userId: locals.user.id, id: data.listId }, select: { units: true, formations: true } });
-		if (list == null) throw invalid(invalid.listId("List could not be loaded. Please try again"));
+		if (list == null) throw invalid(issue.listId("List could not be loaded. Please try again"));
 
 		const units = JSON.parse(list.units);
 		for (const formation of JSON.parse(list.formations)) {

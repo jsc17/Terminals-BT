@@ -3,6 +3,8 @@ import * as v from "valibot";
 import { prisma } from "$lib/server/prisma";
 import { clients } from "$lib/server/sseClients";
 import type { MatchUnit, MatchCrit } from "$lib/generated/prisma/browser";
+import { UpdateMatchSchema } from "../../schema/matchlistSchema";
+import { nothing } from "../../../validation/validate.remote";
 
 export const getMatchDetails = query(v.number(), async (matchId) => {
 	const match = await prisma.match.findUnique({ where: { id: matchId } });
@@ -137,4 +139,36 @@ export const startGame = command(v.number(), async (matchId) => {
 	clients.forEach((c) => {
 		c.emit(`${matchId}`, JSON.stringify({ type: "matchStart", data: "" }));
 	});
+});
+
+export const updateMatchData = form(UpdateMatchSchema, async ({ matchId, name, joinCode, teamNames, teamScores, currentRound, privateMatch }) => {
+	const { locals } = getRequestEvent();
+	if (!locals.user) return { status: "failure", message: "User is not logged in" };
+
+	const matchData = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { playerRole: "HOST" } } } });
+	if (matchData != null && matchData.players[0].playerId == locals.user.id) {
+		await prisma.match.update({ where: { id: matchId }, data: { name, joinCode, currentRound, private: privateMatch } });
+		const existingTeams = await prisma.matchTeam.findMany({ where: { matchId } });
+		await Promise.all(
+			existingTeams.map(async (team, index) => prisma.matchTeam.update({ where: { id: team.id }, data: { name: teamNames[index], objectivePoints: teamScores[index] } }))
+		);
+		clients.forEach((c) => {
+			c.emit(`${matchId}`, JSON.stringify({ type: "matchUpdate", data: {} }));
+		});
+	}
+	await nothing().refresh();
+});
+
+export const deleteMatch = command(v.number(), async (matchId) => {
+	const { locals } = getRequestEvent();
+	if (!locals.user) return { status: "failure", message: "User is not logged in" };
+
+	const matchData = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { playerRole: "HOST" } } } });
+	if (matchData != null && matchData.players[0].playerId == locals.user.id) {
+		await prisma.match.delete({ where: { id: matchId } });
+
+		clients.forEach((c) => {
+			c.emit(`${matchId}`, JSON.stringify({ type: "matchDelete", data: {} }));
+		});
+	}
 });

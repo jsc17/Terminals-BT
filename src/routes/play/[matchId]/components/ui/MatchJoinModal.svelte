@@ -14,7 +14,7 @@
 		host: boolean;
 	};
 
-	let { open = $bindable(), joinCode, matchId, teams, host }: Props = $props();
+	let { open = $bindable(), matchId, teams, host }: Props = $props();
 
 	let lists = $derived(await getUsersLists());
 	joinMatch.fields.nickname.set(await getNickname());

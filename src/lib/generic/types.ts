@@ -7,7 +7,7 @@ type Item = {
 type MenuSimpleItem = {
 	type: "item";
 	label: string;
-	onSelect: () => void;
+	onSelect?: () => void;
 };
 
 type MenuCheck = {

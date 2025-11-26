@@ -9,16 +9,17 @@
 	import { type Source } from "sveltekit-sse";
 	import { getContext, setContext } from "svelte";
 	import { Dialog } from "$lib/generic";
-	import { getAllPlayerData, getTeamData, getMyData, getMatchDetails, startGame, getMatchUnitData } from "./remote/matchData.remote";
+	import { getAllPlayerData, getTeamData, getMyData, getMatchDetails, startGame, deleteMatch } from "./remote/matchData.remote";
 	import MatchJoinModal from "./components/ui/MatchJoinModal.svelte";
 	import { CaretLeft, CaretRight } from "phosphor-svelte";
 	import EndRoundModal from "./components/ui/EndRoundModal.svelte";
 	import { SvelteMap } from "svelte/reactivity";
 	import type { MulUnit } from "$lib/types/listTypes";
 	import { handleUnitUpdate, handlePlayerJoined, initializePlayerLists } from "./utilities/handleMatchEvents";
-	import { deleteMatch } from "../remote/matchlist.remote";
 	import { toastController } from "$lib/stores";
 	import { goto } from "$app/navigation";
+	import type { MenuItem } from "$lib/generic/types";
+	import MatchManagementModal from "./components/ui/MatchManagementModal.svelte";
 
 	let { data } = $props();
 
@@ -50,6 +51,10 @@
 					matchUnits.forEach((u) => {
 						handleUnitUpdate(u.data.id, matchUnits);
 					});
+					break;
+				case "matchUpdate":
+					getMatchDetails(data.matchId).refresh();
+					getTeamData(data.matchId).refresh();
 					break;
 				case "matchDelete":
 					toastController.addToast("Host deleted the match. Redirecting you to match selection.");
@@ -88,6 +93,23 @@
 
 	let joinModalOpen = $state(false);
 	let roundOpenModel = $state(false);
+	let managementModalOpen = $state(false);
+
+	const hostMenuOptions: MenuItem[] = $derived([
+		{ type: "item", label: "Join Match as Player", onSelect: () => (joinModalOpen = true) },
+		{ type: "item", label: "Player List", onSelect: () => {} },
+		{ type: "item", label: "Manage Match", onSelect: () => (managementModalOpen = true) },
+		{ type: "item", label: "End Match", onSelect: () => {} },
+		{
+			type: "item",
+			label: "Delete Match",
+			onSelect: () => {
+				if (confirm("Delete match immediately and end without showing summary screen?")) deleteMatch(data.matchId);
+			}
+		},
+		{ type: "separator" },
+		{ type: "item", label: `Join Code: ${matchData?.joinCode}` }
+	]);
 </script>
 
 <svelte:head>
@@ -95,19 +117,8 @@
 </svelte:head>
 
 <div class="play-body">
-	<div class="space-between">
+	<div class="match-name-bar">
 		<p>{matchData?.name}</p>
-		<p>
-			Join Code: <Dialog title="Join Code">
-				{#snippet trigger()}
-					Reveal
-				{/snippet}
-				{#snippet description()}
-					This code will allow players to join the game
-				{/snippet}
-				<div style="padding: 4px 10px">{matchData?.joinCode}</div>
-			</Dialog>
-		</p>
 		<a href="/play">Return to match selection</a>
 	</div>
 	<div class="match-bars">
@@ -129,28 +140,7 @@
 							}}>Join Match</button
 						>
 					{:else if myData.playerRole == "HOST"}
-						<DropdownMenu
-							items={[
-								{
-									type: "item",
-									label: "Join Match as Player",
-									onSelect: () => {
-										joinModalOpen = true;
-									}
-								},
-								{ type: "item", label: "Player List", onSelect: () => {} },
-								{ type: "item", label: "Manage Teams", onSelect: () => {} },
-								{ type: "item", label: "End Match", onSelect: () => {} },
-								{
-									type: "item",
-									label: "Delete Match",
-									onSelect: () => {
-										if (confirm("Delete match immediately and end without showing summary screen?")) deleteMatch(data.matchId);
-									}
-								}
-							]}
-							triggerClasses="transparent-button"
-						>
+						<DropdownMenu items={myData.teamId ? hostMenuOptions.slice(1) : hostMenuOptions} triggerClasses="transparent-button">
 							{#snippet trigger()}
 								<div class="toolbar-button">Host Menu</div>
 							{/snippet}
@@ -227,6 +217,10 @@
 	host={myData?.playerRole == "HOST"}
 />
 
+{#if matchData}
+	<MatchManagementModal bind:open={managementModalOpen} {matchData} {teamData} />
+{/if}
+
 <style>
 	.play-body {
 		position: relative;
@@ -234,6 +228,11 @@
 		grid-template-rows: repeat(3, max-content) 1fr;
 		gap: 4px;
 		height: 100%;
+	}
+	.match-name-bar {
+		display: flex;
+		justify-content: space-between;
+		padding: 0px 24px;
 	}
 	.match-bars {
 		position: sticky;

@@ -9,3 +9,16 @@ export const CreateMatchSchema = v.object({
 });
 
 export const NicknameSchema = v.object({ nickname: v.pipe(v.string(), v.minLength(3)) });
+
+export const UpdateMatchSchema = v.object({
+	matchId: v.pipe(
+		v.string(),
+		v.transform((input) => Number(input))
+	),
+	name: v.string(),
+	joinCode: v.string(),
+	teamNames: v.array(v.string()),
+	teamScores: v.array(v.number()),
+	currentRound: v.number(),
+	privateMatch: v.optional(v.boolean(), false)
+});

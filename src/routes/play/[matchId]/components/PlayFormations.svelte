@@ -87,6 +87,7 @@
 		width: 100%;
 		border: 1px solid var(--primary-dark);
 		border-radius: var(--radius);
+		margin-bottom: 8px;
 	}
 	.play-formation-header,
 	.secondary-header {

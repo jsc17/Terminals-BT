@@ -72,14 +72,4 @@ export const createMatch = form(CreateMatchSchema, async (data) => {
 	}
 });
 
-export const deleteMatch = command(v.number(), async (matchId) => {
-	const { locals } = getRequestEvent();
-	if (!locals.user) return { status: "failure", message: "User is not logged in" };
 
-	const matchData = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { playerRole: "HOST" } } } });
-	if (matchData != null && matchData.players[0].playerId == locals.user.id) await prisma.match.delete({ where: { id: matchId } });
-
-	clients.forEach((c) => {
-		c.emit(`${matchId}`, JSON.stringify({ type: "matchDelete", data: {} }));
-	});
-});

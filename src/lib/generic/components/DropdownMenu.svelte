@@ -20,6 +20,10 @@
 		<DropdownMenu.Item class="dropdown-button" textValue={item.label} onSelect={item.onSelect}>
 			{item.label}
 		</DropdownMenu.Item>
+	{:else if item.type == "info"}
+		<DropdownMenu.Item class="dropdown-info" textValue={item.label}>
+			{item.label}
+		</DropdownMenu.Item>
 	{:else if item.type == "check"}
 		<DropdownMenu.CheckboxItem
 			class="inline"

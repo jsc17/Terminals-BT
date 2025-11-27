@@ -10,6 +10,11 @@ type MenuSimpleItem = {
 	onSelect?: () => void;
 };
 
+type MenuInfoItem = {
+	type: "info";
+	label: string;
+};
+
 type MenuCheck = {
 	type: "check";
 	label: string;
@@ -45,7 +50,7 @@ type Submenu = {
 	subitems: MenuItem[];
 };
 
-type MenuItem = MenuSimpleItem | MenuSeparator | MenuCheck | MenuRadioGroup | Submenu;
+type MenuItem = MenuSimpleItem | MenuSeparator | MenuCheck | MenuRadioGroup | Submenu | MenuInfoItem;
 
 type Notification = {
 	date: Date;

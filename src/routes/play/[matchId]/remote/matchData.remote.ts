@@ -135,13 +135,6 @@ export const joinMatch = form(
 	}
 );
 
-export const startGame = command(v.number(), async (matchId) => {
-	await prisma.match.update({ where: { id: matchId }, data: { currentRound: 1 } });
-	clients.forEach((c) => {
-		c.emit(`${matchId}`, JSON.stringify({ type: "matchStart", data: "" }));
-	});
-});
-
 export const updateMatchData = form(UpdateMatchSchema, async ({ matchId, name, joinCode, teamNames, teamScores, currentRound, privateMatch }) => {
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
@@ -170,6 +163,19 @@ export const deleteMatch = command(v.number(), async (matchId) => {
 
 		clients.forEach((c) => {
 			c.emit(`${matchId}`, JSON.stringify({ type: "matchDelete", data: {} }));
+		});
+	}
+});
+
+export const kickPlayer = command(v.object({ matchId: v.number(), playerId: v.string() }), async ({ matchId, playerId }) => {
+	const { locals } = getRequestEvent();
+	if (!locals.user) return { status: "failure", message: "User is not logged in" };
+
+	const matchData = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { playerRole: "HOST" } } } });
+	if (matchData != null && matchData.players[0].playerId == locals.user.id) {
+		await prisma.usersInMatch.delete({ where: { matchId_playerId: { matchId, playerId } } });
+		clients.forEach((c) => {
+			c.emit(`${matchId}`, JSON.stringify({ type: "removePlayer", data: playerId }));
 		});
 	}
 });

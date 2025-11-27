@@ -19,8 +19,6 @@
 	let cardWidth = $derived((formationWidth! - 16 - 8 * (options.cardsPerRow ?? 3)) / (options.cardsPerRow ?? 3));
 
 	let assignedBonuses = $state<SvelteMap<number, SvelteMap<string, number>>>(new SvelteMap());
-
-	$inspect(formation, matchUnits);
 </script>
 
 {#snippet drawFormationUnits(formationUnits: number[])}

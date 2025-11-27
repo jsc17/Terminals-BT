@@ -4,6 +4,13 @@ import { prisma } from "$lib/server/prisma";
 import { clients } from "$lib/server/sseClients";
 import { nothing } from "../../../validation/validate.remote";
 
+export const startGame = command(v.number(), async (matchId) => {
+	await prisma.match.update({ where: { id: matchId }, data: { currentRound: 1 } });
+	clients.forEach((c) => {
+		c.emit(`${matchId}`, JSON.stringify({ type: "matchStart", data: "" }));
+	});
+});
+
 export const takeDamage = command(v.object({ unitId: v.number(), damage: v.number(), pending: v.boolean() }), async ({ unitId, damage, pending }) => {
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
@@ -23,7 +30,7 @@ export const removeDamage = command(v.object({ unitId: v.number(), damage: v.num
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
 
 	const existingUnit = prisma.matchUnit.findUnique({ where: { id: unitId }, select: { pendingDamage: true, currentDamage: true } });
-	if(existingUnit == null) return;
+	if (existingUnit == null) return;
 
 	const result = await prisma.matchUnit.update({
 		where: { id: unitId },

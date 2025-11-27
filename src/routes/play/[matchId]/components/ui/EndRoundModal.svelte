@@ -5,14 +5,14 @@
 	import { endRound } from "../../remote/matchUpdates.remote";
 
 	type Props = {
-		open: boolean;
 		matchData: Match;
 		teams: MatchTeam[];
 		trigger: Snippet;
 	};
 
-	let { open = $bindable(), matchData, teams, trigger }: Props = $props();
+	let { matchData, teams, trigger }: Props = $props();
 
+	let open = $state(false);
 	endRound.fields.teamScores.set(teams.map(() => 0));
 </script>
 

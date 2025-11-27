@@ -8,18 +8,18 @@
 	import { safeParseJSON } from "$lib/utilities/utilities";
 	import { type Source } from "sveltekit-sse";
 	import { getContext, setContext } from "svelte";
-	import { Dialog } from "$lib/generic";
-	import { getAllPlayerData, getTeamData, getMyData, getMatchDetails, startGame, deleteMatch } from "./remote/matchData.remote";
+	import { getAllPlayerData, getTeamData, getMyData, getMatchDetails, deleteMatch, getPlayerData } from "./remote/matchData.remote";
 	import MatchJoinModal from "./components/ui/MatchJoinModal.svelte";
 	import { CaretLeft, CaretRight } from "phosphor-svelte";
 	import EndRoundModal from "./components/ui/EndRoundModal.svelte";
 	import { SvelteMap } from "svelte/reactivity";
 	import type { MulUnit } from "$lib/types/listTypes";
-	import { handleUnitUpdate, handlePlayerJoined, initializePlayerLists } from "./utilities/handleMatchEvents";
+	import { handleUnitUpdate, initializePlayerList } from "./utilities/handleMatchEvents";
 	import { toastController } from "$lib/stores";
 	import { goto } from "$app/navigation";
 	import type { MenuItem } from "$lib/generic/types";
 	import MatchManagementModal from "./components/ui/MatchManagementModal.svelte";
+	import { startGame } from "./remote/matchUpdates.remote";
 
 	let { data } = $props();
 
@@ -33,7 +33,11 @@
 		if (event) {
 			switch (event.type) {
 				case "playerJoined":
-					handlePlayerJoined(data.matchId, event.data, playerLists, matchUnits);
+					const newPlayerData: { nickname: string; teamId: number; playerId: string } = safeParseJSON(event.data);
+					toastController.addToast(`${newPlayerData.nickname} has joined the match on team ${newPlayerData.teamId}`);
+					getPlayerData({ playerId: newPlayerData.playerId, matchId: data.matchId }).then(async (r) => {
+						if (r) playerList.push({ id: r.playerId, team: r.teamId ?? undefined, nickname: r.playerNickname, list: await initializePlayerList(r, matchUnits) });
+					});
 					break;
 				case "matchStart":
 					getMatchDetails(data.matchId).refresh();
@@ -60,6 +64,10 @@
 					toastController.addToast("Host deleted the match. Redirecting you to match selection.");
 					goto("/play");
 					break;
+				case "removePlayer":
+					playerList = playerList.filter((p) => p.id != event.data);
+					getMyData(data.matchId).refresh();
+					break;
 				default:
 					console.log("Unhandled Event");
 			}
@@ -77,28 +85,22 @@
 	const matchData = $derived(await getMatchDetails(data.matchId));
 	const myData = $derived(await getMyData(data.matchId));
 	const teamData = $derived(await getTeamData(data.matchId));
-	const playerData = $derived(await getAllPlayerData(data.matchId));
+	getAllPlayerData(data.matchId).then((results) => {
+		console.log("initializing lists");
+		results.forEach(async (r) => {
+			playerList.push({ id: r.playerId, team: r.teamId ?? undefined, nickname: r.playerNickname, list: await initializePlayerList(r, matchUnits) });
+		});
+		console.log("lists set");
+	});
 
-	let playerLists = $state<PlayList[]>([]);
+	let playerList = $state<{ id: string; team?: number; nickname: string; list?: PlayList }[]>([]);
 	let matchUnits = new SvelteMap<number, { data: PlayUnit; reference?: MulUnit; image?: string }>();
 
-	watch(
-		() => playerData,
-		() => {
-			initializePlayerLists(playerData, matchUnits).then((results) => {
-				playerLists = results;
-			});
-		}
-	);
-
-	let joinModalOpen = $state(false);
-	let roundOpenModel = $state(false);
-	let managementModalOpen = $state(false);
+	const modalsOpen = $state({ join: false, management: false });
 
 	const hostMenuOptions: MenuItem[] = $derived([
-		{ type: "item", label: "Join Match as Player", onSelect: () => (joinModalOpen = true) },
-		{ type: "item", label: "Player List", onSelect: () => {} },
-		{ type: "item", label: "Manage Match", onSelect: () => (managementModalOpen = true) },
+		{ type: "item", label: "Join Match as Player", onSelect: () => (modalsOpen.join = true) },
+		{ type: "item", label: "Manage Match", onSelect: () => (modalsOpen.management = true) },
 		{ type: "item", label: "End Match", onSelect: () => {} },
 		{
 			type: "item",
@@ -108,7 +110,7 @@
 			}
 		},
 		{ type: "separator" },
-		{ type: "item", label: `Join Code: ${matchData?.joinCode}` }
+		{ type: "info", label: `Join Code: ${matchData?.joinCode}` }
 	]);
 </script>
 
@@ -136,7 +138,7 @@
 						<button
 							class="toolbar-button"
 							onclick={() => {
-								joinModalOpen = true;
+								modalsOpen.join = true;
 							}}>Join Match</button
 						>
 					{:else if myData.playerRole == "HOST"}
@@ -160,7 +162,7 @@
 							}}>Start Game</button
 						>
 					{:else}
-						<EndRoundModal open={roundOpenModel} matchData={matchData!} teams={teamData}>
+						<EndRoundModal matchData={matchData!} teams={teamData}>
 							{#snippet trigger()}
 								<div class="toolbar-button">End Round</div>
 							{/snippet}
@@ -176,11 +178,11 @@
 			</div>
 		</div>
 	</div>
-	{#if playerLists.length > 1}
+	{#if playerList.filter((p) => p.list).length > 1}
 		<div class="list-selector">
-			{#each playerLists as list (list.id)}
-				<a class="jump-link-button" data-team={teamData.findIndex((t) => t.id == list.team)} href={`#${list.id}`}>
-					{list.owner}
+			{#each playerList.filter((p) => p.list) as player, index (player.id)}
+				<a class="jump-link-button" data-team={teamData.findIndex((t) => t.id == player.team)} href={`#list-${index}`}>
+					{player.nickname}
 				</a>
 			{/each}
 		</div>
@@ -189,37 +191,40 @@
 	{/if}
 	<div>
 		<div class="list-scroll-container">
-			{#each playerLists as list, index (list.id)}
+			{#each playerList.filter((p) => p.list) as player, index (player.id)}
 				<div class="list-scroll-slide">
-					<a class={{ "list-scroll-button": true, "list-scroll-button-disabled": index == 0 }} href={index != 0 ? `#${playerLists[index - 1].id}` : ""}
-						><CaretLeft style="fill: var(--button-text);" /></a
-					>
-					<div class="list" id={list.id}>
-						{#each list.formations as formation}
+					<a class={{ "list-scroll-button": true, "list-scroll-button-disabled": index == 0 }} href={index != 0 ? `#list-${index - 1}` : ""}>
+						<CaretLeft style="fill: var(--button-text);" />
+					</a>
+					<div class="list" id={`list-${index}`}>
+						{#each player.list!.formations as formation}
 							<PlayFormations {formation} {matchUnits} options={options.current} />
 						{/each}
 					</div>
 					<a
-						class={{ "list-scroll-button": true, "list-scroll-button-disabled": index == playerLists.length - 1 }}
-						href={index != playerLists.length - 1 ? `#${playerLists[index + 1].id}` : ""}><CaretRight style="fill: var(--button-text);" /></a
+						class={{ "list-scroll-button": true, "list-scroll-button-disabled": index == playerList.length - 1 }}
+						href={index != playerList.length - 1 ? `#list-${index + 1}` : ""}
 					>
+						<CaretRight style="fill: var(--button-text);" />
+					</a>
 				</div>
+			{:else}
+				<p>No Lists loaded</p>
+				<p>{playerList.length}</p>
 			{/each}
 		</div>
 	</div>
 </div>
 
 <MatchJoinModal
-	bind:open={joinModalOpen}
+	bind:open={modalsOpen.join}
 	joinCode={matchData?.joinCode ?? ""}
 	matchId={matchData?.id.toString() ?? ""}
 	teams={teamData.map((t) => ({ id: t.id, name: t.name }))}
 	host={myData?.playerRole == "HOST"}
 />
 
-{#if matchData}
-	<MatchManagementModal bind:open={managementModalOpen} {matchData} {teamData} />
-{/if}
+<MatchManagementModal bind:open={modalsOpen.management} {matchData} {teamData} {playerList} />
 
 <style>
 	.play-body {

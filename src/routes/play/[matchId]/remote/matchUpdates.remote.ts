@@ -1,14 +1,11 @@
 import { command, form, getRequestEvent } from "$app/server";
 import * as v from "valibot";
 import { prisma } from "$lib/server/prisma";
-import { clients } from "$lib/server/sseClients";
 import { nothing } from "../../../validation/validate.remote";
 
 export const startGame = command(v.number(), async (matchId) => {
 	await prisma.match.update({ where: { id: matchId }, data: { currentRound: 1 } });
-	clients.forEach((c) => {
-		c.emit(`${matchId}`, JSON.stringify({ type: "matchStart", data: "" }));
-	});
+	await prisma.matchMessage.create({ data: { matchId, type: "matchStart", data: "" } });
 });
 
 export const takeDamage = command(v.object({ unitId: v.number(), damage: v.number(), pending: v.boolean() }), async ({ unitId, damage, pending }) => {
@@ -20,9 +17,8 @@ export const takeDamage = command(v.object({ unitId: v.number(), damage: v.numbe
 		data: pending ? { pendingDamage: { increment: damage } } : { currentDamage: { increment: damage } },
 		select: { pendingDamage: true, currentDamage: true, formation: { select: { matchId: true } } }
 	});
-	clients.forEach((c) => {
-		c.emit(`${result.formation.matchId}`, JSON.stringify({ type: "updateUnit", data: unitId, time: Date.now() }));
-	});
+
+	await prisma.matchMessage.create({ data: { matchId: result.formation.matchId, type: "updateUnit", data: unitId.toString() } });
 });
 
 export const removeDamage = command(v.object({ unitId: v.number(), damage: v.number(), pending: v.boolean() }), async ({ unitId, damage, pending }) => {
@@ -37,9 +33,8 @@ export const removeDamage = command(v.object({ unitId: v.number(), damage: v.num
 		data: pending ? { pendingDamage: { decrement: damage } } : { currentDamage: { decrement: damage } },
 		select: { pendingDamage: true, currentDamage: true, formation: { select: { matchId: true } } }
 	});
-	clients.forEach((c) => {
-		c.emit(`${result.formation.matchId}`, JSON.stringify({ type: "updateUnit", data: unitId, time: Date.now() }));
-	});
+
+	await prisma.matchMessage.create({ data: { matchId: result.formation.matchId, type: "updateUnit", data: unitId.toString() } });
 });
 
 export const setHeat = command(v.object({ unitId: v.number(), heatLevel: v.number(), pending: v.boolean() }), async ({ unitId, heatLevel, pending }) => {
@@ -51,9 +46,7 @@ export const setHeat = command(v.object({ unitId: v.number(), heatLevel: v.numbe
 		data: pending ? { pendingHeat: heatLevel } : { currentHeat: heatLevel, pendingHeat: heatLevel },
 		select: { pendingHeat: true, currentHeat: true, formation: { select: { matchId: true } } }
 	});
-	clients.forEach((c) => {
-		c.emit(`${result.formation.matchId}`, JSON.stringify({ type: "updateUnit", data: unitId, time: Date.now() }));
-	});
+	await prisma.matchMessage.create({ data: { matchId: result.formation.matchId, type: "updateUnit", data: unitId.toString() } });
 });
 
 export const takeCritical = command(
@@ -66,9 +59,7 @@ export const takeCritical = command(
 		const result = await prisma.matchCrit.create({
 			data: { type, pending, roundsRemaining: rounds, round: currentround ?? 0, unit: { connect: { id: unitId } } }
 		});
-		clients.forEach((c) => {
-			c.emit(`${matchId}`, JSON.stringify({ type: "updateUnit", data: unitId, time: Date.now() }));
-		});
+		await prisma.matchMessage.create({ data: { matchId, type: "updateUnit", data: unitId.toString() } });
 	}
 );
 
@@ -77,10 +68,7 @@ export const removeCritical = command(v.object({ matchId: v.number(), critId: v.
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
 
 	const result = await prisma.matchCrit.delete({ where: { id: critId } });
-
-	clients.forEach((c) => {
-		c.emit(`${matchId}`, JSON.stringify({ type: "updateUnit", data: result.unitId, time: Date.now() }));
-	});
+	await prisma.matchMessage.create({ data: { matchId, type: "updateUnit", data: result.unitId.toString() } });
 });
 
 export const endRound = form(
@@ -118,7 +106,7 @@ export const endRound = form(
 			})
 		);
 
-		clients.forEach((c) => c.emit(`${matchId}`, JSON.stringify({ type: "roundEnd", data: {} })));
+		await prisma.matchMessage.create({ data: { matchId, type: "roundEnd", data: "" } });
 		await nothing().refresh();
 	}
 );

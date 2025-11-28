@@ -67,6 +67,7 @@ export const ModelName = {
   MatchUnit: 'MatchUnit',
   MatchCrit: 'MatchCrit',
   MatchLog: 'MatchLog',
+  MatchMessage: 'MatchMessage',
   Tournament: 'Tournament',
   Participant: 'Participant',
   Unit: 'Unit',
@@ -286,6 +287,17 @@ export const MatchLogScalarFieldEnum = {
 } as const
 
 export type MatchLogScalarFieldEnum = (typeof MatchLogScalarFieldEnum)[keyof typeof MatchLogScalarFieldEnum]
+
+
+export const MatchMessageScalarFieldEnum = {
+  id: 'id',
+  matchId: 'matchId',
+  type: 'type',
+  data: 'data',
+  updated_at: 'updated_at'
+} as const
+
+export type MatchMessageScalarFieldEnum = (typeof MatchMessageScalarFieldEnum)[keyof typeof MatchMessageScalarFieldEnum]
 
 
 export const TournamentScalarFieldEnum = {
@@ -584,6 +596,14 @@ export const MatchLogOrderByRelevanceFieldEnum = {
 } as const
 
 export type MatchLogOrderByRelevanceFieldEnum = (typeof MatchLogOrderByRelevanceFieldEnum)[keyof typeof MatchLogOrderByRelevanceFieldEnum]
+
+
+export const MatchMessageOrderByRelevanceFieldEnum = {
+  type: 'type',
+  data: 'data'
+} as const
+
+export type MatchMessageOrderByRelevanceFieldEnum = (typeof MatchMessageOrderByRelevanceFieldEnum)[keyof typeof MatchMessageOrderByRelevanceFieldEnum]
 
 
 export const TournamentOrderByRelevanceFieldEnum = {

@@ -1,7 +1,6 @@
 import { query, command, getRequestEvent, form } from "$app/server";
 import * as v from "valibot";
 import { prisma } from "$lib/server/prisma";
-import { clients } from "$lib/server/sseClients";
 import type { MatchUnit, MatchCrit } from "$lib/generated/prisma/browser";
 import { UpdateMatchSchema } from "../../schema/matchlistSchema";
 import { nothing } from "../../../validation/validate.remote";
@@ -124,9 +123,8 @@ export const joinMatch = form(
 				}
 			});
 		}
-
-		clients.forEach((c) => {
-			c.emit(`${data.matchId}`, JSON.stringify({ type: "playerJoined", data: JSON.stringify({ nickname: data.nickname, teamId: data.teamId, playerId: locals.user?.id }) }));
+		await prisma.matchMessage.create({
+			data: { matchId: data.matchId, type: "playerJoined", data: JSON.stringify({ nickname: data.nickname, teamId: data.teamId, playerId: locals.user?.id }) }
 		});
 
 		await getMyData(data.matchId).refresh();
@@ -146,9 +144,7 @@ export const updateMatchData = form(UpdateMatchSchema, async ({ matchId, name, j
 		await Promise.all(
 			existingTeams.map(async (team, index) => prisma.matchTeam.update({ where: { id: team.id }, data: { name: teamNames[index], objectivePoints: teamScores[index] } }))
 		);
-		clients.forEach((c) => {
-			c.emit(`${matchId}`, JSON.stringify({ type: "matchUpdate", data: {} }));
-		});
+		await prisma.matchMessage.create({ data: { matchId, type: "matchUpdate", data: "" } });
 	}
 	await nothing().refresh();
 });
@@ -160,10 +156,7 @@ export const deleteMatch = command(v.number(), async (matchId) => {
 	const matchData = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { playerRole: "HOST" } } } });
 	if (matchData != null && matchData.players[0].playerId == locals.user.id) {
 		await prisma.match.delete({ where: { id: matchId } });
-
-		clients.forEach((c) => {
-			c.emit(`${matchId}`, JSON.stringify({ type: "matchDelete", data: {} }));
-		});
+		await prisma.matchMessage.create({ data: { matchId, type: "matchDelete", data: "" } });
 	}
 });
 
@@ -174,8 +167,6 @@ export const kickPlayer = command(v.object({ matchId: v.number(), playerId: v.st
 	const matchData = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { playerRole: "HOST" } } } });
 	if (matchData != null && matchData.players[0].playerId == locals.user.id) {
 		await prisma.usersInMatch.delete({ where: { matchId_playerId: { matchId, playerId } } });
-		clients.forEach((c) => {
-			c.emit(`${matchId}`, JSON.stringify({ type: "removePlayer", data: playerId }));
-		});
+		await prisma.matchMessage.create({ data: { matchId, type: "removePlayer", data: playerId.toString() } });
 	}
 });

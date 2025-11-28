@@ -1,49 +1,46 @@
 <script lang="ts">
-	import { PlayFormations, DisplayOptionsPopover } from "./components";
-	import { PersistedState, watch } from "runed";
-	import { type PlayList, type LogRound, type PlayFormation, type PlayUnit } from "../types/types";
+	import { PlayFormations, DisplayOptionsPopover, EndRoundModal, MatchJoinModal, MatchManagementModal } from "./components";
+	import { PersistedState } from "runed";
+	import { type PlayList, type PlayUnit } from "../types/types";
 	import { PlaymodeOptionsSchema, type PlaymodeOptionsOutput } from "../schema/playmode";
 	import DropdownMenu from "$lib/generic/components/DropdownMenu.svelte";
 	import * as v from "valibot";
 	import { safeParseJSON } from "$lib/utilities/utilities";
-	import { type Source } from "sveltekit-sse";
-	import { getContext, setContext } from "svelte";
+	import { onMount, setContext } from "svelte";
 	import { getAllPlayerData, getTeamData, getMyData, getMatchDetails, deleteMatch, getPlayerData } from "./remote/matchData.remote";
-	import MatchJoinModal from "./components/ui/MatchJoinModal.svelte";
+	import { startGame } from "./remote/matchUpdates.remote";
 	import { CaretLeft, CaretRight } from "phosphor-svelte";
-	import EndRoundModal from "./components/ui/EndRoundModal.svelte";
 	import { SvelteMap } from "svelte/reactivity";
 	import type { MulUnit } from "$lib/types/listTypes";
 	import { handleUnitUpdate, initializePlayerList } from "./utilities/handleMatchEvents";
 	import { toastController } from "$lib/stores";
 	import { goto } from "$app/navigation";
 	import type { MenuItem } from "$lib/generic/types";
-	import MatchManagementModal from "./components/ui/MatchManagementModal.svelte";
-	import { startGame } from "./remote/matchUpdates.remote";
+	import type { MatchMessage } from "$lib/generated/prisma/browser";
 
 	let { data } = $props();
 
 	setContext("matchId", data.matchId);
 
-	let connection: Source = getContext("connection");
-	const matchChannel = connection.select(`${data.matchId}`);
-	matchChannel.subscribe((message: string) => {
-		if (message == "") return;
-		const event: { type: string; data: string } = safeParseJSON(message);
-		if (event) {
-			switch (event.type) {
+	onMount(() => {
+		const es = new EventSource(`/play/${data.matchId}/stream`);
+
+		es.onmessage = ({ data: updateData }) => {
+			console.log("Message Recieved", data);
+			const update: MatchMessage = JSON.parse(updateData);
+			switch (update.type) {
 				case "playerJoined":
-					const newPlayerData: { nickname: string; teamId: number; playerId: string } = safeParseJSON(event.data);
+					const newPlayerData: { nickname: string; teamId: number; playerId: string } = safeParseJSON(update.data);
 					toastController.addToast(`${newPlayerData.nickname} has joined the match on team ${newPlayerData.teamId}`);
 					getPlayerData({ playerId: newPlayerData.playerId, matchId: data.matchId }).then(async (r) => {
 						if (r) playerList.push({ id: r.playerId, team: r.teamId ?? undefined, nickname: r.playerNickname, list: await initializePlayerList(r, matchUnits) });
 					});
 					break;
 				case "matchStart":
-					getMatchDetails(data.matchId).refresh();
+					getMatchDetails(update.matchId).refresh();
 					break;
 				case "updateUnit": {
-					const unitId = Number(event.data);
+					const unitId = Number(update.data);
 					if (isNaN(unitId)) console.log("Received update with invalid unit id");
 					if (!matchUnits.has(unitId)) console.log("Id not found in existing units");
 					handleUnitUpdate(unitId, matchUnits);
@@ -65,15 +62,18 @@
 					goto("/play");
 					break;
 				case "removePlayer":
-					playerList = playerList.filter((p) => p.id != event.data);
+					playerList = playerList.filter((p) => p.id != update.data);
 					getMyData(data.matchId).refresh();
 					break;
 				default:
 					console.log("Unhandled Event");
 			}
-		} else {
-			console.log("Invalid json message");
-		}
+		};
+
+		return () => {
+			console.log("test navigation");
+			es.close();
+		};
 	});
 
 	const options = new PersistedState<PlaymodeOptionsOutput>("playOptions", v.parse(PlaymodeOptionsSchema, {}), {

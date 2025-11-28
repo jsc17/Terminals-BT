@@ -9,6 +9,7 @@ model Match {
     currentRound Int @default(0)
     gameCompleted Boolean @default(false)
     teams MatchTeam[]
+    messages MatchMessage[]
 }
 
 model UsersInMatch {
@@ -89,6 +90,15 @@ model MatchLog {
     damage Int?
     heat Int?
     critical String?
+}
+
+model MatchMessage {
+    id Int @id @default(autoincrement())
+    match Match @relation(references: [id], fields: [matchId], onDelete: Cascade)
+    matchId Int
+    type String
+    data String
+    updated_at DateTime @default(now())
 }
 
 enum PlayerRole {

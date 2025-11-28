@@ -98,6 +98,11 @@ export type MatchCrit = Prisma.MatchCritModel
  */
 export type MatchLog = Prisma.MatchLogModel
 /**
+ * Model MatchMessage
+ * 
+ */
+export type MatchMessage = Prisma.MatchMessageModel
+/**
  * Model Tournament
  * 
  */

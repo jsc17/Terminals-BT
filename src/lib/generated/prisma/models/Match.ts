@@ -239,6 +239,7 @@ export type MatchWhereInput = {
   players?: Prisma.UsersInMatchListRelationFilter
   logEntries?: Prisma.MatchLogListRelationFilter
   teams?: Prisma.MatchTeamListRelationFilter
+  messages?: Prisma.MatchMessageListRelationFilter
 }
 
 export type MatchOrderByWithRelationInput = {
@@ -252,6 +253,7 @@ export type MatchOrderByWithRelationInput = {
   players?: Prisma.UsersInMatchOrderByRelationAggregateInput
   logEntries?: Prisma.MatchLogOrderByRelationAggregateInput
   teams?: Prisma.MatchTeamOrderByRelationAggregateInput
+  messages?: Prisma.MatchMessageOrderByRelationAggregateInput
   _relevance?: Prisma.MatchOrderByRelevanceInput
 }
 
@@ -269,6 +271,7 @@ export type MatchWhereUniqueInput = Prisma.AtLeast<{
   players?: Prisma.UsersInMatchListRelationFilter
   logEntries?: Prisma.MatchLogListRelationFilter
   teams?: Prisma.MatchTeamListRelationFilter
+  messages?: Prisma.MatchMessageListRelationFilter
 }, "id" | "name" | "joinCode">
 
 export type MatchOrderByWithAggregationInput = {
@@ -309,6 +312,7 @@ export type MatchCreateInput = {
   players?: Prisma.UsersInMatchCreateNestedManyWithoutMatchInput
   logEntries?: Prisma.MatchLogCreateNestedManyWithoutMatchInput
   teams?: Prisma.MatchTeamCreateNestedManyWithoutMatchInput
+  messages?: Prisma.MatchMessageCreateNestedManyWithoutMatchInput
 }
 
 export type MatchUncheckedCreateInput = {
@@ -322,6 +326,7 @@ export type MatchUncheckedCreateInput = {
   players?: Prisma.UsersInMatchUncheckedCreateNestedManyWithoutMatchInput
   logEntries?: Prisma.MatchLogUncheckedCreateNestedManyWithoutMatchInput
   teams?: Prisma.MatchTeamUncheckedCreateNestedManyWithoutMatchInput
+  messages?: Prisma.MatchMessageUncheckedCreateNestedManyWithoutMatchInput
 }
 
 export type MatchUpdateInput = {
@@ -334,6 +339,7 @@ export type MatchUpdateInput = {
   players?: Prisma.UsersInMatchUpdateManyWithoutMatchNestedInput
   logEntries?: Prisma.MatchLogUpdateManyWithoutMatchNestedInput
   teams?: Prisma.MatchTeamUpdateManyWithoutMatchNestedInput
+  messages?: Prisma.MatchMessageUpdateManyWithoutMatchNestedInput
 }
 
 export type MatchUncheckedUpdateInput = {
@@ -347,6 +353,7 @@ export type MatchUncheckedUpdateInput = {
   players?: Prisma.UsersInMatchUncheckedUpdateManyWithoutMatchNestedInput
   logEntries?: Prisma.MatchLogUncheckedUpdateManyWithoutMatchNestedInput
   teams?: Prisma.MatchTeamUncheckedUpdateManyWithoutMatchNestedInput
+  messages?: Prisma.MatchMessageUncheckedUpdateManyWithoutMatchNestedInput
 }
 
 export type MatchCreateManyInput = {
@@ -475,6 +482,20 @@ export type MatchUpdateOneRequiredWithoutLogEntriesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.MatchUpdateToOneWithWhereWithoutLogEntriesInput, Prisma.MatchUpdateWithoutLogEntriesInput>, Prisma.MatchUncheckedUpdateWithoutLogEntriesInput>
 }
 
+export type MatchCreateNestedOneWithoutMessagesInput = {
+  create?: Prisma.XOR<Prisma.MatchCreateWithoutMessagesInput, Prisma.MatchUncheckedCreateWithoutMessagesInput>
+  connectOrCreate?: Prisma.MatchCreateOrConnectWithoutMessagesInput
+  connect?: Prisma.MatchWhereUniqueInput
+}
+
+export type MatchUpdateOneRequiredWithoutMessagesNestedInput = {
+  create?: Prisma.XOR<Prisma.MatchCreateWithoutMessagesInput, Prisma.MatchUncheckedCreateWithoutMessagesInput>
+  connectOrCreate?: Prisma.MatchCreateOrConnectWithoutMessagesInput
+  upsert?: Prisma.MatchUpsertWithoutMessagesInput
+  connect?: Prisma.MatchWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MatchUpdateToOneWithWhereWithoutMessagesInput, Prisma.MatchUpdateWithoutMessagesInput>, Prisma.MatchUncheckedUpdateWithoutMessagesInput>
+}
+
 export type MatchCreateWithoutPlayersInput = {
   name?: string | null
   private: boolean
@@ -484,6 +505,7 @@ export type MatchCreateWithoutPlayersInput = {
   gameCompleted?: boolean
   logEntries?: Prisma.MatchLogCreateNestedManyWithoutMatchInput
   teams?: Prisma.MatchTeamCreateNestedManyWithoutMatchInput
+  messages?: Prisma.MatchMessageCreateNestedManyWithoutMatchInput
 }
 
 export type MatchUncheckedCreateWithoutPlayersInput = {
@@ -496,6 +518,7 @@ export type MatchUncheckedCreateWithoutPlayersInput = {
   gameCompleted?: boolean
   logEntries?: Prisma.MatchLogUncheckedCreateNestedManyWithoutMatchInput
   teams?: Prisma.MatchTeamUncheckedCreateNestedManyWithoutMatchInput
+  messages?: Prisma.MatchMessageUncheckedCreateNestedManyWithoutMatchInput
 }
 
 export type MatchCreateOrConnectWithoutPlayersInput = {
@@ -523,6 +546,7 @@ export type MatchUpdateWithoutPlayersInput = {
   gameCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   logEntries?: Prisma.MatchLogUpdateManyWithoutMatchNestedInput
   teams?: Prisma.MatchTeamUpdateManyWithoutMatchNestedInput
+  messages?: Prisma.MatchMessageUpdateManyWithoutMatchNestedInput
 }
 
 export type MatchUncheckedUpdateWithoutPlayersInput = {
@@ -535,6 +559,7 @@ export type MatchUncheckedUpdateWithoutPlayersInput = {
   gameCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   logEntries?: Prisma.MatchLogUncheckedUpdateManyWithoutMatchNestedInput
   teams?: Prisma.MatchTeamUncheckedUpdateManyWithoutMatchNestedInput
+  messages?: Prisma.MatchMessageUncheckedUpdateManyWithoutMatchNestedInput
 }
 
 export type MatchCreateWithoutTeamsInput = {
@@ -546,6 +571,7 @@ export type MatchCreateWithoutTeamsInput = {
   gameCompleted?: boolean
   players?: Prisma.UsersInMatchCreateNestedManyWithoutMatchInput
   logEntries?: Prisma.MatchLogCreateNestedManyWithoutMatchInput
+  messages?: Prisma.MatchMessageCreateNestedManyWithoutMatchInput
 }
 
 export type MatchUncheckedCreateWithoutTeamsInput = {
@@ -558,6 +584,7 @@ export type MatchUncheckedCreateWithoutTeamsInput = {
   gameCompleted?: boolean
   players?: Prisma.UsersInMatchUncheckedCreateNestedManyWithoutMatchInput
   logEntries?: Prisma.MatchLogUncheckedCreateNestedManyWithoutMatchInput
+  messages?: Prisma.MatchMessageUncheckedCreateNestedManyWithoutMatchInput
 }
 
 export type MatchCreateOrConnectWithoutTeamsInput = {
@@ -585,6 +612,7 @@ export type MatchUpdateWithoutTeamsInput = {
   gameCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   players?: Prisma.UsersInMatchUpdateManyWithoutMatchNestedInput
   logEntries?: Prisma.MatchLogUpdateManyWithoutMatchNestedInput
+  messages?: Prisma.MatchMessageUpdateManyWithoutMatchNestedInput
 }
 
 export type MatchUncheckedUpdateWithoutTeamsInput = {
@@ -597,6 +625,7 @@ export type MatchUncheckedUpdateWithoutTeamsInput = {
   gameCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   players?: Prisma.UsersInMatchUncheckedUpdateManyWithoutMatchNestedInput
   logEntries?: Prisma.MatchLogUncheckedUpdateManyWithoutMatchNestedInput
+  messages?: Prisma.MatchMessageUncheckedUpdateManyWithoutMatchNestedInput
 }
 
 export type MatchCreateWithoutLogEntriesInput = {
@@ -608,6 +637,7 @@ export type MatchCreateWithoutLogEntriesInput = {
   gameCompleted?: boolean
   players?: Prisma.UsersInMatchCreateNestedManyWithoutMatchInput
   teams?: Prisma.MatchTeamCreateNestedManyWithoutMatchInput
+  messages?: Prisma.MatchMessageCreateNestedManyWithoutMatchInput
 }
 
 export type MatchUncheckedCreateWithoutLogEntriesInput = {
@@ -620,6 +650,7 @@ export type MatchUncheckedCreateWithoutLogEntriesInput = {
   gameCompleted?: boolean
   players?: Prisma.UsersInMatchUncheckedCreateNestedManyWithoutMatchInput
   teams?: Prisma.MatchTeamUncheckedCreateNestedManyWithoutMatchInput
+  messages?: Prisma.MatchMessageUncheckedCreateNestedManyWithoutMatchInput
 }
 
 export type MatchCreateOrConnectWithoutLogEntriesInput = {
@@ -647,6 +678,7 @@ export type MatchUpdateWithoutLogEntriesInput = {
   gameCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   players?: Prisma.UsersInMatchUpdateManyWithoutMatchNestedInput
   teams?: Prisma.MatchTeamUpdateManyWithoutMatchNestedInput
+  messages?: Prisma.MatchMessageUpdateManyWithoutMatchNestedInput
 }
 
 export type MatchUncheckedUpdateWithoutLogEntriesInput = {
@@ -659,6 +691,73 @@ export type MatchUncheckedUpdateWithoutLogEntriesInput = {
   gameCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   players?: Prisma.UsersInMatchUncheckedUpdateManyWithoutMatchNestedInput
   teams?: Prisma.MatchTeamUncheckedUpdateManyWithoutMatchNestedInput
+  messages?: Prisma.MatchMessageUncheckedUpdateManyWithoutMatchNestedInput
+}
+
+export type MatchCreateWithoutMessagesInput = {
+  name?: string | null
+  private: boolean
+  joinCode?: string | null
+  createdAt?: Date | string
+  currentRound?: number
+  gameCompleted?: boolean
+  players?: Prisma.UsersInMatchCreateNestedManyWithoutMatchInput
+  logEntries?: Prisma.MatchLogCreateNestedManyWithoutMatchInput
+  teams?: Prisma.MatchTeamCreateNestedManyWithoutMatchInput
+}
+
+export type MatchUncheckedCreateWithoutMessagesInput = {
+  id?: number
+  name?: string | null
+  private: boolean
+  joinCode?: string | null
+  createdAt?: Date | string
+  currentRound?: number
+  gameCompleted?: boolean
+  players?: Prisma.UsersInMatchUncheckedCreateNestedManyWithoutMatchInput
+  logEntries?: Prisma.MatchLogUncheckedCreateNestedManyWithoutMatchInput
+  teams?: Prisma.MatchTeamUncheckedCreateNestedManyWithoutMatchInput
+}
+
+export type MatchCreateOrConnectWithoutMessagesInput = {
+  where: Prisma.MatchWhereUniqueInput
+  create: Prisma.XOR<Prisma.MatchCreateWithoutMessagesInput, Prisma.MatchUncheckedCreateWithoutMessagesInput>
+}
+
+export type MatchUpsertWithoutMessagesInput = {
+  update: Prisma.XOR<Prisma.MatchUpdateWithoutMessagesInput, Prisma.MatchUncheckedUpdateWithoutMessagesInput>
+  create: Prisma.XOR<Prisma.MatchCreateWithoutMessagesInput, Prisma.MatchUncheckedCreateWithoutMessagesInput>
+  where?: Prisma.MatchWhereInput
+}
+
+export type MatchUpdateToOneWithWhereWithoutMessagesInput = {
+  where?: Prisma.MatchWhereInput
+  data: Prisma.XOR<Prisma.MatchUpdateWithoutMessagesInput, Prisma.MatchUncheckedUpdateWithoutMessagesInput>
+}
+
+export type MatchUpdateWithoutMessagesInput = {
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  private?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  currentRound?: Prisma.IntFieldUpdateOperationsInput | number
+  gameCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  players?: Prisma.UsersInMatchUpdateManyWithoutMatchNestedInput
+  logEntries?: Prisma.MatchLogUpdateManyWithoutMatchNestedInput
+  teams?: Prisma.MatchTeamUpdateManyWithoutMatchNestedInput
+}
+
+export type MatchUncheckedUpdateWithoutMessagesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  private?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  currentRound?: Prisma.IntFieldUpdateOperationsInput | number
+  gameCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  players?: Prisma.UsersInMatchUncheckedUpdateManyWithoutMatchNestedInput
+  logEntries?: Prisma.MatchLogUncheckedUpdateManyWithoutMatchNestedInput
+  teams?: Prisma.MatchTeamUncheckedUpdateManyWithoutMatchNestedInput
 }
 
 
@@ -670,12 +769,14 @@ export type MatchCountOutputType = {
   players: number
   logEntries: number
   teams: number
+  messages: number
 }
 
 export type MatchCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   players?: boolean | MatchCountOutputTypeCountPlayersArgs
   logEntries?: boolean | MatchCountOutputTypeCountLogEntriesArgs
   teams?: boolean | MatchCountOutputTypeCountTeamsArgs
+  messages?: boolean | MatchCountOutputTypeCountMessagesArgs
 }
 
 /**
@@ -709,6 +810,13 @@ export type MatchCountOutputTypeCountTeamsArgs<ExtArgs extends runtime.Types.Ext
   where?: Prisma.MatchTeamWhereInput
 }
 
+/**
+ * MatchCountOutputType without action
+ */
+export type MatchCountOutputTypeCountMessagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MatchMessageWhereInput
+}
+
 
 export type MatchSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -721,6 +829,7 @@ export type MatchSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   players?: boolean | Prisma.Match$playersArgs<ExtArgs>
   logEntries?: boolean | Prisma.Match$logEntriesArgs<ExtArgs>
   teams?: boolean | Prisma.Match$teamsArgs<ExtArgs>
+  messages?: boolean | Prisma.Match$messagesArgs<ExtArgs>
   _count?: boolean | Prisma.MatchCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["match"]>
 
@@ -741,6 +850,7 @@ export type MatchInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   players?: boolean | Prisma.Match$playersArgs<ExtArgs>
   logEntries?: boolean | Prisma.Match$logEntriesArgs<ExtArgs>
   teams?: boolean | Prisma.Match$teamsArgs<ExtArgs>
+  messages?: boolean | Prisma.Match$messagesArgs<ExtArgs>
   _count?: boolean | Prisma.MatchCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -750,6 +860,7 @@ export type $MatchPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     players: Prisma.$UsersInMatchPayload<ExtArgs>[]
     logEntries: Prisma.$MatchLogPayload<ExtArgs>[]
     teams: Prisma.$MatchTeamPayload<ExtArgs>[]
+    messages: Prisma.$MatchMessagePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1102,6 +1213,7 @@ export interface Prisma__MatchClient<T, Null = never, ExtArgs extends runtime.Ty
   players<T extends Prisma.Match$playersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Match$playersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UsersInMatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   logEntries<T extends Prisma.Match$logEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Match$logEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MatchLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   teams<T extends Prisma.Match$teamsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Match$teamsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MatchTeamPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  messages<T extends Prisma.Match$messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Match$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MatchMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1550,6 +1662,30 @@ export type Match$teamsArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   distinct?: Prisma.MatchTeamScalarFieldEnum | Prisma.MatchTeamScalarFieldEnum[]
+}
+
+/**
+ * Match.messages
+ */
+export type Match$messagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MatchMessage
+   */
+  select?: Prisma.MatchMessageSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MatchMessage
+   */
+  omit?: Prisma.MatchMessageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MatchMessageInclude<ExtArgs> | null
+  where?: Prisma.MatchMessageWhereInput
+  orderBy?: Prisma.MatchMessageOrderByWithRelationInput | Prisma.MatchMessageOrderByWithRelationInput[]
+  cursor?: Prisma.MatchMessageWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MatchMessageScalarFieldEnum | Prisma.MatchMessageScalarFieldEnum[]
 }
 
 /**

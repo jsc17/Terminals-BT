@@ -21,7 +21,8 @@
 		End of the round. Scores will be updated and all pending damage and effects will be applied.
 	{/snippet}
 	<form
-		{...endRound.enhance(async ({ submit }) => {
+		{...endRound.enhance(async ({ submit, data }) => {
+			console.log(data);
 			await submit();
 			open = false;
 		})}

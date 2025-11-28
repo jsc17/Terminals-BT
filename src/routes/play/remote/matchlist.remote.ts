@@ -2,8 +2,6 @@ import { query, form, command, getRequestEvent } from "$app/server";
 import { prisma } from "$lib/server/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 import { CreateMatchSchema, NicknameSchema } from "../schema/matchlistSchema";
-import * as v from "valibot";
-import { clients } from "$lib/server/sseClients";
 
 export const getNickname = query(async () => {
 	const { locals } = getRequestEvent();

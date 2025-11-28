@@ -80,12 +80,12 @@ export type PrismaVersion = {
 }
 
 /**
- * Prisma Client JS version: 7.0.0
- * Query Engine version: 0c19ccc313cf9911a90d99d2ac2eb0280c76c513
+ * Prisma Client JS version: 7.0.1
+ * Query Engine version: f09f2815f091dbba658cdcd2264306d88bb5bda6
  */
 export const prismaVersion: PrismaVersion = {
-  client: "7.0.0",
-  engine: "0c19ccc313cf9911a90d99d2ac2eb0280c76c513"
+  client: "7.0.1",
+  engine: "f09f2815f091dbba658cdcd2264306d88bb5bda6"
 }
 
 /**
@@ -400,6 +400,7 @@ export const ModelName = {
   MatchUnit: 'MatchUnit',
   MatchCrit: 'MatchCrit',
   MatchLog: 'MatchLog',
+  MatchMessage: 'MatchMessage',
   Tournament: 'Tournament',
   Participant: 'Participant',
   Unit: 'Unit',
@@ -426,7 +427,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "collectionTag" | "collectionTagsToModels" | "collectionModel" | "faction" | "era" | "factionInEra" | "availability" | "listV3" | "sharedList" | "match" | "usersInMatch" | "matchTeam" | "matchFormation" | "matchUnit" | "matchCrit" | "matchLog" | "tournament" | "participant" | "unit" | "sPA" | "ammo" | "customCard" | "unitImage" | "user" | "session" | "resetToken" | "notification"
+    modelProps: "collectionTag" | "collectionTagsToModels" | "collectionModel" | "faction" | "era" | "factionInEra" | "availability" | "listV3" | "sharedList" | "match" | "usersInMatch" | "matchTeam" | "matchFormation" | "matchUnit" | "matchCrit" | "matchLog" | "matchMessage" | "tournament" | "participant" | "unit" | "sPA" | "ammo" | "customCard" | "unitImage" | "user" | "session" | "resetToken" | "notification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1486,6 +1487,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MatchMessage: {
+      payload: Prisma.$MatchMessagePayload<ExtArgs>
+      fields: Prisma.MatchMessageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MatchMessageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchMessagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MatchMessageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchMessagePayload>
+        }
+        findFirst: {
+          args: Prisma.MatchMessageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchMessagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MatchMessageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchMessagePayload>
+        }
+        findMany: {
+          args: Prisma.MatchMessageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchMessagePayload>[]
+        }
+        create: {
+          args: Prisma.MatchMessageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchMessagePayload>
+        }
+        createMany: {
+          args: Prisma.MatchMessageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.MatchMessageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchMessagePayload>
+        }
+        update: {
+          args: Prisma.MatchMessageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchMessagePayload>
+        }
+        deleteMany: {
+          args: Prisma.MatchMessageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MatchMessageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.MatchMessageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchMessagePayload>
+        }
+        aggregate: {
+          args: Prisma.MatchMessageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMatchMessage>
+        }
+        groupBy: {
+          args: Prisma.MatchMessageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MatchMessageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MatchMessageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MatchMessageCountAggregateOutputType> | number
+        }
+      }
+    }
     Tournament: {
       payload: Prisma.$TournamentPayload<ExtArgs>
       fields: Prisma.TournamentFieldRefs
@@ -2443,6 +2510,17 @@ export const MatchLogScalarFieldEnum = {
 export type MatchLogScalarFieldEnum = (typeof MatchLogScalarFieldEnum)[keyof typeof MatchLogScalarFieldEnum]
 
 
+export const MatchMessageScalarFieldEnum = {
+  id: 'id',
+  matchId: 'matchId',
+  type: 'type',
+  data: 'data',
+  updated_at: 'updated_at'
+} as const
+
+export type MatchMessageScalarFieldEnum = (typeof MatchMessageScalarFieldEnum)[keyof typeof MatchMessageScalarFieldEnum]
+
+
 export const TournamentScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -2741,6 +2819,14 @@ export const MatchLogOrderByRelevanceFieldEnum = {
 export type MatchLogOrderByRelevanceFieldEnum = (typeof MatchLogOrderByRelevanceFieldEnum)[keyof typeof MatchLogOrderByRelevanceFieldEnum]
 
 
+export const MatchMessageOrderByRelevanceFieldEnum = {
+  type: 'type',
+  data: 'data'
+} as const
+
+export type MatchMessageOrderByRelevanceFieldEnum = (typeof MatchMessageOrderByRelevanceFieldEnum)[keyof typeof MatchMessageOrderByRelevanceFieldEnum]
+
+
 export const TournamentOrderByRelevanceFieldEnum = {
   userId: 'userId',
   name: 'name',
@@ -3002,6 +3088,7 @@ export type GlobalOmitConfig = {
   matchUnit?: Prisma.MatchUnitOmit
   matchCrit?: Prisma.MatchCritOmit
   matchLog?: Prisma.MatchLogOmit
+  matchMessage?: Prisma.MatchMessageOmit
   tournament?: Prisma.TournamentOmit
   participant?: Prisma.ParticipantOmit
   unit?: Prisma.UnitOmit

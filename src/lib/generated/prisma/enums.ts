@@ -16,3 +16,23 @@ export const PlayerRole = {
 } as const
 
 export type PlayerRole = (typeof PlayerRole)[keyof typeof PlayerRole]
+
+
+export const LogType = {
+  MATCH_CREATED: 'MATCH_CREATED',
+  MATCH_START: 'MATCH_START',
+  MATCH_UPDATE: 'MATCH_UPDATE',
+  MATCH_END: 'MATCH_END',
+  MATCH_DELETE: 'MATCH_DELETE',
+  PLAYER_JOINED: 'PLAYER_JOINED',
+  PLAYER_LEFT: 'PLAYER_LEFT',
+  REMOVE_PLAYER: 'REMOVE_PLAYER',
+  ROUND_END: 'ROUND_END',
+  UNIT_DAMAGE: 'UNIT_DAMAGE',
+  UNIT_DAMAGE_REMOVED: 'UNIT_DAMAGE_REMOVED',
+  UNIT_HEAT: 'UNIT_HEAT',
+  UNIT_CRIT: 'UNIT_CRIT',
+  UNIT_CRIT_REMOVED: 'UNIT_CRIT_REMOVED'
+} as const
+
+export type LogType = (typeof LogType)[keyof typeof LogType]

@@ -2,64 +2,113 @@ import { command, form, getRequestEvent } from "$app/server";
 import * as v from "valibot";
 import { prisma } from "$lib/server/prisma";
 import { nothing } from "../../../validation/validate.remote";
+import { getSubmitter } from "./utilities";
 
 export const startGame = command(v.number(), async (matchId) => {
-	await prisma.match.update({ where: { id: matchId }, data: { currentRound: 1 } });
-	await prisma.matchMessage.create({ data: { matchId, type: "matchStart", data: "" } });
+	const { locals } = getRequestEvent();
+	if (!locals.user) return { status: "failure", message: "User is not logged in" };
+	const submitter = await getSubmitter(matchId, locals.user.id);
+	if (submitter?.playerRole != "HOST" && submitter?.playerRole != "MODERATOR") return { status: "failure", message: "User does not have permission to start this game" };
+
+	await prisma.match.update({
+		where: { id: matchId },
+		data: { currentRound: 1, logEntries: { create: { submitter: { connect: { id: submitter.id } }, round: 1, type: "MATCH_START" } } }
+	});
 });
 
-export const takeDamage = command(v.object({ unitId: v.number(), damage: v.number(), pending: v.boolean() }), async ({ unitId, damage, pending }) => {
+const RemoteDamageSchema = v.object({ matchId: v.number(), unitId: v.number(), damage: v.number(), pending: v.boolean() });
+export const takeDamage = command(RemoteDamageSchema, async ({ matchId, unitId, damage, pending }) => {
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
 
-	const result = await prisma.matchUnit.update({
-		where: { id: unitId },
-		data: pending ? { pendingDamage: { increment: damage } } : { currentDamage: { increment: damage } },
-		select: { pendingDamage: true, currentDamage: true, formation: { select: { matchId: true } } }
-	});
+	const match = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { player: { id: locals.user.id } } } } });
 
-	await prisma.matchMessage.create({ data: { matchId: result.formation.matchId, type: "updateUnit", data: unitId.toString() } });
+	const data = pending ? { pendingDamage: { increment: damage } } : { currentDamage: { increment: damage } };
+	await prisma.matchUnit.update({ where: { id: unitId }, data });
+
+	await prisma.matchLog.create({
+		data: {
+			type: "UNIT_DAMAGE",
+			unitId,
+			round: match?.currentRound ?? 0,
+			damage,
+			applied: pending,
+			match: { connect: { id: matchId } },
+			submitter: { connect: { id: match?.players[0].id } }
+		}
+	});
 });
 
-export const removeDamage = command(v.object({ unitId: v.number(), damage: v.number(), pending: v.boolean() }), async ({ unitId, damage, pending }) => {
+export const removeDamage = command(RemoteDamageSchema, async ({ matchId, unitId, damage, pending }) => {
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
+	const match = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { player: { id: locals.user.id } } } } });
 
-	const existingUnit = prisma.matchUnit.findUnique({ where: { id: unitId }, select: { pendingDamage: true, currentDamage: true } });
-	if (existingUnit == null) return;
+	const data = pending ? { pendingDamage: { decrement: damage } } : { currentDamage: { decrement: damage } };
+	await prisma.matchUnit.update({ where: { id: unitId }, data });
 
-	const result = await prisma.matchUnit.update({
-		where: { id: unitId },
-		data: pending ? { pendingDamage: { decrement: damage } } : { currentDamage: { decrement: damage } },
-		select: { pendingDamage: true, currentDamage: true, formation: { select: { matchId: true } } }
+	await prisma.matchLog.create({
+		data: {
+			type: "UNIT_DAMAGE_REMOVED",
+			unitId,
+			round: match?.currentRound ?? 0,
+			damage,
+			applied: pending,
+			match: { connect: { id: matchId } },
+			submitter: { connect: { id: match?.players[0].id } }
+		}
 	});
-
-	await prisma.matchMessage.create({ data: { matchId: result.formation.matchId, type: "updateUnit", data: unitId.toString() } });
 });
 
-export const setHeat = command(v.object({ unitId: v.number(), heatLevel: v.number(), pending: v.boolean() }), async ({ unitId, heatLevel, pending }) => {
-	const { locals } = getRequestEvent();
-	if (!locals.user) return { status: "failure", message: "User is not logged in" };
+export const setHeat = command(
+	v.object({ matchId: v.number(), unitId: v.number(), heatLevel: v.number(), pending: v.boolean() }),
+	async ({ matchId, unitId, heatLevel, pending }) => {
+		const { locals } = getRequestEvent();
+		if (!locals.user) return { status: "failure", message: "User is not logged in" };
+		const match = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { player: { id: locals.user.id } } } } });
 
-	const result = await prisma.matchUnit.update({
-		where: { id: unitId },
-		data: pending ? { pendingHeat: heatLevel } : { currentHeat: heatLevel, pendingHeat: heatLevel },
-		select: { pendingHeat: true, currentHeat: true, formation: { select: { matchId: true } } }
-	});
-	await prisma.matchMessage.create({ data: { matchId: result.formation.matchId, type: "updateUnit", data: unitId.toString() } });
-});
+		await prisma.matchUnit.update({
+			where: { id: unitId },
+			data: pending ? { pendingHeat: heatLevel } : { currentHeat: heatLevel, pendingHeat: heatLevel },
+			select: { pendingHeat: true, currentHeat: true, formation: { select: { matchId: true } } }
+		});
+
+		await prisma.matchLog.create({
+			data: {
+				type: "UNIT_HEAT",
+				unitId,
+				round: match?.currentRound ?? 0,
+				heat: heatLevel,
+				applied: pending,
+				match: { connect: { id: matchId } },
+				submitter: { connect: { id: match?.players[0].id } }
+			}
+		});
+	}
+);
 
 export const takeCritical = command(
 	v.object({ matchId: v.number(), unitId: v.number(), type: v.string(), pending: v.boolean(), rounds: v.optional(v.number()) }),
 	async ({ matchId, unitId, type, pending, rounds }) => {
 		const { locals } = getRequestEvent();
 		if (!locals.user) return { status: "failure", message: "User is not logged in" };
+		const match = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { player: { id: locals.user.id } } } } });
 
 		const currentround = (await prisma.match.findUnique({ where: { id: matchId }, select: { currentRound: true } }))?.currentRound;
 		const result = await prisma.matchCrit.create({
 			data: { type, pending, roundsRemaining: rounds, round: currentround ?? 0, unit: { connect: { id: unitId } } }
 		});
-		await prisma.matchMessage.create({ data: { matchId, type: "updateUnit", data: unitId.toString() } });
+		await prisma.matchLog.create({
+			data: {
+				type: "UNIT_CRIT",
+				unitId,
+				round: match?.currentRound ?? 0,
+				applied: pending,
+				critical: result.type,
+				match: { connect: { id: matchId } },
+				submitter: { connect: { id: match?.players[0].id } }
+			}
+		});
 	}
 );
 
@@ -67,8 +116,20 @@ export const removeCritical = command(v.object({ matchId: v.number(), critId: v.
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
 
+	const match = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { player: { id: locals.user.id } } } } });
+
 	const result = await prisma.matchCrit.delete({ where: { id: critId } });
-	await prisma.matchMessage.create({ data: { matchId, type: "updateUnit", data: result.unitId.toString() } });
+	await prisma.matchLog.create({
+		data: {
+			type: "UNIT_CRIT_REMOVED",
+			unitId: result.unitId,
+			round: match?.currentRound ?? 0,
+			applied: result.pending,
+			critical: result.type,
+			match: { connect: { id: matchId } },
+			submitter: { connect: { id: match?.players[0].id } }
+		}
+	});
 });
 
 export const endRound = form(
@@ -88,7 +149,11 @@ export const endRound = form(
 		const existingUnits = await prisma.matchUnit.findMany({ where: { formation: { matchId } } });
 
 		//update match data
-		const matchDetails = await prisma.match.update({ where: { id: matchId }, data: { currentRound: { increment: 1 } } });
+		const match = await prisma.match.update({
+			where: { id: matchId },
+			data: { currentRound: { increment: 1 } },
+			include: { players: { where: { player: { id: locals.user.id } } } }
+		});
 		const updatedTeams = await Promise.all(
 			existingTeams.map((team, index) => prisma.matchTeam.update({ where: { id: team.id }, data: { objectivePoints: { increment: teamScores[index] } } }))
 		);
@@ -106,7 +171,14 @@ export const endRound = form(
 			})
 		);
 
-		await prisma.matchMessage.create({ data: { matchId, type: "roundEnd", data: "" } });
+		await prisma.matchLog.create({
+			data: {
+				type: "ROUND_END",
+				round: match?.currentRound ?? 0,
+				match: { connect: { id: matchId } },
+				submitter: { connect: { id: match?.players[0].id } }
+			}
+		});
 		await nothing().refresh();
 	}
 );

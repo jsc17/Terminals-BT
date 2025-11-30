@@ -1,4 +1,4 @@
-import Log from "./Log.svelte";
+import Log from "./ui/MatchLogEntry.svelte";
 import PlayFormations from "./PlayFormations.svelte";
 import PlayUnitCard from "./card/PlayUnitCard.svelte";
 

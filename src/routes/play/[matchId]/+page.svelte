@@ -7,74 +7,19 @@
 	import * as v from "valibot";
 	import { safeParseJSON } from "$lib/utilities/utilities";
 	import { onMount, setContext } from "svelte";
-	import { getAllPlayerData, getTeamData, getMyData, getMatchDetails, deleteMatch, getPlayerData } from "./remote/matchData.remote";
+	import { getAllPlayerData, getTeamData, getMyData, getMatchDetails, deleteMatch, getPlayerData, getLogs } from "./remote/matchData.remote";
 	import { startGame } from "./remote/matchUpdates.remote";
 	import { CaretLeft, CaretRight } from "phosphor-svelte";
 	import { SvelteMap } from "svelte/reactivity";
 	import type { MulUnit } from "$lib/types/listTypes";
-	import { handleUnitUpdate, initializePlayerList } from "./utilities/handleMatchEvents";
-	import { toastController } from "$lib/stores";
-	import { goto } from "$app/navigation";
+	import { initializePlayerList, processMessage } from "./utilities/handleMatchEvents";
 	import type { MenuItem } from "$lib/generic/types";
-	import type { MatchMessage } from "$lib/generated/prisma/browser";
+	import type { MatchLog } from "$lib/generated/prisma/browser";
+	import MatchLogWindow from "./components/ui/MatchLogWindow.svelte";
 
 	let { data } = $props();
 
 	setContext("matchId", data.matchId);
-
-	onMount(() => {
-		const es = new EventSource(`/play/${data.matchId}/stream`);
-
-		es.onmessage = ({ data: updateData }) => {
-			console.log("Message Recieved", data);
-			const update: MatchMessage = JSON.parse(updateData);
-			switch (update.type) {
-				case "playerJoined":
-					const newPlayerData: { nickname: string; teamId: number; playerId: string } = safeParseJSON(update.data);
-					toastController.addToast(`${newPlayerData.nickname} has joined the match on team ${newPlayerData.teamId}`);
-					getPlayerData({ playerId: newPlayerData.playerId, matchId: data.matchId }).then(async (r) => {
-						if (r) playerList.push({ id: r.playerId, team: r.teamId ?? undefined, nickname: r.playerNickname, list: await initializePlayerList(r, matchUnits) });
-					});
-					break;
-				case "matchStart":
-					getMatchDetails(update.matchId).refresh();
-					break;
-				case "updateUnit": {
-					const unitId = Number(update.data);
-					if (isNaN(unitId)) console.log("Received update with invalid unit id");
-					if (!matchUnits.has(unitId)) console.log("Id not found in existing units");
-					handleUnitUpdate(unitId, matchUnits);
-					break;
-				}
-				case "roundEnd":
-					getMatchDetails(data.matchId).refresh();
-					getTeamData(data.matchId).refresh();
-					matchUnits.forEach((u) => {
-						handleUnitUpdate(u.data.id, matchUnits);
-					});
-					break;
-				case "matchUpdate":
-					getMatchDetails(data.matchId).refresh();
-					getTeamData(data.matchId).refresh();
-					break;
-				case "matchDelete":
-					toastController.addToast("Host deleted the match. Redirecting you to match selection.");
-					goto("/play");
-					break;
-				case "removePlayer":
-					playerList = playerList.filter((p) => p.id != update.data);
-					getMyData(data.matchId).refresh();
-					break;
-				default:
-					console.log("Unhandled Event");
-			}
-		};
-
-		return () => {
-			console.log("test navigation");
-			es.close();
-		};
-	});
 
 	const options = new PersistedState<PlaymodeOptionsOutput>("playOptions", v.parse(PlaymodeOptionsSchema, {}), {
 		serializer: {
@@ -82,25 +27,28 @@
 			deserialize: (savedData) => v.parse(PlaymodeOptionsSchema, safeParseJSON(savedData) ?? {})
 		}
 	});
+
+	let playerList = $state<{ id: number; team?: number; nickname: string; list?: PlayList }[]>([]);
+	let matchUnits = new SvelteMap<number, { data: PlayUnit; reference?: MulUnit; image?: string }>();
+	let matchLogs = $state<MatchLog[]>([]);
+
 	const matchData = $derived(await getMatchDetails(data.matchId));
 	const myData = $derived(await getMyData(data.matchId));
 	const teamData = $derived(await getTeamData(data.matchId));
+
 	getAllPlayerData(data.matchId).then((results) => {
-		console.log("initializing lists");
+		console.log(results);
 		results.forEach(async (r) => {
-			playerList.push({ id: r.playerId, team: r.teamId ?? undefined, nickname: r.playerNickname, list: await initializePlayerList(r, matchUnits) });
+			playerList.push({ id: r.id, team: r.teamId ?? undefined, nickname: r.playerNickname, list: await initializePlayerList(r, matchUnits) });
 		});
-		console.log("lists set");
 	});
+	getLogs({ matchId: data.matchId, lastLogId: 0 }).then((results) => (matchLogs = matchLogs.concat(results)));
 
-	let playerList = $state<{ id: string; team?: number; nickname: string; list?: PlayList }[]>([]);
-	let matchUnits = new SvelteMap<number, { data: PlayUnit; reference?: MulUnit; image?: string }>();
-
-	const modalsOpen = $state({ join: false, management: false });
+	const componentsOpen = $state({ join: false, management: false, matchLog: false });
 
 	const hostMenuOptions: MenuItem[] = $derived([
-		{ type: "item", label: "Join Match as Player", onSelect: () => (modalsOpen.join = true) },
-		{ type: "item", label: "Manage Match", onSelect: () => (modalsOpen.management = true) },
+		{ type: "item", label: "Join Match as Player", onSelect: () => (componentsOpen.join = true) },
+		{ type: "item", label: "Manage Match", onSelect: () => (componentsOpen.management = true) },
 		{ type: "item", label: "End Match", onSelect: () => {} },
 		{
 			type: "item",
@@ -112,6 +60,14 @@
 		{ type: "separator" },
 		{ type: "info", label: `Join Code: ${matchData?.joinCode}` }
 	]);
+
+	onMount(() => {
+		const es = new EventSource(`/play/${data.matchId}/stream`);
+		es.onmessage = ({ data }) => processMessage(data, playerList, matchUnits, matchLogs);
+		return () => {
+			es.close();
+		};
+	});
 </script>
 
 <svelte:head>
@@ -119,11 +75,11 @@
 </svelte:head>
 
 <div class="play-body">
-	<div class="match-name-bar">
-		<p>{matchData?.name}</p>
-		<a href="/play">Return to match selection</a>
-	</div>
 	<div class="match-bars">
+		<div class="match-name-bar">
+			<p>{matchData?.name}</p>
+			<a href="/play">Return to match selection</a>
+		</div>
 		<div class="match-header">
 			<div class="toolbar-item">{teamData?.[0].name}</div>
 			<div class="toolbar-item">{teamData?.[0].objectivePoints}</div>
@@ -138,7 +94,7 @@
 						<button
 							class="toolbar-button"
 							onclick={() => {
-								modalsOpen.join = true;
+								componentsOpen.join = true;
 							}}>Join Match</button
 						>
 					{:else if myData.playerRole == "HOST"}
@@ -174,63 +130,69 @@
 				<div>
 					<DisplayOptionsPopover bind:options={options.current} />
 				</div>
-				<button class="toolbar-button">Match Log</button>
 			</div>
 		</div>
 	</div>
-	{#if playerList.filter((p) => p.list).length > 1}
+	{#if playerList
+		.filter((p) => p.list)
+		.sort((a, b) => {
+			return (a.team ?? 0) - (b.team ?? 0);
+		}).length > 1}
 		<div class="list-selector">
-			{#each playerList.filter((p) => p.list) as player, index (player.id)}
+			{#each playerList
+				.filter((p) => p.list)
+				.sort((a, b) => {
+					return (a.team ?? 0) - (b.team ?? 0);
+				}) as player, index (player.id)}
 				<a class="jump-link-button" data-team={teamData.findIndex((t) => t.id == player.team)} href={`#list-${index}`}>
 					{player.nickname}
 				</a>
 			{/each}
 		</div>
-	{:else}
-		<div></div>
 	{/if}
-	<div>
-		<div class="list-scroll-container">
-			{#each playerList.filter((p) => p.list) as player, index (player.id)}
-				<div class="list-scroll-slide">
-					<a class={{ "list-scroll-button": true, "list-scroll-button-disabled": index == 0 }} href={index != 0 ? `#list-${index - 1}` : ""}>
-						<CaretLeft style="fill: var(--button-text);" />
-					</a>
-					<div class="list" id={`list-${index}`}>
-						{#each player.list!.formations as formation}
-							<PlayFormations {formation} {matchUnits} options={options.current} />
-						{/each}
-					</div>
-					<a
-						class={{ "list-scroll-button": true, "list-scroll-button-disabled": index == playerList.length - 1 }}
-						href={index != playerList.length - 1 ? `#list-${index + 1}` : ""}
-					>
-						<CaretRight style="fill: var(--button-text);" />
-					</a>
+	<div class="list-scroll-container">
+		{#each playerList
+			.filter((p) => p.list)
+			.sort((a, b) => {
+				console.log(a, b);
+				return (a.team ?? 0) - (b.team ?? 0);
+			}) as player, index (player.id)}
+			<div class="list-scroll-slide">
+				<a class={{ "list-scroll-button": true, "list-scroll-button-disabled": index == 0 }} href={index != 0 ? `#list-${index - 1}` : ""}>
+					<CaretLeft style="fill: var(--button-text);" />
+				</a>
+				<div class="list" id={`list-${index}`}>
+					{#each player.list!.formations as formation}
+						<PlayFormations {formation} {matchUnits} options={options.current} />
+					{/each}
 				</div>
-			{:else}
-				<p>No Lists loaded</p>
-				<p>{playerList.length}</p>
-			{/each}
-		</div>
+				<a class={{ "list-scroll-button": true, "list-scroll-button-disabled": index == playerList.length - 1 }} href={index != playerList.length - 1 ? `#list-${index + 1}` : ""}>
+					<CaretRight style="fill: var(--button-text);" />
+				</a>
+			</div>
+		{:else}
+			<p>No Lists loaded</p>
+			<p>{playerList.length}</p>
+		{/each}
 	</div>
+	<MatchLogWindow {matchLogs} {matchUnits} {playerList} />
 </div>
 
 <MatchJoinModal
-	bind:open={modalsOpen.join}
+	bind:open={componentsOpen.join}
 	joinCode={matchData?.joinCode ?? ""}
 	matchId={matchData?.id.toString() ?? ""}
 	teams={teamData.map((t) => ({ id: t.id, name: t.name }))}
 	host={myData?.playerRole == "HOST"}
 />
 
-<MatchManagementModal bind:open={modalsOpen.management} {matchData} {teamData} {playerList} />
+<MatchManagementModal bind:open={componentsOpen.management} {matchData} {teamData} {playerList} />
 
 <style>
 	.play-body {
 		position: relative;
-		display: grid;
-		grid-template-rows: repeat(3, max-content) 1fr;
+		display: flex;
+		flex-direction: column;
 		gap: 4px;
 		height: 100%;
 	}
@@ -240,13 +202,12 @@
 		padding: 0px 24px;
 	}
 	.match-bars {
-		position: sticky;
-		top: 0;
 		display: flex;
 		flex-direction: column;
 		gap: 4px;
 		background-color: var(--background);
 		z-index: 1;
+		flex-shrink: 0;
 	}
 	.match-header {
 		padding: 0px 5dvw;
@@ -293,6 +254,7 @@
 		display: flex;
 		justify-content: center;
 		gap: 16px;
+		flex-shrink: 0;
 	}
 	.jump-link-button {
 		padding: 4px 6px;
@@ -310,19 +272,17 @@
 		overflow-x: hidden;
 		scroll-snap-type: x mandatory;
 		scroll-behavior: smooth;
-		height: 100%;
 	}
 	.list-scroll-slide {
 		width: 100%;
 		height: 100%;
-		flex-shrink: 0;
 		scroll-snap-align: start;
 		display: grid;
 		grid-template-columns: 3% 1fr 3%;
+		flex-shrink: 0;
 	}
 	.list {
 		overflow-x: auto;
-		scroll-snap-type: y mandatory;
 	}
 	.list-scroll-button {
 		background-color: var(--button);

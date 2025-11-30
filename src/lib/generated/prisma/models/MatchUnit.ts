@@ -293,7 +293,6 @@ export type MatchUnitWhereInput = {
   spas?: Prisma.StringNullableFilter<"MatchUnit"> | string | null
   ammo?: Prisma.StringNullableFilter<"MatchUnit"> | string | null
   criticals?: Prisma.MatchCritListRelationFilter
-  logEntries?: Prisma.MatchLogListRelationFilter
   formation?: Prisma.XOR<Prisma.MatchFormationScalarRelationFilter, Prisma.MatchFormationWhereInput>
 }
 
@@ -310,7 +309,6 @@ export type MatchUnitOrderByWithRelationInput = {
   spas?: Prisma.SortOrderInput | Prisma.SortOrder
   ammo?: Prisma.SortOrderInput | Prisma.SortOrder
   criticals?: Prisma.MatchCritOrderByRelationAggregateInput
-  logEntries?: Prisma.MatchLogOrderByRelationAggregateInput
   formation?: Prisma.MatchFormationOrderByWithRelationInput
   _relevance?: Prisma.MatchUnitOrderByRelevanceInput
 }
@@ -331,7 +329,6 @@ export type MatchUnitWhereUniqueInput = Prisma.AtLeast<{
   spas?: Prisma.StringNullableFilter<"MatchUnit"> | string | null
   ammo?: Prisma.StringNullableFilter<"MatchUnit"> | string | null
   criticals?: Prisma.MatchCritListRelationFilter
-  logEntries?: Prisma.MatchLogListRelationFilter
   formation?: Prisma.XOR<Prisma.MatchFormationScalarRelationFilter, Prisma.MatchFormationWhereInput>
 }, "id">
 
@@ -382,7 +379,6 @@ export type MatchUnitCreateInput = {
   spas?: string | null
   ammo?: string | null
   criticals?: Prisma.MatchCritCreateNestedManyWithoutUnitInput
-  logEntries?: Prisma.MatchLogCreateNestedManyWithoutUnitInput
   formation: Prisma.MatchFormationCreateNestedOneWithoutUnitsInput
 }
 
@@ -399,7 +395,6 @@ export type MatchUnitUncheckedCreateInput = {
   spas?: string | null
   ammo?: string | null
   criticals?: Prisma.MatchCritUncheckedCreateNestedManyWithoutUnitInput
-  logEntries?: Prisma.MatchLogUncheckedCreateNestedManyWithoutUnitInput
 }
 
 export type MatchUnitUpdateInput = {
@@ -413,7 +408,6 @@ export type MatchUnitUpdateInput = {
   spas?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ammo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticals?: Prisma.MatchCritUpdateManyWithoutUnitNestedInput
-  logEntries?: Prisma.MatchLogUpdateManyWithoutUnitNestedInput
   formation?: Prisma.MatchFormationUpdateOneRequiredWithoutUnitsNestedInput
 }
 
@@ -430,7 +424,6 @@ export type MatchUnitUncheckedUpdateInput = {
   spas?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ammo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticals?: Prisma.MatchCritUncheckedUpdateManyWithoutUnitNestedInput
-  logEntries?: Prisma.MatchLogUncheckedUpdateManyWithoutUnitNestedInput
 }
 
 export type MatchUnitCreateManyInput = {
@@ -614,20 +607,6 @@ export type MatchUnitUpdateOneRequiredWithoutCriticalsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.MatchUnitUpdateToOneWithWhereWithoutCriticalsInput, Prisma.MatchUnitUpdateWithoutCriticalsInput>, Prisma.MatchUnitUncheckedUpdateWithoutCriticalsInput>
 }
 
-export type MatchUnitCreateNestedOneWithoutLogEntriesInput = {
-  create?: Prisma.XOR<Prisma.MatchUnitCreateWithoutLogEntriesInput, Prisma.MatchUnitUncheckedCreateWithoutLogEntriesInput>
-  connectOrCreate?: Prisma.MatchUnitCreateOrConnectWithoutLogEntriesInput
-  connect?: Prisma.MatchUnitWhereUniqueInput
-}
-
-export type MatchUnitUpdateOneRequiredWithoutLogEntriesNestedInput = {
-  create?: Prisma.XOR<Prisma.MatchUnitCreateWithoutLogEntriesInput, Prisma.MatchUnitUncheckedCreateWithoutLogEntriesInput>
-  connectOrCreate?: Prisma.MatchUnitCreateOrConnectWithoutLogEntriesInput
-  upsert?: Prisma.MatchUnitUpsertWithoutLogEntriesInput
-  connect?: Prisma.MatchUnitWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.MatchUnitUpdateToOneWithWhereWithoutLogEntriesInput, Prisma.MatchUnitUpdateWithoutLogEntriesInput>, Prisma.MatchUnitUncheckedUpdateWithoutLogEntriesInput>
-}
-
 export type MatchUnitCreateWithoutFormationInput = {
   mulId: number
   skill: number
@@ -639,7 +618,6 @@ export type MatchUnitCreateWithoutFormationInput = {
   spas?: string | null
   ammo?: string | null
   criticals?: Prisma.MatchCritCreateNestedManyWithoutUnitInput
-  logEntries?: Prisma.MatchLogCreateNestedManyWithoutUnitInput
 }
 
 export type MatchUnitUncheckedCreateWithoutFormationInput = {
@@ -654,7 +632,6 @@ export type MatchUnitUncheckedCreateWithoutFormationInput = {
   spas?: string | null
   ammo?: string | null
   criticals?: Prisma.MatchCritUncheckedCreateNestedManyWithoutUnitInput
-  logEntries?: Prisma.MatchLogUncheckedCreateNestedManyWithoutUnitInput
 }
 
 export type MatchUnitCreateOrConnectWithoutFormationInput = {
@@ -710,7 +687,6 @@ export type MatchUnitCreateWithoutCriticalsInput = {
   currentHeat?: number
   spas?: string | null
   ammo?: string | null
-  logEntries?: Prisma.MatchLogCreateNestedManyWithoutUnitInput
   formation: Prisma.MatchFormationCreateNestedOneWithoutUnitsInput
 }
 
@@ -726,7 +702,6 @@ export type MatchUnitUncheckedCreateWithoutCriticalsInput = {
   formationId: number
   spas?: string | null
   ammo?: string | null
-  logEntries?: Prisma.MatchLogUncheckedCreateNestedManyWithoutUnitInput
 }
 
 export type MatchUnitCreateOrConnectWithoutCriticalsInput = {
@@ -755,7 +730,6 @@ export type MatchUnitUpdateWithoutCriticalsInput = {
   currentHeat?: Prisma.IntFieldUpdateOperationsInput | number
   spas?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ammo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  logEntries?: Prisma.MatchLogUpdateManyWithoutUnitNestedInput
   formation?: Prisma.MatchFormationUpdateOneRequiredWithoutUnitsNestedInput
 }
 
@@ -771,81 +745,6 @@ export type MatchUnitUncheckedUpdateWithoutCriticalsInput = {
   formationId?: Prisma.IntFieldUpdateOperationsInput | number
   spas?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ammo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  logEntries?: Prisma.MatchLogUncheckedUpdateManyWithoutUnitNestedInput
-}
-
-export type MatchUnitCreateWithoutLogEntriesInput = {
-  mulId: number
-  skill: number
-  secondary: boolean
-  pendingDamage?: number
-  pendingHeat?: number
-  currentDamage?: number
-  currentHeat?: number
-  spas?: string | null
-  ammo?: string | null
-  criticals?: Prisma.MatchCritCreateNestedManyWithoutUnitInput
-  formation: Prisma.MatchFormationCreateNestedOneWithoutUnitsInput
-}
-
-export type MatchUnitUncheckedCreateWithoutLogEntriesInput = {
-  id?: number
-  mulId: number
-  skill: number
-  secondary: boolean
-  pendingDamage?: number
-  pendingHeat?: number
-  currentDamage?: number
-  currentHeat?: number
-  formationId: number
-  spas?: string | null
-  ammo?: string | null
-  criticals?: Prisma.MatchCritUncheckedCreateNestedManyWithoutUnitInput
-}
-
-export type MatchUnitCreateOrConnectWithoutLogEntriesInput = {
-  where: Prisma.MatchUnitWhereUniqueInput
-  create: Prisma.XOR<Prisma.MatchUnitCreateWithoutLogEntriesInput, Prisma.MatchUnitUncheckedCreateWithoutLogEntriesInput>
-}
-
-export type MatchUnitUpsertWithoutLogEntriesInput = {
-  update: Prisma.XOR<Prisma.MatchUnitUpdateWithoutLogEntriesInput, Prisma.MatchUnitUncheckedUpdateWithoutLogEntriesInput>
-  create: Prisma.XOR<Prisma.MatchUnitCreateWithoutLogEntriesInput, Prisma.MatchUnitUncheckedCreateWithoutLogEntriesInput>
-  where?: Prisma.MatchUnitWhereInput
-}
-
-export type MatchUnitUpdateToOneWithWhereWithoutLogEntriesInput = {
-  where?: Prisma.MatchUnitWhereInput
-  data: Prisma.XOR<Prisma.MatchUnitUpdateWithoutLogEntriesInput, Prisma.MatchUnitUncheckedUpdateWithoutLogEntriesInput>
-}
-
-export type MatchUnitUpdateWithoutLogEntriesInput = {
-  mulId?: Prisma.IntFieldUpdateOperationsInput | number
-  skill?: Prisma.IntFieldUpdateOperationsInput | number
-  secondary?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  pendingDamage?: Prisma.IntFieldUpdateOperationsInput | number
-  pendingHeat?: Prisma.IntFieldUpdateOperationsInput | number
-  currentDamage?: Prisma.IntFieldUpdateOperationsInput | number
-  currentHeat?: Prisma.IntFieldUpdateOperationsInput | number
-  spas?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ammo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  criticals?: Prisma.MatchCritUpdateManyWithoutUnitNestedInput
-  formation?: Prisma.MatchFormationUpdateOneRequiredWithoutUnitsNestedInput
-}
-
-export type MatchUnitUncheckedUpdateWithoutLogEntriesInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  mulId?: Prisma.IntFieldUpdateOperationsInput | number
-  skill?: Prisma.IntFieldUpdateOperationsInput | number
-  secondary?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  pendingDamage?: Prisma.IntFieldUpdateOperationsInput | number
-  pendingHeat?: Prisma.IntFieldUpdateOperationsInput | number
-  currentDamage?: Prisma.IntFieldUpdateOperationsInput | number
-  currentHeat?: Prisma.IntFieldUpdateOperationsInput | number
-  formationId?: Prisma.IntFieldUpdateOperationsInput | number
-  spas?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ammo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  criticals?: Prisma.MatchCritUncheckedUpdateManyWithoutUnitNestedInput
 }
 
 export type MatchUnitCreateManyFormationInput = {
@@ -872,7 +771,6 @@ export type MatchUnitUpdateWithoutFormationInput = {
   spas?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ammo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticals?: Prisma.MatchCritUpdateManyWithoutUnitNestedInput
-  logEntries?: Prisma.MatchLogUpdateManyWithoutUnitNestedInput
 }
 
 export type MatchUnitUncheckedUpdateWithoutFormationInput = {
@@ -887,7 +785,6 @@ export type MatchUnitUncheckedUpdateWithoutFormationInput = {
   spas?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ammo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticals?: Prisma.MatchCritUncheckedUpdateManyWithoutUnitNestedInput
-  logEntries?: Prisma.MatchLogUncheckedUpdateManyWithoutUnitNestedInput
 }
 
 export type MatchUnitUncheckedUpdateManyWithoutFormationInput = {
@@ -910,12 +807,10 @@ export type MatchUnitUncheckedUpdateManyWithoutFormationInput = {
 
 export type MatchUnitCountOutputType = {
   criticals: number
-  logEntries: number
 }
 
 export type MatchUnitCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   criticals?: boolean | MatchUnitCountOutputTypeCountCriticalsArgs
-  logEntries?: boolean | MatchUnitCountOutputTypeCountLogEntriesArgs
 }
 
 /**
@@ -935,13 +830,6 @@ export type MatchUnitCountOutputTypeCountCriticalsArgs<ExtArgs extends runtime.T
   where?: Prisma.MatchCritWhereInput
 }
 
-/**
- * MatchUnitCountOutputType without action
- */
-export type MatchUnitCountOutputTypeCountLogEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.MatchLogWhereInput
-}
-
 
 export type MatchUnitSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -956,7 +844,6 @@ export type MatchUnitSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   spas?: boolean
   ammo?: boolean
   criticals?: boolean | Prisma.MatchUnit$criticalsArgs<ExtArgs>
-  logEntries?: boolean | Prisma.MatchUnit$logEntriesArgs<ExtArgs>
   formation?: boolean | Prisma.MatchFormationDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.MatchUnitCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["matchUnit"]>
@@ -980,7 +867,6 @@ export type MatchUnitSelectScalar = {
 export type MatchUnitOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "mulId" | "skill" | "secondary" | "pendingDamage" | "pendingHeat" | "currentDamage" | "currentHeat" | "formationId" | "spas" | "ammo", ExtArgs["result"]["matchUnit"]>
 export type MatchUnitInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   criticals?: boolean | Prisma.MatchUnit$criticalsArgs<ExtArgs>
-  logEntries?: boolean | Prisma.MatchUnit$logEntriesArgs<ExtArgs>
   formation?: boolean | Prisma.MatchFormationDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.MatchUnitCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -989,7 +875,6 @@ export type $MatchUnitPayload<ExtArgs extends runtime.Types.Extensions.InternalA
   name: "MatchUnit"
   objects: {
     criticals: Prisma.$MatchCritPayload<ExtArgs>[]
-    logEntries: Prisma.$MatchLogPayload<ExtArgs>[]
     formation: Prisma.$MatchFormationPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1345,7 +1230,6 @@ readonly fields: MatchUnitFieldRefs;
 export interface Prisma__MatchUnitClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   criticals<T extends Prisma.MatchUnit$criticalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MatchUnit$criticalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MatchCritPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  logEntries<T extends Prisma.MatchUnit$logEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MatchUnit$logEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MatchLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   formation<T extends Prisma.MatchFormationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MatchFormationDefaultArgs<ExtArgs>>): Prisma.Prisma__MatchFormationClient<runtime.Types.Result.GetResult<Prisma.$MatchFormationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1751,30 +1635,6 @@ export type MatchUnit$criticalsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.MatchCritScalarFieldEnum | Prisma.MatchCritScalarFieldEnum[]
-}
-
-/**
- * MatchUnit.logEntries
- */
-export type MatchUnit$logEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the MatchLog
-   */
-  select?: Prisma.MatchLogSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the MatchLog
-   */
-  omit?: Prisma.MatchLogOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.MatchLogInclude<ExtArgs> | null
-  where?: Prisma.MatchLogWhereInput
-  orderBy?: Prisma.MatchLogOrderByWithRelationInput | Prisma.MatchLogOrderByWithRelationInput[]
-  cursor?: Prisma.MatchLogWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.MatchLogScalarFieldEnum | Prisma.MatchLogScalarFieldEnum[]
 }
 
 /**

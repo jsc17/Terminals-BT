@@ -400,7 +400,6 @@ export const ModelName = {
   MatchUnit: 'MatchUnit',
   MatchCrit: 'MatchCrit',
   MatchLog: 'MatchLog',
-  MatchMessage: 'MatchMessage',
   Tournament: 'Tournament',
   Participant: 'Participant',
   Unit: 'Unit',
@@ -427,7 +426,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "collectionTag" | "collectionTagsToModels" | "collectionModel" | "faction" | "era" | "factionInEra" | "availability" | "listV3" | "sharedList" | "match" | "usersInMatch" | "matchTeam" | "matchFormation" | "matchUnit" | "matchCrit" | "matchLog" | "matchMessage" | "tournament" | "participant" | "unit" | "sPA" | "ammo" | "customCard" | "unitImage" | "user" | "session" | "resetToken" | "notification"
+    modelProps: "collectionTag" | "collectionTagsToModels" | "collectionModel" | "faction" | "era" | "factionInEra" | "availability" | "listV3" | "sharedList" | "match" | "usersInMatch" | "matchTeam" | "matchFormation" | "matchUnit" | "matchCrit" | "matchLog" | "tournament" | "participant" | "unit" | "sPA" | "ammo" | "customCard" | "unitImage" | "user" | "session" | "resetToken" | "notification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1487,72 +1486,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    MatchMessage: {
-      payload: Prisma.$MatchMessagePayload<ExtArgs>
-      fields: Prisma.MatchMessageFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.MatchMessageFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchMessagePayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.MatchMessageFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchMessagePayload>
-        }
-        findFirst: {
-          args: Prisma.MatchMessageFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchMessagePayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.MatchMessageFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchMessagePayload>
-        }
-        findMany: {
-          args: Prisma.MatchMessageFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchMessagePayload>[]
-        }
-        create: {
-          args: Prisma.MatchMessageCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchMessagePayload>
-        }
-        createMany: {
-          args: Prisma.MatchMessageCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        delete: {
-          args: Prisma.MatchMessageDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchMessagePayload>
-        }
-        update: {
-          args: Prisma.MatchMessageUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchMessagePayload>
-        }
-        deleteMany: {
-          args: Prisma.MatchMessageDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.MatchMessageUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        upsert: {
-          args: Prisma.MatchMessageUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchMessagePayload>
-        }
-        aggregate: {
-          args: Prisma.MatchMessageAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateMatchMessage>
-        }
-        groupBy: {
-          args: Prisma.MatchMessageGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.MatchMessageGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.MatchMessageCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.MatchMessageCountAggregateOutputType> | number
-        }
-      }
-    }
     Tournament: {
       payload: Prisma.$TournamentPayload<ExtArgs>
       fields: Prisma.TournamentFieldRefs
@@ -2432,6 +2365,7 @@ export type MatchScalarFieldEnum = (typeof MatchScalarFieldEnum)[keyof typeof Ma
 
 
 export const UsersInMatchScalarFieldEnum = {
+  id: 'id',
   matchId: 'matchId',
   playerId: 'playerId',
   playerNickname: 'playerNickname',
@@ -2497,28 +2431,19 @@ export type MatchCritScalarFieldEnum = (typeof MatchCritScalarFieldEnum)[keyof t
 export const MatchLogScalarFieldEnum = {
   id: 'id',
   matchId: 'matchId',
-  unitId: 'unitId',
+  submitterId: 'submitterId',
+  updated_at: 'updated_at',
   round: 'round',
-  applied: 'applied',
-  rolledBack: 'rolledBack',
   type: 'type',
+  unitId: 'unitId',
+  applied: 'applied',
   damage: 'damage',
   heat: 'heat',
-  critical: 'critical'
+  critical: 'critical',
+  affectedUser: 'affectedUser'
 } as const
 
 export type MatchLogScalarFieldEnum = (typeof MatchLogScalarFieldEnum)[keyof typeof MatchLogScalarFieldEnum]
-
-
-export const MatchMessageScalarFieldEnum = {
-  id: 'id',
-  matchId: 'matchId',
-  type: 'type',
-  data: 'data',
-  updated_at: 'updated_at'
-} as const
-
-export type MatchMessageScalarFieldEnum = (typeof MatchMessageScalarFieldEnum)[keyof typeof MatchMessageScalarFieldEnum]
 
 
 export const TournamentScalarFieldEnum = {
@@ -2812,19 +2737,10 @@ export type MatchCritOrderByRelevanceFieldEnum = (typeof MatchCritOrderByRelevan
 
 
 export const MatchLogOrderByRelevanceFieldEnum = {
-  type: 'type',
   critical: 'critical'
 } as const
 
 export type MatchLogOrderByRelevanceFieldEnum = (typeof MatchLogOrderByRelevanceFieldEnum)[keyof typeof MatchLogOrderByRelevanceFieldEnum]
-
-
-export const MatchMessageOrderByRelevanceFieldEnum = {
-  type: 'type',
-  data: 'data'
-} as const
-
-export type MatchMessageOrderByRelevanceFieldEnum = (typeof MatchMessageOrderByRelevanceFieldEnum)[keyof typeof MatchMessageOrderByRelevanceFieldEnum]
 
 
 export const TournamentOrderByRelevanceFieldEnum = {
@@ -2988,6 +2904,13 @@ export type EnumPlayerRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$Prism
 
 
 /**
+ * Reference to a field of type 'LogType'
+ */
+export type EnumLogTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LogType'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -3088,7 +3011,6 @@ export type GlobalOmitConfig = {
   matchUnit?: Prisma.MatchUnitOmit
   matchCrit?: Prisma.MatchCritOmit
   matchLog?: Prisma.MatchLogOmit
-  matchMessage?: Prisma.MatchMessageOmit
   tournament?: Prisma.TournamentOmit
   participant?: Prisma.ParticipantOmit
   unit?: Prisma.UnitOmit

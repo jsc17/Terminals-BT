@@ -1,10 +1,11 @@
 import { query, command, getRequestEvent, form } from "$app/server";
 import * as v from "valibot";
 import { prisma } from "$lib/server/prisma";
-import type { MatchUnit, MatchCrit } from "$lib/generated/prisma/browser";
+import type { MatchUnit, MatchCrit, UsersInMatch } from "$lib/generated/prisma/browser";
 import { UpdateMatchSchema } from "../../schema/matchlistSchema";
 import { nothing } from "../../../validation/validate.remote";
 import { invalid } from "@sveltejs/kit";
+import type { MatchLog } from "$lib/generated/prisma/client";
 
 export const getMatchDetails = query(v.number(), async (matchId) => {
 	const match = await prisma.match.findUnique({ where: { id: matchId } });
@@ -20,9 +21,9 @@ export const getMyData = query(v.number(), async (matchId) => {
 	return userData;
 });
 
-export const getPlayerData = query(v.object({ playerId: v.string(), matchId: v.number() }), async ({ playerId, matchId }) => {
+export const getPlayerData = query(v.object({ playerId: v.number() }), async ({ playerId }) => {
 	const results = await prisma.usersInMatch.findUnique({
-		where: { matchId_playerId: { playerId, matchId } },
+		where: { id: playerId },
 		include: { formations: { include: { units: { include: { criticals: true } } } } }
 	});
 	return results != null ? results : undefined;
@@ -75,7 +76,7 @@ export const joinMatch = form(
 
 		if (host?.playerId == locals.user.id) {
 			await prisma.usersInMatch.update({
-				where: { matchId_playerId: { playerId: locals.user.id, matchId: data.matchId } },
+				where: { match_player: { playerId: locals.user.id, matchId: data.matchId } },
 				data: { playerNickname: data.nickname, team: { connect: { id: data.teamId } } }
 			});
 		} else {
@@ -92,11 +93,13 @@ export const joinMatch = form(
 		const list = await prisma.listV3.findUnique({ where: { userId: locals.user.id, id: data.listId }, select: { units: true, formations: true } });
 		if (list == null) throw invalid(issue.listId("List could not be loaded. Please try again"));
 
+		let newPlayer: UsersInMatch | undefined = undefined;
+
 		const units = JSON.parse(list.units);
 		for (const formation of JSON.parse(list.formations)) {
 			if (formation.units.length == 0) continue;
-			await prisma.usersInMatch.update({
-				where: { matchId_playerId: { playerId: locals.user.id, matchId: data.matchId } },
+			newPlayer = await prisma.usersInMatch.update({
+				where: { match_player: { playerId: locals.user.id, matchId: data.matchId } },
 				data: {
 					formations: {
 						create: [
@@ -123,8 +126,13 @@ export const joinMatch = form(
 				}
 			});
 		}
-		await prisma.matchMessage.create({
-			data: { matchId: data.matchId, type: "playerJoined", data: JSON.stringify({ nickname: data.nickname, teamId: data.teamId, playerId: locals.user?.id }) }
+		await prisma.matchLog.create({
+			data: {
+				type: "PLAYER_JOINED",
+				round: match?.currentRound ?? 0,
+				match: { connect: { id: data.matchId } },
+				submitter: { connect: { id: newPlayer?.id } }
+			}
 		});
 
 		await getMyData(data.matchId).refresh();
@@ -139,12 +147,20 @@ export const updateMatchData = form(UpdateMatchSchema, async ({ matchId, name, j
 
 	const matchData = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { playerRole: "HOST" } } } });
 	if (matchData != null && matchData.players[0].playerId == locals.user.id) {
-		await prisma.match.update({ where: { id: matchId }, data: { name, joinCode, currentRound, private: privateMatch } });
+		await prisma.match.update({
+			where: { id: matchId },
+			data: {
+				name,
+				joinCode,
+				currentRound,
+				private: privateMatch,
+				logEntries: { create: { round: matchData.currentRound, type: "MATCH_UPDATE", submitter: { connect: { id: matchData.players[0].id } } } }
+			}
+		});
 		const existingTeams = await prisma.matchTeam.findMany({ where: { matchId } });
 		await Promise.all(
 			existingTeams.map(async (team, index) => prisma.matchTeam.update({ where: { id: team.id }, data: { name: teamNames[index], objectivePoints: teamScores[index] } }))
 		);
-		await prisma.matchMessage.create({ data: { matchId, type: "matchUpdate", data: "" } });
 	}
 	await nothing().refresh();
 });
@@ -152,21 +168,28 @@ export const updateMatchData = form(UpdateMatchSchema, async ({ matchId, name, j
 export const deleteMatch = command(v.number(), async (matchId) => {
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
-
+	console.log("match deleted");
 	const matchData = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { playerRole: "HOST" } } } });
 	if (matchData != null && matchData.players[0].playerId == locals.user.id) {
 		await prisma.match.delete({ where: { id: matchId } });
-		await prisma.matchMessage.create({ data: { matchId, type: "matchDelete", data: "" } });
 	}
 });
 
-export const kickPlayer = command(v.object({ matchId: v.number(), playerId: v.string() }), async ({ matchId, playerId }) => {
+export const kickPlayer = command(v.object({ matchId: v.number(), playerId: v.number() }), async ({ matchId, playerId }) => {
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
 
 	const matchData = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { playerRole: "HOST" } } } });
 	if (matchData != null && matchData.players[0].playerId == locals.user.id) {
-		await prisma.usersInMatch.delete({ where: { matchId_playerId: { matchId, playerId } } });
-		await prisma.matchMessage.create({ data: { matchId, type: "removePlayer", data: playerId.toString() } });
+		await prisma.usersInMatch.delete({ where: { id: playerId } });
+		await prisma.match.update({
+			where: { id: matchId },
+			data: { logEntries: { create: { round: matchData.currentRound, type: "REMOVE_PLAYER", affectedUser: playerId, submitter: { connect: { id: matchData.players[0].id } } } } }
+		});
 	}
+});
+
+export const getLogs = query(v.object({ matchId: v.number(), lastLogId: v.number() }), async ({ matchId, lastLogId }) => {
+	const logs = await prisma.matchLog.findMany({ where: { matchId: matchId, id: { gt: lastLogId } } });
+	return logs;
 });

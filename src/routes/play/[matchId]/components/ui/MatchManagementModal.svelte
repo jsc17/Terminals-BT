@@ -9,7 +9,7 @@
 		open: boolean;
 		matchData?: Match;
 		teamData: MatchTeam[];
-		playerList: { id: string; team?: number; nickname: string; list?: PlayList }[];
+		playerList: { id: number; team?: number; nickname: string; list?: PlayList }[];
 	};
 
 	let { open = $bindable(), matchData, teamData, playerList }: Props = $props();
@@ -28,7 +28,7 @@
 		}
 	});
 
-	function removePlayer(player: { id: string; team?: number; nickname: string; list?: PlayList }) {
+	function removePlayer(player: { id: number; team?: number; nickname: string; list?: PlayList }) {
 		if (confirm(`Remove player ${player.nickname} from the game?`)) kickPlayer({ matchId: matchData!.id, playerId: player.id });
 	}
 </script>

@@ -67,7 +67,6 @@ export const ModelName = {
   MatchUnit: 'MatchUnit',
   MatchCrit: 'MatchCrit',
   MatchLog: 'MatchLog',
-  MatchMessage: 'MatchMessage',
   Tournament: 'Tournament',
   Participant: 'Participant',
   Unit: 'Unit',
@@ -211,6 +210,7 @@ export type MatchScalarFieldEnum = (typeof MatchScalarFieldEnum)[keyof typeof Ma
 
 
 export const UsersInMatchScalarFieldEnum = {
+  id: 'id',
   matchId: 'matchId',
   playerId: 'playerId',
   playerNickname: 'playerNickname',
@@ -276,28 +276,19 @@ export type MatchCritScalarFieldEnum = (typeof MatchCritScalarFieldEnum)[keyof t
 export const MatchLogScalarFieldEnum = {
   id: 'id',
   matchId: 'matchId',
-  unitId: 'unitId',
+  submitterId: 'submitterId',
+  updated_at: 'updated_at',
   round: 'round',
-  applied: 'applied',
-  rolledBack: 'rolledBack',
   type: 'type',
+  unitId: 'unitId',
+  applied: 'applied',
   damage: 'damage',
   heat: 'heat',
-  critical: 'critical'
+  critical: 'critical',
+  affectedUser: 'affectedUser'
 } as const
 
 export type MatchLogScalarFieldEnum = (typeof MatchLogScalarFieldEnum)[keyof typeof MatchLogScalarFieldEnum]
-
-
-export const MatchMessageScalarFieldEnum = {
-  id: 'id',
-  matchId: 'matchId',
-  type: 'type',
-  data: 'data',
-  updated_at: 'updated_at'
-} as const
-
-export type MatchMessageScalarFieldEnum = (typeof MatchMessageScalarFieldEnum)[keyof typeof MatchMessageScalarFieldEnum]
 
 
 export const TournamentScalarFieldEnum = {
@@ -591,19 +582,10 @@ export type MatchCritOrderByRelevanceFieldEnum = (typeof MatchCritOrderByRelevan
 
 
 export const MatchLogOrderByRelevanceFieldEnum = {
-  type: 'type',
   critical: 'critical'
 } as const
 
 export type MatchLogOrderByRelevanceFieldEnum = (typeof MatchLogOrderByRelevanceFieldEnum)[keyof typeof MatchLogOrderByRelevanceFieldEnum]
-
-
-export const MatchMessageOrderByRelevanceFieldEnum = {
-  type: 'type',
-  data: 'data'
-} as const
-
-export type MatchMessageOrderByRelevanceFieldEnum = (typeof MatchMessageOrderByRelevanceFieldEnum)[keyof typeof MatchMessageOrderByRelevanceFieldEnum]
 
 
 export const TournamentOrderByRelevanceFieldEnum = {

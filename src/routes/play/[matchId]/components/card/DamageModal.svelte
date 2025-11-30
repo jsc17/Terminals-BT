@@ -2,8 +2,9 @@
 	import { Dialog, Slider, Switch } from "$lib/generic";
 	import type { MulUnit } from "$lib/types/list.svelte";
 	import { Tabs } from "bits-ui";
-	import type { LogRound, PlayUnit } from "../../../types/types";
+	import type { PlayUnit } from "../../../types/types";
 	import { removeDamage, takeDamage } from "../../remote/matchUpdates.remote";
+	import { getContext } from "svelte";
 
 	type Props = {
 		unit: PlayUnit;
@@ -12,6 +13,7 @@
 	};
 
 	let { unit, open = $bindable(false), reference }: Props = $props();
+	const matchId: number = getContext("matchId");
 
 	let damageToTake = $state(0);
 	let takePending = $state(true);
@@ -19,14 +21,14 @@
 	let removePending = $derived(unit.pending.damage != 0);
 
 	function applyDamage() {
-		takeDamage({ unitId: unit.id, damage: damageToTake, pending: takePending });
+		takeDamage({ matchId, unitId: unit.id, damage: damageToTake, pending: takePending });
 		damageToTake = 0;
 		takePending = true;
 		open = false;
 	}
 	function healDamage() {
 		if (confirm(`Remove ${damageToRemove} ${removePending ? "pending" : "applied"} damage from this unit?`)) {
-			removeDamage({ unitId: unit.id, damage: damageToRemove, pending: removePending });
+			removeDamage({ matchId, unitId: unit.id, damage: damageToRemove, pending: removePending });
 			damageToRemove = 0;
 			open = false;
 		}

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Dialog, Switch } from "$lib/generic";
 	import type { MulUnit } from "$lib/types/list.svelte";
+	import { getContext } from "svelte";
 	import type { PlayUnit } from "../../../types/types";
 	import { setHeat } from "../../remote/matchUpdates.remote";
 
@@ -11,6 +12,7 @@
 	};
 
 	let { unit, open = $bindable(false), reference }: Props = $props();
+	const matchId: number = getContext("matchId");
 
 	let newHeatLevel = $derived(unit.pending.heat);
 	let takePending = $state(true);
@@ -24,7 +26,7 @@
 	function applyHeat() {
 		if (newHeatLevel < 0) newHeatLevel = 0;
 		if (newHeatLevel > 4) newHeatLevel = 4;
-		setHeat({ unitId: unit.id, heatLevel: newHeatLevel, pending: takePending });
+		setHeat({ matchId, unitId: unit.id, heatLevel: newHeatLevel, pending: takePending });
 		open = false;
 	}
 </script>

@@ -6,7 +6,7 @@ export async function startWatcher(matchId: number, intervalMs = 1000) {
 
 	if (watcher.running) return;
 	watcher.running = true;
-	let lastCheck = new Date(0); // cursor timestamp
+	let lastCheck = new Date(); // cursor timestamp
 
 	console.log(`Watcher for "${matchId}" started`);
 
@@ -18,7 +18,7 @@ export async function startWatcher(matchId: number, intervalMs = 1000) {
 			return;
 		}
 
-		const messages = await prisma.matchMessage.findMany({ where: { matchId, updated_at: { gte: lastCheck } } });
+		const messages = await prisma.matchLog.findMany({ where: { matchId, updated_at: { gte: lastCheck } } });
 
 		if (messages.length > 0) {
 			for (const message of messages) {

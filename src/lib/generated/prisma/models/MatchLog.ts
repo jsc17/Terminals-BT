@@ -29,58 +29,68 @@ export type AggregateMatchLog = {
 export type MatchLogAvgAggregateOutputType = {
   id: number | null
   matchId: number | null
-  unitId: number | null
+  submitterId: number | null
   round: number | null
+  unitId: number | null
   damage: number | null
   heat: number | null
+  affectedUser: number | null
 }
 
 export type MatchLogSumAggregateOutputType = {
   id: number | null
   matchId: number | null
-  unitId: number | null
+  submitterId: number | null
   round: number | null
+  unitId: number | null
   damage: number | null
   heat: number | null
+  affectedUser: number | null
 }
 
 export type MatchLogMinAggregateOutputType = {
   id: number | null
   matchId: number | null
-  unitId: number | null
+  submitterId: number | null
+  updated_at: Date | null
   round: number | null
+  type: $Enums.LogType | null
+  unitId: number | null
   applied: boolean | null
-  rolledBack: boolean | null
-  type: string | null
   damage: number | null
   heat: number | null
   critical: string | null
+  affectedUser: number | null
 }
 
 export type MatchLogMaxAggregateOutputType = {
   id: number | null
   matchId: number | null
-  unitId: number | null
+  submitterId: number | null
+  updated_at: Date | null
   round: number | null
+  type: $Enums.LogType | null
+  unitId: number | null
   applied: boolean | null
-  rolledBack: boolean | null
-  type: string | null
   damage: number | null
   heat: number | null
   critical: string | null
+  affectedUser: number | null
 }
 
 export type MatchLogCountAggregateOutputType = {
   id: number
   matchId: number
-  unitId: number
+  submitterId: number
+  updated_at: number
   round: number
-  applied: number
-  rolledBack: number
   type: number
+  unitId: number
+  applied: number
   damage: number
   heat: number
   critical: number
+  affectedUser: number
   _all: number
 }
 
@@ -88,58 +98,68 @@ export type MatchLogCountAggregateOutputType = {
 export type MatchLogAvgAggregateInputType = {
   id?: true
   matchId?: true
-  unitId?: true
+  submitterId?: true
   round?: true
+  unitId?: true
   damage?: true
   heat?: true
+  affectedUser?: true
 }
 
 export type MatchLogSumAggregateInputType = {
   id?: true
   matchId?: true
-  unitId?: true
+  submitterId?: true
   round?: true
+  unitId?: true
   damage?: true
   heat?: true
+  affectedUser?: true
 }
 
 export type MatchLogMinAggregateInputType = {
   id?: true
   matchId?: true
-  unitId?: true
+  submitterId?: true
+  updated_at?: true
   round?: true
-  applied?: true
-  rolledBack?: true
   type?: true
+  unitId?: true
+  applied?: true
   damage?: true
   heat?: true
   critical?: true
+  affectedUser?: true
 }
 
 export type MatchLogMaxAggregateInputType = {
   id?: true
   matchId?: true
-  unitId?: true
+  submitterId?: true
+  updated_at?: true
   round?: true
-  applied?: true
-  rolledBack?: true
   type?: true
+  unitId?: true
+  applied?: true
   damage?: true
   heat?: true
   critical?: true
+  affectedUser?: true
 }
 
 export type MatchLogCountAggregateInputType = {
   id?: true
   matchId?: true
-  unitId?: true
+  submitterId?: true
+  updated_at?: true
   round?: true
-  applied?: true
-  rolledBack?: true
   type?: true
+  unitId?: true
+  applied?: true
   damage?: true
   heat?: true
   critical?: true
+  affectedUser?: true
   _all?: true
 }
 
@@ -232,14 +252,16 @@ export type MatchLogGroupByArgs<ExtArgs extends runtime.Types.Extensions.Interna
 export type MatchLogGroupByOutputType = {
   id: number
   matchId: number
-  unitId: number
+  submitterId: number
+  updated_at: Date
   round: number
-  applied: boolean
-  rolledBack: boolean
-  type: string
+  type: $Enums.LogType
+  unitId: number | null
+  applied: boolean | null
   damage: number | null
   heat: number | null
   critical: string | null
+  affectedUser: number | null
   _count: MatchLogCountAggregateOutputType | null
   _avg: MatchLogAvgAggregateOutputType | null
   _sum: MatchLogSumAggregateOutputType | null
@@ -268,31 +290,35 @@ export type MatchLogWhereInput = {
   NOT?: Prisma.MatchLogWhereInput | Prisma.MatchLogWhereInput[]
   id?: Prisma.IntFilter<"MatchLog"> | number
   matchId?: Prisma.IntFilter<"MatchLog"> | number
-  unitId?: Prisma.IntFilter<"MatchLog"> | number
+  submitterId?: Prisma.IntFilter<"MatchLog"> | number
+  updated_at?: Prisma.DateTimeFilter<"MatchLog"> | Date | string
   round?: Prisma.IntFilter<"MatchLog"> | number
-  applied?: Prisma.BoolFilter<"MatchLog"> | boolean
-  rolledBack?: Prisma.BoolFilter<"MatchLog"> | boolean
-  type?: Prisma.StringFilter<"MatchLog"> | string
+  type?: Prisma.EnumLogTypeFilter<"MatchLog"> | $Enums.LogType
+  unitId?: Prisma.IntNullableFilter<"MatchLog"> | number | null
+  applied?: Prisma.BoolNullableFilter<"MatchLog"> | boolean | null
   damage?: Prisma.IntNullableFilter<"MatchLog"> | number | null
   heat?: Prisma.IntNullableFilter<"MatchLog"> | number | null
   critical?: Prisma.StringNullableFilter<"MatchLog"> | string | null
+  affectedUser?: Prisma.IntNullableFilter<"MatchLog"> | number | null
   match?: Prisma.XOR<Prisma.MatchScalarRelationFilter, Prisma.MatchWhereInput>
-  unit?: Prisma.XOR<Prisma.MatchUnitScalarRelationFilter, Prisma.MatchUnitWhereInput>
+  submitter?: Prisma.XOR<Prisma.UsersInMatchScalarRelationFilter, Prisma.UsersInMatchWhereInput>
 }
 
 export type MatchLogOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   matchId?: Prisma.SortOrder
-  unitId?: Prisma.SortOrder
+  submitterId?: Prisma.SortOrder
+  updated_at?: Prisma.SortOrder
   round?: Prisma.SortOrder
-  applied?: Prisma.SortOrder
-  rolledBack?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  unitId?: Prisma.SortOrderInput | Prisma.SortOrder
+  applied?: Prisma.SortOrderInput | Prisma.SortOrder
   damage?: Prisma.SortOrderInput | Prisma.SortOrder
   heat?: Prisma.SortOrderInput | Prisma.SortOrder
   critical?: Prisma.SortOrderInput | Prisma.SortOrder
+  affectedUser?: Prisma.SortOrderInput | Prisma.SortOrder
   match?: Prisma.MatchOrderByWithRelationInput
-  unit?: Prisma.MatchUnitOrderByWithRelationInput
+  submitter?: Prisma.UsersInMatchOrderByWithRelationInput
   _relevance?: Prisma.MatchLogOrderByRelevanceInput
 }
 
@@ -302,29 +328,33 @@ export type MatchLogWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.MatchLogWhereInput[]
   NOT?: Prisma.MatchLogWhereInput | Prisma.MatchLogWhereInput[]
   matchId?: Prisma.IntFilter<"MatchLog"> | number
-  unitId?: Prisma.IntFilter<"MatchLog"> | number
+  submitterId?: Prisma.IntFilter<"MatchLog"> | number
+  updated_at?: Prisma.DateTimeFilter<"MatchLog"> | Date | string
   round?: Prisma.IntFilter<"MatchLog"> | number
-  applied?: Prisma.BoolFilter<"MatchLog"> | boolean
-  rolledBack?: Prisma.BoolFilter<"MatchLog"> | boolean
-  type?: Prisma.StringFilter<"MatchLog"> | string
+  type?: Prisma.EnumLogTypeFilter<"MatchLog"> | $Enums.LogType
+  unitId?: Prisma.IntNullableFilter<"MatchLog"> | number | null
+  applied?: Prisma.BoolNullableFilter<"MatchLog"> | boolean | null
   damage?: Prisma.IntNullableFilter<"MatchLog"> | number | null
   heat?: Prisma.IntNullableFilter<"MatchLog"> | number | null
   critical?: Prisma.StringNullableFilter<"MatchLog"> | string | null
+  affectedUser?: Prisma.IntNullableFilter<"MatchLog"> | number | null
   match?: Prisma.XOR<Prisma.MatchScalarRelationFilter, Prisma.MatchWhereInput>
-  unit?: Prisma.XOR<Prisma.MatchUnitScalarRelationFilter, Prisma.MatchUnitWhereInput>
+  submitter?: Prisma.XOR<Prisma.UsersInMatchScalarRelationFilter, Prisma.UsersInMatchWhereInput>
 }, "id">
 
 export type MatchLogOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   matchId?: Prisma.SortOrder
-  unitId?: Prisma.SortOrder
+  submitterId?: Prisma.SortOrder
+  updated_at?: Prisma.SortOrder
   round?: Prisma.SortOrder
-  applied?: Prisma.SortOrder
-  rolledBack?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  unitId?: Prisma.SortOrderInput | Prisma.SortOrder
+  applied?: Prisma.SortOrderInput | Prisma.SortOrder
   damage?: Prisma.SortOrderInput | Prisma.SortOrder
   heat?: Prisma.SortOrderInput | Prisma.SortOrder
   critical?: Prisma.SortOrderInput | Prisma.SortOrder
+  affectedUser?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.MatchLogCountOrderByAggregateInput
   _avg?: Prisma.MatchLogAvgOrderByAggregateInput
   _max?: Prisma.MatchLogMaxOrderByAggregateInput
@@ -338,100 +368,116 @@ export type MatchLogScalarWhereWithAggregatesInput = {
   NOT?: Prisma.MatchLogScalarWhereWithAggregatesInput | Prisma.MatchLogScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"MatchLog"> | number
   matchId?: Prisma.IntWithAggregatesFilter<"MatchLog"> | number
-  unitId?: Prisma.IntWithAggregatesFilter<"MatchLog"> | number
+  submitterId?: Prisma.IntWithAggregatesFilter<"MatchLog"> | number
+  updated_at?: Prisma.DateTimeWithAggregatesFilter<"MatchLog"> | Date | string
   round?: Prisma.IntWithAggregatesFilter<"MatchLog"> | number
-  applied?: Prisma.BoolWithAggregatesFilter<"MatchLog"> | boolean
-  rolledBack?: Prisma.BoolWithAggregatesFilter<"MatchLog"> | boolean
-  type?: Prisma.StringWithAggregatesFilter<"MatchLog"> | string
+  type?: Prisma.EnumLogTypeWithAggregatesFilter<"MatchLog"> | $Enums.LogType
+  unitId?: Prisma.IntNullableWithAggregatesFilter<"MatchLog"> | number | null
+  applied?: Prisma.BoolNullableWithAggregatesFilter<"MatchLog"> | boolean | null
   damage?: Prisma.IntNullableWithAggregatesFilter<"MatchLog"> | number | null
   heat?: Prisma.IntNullableWithAggregatesFilter<"MatchLog"> | number | null
   critical?: Prisma.StringNullableWithAggregatesFilter<"MatchLog"> | string | null
+  affectedUser?: Prisma.IntNullableWithAggregatesFilter<"MatchLog"> | number | null
 }
 
 export type MatchLogCreateInput = {
+  updated_at?: Date | string
   round: number
-  applied: boolean
-  rolledBack: boolean
-  type: string
+  type: $Enums.LogType
+  unitId?: number | null
+  applied?: boolean | null
   damage?: number | null
   heat?: number | null
   critical?: string | null
+  affectedUser?: number | null
   match: Prisma.MatchCreateNestedOneWithoutLogEntriesInput
-  unit: Prisma.MatchUnitCreateNestedOneWithoutLogEntriesInput
+  submitter: Prisma.UsersInMatchCreateNestedOneWithoutLogsInput
 }
 
 export type MatchLogUncheckedCreateInput = {
   id?: number
   matchId: number
-  unitId: number
+  submitterId: number
+  updated_at?: Date | string
   round: number
-  applied: boolean
-  rolledBack: boolean
-  type: string
+  type: $Enums.LogType
+  unitId?: number | null
+  applied?: boolean | null
   damage?: number | null
   heat?: number | null
   critical?: string | null
+  affectedUser?: number | null
 }
 
 export type MatchLogUpdateInput = {
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   round?: Prisma.IntFieldUpdateOperationsInput | number
-  applied?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  rolledBack?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumLogTypeFieldUpdateOperationsInput | $Enums.LogType
+  unitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  applied?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   damage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   heat?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   critical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  affectedUser?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   match?: Prisma.MatchUpdateOneRequiredWithoutLogEntriesNestedInput
-  unit?: Prisma.MatchUnitUpdateOneRequiredWithoutLogEntriesNestedInput
+  submitter?: Prisma.UsersInMatchUpdateOneRequiredWithoutLogsNestedInput
 }
 
 export type MatchLogUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   matchId?: Prisma.IntFieldUpdateOperationsInput | number
-  unitId?: Prisma.IntFieldUpdateOperationsInput | number
+  submitterId?: Prisma.IntFieldUpdateOperationsInput | number
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   round?: Prisma.IntFieldUpdateOperationsInput | number
-  applied?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  rolledBack?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumLogTypeFieldUpdateOperationsInput | $Enums.LogType
+  unitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  applied?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   damage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   heat?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   critical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  affectedUser?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type MatchLogCreateManyInput = {
   id?: number
   matchId: number
-  unitId: number
+  submitterId: number
+  updated_at?: Date | string
   round: number
-  applied: boolean
-  rolledBack: boolean
-  type: string
+  type: $Enums.LogType
+  unitId?: number | null
+  applied?: boolean | null
   damage?: number | null
   heat?: number | null
   critical?: string | null
+  affectedUser?: number | null
 }
 
 export type MatchLogUpdateManyMutationInput = {
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   round?: Prisma.IntFieldUpdateOperationsInput | number
-  applied?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  rolledBack?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumLogTypeFieldUpdateOperationsInput | $Enums.LogType
+  unitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  applied?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   damage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   heat?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   critical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  affectedUser?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type MatchLogUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   matchId?: Prisma.IntFieldUpdateOperationsInput | number
-  unitId?: Prisma.IntFieldUpdateOperationsInput | number
+  submitterId?: Prisma.IntFieldUpdateOperationsInput | number
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   round?: Prisma.IntFieldUpdateOperationsInput | number
-  applied?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  rolledBack?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumLogTypeFieldUpdateOperationsInput | $Enums.LogType
+  unitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  applied?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   damage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   heat?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   critical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  affectedUser?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type MatchLogListRelationFilter = {
@@ -453,58 +499,68 @@ export type MatchLogOrderByRelevanceInput = {
 export type MatchLogCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   matchId?: Prisma.SortOrder
-  unitId?: Prisma.SortOrder
+  submitterId?: Prisma.SortOrder
+  updated_at?: Prisma.SortOrder
   round?: Prisma.SortOrder
-  applied?: Prisma.SortOrder
-  rolledBack?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  unitId?: Prisma.SortOrder
+  applied?: Prisma.SortOrder
   damage?: Prisma.SortOrder
   heat?: Prisma.SortOrder
   critical?: Prisma.SortOrder
+  affectedUser?: Prisma.SortOrder
 }
 
 export type MatchLogAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   matchId?: Prisma.SortOrder
-  unitId?: Prisma.SortOrder
+  submitterId?: Prisma.SortOrder
   round?: Prisma.SortOrder
+  unitId?: Prisma.SortOrder
   damage?: Prisma.SortOrder
   heat?: Prisma.SortOrder
+  affectedUser?: Prisma.SortOrder
 }
 
 export type MatchLogMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   matchId?: Prisma.SortOrder
-  unitId?: Prisma.SortOrder
+  submitterId?: Prisma.SortOrder
+  updated_at?: Prisma.SortOrder
   round?: Prisma.SortOrder
-  applied?: Prisma.SortOrder
-  rolledBack?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  unitId?: Prisma.SortOrder
+  applied?: Prisma.SortOrder
   damage?: Prisma.SortOrder
   heat?: Prisma.SortOrder
   critical?: Prisma.SortOrder
+  affectedUser?: Prisma.SortOrder
 }
 
 export type MatchLogMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   matchId?: Prisma.SortOrder
-  unitId?: Prisma.SortOrder
+  submitterId?: Prisma.SortOrder
+  updated_at?: Prisma.SortOrder
   round?: Prisma.SortOrder
-  applied?: Prisma.SortOrder
-  rolledBack?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  unitId?: Prisma.SortOrder
+  applied?: Prisma.SortOrder
   damage?: Prisma.SortOrder
   heat?: Prisma.SortOrder
   critical?: Prisma.SortOrder
+  affectedUser?: Prisma.SortOrder
 }
 
 export type MatchLogSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   matchId?: Prisma.SortOrder
-  unitId?: Prisma.SortOrder
+  submitterId?: Prisma.SortOrder
   round?: Prisma.SortOrder
+  unitId?: Prisma.SortOrder
   damage?: Prisma.SortOrder
   heat?: Prisma.SortOrder
+  affectedUser?: Prisma.SortOrder
 }
 
 export type MatchLogCreateNestedManyWithoutMatchInput = {
@@ -549,69 +605,81 @@ export type MatchLogUncheckedUpdateManyWithoutMatchNestedInput = {
   deleteMany?: Prisma.MatchLogScalarWhereInput | Prisma.MatchLogScalarWhereInput[]
 }
 
-export type MatchLogCreateNestedManyWithoutUnitInput = {
-  create?: Prisma.XOR<Prisma.MatchLogCreateWithoutUnitInput, Prisma.MatchLogUncheckedCreateWithoutUnitInput> | Prisma.MatchLogCreateWithoutUnitInput[] | Prisma.MatchLogUncheckedCreateWithoutUnitInput[]
-  connectOrCreate?: Prisma.MatchLogCreateOrConnectWithoutUnitInput | Prisma.MatchLogCreateOrConnectWithoutUnitInput[]
-  createMany?: Prisma.MatchLogCreateManyUnitInputEnvelope
+export type MatchLogCreateNestedManyWithoutSubmitterInput = {
+  create?: Prisma.XOR<Prisma.MatchLogCreateWithoutSubmitterInput, Prisma.MatchLogUncheckedCreateWithoutSubmitterInput> | Prisma.MatchLogCreateWithoutSubmitterInput[] | Prisma.MatchLogUncheckedCreateWithoutSubmitterInput[]
+  connectOrCreate?: Prisma.MatchLogCreateOrConnectWithoutSubmitterInput | Prisma.MatchLogCreateOrConnectWithoutSubmitterInput[]
+  createMany?: Prisma.MatchLogCreateManySubmitterInputEnvelope
   connect?: Prisma.MatchLogWhereUniqueInput | Prisma.MatchLogWhereUniqueInput[]
 }
 
-export type MatchLogUncheckedCreateNestedManyWithoutUnitInput = {
-  create?: Prisma.XOR<Prisma.MatchLogCreateWithoutUnitInput, Prisma.MatchLogUncheckedCreateWithoutUnitInput> | Prisma.MatchLogCreateWithoutUnitInput[] | Prisma.MatchLogUncheckedCreateWithoutUnitInput[]
-  connectOrCreate?: Prisma.MatchLogCreateOrConnectWithoutUnitInput | Prisma.MatchLogCreateOrConnectWithoutUnitInput[]
-  createMany?: Prisma.MatchLogCreateManyUnitInputEnvelope
+export type MatchLogUncheckedCreateNestedManyWithoutSubmitterInput = {
+  create?: Prisma.XOR<Prisma.MatchLogCreateWithoutSubmitterInput, Prisma.MatchLogUncheckedCreateWithoutSubmitterInput> | Prisma.MatchLogCreateWithoutSubmitterInput[] | Prisma.MatchLogUncheckedCreateWithoutSubmitterInput[]
+  connectOrCreate?: Prisma.MatchLogCreateOrConnectWithoutSubmitterInput | Prisma.MatchLogCreateOrConnectWithoutSubmitterInput[]
+  createMany?: Prisma.MatchLogCreateManySubmitterInputEnvelope
   connect?: Prisma.MatchLogWhereUniqueInput | Prisma.MatchLogWhereUniqueInput[]
 }
 
-export type MatchLogUpdateManyWithoutUnitNestedInput = {
-  create?: Prisma.XOR<Prisma.MatchLogCreateWithoutUnitInput, Prisma.MatchLogUncheckedCreateWithoutUnitInput> | Prisma.MatchLogCreateWithoutUnitInput[] | Prisma.MatchLogUncheckedCreateWithoutUnitInput[]
-  connectOrCreate?: Prisma.MatchLogCreateOrConnectWithoutUnitInput | Prisma.MatchLogCreateOrConnectWithoutUnitInput[]
-  upsert?: Prisma.MatchLogUpsertWithWhereUniqueWithoutUnitInput | Prisma.MatchLogUpsertWithWhereUniqueWithoutUnitInput[]
-  createMany?: Prisma.MatchLogCreateManyUnitInputEnvelope
+export type MatchLogUpdateManyWithoutSubmitterNestedInput = {
+  create?: Prisma.XOR<Prisma.MatchLogCreateWithoutSubmitterInput, Prisma.MatchLogUncheckedCreateWithoutSubmitterInput> | Prisma.MatchLogCreateWithoutSubmitterInput[] | Prisma.MatchLogUncheckedCreateWithoutSubmitterInput[]
+  connectOrCreate?: Prisma.MatchLogCreateOrConnectWithoutSubmitterInput | Prisma.MatchLogCreateOrConnectWithoutSubmitterInput[]
+  upsert?: Prisma.MatchLogUpsertWithWhereUniqueWithoutSubmitterInput | Prisma.MatchLogUpsertWithWhereUniqueWithoutSubmitterInput[]
+  createMany?: Prisma.MatchLogCreateManySubmitterInputEnvelope
   set?: Prisma.MatchLogWhereUniqueInput | Prisma.MatchLogWhereUniqueInput[]
   disconnect?: Prisma.MatchLogWhereUniqueInput | Prisma.MatchLogWhereUniqueInput[]
   delete?: Prisma.MatchLogWhereUniqueInput | Prisma.MatchLogWhereUniqueInput[]
   connect?: Prisma.MatchLogWhereUniqueInput | Prisma.MatchLogWhereUniqueInput[]
-  update?: Prisma.MatchLogUpdateWithWhereUniqueWithoutUnitInput | Prisma.MatchLogUpdateWithWhereUniqueWithoutUnitInput[]
-  updateMany?: Prisma.MatchLogUpdateManyWithWhereWithoutUnitInput | Prisma.MatchLogUpdateManyWithWhereWithoutUnitInput[]
+  update?: Prisma.MatchLogUpdateWithWhereUniqueWithoutSubmitterInput | Prisma.MatchLogUpdateWithWhereUniqueWithoutSubmitterInput[]
+  updateMany?: Prisma.MatchLogUpdateManyWithWhereWithoutSubmitterInput | Prisma.MatchLogUpdateManyWithWhereWithoutSubmitterInput[]
   deleteMany?: Prisma.MatchLogScalarWhereInput | Prisma.MatchLogScalarWhereInput[]
 }
 
-export type MatchLogUncheckedUpdateManyWithoutUnitNestedInput = {
-  create?: Prisma.XOR<Prisma.MatchLogCreateWithoutUnitInput, Prisma.MatchLogUncheckedCreateWithoutUnitInput> | Prisma.MatchLogCreateWithoutUnitInput[] | Prisma.MatchLogUncheckedCreateWithoutUnitInput[]
-  connectOrCreate?: Prisma.MatchLogCreateOrConnectWithoutUnitInput | Prisma.MatchLogCreateOrConnectWithoutUnitInput[]
-  upsert?: Prisma.MatchLogUpsertWithWhereUniqueWithoutUnitInput | Prisma.MatchLogUpsertWithWhereUniqueWithoutUnitInput[]
-  createMany?: Prisma.MatchLogCreateManyUnitInputEnvelope
+export type MatchLogUncheckedUpdateManyWithoutSubmitterNestedInput = {
+  create?: Prisma.XOR<Prisma.MatchLogCreateWithoutSubmitterInput, Prisma.MatchLogUncheckedCreateWithoutSubmitterInput> | Prisma.MatchLogCreateWithoutSubmitterInput[] | Prisma.MatchLogUncheckedCreateWithoutSubmitterInput[]
+  connectOrCreate?: Prisma.MatchLogCreateOrConnectWithoutSubmitterInput | Prisma.MatchLogCreateOrConnectWithoutSubmitterInput[]
+  upsert?: Prisma.MatchLogUpsertWithWhereUniqueWithoutSubmitterInput | Prisma.MatchLogUpsertWithWhereUniqueWithoutSubmitterInput[]
+  createMany?: Prisma.MatchLogCreateManySubmitterInputEnvelope
   set?: Prisma.MatchLogWhereUniqueInput | Prisma.MatchLogWhereUniqueInput[]
   disconnect?: Prisma.MatchLogWhereUniqueInput | Prisma.MatchLogWhereUniqueInput[]
   delete?: Prisma.MatchLogWhereUniqueInput | Prisma.MatchLogWhereUniqueInput[]
   connect?: Prisma.MatchLogWhereUniqueInput | Prisma.MatchLogWhereUniqueInput[]
-  update?: Prisma.MatchLogUpdateWithWhereUniqueWithoutUnitInput | Prisma.MatchLogUpdateWithWhereUniqueWithoutUnitInput[]
-  updateMany?: Prisma.MatchLogUpdateManyWithWhereWithoutUnitInput | Prisma.MatchLogUpdateManyWithWhereWithoutUnitInput[]
+  update?: Prisma.MatchLogUpdateWithWhereUniqueWithoutSubmitterInput | Prisma.MatchLogUpdateWithWhereUniqueWithoutSubmitterInput[]
+  updateMany?: Prisma.MatchLogUpdateManyWithWhereWithoutSubmitterInput | Prisma.MatchLogUpdateManyWithWhereWithoutSubmitterInput[]
   deleteMany?: Prisma.MatchLogScalarWhereInput | Prisma.MatchLogScalarWhereInput[]
+}
+
+export type EnumLogTypeFieldUpdateOperationsInput = {
+  set?: $Enums.LogType
+}
+
+export type NullableBoolFieldUpdateOperationsInput = {
+  set?: boolean | null
 }
 
 export type MatchLogCreateWithoutMatchInput = {
+  updated_at?: Date | string
   round: number
-  applied: boolean
-  rolledBack: boolean
-  type: string
+  type: $Enums.LogType
+  unitId?: number | null
+  applied?: boolean | null
   damage?: number | null
   heat?: number | null
   critical?: string | null
-  unit: Prisma.MatchUnitCreateNestedOneWithoutLogEntriesInput
+  affectedUser?: number | null
+  submitter: Prisma.UsersInMatchCreateNestedOneWithoutLogsInput
 }
 
 export type MatchLogUncheckedCreateWithoutMatchInput = {
   id?: number
-  unitId: number
+  submitterId: number
+  updated_at?: Date | string
   round: number
-  applied: boolean
-  rolledBack: boolean
-  type: string
+  type: $Enums.LogType
+  unitId?: number | null
+  applied?: boolean | null
   damage?: number | null
   heat?: number | null
   critical?: string | null
+  affectedUser?: number | null
 }
 
 export type MatchLogCreateOrConnectWithoutMatchInput = {
@@ -646,157 +714,179 @@ export type MatchLogScalarWhereInput = {
   NOT?: Prisma.MatchLogScalarWhereInput | Prisma.MatchLogScalarWhereInput[]
   id?: Prisma.IntFilter<"MatchLog"> | number
   matchId?: Prisma.IntFilter<"MatchLog"> | number
-  unitId?: Prisma.IntFilter<"MatchLog"> | number
+  submitterId?: Prisma.IntFilter<"MatchLog"> | number
+  updated_at?: Prisma.DateTimeFilter<"MatchLog"> | Date | string
   round?: Prisma.IntFilter<"MatchLog"> | number
-  applied?: Prisma.BoolFilter<"MatchLog"> | boolean
-  rolledBack?: Prisma.BoolFilter<"MatchLog"> | boolean
-  type?: Prisma.StringFilter<"MatchLog"> | string
+  type?: Prisma.EnumLogTypeFilter<"MatchLog"> | $Enums.LogType
+  unitId?: Prisma.IntNullableFilter<"MatchLog"> | number | null
+  applied?: Prisma.BoolNullableFilter<"MatchLog"> | boolean | null
   damage?: Prisma.IntNullableFilter<"MatchLog"> | number | null
   heat?: Prisma.IntNullableFilter<"MatchLog"> | number | null
   critical?: Prisma.StringNullableFilter<"MatchLog"> | string | null
+  affectedUser?: Prisma.IntNullableFilter<"MatchLog"> | number | null
 }
 
-export type MatchLogCreateWithoutUnitInput = {
+export type MatchLogCreateWithoutSubmitterInput = {
+  updated_at?: Date | string
   round: number
-  applied: boolean
-  rolledBack: boolean
-  type: string
+  type: $Enums.LogType
+  unitId?: number | null
+  applied?: boolean | null
   damage?: number | null
   heat?: number | null
   critical?: string | null
+  affectedUser?: number | null
   match: Prisma.MatchCreateNestedOneWithoutLogEntriesInput
 }
 
-export type MatchLogUncheckedCreateWithoutUnitInput = {
+export type MatchLogUncheckedCreateWithoutSubmitterInput = {
   id?: number
   matchId: number
+  updated_at?: Date | string
   round: number
-  applied: boolean
-  rolledBack: boolean
-  type: string
+  type: $Enums.LogType
+  unitId?: number | null
+  applied?: boolean | null
   damage?: number | null
   heat?: number | null
   critical?: string | null
+  affectedUser?: number | null
 }
 
-export type MatchLogCreateOrConnectWithoutUnitInput = {
+export type MatchLogCreateOrConnectWithoutSubmitterInput = {
   where: Prisma.MatchLogWhereUniqueInput
-  create: Prisma.XOR<Prisma.MatchLogCreateWithoutUnitInput, Prisma.MatchLogUncheckedCreateWithoutUnitInput>
+  create: Prisma.XOR<Prisma.MatchLogCreateWithoutSubmitterInput, Prisma.MatchLogUncheckedCreateWithoutSubmitterInput>
 }
 
-export type MatchLogCreateManyUnitInputEnvelope = {
-  data: Prisma.MatchLogCreateManyUnitInput | Prisma.MatchLogCreateManyUnitInput[]
+export type MatchLogCreateManySubmitterInputEnvelope = {
+  data: Prisma.MatchLogCreateManySubmitterInput | Prisma.MatchLogCreateManySubmitterInput[]
   skipDuplicates?: boolean
 }
 
-export type MatchLogUpsertWithWhereUniqueWithoutUnitInput = {
+export type MatchLogUpsertWithWhereUniqueWithoutSubmitterInput = {
   where: Prisma.MatchLogWhereUniqueInput
-  update: Prisma.XOR<Prisma.MatchLogUpdateWithoutUnitInput, Prisma.MatchLogUncheckedUpdateWithoutUnitInput>
-  create: Prisma.XOR<Prisma.MatchLogCreateWithoutUnitInput, Prisma.MatchLogUncheckedCreateWithoutUnitInput>
+  update: Prisma.XOR<Prisma.MatchLogUpdateWithoutSubmitterInput, Prisma.MatchLogUncheckedUpdateWithoutSubmitterInput>
+  create: Prisma.XOR<Prisma.MatchLogCreateWithoutSubmitterInput, Prisma.MatchLogUncheckedCreateWithoutSubmitterInput>
 }
 
-export type MatchLogUpdateWithWhereUniqueWithoutUnitInput = {
+export type MatchLogUpdateWithWhereUniqueWithoutSubmitterInput = {
   where: Prisma.MatchLogWhereUniqueInput
-  data: Prisma.XOR<Prisma.MatchLogUpdateWithoutUnitInput, Prisma.MatchLogUncheckedUpdateWithoutUnitInput>
+  data: Prisma.XOR<Prisma.MatchLogUpdateWithoutSubmitterInput, Prisma.MatchLogUncheckedUpdateWithoutSubmitterInput>
 }
 
-export type MatchLogUpdateManyWithWhereWithoutUnitInput = {
+export type MatchLogUpdateManyWithWhereWithoutSubmitterInput = {
   where: Prisma.MatchLogScalarWhereInput
-  data: Prisma.XOR<Prisma.MatchLogUpdateManyMutationInput, Prisma.MatchLogUncheckedUpdateManyWithoutUnitInput>
+  data: Prisma.XOR<Prisma.MatchLogUpdateManyMutationInput, Prisma.MatchLogUncheckedUpdateManyWithoutSubmitterInput>
 }
 
 export type MatchLogCreateManyMatchInput = {
   id?: number
-  unitId: number
+  submitterId: number
+  updated_at?: Date | string
   round: number
-  applied: boolean
-  rolledBack: boolean
-  type: string
+  type: $Enums.LogType
+  unitId?: number | null
+  applied?: boolean | null
   damage?: number | null
   heat?: number | null
   critical?: string | null
+  affectedUser?: number | null
 }
 
 export type MatchLogUpdateWithoutMatchInput = {
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   round?: Prisma.IntFieldUpdateOperationsInput | number
-  applied?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  rolledBack?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumLogTypeFieldUpdateOperationsInput | $Enums.LogType
+  unitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  applied?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   damage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   heat?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   critical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  unit?: Prisma.MatchUnitUpdateOneRequiredWithoutLogEntriesNestedInput
+  affectedUser?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  submitter?: Prisma.UsersInMatchUpdateOneRequiredWithoutLogsNestedInput
 }
 
 export type MatchLogUncheckedUpdateWithoutMatchInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  unitId?: Prisma.IntFieldUpdateOperationsInput | number
+  submitterId?: Prisma.IntFieldUpdateOperationsInput | number
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   round?: Prisma.IntFieldUpdateOperationsInput | number
-  applied?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  rolledBack?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumLogTypeFieldUpdateOperationsInput | $Enums.LogType
+  unitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  applied?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   damage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   heat?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   critical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  affectedUser?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type MatchLogUncheckedUpdateManyWithoutMatchInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  unitId?: Prisma.IntFieldUpdateOperationsInput | number
+  submitterId?: Prisma.IntFieldUpdateOperationsInput | number
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   round?: Prisma.IntFieldUpdateOperationsInput | number
-  applied?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  rolledBack?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumLogTypeFieldUpdateOperationsInput | $Enums.LogType
+  unitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  applied?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   damage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   heat?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   critical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  affectedUser?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
-export type MatchLogCreateManyUnitInput = {
+export type MatchLogCreateManySubmitterInput = {
   id?: number
   matchId: number
+  updated_at?: Date | string
   round: number
-  applied: boolean
-  rolledBack: boolean
-  type: string
+  type: $Enums.LogType
+  unitId?: number | null
+  applied?: boolean | null
   damage?: number | null
   heat?: number | null
   critical?: string | null
+  affectedUser?: number | null
 }
 
-export type MatchLogUpdateWithoutUnitInput = {
+export type MatchLogUpdateWithoutSubmitterInput = {
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   round?: Prisma.IntFieldUpdateOperationsInput | number
-  applied?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  rolledBack?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumLogTypeFieldUpdateOperationsInput | $Enums.LogType
+  unitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  applied?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   damage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   heat?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   critical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  affectedUser?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   match?: Prisma.MatchUpdateOneRequiredWithoutLogEntriesNestedInput
 }
 
-export type MatchLogUncheckedUpdateWithoutUnitInput = {
+export type MatchLogUncheckedUpdateWithoutSubmitterInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   matchId?: Prisma.IntFieldUpdateOperationsInput | number
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   round?: Prisma.IntFieldUpdateOperationsInput | number
-  applied?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  rolledBack?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumLogTypeFieldUpdateOperationsInput | $Enums.LogType
+  unitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  applied?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   damage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   heat?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   critical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  affectedUser?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
-export type MatchLogUncheckedUpdateManyWithoutUnitInput = {
+export type MatchLogUncheckedUpdateManyWithoutSubmitterInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   matchId?: Prisma.IntFieldUpdateOperationsInput | number
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   round?: Prisma.IntFieldUpdateOperationsInput | number
-  applied?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  rolledBack?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumLogTypeFieldUpdateOperationsInput | $Enums.LogType
+  unitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  applied?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   damage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   heat?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   critical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  affectedUser?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 
@@ -804,16 +894,18 @@ export type MatchLogUncheckedUpdateManyWithoutUnitInput = {
 export type MatchLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   matchId?: boolean
-  unitId?: boolean
+  submitterId?: boolean
+  updated_at?: boolean
   round?: boolean
-  applied?: boolean
-  rolledBack?: boolean
   type?: boolean
+  unitId?: boolean
+  applied?: boolean
   damage?: boolean
   heat?: boolean
   critical?: boolean
+  affectedUser?: boolean
   match?: boolean | Prisma.MatchDefaultArgs<ExtArgs>
-  unit?: boolean | Prisma.MatchUnitDefaultArgs<ExtArgs>
+  submitter?: boolean | Prisma.UsersInMatchDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["matchLog"]>
 
 
@@ -821,39 +913,43 @@ export type MatchLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
 export type MatchLogSelectScalar = {
   id?: boolean
   matchId?: boolean
-  unitId?: boolean
+  submitterId?: boolean
+  updated_at?: boolean
   round?: boolean
-  applied?: boolean
-  rolledBack?: boolean
   type?: boolean
+  unitId?: boolean
+  applied?: boolean
   damage?: boolean
   heat?: boolean
   critical?: boolean
+  affectedUser?: boolean
 }
 
-export type MatchLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "matchId" | "unitId" | "round" | "applied" | "rolledBack" | "type" | "damage" | "heat" | "critical", ExtArgs["result"]["matchLog"]>
+export type MatchLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "matchId" | "submitterId" | "updated_at" | "round" | "type" | "unitId" | "applied" | "damage" | "heat" | "critical" | "affectedUser", ExtArgs["result"]["matchLog"]>
 export type MatchLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   match?: boolean | Prisma.MatchDefaultArgs<ExtArgs>
-  unit?: boolean | Prisma.MatchUnitDefaultArgs<ExtArgs>
+  submitter?: boolean | Prisma.UsersInMatchDefaultArgs<ExtArgs>
 }
 
 export type $MatchLogPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "MatchLog"
   objects: {
     match: Prisma.$MatchPayload<ExtArgs>
-    unit: Prisma.$MatchUnitPayload<ExtArgs>
+    submitter: Prisma.$UsersInMatchPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     matchId: number
-    unitId: number
+    submitterId: number
+    updated_at: Date
     round: number
-    applied: boolean
-    rolledBack: boolean
-    type: string
+    type: $Enums.LogType
+    unitId: number | null
+    applied: boolean | null
     damage: number | null
     heat: number | null
     critical: string | null
+    affectedUser: number | null
   }, ExtArgs["result"]["matchLog"]>
   composites: {}
 }
@@ -1195,7 +1291,7 @@ readonly fields: MatchLogFieldRefs;
 export interface Prisma__MatchLogClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   match<T extends Prisma.MatchDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MatchDefaultArgs<ExtArgs>>): Prisma.Prisma__MatchClient<runtime.Types.Result.GetResult<Prisma.$MatchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  unit<T extends Prisma.MatchUnitDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MatchUnitDefaultArgs<ExtArgs>>): Prisma.Prisma__MatchUnitClient<runtime.Types.Result.GetResult<Prisma.$MatchUnitPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  submitter<T extends Prisma.UsersInMatchDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UsersInMatchDefaultArgs<ExtArgs>>): Prisma.Prisma__UsersInMatchClient<runtime.Types.Result.GetResult<Prisma.$UsersInMatchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1227,14 +1323,16 @@ export interface Prisma__MatchLogClient<T, Null = never, ExtArgs extends runtime
 export interface MatchLogFieldRefs {
   readonly id: Prisma.FieldRef<"MatchLog", 'Int'>
   readonly matchId: Prisma.FieldRef<"MatchLog", 'Int'>
-  readonly unitId: Prisma.FieldRef<"MatchLog", 'Int'>
+  readonly submitterId: Prisma.FieldRef<"MatchLog", 'Int'>
+  readonly updated_at: Prisma.FieldRef<"MatchLog", 'DateTime'>
   readonly round: Prisma.FieldRef<"MatchLog", 'Int'>
+  readonly type: Prisma.FieldRef<"MatchLog", 'LogType'>
+  readonly unitId: Prisma.FieldRef<"MatchLog", 'Int'>
   readonly applied: Prisma.FieldRef<"MatchLog", 'Boolean'>
-  readonly rolledBack: Prisma.FieldRef<"MatchLog", 'Boolean'>
-  readonly type: Prisma.FieldRef<"MatchLog", 'String'>
   readonly damage: Prisma.FieldRef<"MatchLog", 'Int'>
   readonly heat: Prisma.FieldRef<"MatchLog", 'Int'>
   readonly critical: Prisma.FieldRef<"MatchLog", 'String'>
+  readonly affectedUser: Prisma.FieldRef<"MatchLog", 'Int'>
 }
     
 

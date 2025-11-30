@@ -107,9 +107,6 @@ importers:
       svelte-color-select:
         specifier: ^0.0.14
         version: 0.0.14(svelte@5.44.1)
-      sveltekit-sse:
-        specifier: ^0.14.3
-        version: 0.14.3(@sveltejs/kit@2.48.8(@sveltejs/vite-plugin-svelte@6.2.1(svelte@5.44.1)(vite@7.2.4(@types/node@22.18.13)(jiti@2.6.1)))(svelte@5.44.1)(vite@7.2.4(@types/node@22.18.13)(jiti@2.6.1)))(svelte@5.44.1)
       svelteplot:
         specifier: ^0.4.10
         version: 0.4.10
@@ -3214,12 +3211,6 @@ packages:
   svelte@5.44.1:
     resolution: {integrity: sha512-8VnkRXpa6tJ9IqiwKvzZBNnBy9tZg0N63duDz0EJqiozsmBEAZfHiZzWWWAneIN+cAWkK1JkafW1xIbC4YrdBA==}
     engines: {node: '>=18'}
-
-  sveltekit-sse@0.14.3:
-    resolution: {integrity: sha512-S7sACdaaHzU7FZgk5V0LnpHdyOKfbghOUrs8v0CK5kW5dr0m9kh73P1HAuSnGZ3AOkFHAlv3JiCsOnRFdVOgvw==}
-    peerDependencies:
-      '@sveltejs/kit': ^2.0.0
-      svelte: ^4.0.0 || ^5.0.0-next.0
 
   svelteplot@0.4.10:
     resolution: {integrity: sha512-CWcIK3Df7FEJGuF0BKIvMEdQFVT7YH1xgNT8g/MlNKcBwGx4TkX+tsSpQXzFvAagiYX4UhtS4ve1F9UswWB+xA==}
@@ -6844,11 +6835,6 @@ snapshots:
       locate-character: 3.0.0
       magic-string: 0.30.21
       zimmerframe: 1.1.4
-
-  sveltekit-sse@0.14.3(@sveltejs/kit@2.48.8(@sveltejs/vite-plugin-svelte@6.2.1(svelte@5.44.1)(vite@7.2.4(@types/node@22.18.13)(jiti@2.6.1)))(svelte@5.44.1)(vite@7.2.4(@types/node@22.18.13)(jiti@2.6.1)))(svelte@5.44.1):
-    dependencies:
-      '@sveltejs/kit': 2.48.8(@sveltejs/vite-plugin-svelte@6.2.1(svelte@5.44.1)(vite@7.2.4(@types/node@22.18.13)(jiti@2.6.1)))(svelte@5.44.1)(vite@7.2.4(@types/node@22.18.13)(jiti@2.6.1))
-      svelte: 5.44.1
 
   svelteplot@0.4.10:
     dependencies:

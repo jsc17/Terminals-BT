@@ -129,7 +129,6 @@
 	}
 	.unit-card-container {
 		container: unit-card / size;
-		scroll-snap-align: start;
 	}
 	/* .bonus-wrapper {
 		padding: 16px;

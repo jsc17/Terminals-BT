@@ -42,15 +42,19 @@ export const createMatch = form(CreateMatchSchema, async (data) => {
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
 
 	try {
-		await prisma.match.create({
+		const match = await prisma.match.create({
 			data: {
 				name: data.name,
 				joinCode: data.joinCode,
 				private: data.private,
-				players: { create: { player: { connect: { id: locals.user.id } }, playerNickname: data.hostNickname, playerRole: "HOST" } },
+				players: {
+					create: { player: { connect: { id: locals.user.id } }, playerNickname: data.hostNickname, playerRole: "HOST" }
+				},
 				teams: { createMany: { data: data.teamNames.map((d) => ({ name: d })) } }
-			}
+			},
+			include: { players: true }
 		});
+		await prisma.matchLog.create({ data: { round: 0, type: "MATCH_CREATED", match: { connect: { id: match.id } }, submitter: { connect: { id: match.players[0].id } } } });
 		await getMatches().refresh();
 		return { status: "success", message: "Match created" };
 	} catch (error: unknown) {
@@ -69,5 +73,3 @@ export const createMatch = form(CreateMatchSchema, async (data) => {
 		}
 	}
 });
-
-

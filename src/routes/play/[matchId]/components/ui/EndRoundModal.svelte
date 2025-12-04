@@ -22,7 +22,6 @@
 	{/snippet}
 	<form
 		{...endRound.enhance(async ({ submit, data }) => {
-			console.log(data);
 			await submit();
 			open = false;
 		})}

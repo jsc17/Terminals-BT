@@ -29,7 +29,7 @@
 	});
 
 	let playerList = $state<{ id: number; team?: number; nickname: string; list?: PlayList }[]>([]);
-	let matchUnits = new SvelteMap<number, { data: PlayUnit; reference?: MulUnit; image?: string }>();
+	let matchUnits = new SvelteMap<number, PlayUnit>();
 	let matchLogs = $state<MatchLog[]>([]);
 
 	const matchData = $derived(await getMatchDetails(data.matchId));
@@ -37,7 +37,6 @@
 	const teamData = $derived(await getTeamData(data.matchId));
 
 	getAllPlayerData(data.matchId).then((results) => {
-		console.log(results);
 		results.forEach(async (r) => {
 			playerList.push({ id: r.id, team: r.teamId ?? undefined, nickname: r.playerNickname, list: await initializePlayerList(r, matchUnits) });
 		});
@@ -154,7 +153,6 @@
 		{#each playerList
 			.filter((p) => p.list)
 			.sort((a, b) => {
-				console.log(a, b);
 				return (a.team ?? 0) - (b.team ?? 0);
 			}) as player, index (player.id)}
 			<div class="list-scroll-slide">
@@ -175,6 +173,7 @@
 			<p>{playerList.length}</p>
 		{/each}
 	</div>
+
 	<MatchLogWindow {matchLogs} {matchUnits} {playerList} />
 </div>
 

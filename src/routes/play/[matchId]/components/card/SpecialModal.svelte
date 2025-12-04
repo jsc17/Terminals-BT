@@ -2,12 +2,12 @@
 	import { Dialog } from "$lib/generic";
 	import { abilityReferences } from "$lib/data";
 	import type { UnitAbility } from "$lib/data/abilities";
-	import type { PlayUnit } from "../../../types/types";
+	import type { PlayUnitData } from "../../../types/types";
 
 	type Props = {
 		ability?: UnitAbility;
 		open: boolean;
-		unit: PlayUnit;
+		unit: PlayUnitData;
 	};
 
 	let { ability, open = $bindable(false), unit }: Props = $props();

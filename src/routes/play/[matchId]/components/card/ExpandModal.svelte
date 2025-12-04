@@ -7,7 +7,7 @@
 	import type { PlaymodeOptionsOutput } from "../../../schema/playmode";
 
 	type Props = {
-		unit: { data: PlayUnit; reference?: MulUnit; image?: string };
+		unit: PlayUnit;
 		open: boolean;
 		options: PlaymodeOptionsOutput;
 	};

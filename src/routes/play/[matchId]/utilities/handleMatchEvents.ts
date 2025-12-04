@@ -13,7 +13,7 @@ import { goto } from "$app/navigation";
 export function processMessage(
 	message: string,
 	playerList: { id: number; team?: number; nickname: string; list?: PlayList }[],
-	matchUnits: SvelteMap<number, { data: PlayUnit; reference?: MulUnit; image?: string }>,
+	matchUnits: SvelteMap<number, PlayUnit>,
 	matchLogs: MatchLog[]
 ) {
 	const update: MatchLog = JSON.parse(message);
@@ -63,7 +63,7 @@ export function processMessage(
 
 export async function initializePlayerList(
 	playerData: UsersInMatch & { formations: (MatchFormation & { units: (MatchUnit & { criticals: MatchCrit[] })[] })[] },
-	matchUnits: SvelteMap<number, { data: PlayUnit; reference?: MulUnit; image?: string }>
+	matchUnits: SvelteMap<number, PlayUnit>
 ) {
 	const playerFormationList: PlayFormation[] = [];
 	const duplicateMap = new SvelteMap<string, number[]>();
@@ -96,7 +96,7 @@ export async function initializePlayerList(
 				};
 				const reference = await getMULDataFromId(u.mulId);
 				const image = await getMulImage(reference?.imageLink ?? "");
-				matchUnits.set(u.id, { data: unitData, reference, image: image.image });
+				matchUnits.set(u.id, { data: unitData, reference, image: image.image, owner: playerData.playerNickname });
 
 				if (reference) {
 					const key = reference.group != "" ? reference.group : reference.class;
@@ -123,7 +123,7 @@ export async function initializePlayerList(
 	return { id: nanoid(10), owner: playerData.playerNickname, team: playerData.teamId, formations: playerFormationList } as PlayList;
 }
 
-async function handleUnitUpdate(unitId: number, matchUnits: SvelteMap<number, { data: PlayUnit; reference?: MulUnit; image?: string }>) {
+async function handleUnitUpdate(unitId: number, matchUnits: SvelteMap<number, PlayUnit>) {
 	if (!matchUnits.has(unitId)) return;
 	const unit = matchUnits.get(unitId)!;
 

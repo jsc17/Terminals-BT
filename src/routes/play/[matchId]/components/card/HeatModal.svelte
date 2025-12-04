@@ -2,11 +2,11 @@
 	import { Dialog, Switch } from "$lib/generic";
 	import type { MulUnit } from "$lib/types/list.svelte";
 	import { getContext } from "svelte";
-	import type { PlayUnit } from "../../../types/types";
+	import type { PlayUnitData } from "../../../types/types";
 	import { setHeat } from "../../remote/matchUpdates.remote";
 
 	type Props = {
-		unit: PlayUnit;
+		unit: PlayUnitData;
 		open: boolean;
 		reference: MulUnit;
 	};

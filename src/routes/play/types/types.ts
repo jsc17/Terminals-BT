@@ -1,7 +1,7 @@
 import type { FormationBonus } from "$lib/types/formationData";
-import type { UnitCustomization } from "$lib/types/listTypes";
+import type { MulUnit, UnitCustomization } from "$lib/types/listTypes";
 
-type PlayUnit = {
+type PlayUnitData = {
 	id: number;
 	mulId: number;
 	skill?: number;
@@ -18,6 +18,13 @@ type PlayUnit = {
 		crits: { id: number; round: number; type: string; roundsRemaining?: number }[];
 		disabledAbilities: string[];
 	};
+};
+
+type PlayUnit = {
+	data: PlayUnitData;
+	reference?: MulUnit;
+	image?: string;
+	owner: string;
 };
 
 type PlayFormation = {
@@ -57,4 +64,4 @@ type PlayMatch = {
 	createdAt: Date;
 };
 
-export type { PlayMatch, PlayList, PlayFormation, PlayUnit, LogRound, LogEntry };
+export type { PlayMatch, PlayList, PlayFormation, PlayUnitData, PlayUnit, LogRound, LogEntry };

@@ -23,7 +23,7 @@
 			const unit = units.find((unit) => unit.id == unitId);
 			const unitReference = unitReferences.get(unitId);
 			if (unit && unitReference) {
-				return unit.current.damage >= (unitReference.health ?? 0) || unit.current.crits.find((crit) => crit.type == "destroyed");
+				return unit.data.current.damage >= (unitReference.health ?? 0) || unit.data.current.crits.find((crit) => crit.type == "destroyed");
 			}
 			return false;
 		})

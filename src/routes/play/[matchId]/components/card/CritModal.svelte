@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { Dialog, Switch } from "$lib/generic";
 	import type { MulUnit } from "$lib/types/listTypes";
-	import type { PlayUnit } from "../../../types/types";
+	import type { PlayUnitData } from "../../../types/types";
 	import { criticalLists } from "../../utilities/criticalList";
 	import { Tabs } from "bits-ui";
 	import { takeCritical, removeCritical } from "../../remote/matchUpdates.remote";
 	import { getContext } from "svelte";
 
 	type Props = {
-		unit: PlayUnit;
+		unit: PlayUnitData;
 		reference: MulUnit;
 		open: boolean;
 	};

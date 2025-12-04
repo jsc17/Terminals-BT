@@ -2,12 +2,12 @@
 	import { Dialog, Slider, Switch } from "$lib/generic";
 	import type { MulUnit } from "$lib/types/list.svelte";
 	import { Tabs } from "bits-ui";
-	import type { PlayUnit } from "../../../types/types";
+	import type { PlayUnitData } from "../../../types/types";
 	import { removeDamage, takeDamage } from "../../remote/matchUpdates.remote";
 	import { getContext } from "svelte";
 
 	type Props = {
-		unit: PlayUnit;
+		unit: PlayUnitData;
 		open: boolean;
 		reference: MulUnit;
 	};

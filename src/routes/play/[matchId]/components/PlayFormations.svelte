@@ -9,7 +9,7 @@
 	type Props = {
 		formation: PlayFormation;
 		options: PlaymodeOptionsOutput;
-		matchUnits: SvelteMap<number, { data: PlayUnit; reference?: MulUnit; image?: string }>;
+		matchUnits: SvelteMap<number, PlayUnit>;
 	};
 
 	let { formation, options, matchUnits }: Props = $props();

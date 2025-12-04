@@ -15,7 +15,7 @@
 	import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 
 	type Props = {
-		unit: { data: PlayUnit; reference?: MulUnit; image?: string };
+		unit: PlayUnit;
 		options: PlaymodeOptionsOutput;
 		assignedBonuses?: SvelteMap<number, SvelteMap<string, number>>;
 	};

@@ -1,22 +1,31 @@
 <script lang="ts">
 	import type { MatchLog } from "$lib/generated/prisma/browser";
-	import type { MulUnit } from "$lib/types/listTypes";
 	import type { SvelteMap } from "svelte/reactivity";
 	import type { PlayList, PlayUnit } from "../../../types/types";
 	import MatchLogEntry from "./MatchLogEntry.svelte";
+	import { tick } from "svelte";
 
 	type Props = {
 		matchLogs: MatchLog[];
-		matchUnits: SvelteMap<number, { data: PlayUnit; reference?: MulUnit; image?: string }>;
+		matchUnits: SvelteMap<number, PlayUnit>;
 		playerList: { id: number; team?: number; nickname: string; list?: PlayList }[];
 	};
 
 	let { matchLogs, matchUnits, playerList }: Props = $props();
+	let logElement = $state<HTMLDivElement>();
+
+	$effect.pre(() => {
+		if (!logElement) return;
+		matchLogs.length;
+		tick().then(() => {
+			logElement!.scrollTo(0, logElement!.scrollHeight);
+		});
+	});
 </script>
 
-<div class="match-log">
+<div class="match-log" bind:this={logElement}>
 	{#each matchLogs as log}
-		<MatchLogEntry {log} unit={log.unitId ? matchUnits.get(log.unitId) : undefined} player={playerList.find((p) => p.id == log.submitterId)} />
+		<MatchLogEntry {log} unit={log.unitId ? matchUnits.get(log.unitId) : undefined} submitter={playerList.find((p) => p.id == log.submitterId)} />
 	{/each}
 </div>
 

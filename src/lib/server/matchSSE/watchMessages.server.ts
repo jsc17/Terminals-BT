@@ -22,7 +22,6 @@ export async function startWatcher(matchId: number, intervalMs = 1000) {
 
 		if (messages.length > 0) {
 			for (const message of messages) {
-				console.log(message);
 				for (const send of watcher.clients) {
 					send(message);
 				}

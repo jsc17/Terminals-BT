@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { PlayUnit } from "../../../types/types";
+	import type { PlayUnitData } from "../../../types/types";
 	import type { CritList } from "../../utilities/playmodeAutomation";
 
 	type Props = {
-		unit: PlayUnit;
+		unit: PlayUnitData;
 		critCount: { current: CritList; pending: CritList };
 	};
 

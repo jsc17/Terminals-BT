@@ -36,7 +36,6 @@
 <Dialog title="Join Match" bind:open>
 	<form
 		{...updateMatchData.preflight(UpdateMatchSchema).enhance(async ({ submit, data }) => {
-			console.log(data);
 			if (confirm("Are you sure you wish to update the match details?")) {
 				await submit();
 				open = false;

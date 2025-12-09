@@ -1,9 +1,14 @@
-import { PrismaClient } from "@prisma/client";
+import {env} from "$env/dynamic/private"
+import {PrismaClient} from "$lib/generated/prisma/client"
+import {PrismaMariaDb} from "@prisma/adapter-mariadb"
 
-const prisma = global.prisma || new PrismaClient();
+const adapter = new PrismaMariaDb({
+	host: env.DATABASE_HOST,
+	database: env.DATABASE_NAME,
+	user: env.DATABASE_USER,
+	password: env.DATABASE_PASSWORD
+})
 
-if (process.env.NODE_ENV === "development") {
-	global.prisma = prisma;
-}
+const prisma = new PrismaClient({adapter})
 
 export { prisma };

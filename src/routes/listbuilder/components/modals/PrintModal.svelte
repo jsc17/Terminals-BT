@@ -26,7 +26,12 @@
 		let listData: PrintListOutput = {
 			name: printName,
 			units: list.units.map((u) => ({ id: u.id, mulId: u.baseUnit.mulId, skill: u.skill ?? 4, customization: u.customization })),
-			formations: list.formations.map((f) => ({ name: f.name, type: f.type, units: f.units.map((u) => u.id) })),
+			formations: list.formations.map((f) => ({
+				name: f.name,
+				type: f.type,
+				units: f.units.map((u) => u.id),
+				secondary: f.secondary && f.secondary.units.length ? { type: f.secondary?.type, units: f.secondary?.units.map((u) => u.id) } : undefined
+			})),
 			scas: list.scaList.map((v) => v.id),
 			bs: list.bsList
 		};

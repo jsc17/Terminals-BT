@@ -14,7 +14,8 @@ export const PrintListSchema = v.object({
 		v.object({
 			name: v.string(),
 			type: v.string(),
-			units: v.array(v.string())
+			units: v.array(v.string()),
+			secondary: v.optional(v.object({ type: v.string(), units: v.array(v.string()) }))
 		})
 	),
 	scas: v.optional(v.array(v.number())),

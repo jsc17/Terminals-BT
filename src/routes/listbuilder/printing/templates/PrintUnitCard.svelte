@@ -190,7 +190,7 @@
 <style>
 	.wrapper {
 		aspect-ratio: 7 / 5;
-		width: 271pt;
+		width: 268pt;
 		container: unit-card / size;
 		font-family: Arial, Helvetica, sans-serif;
 		padding: 0;
@@ -210,13 +210,13 @@
 		font-weight: bold;
 	}
 	.play-unit-card-container {
-		padding: 1cqh 1cqw;
+		padding: 1.5cqh 1.5cqw;
 		display: grid;
 		grid-template-rows: 14.2cqh 63.3cqh 12.5cqh;
 		gap: 1.5cqh;
 		max-height: 100%;
 		max-width: 100%;
-		border: 3cqh solid black;
+		border: 2cqh solid black;
 		background-color: white;
 	}
 	p,

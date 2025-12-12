@@ -67,6 +67,7 @@ export const actions = {
 	},
 	getCustomUnits: async (event) => {
 		let { unitPacks } = await event.request.json();
+		if (!unitPacks) return { customUnits: [] };
 
 		const customUnits = await prisma.customCard.findMany({
 			where: {

@@ -40,8 +40,7 @@ export const ruleSets: Ruleset[] = [
 		name: "noRes",
 		display: "No Restrictions",
 		eraFactionRestriction: true,
-		sublistScenarios: [],
-		customUnitPacks: ["none"]
+		sublistScenarios: []
 	},
 	// {
 	// 	name: "wn350",

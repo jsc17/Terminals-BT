@@ -23,9 +23,9 @@
 	const tournamentList = $derived((await getApprovedTournamentList()).data);
 
 	let selectedTournament = $state<TournamentData | undefined>();
-	let selectedEra = $derived(selectedTournament?.era ?? 10);
-	let selectedFaction = $state<number>();
-	let selectedRules = $derived(selectedTournament?.tournamentRules ?? "wn350v3");
+	let selectedEra = $state<number>(10);
+	let selectedFaction = $state<number>(5);
+	let selectedRules = $state<string>("noRes");
 	let lockSelections = $state(false);
 
 	let unitData = $state<ValidationUnitData[]>([]);
@@ -65,7 +65,15 @@
 	watch(
 		() => selectedEra,
 		() => {
-			if (!page.url.searchParams.has("redirect") || !submittedList.faction) selectedFaction = eraList.get(selectedEra)![0].id;
+			if (!eraList.get(selectedEra)!.find((f) => f.id == selectedFaction)) selectedFaction = 5;
+		}
+	);
+
+	watch(
+		() => selectedTournament,
+		() => {
+			if (selectedTournament?.era) selectedEra = selectedTournament.era;
+			if (selectedTournament?.tournamentRules) selectedRules = selectedTournament.tournamentRules;
 		}
 	);
 
@@ -75,6 +83,7 @@
 		files = dataTransfer.files;
 		if (submittedList.era) selectedEra = submittedList.era;
 		if (submittedList.faction) selectedFaction = submittedList.faction;
+		if (submittedList.rules) selectedRules = submittedList.rules;
 	}
 </script>
 

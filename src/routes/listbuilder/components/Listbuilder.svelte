@@ -126,7 +126,7 @@
 			submittedList.data = blob;
 			submittedList.era = list.details.eras.length == 1 ? list.details.eras[0] : undefined;
 			submittedList.faction = list.details.factions.length == 1 ? list.details.factions[0] : undefined;
-
+			submittedList.rules = list.rules;
 			goto(`/validation?redirect`);
 		});
 	}

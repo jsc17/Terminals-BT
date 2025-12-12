@@ -30,7 +30,7 @@ export const getUnitData = form(v.object({ listFile: v.file(), selectedEra: v.st
 	for (const parsedUnit of parsedData.data ?? []) {
 		const unit = await getMULDataFromName(parsedUnit.name);
 		if (unit) {
-			let unique: boolean | undefined = await isUnique({ mulId: unit.mulId, era });
+			let unique: boolean | undefined = await isUnique({ mulId: unit.mulId, eras: [era] });
 			const general = (await getGeneralId({ era, faction }))?.general;
 			let available: boolean | undefined = (await isAvailable({ mulId: unit.mulId, eras: [era], factions: [faction, general ?? 0] })) || unit.mulId < 0;
 
@@ -78,7 +78,7 @@ export const fixUnitData = form(
 		if (mulData == undefined) {
 			return { status: "failed", message: "Invalid Unit Id" };
 		} else {
-			const unique = await isUnique({ mulId: mulId, era });
+			const unique = await isUnique({ mulId: mulId, eras: [era] });
 			const general = (await getGeneralId({ era, faction }))?.general;
 			const available = await isAvailable({ mulId: mulId, eras: [era], factions: [faction, general ?? 0] });
 

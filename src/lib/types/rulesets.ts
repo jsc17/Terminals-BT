@@ -1,9 +1,10 @@
 type Limit = {
 	types: string[];
-	min?: number;
-	max?: number;
+	min?: number | `${number}%`;
+	max?: number | `${number}%`;
 	equal?: number[];
-	exceptions?: { ability: { name: string; minValue: number; max: number }[] };
+	exceptions?: { ability: { name: string; min: number; max: number }[] };
+	requirements?: { skill?: { min?: number; max?: number }; pv?: { min?: number; max?: number } };
 };
 
 export type Ruleset = {
@@ -21,6 +22,7 @@ export type Ruleset = {
 	maxSkill?: number;
 	minSkill?: number;
 	unitLimits?: Limit[];
+	unitPvLimits?: Limit[];
 	chassisLimits?: Limit[];
 	variantLimits?: Limit[];
 	skillLimits?: Limit[];
@@ -30,7 +32,7 @@ export type Ruleset = {
 	unitMinPV?: number;
 	sublistMaxUnits?: number;
 	sublistMaxPv?: number;
-	sublistScenarios: string[];
+	sublistScenarios?: string[];
 };
 
 export const ruleSets: Ruleset[] = [
@@ -92,7 +94,7 @@ export const ruleSets: Ruleset[] = [
 		chassisLimits: [{ types: ["All"], max: 2 }],
 		variantLimits: [
 			{ types: ["BM", "IM"], max: 1 },
-			{ types: ["CV"], max: 1, exceptions: { ability: [{ name: "IT", minValue: 3, max: 2 }] } }
+			{ types: ["CV"], max: 1, exceptions: { ability: [{ name: "IT", min: 3, max: 2 }] } }
 		],
 		skillLimits: [{ types: ["2", "6"], max: 2 }],
 		requireHitch: true,
@@ -136,7 +138,7 @@ export const ruleSets: Ruleset[] = [
 		chassisLimits: [{ types: ["All"], max: 2 }],
 		variantLimits: [
 			{ types: ["BM", "IM"], max: 1 },
-			{ types: ["CV"], max: 1, exceptions: { ability: [{ name: "IT", minValue: 3, max: 2 }] } }
+			{ types: ["CV"], max: 1, exceptions: { ability: [{ name: "IT", min: 3, max: 2 }] } }
 		],
 		skillLimits: [{ types: ["2", "6"], max: 2 }],
 		requireHitch: true,
@@ -179,7 +181,7 @@ export const ruleSets: Ruleset[] = [
 		chassisLimits: [{ types: ["All"], max: 2 }],
 		variantLimits: [
 			{ types: ["BM", "IM"], max: 1 },
-			{ types: ["CV"], max: 1, exceptions: { ability: [{ name: "IT", minValue: 3, max: 2 }] } }
+			{ types: ["CV"], max: 1, exceptions: { ability: [{ name: "IT", min: 3, max: 2 }] } }
 		],
 		skillLimits: [
 			{ types: ["2", "6"], max: 2 },
@@ -203,6 +205,28 @@ export const ruleSets: Ruleset[] = [
 			"Pressure Plate",
 			"Stranglehold"
 		]
+	},
+	{
+		name: "asopen",
+		display: "Alpha Strike Open",
+		singleEraFaction: true,
+		eraFactionRestriction: true,
+		maxPv: 400,
+		maxUnits: 16,
+		allowedTypes: ["BA", "BM", "CV", "CI", "IM", "PM"],
+		disallowedAbilities: ["DRO", "BIM", "DCC", "HPG", "LAM", "RBT"],
+		maxSkill: 6,
+		minSkill: 2,
+		unitPvLimits: [{ types: ["BM", "IM"], min: "50%" }],
+		chassisLimits: [{ types: ["All"], max: 2 }],
+		variantLimits: [{ types: ["BM", "IM"], max: 1 }],
+		skillLimits: [{ types: ["6"], max: 2 }],
+		requireHitch: true,
+		abilityLimits: [
+			{ types: ["JMPS"], max: 2 },
+			{ types: ["ART"], max: 2, requirements: { skill: { min: 4 } } }
+		],
+		uniqueMaxLimit: 1
 	}
 ];
 

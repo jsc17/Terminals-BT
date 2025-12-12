@@ -208,7 +208,7 @@
 		{#if printOptions.printCardsByFormation}
 			{#each listData.formations as formation}
 				{@const formationPv = formation.units.reduce((a, v) => (a += getNewSkillCost(unitData.get(v)!.skill, mulUnitData.get(unitData.get(v)!.mulId)!.pv)), 0)}
-				<div class={{ formation: true, "formation-side": printOptions.formationHeaderStyle == "side" }}>
+				<div class={{ "formation-break": formation.units.length + (formation.secondary?.units.length ?? 0) > 4, "formation-side": printOptions.formationHeaderStyle == "side" }}>
 					{#if printOptions.formationHeaderStyle == "inline" && formation.type != "none"}
 						<h2 class="formation-header-inline">
 							{`${formation.name} - ${formation.type} Formation - ${formation.units.length} Units - ${formationPv}pv`}
@@ -382,9 +382,8 @@
 		flex-direction: column;
 		gap: 5pt;
 	}
-	.formation {
-		break-before: avoid;
-		break-inside: avoid;
+	.formation-break {
+		break-after: page;
 	}
 	.formation-side {
 		display: grid;

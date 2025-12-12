@@ -30,8 +30,6 @@
 	onMount(() => {
 		resultList.setOptions(list.rules);
 	});
-
-	$inspect(showEraFaction, showFilters, showListbuilder);
 </script>
 
 <main>

@@ -6,6 +6,7 @@ import { nanoid } from "nanoid";
 import { loadMULUnit } from "$lib/utilities/loadUtilities";
 import { getCustomUnitData, getMULDataFromId, getUnitAvailability } from "$lib/remote/unit.remote";
 import { db } from "$lib/offline/db";
+import { validateRules } from "$lib/rules/validateList";
 
 export type { ListCode, ListCodeUnit, ListUnit, ListFormation, SCA, MulUnit, Sublist, SublistStats };
 
@@ -18,6 +19,7 @@ export class List {
 
 	details: { name: string; eras: number[]; factions: number[]; general: number } = $state({ name: "New List", eras: [], factions: [], general: -1 });
 	rules = $state<string>("noRes");
+	options = $derived(getRulesByName(this.rules));
 	id: string = $state(crypto.randomUUID());
 
 	unitCount = $derived(this.units.filter((u) => u.baseUnit.mulId >= 0).length);
@@ -30,8 +32,6 @@ export class List {
 	stats = $derived(calculateListStats(this.units));
 
 	unitAvailability = $derived(getUnitAvailability(this.units.map((u) => u.baseUnit.mulId)));
-
-	options = $derived(getRulesByName(this.rules));
 
 	listCode = $derived.by(() => {
 		let unitList: ListCodeUnit[] = [];
@@ -64,269 +64,14 @@ export class List {
 		return newListCode;
 	});
 
-	issues = $derived.by(() => {
-		const issueList = new Map<string, Set<string>>();
-		const issueUnits = new Set<string>();
-		let issueMessage = "";
-
-		if (this.options && this.options.name != "noRes") {
-			let uniquesInList = [];
-			if (this.options.maxPv && this.pv > this.options.maxPv) {
-				issueList.set("Max PV", new Set([`${this.pv}/${this.options.maxPv}`]));
-			}
-			if (this.options.maxUnits && this.unitCount > this.options.maxUnits) {
-				issueList.set("Max Units", new Set([`${this.unitCount}/${this.options.maxUnits}`]));
-			}
-			if (this.options.singleEraFaction && (this.details.eras.length != 1 || this.details.factions.length != 1)) {
-				issueList.set("Era/Faction", new Set(["Must select a single era and faction"]));
-			}
-			for (const unit of this.units) {
-				const availability = this.unitAvailability.current?.get(unit.baseUnit.mulId)?.availability;
-				const available =
-					(availability?.find(({ era, faction }) => this.details.eras.includes(era) && (this.details.factions.includes(faction) || this.details.general == faction))
-						? true
-						: false) || unit.baseUnit.mulId < 0;
-				const unique = availability?.find(({ era, faction }) => this.details.eras.includes(era) && faction == 4) ? true : false;
-				if (unique) uniquesInList.push(unit);
-				if (this.options.eraFactionRestriction && !available) {
-					if (unit.baseUnit.mulId < 0) {
-						issueMessage = "If a battlefield support unit is showing as unavailable, it might have been added using a different rules selection. Remove and re-add the unit";
-					}
-					if (issueList.has("Unavailable Unit")) {
-						issueList.get("Unavailable Unit")?.add(unit.baseUnit.name);
-					} else {
-						issueList.set("Unavailable Unit", new Set([unit.baseUnit.name]));
-					}
-					issueUnits.add(unit.id!);
-				}
-				if (this.options.allowedTypes && !this.options.allowedTypes.includes(unit.baseUnit.subtype)) {
-					if (issueList.has("Invalid Type")) {
-						issueList.get("Invalid Type")?.add(unit.baseUnit.name);
-					} else {
-						issueList.set("Invalid Type", new Set([unit.baseUnit.name]));
-					}
-					issueUnits.add(unit.id!);
-				}
-				if (this.options.allowedRules && !this.options.allowedRules.includes(unit.baseUnit.rulesLevel)) {
-					if (issueList.has("Invalid Rules Level")) {
-						issueList.get("Invalid Rules Level")?.add(unit.baseUnit.name);
-					} else {
-						issueList.set("Invalid Rules Level", new Set([unit.baseUnit.name]));
-					}
-					issueUnits.add(unit.id!);
-				}
-				if (this.options.disallowUnique && unique) {
-					if (issueList.has("Unique units")) {
-						issueList.get("Unique units")?.add(unit.baseUnit.name);
-					} else {
-						issueList.set("Unique units", new Set([unit.baseUnit.name]));
-					}
-					issueUnits.add(unit.id!);
-				}
-				if (this.options.disallowedAbilities) {
-					let prohibittedAbility = false;
-					for (const ability of unit.baseUnit.abilities) {
-						if (this.options.disallowedAbilities.includes(ability.name)) {
-							prohibittedAbility = true;
-						}
-					}
-					if (prohibittedAbility) {
-						if (issueList.has("Invalid ability")) {
-							issueList.get("Invalid ability")?.add(unit.baseUnit.name);
-						} else {
-							issueList.set("Invalid ability", new Set([unit.baseUnit.name]));
-						}
-						issueUnits.add(unit.id!);
-					}
-				}
-				if (this.options.minSkill !== undefined && unit.skill !== undefined && this.options.minSkill > unit.skill) {
-					if (issueList.has("Minimum skill")) {
-						issueList.get("Minimum skill")?.add(unit.baseUnit.name);
-					} else {
-						issueList.set("Minimum skill", new Set([unit.baseUnit.name]));
-					}
-					issueUnits.add(unit.id!);
-				}
-				if (this.options.maxSkill && unit.skill && this.options.maxSkill < unit.skill) {
-					if (issueList.has("Maximum skill")) {
-						issueList.get("Maximum skill")?.add(unit.baseUnit.name);
-					} else {
-						issueList.set("Maximum skill", new Set([unit.baseUnit.name]));
-					}
-					issueUnits.add(unit.id!);
-				}
-				if (this.options.unitMinPV && unit.cost < this.options.unitMinPV && unit.baseUnit.name != "Off Board Artillery Support - Thumper") {
-					if (issueList.has(`Minimum unit pv (${this.options.unitMinPV})`)) {
-						issueList.get(`Minimum unit pv (${this.options.unitMinPV})`)?.add(unit.baseUnit.name);
-					} else {
-						issueList.set(`Minimum unit pv (${this.options.unitMinPV})`, new Set([unit.baseUnit.name]));
-					}
-					issueUnits.add(unit.id!);
-				}
-			}
-			if (this.options.unitLimits) {
-				let groupedUnits = Object.groupBy(this.units, (unit) => unit.baseUnit.subtype);
-				for (const limit of this.options.unitLimits) {
-					let count = 0;
-					for (const type of limit.types) {
-						count += groupedUnits[type]?.length ?? 0;
-					}
-					if (limit.max && count > limit.max) {
-						issueList.set(`Maximum ${limit.types.join("/")}`, new Set([`${count}/${limit.max}`]));
-						for (const unit of this.units) {
-							if (limit.types.includes(unit.baseUnit.subtype)) {
-								issueUnits.add(unit.id!);
-							}
-						}
-					}
-					if (limit.equal && !limit.equal.includes(count)) {
-						issueList.set(`${limit.types.join("/")}`, new Set([`Exactly ${limit.equal.join(" or ")}: Currently ${count}`]));
-						for (const unit of this.units) {
-							if (limit.types.includes(unit.baseUnit.subtype)) {
-								issueUnits.add(unit.id!);
-							}
-						}
-					}
-				}
-			}
-
-			if (this.options.chassisLimits) {
-				for (const limit of this.options.chassisLimits) {
-					let filteredUnits = this.units.filter((unit) => {
-						return limit.types.includes("All") || limit.types.includes(unit.baseUnit.subtype);
-					});
-					let chassisList = Object.groupBy(filteredUnits, (unit) => unit.baseUnit.class);
-					for (const [chassisKey, chassisValue] of Object.entries(chassisList)) {
-						if (chassisValue?.length && limit.max && chassisValue.length > limit.max) {
-							if (issueList.has("Maximum chassis")) {
-								issueList.get("Maximum chassis")?.add(chassisKey);
-							} else {
-								issueList.set("Maximum chassis", new Set([chassisKey]));
-							}
-							for (const unit of this.units) {
-								if (unit.baseUnit.class == chassisKey) {
-									issueUnits.add(unit.id!);
-								}
-							}
-						}
-					}
-				}
-			}
-
-			if (this.options.variantLimits) {
-				for (const limit of this.options.variantLimits) {
-					let filteredUnits = this.units.filter((unit) => {
-						return limit.types.includes("All") || limit.types.includes(unit.baseUnit.subtype);
-					});
-					let chassisList = Object.groupBy(filteredUnits, (unit) => unit.baseUnit.class);
-					for (const [chassisKey, chassisValue] of Object.entries(chassisList)) {
-						let variantList = Object.groupBy(chassisValue!, (unit) => unit.baseUnit.variant);
-						for (const [variantKey, variantValue] of Object.entries(variantList)) {
-							if (variantValue?.length && limit.max && variantValue.length > limit.max) {
-								if (
-									!limit.exceptions ||
-									!variantValue[0].baseUnit.abilities.find((ability) => {
-										return ability.name == "IT" && (ability.v ?? 0) >= 3;
-									})
-								) {
-									if (issueList.has("Maximum variants")) {
-										issueList.get("Maximum variants")?.add(chassisKey);
-									} else {
-										issueList.set("Maximum variants", new Set([chassisKey]));
-									}
-									for (const unit of this.units) {
-										if (unit.baseUnit.class == chassisKey) {
-											issueUnits.add(unit.id!);
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-
-			if (this.options.skillLimits) {
-				for (const limit of this.options.skillLimits) {
-					let groupedUnits = this.units.filter((unit) => {
-						return limit.types.includes(unit.skill?.toString() ?? "4");
-					});
-					if (limit.max && groupedUnits.length > limit.max) {
-						if (issueList.has(`Maximum skill limits`)) {
-							issueList.get(`Maximum skill limits`)?.add(`Skills ${limit.types.join("+")} - ${groupedUnits.length}/${limit.max}`);
-						} else {
-							issueList.set(`Maximum skill limits`, new Set([`Skills ${limit.types.join("+")} - ${groupedUnits.length}/${limit.max}`]));
-						}
-						for (const unit of this.units) {
-							if (limit.types.includes(unit.skill?.toString() ?? "4")) {
-								issueUnits.add(unit.id!);
-							}
-						}
-					}
-				}
-			}
-
-			if (this.options.requireHitch) {
-				const htcUnits = this.units.filter((unit) => {
-					return unit.baseUnit.abilities?.find((ability) => ability.name == "HTC");
-				});
-				let trailers = htcUnits.filter((unit) => {
-					if (unit.baseUnit.move) {
-						return !unit.baseUnit.move[0].speed;
-					}
-				});
-				let hitches = htcUnits.filter((unit) => {
-					if (unit.baseUnit.move) {
-						return unit.baseUnit.move[0].speed;
-					}
-				});
-				if (trailers.length > hitches.length) {
-					issueList.set("Trailers without HTC ", new Set([`${trailers.length} Trailers / ${hitches.length} Transports`]));
-					for (const trailer of trailers) {
-						issueUnits.add(trailer.id!);
-					}
-				}
-			}
-
-			if (this.options.abilityLimits) {
-				for (const limit of this.options.abilityLimits) {
-					for (const limitedAbility of limit.types) {
-						const limitedUnits = this.units.filter((unit) => {
-							return unit.baseUnit.abilities.find((ability) => limitedAbility == ability.name);
-						});
-						const count = limitedUnits.reduce((total, unit) => {
-							const unitAbility = unit.baseUnit.abilities.find((ability) => limitedAbility == ability.name);
-							return (total += (unitAbility?.v ?? 0) + (unitAbility?.vhid ?? 0));
-						}, 0);
-						if (limit.max && count > limit.max) {
-							issueList.set(
-								`${limit.types} limit exceeded`,
-								new Set(
-									limitedUnits.map((unit) => {
-										return unit.baseUnit.name;
-									})
-								)
-							);
-							for (const unit of limitedUnits) {
-								issueUnits.add(unit.id!);
-							}
-						}
-					}
-				}
-			}
-			if (this.options.uniqueMaxLimit && uniquesInList.length > this.options.uniqueMaxLimit) {
-				for (const unit of uniquesInList) {
-					if (issueList.has("Unique units limit")) {
-						issueList.get("Unique units limit")?.add(unit.baseUnit.name);
-					} else {
-						issueList.set("Unique units limit", new Set([unit.baseUnit.name]));
-					}
-					issueUnits.add(unit.id!);
-				}
-			}
-		}
-		return { issueList, issueUnits, issueMessage };
-	});
+	issues = $derived(
+		validateRules(
+			$state.snapshot(this.units.map((u) => ({ id: u.id, skill: u.skill ?? 4, data: u.baseUnit }))),
+			$state.snapshot(this.details.eras),
+			$state.snapshot(this.details.factions.concat(this.details.general == -1 ? [] : [this.details.general])),
+			$state.snapshot(this.rules)
+		)
+	);
 
 	setOptions(newRules: string) {
 		this.rules = newRules;

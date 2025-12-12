@@ -165,24 +165,26 @@
 				{/if}
 				<ListInfoPopover bind:list />
 			</div>
-			{#if list.issues?.issueList.size}
-				<Dialog title="List Rules Issues" triggerClasses="transparent-button">
-					{#snippet trigger()}
-						<div class="center"><img src="/icons/alert-outline.svg" alt="Error" class="error-icon" /> <span class="primary">Show issues</span></div>
-					{/snippet}
-					{#snippet description()}
-						{#if list.issues.issueMessage}
-							<p class="muted">{list.issues.issueMessage}</p>
-						{/if}
-					{/snippet}
-					<div class="error-dialog-body">
-						{#each list.issues.issueList as [issue, units]}
-							<div class="errors align-right">{issue}:</div>
-							<div>{Array.from(units).join(", ")}</div>
-						{/each}
-					</div>
-				</Dialog>
-			{/if}
+			{#await list.issues then issues}
+				{#if issues.issueList.size}
+					<Dialog title="List Rules Issues" triggerClasses="transparent-button">
+						{#snippet trigger()}
+							<div class="center"><img src="/icons/alert-outline.svg" alt="Error" class="error-icon" /> <span class="primary">Show issues</span></div>
+						{/snippet}
+						{#snippet description()}
+							{#if issues.issueMessage}
+								<p class="muted">{issues.issueMessage}</p>
+							{/if}
+						{/snippet}
+						<div class="error-dialog-body">
+							{#each issues.issueList as [issue, units]}
+								<div class="errors align-right">{issue}:</div>
+								<div>{Array.from(units).join(", ")}</div>
+							{/each}
+						</div>
+					</Dialog>
+				{/if}
+			{/await}
 			<div class="list-buttons">
 				<DropdownMenu
 					items={[

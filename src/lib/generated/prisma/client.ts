@@ -85,6 +85,41 @@ export type ListV3 = Prisma.ListV3Model
  */
 export type SharedList = Prisma.SharedListModel
 /**
+ * Model Match
+ * 
+ */
+export type Match = Prisma.MatchModel
+/**
+ * Model UsersInMatch
+ * 
+ */
+export type UsersInMatch = Prisma.UsersInMatchModel
+/**
+ * Model MatchTeam
+ * 
+ */
+export type MatchTeam = Prisma.MatchTeamModel
+/**
+ * Model MatchFormation
+ * 
+ */
+export type MatchFormation = Prisma.MatchFormationModel
+/**
+ * Model MatchUnit
+ * 
+ */
+export type MatchUnit = Prisma.MatchUnitModel
+/**
+ * Model MatchCrit
+ * 
+ */
+export type MatchCrit = Prisma.MatchCritModel
+/**
+ * Model MatchLog
+ * 
+ */
+export type MatchLog = Prisma.MatchLogModel
+/**
  * Model Tournament
  * 
  */

@@ -136,14 +136,6 @@
 	<button onclick={() => uploadAmmo()}>Upload Ammo</button>
 
 	<button onclick={() => cacheImages()}>Cache Images</button>
-
-	<form {...getImage}>
-		<input type="text" name="mulId" id="mulId" />
-		<button>Get</button>
-	</form>
-	{#if imageData}
-		<img src={imageData} />
-	{/if}
 </main>
 
 <style>

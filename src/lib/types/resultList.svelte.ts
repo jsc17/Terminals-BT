@@ -294,154 +294,94 @@ export class ResultList {
 		return tempRestrictedList;
 	}
 	filterList(filters: Filter[], additionalFilters: Filter[]) {
-		let tempResultList = [...this.restrictedList];
-		filters.concat(additionalFilters).forEach((filter) => {
-			switch (filter.type) {
-				case "string":
-					if (filter.value && filter.value != "any") {
-						tempResultList = tempResultList.filter((unit) => {
+		let tempResultList: MulUnit[] = [];
+		for (const unit of this.restrictedList) {
+			let meetsAllFilters = true;
+			filters.concat(additionalFilters).forEach((filter) => {
+				if (!meetsAllFilters) return;
+				switch (filter.type) {
+					case "string":
+						if (filter.value && filter.value != "any") {
+							const words = filter.value.split(" ");
 							if (unit[filter.name] != null) {
-								return unit[filter.name]
+								const unitData = unit[filter.name]
 									.normalize("NFD")
 									.replace(/[\u0300-\u036f]/g, "")
-									.toLowerCase()
-									.includes(
-										filter
-											.value!.toString()
-											.normalize("NFD")
-											.replace(/[\u0300-\u036f]/g, "")
-											.toLowerCase()
-									);
+									.toLowerCase();
+								for (const word of words) {
+									const normalizedWord = word
+										.normalize("NFD")
+										.replace(/[\u0300-\u036f]/g, "")
+										.toLowerCase();
+									if (!unitData.includes(normalizedWord)) meetsAllFilters = false;
+								}
 							}
-						});
-					}
-					break;
-				case "select":
-					if (filter.value.length) {
-						tempResultList = tempResultList.filter((unit) => {
-							return filter.value.includes(unit[filter.name]);
-						});
-					}
-					break;
-
-				case "number":
-					if (filter.valueMin) {
-						tempResultList = tempResultList.filter((unit) => {
-							return unit[filter.name] >= filter.valueMin!;
-						});
-					}
-					if (filter.valueMax !== undefined && filter.valueMax !== null) {
-						tempResultList = tempResultList.filter((unit) => {
-							return unit[filter.name] <= filter.valueMax!;
-						});
-					}
-					break;
-				case "numberGroup":
-					filter.values!.forEach((value, index) => {
-						if (value.min) {
-							tempResultList = tempResultList.filter((unit) => {
-								return unit[filter.properties![index]] >= value.min!;
-							});
 						}
-						if (value.max !== undefined && value.max !== null) {
-							tempResultList = tempResultList.filter((unit) => {
-								return unit[filter.properties![index]] <= value.max!;
-							});
-						}
-					});
-
-					break;
-				case "movement":
-					if (filter.speedMaxValue || filter.speedMinValue || filter.typeValue.length) {
-						tempResultList = tempResultList.filter((unit) => {
+						break;
+					case "select":
+						if (filter.value.length && !filter.value.includes(unit[filter.name])) meetsAllFilters = false;
+						break;
+					case "number":
+						if (filter.valueMin && unit[filter.name] < filter.valueMin) meetsAllFilters = false;
+						if (filter.valueMax !== undefined && filter.valueMax !== null && unit[filter.name] > filter.valueMax) meetsAllFilters = false;
+						break;
+					case "numberGroup":
+						filter.values!.forEach((value, index) => {
+							if (value.min && unit[filter.properties![index]] < value.min) meetsAllFilters = false;
+							if (value.max !== undefined && value.max !== null && unit[filter.properties![index]] > value.max) meetsAllFilters = false;
+						});
+						break;
+					case "movement":
+						if (filter.speedMaxValue || filter.speedMinValue || filter.typeValue.length) {
 							if (unit.move === undefined) {
-								return false;
+								meetsAllFilters = false;
+								break;
 							}
 
 							let meetsType = false,
-								meetsMinSpeed = false,
-								meetsMaxSpeed = false;
+								meetsMinSpeed = false;
 							for (const move of unit.move) {
+								if (filter.speedMaxValue && move.speed > filter.speedMaxValue) {
+									meetsAllFilters = false;
+									break;
+								}
 								if (filter.typeValue.includes(move.type) || !filter.typeValue.length || (filter.typeValue.includes("st") && move.type == undefined)) {
 									meetsType = true;
 									if (!filter.speedMinValue || move.speed >= filter.speedMinValue) {
 										meetsMinSpeed = true;
 									}
-									if (!filter.speedMaxValue || move.speed <= filter.speedMaxValue) {
-										meetsMaxSpeed = true;
-									}
 								}
-								if (filter.typeValue.includes("st") && move.type) return false;
+								if (filter.typeValue.includes("st") && move.type) meetsAllFilters = false;
 							}
-
-							return meetsType && meetsMinSpeed && meetsMaxSpeed;
-						});
-					}
-					break;
-				case "abilities":
-					if (filter.value) {
-						const rawSearchBrackets = [...filter.value.matchAll(/\([^)]*\)/g)].map((match) => match[0].replaceAll(/[\s\(\)]/g, "").split(","));
-						const rawNonBrackets = filter.value.replaceAll(/\([^)]*\)/g, "");
-						let rawSearchArray = rawNonBrackets
-							.split(",")
-							.map((ability) => ability.trim())
-							.filter((split) => split != "");
-						let searchTermArray: SearchTerm[] = [];
-						let searchBracketArray: SearchTerm[][] = [];
-
-						for (let rawSearchTerm of rawSearchArray) {
-							const exactMatch = rawSearchTerm[0] == "=";
-							const excludeMatch = rawSearchTerm[0] == "!";
-							if (exactMatch || excludeMatch) {
-								rawSearchTerm = rawSearchTerm.slice(1);
-							}
-							let searchTerm: SearchTerm;
-
-							const rawArtSearch = rawSearchTerm.match(/(ART)/i);
-							if (rawArtSearch !== null) {
-								const valueStartIndex = rawSearchTerm.search(/\d/);
-								if (valueStartIndex == -1) {
-									searchTerm = { name: "ART", extraType: rawSearchTerm.slice(3, rawSearchTerm.length) };
-								} else {
-									searchTerm = { name: "ART", extraType: rawSearchTerm.slice(3, valueStartIndex), exactMatch };
-									searchTerm.value = parseSearchConstraint(rawSearchTerm.slice(valueStartIndex));
-								}
-							} else {
-								const rawArray: string[] = rawSearchTerm.split("/");
-								const valueStartIndex = rawArray[0].search(/(?<!^c)\d/i);
-								if (valueStartIndex != -1) {
-									searchTerm = { name: rawSearchTerm.slice(0, valueStartIndex) };
-									rawArray[0] = rawArray[0].slice(valueStartIndex, rawArray[0].length);
-								} else {
-									searchTerm = { name: rawSearchTerm };
-									rawArray[0] = "";
-								}
-								if (rawArray.length == 1) {
-									if (rawArray[0] != "") {
-										searchTerm.value = parseSearchConstraint(rawArray[0]);
-									}
-								} else {
-									searchTerm.value = parseSearchConstraint(rawArray[0]);
-									searchTerm.medium = parseSearchConstraint(rawArray[1]);
-									searchTerm.long = parseSearchConstraint(rawArray[2]);
-									searchTerm.extreme = parseSearchConstraint(rawArray[3]);
-								}
-							}
-							searchTerm.exactMatch = exactMatch;
-							searchTerm.excludeMatch = excludeMatch;
-							searchTermArray.push(searchTerm);
+							if (!meetsType || !meetsMinSpeed) meetsAllFilters = false;
 						}
-						for (const bracket of rawSearchBrackets) {
-							const bracketTermArray: SearchTerm[] = [];
-							for (const rawSearchTerm of bracket) {
+						break;
+					case "abilities":
+						if (filter.value) {
+							const rawSearchBrackets = [...filter.value.matchAll(/\([^)]*\)/g)].map((match) => match[0].replaceAll(/[\s\(\)]/g, "").split(","));
+							const rawNonBrackets = filter.value.replaceAll(/\([^)]*\)/g, "");
+							let rawSearchArray = rawNonBrackets
+								.split(",")
+								.map((ability) => ability.trim())
+								.filter((split) => split != "");
+							let searchTermArray: SearchTerm[] = [];
+							let searchBracketArray: SearchTerm[][] = [];
+
+							for (let rawSearchTerm of rawSearchArray) {
+								const exactMatch = rawSearchTerm[0] == "=";
+								const excludeMatch = rawSearchTerm[0] == "!";
+								if (exactMatch || excludeMatch) {
+									rawSearchTerm = rawSearchTerm.slice(1);
+								}
 								let searchTerm: SearchTerm;
+
 								const rawArtSearch = rawSearchTerm.match(/(ART)/i);
 								if (rawArtSearch !== null) {
 									const valueStartIndex = rawSearchTerm.search(/\d/);
 									if (valueStartIndex == -1) {
 										searchTerm = { name: "ART", extraType: rawSearchTerm.slice(3, rawSearchTerm.length) };
 									} else {
-										searchTerm = { name: "ART", extraType: rawSearchTerm.slice(3, valueStartIndex) };
+										searchTerm = { name: "ART", extraType: rawSearchTerm.slice(3, valueStartIndex), exactMatch };
 										searchTerm.value = parseSearchConstraint(rawSearchTerm.slice(valueStartIndex));
 									}
 								} else {
@@ -465,11 +405,49 @@ export class ResultList {
 										searchTerm.extreme = parseSearchConstraint(rawArray[3]);
 									}
 								}
-								bracketTermArray.push(searchTerm);
+								searchTerm.exactMatch = exactMatch;
+								searchTerm.excludeMatch = excludeMatch;
+								searchTermArray.push(searchTerm);
 							}
-							searchBracketArray.push(bracketTermArray);
-						}
-						tempResultList = tempResultList.filter((unit) => {
+							for (const bracket of rawSearchBrackets) {
+								const bracketTermArray: SearchTerm[] = [];
+								for (const rawSearchTerm of bracket) {
+									let searchTerm: SearchTerm;
+									const rawArtSearch = rawSearchTerm.match(/(ART)/i);
+									if (rawArtSearch !== null) {
+										const valueStartIndex = rawSearchTerm.search(/\d/);
+										if (valueStartIndex == -1) {
+											searchTerm = { name: "ART", extraType: rawSearchTerm.slice(3, rawSearchTerm.length) };
+										} else {
+											searchTerm = { name: "ART", extraType: rawSearchTerm.slice(3, valueStartIndex) };
+											searchTerm.value = parseSearchConstraint(rawSearchTerm.slice(valueStartIndex));
+										}
+									} else {
+										const rawArray: string[] = rawSearchTerm.split("/");
+										const valueStartIndex = rawArray[0].search(/(?<!^c)\d/i);
+										if (valueStartIndex != -1) {
+											searchTerm = { name: rawSearchTerm.slice(0, valueStartIndex) };
+											rawArray[0] = rawArray[0].slice(valueStartIndex, rawArray[0].length);
+										} else {
+											searchTerm = { name: rawSearchTerm };
+											rawArray[0] = "";
+										}
+										if (rawArray.length == 1) {
+											if (rawArray[0] != "") {
+												searchTerm.value = parseSearchConstraint(rawArray[0]);
+											}
+										} else {
+											searchTerm.value = parseSearchConstraint(rawArray[0]);
+											searchTerm.medium = parseSearchConstraint(rawArray[1]);
+											searchTerm.long = parseSearchConstraint(rawArray[2]);
+											searchTerm.extreme = parseSearchConstraint(rawArray[3]);
+										}
+									}
+									bracketTermArray.push(searchTerm);
+								}
+								searchBracketArray.push(bracketTermArray);
+							}
+
 							let allFound = true;
 							for (const searchTerm of searchTermArray) {
 								const unitAbility = unit.abilities.find(({ name }) => {
@@ -554,18 +532,16 @@ export class ResultList {
 									allFound = false;
 								}
 							}
-							return allFound;
-						});
-					}
-					break;
-				case "unique":
-					if (filter.checked == false) {
-						tempResultList = tempResultList.filter((unit) => {
-							return !this.uniqueList.includes(unit.mulId);
-						});
-					}
-			}
-		});
+							meetsAllFilters = allFound;
+						}
+						break;
+					case "unique":
+						if (!filter.checked && this.uniqueList.includes(unit.mulId)) meetsAllFilters = false;
+						break;
+				}
+			});
+			if (meetsAllFilters) tempResultList.push(unit);
+		}
 		if (this.sort.key != "") {
 			tempResultList = tempResultList.sort((a, b) => {
 				let first;

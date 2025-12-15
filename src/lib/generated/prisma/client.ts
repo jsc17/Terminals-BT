@@ -33,7 +33,7 @@ export * from "./enums"
  * const collectionTags = await prisma.collectionTag.findMany()
  * ```
  * 
- * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
+ * Read more in our [docs](https://pris.ly/d/client).
  */
 export const PrismaClient = $Class.getPrismaClientClass()
 export type PrismaClient<LogOpts extends Prisma.LogLevel = never, OmitOpts extends Prisma.PrismaClientOptions["omit"] = Prisma.PrismaClientOptions["omit"], ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = $Class.PrismaClient<LogOpts, OmitOpts, ExtArgs>
@@ -84,41 +84,6 @@ export type ListV3 = Prisma.ListV3Model
  * 
  */
 export type SharedList = Prisma.SharedListModel
-/**
- * Model Match
- * 
- */
-export type Match = Prisma.MatchModel
-/**
- * Model UsersInMatch
- * 
- */
-export type UsersInMatch = Prisma.UsersInMatchModel
-/**
- * Model MatchTeam
- * 
- */
-export type MatchTeam = Prisma.MatchTeamModel
-/**
- * Model MatchFormation
- * 
- */
-export type MatchFormation = Prisma.MatchFormationModel
-/**
- * Model MatchUnit
- * 
- */
-export type MatchUnit = Prisma.MatchUnitModel
-/**
- * Model MatchCrit
- * 
- */
-export type MatchCrit = Prisma.MatchCritModel
-/**
- * Model MatchLog
- * 
- */
-export type MatchLog = Prisma.MatchLogModel
 /**
  * Model Tournament
  * 

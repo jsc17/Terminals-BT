@@ -1,14 +1,14 @@
-import { env } from "$env/dynamic/private";
-import { PrismaClient } from "$lib/generated/prisma/client";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+import {env} from "$env/dynamic/private"
+import {PrismaClient} from "$lib/generated/prisma/client"
+import {PrismaMariaDb} from "@prisma/adapter-mariadb"
 
 const adapter = new PrismaMariaDb({
-	host: "localhost",
-	database: "battletech_dev_beta",
-	user: "prisma-bt",
-	password: "+JBqi+jz08>!UVP2rWtyMVFZN"
-});
+	host: env.DATABASE_HOST,
+	database: env.DATABASE_NAME,
+	user: env.DATABASE_USER,
+	password: env.DATABASE_PASSWORD
+})
 
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient({adapter})
 
 export { prisma };

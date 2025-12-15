@@ -5,6 +5,7 @@ import * as v from "valibot";
 import { calculateTournamentStatistics } from "./statistics";
 import { tournamentEmailTransporter } from "$lib/server/emails/mailer.server";
 import { FormCreationSchema } from "./schema";
+import { env } from "$env/dynamic/private";
 
 export const createTournament = form(FormCreationSchema, async (data) => {
 	let { locals } = getRequestEvent();
@@ -42,16 +43,15 @@ export const getUsersTournamentList = query(async () => {
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failed", message: "User not logged in" };
 
-	if (locals.user.id == process.env.ADMIN_USER_ID) {
+	if (locals.user.id == env.ADMIN_USER_ID) {
 		const data = await prisma.tournament.findMany({
-			where: { tournament_date: { gte: new Date() } },
 			select: { id: true, name: true, location: true, era: true, tournament_date: true, tournamentRules: true }
 		});
 		return { status: "success", data };
 	}
 
 	const data = await prisma.tournament.findMany({
-		where: { userId: locals.user.id, tournament_date: { gte: new Date() } },
+		where: { userId: locals.user.id },
 		select: { id: true, name: true, location: true, era: true, tournament_date: true, tournamentRules: true }
 	});
 	return { status: "success", data };

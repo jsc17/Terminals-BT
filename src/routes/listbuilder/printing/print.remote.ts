@@ -60,7 +60,7 @@ export const printList = query(
 		const unitCardImages = new Map(
 			(await Promise.allSettled(listData.units.map(async (u) => getMulCard({ mulId: u.mulId, skill: u.skill }))))
 				.filter((r) => r.status == "fulfilled")
-				.map((r) => [r.value.mulId, r.value.image ?? ""])
+				.map((r) => [`${r.value.mulId}-${r.value.skill}`, r.value.image ?? ""])
 		);
 		const bsList = Map.groupBy(listData.bs ?? [], (v) => v);
 

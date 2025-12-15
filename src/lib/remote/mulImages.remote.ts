@@ -35,7 +35,7 @@ export const getMulCard = query.batch(v.object({ mulId: v.number(), skill: v.num
 			}
 		})
 	);
-	return ({ mulId, skill }) => ({ mulId, image: lookup.get(`${mulId}-${skill}`) });
+	return ({ mulId, skill }) => ({ mulId, skill, image: lookup.get(`${mulId}-${skill}`) });
 });
 
 //gets the unit image when provided with an mulId and a unit image link. Attempts to access cached image first, before downloading it from the mul and caching it for future use.

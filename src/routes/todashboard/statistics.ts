@@ -1,5 +1,4 @@
-import { getFactionName } from "$lib/remote/era-faction.remote";
-import { getMULDataFromId } from "$lib/remote/unit.remote";
+import { getCustomUnitData, getMULDataFromId } from "$lib/remote/unit.remote";
 import type { MulUnit } from "$lib/types/listTypes";
 import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 import { type TournamentStatistics } from "./types";
@@ -11,7 +10,10 @@ export async function calculateTournamentStatistics(participants: { name: string
 		const unitIds = JSON.parse(participant.units).map((s: string) => JSON.parse(s));
 		let listPV = 0;
 		for (const unit of unitIds) {
-			const data = (await getMULDataFromId(unit.id));
+			let tempId = unit.id;
+			if (tempId == -1) tempId = -3;
+			if (tempId == -2) tempId = -4;
+			const data = tempId >= 0 ? await getMULDataFromId(tempId) : await getCustomUnitData(tempId);
 			const cost = getNewSkillCost(unit.sk, data!.pv);
 			unitData.push({ player: participant.name, data: data!, skill: unit.sk, pv: cost });
 			listPV += cost;

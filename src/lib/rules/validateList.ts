@@ -2,6 +2,7 @@ import { isAvailable, isUnique } from "$lib/remote/unit.remote";
 import type { MulUnit } from "$lib/types/listTypes";
 import { getRulesByName } from "$lib/types/rulesets";
 import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
+import { failsMax, failsMin } from "./utilities";
 
 export async function validateRules(unitList: { id: string; skill: number; data: MulUnit }[], eras: number[], factions: number[], selectedRules: string) {
 	const rulesData = getRulesByName(selectedRules)!;
@@ -42,7 +43,7 @@ export async function validateRules(unitList: { id: string; skill: number; data:
 				}
 				issueUnits.add(unit.id!);
 			}
-			if (rulesData.disallowUnique && (await isUnique({ mulId: unit.data.mulId, era: eras[0] }))) {
+			if (rulesData.disallowUnique && (await isUnique({ mulId: unit.data.mulId, eras }))) {
 				if (issueList.has("Unique Units")) {
 					issueList.get("Unique Units")?.add(unit.data.name);
 				} else {
@@ -95,10 +96,12 @@ export async function validateRules(unitList: { id: string; skill: number; data:
 			let groupedUnits = Object.groupBy(unitList, (unit) => unit.data.subtype);
 			for (const limit of rulesData.unitLimits) {
 				let count = 0;
+				let pv = 0;
 				for (const type of limit.types) {
 					count += groupedUnits[type]?.length ?? 0;
+					pv += groupedUnits[type]?.reduce((a, u) => (a += getNewSkillCost(u.skill, u.data.pv)), 0) ?? 0;
 				}
-				if (limit.max && count > limit.max) {
+				if (limit.max && failsMax(limit.max, count, unitList.length)) {
 					issueList.set(`Maximum ${limit.types.join("/")}`, new Set([`${count}/${limit.max}`]));
 					for (const unit of unitList) {
 						if (limit.types.includes(unit.data.subtype)) {
@@ -116,6 +119,33 @@ export async function validateRules(unitList: { id: string; skill: number; data:
 				}
 			}
 		}
+		if (rulesData.unitPvLimits) {
+			let groupedUnits = Object.groupBy(unitList, (unit) => unit.data.subtype);
+			for (const limit of rulesData.unitPvLimits) {
+				let pv = 0;
+				for (const type of limit.types) {
+					pv += groupedUnits[type]?.reduce((a, u) => (a += getNewSkillCost(u.skill, u.data.pv)), 0) ?? 0;
+				}
+				if (limit.min && failsMin(limit.min, pv, listTotalPv)) {
+					const issueMessage = typeof limit.min == "number" ? `${pv}/${limit.min}` : `${((pv / listTotalPv) * 100).toFixed(1)}/${limit.min}`;
+					issueList.set(`Minimum ${limit.types.join("/")} PV`, new Set([issueMessage]));
+					for (const unit of unitList) {
+						if (!limit.types.includes(unit.data.subtype)) {
+							issueUnits.add(unit.id!);
+						}
+					}
+				}
+				if (limit.max && failsMax(limit.max, pv, listTotalPv)) {
+					const issueMessage = typeof limit.max == "number" ? `${pv}/${limit.max}` : `${((pv / listTotalPv) * 100).toFixed(1)}/${limit.max}`;
+					issueList.set(`Maximum ${limit.types.join("/")} PV`, new Set([issueMessage]));
+					for (const unit of unitList) {
+						if (!limit.types.includes(unit.data.subtype)) {
+							issueUnits.add(unit.id!);
+						}
+					}
+				}
+			}
+		}
 		if (rulesData.chassisLimits) {
 			for (const limit of rulesData.chassisLimits) {
 				let filteredUnits = unitList.filter((unit) => {
@@ -123,7 +153,7 @@ export async function validateRules(unitList: { id: string; skill: number; data:
 				});
 				let chassisList = Object.groupBy(filteredUnits, (unit) => unit.data.class);
 				for (const [chassisKey, chassisValue] of Object.entries(chassisList)) {
-					if (chassisValue?.length && limit.max && chassisValue.length > limit.max) {
+					if (chassisValue?.length && limit.max && failsMax(limit.max, chassisValue.length, unitList.length)) {
 						if (issueList.has("Maximum chassis")) {
 							issueList.get("Maximum chassis")?.add(chassisKey);
 						} else {
@@ -147,7 +177,7 @@ export async function validateRules(unitList: { id: string; skill: number; data:
 				for (const [chassisKey, chassisValue] of Object.entries(chassisList)) {
 					let variantList = Object.groupBy(chassisValue!, (unit) => unit.data.variant);
 					for (const [variantKey, variantValue] of Object.entries(variantList)) {
-						if (variantValue?.length && limit.max && variantValue.length > limit.max) {
+						if (variantValue?.length && limit.max && failsMax(limit.max, variantValue.length, unitList.length)) {
 							if (
 								!limit.exceptions ||
 								!variantValue[0].data.abilities.find((ability) => {
@@ -175,7 +205,7 @@ export async function validateRules(unitList: { id: string; skill: number; data:
 				let groupedUnits = unitList.filter((unit) => {
 					return limit.types.includes(unit.skill?.toString() ?? "4");
 				});
-				if (limit.max && groupedUnits.length > limit.max) {
+				if (limit.max && failsMax(limit.max, groupedUnits.length, unitList.length)) {
 					if (issueList.has(`Maximum skill limits`)) {
 						issueList.get(`Maximum skill limits`)?.add(`Skills ${limit.types.join("+")} - ${groupedUnits.length}/${limit.max}`);
 					} else {
@@ -220,17 +250,42 @@ export async function validateRules(unitList: { id: string; skill: number; data:
 						const unitAbility = unit.data.abilities.find((ability) => limitedAbility == ability.name);
 						return (total += (unitAbility?.v ?? 0) + (unitAbility?.vhid ?? 0));
 					}, 0);
-					if (limit.max && count > limit.max) {
-						issueList.set(
-							`${limit.types} limit exceeded`,
-							new Set(
-								limitedUnits.map((unit) => {
-									return unit.data.name;
-								})
-							)
-						);
+					if (limit.max && failsMax(limit.max, count, unitList.length)) {
+						issueList.set(`${limit.types} limit exceeded`, new Set(limitedUnits.map((unit) => unit.data.name)));
 						for (const unit of limitedUnits) {
 							issueUnits.add(unit.id!);
+						}
+					}
+					if (limit.requirements) {
+						for (const unit of limitedUnits) {
+							if (limit.requirements.skill) {
+								if (limit.requirements.skill.min && unit.skill < limit.requirements.skill.min) {
+									const key = `${limit.types} Minimum Skill`;
+									if (!issueList.has(key)) issueList.set(key, new Set());
+									issueList.get(key)?.add(unit.data.name);
+									issueUnits.add(unit.id!);
+								}
+								if (limit.requirements.skill.max && unit.skill < limit.requirements.skill.max) {
+									const key = `${limit.types} Maximum Skill`;
+									if (!issueList.has(key)) issueList.set(key, new Set());
+									issueList.get(key)?.add(unit.data.name);
+									issueUnits.add(unit.id!);
+								}
+							}
+							if (limit.requirements.pv) {
+								if (limit.requirements.pv.min && unit.skill < limit.requirements.pv.min) {
+									const key = `${limit.types} Minimum PV`;
+									if (!issueList.has(key)) issueList.set(key, new Set());
+									issueList.get(key)?.add(unit.data.name);
+									issueUnits.add(unit.id!);
+								}
+								if (limit.requirements.pv.max && unit.skill < limit.requirements.pv.max) {
+									const key = `${limit.types} Maximum PV`;
+									if (!issueList.has(key)) issueList.set(key, new Set());
+									issueList.get(key)?.add(unit.data.name);
+									issueUnits.add(unit.id!);
+								}
+							}
 						}
 					}
 				}
@@ -239,7 +294,7 @@ export async function validateRules(unitList: { id: string; skill: number; data:
 		if (rulesData.uniqueMaxLimit) {
 			const uniquesInList: { id: string; skill: number; data: MulUnit }[] = [];
 			for (const unit of unitList) {
-				if (await isUnique({ mulId: unit.data.mulId, era: eras[0] })) {
+				if (await isUnique({ mulId: unit.data.mulId, eras })) {
 					uniquesInList.push(unit);
 				}
 			}
@@ -263,7 +318,7 @@ export async function validateRules(unitList: { id: string; skill: number; data:
 		}
 		const nonGeneralfactionList = factions.filter((faction) => {
 			const generalLists = [-1, 55, 56, 57, 85, 90];
-			return generalLists.includes(faction);
+			return !generalLists.includes(faction);
 		});
 		if (rulesData.singleEraFaction && (eras.length != 1 || nonGeneralfactionList.length != 1 || factions.length > 2)) {
 			issueList.set("Era/Faction", new Set(["Must select a single era and faction"]));

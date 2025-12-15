@@ -16,7 +16,7 @@
 		mulUnitData: Map<number, MulUnit>;
 		ammoReferenceList: string[];
 		unitImages?: Map<string, string>;
-		unitCardImages?: Map<number, string>;
+		unitCardImages?: Map<string, string>;
 		bsList: Map<number, number[]>;
 		scaList: number[];
 		counts: Map<number, string[]>;
@@ -40,7 +40,15 @@
 		});
 		return referenceList;
 	});
-	let formationReferenceList = $derived([...new Set(listData.formations.filter((f) => f.type != "none").map((f) => `${f.type} (${getFormationDataFromName(f.type)?.page})`))]);
+	let formationReferenceList = $derived([
+		...new Set(
+			listData.formations
+				.filter((f) => f.type != "none")
+				.flatMap((f) =>
+					[`${f.type} (${getFormationDataFromName(f.type)?.page})`].concat(f.secondary ? [`${f.secondary?.type} (${getFormationDataFromName(f.secondary.type)?.page})`] : [])
+				)
+		)
+	]);
 	let spaReferenceList = $derived.by(() => {
 		const spaList = new Set<string>();
 		unitData.values().forEach((u) => u.customization?.spa?.forEach((v) => spaList.add(v)));
@@ -78,35 +86,70 @@
 			<tbody>
 				{#each listData.formations as formation}
 					{@const formationPv = formation.units.reduce((a, v) => (a += getNewSkillCost(unitData.get(v)!.skill, mulUnitData.get(unitData.get(v)!.mulId)!.pv)), 0)}
-					{#if printOptions.printFormations && formation.type != "none"}
-						<tr>
-							<td class="formation-line" colspan={printOptions.printStyle == "simple" ? 4 : 7}>
-								{`${formation.name} - ${formation.type} - ${formation.units.length} Units - ${formationPv} PV`}
-							</td>
-						</tr>
+					{#if formation.units.length}
+						{#if printOptions.printFormations && formation.type != "none"}
+							<tr>
+								<td class="formation-line" colspan={printOptions.printStyle == "simple" ? 4 : 7}>
+									{`${formation.name} - ${formation.type} - ${formation.units.length} Units - ${formationPv} PV`}
+								</td>
+							</tr>
+						{/if}
+						{#each formation.units as unitId}
+							{@const unit = unitData.get(unitId)}
+							{@const mulData = mulUnitData.get(unit!.mulId)}
+							{@const unitCost = getNewSkillCost(unit!.skill, mulData!.pv)}
+							{@const stats =
+								printOptions.printStyle == "simple"
+									? [mulData!.name, mulData!.subtype, unit!.skill, getNewSkillCost(unit!.skill, mulData!.pv)]
+									: [
+											mulData!.name,
+											mulData!.subtype,
+											`${mulData!.move?.map((m) => (printOptions.measurementUnits == "inches" ? `${m.speed}"${m.type ?? ""}` : `${m.speed / 2}⬢${m.type ?? ""}`)).join("/") ?? "-"} `,
+											`${mulData!.damageS == undefined ? "-" : `${mulData!.damageS}/${mulData!.damageM}/${mulData!.damageL}`}`,
+											`${mulData!.health == undefined ? "-" : `${mulData!.health} (${mulData!.armor}a+${mulData?.structure}s)`}`,
+											unit!.skill,
+											`${unitCost} (${unitCost / 2})`
+										]}
+							<tr>
+								{#each stats as stat}
+									<td class="unit-stat">{stat}</td>
+								{/each}
+							</tr>
+						{/each}
 					{/if}
-					{#each formation.units as unitId}
-						{@const unit = unitData.get(unitId)}
-						{@const mulData = mulUnitData.get(unit!.mulId)}
-						{@const unitCost = getNewSkillCost(unit!.skill, mulData!.pv)}
-						{@const stats =
-							printOptions.printStyle == "simple"
-								? [mulData!.name, mulData!.subtype, unit!.skill, getNewSkillCost(unit!.skill, mulData!.pv)]
-								: [
-										mulData!.name,
-										mulData!.subtype,
-										`${mulData!.move?.map((m) => (printOptions.measurementUnits == "inches" ? `${m.speed}"${m.type ?? ""}` : `${m.speed / 2}⬢${m.type ?? ""}`)).join("/") ?? "-"} `,
-										`${mulData!.damageS == undefined ? "-" : `${mulData!.damageS}/${mulData!.damageM}/${mulData!.damageL}`}`,
-										`${mulData!.health == undefined ? "-" : `${mulData!.health} (${mulData!.armor}a+${mulData?.structure}s)`}`,
-										unit!.skill,
-										`${unitCost} (${unitCost / 2})`
-									]}
-						<tr>
-							{#each stats as stat}
-								<td class="unit-stat">{stat}</td>
-							{/each}
-						</tr>
-					{/each}
+
+					{#if formation.secondary && formation.secondary.units.length}
+						{@const secondaryPv = formation.secondary.units.reduce((a, v) => (a += getNewSkillCost(unitData.get(v)!.skill, mulUnitData.get(unitData.get(v)!.mulId)!.pv)), 0)}
+						{#if printOptions.printFormations}
+							<tr>
+								<td class="formation-line" colspan={printOptions.printStyle == "simple" ? 4 : 7}>
+									{`${formation.name} - ${formation.secondary.type} - ${formation.secondary.units.length} Units - ${secondaryPv} PV`}
+								</td>
+							</tr>
+						{/if}
+						{#each formation.secondary.units as unitId}
+							{@const unit = unitData.get(unitId)}
+							{@const mulData = mulUnitData.get(unit!.mulId)}
+							{@const unitCost = getNewSkillCost(unit!.skill, mulData!.pv)}
+							{@const stats =
+								printOptions.printStyle == "simple"
+									? [mulData!.name, mulData!.subtype, unit!.skill, getNewSkillCost(unit!.skill, mulData!.pv)]
+									: [
+											mulData!.name,
+											mulData!.subtype,
+											`${mulData!.move?.map((m) => (printOptions.measurementUnits == "inches" ? `${m.speed}"${m.type ?? ""}` : `${m.speed / 2}⬢${m.type ?? ""}`)).join("/") ?? "-"} `,
+											`${mulData!.damageS == undefined ? "-" : `${mulData!.damageS}/${mulData!.damageM}/${mulData!.damageL}`}`,
+											`${mulData!.health == undefined ? "-" : `${mulData!.health} (${mulData!.armor}a+${mulData?.structure}s)`}`,
+											unit!.skill,
+											`${unitCost} (${unitCost / 2})`
+										]}
+							<tr>
+								{#each stats as stat}
+									<td class="unit-stat">{stat}</td>
+								{/each}
+							</tr>
+						{/each}
+					{/if}
 				{/each}
 			</tbody>
 			<tfoot>
@@ -165,7 +208,7 @@
 		{#if printOptions.printCardsByFormation}
 			{#each listData.formations as formation}
 				{@const formationPv = formation.units.reduce((a, v) => (a += getNewSkillCost(unitData.get(v)!.skill, mulUnitData.get(unitData.get(v)!.mulId)!.pv)), 0)}
-				<div class={{ formation: true, "formation-side": printOptions.formationHeaderStyle == "side" }}>
+				<div class={{ "formation-break": formation.units.length + (formation.secondary?.units.length ?? 0) > 4, "formation-side": printOptions.formationHeaderStyle == "side" }}>
 					{#if printOptions.formationHeaderStyle == "inline" && formation.type != "none"}
 						<h2 class="formation-header-inline">
 							{`${formation.name} - ${formation.type} Formation - ${formation.units.length} Units - ${formationPv}pv`}
@@ -185,7 +228,7 @@
 							{@const unit = unitData.get(unitId)}
 							{@const mulData = mulUnitData.get(unit!.mulId)}
 							{#if printOptions.cardStyle == "mul" || unit!.mulId < 0}
-								<img src={unitCardImages?.get(unit!.mulId)} class="unit-card" alt="unit card" />
+								<img src={unitCardImages?.get(`${unit!.mulId}-${unit!.skill}`)} class="unit-card" alt="unit card" />
 							{:else}
 								<PrintUnitCard
 									unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
@@ -198,15 +241,49 @@
 							{/if}
 						{/each}
 					</div>
+					{#if formation.secondary}
+						{#if printOptions.formationHeaderStyle == "inline" && formation.secondary}
+							<h2 class="formation-header-inline">
+								{`${formation.name} - ${formation.secondary.type} Formation - ${formation.secondary.units.length} Units - ${formationPv}pv`}
+							</h2>
+						{:else if formation.type != "none"}
+							<div>
+								<h2 class="formation-header-side">
+									{`${formation.name} - ${formation.secondary.type} Formation`} <br />
+									{`${formation.secondary.units.length} Units - ${formationPv}pv`}
+								</h2>
+							</div>
+						{:else}
+							<div></div>
+						{/if}
+						<div class="unit-card-container">
+							{#each formation.secondary.units as unitId}
+								{@const unit = unitData.get(unitId)}
+								{@const mulData = mulUnitData.get(unit!.mulId)}
+								{#if printOptions.cardStyle == "mul" || unit!.mulId < 0}
+									<img src={unitCardImages?.get(`${unit!.mulId}-${unit!.skill}`)} class="unit-card" alt="unit card" />
+								{:else}
+									<PrintUnitCard
+										unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
+										image={unitImages?.get(mulData!.imageLink ?? "") ?? ""}
+										formationSPAs={[]}
+										measurementUnits={printOptions.measurementUnits}
+										numbering={counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) ?? -1}
+										numberingType={printOptions.printDuplicateMarkingsType}
+									/>
+								{/if}
+							{/each}
+						</div>
+					{/if}
 				</div>
 			{/each}
 		{:else}
 			<div class="unit-card-container">
-				{#each listData.formations.flatMap((f) => f.units) as unitId}
+				{#each listData.formations.flatMap((f) => f.units.concat(f.secondary?.units ?? [])) as unitId}
 					{@const unit = unitData.get(unitId)}
 					{@const mulData = mulUnitData.get(unit!.mulId)}
 					{#if printOptions.cardStyle == "mul" || unit!.mulId < 0}
-						<img src={unitCardImages?.get(unit!.mulId)} class="unit-card" alt="unit card" />
+						<img src={unitCardImages?.get(`${unit!.mulId}-${unit!.skill}`)} class="unit-card" alt="unit card" />
 					{:else}
 						<PrintUnitCard
 							unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
@@ -305,8 +382,8 @@
 		flex-direction: column;
 		gap: 5pt;
 	}
-	.formation {
-		break-inside: avoid;
+	.formation-break {
+		break-after: page;
 	}
 	.formation-side {
 		display: grid;
@@ -319,11 +396,10 @@
 	.unit-card-container {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 0.05in;
 	}
 	.unit-card {
 		aspect-ratio: 7/ 5;
-		width: 271pt;
+		width: 268pt;
 	}
 	ul {
 		margin: 2pt;

@@ -515,6 +515,18 @@ export type TournamentOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
 export type TournamentCreateNestedOneWithoutParticipantsInput = {
   create?: Prisma.XOR<Prisma.TournamentCreateWithoutParticipantsInput, Prisma.TournamentUncheckedCreateWithoutParticipantsInput>
   connectOrCreate?: Prisma.TournamentCreateOrConnectWithoutParticipantsInput

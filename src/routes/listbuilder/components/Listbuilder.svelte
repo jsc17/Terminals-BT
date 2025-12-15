@@ -109,7 +109,12 @@
 		let listData: PrintListOutput = {
 			name: list.details.name,
 			units: list.units.map((u) => ({ id: u.id, mulId: u.baseUnit.mulId, skill: u.skill ?? 4, customization: u.customization })),
-			formations: list.formations.map((f) => ({ name: f.name, type: f.type, units: f.units.map((u) => u.id) })),
+			formations: list.formations.map((f) => ({
+				name: f.name,
+				type: f.type,
+				units: f.units.map((u) => u.id),
+				secondary: f.secondary && f.secondary.units.length ? { type: f.secondary?.type, units: f.secondary?.units.map((u) => u.id) } : undefined
+			})),
 			scas: list.scaList.map((v) => v.id),
 			bs: list.bsList
 		};
@@ -121,7 +126,7 @@
 			submittedList.data = blob;
 			submittedList.era = list.details.eras.length == 1 ? list.details.eras[0] : undefined;
 			submittedList.faction = list.details.factions.length == 1 ? list.details.factions[0] : undefined;
-
+			submittedList.rules = list.rules;
 			goto(`/validation?redirect`);
 		});
 	}
@@ -160,24 +165,26 @@
 				{/if}
 				<ListInfoPopover bind:list />
 			</div>
-			{#if list.issues?.issueList.size}
-				<Dialog title="List Rules Issues" triggerClasses="transparent-button">
-					{#snippet trigger()}
-						<div class="center"><img src="/icons/alert-outline.svg" alt="Error" class="error-icon" /> <span class="primary">Show issues</span></div>
-					{/snippet}
-					{#snippet description()}
-						{#if list.issues.issueMessage}
-							<p class="muted">{list.issues.issueMessage}</p>
-						{/if}
-					{/snippet}
-					<div class="error-dialog-body">
-						{#each list.issues.issueList as [issue, units]}
-							<div class="errors align-right">{issue}:</div>
-							<div>{Array.from(units).join(", ")}</div>
-						{/each}
-					</div>
-				</Dialog>
-			{/if}
+			{#await list.issues then issues}
+				{#if issues.issueList.size}
+					<Dialog title="List Rules Issues" triggerClasses="transparent-button">
+						{#snippet trigger()}
+							<div class="center"><img src="/icons/alert-outline.svg" alt="Error" class="error-icon" /> <span class="primary">Show issues</span></div>
+						{/snippet}
+						{#snippet description()}
+							{#if issues.issueMessage}
+								<p class="muted">{issues.issueMessage}</p>
+							{/if}
+						{/snippet}
+						<div class="error-dialog-body">
+							{#each issues.issueList as [issue, units]}
+								<div class="errors align-right">{issue}:</div>
+								<div>{Array.from(units).join(", ")}</div>
+							{/each}
+						</div>
+					</Dialog>
+				{/if}
+			{/await}
 			<div class="list-buttons">
 				<DropdownMenu
 					items={[

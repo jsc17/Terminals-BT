@@ -33,7 +33,6 @@ export type UserMinAggregateOutputType = {
   discord_id: string | null
   account_created: Date | null
   last_login: Date | null
-  playModeNickname: string | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -45,7 +44,6 @@ export type UserMaxAggregateOutputType = {
   discord_id: string | null
   account_created: Date | null
   last_login: Date | null
-  playModeNickname: string | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -57,7 +55,6 @@ export type UserCountAggregateOutputType = {
   discord_id: number
   account_created: number
   last_login: number
-  playModeNickname: number
   _all: number
 }
 
@@ -71,7 +68,6 @@ export type UserMinAggregateInputType = {
   discord_id?: true
   account_created?: true
   last_login?: true
-  playModeNickname?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -83,7 +79,6 @@ export type UserMaxAggregateInputType = {
   discord_id?: true
   account_created?: true
   last_login?: true
-  playModeNickname?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -95,7 +90,6 @@ export type UserCountAggregateInputType = {
   discord_id?: true
   account_created?: true
   last_login?: true
-  playModeNickname?: true
   _all?: true
 }
 
@@ -180,7 +174,6 @@ export type UserGroupByOutputType = {
   discord_id: string | null
   account_created: Date
   last_login: Date | null
-  playModeNickname: string
   _count: UserCountAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
@@ -213,7 +206,6 @@ export type UserWhereInput = {
   discord_id?: Prisma.StringNullableFilter<"User"> | string | null
   account_created?: Prisma.DateTimeFilter<"User"> | Date | string
   last_login?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
-  playModeNickname?: Prisma.StringFilter<"User"> | string
   sessions?: Prisma.SessionListRelationFilter
   listsV3?: Prisma.ListV3ListRelationFilter
   tournamentsOrganized?: Prisma.TournamentListRelationFilter
@@ -221,7 +213,6 @@ export type UserWhereInput = {
   notifications?: Prisma.NotificationListRelationFilter
   tags?: Prisma.CollectionTagListRelationFilter
   models?: Prisma.CollectionModelListRelationFilter
-  matches?: Prisma.UsersInMatchListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -233,7 +224,6 @@ export type UserOrderByWithRelationInput = {
   discord_id?: Prisma.SortOrderInput | Prisma.SortOrder
   account_created?: Prisma.SortOrder
   last_login?: Prisma.SortOrderInput | Prisma.SortOrder
-  playModeNickname?: Prisma.SortOrder
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   listsV3?: Prisma.ListV3OrderByRelationAggregateInput
   tournamentsOrganized?: Prisma.TournamentOrderByRelationAggregateInput
@@ -241,7 +231,6 @@ export type UserOrderByWithRelationInput = {
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   tags?: Prisma.CollectionTagOrderByRelationAggregateInput
   models?: Prisma.CollectionModelOrderByRelationAggregateInput
-  matches?: Prisma.UsersInMatchOrderByRelationAggregateInput
   _relevance?: Prisma.UserOrderByRelevanceInput
 }
 
@@ -257,7 +246,6 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   hashedPassword?: Prisma.StringNullableFilter<"User"> | string | null
   account_created?: Prisma.DateTimeFilter<"User"> | Date | string
   last_login?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
-  playModeNickname?: Prisma.StringFilter<"User"> | string
   sessions?: Prisma.SessionListRelationFilter
   listsV3?: Prisma.ListV3ListRelationFilter
   tournamentsOrganized?: Prisma.TournamentListRelationFilter
@@ -265,7 +253,6 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   notifications?: Prisma.NotificationListRelationFilter
   tags?: Prisma.CollectionTagListRelationFilter
   models?: Prisma.CollectionModelListRelationFilter
-  matches?: Prisma.UsersInMatchListRelationFilter
 }, "id" | "username" | "email" | "google_id" | "discord_id">
 
 export type UserOrderByWithAggregationInput = {
@@ -277,7 +264,6 @@ export type UserOrderByWithAggregationInput = {
   discord_id?: Prisma.SortOrderInput | Prisma.SortOrder
   account_created?: Prisma.SortOrder
   last_login?: Prisma.SortOrderInput | Prisma.SortOrder
-  playModeNickname?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
@@ -295,7 +281,6 @@ export type UserScalarWhereWithAggregatesInput = {
   discord_id?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   account_created?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   last_login?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
-  playModeNickname?: Prisma.StringWithAggregatesFilter<"User"> | string
 }
 
 export type UserCreateInput = {
@@ -307,7 +292,6 @@ export type UserCreateInput = {
   discord_id?: string | null
   account_created?: Date | string
   last_login?: Date | string | null
-  playModeNickname?: string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   listsV3?: Prisma.ListV3CreateNestedManyWithoutUserInput
   tournamentsOrganized?: Prisma.TournamentCreateNestedManyWithoutUserInput
@@ -315,7 +299,6 @@ export type UserCreateInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   tags?: Prisma.CollectionTagCreateNestedManyWithoutUserInput
   models?: Prisma.CollectionModelCreateNestedManyWithoutUserInput
-  matches?: Prisma.UsersInMatchCreateNestedManyWithoutPlayerInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -327,7 +310,6 @@ export type UserUncheckedCreateInput = {
   discord_id?: string | null
   account_created?: Date | string
   last_login?: Date | string | null
-  playModeNickname?: string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   listsV3?: Prisma.ListV3UncheckedCreateNestedManyWithoutUserInput
   tournamentsOrganized?: Prisma.TournamentUncheckedCreateNestedManyWithoutUserInput
@@ -335,7 +317,6 @@ export type UserUncheckedCreateInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   tags?: Prisma.CollectionTagUncheckedCreateNestedManyWithoutUserInput
   models?: Prisma.CollectionModelUncheckedCreateNestedManyWithoutUserInput
-  matches?: Prisma.UsersInMatchUncheckedCreateNestedManyWithoutPlayerInput
 }
 
 export type UserUpdateInput = {
@@ -347,7 +328,6 @@ export type UserUpdateInput = {
   discord_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   account_created?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   last_login?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  playModeNickname?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   listsV3?: Prisma.ListV3UpdateManyWithoutUserNestedInput
   tournamentsOrganized?: Prisma.TournamentUpdateManyWithoutUserNestedInput
@@ -355,7 +335,6 @@ export type UserUpdateInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   tags?: Prisma.CollectionTagUpdateManyWithoutUserNestedInput
   models?: Prisma.CollectionModelUpdateManyWithoutUserNestedInput
-  matches?: Prisma.UsersInMatchUpdateManyWithoutPlayerNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -367,7 +346,6 @@ export type UserUncheckedUpdateInput = {
   discord_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   account_created?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   last_login?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  playModeNickname?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   listsV3?: Prisma.ListV3UncheckedUpdateManyWithoutUserNestedInput
   tournamentsOrganized?: Prisma.TournamentUncheckedUpdateManyWithoutUserNestedInput
@@ -375,7 +353,6 @@ export type UserUncheckedUpdateInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   tags?: Prisma.CollectionTagUncheckedUpdateManyWithoutUserNestedInput
   models?: Prisma.CollectionModelUncheckedUpdateManyWithoutUserNestedInput
-  matches?: Prisma.UsersInMatchUncheckedUpdateManyWithoutPlayerNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -387,7 +364,6 @@ export type UserCreateManyInput = {
   discord_id?: string | null
   account_created?: Date | string
   last_login?: Date | string | null
-  playModeNickname?: string
 }
 
 export type UserUpdateManyMutationInput = {
@@ -399,7 +375,6 @@ export type UserUpdateManyMutationInput = {
   discord_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   account_created?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   last_login?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  playModeNickname?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -411,7 +386,6 @@ export type UserUncheckedUpdateManyInput = {
   discord_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   account_created?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   last_login?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  playModeNickname?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type UserNullableScalarRelationFilter = {
@@ -439,7 +413,6 @@ export type UserCountOrderByAggregateInput = {
   discord_id?: Prisma.SortOrder
   account_created?: Prisma.SortOrder
   last_login?: Prisma.SortOrder
-  playModeNickname?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -451,7 +424,6 @@ export type UserMaxOrderByAggregateInput = {
   discord_id?: Prisma.SortOrder
   account_created?: Prisma.SortOrder
   last_login?: Prisma.SortOrder
-  playModeNickname?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -463,7 +435,6 @@ export type UserMinOrderByAggregateInput = {
   discord_id?: Prisma.SortOrder
   account_created?: Prisma.SortOrder
   last_login?: Prisma.SortOrder
-  playModeNickname?: Prisma.SortOrder
 }
 
 export type UserCreateNestedOneWithoutTagsInput = {
@@ -508,20 +479,6 @@ export type UserUpdateOneRequiredWithoutListsV3NestedInput = {
   upsert?: Prisma.UserUpsertWithoutListsV3Input
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutListsV3Input, Prisma.UserUpdateWithoutListsV3Input>, Prisma.UserUncheckedUpdateWithoutListsV3Input>
-}
-
-export type UserCreateNestedOneWithoutMatchesInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutMatchesInput, Prisma.UserUncheckedCreateWithoutMatchesInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMatchesInput
-  connect?: Prisma.UserWhereUniqueInput
-}
-
-export type UserUpdateOneRequiredWithoutMatchesNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutMatchesInput, Prisma.UserUncheckedCreateWithoutMatchesInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMatchesInput
-  upsert?: Prisma.UserUpsertWithoutMatchesInput
-  connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMatchesInput, Prisma.UserUpdateWithoutMatchesInput>, Prisma.UserUncheckedUpdateWithoutMatchesInput>
 }
 
 export type UserCreateNestedOneWithoutTournamentsOrganizedInput = {
@@ -593,14 +550,12 @@ export type UserCreateWithoutTagsInput = {
   discord_id?: string | null
   account_created?: Date | string
   last_login?: Date | string | null
-  playModeNickname?: string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   listsV3?: Prisma.ListV3CreateNestedManyWithoutUserInput
   tournamentsOrganized?: Prisma.TournamentCreateNestedManyWithoutUserInput
   resetTokens?: Prisma.ResetTokenCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   models?: Prisma.CollectionModelCreateNestedManyWithoutUserInput
-  matches?: Prisma.UsersInMatchCreateNestedManyWithoutPlayerInput
 }
 
 export type UserUncheckedCreateWithoutTagsInput = {
@@ -612,14 +567,12 @@ export type UserUncheckedCreateWithoutTagsInput = {
   discord_id?: string | null
   account_created?: Date | string
   last_login?: Date | string | null
-  playModeNickname?: string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   listsV3?: Prisma.ListV3UncheckedCreateNestedManyWithoutUserInput
   tournamentsOrganized?: Prisma.TournamentUncheckedCreateNestedManyWithoutUserInput
   resetTokens?: Prisma.ResetTokenUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   models?: Prisma.CollectionModelUncheckedCreateNestedManyWithoutUserInput
-  matches?: Prisma.UsersInMatchUncheckedCreateNestedManyWithoutPlayerInput
 }
 
 export type UserCreateOrConnectWithoutTagsInput = {
@@ -647,14 +600,12 @@ export type UserUpdateWithoutTagsInput = {
   discord_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   account_created?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   last_login?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  playModeNickname?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   listsV3?: Prisma.ListV3UpdateManyWithoutUserNestedInput
   tournamentsOrganized?: Prisma.TournamentUpdateManyWithoutUserNestedInput
   resetTokens?: Prisma.ResetTokenUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   models?: Prisma.CollectionModelUpdateManyWithoutUserNestedInput
-  matches?: Prisma.UsersInMatchUpdateManyWithoutPlayerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTagsInput = {
@@ -666,14 +617,12 @@ export type UserUncheckedUpdateWithoutTagsInput = {
   discord_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   account_created?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   last_login?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  playModeNickname?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   listsV3?: Prisma.ListV3UncheckedUpdateManyWithoutUserNestedInput
   tournamentsOrganized?: Prisma.TournamentUncheckedUpdateManyWithoutUserNestedInput
   resetTokens?: Prisma.ResetTokenUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   models?: Prisma.CollectionModelUncheckedUpdateManyWithoutUserNestedInput
-  matches?: Prisma.UsersInMatchUncheckedUpdateManyWithoutPlayerNestedInput
 }
 
 export type UserCreateWithoutModelsInput = {
@@ -685,14 +634,12 @@ export type UserCreateWithoutModelsInput = {
   discord_id?: string | null
   account_created?: Date | string
   last_login?: Date | string | null
-  playModeNickname?: string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   listsV3?: Prisma.ListV3CreateNestedManyWithoutUserInput
   tournamentsOrganized?: Prisma.TournamentCreateNestedManyWithoutUserInput
   resetTokens?: Prisma.ResetTokenCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   tags?: Prisma.CollectionTagCreateNestedManyWithoutUserInput
-  matches?: Prisma.UsersInMatchCreateNestedManyWithoutPlayerInput
 }
 
 export type UserUncheckedCreateWithoutModelsInput = {
@@ -704,14 +651,12 @@ export type UserUncheckedCreateWithoutModelsInput = {
   discord_id?: string | null
   account_created?: Date | string
   last_login?: Date | string | null
-  playModeNickname?: string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   listsV3?: Prisma.ListV3UncheckedCreateNestedManyWithoutUserInput
   tournamentsOrganized?: Prisma.TournamentUncheckedCreateNestedManyWithoutUserInput
   resetTokens?: Prisma.ResetTokenUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   tags?: Prisma.CollectionTagUncheckedCreateNestedManyWithoutUserInput
-  matches?: Prisma.UsersInMatchUncheckedCreateNestedManyWithoutPlayerInput
 }
 
 export type UserCreateOrConnectWithoutModelsInput = {
@@ -739,14 +684,12 @@ export type UserUpdateWithoutModelsInput = {
   discord_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   account_created?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   last_login?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  playModeNickname?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   listsV3?: Prisma.ListV3UpdateManyWithoutUserNestedInput
   tournamentsOrganized?: Prisma.TournamentUpdateManyWithoutUserNestedInput
   resetTokens?: Prisma.ResetTokenUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   tags?: Prisma.CollectionTagUpdateManyWithoutUserNestedInput
-  matches?: Prisma.UsersInMatchUpdateManyWithoutPlayerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutModelsInput = {
@@ -758,14 +701,12 @@ export type UserUncheckedUpdateWithoutModelsInput = {
   discord_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   account_created?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   last_login?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  playModeNickname?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   listsV3?: Prisma.ListV3UncheckedUpdateManyWithoutUserNestedInput
   tournamentsOrganized?: Prisma.TournamentUncheckedUpdateManyWithoutUserNestedInput
   resetTokens?: Prisma.ResetTokenUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   tags?: Prisma.CollectionTagUncheckedUpdateManyWithoutUserNestedInput
-  matches?: Prisma.UsersInMatchUncheckedUpdateManyWithoutPlayerNestedInput
 }
 
 export type UserCreateWithoutListsV3Input = {
@@ -777,14 +718,12 @@ export type UserCreateWithoutListsV3Input = {
   discord_id?: string | null
   account_created?: Date | string
   last_login?: Date | string | null
-  playModeNickname?: string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   tournamentsOrganized?: Prisma.TournamentCreateNestedManyWithoutUserInput
   resetTokens?: Prisma.ResetTokenCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   tags?: Prisma.CollectionTagCreateNestedManyWithoutUserInput
   models?: Prisma.CollectionModelCreateNestedManyWithoutUserInput
-  matches?: Prisma.UsersInMatchCreateNestedManyWithoutPlayerInput
 }
 
 export type UserUncheckedCreateWithoutListsV3Input = {
@@ -796,14 +735,12 @@ export type UserUncheckedCreateWithoutListsV3Input = {
   discord_id?: string | null
   account_created?: Date | string
   last_login?: Date | string | null
-  playModeNickname?: string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   tournamentsOrganized?: Prisma.TournamentUncheckedCreateNestedManyWithoutUserInput
   resetTokens?: Prisma.ResetTokenUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   tags?: Prisma.CollectionTagUncheckedCreateNestedManyWithoutUserInput
   models?: Prisma.CollectionModelUncheckedCreateNestedManyWithoutUserInput
-  matches?: Prisma.UsersInMatchUncheckedCreateNestedManyWithoutPlayerInput
 }
 
 export type UserCreateOrConnectWithoutListsV3Input = {
@@ -831,14 +768,12 @@ export type UserUpdateWithoutListsV3Input = {
   discord_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   account_created?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   last_login?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  playModeNickname?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   tournamentsOrganized?: Prisma.TournamentUpdateManyWithoutUserNestedInput
   resetTokens?: Prisma.ResetTokenUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   tags?: Prisma.CollectionTagUpdateManyWithoutUserNestedInput
   models?: Prisma.CollectionModelUpdateManyWithoutUserNestedInput
-  matches?: Prisma.UsersInMatchUpdateManyWithoutPlayerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutListsV3Input = {
@@ -850,101 +785,7 @@ export type UserUncheckedUpdateWithoutListsV3Input = {
   discord_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   account_created?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   last_login?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  playModeNickname?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
-  tournamentsOrganized?: Prisma.TournamentUncheckedUpdateManyWithoutUserNestedInput
-  resetTokens?: Prisma.ResetTokenUncheckedUpdateManyWithoutUserNestedInput
-  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
-  tags?: Prisma.CollectionTagUncheckedUpdateManyWithoutUserNestedInput
-  models?: Prisma.CollectionModelUncheckedUpdateManyWithoutUserNestedInput
-  matches?: Prisma.UsersInMatchUncheckedUpdateManyWithoutPlayerNestedInput
-}
-
-export type UserCreateWithoutMatchesInput = {
-  id: string
-  username: string
-  email: string
-  hashedPassword?: string | null
-  google_id?: string | null
-  discord_id?: string | null
-  account_created?: Date | string
-  last_login?: Date | string | null
-  playModeNickname?: string
-  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
-  listsV3?: Prisma.ListV3CreateNestedManyWithoutUserInput
-  tournamentsOrganized?: Prisma.TournamentCreateNestedManyWithoutUserInput
-  resetTokens?: Prisma.ResetTokenCreateNestedManyWithoutUserInput
-  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
-  tags?: Prisma.CollectionTagCreateNestedManyWithoutUserInput
-  models?: Prisma.CollectionModelCreateNestedManyWithoutUserInput
-}
-
-export type UserUncheckedCreateWithoutMatchesInput = {
-  id: string
-  username: string
-  email: string
-  hashedPassword?: string | null
-  google_id?: string | null
-  discord_id?: string | null
-  account_created?: Date | string
-  last_login?: Date | string | null
-  playModeNickname?: string
-  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
-  listsV3?: Prisma.ListV3UncheckedCreateNestedManyWithoutUserInput
-  tournamentsOrganized?: Prisma.TournamentUncheckedCreateNestedManyWithoutUserInput
-  resetTokens?: Prisma.ResetTokenUncheckedCreateNestedManyWithoutUserInput
-  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
-  tags?: Prisma.CollectionTagUncheckedCreateNestedManyWithoutUserInput
-  models?: Prisma.CollectionModelUncheckedCreateNestedManyWithoutUserInput
-}
-
-export type UserCreateOrConnectWithoutMatchesInput = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutMatchesInput, Prisma.UserUncheckedCreateWithoutMatchesInput>
-}
-
-export type UserUpsertWithoutMatchesInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutMatchesInput, Prisma.UserUncheckedUpdateWithoutMatchesInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutMatchesInput, Prisma.UserUncheckedCreateWithoutMatchesInput>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutMatchesInput = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutMatchesInput, Prisma.UserUncheckedUpdateWithoutMatchesInput>
-}
-
-export type UserUpdateWithoutMatchesInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  username?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  hashedPassword?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  google_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  discord_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  account_created?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  last_login?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  playModeNickname?: Prisma.StringFieldUpdateOperationsInput | string
-  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
-  listsV3?: Prisma.ListV3UpdateManyWithoutUserNestedInput
-  tournamentsOrganized?: Prisma.TournamentUpdateManyWithoutUserNestedInput
-  resetTokens?: Prisma.ResetTokenUpdateManyWithoutUserNestedInput
-  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
-  tags?: Prisma.CollectionTagUpdateManyWithoutUserNestedInput
-  models?: Prisma.CollectionModelUpdateManyWithoutUserNestedInput
-}
-
-export type UserUncheckedUpdateWithoutMatchesInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  username?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  hashedPassword?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  google_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  discord_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  account_created?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  last_login?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  playModeNickname?: Prisma.StringFieldUpdateOperationsInput | string
-  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
-  listsV3?: Prisma.ListV3UncheckedUpdateManyWithoutUserNestedInput
   tournamentsOrganized?: Prisma.TournamentUncheckedUpdateManyWithoutUserNestedInput
   resetTokens?: Prisma.ResetTokenUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
@@ -961,14 +802,12 @@ export type UserCreateWithoutTournamentsOrganizedInput = {
   discord_id?: string | null
   account_created?: Date | string
   last_login?: Date | string | null
-  playModeNickname?: string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   listsV3?: Prisma.ListV3CreateNestedManyWithoutUserInput
   resetTokens?: Prisma.ResetTokenCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   tags?: Prisma.CollectionTagCreateNestedManyWithoutUserInput
   models?: Prisma.CollectionModelCreateNestedManyWithoutUserInput
-  matches?: Prisma.UsersInMatchCreateNestedManyWithoutPlayerInput
 }
 
 export type UserUncheckedCreateWithoutTournamentsOrganizedInput = {
@@ -980,14 +819,12 @@ export type UserUncheckedCreateWithoutTournamentsOrganizedInput = {
   discord_id?: string | null
   account_created?: Date | string
   last_login?: Date | string | null
-  playModeNickname?: string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   listsV3?: Prisma.ListV3UncheckedCreateNestedManyWithoutUserInput
   resetTokens?: Prisma.ResetTokenUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   tags?: Prisma.CollectionTagUncheckedCreateNestedManyWithoutUserInput
   models?: Prisma.CollectionModelUncheckedCreateNestedManyWithoutUserInput
-  matches?: Prisma.UsersInMatchUncheckedCreateNestedManyWithoutPlayerInput
 }
 
 export type UserCreateOrConnectWithoutTournamentsOrganizedInput = {
@@ -1015,14 +852,12 @@ export type UserUpdateWithoutTournamentsOrganizedInput = {
   discord_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   account_created?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   last_login?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  playModeNickname?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   listsV3?: Prisma.ListV3UpdateManyWithoutUserNestedInput
   resetTokens?: Prisma.ResetTokenUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   tags?: Prisma.CollectionTagUpdateManyWithoutUserNestedInput
   models?: Prisma.CollectionModelUpdateManyWithoutUserNestedInput
-  matches?: Prisma.UsersInMatchUpdateManyWithoutPlayerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTournamentsOrganizedInput = {
@@ -1034,14 +869,12 @@ export type UserUncheckedUpdateWithoutTournamentsOrganizedInput = {
   discord_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   account_created?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   last_login?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  playModeNickname?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   listsV3?: Prisma.ListV3UncheckedUpdateManyWithoutUserNestedInput
   resetTokens?: Prisma.ResetTokenUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   tags?: Prisma.CollectionTagUncheckedUpdateManyWithoutUserNestedInput
   models?: Prisma.CollectionModelUncheckedUpdateManyWithoutUserNestedInput
-  matches?: Prisma.UsersInMatchUncheckedUpdateManyWithoutPlayerNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -1053,14 +886,12 @@ export type UserCreateWithoutSessionsInput = {
   discord_id?: string | null
   account_created?: Date | string
   last_login?: Date | string | null
-  playModeNickname?: string
   listsV3?: Prisma.ListV3CreateNestedManyWithoutUserInput
   tournamentsOrganized?: Prisma.TournamentCreateNestedManyWithoutUserInput
   resetTokens?: Prisma.ResetTokenCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   tags?: Prisma.CollectionTagCreateNestedManyWithoutUserInput
   models?: Prisma.CollectionModelCreateNestedManyWithoutUserInput
-  matches?: Prisma.UsersInMatchCreateNestedManyWithoutPlayerInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -1072,14 +903,12 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   discord_id?: string | null
   account_created?: Date | string
   last_login?: Date | string | null
-  playModeNickname?: string
   listsV3?: Prisma.ListV3UncheckedCreateNestedManyWithoutUserInput
   tournamentsOrganized?: Prisma.TournamentUncheckedCreateNestedManyWithoutUserInput
   resetTokens?: Prisma.ResetTokenUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   tags?: Prisma.CollectionTagUncheckedCreateNestedManyWithoutUserInput
   models?: Prisma.CollectionModelUncheckedCreateNestedManyWithoutUserInput
-  matches?: Prisma.UsersInMatchUncheckedCreateNestedManyWithoutPlayerInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -1107,14 +936,12 @@ export type UserUpdateWithoutSessionsInput = {
   discord_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   account_created?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   last_login?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  playModeNickname?: Prisma.StringFieldUpdateOperationsInput | string
   listsV3?: Prisma.ListV3UpdateManyWithoutUserNestedInput
   tournamentsOrganized?: Prisma.TournamentUpdateManyWithoutUserNestedInput
   resetTokens?: Prisma.ResetTokenUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   tags?: Prisma.CollectionTagUpdateManyWithoutUserNestedInput
   models?: Prisma.CollectionModelUpdateManyWithoutUserNestedInput
-  matches?: Prisma.UsersInMatchUpdateManyWithoutPlayerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -1126,14 +953,12 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   discord_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   account_created?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   last_login?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  playModeNickname?: Prisma.StringFieldUpdateOperationsInput | string
   listsV3?: Prisma.ListV3UncheckedUpdateManyWithoutUserNestedInput
   tournamentsOrganized?: Prisma.TournamentUncheckedUpdateManyWithoutUserNestedInput
   resetTokens?: Prisma.ResetTokenUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   tags?: Prisma.CollectionTagUncheckedUpdateManyWithoutUserNestedInput
   models?: Prisma.CollectionModelUncheckedUpdateManyWithoutUserNestedInput
-  matches?: Prisma.UsersInMatchUncheckedUpdateManyWithoutPlayerNestedInput
 }
 
 export type UserCreateWithoutResetTokensInput = {
@@ -1145,14 +970,12 @@ export type UserCreateWithoutResetTokensInput = {
   discord_id?: string | null
   account_created?: Date | string
   last_login?: Date | string | null
-  playModeNickname?: string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   listsV3?: Prisma.ListV3CreateNestedManyWithoutUserInput
   tournamentsOrganized?: Prisma.TournamentCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   tags?: Prisma.CollectionTagCreateNestedManyWithoutUserInput
   models?: Prisma.CollectionModelCreateNestedManyWithoutUserInput
-  matches?: Prisma.UsersInMatchCreateNestedManyWithoutPlayerInput
 }
 
 export type UserUncheckedCreateWithoutResetTokensInput = {
@@ -1164,14 +987,12 @@ export type UserUncheckedCreateWithoutResetTokensInput = {
   discord_id?: string | null
   account_created?: Date | string
   last_login?: Date | string | null
-  playModeNickname?: string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   listsV3?: Prisma.ListV3UncheckedCreateNestedManyWithoutUserInput
   tournamentsOrganized?: Prisma.TournamentUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   tags?: Prisma.CollectionTagUncheckedCreateNestedManyWithoutUserInput
   models?: Prisma.CollectionModelUncheckedCreateNestedManyWithoutUserInput
-  matches?: Prisma.UsersInMatchUncheckedCreateNestedManyWithoutPlayerInput
 }
 
 export type UserCreateOrConnectWithoutResetTokensInput = {
@@ -1199,14 +1020,12 @@ export type UserUpdateWithoutResetTokensInput = {
   discord_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   account_created?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   last_login?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  playModeNickname?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   listsV3?: Prisma.ListV3UpdateManyWithoutUserNestedInput
   tournamentsOrganized?: Prisma.TournamentUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   tags?: Prisma.CollectionTagUpdateManyWithoutUserNestedInput
   models?: Prisma.CollectionModelUpdateManyWithoutUserNestedInput
-  matches?: Prisma.UsersInMatchUpdateManyWithoutPlayerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutResetTokensInput = {
@@ -1218,14 +1037,12 @@ export type UserUncheckedUpdateWithoutResetTokensInput = {
   discord_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   account_created?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   last_login?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  playModeNickname?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   listsV3?: Prisma.ListV3UncheckedUpdateManyWithoutUserNestedInput
   tournamentsOrganized?: Prisma.TournamentUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   tags?: Prisma.CollectionTagUncheckedUpdateManyWithoutUserNestedInput
   models?: Prisma.CollectionModelUncheckedUpdateManyWithoutUserNestedInput
-  matches?: Prisma.UsersInMatchUncheckedUpdateManyWithoutPlayerNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -1237,14 +1054,12 @@ export type UserCreateWithoutNotificationsInput = {
   discord_id?: string | null
   account_created?: Date | string
   last_login?: Date | string | null
-  playModeNickname?: string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   listsV3?: Prisma.ListV3CreateNestedManyWithoutUserInput
   tournamentsOrganized?: Prisma.TournamentCreateNestedManyWithoutUserInput
   resetTokens?: Prisma.ResetTokenCreateNestedManyWithoutUserInput
   tags?: Prisma.CollectionTagCreateNestedManyWithoutUserInput
   models?: Prisma.CollectionModelCreateNestedManyWithoutUserInput
-  matches?: Prisma.UsersInMatchCreateNestedManyWithoutPlayerInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -1256,14 +1071,12 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   discord_id?: string | null
   account_created?: Date | string
   last_login?: Date | string | null
-  playModeNickname?: string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   listsV3?: Prisma.ListV3UncheckedCreateNestedManyWithoutUserInput
   tournamentsOrganized?: Prisma.TournamentUncheckedCreateNestedManyWithoutUserInput
   resetTokens?: Prisma.ResetTokenUncheckedCreateNestedManyWithoutUserInput
   tags?: Prisma.CollectionTagUncheckedCreateNestedManyWithoutUserInput
   models?: Prisma.CollectionModelUncheckedCreateNestedManyWithoutUserInput
-  matches?: Prisma.UsersInMatchUncheckedCreateNestedManyWithoutPlayerInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -1291,14 +1104,12 @@ export type UserUpdateWithoutNotificationsInput = {
   discord_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   account_created?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   last_login?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  playModeNickname?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   listsV3?: Prisma.ListV3UpdateManyWithoutUserNestedInput
   tournamentsOrganized?: Prisma.TournamentUpdateManyWithoutUserNestedInput
   resetTokens?: Prisma.ResetTokenUpdateManyWithoutUserNestedInput
   tags?: Prisma.CollectionTagUpdateManyWithoutUserNestedInput
   models?: Prisma.CollectionModelUpdateManyWithoutUserNestedInput
-  matches?: Prisma.UsersInMatchUpdateManyWithoutPlayerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -1310,14 +1121,12 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   discord_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   account_created?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   last_login?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  playModeNickname?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   listsV3?: Prisma.ListV3UncheckedUpdateManyWithoutUserNestedInput
   tournamentsOrganized?: Prisma.TournamentUncheckedUpdateManyWithoutUserNestedInput
   resetTokens?: Prisma.ResetTokenUncheckedUpdateManyWithoutUserNestedInput
   tags?: Prisma.CollectionTagUncheckedUpdateManyWithoutUserNestedInput
   models?: Prisma.CollectionModelUncheckedUpdateManyWithoutUserNestedInput
-  matches?: Prisma.UsersInMatchUncheckedUpdateManyWithoutPlayerNestedInput
 }
 
 
@@ -1333,7 +1142,6 @@ export type UserCountOutputType = {
   notifications: number
   tags: number
   models: number
-  matches: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1344,7 +1152,6 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
   tags?: boolean | UserCountOutputTypeCountTagsArgs
   models?: boolean | UserCountOutputTypeCountModelsArgs
-  matches?: boolean | UserCountOutputTypeCountMatchesArgs
 }
 
 /**
@@ -1406,13 +1213,6 @@ export type UserCountOutputTypeCountModelsArgs<ExtArgs extends runtime.Types.Ext
   where?: Prisma.CollectionModelWhereInput
 }
 
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountMatchesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.UsersInMatchWhereInput
-}
-
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1423,7 +1223,6 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   discord_id?: boolean
   account_created?: boolean
   last_login?: boolean
-  playModeNickname?: boolean
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   listsV3?: boolean | Prisma.User$listsV3Args<ExtArgs>
   tournamentsOrganized?: boolean | Prisma.User$tournamentsOrganizedArgs<ExtArgs>
@@ -1431,7 +1230,6 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   tags?: boolean | Prisma.User$tagsArgs<ExtArgs>
   models?: boolean | Prisma.User$modelsArgs<ExtArgs>
-  matches?: boolean | Prisma.User$matchesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1446,10 +1244,9 @@ export type UserSelectScalar = {
   discord_id?: boolean
   account_created?: boolean
   last_login?: boolean
-  playModeNickname?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "email" | "hashedPassword" | "google_id" | "discord_id" | "account_created" | "last_login" | "playModeNickname", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "email" | "hashedPassword" | "google_id" | "discord_id" | "account_created" | "last_login", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   listsV3?: boolean | Prisma.User$listsV3Args<ExtArgs>
@@ -1458,7 +1255,6 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   tags?: boolean | Prisma.User$tagsArgs<ExtArgs>
   models?: boolean | Prisma.User$modelsArgs<ExtArgs>
-  matches?: boolean | Prisma.User$matchesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -1472,7 +1268,6 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     tags: Prisma.$CollectionTagPayload<ExtArgs>[]
     models: Prisma.$CollectionModelPayload<ExtArgs>[]
-    matches: Prisma.$UsersInMatchPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1483,7 +1278,6 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     discord_id: string | null
     account_created: Date
     last_login: Date | null
-    playModeNickname: string
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -1831,7 +1625,6 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tags<T extends Prisma.User$tagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$tagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CollectionTagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   models<T extends Prisma.User$modelsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$modelsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CollectionModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  matches<T extends Prisma.User$matchesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$matchesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UsersInMatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1869,7 +1662,6 @@ export interface UserFieldRefs {
   readonly discord_id: Prisma.FieldRef<"User", 'String'>
   readonly account_created: Prisma.FieldRef<"User", 'DateTime'>
   readonly last_login: Prisma.FieldRef<"User", 'DateTime'>
-  readonly playModeNickname: Prisma.FieldRef<"User", 'String'>
 }
     
 
@@ -2378,30 +2170,6 @@ export type User$modelsArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   distinct?: Prisma.CollectionModelScalarFieldEnum | Prisma.CollectionModelScalarFieldEnum[]
-}
-
-/**
- * User.matches
- */
-export type User$matchesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the UsersInMatch
-   */
-  select?: Prisma.UsersInMatchSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the UsersInMatch
-   */
-  omit?: Prisma.UsersInMatchOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.UsersInMatchInclude<ExtArgs> | null
-  where?: Prisma.UsersInMatchWhereInput
-  orderBy?: Prisma.UsersInMatchOrderByWithRelationInput | Prisma.UsersInMatchOrderByWithRelationInput[]
-  cursor?: Prisma.UsersInMatchWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.UsersInMatchScalarFieldEnum | Prisma.UsersInMatchScalarFieldEnum[]
 }
 
 /**

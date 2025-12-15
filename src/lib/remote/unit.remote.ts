@@ -97,13 +97,18 @@ export const getMULDataFromName = query(z.string(), async (name) => {
 	return undefined;
 });
 
-export const isUnique = query(z.object({ mulId: z.number(), era: z.number() }), async (data) => {
-	const unit = await prisma.unit.findUnique({ where: { mulId: data.mulId, availability: { some: { era: data.era, faction: 4 } } } });
+export const isUnique = query(v.object({ mulId: v.number(), eras: v.array(v.number()) }), async (data) => {
+	const unit = await prisma.unit.findUnique({ where: { mulId: data.mulId, availability: { some: { era: data.eras.length ? { in: data.eras } : undefined, faction: 4 } } } });
 	return unit != null;
 });
 
-export const isAvailable = query(z.object({ mulId: z.number(), eras: z.number().array(), factions: z.number().array() }), async (data) => {
-	const unit = await prisma.unit.findUnique({ where: { mulId: data.mulId, availability: { some: { era: { in: data.eras }, faction: { in: data.factions } } } } });
+export const isAvailable = query(v.object({ mulId: v.number(), eras: v.array(v.number()), factions: v.array(v.number()) }), async (data) => {
+	const unit = await prisma.unit.findUnique({
+		where: {
+			mulId: data.mulId,
+			availability: { some: { era: data.eras.length ? { in: data.eras } : undefined, faction: data.factions.length ? { in: data.factions } : undefined } }
+		}
+	});
 	return unit != null;
 });
 

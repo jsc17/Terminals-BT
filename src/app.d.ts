@@ -1,6 +1,6 @@
 // See https://kit.svelte.dev/docs/types#app
 
-import type { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "$lib/generated/prisma/browser";
 
 // for information about these interfaces
 declare global {

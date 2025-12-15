@@ -72,7 +72,12 @@
 	{/if}
 	<div class="unit-row-container">
 		<div class="unit-name-row">
-			<p class="name-row-name" class:invalid-unit={list.issues.issueUnits.has(unitDetails?.id ?? "0")}>{unitDetails?.baseUnit.name}</p>
+			{#await list.issues}
+				<p class="name-row-name">{unitDetails?.baseUnit.name}</p>
+			{:then issues}
+				<p class="name-row-name" class:invalid-unit={issues.issueUnits.has(unitDetails?.id ?? "0")}>{unitDetails?.baseUnit.name}</p>
+			{/await}
+
 			<p class="name-row-pv"><span class="muted">PV:</span> {unitDetails?.cost}</p>
 			<DropdownMenu items={unitMenuItems}>
 				{#snippet trigger()}

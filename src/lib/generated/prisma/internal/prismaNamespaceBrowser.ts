@@ -60,13 +60,6 @@ export const ModelName = {
   Availability: 'Availability',
   ListV3: 'ListV3',
   SharedList: 'SharedList',
-  Match: 'Match',
-  UsersInMatch: 'UsersInMatch',
-  MatchTeam: 'MatchTeam',
-  MatchFormation: 'MatchFormation',
-  MatchUnit: 'MatchUnit',
-  MatchCrit: 'MatchCrit',
-  MatchLog: 'MatchLog',
   Tournament: 'Tournament',
   Participant: 'Participant',
   Unit: 'Unit',
@@ -196,101 +189,6 @@ export const SharedListScalarFieldEnum = {
 export type SharedListScalarFieldEnum = (typeof SharedListScalarFieldEnum)[keyof typeof SharedListScalarFieldEnum]
 
 
-export const MatchScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  private: 'private',
-  joinCode: 'joinCode',
-  createdAt: 'createdAt',
-  currentRound: 'currentRound',
-  gameCompleted: 'gameCompleted'
-} as const
-
-export type MatchScalarFieldEnum = (typeof MatchScalarFieldEnum)[keyof typeof MatchScalarFieldEnum]
-
-
-export const UsersInMatchScalarFieldEnum = {
-  id: 'id',
-  matchId: 'matchId',
-  playerId: 'playerId',
-  playerNickname: 'playerNickname',
-  playerFaction: 'playerFaction',
-  playerRole: 'playerRole',
-  teamId: 'teamId'
-} as const
-
-export type UsersInMatchScalarFieldEnum = (typeof UsersInMatchScalarFieldEnum)[keyof typeof UsersInMatchScalarFieldEnum]
-
-
-export const MatchTeamScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  objectivePoints: 'objectivePoints',
-  matchId: 'matchId'
-} as const
-
-export type MatchTeamScalarFieldEnum = (typeof MatchTeamScalarFieldEnum)[keyof typeof MatchTeamScalarFieldEnum]
-
-
-export const MatchFormationScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  type: 'type',
-  secondaryType: 'secondaryType',
-  matchId: 'matchId',
-  playerId: 'playerId'
-} as const
-
-export type MatchFormationScalarFieldEnum = (typeof MatchFormationScalarFieldEnum)[keyof typeof MatchFormationScalarFieldEnum]
-
-
-export const MatchUnitScalarFieldEnum = {
-  id: 'id',
-  mulId: 'mulId',
-  skill: 'skill',
-  secondary: 'secondary',
-  pendingDamage: 'pendingDamage',
-  pendingHeat: 'pendingHeat',
-  currentDamage: 'currentDamage',
-  currentHeat: 'currentHeat',
-  formationId: 'formationId',
-  spas: 'spas',
-  ammo: 'ammo'
-} as const
-
-export type MatchUnitScalarFieldEnum = (typeof MatchUnitScalarFieldEnum)[keyof typeof MatchUnitScalarFieldEnum]
-
-
-export const MatchCritScalarFieldEnum = {
-  id: 'id',
-  unitId: 'unitId',
-  round: 'round',
-  pending: 'pending',
-  type: 'type',
-  roundsRemaining: 'roundsRemaining'
-} as const
-
-export type MatchCritScalarFieldEnum = (typeof MatchCritScalarFieldEnum)[keyof typeof MatchCritScalarFieldEnum]
-
-
-export const MatchLogScalarFieldEnum = {
-  id: 'id',
-  matchId: 'matchId',
-  submitterId: 'submitterId',
-  updated_at: 'updated_at',
-  round: 'round',
-  type: 'type',
-  unitId: 'unitId',
-  applied: 'applied',
-  damage: 'damage',
-  heat: 'heat',
-  critical: 'critical',
-  affectedUser: 'affectedUser'
-} as const
-
-export type MatchLogScalarFieldEnum = (typeof MatchLogScalarFieldEnum)[keyof typeof MatchLogScalarFieldEnum]
-
-
 export const TournamentScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -413,8 +311,7 @@ export const UserScalarFieldEnum = {
   google_id: 'google_id',
   discord_id: 'discord_id',
   account_created: 'account_created',
-  last_login: 'last_login',
-  playModeNickname: 'playModeNickname'
+  last_login: 'last_login'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -532,62 +429,6 @@ export const SharedListOrderByRelevanceFieldEnum = {
 export type SharedListOrderByRelevanceFieldEnum = (typeof SharedListOrderByRelevanceFieldEnum)[keyof typeof SharedListOrderByRelevanceFieldEnum]
 
 
-export const MatchOrderByRelevanceFieldEnum = {
-  name: 'name',
-  joinCode: 'joinCode'
-} as const
-
-export type MatchOrderByRelevanceFieldEnum = (typeof MatchOrderByRelevanceFieldEnum)[keyof typeof MatchOrderByRelevanceFieldEnum]
-
-
-export const UsersInMatchOrderByRelevanceFieldEnum = {
-  playerId: 'playerId',
-  playerNickname: 'playerNickname',
-  playerFaction: 'playerFaction'
-} as const
-
-export type UsersInMatchOrderByRelevanceFieldEnum = (typeof UsersInMatchOrderByRelevanceFieldEnum)[keyof typeof UsersInMatchOrderByRelevanceFieldEnum]
-
-
-export const MatchTeamOrderByRelevanceFieldEnum = {
-  name: 'name'
-} as const
-
-export type MatchTeamOrderByRelevanceFieldEnum = (typeof MatchTeamOrderByRelevanceFieldEnum)[keyof typeof MatchTeamOrderByRelevanceFieldEnum]
-
-
-export const MatchFormationOrderByRelevanceFieldEnum = {
-  name: 'name',
-  type: 'type',
-  secondaryType: 'secondaryType',
-  playerId: 'playerId'
-} as const
-
-export type MatchFormationOrderByRelevanceFieldEnum = (typeof MatchFormationOrderByRelevanceFieldEnum)[keyof typeof MatchFormationOrderByRelevanceFieldEnum]
-
-
-export const MatchUnitOrderByRelevanceFieldEnum = {
-  spas: 'spas',
-  ammo: 'ammo'
-} as const
-
-export type MatchUnitOrderByRelevanceFieldEnum = (typeof MatchUnitOrderByRelevanceFieldEnum)[keyof typeof MatchUnitOrderByRelevanceFieldEnum]
-
-
-export const MatchCritOrderByRelevanceFieldEnum = {
-  type: 'type'
-} as const
-
-export type MatchCritOrderByRelevanceFieldEnum = (typeof MatchCritOrderByRelevanceFieldEnum)[keyof typeof MatchCritOrderByRelevanceFieldEnum]
-
-
-export const MatchLogOrderByRelevanceFieldEnum = {
-  critical: 'critical'
-} as const
-
-export type MatchLogOrderByRelevanceFieldEnum = (typeof MatchLogOrderByRelevanceFieldEnum)[keyof typeof MatchLogOrderByRelevanceFieldEnum]
-
-
 export const TournamentOrderByRelevanceFieldEnum = {
   userId: 'userId',
   name: 'name',
@@ -674,8 +515,7 @@ export const UserOrderByRelevanceFieldEnum = {
   email: 'email',
   hashedPassword: 'hashedPassword',
   google_id: 'google_id',
-  discord_id: 'discord_id',
-  playModeNickname: 'playModeNickname'
+  discord_id: 'discord_id'
 } as const
 
 export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]

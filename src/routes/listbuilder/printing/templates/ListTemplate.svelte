@@ -16,7 +16,7 @@
 		mulUnitData: Map<number, MulUnit>;
 		ammoReferenceList: string[];
 		unitImages?: Map<string, string>;
-		unitCardImages?: Map<number, string>;
+		unitCardImages?: Map<string, string>;
 		bsList: Map<number, number[]>;
 		scaList: number[];
 		counts: Map<number, string[]>;
@@ -228,7 +228,7 @@
 							{@const unit = unitData.get(unitId)}
 							{@const mulData = mulUnitData.get(unit!.mulId)}
 							{#if printOptions.cardStyle == "mul" || unit!.mulId < 0}
-								<img src={unitCardImages?.get(unit!.mulId)} class="unit-card" alt="unit card" />
+								<img src={unitCardImages?.get(`${unit!.mulId}-${unit!.skill}`)} class="unit-card" alt="unit card" />
 							{:else}
 								<PrintUnitCard
 									unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
@@ -261,7 +261,7 @@
 								{@const unit = unitData.get(unitId)}
 								{@const mulData = mulUnitData.get(unit!.mulId)}
 								{#if printOptions.cardStyle == "mul" || unit!.mulId < 0}
-									<img src={unitCardImages?.get(unit!.mulId)} class="unit-card" alt="unit card" />
+									<img src={unitCardImages?.get(`${unit!.mulId}-${unit!.skill}`)} class="unit-card" alt="unit card" />
 								{:else}
 									<PrintUnitCard
 										unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
@@ -283,7 +283,7 @@
 					{@const unit = unitData.get(unitId)}
 					{@const mulData = mulUnitData.get(unit!.mulId)}
 					{#if printOptions.cardStyle == "mul" || unit!.mulId < 0}
-						<img src={unitCardImages?.get(unit!.mulId)} class="unit-card" alt="unit card" />
+						<img src={unitCardImages?.get(`${unit!.mulId}-${unit!.skill}`)} class="unit-card" alt="unit card" />
 					{:else}
 						<PrintUnitCard
 							unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}

@@ -19,52 +19,12 @@
 		<p class="round-header">Round {log.round}</p>
 		<p class="info">{log.updated_at.toUTCString()}</p>
 	{:else if log.type == "UNIT_DAMAGE"}
+		{@const damage = Number(log.details)}
 		<p>
 			{unit?.owner}'s {unit?.reference?.class}
 			{#if unit?.data.number}
 				({unit?.data.number})
-			{/if} took {log.damage} points of damage
-		</p>
-		<p class="info">
-			{log.updated_at.toUTCString()}
-			{#if unit?.owner != submitter?.nickname}
-				(applied by {submitter?.nickname})
-			{/if}
-		</p>
-	{:else if log.type == "UNIT_CRIT"}
-		<p>
-			{unit?.owner}'s {unit?.reference?.class}
-			{#if unit?.data.number}
-				({unit?.data.number})
-			{/if} suffered {RegExp(/[aeiou]/i).test(log.critical!.at(0)!) ? "an" : "a"}
-			{log.critical!.at(0)?.toUpperCase() + log.critical!.slice(1)} critical hit
-		</p>
-		<p class="info">
-			{log.updated_at.toUTCString()}
-			{#if unit?.owner != submitter?.nickname}
-				(applied by {submitter?.nickname})
-			{/if}
-		</p>
-	{:else if log.type == "UNIT_HEAT"}
-		<p>
-			{unit?.owner}'s {unit?.reference?.class}
-			{#if unit?.data.number}
-				({unit?.data.number})
-			{/if} heat level set to {log.heat}
-		</p>
-		<p class="info">
-			{log.updated_at.toUTCString()}
-			{#if unit?.owner != submitter?.nickname}
-				(applied by {submitter?.nickname})
-			{/if}
-		</p>
-	{:else if log.type == "UNIT_CRIT_REMOVED"}
-		<p>
-			{unit?.owner}'s {unit?.reference?.class}
-			{#if unit?.data.number}
-				({unit?.data.number})
-			{/if} removed a previously taken
-			{log.critical!.at(0)?.toUpperCase() + log.critical!.slice(1)} critical hit
+			{/if} took {damage} points of damage
 		</p>
 		<p class="info">
 			{log.updated_at.toUTCString()}
@@ -77,7 +37,7 @@
 			{unit?.owner}'s {unit?.reference?.class}
 			{#if unit?.data.number}
 				({unit?.data.number})
-			{/if} removed {log.damage} previously taken points of damage
+			{/if} removed {log.details} previously taken points of damage
 		</p>
 		<p class="info">
 			{log.updated_at.toUTCString()}
@@ -85,6 +45,53 @@
 				(applied by {submitter?.nickname})
 			{/if}
 		</p>
+	{:else if log.type == "UNIT_HEAT"}
+		{@const heat = log.details as number}
+		<p>
+			{unit?.owner}'s {unit?.reference?.class}
+			{#if unit?.data.number}
+				({unit?.data.number})
+			{/if} heat level set to {heat}
+		</p>
+		<p class="info">
+			{log.updated_at.toUTCString()}
+			{#if unit?.owner != submitter?.nickname}
+				(applied by {submitter?.nickname})
+			{/if}
+		</p>
+	{:else if log.type == "UNIT_CRIT"}
+		{@const critical = log.details as string}
+		<p>
+			{unit?.owner}'s {unit?.reference?.class}
+			{#if unit?.data.number}
+				({unit?.data.number})
+			{/if} suffered {RegExp(/[aeiou]/i).test((log.details! as string).at(0)!) ? "an" : "a"}
+			{critical.at(0)?.toUpperCase() + critical!.slice(1)} critical hit
+		</p>
+		<p class="info">
+			{log.updated_at.toUTCString()}
+			{#if unit?.owner != submitter?.nickname}
+				(applied by {submitter?.nickname})
+			{/if}
+		</p>
+	{:else if log.type == "UNIT_CRIT_REMOVED"}
+		{@const critical = log.details as string}
+
+		<p>
+			{unit?.owner}'s {unit?.reference?.class}
+			{#if unit?.data.number}
+				({unit?.data.number})
+			{/if} removed a previously taken
+			{critical.at(0)?.toUpperCase() + critical.slice(1)} critical hit
+		</p>
+		<p class="info">
+			{log.updated_at.toUTCString()}
+			{#if unit?.owner != submitter?.nickname}
+				(applied by {submitter?.nickname})
+			{/if}
+		</p>
+	{:else}
+		<p>{log.type}</p>
 	{/if}
 </div>
 

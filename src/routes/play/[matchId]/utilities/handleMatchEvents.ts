@@ -1,27 +1,34 @@
 import { toastController } from "$lib/stores";
 import { safeParseJSON } from "$lib/utilities/utilities";
 import { nanoid } from "nanoid";
-import { getPlayerData, getMatchUnitData, getMatchDetails, getTeamData, getMyData } from "../remote/matchData.remote";
+import { getPlayerData, getMatchUnitData, getMatchDetails, getTeamData, getMyData, getMatchList } from "../remote/matchData.remote";
 import type { PlayFormation, PlayList, PlayUnit } from "../../types/types";
 import type { MulUnit } from "$lib/types/listTypes";
 import { SvelteMap } from "svelte/reactivity";
 import { getMulImage } from "$lib/remote/mulImages.remote";
 import { getMULDataFromId } from "$lib/remote/unit.remote";
-import type { MatchCrit, MatchFormation, MatchLog, MatchUnit, UsersInMatch } from "$lib/generated/prisma/browser";
+import type { MatchCrit, MatchFormation, MatchLog, MatchUnit, UsersInMatch, MatchList } from "$lib/generated/prisma/browser";
 import { goto } from "$app/navigation";
 
 export function processMessage(
 	message: string,
-	playerList: { id: number; team?: number; nickname: string; list?: PlayList }[],
+	playerList: { id: number; team?: number; nickname: string; role: string }[],
 	matchUnits: SvelteMap<number, PlayUnit>,
-	matchLogs: MatchLog[]
+	matchLogs: MatchLog[],
+	matchLists: PlayList[]
 ) {
 	const update: MatchLog = JSON.parse(message);
 	matchLogs.push(update);
 	switch (update.type) {
 		case "PLAYER_JOINED":
-			getPlayerData({ playerId: update.submitterId }).then(async (r) => {
-				if (r) playerList.push({ id: r.id, team: r.teamId ?? undefined, nickname: r.playerNickname, list: await initializePlayerList(r, matchUnits) });
+			getPlayerData({ playerId: update.submitterId }).then((r) => {
+				if (r) playerList.push({ id: r.id, team: r.teamId ?? undefined, nickname: r.playerNickname, role: r.playerRole });
+			});
+			break;
+		case "PLAYER_ADDED_LIST":
+			const listId = Number(update.details);
+			getMatchList(listId).then(async (r) => {
+				if (r) matchLists.push(await initializePlayerList(r, matchUnits));
 			});
 			break;
 		case "MATCH_START":
@@ -53,7 +60,7 @@ export function processMessage(
 			goto("/play");
 			break;
 		case "REMOVE_PLAYER":
-			playerList = playerList.filter((p) => p.id != update.affectedUser!);
+			playerList = playerList.filter((p) => p.id != Number(update.details));
 			getMyData(update.matchId).refresh();
 			break;
 		default:
@@ -62,12 +69,13 @@ export function processMessage(
 }
 
 export async function initializePlayerList(
-	playerData: UsersInMatch & { formations: (MatchFormation & { units: (MatchUnit & { criticals: MatchCrit[] })[] })[] },
+	list: MatchList & { formations: (MatchFormation & { units: (MatchUnit & { criticals: MatchCrit[] })[] })[] },
 	matchUnits: SvelteMap<number, PlayUnit>
 ) {
 	const playerFormationList: PlayFormation[] = [];
 	const duplicateMap = new SvelteMap<string, number[]>();
-	for (const formation of playerData.formations) {
+
+	for (const formation of list.formations) {
 		await Promise.all(
 			formation.units.map(async (u) => {
 				const unitData = {
@@ -96,7 +104,7 @@ export async function initializePlayerList(
 				};
 				const reference = await getMULDataFromId(u.mulId);
 				const image = await getMulImage(reference?.imageLink ?? "");
-				matchUnits.set(u.id, { data: unitData, reference, image: image.image, owner: playerData.playerNickname });
+				matchUnits.set(u.id, { data: unitData, reference, image: image.image, owner: list.playerId });
 
 				if (reference) {
 					const key = reference.group != "" ? reference.group : reference.class;
@@ -113,14 +121,15 @@ export async function initializePlayerList(
 			units: formation.units.filter((u) => !u.secondary).map((u) => u.id),
 			secondary
 		});
-	}
-	duplicateMap.forEach((value) => {
-		value.forEach((id, index) => {
-			if (value.length > 1) matchUnits.get(id)!.data.number = index + 1;
-		});
-	});
 
-	return { id: nanoid(10), owner: playerData.playerNickname, team: playerData.teamId, formations: playerFormationList } as PlayList;
+		duplicateMap.forEach((value) => {
+			value.forEach((id, index) => {
+				if (value.length > 1) matchUnits.get(id)!.data.number = index + 1;
+			});
+		});
+	}
+	const newPlaylist: PlayList = { id: nanoid(10), name: list.name, owner: list.playerId, team: list.teamId, formations: playerFormationList };
+	return newPlaylist;
 }
 
 async function handleUnitUpdate(unitId: number, matchUnits: SvelteMap<number, PlayUnit>) {

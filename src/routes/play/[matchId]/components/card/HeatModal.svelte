@@ -3,7 +3,7 @@
 	import type { MulUnit } from "$lib/types/list.svelte";
 	import { getContext } from "svelte";
 	import type { PlayUnitData } from "../../../types/types";
-	import { setHeat } from "../../remote/matchUpdates.remote";
+	import { setHeat } from "../../remote/matchUnitUpdates.remote";
 
 	type Props = {
 		unit: PlayUnitData;

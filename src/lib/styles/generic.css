@@ -127,9 +127,14 @@
 	font-size: 0.9em;
 }
 
-[data-dropdown-menu-item].dropdown-button,
-[data-dropdown-menu-item].dropdown-info {
+[data-dropdown-menu-item].dropdown-button {
 	color: var(--primary);
+	padding: 8px 24px;
+	border-radius: var(--radius);
+	text-align: center;
+}
+[data-dropdown-menu-item].dropdown-info {
+	color: var(--text-color);
 	padding: 8px 24px;
 	border-radius: var(--radius);
 	text-align: center;

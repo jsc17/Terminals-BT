@@ -2,7 +2,7 @@
 	import { Dialog } from "$lib/generic";
 	import type { Match, MatchTeam } from "$lib/generated/prisma/browser";
 	import type { Snippet } from "svelte";
-	import { endRound } from "../../remote/matchUpdates.remote";
+	import { endRound } from "../../remote/matchManagement.remote";
 
 	type Props = {
 		matchData: Match;

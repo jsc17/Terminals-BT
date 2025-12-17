@@ -3,7 +3,7 @@
 	import type { MulUnit } from "$lib/types/list.svelte";
 	import { Tabs } from "bits-ui";
 	import type { PlayUnitData } from "../../../types/types";
-	import { removeDamage, takeDamage } from "../../remote/matchUpdates.remote";
+	import { removeDamage, takeDamage } from "../../remote/matchUnitUpdates.remote";
 	import { getContext } from "svelte";
 
 	type Props = {

@@ -20,7 +20,7 @@ model UsersInMatch {
     playerNickname String
     playerFaction String?
     playerRole PlayerRole
-    formations MatchFormation[]
+    lists MatchList[]
     team MatchTeam? @relation(references: [id], fields: [teamId], onDelete: Cascade)
     teamId Int?
     logs MatchLog[]
@@ -32,12 +32,21 @@ model MatchTeam {
     id Int @id @default(autoincrement())
     name String
     objectivePoints Int @default(0)
-
     match Match @relation(references: [id], fields: [matchId], onDelete: Cascade)
     matchId Int
-
+    lists MatchList[]
     teammates UsersInMatch[]
+}
 
+model MatchList {
+    id Int @id @default(autoincrement())
+    player UsersInMatch @relation(references: [matchId, playerId], fields: [matchId, playerId], onDelete: Cascade)
+    matchId Int
+    playerId String
+    name String
+    team MatchTeam @relation(references: [id], fields: [teamId], onDelete: Cascade)
+    teamId Int
+    formations MatchFormation[]
 }
 
 model MatchFormation {
@@ -45,10 +54,9 @@ model MatchFormation {
     name String
     type String
     secondaryType String?
+    list MatchList @relation(references: [id], fields: [listId], onDelete: Cascade)
+    listId Int
     units MatchUnit[]
-    player UsersInMatch @relation(references: [matchId, playerId], fields: [matchId, playerId], onDelete: Cascade)
-    matchId Int
-    playerId String 
 }
 
 model MatchUnit {
@@ -88,10 +96,7 @@ model MatchLog {
     type LogType
     unitId Int?
     applied Boolean?
-    damage Int?
-    heat Int?
-    critical String?
-    affectedUser Int?
+    details Json?
 }
 
 enum PlayerRole {
@@ -107,6 +112,7 @@ enum LogType {
     MATCH_END
     MATCH_DELETE
     PLAYER_JOINED
+    PLAYER_ADDED_LIST
     PLAYER_LEFT
     REMOVE_PLAYER
     ROUND_END

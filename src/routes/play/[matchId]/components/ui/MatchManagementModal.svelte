@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { Dialog, Separator } from "$lib/generic";
 	import type { Match, MatchTeam } from "$lib/generated/prisma/browser";
-	import { updateMatchData, kickPlayer } from "../../remote/matchData.remote";
 	import { UpdateMatchSchema } from "../../../schema/matchlistSchema";
 	import type { PlayList } from "../../../types/types";
+	import { kickPlayer, updateMatchData } from "../../remote/matchManagement.remote";
 
 	type Props = {
 		open: boolean;

@@ -4,7 +4,7 @@
 	import type { PlayUnitData } from "../../../types/types";
 	import { criticalLists } from "../../utilities/criticalList";
 	import { Tabs } from "bits-ui";
-	import { takeCritical, removeCritical } from "../../remote/matchUpdates.remote";
+	import { takeCritical, removeCritical } from "../../remote/matchUnitUpdates.remote";
 	import { getContext } from "svelte";
 
 	type Props = {

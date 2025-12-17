@@ -38,6 +38,7 @@ type PlayFormation = {
 
 type PlayList = {
 	id: string;
+	name: string;
 	owner: string;
 	team: number;
 	formations: PlayFormation[];

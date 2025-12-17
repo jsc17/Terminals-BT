@@ -8,14 +8,15 @@
 	import { safeParseJSON } from "$lib/utilities/utilities";
 	import { onMount, setContext } from "svelte";
 	import { getAllPlayerData, getTeamData, getMyData, getMatchDetails, deleteMatch, getPlayerData, getLogs } from "./remote/matchData.remote";
-	import { startGame } from "./remote/matchUpdates.remote";
+	import { startGame } from "./remote/matchManagement.remote";
 	import { CaretLeft, CaretRight } from "phosphor-svelte";
 	import { SvelteMap } from "svelte/reactivity";
-	import type { MulUnit } from "$lib/types/listTypes";
 	import { initializePlayerList, processMessage } from "./utilities/handleMatchEvents";
 	import type { MenuItem } from "$lib/generic/types";
 	import type { MatchLog } from "$lib/generated/prisma/browser";
 	import MatchLogWindow from "./components/ui/MatchLogWindow.svelte";
+	import { goto } from "$app/navigation";
+	import LoadListModal from "./components/ui/LoadListModal.svelte";
 
 	let { data } = $props();
 
@@ -28,7 +29,8 @@
 		}
 	});
 
-	let playerList = $state<{ id: number; team?: number; nickname: string; list?: PlayList }[]>([]);
+	let matchPlayers = $state<{ id: number; team?: number; nickname: string; role: string }[]>([]);
+	let matchLists = $state<PlayList[]>([]);
 	let matchUnits = new SvelteMap<number, PlayUnit>();
 	let matchLogs = $state<MatchLog[]>([]);
 
@@ -38,31 +40,50 @@
 
 	getAllPlayerData(data.matchId).then((results) => {
 		results.forEach(async (r) => {
-			playerList.push({ id: r.id, team: r.teamId ?? undefined, nickname: r.playerNickname, list: await initializePlayerList(r, matchUnits) });
+			matchPlayers.push({ id: r.id, team: r.teamId ?? undefined, nickname: r.playerNickname, role: r.playerRole });
+			for (const list of r.lists) matchLists.push(await initializePlayerList(list, matchUnits));
 		});
 	});
 	getLogs({ matchId: data.matchId, lastLogId: 0 }).then((results) => (matchLogs = matchLogs.concat(results)));
 
-	const componentsOpen = $state({ join: false, management: false, matchLog: false });
+	const componentsOpen = $state({ join: false, addList: false, management: false, matchLog: false });
 
-	const hostMenuOptions: MenuItem[] = $derived([
-		{ type: "item", label: "Join Match as Player", onSelect: () => (componentsOpen.join = true) },
-		{ type: "item", label: "Manage Match", onSelect: () => (componentsOpen.management = true) },
-		{ type: "item", label: "End Match", onSelect: () => {} },
-		{
-			type: "item",
-			label: "Delete Match",
-			onSelect: () => {
-				if (confirm("Delete match immediately and end without showing summary screen?")) deleteMatch(data.matchId);
-			}
-		},
-		{ type: "separator" },
-		{ type: "info", label: `Join Code: ${matchData?.joinCode}` }
-	]);
+	const menuOptions: MenuItem[] = $derived.by(() => {
+		let options: MenuItem[] = [];
+
+		if (!data.username)
+			return [{ type: "info", label: `Please login to join match` }, { type: "separator" }, { type: "item", label: "Return to match selection", onSelect: () => goto("/play") }];
+
+		if (!myData)
+			return [
+				{ type: "item", label: "Join Match", onSelect: () => (componentsOpen.join = true) },
+				{ type: "separator" },
+				{ type: "item", label: "Return to match selection", onSelect: () => goto("/play") }
+			];
+
+		options.push({ type: "item", label: "Load List", onSelect: () => (componentsOpen.addList = true) });
+		if (myData.playerRole == "HOST" || myData.playerRole == "MODERATOR")
+			options = options.concat([
+				{ type: "separator" },
+				{ type: "item", label: "Manage Match", onSelect: () => (componentsOpen.management = true) },
+				{ type: "item", label: "End Match", onSelect: () => {} },
+				{
+					type: "item",
+					label: "Delete Match",
+					onSelect: () => {
+						if (confirm("Delete match immediately and end without showing summary screen?")) deleteMatch(data.matchId);
+					}
+				},
+				{ type: "separator" },
+				{ type: "info", label: `Join Code: ${matchData?.joinCode}` }
+			]);
+
+		return options.concat([{ type: "separator" }, { type: "item", label: "Return to match selection", onSelect: () => goto("/play") }]);
+	});
 
 	onMount(() => {
 		const es = new EventSource(`/play/${data.matchId}/stream`);
-		es.onmessage = ({ data }) => processMessage(data, playerList, matchUnits, matchLogs);
+		es.onmessage = ({ data }) => processMessage(data, matchPlayers, matchUnits, matchLogs, matchLists);
 		return () => {
 			es.close();
 		};
@@ -75,10 +96,6 @@
 
 <div class="play-body">
 	<div class="match-bars">
-		<div class="match-name-bar">
-			<p>{matchData?.name}</p>
-			<a href="/play">Return to match selection</a>
-		</div>
 		<div class="match-header">
 			<div class="toolbar-item">{teamData?.[0].name}</div>
 			<div class="toolbar-item">{teamData?.[0].objectivePoints}</div>
@@ -88,24 +105,11 @@
 		</div>
 		<div class="toolbar">
 			<div class="toolbar-section">
-				{#if data.username}
-					{#if !myData}
-						<button
-							class="toolbar-button"
-							onclick={() => {
-								componentsOpen.join = true;
-							}}>Join Match</button
-						>
-					{:else if myData.playerRole == "HOST"}
-						<DropdownMenu items={myData.teamId ? hostMenuOptions.slice(1) : hostMenuOptions} triggerClasses="transparent-button">
-							{#snippet trigger()}
-								<div class="toolbar-button">Host Menu</div>
-							{/snippet}
-						</DropdownMenu>
-					{/if}
-				{:else}
-					<div class="toolbar-item">Login to Join</div>
-				{/if}
+				<DropdownMenu items={menuOptions} triggerClasses="transparent-button">
+					{#snippet trigger()}
+						<div class="toolbar-button">Menu</div>
+					{/snippet}
+				</DropdownMenu>
 			</div>
 			{#if myData?.playerRole == "HOST"}
 				<div class="toolbar-section">
@@ -117,11 +121,11 @@
 							}}>Start Game</button
 						>
 					{:else}
-						<EndRoundModal matchData={matchData!} teams={teamData}>
+						<!-- <EndRoundModal matchData={matchData!} teams={teamData}>
 							{#snippet trigger()}
 								<div class="toolbar-button">End Round</div>
 							{/snippet}
-						</EndRoundModal>
+						</EndRoundModal> -->
 					{/if}
 				</div>
 			{/if}
@@ -132,49 +136,40 @@
 			</div>
 		</div>
 	</div>
-	{#if playerList
-		.filter((p) => p.list)
-		.sort((a, b) => {
-			return (a.team ?? 0) - (b.team ?? 0);
-		}).length > 1}
+	{#if matchLists.length > 1}
 		<div class="list-selector">
-			{#each playerList
-				.filter((p) => p.list)
-				.sort((a, b) => {
-					return (a.team ?? 0) - (b.team ?? 0);
-				}) as player, index (player.id)}
-				<a class="jump-link-button" data-team={teamData.findIndex((t) => t.id == player.team)} href={`#list-${index}`}>
-					{player.nickname}
+			{#each matchLists.toSorted((a, b) => {
+				return (a.team ?? 0) - (b.team ?? 0);
+			}) as list, index (list.id)}
+				<a class="jump-link-button" data-team={teamData.findIndex((t) => t.id == list.team)} href={`#list-${index}`}>
+					{list.name}
 				</a>
 			{/each}
 		</div>
 	{/if}
 	<div class="list-scroll-container">
-		{#each playerList
-			.filter((p) => p.list)
-			.sort((a, b) => {
-				return (a.team ?? 0) - (b.team ?? 0);
-			}) as player, index (player.id)}
+		{#each matchLists.toSorted((a, b) => {
+			return (a.team ?? 0) - (b.team ?? 0);
+		}) as list, index (list.id)}
 			<div class="list-scroll-slide">
 				<a class={{ "list-scroll-button": true, "list-scroll-button-disabled": index == 0 }} href={index != 0 ? `#list-${index - 1}` : ""}>
 					<CaretLeft style="fill: var(--button-text);" />
 				</a>
 				<div class="list" id={`list-${index}`}>
-					{#each player.list!.formations as formation}
+					{#each list!.formations as formation}
 						<PlayFormations {formation} {matchUnits} options={options.current} />
 					{/each}
 				</div>
-				<a class={{ "list-scroll-button": true, "list-scroll-button-disabled": index == playerList.length - 1 }} href={index != playerList.length - 1 ? `#list-${index + 1}` : ""}>
+				<a class={{ "list-scroll-button": true, "list-scroll-button-disabled": index == matchLists.length - 1 }} href={index != matchLists.length - 1 ? `#list-${index + 1}` : ""}>
 					<CaretRight style="fill: var(--button-text);" />
 				</a>
 			</div>
 		{:else}
 			<p>No Lists loaded</p>
-			<p>{playerList.length}</p>
 		{/each}
 	</div>
 
-	<MatchLogWindow {matchLogs} {matchUnits} {playerList} />
+	<MatchLogWindow {matchLogs} {matchUnits} playerList={matchPlayers} />
 </div>
 
 <MatchJoinModal
@@ -185,7 +180,9 @@
 	host={myData?.playerRole == "HOST"}
 />
 
-<MatchManagementModal bind:open={componentsOpen.management} {matchData} {teamData} {playerList} />
+<LoadListModal bind:open={componentsOpen.addList} matchId={matchData?.id.toString() ?? ""} teams={teamData.map((t) => ({ id: t.id, name: t.name }))} />
+
+<MatchManagementModal bind:open={componentsOpen.management} {matchData} {teamData} playerList={matchPlayers} />
 
 <style>
 	.play-body {
@@ -194,11 +191,6 @@
 		flex-direction: column;
 		gap: 4px;
 		height: 100%;
-	}
-	.match-name-bar {
-		display: flex;
-		justify-content: space-between;
-		padding: 0px 24px;
 	}
 	.match-bars {
 		display: flex;

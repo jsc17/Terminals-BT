@@ -1,10 +1,7 @@
 <script lang="ts">
-	import { refreshAll } from "$app/navigation";
 	import { Dialog } from "$lib/generic";
-	import { getUsersLists } from "$lib/remote/list.remote";
-	import { watch } from "runed";
-	import { joinMatch } from "../../remote/matchData.remote";
 	import { getNickname } from "../../../remote/matchlist.remote";
+	import { joinMatch } from "../../remote/matchPlayer.remote";
 
 	type Props = {
 		open: boolean;
@@ -16,16 +13,7 @@
 
 	let { open = $bindable(), matchId, teams, host }: Props = $props();
 
-	let lists = $derived(await getUsersLists());
 	joinMatch.fields.nickname.set(await getNickname());
-	watch(
-		() => open,
-		() => {
-			if (open) {
-				getUsersLists().refresh();
-			}
-		}
-	);
 </script>
 
 <Dialog title="Join Match" bind:open>
@@ -50,14 +38,14 @@
 				{/each}
 			</select>
 		</label>
-		<label
+		<!-- <label
 			>List
 			<select {...joinMatch.fields.listId.as("select")}>
 				{#each lists.data as list}
 					<option value={list.id}>{list.name}</option>
 				{/each}
 			</select>
-		</label>
+		</label> -->
 		<button>Submit</button>
 	</form>
 </Dialog>

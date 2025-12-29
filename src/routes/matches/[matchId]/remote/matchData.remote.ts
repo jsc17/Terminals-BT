@@ -28,7 +28,7 @@ export const getPlayerData = query(v.object({ playerId: v.number() }), async ({ 
 export const getAllPlayerData = query(v.number(), async (matchId) => {
 	const results = await prisma.usersInMatch.findMany({
 		where: { matchId },
-		include: { lists: { include: { formations: { include: { units: { include: { criticals: true } } } } } } }
+		include: { lists: { include: { formations: { include: { units: { include: { criticals: true } } } }, player: { select: { id: true, playerNickname: true } } } } }
 	});
 	return results != null ? results : [];
 });
@@ -39,7 +39,10 @@ export const getTeamData = query(v.number(), async (matchId) => {
 });
 
 export const getMatchList = query(v.number(), async (listId) => {
-	const list = await prisma.matchList.findUnique({ where: { id: listId }, include: { formations: { include: { units: { include: { criticals: true } } } } } });
+	const list = await prisma.matchList.findUnique({
+		where: { id: listId },
+		include: { formations: { include: { units: { include: { criticals: true } } } }, player: { select: { id: true, playerNickname: true } } }
+	});
 	return list;
 });
 

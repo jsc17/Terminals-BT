@@ -4,15 +4,17 @@
 	import { UpdateMatchSchema } from "../../../schema/matchlistSchema";
 	import type { PlayList } from "../../../types/types";
 	import { kickPlayer, updateMatchData } from "../../remote/matchManagement.remote";
+	import { filter } from "d3";
 
 	type Props = {
 		open: boolean;
 		matchData?: Match;
 		teamData: MatchTeam[];
-		playerList: { id: number; team?: number; nickname: string; list?: PlayList }[];
+		matchPlayers: { id: number; team?: number; nickname: string; role: string }[];
+		matchLists: PlayList[];
 	};
 
-	let { open = $bindable(), matchData, teamData, playerList }: Props = $props();
+	let { open = $bindable(), matchData, teamData, matchPlayers: playerList, matchLists }: Props = $props();
 
 	$effect(() => {
 		if (open && matchData) {
@@ -66,7 +68,9 @@
 	<table>
 		<thead>
 			<tr>
-				<th>Players</th>
+				<th>Player</th>
+				<th>Team</th>
+				<th>Lists</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -74,6 +78,11 @@
 				<tr>
 					<td>{player.nickname}</td>
 					<td>{player.team ? teamData.find((t) => t.id == player.team)?.name : "Neutral"}</td>
+					<td>
+						{#each matchLists.filter((l) => l.owner == player.id) as list}
+							<p>{list.name} ({teamData.find((t) => t.id == list.team)?.name})</p>
+						{/each}
+					</td>
 					<td>
 						<button class="transparent-button" onclick={() => removePlayer(player)}>Remove</button>
 					</td>
@@ -108,5 +117,8 @@
 	td {
 		border: 1px solid var(--table-border);
 		padding: 2px 6px;
+	}
+	td.list-cell {
+		text-align: end;
 	}
 </style>

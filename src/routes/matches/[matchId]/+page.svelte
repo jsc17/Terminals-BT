@@ -61,7 +61,7 @@
 				{ type: "item", label: "Return to match selection", onSelect: () => goto("/play") }
 			];
 
-		options.push({ type: "item", label: "Load List", onSelect: () => (componentsOpen.addList = true) });
+		options.push({ type: "item", label: matchLists.find((l) => l.owner == myData.id) ? "Load Additional List" : "Load List", onSelect: () => (componentsOpen.addList = true) });
 		if (myData.playerRole == "HOST" || myData.playerRole == "MODERATOR")
 			options = options.concat([
 				{ type: "separator" },
@@ -121,11 +121,11 @@
 							}}>Start Game</button
 						>
 					{:else}
-						<!-- <EndRoundModal matchData={matchData!} teams={teamData}>
+						<EndRoundModal matchData={matchData!} teams={teamData}>
 							{#snippet trigger()}
 								<div class="toolbar-button">End Round</div>
 							{/snippet}
-						</EndRoundModal> -->
+						</EndRoundModal>
 					{/if}
 				</div>
 			{/if}
@@ -133,6 +133,9 @@
 				<div>
 					<DisplayOptionsPopover bind:options={options.current} />
 				</div>
+				<button class={{ "toolbar-button": true, "toolbar-button-selected": componentsOpen.matchLog }} onclick={() => (componentsOpen.matchLog = !componentsOpen.matchLog)}
+					>Match List</button
+				>
 			</div>
 		</div>
 	</div>
@@ -165,11 +168,11 @@
 				</a>
 			</div>
 		{:else}
-			<p>No Lists loaded</p>
+			<p class="center">No Lists have been loaded yet</p>
 		{/each}
 	</div>
 
-	<MatchLogWindow {matchLogs} {matchUnits} playerList={matchPlayers} />
+	<MatchLogWindow {matchLogs} {matchUnits} playerList={matchPlayers} bind:open={componentsOpen.matchLog} />
 </div>
 
 <MatchJoinModal
@@ -182,7 +185,7 @@
 
 <LoadListModal bind:open={componentsOpen.addList} matchId={matchData?.id.toString() ?? ""} teams={teamData.map((t) => ({ id: t.id, name: t.name }))} />
 
-<MatchManagementModal bind:open={componentsOpen.management} {matchData} {teamData} playerList={matchPlayers} />
+<MatchManagementModal bind:open={componentsOpen.management} {matchData} {teamData} {matchPlayers} {matchLists} />
 
 <style>
 	.play-body {
@@ -240,6 +243,10 @@
 		background-color: var(--surface-color-light);
 		color: var(--surface-color-light-text-color);
 	}
+	.toolbar-button-selected {
+		background-color: var(--surface-color-extra-light);
+		color: var(--surface-color-light-text-color);
+	}
 	.list-selector {
 		padding: var(--responsive-padding);
 		display: flex;
@@ -263,6 +270,7 @@
 		overflow-x: hidden;
 		scroll-snap-type: x mandatory;
 		scroll-behavior: smooth;
+		flex: 1;
 	}
 	.list-scroll-slide {
 		width: 100%;

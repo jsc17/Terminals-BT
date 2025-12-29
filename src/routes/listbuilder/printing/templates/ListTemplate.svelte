@@ -4,7 +4,7 @@
 	import type { MulUnit } from "$lib/types/listTypes";
 	import type { PrintListOutput } from "../types";
 	import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
-	import PrintUnitCard from "./PrintUnitCard.svelte";
+	import PrintUnitCard from "$lib/cardgeneration/templates/PrintUnitCard.svelte";
 	import { abilityReferences, spaReferences } from "$lib/data";
 	import { getFormationDataFromName } from "$lib/utilities/formationUtilities";
 	import { getBSCbyId } from "$lib/data/battlefieldSupport";

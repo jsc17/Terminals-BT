@@ -17,7 +17,7 @@ export function processMessage(
 	matchLogs: MatchLog[],
 	matchLists: PlayList[]
 ) {
-	const update: MatchLog = JSON.parse(message);
+	const update: MatchLog = JSON.parse(message, (key, value) => (key == "updated_at" ? new Date(value) : value));
 	matchLogs.push(update);
 	switch (update.type) {
 		case "PLAYER_JOINED":
@@ -69,7 +69,7 @@ export function processMessage(
 }
 
 export async function initializePlayerList(
-	list: MatchList & { formations: (MatchFormation & { units: (MatchUnit & { criticals: MatchCrit[] })[] })[] },
+	list: MatchList & { player: { id: number; playerNickname: string }; formations: (MatchFormation & { units: (MatchUnit & { criticals: MatchCrit[] })[] })[] },
 	matchUnits: SvelteMap<number, PlayUnit>
 ) {
 	const playerFormationList: PlayFormation[] = [];
@@ -104,7 +104,7 @@ export async function initializePlayerList(
 				};
 				const reference = await getMULDataFromId(u.mulId);
 				const image = await getMulImage(reference?.imageLink ?? "");
-				matchUnits.set(u.id, { data: unitData, reference, image: image.image, owner: list.playerId });
+				matchUnits.set(u.id, { data: unitData, reference, image: image.image, owner: list.player.playerNickname });
 
 				if (reference) {
 					const key = reference.group != "" ? reference.group : reference.class;
@@ -128,7 +128,7 @@ export async function initializePlayerList(
 			});
 		});
 	}
-	const newPlaylist: PlayList = { id: nanoid(10), name: list.name, owner: list.playerId, team: list.teamId, formations: playerFormationList };
+	const newPlaylist: PlayList = { id: nanoid(10), name: list.name, owner: list.player.id, team: list.teamId, formations: playerFormationList };
 	return newPlaylist;
 }
 

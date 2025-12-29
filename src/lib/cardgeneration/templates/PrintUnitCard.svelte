@@ -4,10 +4,10 @@
 	import { aeroTypes, infTypes, mechTypes, typeIncludes, vTypes } from "$lib/cardgeneration/unitTypeUtilities";
 	import type { ListUnit } from "$lib/types/list.svelte";
 	import { createSingleAbilityString } from "$lib/utilities/abilityUtilities";
-	import AeroCritBox from "./critboxes/AeroCritBox.svelte";
-	import CvCritBox from "./critboxes/CvCritBox.svelte";
-	import MechCritBox from "./critboxes/MechCritBox.svelte";
-	import ProtoCritBox from "./critboxes/ProtoCritBox.svelte";
+	import AeroCritBox from "../../../routes/listbuilder/printing/templates/critboxes/AeroCritBox.svelte";
+	import CvCritBox from "../../../routes/listbuilder/printing/templates/critboxes/CvCritBox.svelte";
+	import MechCritBox from "../../../routes/listbuilder/printing/templates/critboxes/MechCritBox.svelte";
+	import ProtoCritBox from "../../../routes/listbuilder/printing/templates/critboxes/ProtoCritBox.svelte";
 	import { getSPAfromId } from "$lib/utilities/listUtilities";
 	import { numberToRomanNumeral } from "$lib/utilities/utilities";
 

@@ -22,7 +22,7 @@ export const ConvertMatchSchema = v.object({
 	units: v.array(
 		v.object({
 			id: v.string(),
-			mulId: v.string(),
+			mulId: v.number(),
 			skill: v.optional(v.number()),
 			cost: v.number(),
 			current: v.object({

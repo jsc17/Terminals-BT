@@ -1,7 +1,8 @@
 import { query, form, command, getRequestEvent } from "$app/server";
 import { prisma } from "$lib/server/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
-import { CreateMatchSchema, NicknameSchema } from "../schema/matchlistSchema";
+import { ConvertMatchSchema, CreateMatchSchema, NicknameSchema } from "../schema/matchlistSchema";
+import { nanoid } from "nanoid";
 
 export const getNickname = query(async () => {
 	const { locals } = getRequestEvent();
@@ -72,4 +73,62 @@ export const createMatch = form(CreateMatchSchema, async (data) => {
 			return { status: "failure", message: "Match name already exists. Please choose a different name." };
 		}
 	}
+});
+
+export const convertLocalMatchToServer = command(ConvertMatchSchema, async (data) => {
+	const { locals } = getRequestEvent();
+	if (!locals.user) return { status: "failed", message: "User is not logged in" };
+
+	let matchName = data.name;
+	if (await prisma.match.findUnique({ where: { name: matchName } })) matchName = matchName + `(${nanoid(3)})`;
+
+	const nickname = await getNickname();
+
+	const match = await prisma.match.create({
+		data: {
+			name: matchName,
+			private: true,
+			joinCode: nanoid(6),
+			players: {
+				create: { player: { connect: { id: locals.user.id } }, playerNickname: nickname, playerRole: "HOST" }
+			},
+			teams: { create: [{ name: "Red" }, { name: "Blue" }] }
+		},
+		select: { id: true, players: true, teams: true }
+	});
+
+	await prisma.usersInMatch.update({
+		where: { match_player: { matchId: match.id, playerId: locals.user.id } },
+		data: {
+			team: { connect: { id: match.teams[0].id } },
+			lists: {
+				create: {
+					name: data.name,
+					team: { connect: { id: match.teams[0].id } },
+					formations: {
+						create: data.formations.map((f) => ({
+							name: f.name,
+							type: f.type,
+							secondaryType: f.secondary?.type,
+							units: {
+								create: f.units.map((uId) => {
+									const unitData = data.units.find((u) => u.id == uId);
+									return {
+										mulId: Number(unitData!.mulId),
+										skill: unitData!.skill ?? 4,
+										secondary: false,
+										pendingDamage: unitData!.pending.damage,
+										pendingHeat: unitData!.pending.heat,
+										currentDamage: unitData!.current.damage,
+										currentHeat: unitData!.current.heat
+									};
+								})
+							}
+						}))
+					}
+				}
+			}
+		}
+	});
+	console.log(data);
 });

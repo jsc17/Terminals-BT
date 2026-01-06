@@ -134,7 +134,7 @@
 					<DisplayOptionsPopover bind:options={options.current} />
 				</div>
 				<button class={{ "toolbar-button": true, "toolbar-button-selected": componentsOpen.matchLog }} onclick={() => (componentsOpen.matchLog = !componentsOpen.matchLog)}
-					>Match List</button
+					>Match Log</button
 				>
 			</div>
 		</div>
@@ -172,7 +172,7 @@
 		{/each}
 	</div>
 
-	<MatchLogWindow {matchLogs} {matchUnits} playerList={matchPlayers} bind:open={componentsOpen.matchLog} />
+	<!-- <MatchLogWindow {matchLogs} {matchUnits} playerList={matchPlayers} bind:open={componentsOpen.matchLog} /> -->
 </div>
 
 <MatchJoinModal

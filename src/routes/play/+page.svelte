@@ -3,6 +3,7 @@
 	import EditNicknameModal from "./components/EditNicknameModal.svelte";
 	import { getMatches, getNickname, refreshMatches } from "./remote/matchlist.remote";
 	import CreateMatchModal from "./components/CreateMatchModal.svelte";
+	import { convertLocalMatchesToServerMatches } from "./utilities/localToServerConversion";
 
 	let [myMatches, publicMatches] = $derived(getMatches().current ?? [[], []]);
 	let nickname = $derived(getNickname().current);
@@ -10,6 +11,7 @@
 	let user: { username: string | undefined } = getContext("user");
 
 	onMount(() => {
+		convertLocalMatchesToServerMatches();
 		setInterval(() => {
 			refreshMatches();
 		}, 10000);

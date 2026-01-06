@@ -93,11 +93,4 @@
 	.update {
 		margin-left: 24px;
 	}
-	.complete {
-		color: var(--primary);
-	}
-	.strikethrough {
-		color: var(--primary);
-		text-decoration: line-through;
-	}
 </style>

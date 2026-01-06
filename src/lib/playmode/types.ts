@@ -26,7 +26,7 @@ type PlayFormation = {
 	name: string;
 	type: string;
 	units: string[];
-	secondary?: { type?: string; units?: string[] };
+	secondary?: { type: string; units: string[] };
 	bonuses?: FormationBonus[];
 };
 

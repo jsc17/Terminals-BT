@@ -41,13 +41,23 @@ CREATE TABLE `MatchTeam` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `MatchList` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `matchId` INTEGER NOT NULL,
+    `playerId` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `teamId` INTEGER NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `MatchFormation` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `type` VARCHAR(191) NOT NULL,
     `secondaryType` VARCHAR(191) NULL,
-    `matchId` INTEGER NOT NULL,
-    `playerId` VARCHAR(191) NOT NULL,
+    `listId` INTEGER NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -86,24 +96,12 @@ CREATE TABLE `MatchLog` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `matchId` INTEGER NOT NULL,
     `submitterId` INTEGER NOT NULL,
+    `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `round` INTEGER NOT NULL,
-    `type` VARCHAR(191) NOT NULL,
+    `type` ENUM('MATCH_CREATED', 'MATCH_START', 'MATCH_UPDATE', 'MATCH_END', 'MATCH_DELETE', 'PLAYER_JOINED', 'PLAYER_ADDED_LIST', 'PLAYER_LEFT', 'REMOVE_PLAYER', 'REMOVE_LIST', 'ROUND_END', 'UNIT_DAMAGE', 'UNIT_DAMAGE_REMOVED', 'UNIT_HEAT', 'UNIT_CRIT', 'UNIT_CRIT_REMOVED') NOT NULL,
     `unitId` INTEGER NULL,
     `applied` BOOLEAN NULL,
-    `damage` INTEGER NULL,
-    `heat` INTEGER NULL,
-    `critical` VARCHAR(191) NULL,
-
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `MatchMessage` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `matchId` INTEGER NOT NULL,
-    `type` VARCHAR(191) NOT NULL,
-    `data` VARCHAR(191) NOT NULL,
-    `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `details` JSON NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -121,7 +119,13 @@ ALTER TABLE `UsersInMatch` ADD CONSTRAINT `UsersInMatch_teamId_fkey` FOREIGN KEY
 ALTER TABLE `MatchTeam` ADD CONSTRAINT `MatchTeam_matchId_fkey` FOREIGN KEY (`matchId`) REFERENCES `Match`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `MatchFormation` ADD CONSTRAINT `MatchFormation_matchId_playerId_fkey` FOREIGN KEY (`matchId`, `playerId`) REFERENCES `UsersInMatch`(`matchId`, `playerId`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `MatchList` ADD CONSTRAINT `MatchList_matchId_playerId_fkey` FOREIGN KEY (`matchId`, `playerId`) REFERENCES `UsersInMatch`(`matchId`, `playerId`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `MatchList` ADD CONSTRAINT `MatchList_teamId_fkey` FOREIGN KEY (`teamId`) REFERENCES `MatchTeam`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `MatchFormation` ADD CONSTRAINT `MatchFormation_listId_fkey` FOREIGN KEY (`listId`) REFERENCES `MatchList`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `MatchUnit` ADD CONSTRAINT `MatchUnit_formationId_fkey` FOREIGN KEY (`formationId`) REFERENCES `MatchFormation`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -134,6 +138,3 @@ ALTER TABLE `MatchLog` ADD CONSTRAINT `MatchLog_matchId_fkey` FOREIGN KEY (`matc
 
 -- AddForeignKey
 ALTER TABLE `MatchLog` ADD CONSTRAINT `MatchLog_submitterId_fkey` FOREIGN KEY (`submitterId`) REFERENCES `UsersInMatch`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `MatchMessage` ADD CONSTRAINT `MatchMessage_matchId_fkey` FOREIGN KEY (`matchId`) REFERENCES `Match`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

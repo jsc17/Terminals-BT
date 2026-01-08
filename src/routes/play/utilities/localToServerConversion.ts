@@ -22,4 +22,6 @@ export async function convertLocalMatchesToServerMatches() {
 		})
 	);
 	toastController.addToast("All Matches converted");
+
+	localMatches.forEach((m) => db.localMatches.delete(m.id));
 }

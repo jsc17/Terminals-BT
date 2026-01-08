@@ -43,9 +43,6 @@
 		</Tabs.List>
 		<Tabs.Content value="add">
 			<div class="damage-modal-body">
-				<div class="slider-wrapper">
-					<Slider bind:value={damageToTake} type="single" min={0} max={16} step={1} position="bottom" />
-				</div>
 				<div class="input-row">
 					<button class="damage-amount-button" onclick={() => (damageToTake -= 5)}>-5</button>
 					<button class="damage-amount-button" onclick={() => (damageToTake -= 1)}>-1</button>
@@ -102,6 +99,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 16px;
+		min-width: 400px;
 	}
 	.input-row {
 		display: flex;

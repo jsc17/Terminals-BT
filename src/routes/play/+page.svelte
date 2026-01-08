@@ -14,7 +14,7 @@
 		convertLocalMatchesToServerMatches();
 		setInterval(() => {
 			refreshMatches();
-		}, 10000);
+		}, 5000);
 	});
 </script>
 

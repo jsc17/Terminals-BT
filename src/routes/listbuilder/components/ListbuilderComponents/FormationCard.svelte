@@ -6,10 +6,11 @@
 	import { getFormationStats } from "$lib/utilities/formationUtilities";
 	import { UnitCard, UnitCustomizationModal, EditFormationModal, FormationInfoPopover, FormationMenu, FindUnitAvailabilityModal } from "../";
 	import { validateFormation } from "$lib/utilities/formationRequirementValidation.svelte";
+	import PlayModal from "../modals/PlayModal.svelte";
 
-	type Props = { formation: ListFormation; draggingColumns: boolean; unitCustomizationModal?: UnitCustomizationModal; list: List };
+	type Props = { formation: ListFormation; draggingColumns: boolean; unitCustomizationModal?: UnitCustomizationModal; list: List; playModal?: PlayModal };
 
-	let { formation = $bindable(), draggingColumns, unitCustomizationModal, list = $bindable() }: Props = $props();
+	let { formation = $bindable(), draggingColumns, unitCustomizationModal, list = $bindable(), playModal }: Props = $props();
 	let editModalOpen = $state(false);
 	let availabilityModal = $state<FindUnitAvailabilityModal>();
 
@@ -60,7 +61,7 @@
 			</div>
 			<div class="formation-header-buttons">
 				<FormationInfoPopover {formationStats} />
-				<FormationMenu {formation} {list} bind:editModalOpen availabilityModal={availabilityModal!} />
+				<FormationMenu {formation} {list} bind:editModalOpen availabilityModal={availabilityModal!} {playModal} />
 				<button
 					onclick={() => {
 						open = !open;

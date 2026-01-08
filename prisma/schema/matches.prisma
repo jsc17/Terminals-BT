@@ -1,8 +1,8 @@
 model Match {
-    id Int @id @default(autoincrement())
+    id String @id 
     name String? @unique
     private Boolean
-    joinCode String? @unique
+    joinCode String? 
     players UsersInMatch[]
     createdAt DateTime @default(now())
     logEntries MatchLog[]
@@ -14,7 +14,7 @@ model Match {
 model UsersInMatch {
     id Int @id @default(autoincrement())
     match Match @relation(references: [id], fields: [matchId], onDelete: Cascade)
-    matchId Int
+    matchId String
     player User @relation(references: [id], fields: [playerId], onDelete: Cascade)
     playerId String
     playerNickname String
@@ -33,7 +33,7 @@ model MatchTeam {
     name String
     objectivePoints Int @default(0)
     match Match @relation(references: [id], fields: [matchId], onDelete: Cascade)
-    matchId Int
+    matchId String
     lists MatchList[]
     teammates UsersInMatch[]
 }
@@ -41,7 +41,7 @@ model MatchTeam {
 model MatchList {
     id Int @id @default(autoincrement())
     player UsersInMatch @relation(references: [matchId, playerId], fields: [matchId, playerId], onDelete: Cascade)
-    matchId Int
+    matchId String
     playerId String
     name String
     team MatchTeam @relation(references: [id], fields: [teamId], onDelete: Cascade)
@@ -88,7 +88,7 @@ model MatchCrit {
 model MatchLog {
     id Int @id @default(autoincrement())
     match Match @relation(references: [id], fields: [matchId], onDelete: Cascade)
-    matchId Int
+    matchId String
     submitter UsersInMatch @relation(references: [id], fields: [submitterId], onDelete: Cascade)
     submitterId Int
     updated_at DateTime @default(now())

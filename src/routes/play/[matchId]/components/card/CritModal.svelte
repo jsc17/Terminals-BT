@@ -15,7 +15,7 @@
 
 	let { unit, open = $bindable(false), reference }: Props = $props();
 
-	const matchId: number = getContext("matchId");
+	const matchId: string = getContext("matchId");
 
 	let selectedCritical = $state<number>(-1);
 	let criticalType = $derived(

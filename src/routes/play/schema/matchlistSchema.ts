@@ -53,10 +53,7 @@ export type ConvertMatchInput = v.InferInput<typeof ConvertMatchSchema>;
 export const NicknameSchema = v.object({ nickname: v.pipe(v.string(), v.minLength(3)) });
 
 export const UpdateMatchSchema = v.object({
-	matchId: v.pipe(
-		v.string(),
-		v.transform((input) => Number(input))
-	),
+	matchId: v.string(),
 	name: v.string(),
 	joinCode: v.string(),
 	teamNames: v.array(v.string()),

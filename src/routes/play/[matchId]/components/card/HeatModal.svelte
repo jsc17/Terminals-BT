@@ -12,7 +12,7 @@
 	};
 
 	let { unit, open = $bindable(false), reference }: Props = $props();
-	const matchId: number = getContext("matchId");
+	const matchId: string = getContext("matchId");
 
 	let newHeatLevel = $derived(unit.pending.heat);
 	let takePending = $state(true);

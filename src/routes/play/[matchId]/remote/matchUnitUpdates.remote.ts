@@ -2,7 +2,7 @@ import { command, getRequestEvent } from "$app/server";
 import * as v from "valibot";
 import { prisma } from "$lib/server/prisma";
 
-const RemoteDamageSchema = v.object({ matchId: v.number(), unitId: v.number(), damage: v.number(), pending: v.boolean() });
+const RemoteDamageSchema = v.object({ matchId: v.string(), unitId: v.number(), damage: v.number(), pending: v.boolean() });
 export const takeDamage = command(RemoteDamageSchema, async ({ matchId, unitId, damage, pending }) => {
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
@@ -47,7 +47,7 @@ export const removeDamage = command(RemoteDamageSchema, async ({ matchId, unitId
 });
 
 export const setHeat = command(
-	v.object({ matchId: v.number(), unitId: v.number(), heatLevel: v.number(), pending: v.boolean() }),
+	v.object({ matchId: v.string(), unitId: v.number(), heatLevel: v.number(), pending: v.boolean() }),
 	async ({ matchId, unitId, heatLevel, pending }) => {
 		const { locals } = getRequestEvent();
 		if (!locals.user) return { status: "failure", message: "User is not logged in" };
@@ -73,7 +73,7 @@ export const setHeat = command(
 );
 
 export const takeCritical = command(
-	v.object({ matchId: v.number(), unitId: v.number(), type: v.string(), pending: v.boolean(), rounds: v.optional(v.number()) }),
+	v.object({ matchId: v.string(), unitId: v.number(), type: v.string(), pending: v.boolean(), rounds: v.optional(v.number()) }),
 	async ({ matchId, unitId, type, pending, rounds }) => {
 		const { locals } = getRequestEvent();
 		if (!locals.user) return { status: "failure", message: "User is not logged in" };
@@ -97,7 +97,7 @@ export const takeCritical = command(
 	}
 );
 
-export const removeCritical = command(v.object({ matchId: v.number(), critId: v.number() }), async ({ matchId, critId }) => {
+export const removeCritical = command(v.object({ matchId: v.string(), critId: v.number() }), async ({ matchId, critId }) => {
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
 

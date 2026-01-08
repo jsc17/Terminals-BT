@@ -5,7 +5,7 @@ import { getSubmitter } from "./utilities";
 import { nothing } from "$lib/remote/utilities.remote";
 import { UpdateMatchSchema } from "../../schema/matchlistSchema";
 
-export const startGame = command(v.number(), async (matchId) => {
+export const startGame = command(v.string(), async (matchId) => {
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
 	const submitter = await getSubmitter(matchId, locals.user.id);
@@ -19,10 +19,7 @@ export const startGame = command(v.number(), async (matchId) => {
 
 export const endRound = form(
 	v.object({
-		matchId: v.pipe(
-			v.string(),
-			v.transform((input) => Number(input))
-		),
+		matchId: v.string(),
 		teamScores: v.array(v.number())
 	}),
 	async ({ matchId, teamScores }) => {
@@ -92,7 +89,7 @@ export const updateMatchData = form(UpdateMatchSchema, async ({ matchId, name, j
 	await nothing().refresh();
 });
 
-export const kickPlayer = command(v.object({ matchId: v.number(), playerId: v.number() }), async ({ matchId, playerId }) => {
+export const kickPlayer = command(v.object({ matchId: v.string(), playerId: v.number() }), async ({ matchId, playerId }) => {
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
 

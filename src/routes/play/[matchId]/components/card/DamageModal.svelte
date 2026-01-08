@@ -13,7 +13,7 @@
 	};
 
 	let { unit, open = $bindable(false), reference }: Props = $props();
-	const matchId: number = getContext("matchId");
+	const matchId: string = getContext("matchId");
 
 	let damageToTake = $state(0);
 	let takePending = $state(true);

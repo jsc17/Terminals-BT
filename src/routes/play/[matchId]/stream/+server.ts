@@ -3,7 +3,7 @@ import { getWatcher } from "$lib/server/matchSSE/watchers.server";
 import { startWatcher } from "$lib/server/matchSSE/watchMessages.server";
 
 export const GET: RequestHandler = ({ params }) => {
-	const matchId = Number(params.matchId);
+	const matchId = params.matchId;
 	const watcher = getWatcher(matchId);
 	let send: ((data: any) => void) | null = null;
 

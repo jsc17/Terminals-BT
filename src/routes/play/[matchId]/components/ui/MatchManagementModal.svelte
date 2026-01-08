@@ -118,7 +118,4 @@
 		border: 1px solid var(--table-border);
 		padding: 2px 6px;
 	}
-	td.list-cell {
-		text-align: end;
-	}
 </style>

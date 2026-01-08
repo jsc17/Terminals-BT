@@ -1,7 +1,7 @@
 import { prisma } from "$lib/server/prisma";
 import { getWatcher, removeWatcher } from "./watchers.server";
 
-export async function startWatcher(matchId: number, intervalMs = 1000) {
+export async function startWatcher(matchId: string, intervalMs = 1000) {
 	const watcher = getWatcher(matchId);
 
 	if (watcher.running) return;

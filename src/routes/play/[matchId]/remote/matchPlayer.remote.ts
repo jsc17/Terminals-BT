@@ -13,10 +13,7 @@ export const joinMatch = form(
 			v.string(),
 			v.transform((input) => Number(input))
 		),
-		matchId: v.pipe(
-			v.string(),
-			v.transform((input) => Number(input))
-		),
+		matchId: v.string(),
 		joinCode: v.optional(v.string()),
 		nickname: v.string()
 	}),
@@ -64,10 +61,7 @@ export const loadList = form(
 			v.string(),
 			v.transform((input) => Number(input))
 		),
-		matchId: v.pipe(
-			v.string(),
-			v.transform((input) => Number(input))
-		),
+		matchId: v.string(),
 		listId: v.string(),
 		listName: v.string()
 	}),

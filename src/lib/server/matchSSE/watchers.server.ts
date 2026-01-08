@@ -4,9 +4,9 @@ export type Watcher = {
 	lastId: number;
 };
 
-const watchers = new Map<number, Watcher>();
+const watchers = new Map<string, Watcher>();
 
-export function getWatcher(matchId: number) {
+export function getWatcher(matchId: string) {
 	if (!watchers.has(matchId)) {
 		watchers.set(matchId, {
 			clients: new Set(),
@@ -17,6 +17,6 @@ export function getWatcher(matchId: number) {
 	return watchers.get(matchId)!;
 }
 
-export function removeWatcher(watchId: number) {
+export function removeWatcher(watchId: string) {
 	watchers.delete(watchId);
 }

@@ -2,8 +2,10 @@ import { query, form, command, getRequestEvent } from "$app/server";
 import { prisma } from "$lib/server/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 import { ConvertMatchSchema, CreateMatchSchema, CreateMatchWithListSchema, NicknameSchema } from "../schema/matchlistSchema";
-import { nanoid } from "nanoid";
+import { nanoid, customAlphabet } from "nanoid";
 import { getMULDataFromId } from "$lib/remote/unit.remote";
+
+const stringId = customAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 4);
 
 export const getNickname = query(async () => {
 	const { locals } = getRequestEvent();
@@ -44,8 +46,12 @@ export const createMatch = form(CreateMatchSchema, async (data) => {
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
 
 	try {
+		let id = stringId();
+		while (await prisma.match.findUnique({ where: { id } })) id = stringId();
+
 		const match = await prisma.match.create({
 			data: {
+				id,
 				name: data.name,
 				joinCode: data.joinCode,
 				private: data.private,
@@ -82,8 +88,11 @@ export const createMatchWithList = form(CreateMatchWithListSchema, async (data) 
 
 	console.log(data);
 	try {
+		let id = stringId();
+		while (await prisma.match.findUnique({ where: { id } })) id = stringId();
 		const match = await prisma.match.create({
 			data: {
+				id,
 				name: data.name,
 				joinCode: data.joinCode,
 				private: data.private,
@@ -153,9 +162,12 @@ export const convertLocalMatchToServer = command(ConvertMatchSchema, async (data
 	if (await prisma.match.findUnique({ where: { name: matchName } })) matchName = matchName + `(${nanoid(3)})`;
 
 	const nickname = await getNickname();
+	let id = stringId();
+	while (await prisma.match.findUnique({ where: { id } })) id = stringId();
 
 	const match = await prisma.match.create({
 		data: {
+			id,
 			name: matchName,
 			private: true,
 			joinCode: nanoid(6),

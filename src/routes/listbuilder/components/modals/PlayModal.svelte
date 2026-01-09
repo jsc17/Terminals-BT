@@ -2,8 +2,8 @@
 	import { Dialog } from "$lib/generic";
 	import type { List } from "$lib/types/list.svelte";
 	import { Tabs } from "bits-ui";
-	import { createMatchWithList, getNickname } from "$routes/play/remote/matchlist.remote";
-	import { CreateMatchWithListSchema } from "$routes/play/schema/matchlistSchema";
+	import { createMatchWithList, findPrivateMatch, getNickname, joinPrivateMatchWithList } from "$routes/play/remote/matchlist.remote";
+	import { CreateMatchWithListSchema, JoinPrivateMatchWithListSchema } from "$routes/play/schema/matchlistSchema";
 	import { nanoid } from "nanoid";
 	import { toastController } from "$lib/stores";
 
@@ -65,6 +65,7 @@
 			teamNames: ["Red", "Blue"],
 			formations: formationStrings
 		});
+		joinPrivateMatchWithList.fields.nickname.set(nickname);
 		openState = true;
 	}
 </script>
@@ -77,6 +78,7 @@
 		</Tabs.List>
 		<Tabs.Content value="newMatch">
 			<form
+				class="create-match"
 				{...createMatchWithList.preflight(CreateMatchWithListSchema).enhance(async ({ submit }) => {
 					console.log("submitting");
 					await submit();
@@ -124,20 +126,62 @@
 				<hr />
 				<p>Creating match with <span class="primary">{listName}</span></p>
 
-				<div class="center"><button>Submit</button></div>
+				<div class="center"><button>Create</button></div>
 			</form>
 		</Tabs.Content>
-		<Tabs.Content value="joinMatch"></Tabs.Content>
+		<Tabs.Content value="joinMatch">
+			<form
+				{...findPrivateMatch.enhance(async ({ submit }) => {
+					await submit();
+					if (findPrivateMatch.result?.status != "success") toastController.addToast("No match with that id found");
+				})}
+			>
+				<label>Private Match Id: <input {...findPrivateMatch.fields.matchId.as("text")} /></label>
+				<button>Find</button>
+			</form>
+			<hr />
+			<p class="center muted">{findPrivateMatch.result?.status == "success" ? `Match Found: ${findPrivateMatch.result.data!.name}` : "Find Match to continue"}</p>
+			<form
+				class="join-match"
+				{...joinPrivateMatchWithList.preflight(JoinPrivateMatchWithListSchema).enhance(async ({ submit }) => {
+					await submit();
+					if (joinPrivateMatchWithList.result?.status == "success") {
+						openState = false;
+						window.open(`/play/${findPrivateMatch.result?.data?.id}`, "_blank");
+					}
+				})}
+			>
+				<label>Join Code: <input {...joinPrivateMatchWithList.fields.joinCode.as("text")} disabled={!findPrivateMatch.result} /></label>
+				<label
+					>Team: <select {...joinPrivateMatchWithList.fields.teamId.as("select")} disabled={!findPrivateMatch.result}>
+						{#each findPrivateMatch.result?.data?.teams as team}
+							<option value={team.id.toString()}>{team.name}</option>
+						{/each}
+					</select></label
+				>
+				<label>Nickname: <input {...joinPrivateMatchWithList.fields.nickname.as("text")} disabled={!findPrivateMatch.result} /></label>
+				<div class="center"><button disabled={!findPrivateMatch.result}>Join</button></div>
+				{#if findPrivateMatch.result}
+					{#each formationStrings as formation, index}
+						<input {...joinPrivateMatchWithList.fields.formations[index].as("hidden", formation)} />
+					{/each}
+					<input {...joinPrivateMatchWithList.fields.matchId.as("hidden", findPrivateMatch.result?.data?.id ?? "")} />
+				{/if}
+			</form>
+		</Tabs.Content>
 	</Tabs.Root>
 </Dialog>
 
 <style>
 	form {
+		width: 400px;
+		padding-top: 16px;
+	}
+	.create-match,
+	.join-match {
 		display: flex;
 		flex-direction: column;
 		gap: 16px;
-		width: 400px;
-		padding-top: 16px;
 	}
 	:global([data-tabs-list].matchUnitTabs) {
 		background-color: transparent;

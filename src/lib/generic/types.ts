@@ -15,6 +15,12 @@ type MenuInfoItem = {
 	label: string;
 };
 
+type MenuHiddenInfoItem = {
+	type: "hiddenInfo";
+	label: string;
+	hidden: string;
+};
+
 type MenuCheck = {
 	type: "check";
 	label: string;
@@ -50,7 +56,7 @@ type Submenu = {
 	subitems: MenuItem[];
 };
 
-type MenuItem = MenuSimpleItem | MenuSeparator | MenuCheck | MenuRadioGroup | Submenu | MenuInfoItem;
+type MenuItem = MenuSimpleItem | MenuSeparator | MenuCheck | MenuRadioGroup | Submenu | MenuInfoItem | MenuHiddenInfoItem;
 
 type Notification = {
 	date: Date;

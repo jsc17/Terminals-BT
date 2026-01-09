@@ -75,7 +75,8 @@
 					}
 				},
 				{ type: "separator" },
-				{ type: "info", label: `Join Code: ${matchData?.joinCode}` }
+				{ type: "info", label: `Match Id: ${data.matchId}` },
+				{ type: "hiddenInfo", label: `Join Code`, hidden: `${matchData?.joinCode}` }
 			]);
 
 		return options.concat([{ type: "separator" }, { type: "item", label: "Return to match selection", onSelect: () => goto("/play") }]);

@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { getContext, onMount } from "svelte";
 	import EditNicknameModal from "./components/EditNicknameModal.svelte";
-	import { getMatches, getNickname, refreshMatches } from "./remote/matchlist.remote";
+	import { getMatches, getNickname, findPrivateMatch, refreshMatches } from "./remote/matchlist.remote";
 	import CreateMatchModal from "./components/CreateMatchModal.svelte";
 	import { convertLocalMatchesToServerMatches } from "./utilities/localToServerConversion";
+	import { toastController } from "$lib/stores";
 
 	let [myMatches, publicMatches] = $derived(getMatches().current ?? [[], []]);
 	let nickname = $derived(getNickname().current);
@@ -51,7 +52,22 @@
 		</section>
 
 		<section class="card">
-			<h2 class="section-header">Public Matches</h2>
+			<div class="space-between">
+				<h2 class="section-header">Public Matches</h2>
+				<form
+					{...findPrivateMatch.enhance(async ({ submit }) => {
+						await submit();
+						if (findPrivateMatch.result?.status == "success") {
+							window.location.href = `/play/${findPrivateMatch.result.data!.id}`;
+						} else {
+							toastController.addToast("No match with that id found");
+						}
+					})}
+				>
+					<label>Private Match Id: <input {...findPrivateMatch.fields.matchId.as("text")} /></label>
+					<button>Join</button>
+				</form>
+			</div>
 			<div class="match-list">
 				{#each publicMatches as list}
 					<div class="match-card">

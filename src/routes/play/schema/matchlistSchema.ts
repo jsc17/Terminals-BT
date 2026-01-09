@@ -61,3 +61,18 @@ export const UpdateMatchSchema = v.object({
 	currentRound: v.number(),
 	privateMatch: v.optional(v.boolean(), false)
 });
+
+export const FindPrivateMatchSchema = v.object({
+	matchId: v.string()
+});
+
+export const JoinPrivateMatchWithListSchema = v.object({
+	matchId: v.string(),
+	joinCode: v.string(),
+	teamId: v.pipe(
+		v.string(),
+		v.transform((input) => Number(input))
+	),
+	formations: v.array(v.string()),
+	nickname: v.string()
+});

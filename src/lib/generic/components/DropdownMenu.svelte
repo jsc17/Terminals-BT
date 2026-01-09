@@ -24,6 +24,17 @@
 		<DropdownMenu.Item class="dropdown-info" textValue={item.label}>
 			{item.label}
 		</DropdownMenu.Item>
+	{:else if item.type == "hiddenInfo"}
+		<DropdownMenu.Sub>
+			<DropdownMenu.SubTrigger openDelay={2000}>
+				{item.label}: <span class="primary">Click or Hover to reveal</span>
+			</DropdownMenu.SubTrigger>
+			<DropdownMenu.SubContent>
+				<DropdownMenu.Item textValue={item.hidden}>
+					{item.hidden}
+				</DropdownMenu.Item>
+			</DropdownMenu.SubContent>
+		</DropdownMenu.Sub>
 	{:else if item.type == "check"}
 		<DropdownMenu.CheckboxItem
 			class="inline"

@@ -1,11 +1,19 @@
 import { query, form, command, getRequestEvent } from "$app/server";
 import { prisma } from "$lib/server/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
-import { ConvertMatchSchema, CreateMatchSchema, CreateMatchWithListSchema, NicknameSchema } from "../schema/matchlistSchema";
+import {
+	ConvertMatchSchema,
+	CreateMatchSchema,
+	CreateMatchWithListSchema,
+	FindPrivateMatchSchema,
+	JoinPrivateMatchWithListSchema,
+	NicknameSchema
+} from "../schema/matchlistSchema";
 import { nanoid, customAlphabet } from "nanoid";
-import { getMULDataFromId } from "$lib/remote/unit.remote";
+import { nothing } from "$lib/remote/utilities.remote";
+import { invalid } from "@sveltejs/kit";
 
-const stringId = customAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 4);
+const stringId = customAlphabet("123456789abcdefghijklmnopqrstuvwxyz", 5);
 
 export const getNickname = query(async () => {
 	const { locals } = getRequestEvent();
@@ -86,7 +94,6 @@ export const createMatchWithList = form(CreateMatchWithListSchema, async (data) 
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
 
-	console.log(data);
 	try {
 		let id = stringId();
 		while (await prisma.match.findUnique({ where: { id } })) id = stringId();
@@ -114,7 +121,6 @@ export const createMatchWithList = form(CreateMatchWithListSchema, async (data) 
 						formations: {
 							create: data.formations.map((f) => {
 								const formationData = JSON.parse(f);
-								console.log(formationData);
 								return {
 									name: formationData.name,
 									type: formationData.type,
@@ -212,5 +218,83 @@ export const convertLocalMatchToServer = command(ConvertMatchSchema, async (data
 			}
 		}
 	});
-	console.log(data);
+});
+
+export const findPrivateMatch = form(FindPrivateMatchSchema, async (data) => {
+	const match = await prisma.match.findUnique({ where: { id: data.matchId }, select: { id: true, name: true, teams: true } });
+	await nothing().refresh();
+	return { status: match ? "success" : "failed", data: match };
+});
+
+export const joinPrivateMatchWithList = form(JoinPrivateMatchWithListSchema, async (data, issue) => {
+	const { locals } = getRequestEvent();
+	if (!locals.user) return { status: "failure", message: "User is not logged in" };
+
+	const match = await prisma.match.findUnique({ where: { id: data.matchId }, select: { joinCode: true } });
+	if (match?.joinCode != data.joinCode) invalid(issue.joinCode("Invalid Join Code"));
+
+	const user = await prisma.usersInMatch.upsert({
+		where: { match_player: { playerId: locals.user.id, matchId: data.matchId } },
+		update: {
+			lists: {
+				create: {
+					name: data.nickname,
+					team: { connect: { id: data.teamId } },
+					formations: {
+						create: data.formations.map((f) => {
+							const formationData = JSON.parse(f);
+							return {
+								name: formationData.name,
+								type: formationData.type,
+								secondaryType: formationData.secondary,
+								units: {
+									create: formationData.units.map(({ mulId, skill, secondary }: { mulId: number; skill: number; secondary: boolean }) => {
+										return {
+											mulId,
+											skill,
+											secondary
+										};
+									})
+								}
+							};
+						})
+					}
+				}
+			}
+		},
+		create: {
+			playerNickname: data.nickname,
+			playerRole: "PLAYER",
+			match: { connect: { id: data.matchId } },
+			player: { connect: { id: locals.user.id } },
+			team: { connect: { id: data.teamId } },
+			lists: {
+				create: {
+					name: data.nickname,
+					team: { connect: { id: data.teamId } },
+					formations: {
+						create: data.formations.map((f) => {
+							const formationData = JSON.parse(f);
+							return {
+								name: formationData.name,
+								type: formationData.type,
+								secondaryType: formationData.secondary,
+								units: {
+									create: formationData.units.map(({ mulId, skill, secondary }: { mulId: number; skill: number; secondary: boolean }) => {
+										return {
+											mulId,
+											skill,
+											secondary
+										};
+									})
+								}
+							};
+						})
+					}
+				}
+			}
+		}
+	});
+	await nothing().refresh();
+	return { status: "success" };
 });

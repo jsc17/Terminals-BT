@@ -75,6 +75,7 @@ export async function initializePlayerList(
 	const playerFormationList: PlayFormation[] = [];
 	const duplicateMap = new SvelteMap<string, number[]>();
 
+	console.log("loading list");
 	for (const formation of list.formations) {
 		await Promise.all(
 			formation.units.map(async (u) => {
@@ -128,7 +129,7 @@ export async function initializePlayerList(
 			});
 		});
 	}
-	const newPlaylist: PlayList = { id: nanoid(10), name: list.name, owner: list.player.id, team: list.teamId, formations: playerFormationList };
+	const newPlaylist: PlayList = { id: nanoid(10).replaceAll("-", "*"), name: list.name, owner: list.player.id, team: list.teamId, formations: playerFormationList };
 	return newPlaylist;
 }
 

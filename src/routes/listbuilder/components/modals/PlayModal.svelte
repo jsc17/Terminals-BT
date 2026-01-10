@@ -66,6 +66,8 @@
 			formations: formationStrings
 		});
 		joinPrivateMatchWithList.fields.nickname.set(nickname);
+		joinPrivateMatchWithList.fields.listName.set(list.details.name);
+
 		openState = true;
 	}
 </script>
@@ -160,6 +162,9 @@
 					</select></label
 				>
 				<label>Nickname: <input {...joinPrivateMatchWithList.fields.nickname.as("text")} disabled={!findPrivateMatch.result} /></label>
+				<label>List Name: <input {...joinPrivateMatchWithList.fields.listName.as("text")} disabled={!findPrivateMatch.result} /></label>
+
+				<p>Creating match with <span class="primary">{listName}</span></p>
 				<div class="center"><button disabled={!findPrivateMatch.result}>Join</button></div>
 				{#if findPrivateMatch.result}
 					{#each formationStrings as formation, index}

@@ -9,7 +9,6 @@
 	import { onMount, setContext } from "svelte";
 	import { getAllPlayerData, getTeamData, getMyData, getMatchDetails, deleteMatch, getPlayerData, getLogs } from "./remote/matchData.remote";
 	import { startGame } from "./remote/matchManagement.remote";
-	import { CaretLeft, CaretRight } from "phosphor-svelte";
 	import { SvelteMap } from "svelte/reactivity";
 	import { initializePlayerList, processMessage } from "./utilities/handleMatchEvents";
 	import type { MenuItem } from "$lib/generic/types";
@@ -17,6 +16,9 @@
 	import MatchLogWindow from "./components/ui/MatchLogWindow.svelte";
 	import { goto } from "$app/navigation";
 	import LoadListModal from "./components/ui/LoadListModal.svelte";
+	import type { Attachment } from "svelte/attachments";
+	import { appWindow } from "$lib/stores";
+	import { Popover } from "$lib/generic";
 
 	let { data } = $props();
 
@@ -82,13 +84,36 @@
 		return options.concat([{ type: "separator" }, { type: "item", label: "Return to match selection", onSelect: () => goto("/play") }]);
 	});
 
+	let listContainer = $state<HTMLDivElement>();
+	let activeList = $state<string>();
+	let observer = $state<IntersectionObserver>();
+
 	onMount(() => {
+		console.log("mounting component");
 		const es = new EventSource(`/play/${data.matchId}/stream`);
 		es.onmessage = ({ data }) => processMessage(data, matchPlayers, matchUnits, matchLogs, matchLists);
+
+		observer = new IntersectionObserver(
+			(entries) => {
+				console.log(entries);
+				for (const entry of entries) {
+					if (entry.isIntersecting) {
+						activeList = entry.target.id.split("-")[1];
+					}
+				}
+			},
+			{ rootMargin: "0px", threshold: 0.5 }
+		);
+
 		return () => {
 			es.close();
 		};
 	});
+
+	const observeList: Attachment = (node) => {
+		if (observer && node) observer.observe(node);
+		return () => observer?.unobserve(node);
+	};
 </script>
 
 <svelte:head>
@@ -98,13 +123,6 @@
 <div class="play-body">
 	<div class="match-bars">
 		<div class="match-header">
-			<div class="toolbar-item">{teamData?.[0].name}</div>
-			<div class="toolbar-item">{teamData?.[0].objectivePoints}</div>
-			<div class="toolbar-item">Round: {matchData?.currentRound}</div>
-			<div class="toolbar-item">{teamData?.[1].objectivePoints}</div>
-			<div class="toolbar-item">{teamData?.[1].name}</div>
-		</div>
-		<div class="toolbar">
 			<div class="toolbar-section">
 				<DropdownMenu items={menuOptions} triggerClasses="transparent-button">
 					{#snippet trigger()}
@@ -112,61 +130,80 @@
 					{/snippet}
 				</DropdownMenu>
 			</div>
-			{#if myData?.playerRole == "HOST"}
-				<div class="toolbar-section">
-					{#if matchData?.currentRound == 0}
-						<button
-							class="toolbar-button"
-							onclick={() => {
-								startGame(data.matchId);
-							}}>Start Game</button
-						>
-					{:else}
-						<EndRoundModal matchData={matchData!} teams={teamData}>
-							{#snippet trigger()}
-								<div class="toolbar-button">End Round</div>
-							{/snippet}
-						</EndRoundModal>
-					{/if}
+			<div class="team-names">
+				<div class="team-name-red">
+					<div class="toolbar-item">{teamData?.[0]?.name}</div>
+					<div class="toolbar-item">{teamData?.[0]?.objectivePoints}</div>
 				</div>
-			{/if}
+				<div class="team-name-blue">
+					<div class="toolbar-item">{teamData?.[1]?.name}</div>
+					<div class="toolbar-item">{teamData?.[1]?.objectivePoints}</div>
+				</div>
+			</div>
+
 			<div class="toolbar-section">
 				<div>
 					<DisplayOptionsPopover bind:options={options.current} />
 				</div>
-				<button class={{ "toolbar-button": true, "toolbar-button-selected": componentsOpen.matchLog }} onclick={() => (componentsOpen.matchLog = !componentsOpen.matchLog)}
-					>Match Log</button
-				>
 			</div>
 		</div>
-	</div>
-	{#if matchLists.length > 1}
-		<div class="list-selector">
-			{#each matchLists.toSorted((a, b) => {
-				return (a.team ?? 0) - (b.team ?? 0);
-			}) as list, index (list.id)}
-				<a class="jump-link-button" data-team={teamData.findIndex((t) => t.id == list.team)} href={`#list-${index}`}>
-					{list.name}
-				</a>
-			{/each}
+		<div class="match-list-bar">
+			{#if !appWindow.isMobile}
+				<div class="team-lists team-lists-red">
+					{#each matchLists.filter((l) => l.team == teamData?.[0].id) as list, index (list.id)}
+						<a class={{ "jump-link-button": true, "active-list": list.id == activeList }} data-team={teamData.findIndex((t) => t.id == list.team)} href={`#list-${list.id}`}>
+							{list.name}
+						</a>
+					{/each}
+				</div>
+			{:else}
+				{@const list = matchLists.find((l) => l.id == activeList)}
+				<button class="jump-link-button" data-team={teamData.findIndex((t) => t.id == (list?.team ?? 0))}>{list?.name}</button>
+			{/if}
+			<div class="round-counter">
+				<p>{appWindow.isMobile ? "" : "Current"} Round: {matchData?.currentRound ? matchData.currentRound : "Pregame"}</p>
+				{#if myData?.playerRole == "HOST"}
+					<div class="toolbar-section">
+						{#if matchData?.currentRound == 0}
+							<button
+								class="toolbar-button"
+								onclick={() => {
+									startGame(data.matchId);
+								}}>Start Game</button
+							>
+						{:else}
+							<EndRoundModal matchData={matchData!} teams={teamData}>
+								{#snippet trigger()}
+									<div class="toolbar-button">End Round</div>
+								{/snippet}
+							</EndRoundModal>
+						{/if}
+					</div>
+				{/if}
+			</div>
+			{#if !appWindow.isMobile}
+				<div class="team-lists team-lists-blue">
+					{#each matchLists.filter((l) => l.team == teamData?.[1].id) as list}
+						<a class={{ "jump-link-button": true, "active-list": list.id == activeList }} data-team={teamData.findIndex((t) => t.id == list.team)} href={`#list-${list.id}`}>
+							{list.name}
+						</a>
+					{/each}
+				</div>
+			{/if}
 		</div>
-	{/if}
-	<div class="list-scroll-container">
-		{#each matchLists.toSorted((a, b) => {
-			return (a.team ?? 0) - (b.team ?? 0);
-		}) as list, index (list.id)}
-			<div class="list-scroll-slide">
-				<a class={{ "list-scroll-button": true, "list-scroll-button-disabled": index == 0 }} href={index != 0 ? `#list-${index - 1}` : ""}>
-					<CaretLeft style="fill: var(--button-text);" />
-				</a>
-				<div class="list" id={`list-${index}`}>
+	</div>
+
+	<div class="list-scroll-container" bind:this={listContainer}>
+		{#each matchLists.toSorted((a, b) => (a.team ?? 0) - (b.team ?? 0)) as list, index}
+			<div id={`slide-${list.id}`} class={{ "list-scroll-slide": true, "list-scroll-slide-active": list.id == activeList }} {@attach observeList}>
+				<div class="list" id={`list-${list.id}`}>
 					{#each list!.formations as formation}
 						<PlayFormations {formation} {matchUnits} options={options.current} />
 					{/each}
 				</div>
-				<a class={{ "list-scroll-button": true, "list-scroll-button-disabled": index == matchLists.length - 1 }} href={index != matchLists.length - 1 ? `#list-${index + 1}` : ""}>
-					<CaretRight style="fill: var(--button-text);" />
-				</a>
+				{#if activeList?.length && list.id != activeList}
+					<a href={`#list-${list.id}`} class="list-scroll-overlay" aria-label="scroll list"></a>
+				{/if}
 			</div>
 		{:else}
 			<p class="center">No Lists have been loaded yet</p>
@@ -199,30 +236,46 @@
 	.match-bars {
 		display: flex;
 		flex-direction: column;
-		gap: 4px;
 		background-color: var(--background);
 		z-index: 1;
 		flex-shrink: 0;
 	}
 	.match-header {
-		padding: 0px 5dvw;
 		display: grid;
-		grid-template-columns: repeat(5, 1fr);
-		gap: 16px;
-		border: 1px solid var(--border);
-		background-image: linear-gradient(to right, rgb(180, 0, 0) 30%, rgb(180, 0, 0) 35%, var(--surface-color) 45%, var(--surface-color) 55%, blue 65%, blue 70%);
+		grid-template-columns: max-content 1fr max-content;
+		column-gap: 24px;
+		border-bottom: 2px solid var(--border);
+		flex-shrink: 0;
 	}
-	.toolbar {
+	.team-names {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+	}
+
+	.match-list-bar {
+		display: grid;
+		flex-shrink: 0;
+		padding: var(--responsive-padding);
+		gap: 36px;
+	}
+
+	.team-lists {
 		display: flex;
-		justify-content: space-between;
-		background-color: var(--surface-color);
-		border: 1px solid var(--border);
+		gap: 8px;
+	}
+	.team-lists-red {
+		justify-content: end;
+	}
+	.round-counter {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		align-items: center;
+		gap: 24px;
 	}
 	.toolbar-section {
 		display: flex;
 		gap: 8px;
 		align-items: center;
-		padding: 0px 16px;
 	}
 	.toolbar-item {
 		align-self: center;
@@ -233,7 +286,7 @@
 		width: max-content;
 	}
 	.toolbar-button {
-		padding: 12px;
+		padding: var(--responsive-padding);
 		font-size: 16px;
 		background-color: transparent;
 		border-radius: 0;
@@ -244,56 +297,120 @@
 		background-color: var(--surface-color-light);
 		color: var(--surface-color-light-text-color);
 	}
-	.toolbar-button-selected {
-		background-color: var(--surface-color-extra-light);
-		color: var(--surface-color-light-text-color);
-	}
-	.list-selector {
-		padding: var(--responsive-padding);
-		display: flex;
-		justify-content: center;
-		gap: 16px;
-		flex-shrink: 0;
-	}
 	.jump-link-button {
 		padding: 4px 6px;
-		border: 1px solid var(--border);
+		text-decoration: none;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		align-content: center;
+	}
+	.jump-link-button:hover {
+		transform: translateY(-2px);
 	}
 	.jump-link-button[data-team="0"] {
-		background-color: rgb(180, 0, 0);
+		color: lightgray;
+		background-color: rgb(228, 0, 0);
+		box-shadow:
+			0px -3px 0px rgb(122, 0, 0) inset,
+			0px 4px 5px -3px rgb(122, 0, 0);
+	}
+	.jump-link-button[data-team="0"]:active {
+		box-shadow:
+			3px 6px 12px rgb(122, 0, 0) inset,
+			-3px -6px 12px rgb(122, 0, 0) inset;
+		transform: translateY(-2px);
 	}
 	.jump-link-button[data-team="1"] {
+		color: lightgray;
 		background-color: blue;
+		box-shadow:
+			0px -3px 0px rgb(0, 29, 92) inset,
+			0px 4px 5px -3px rgb(0, 29, 92);
+	}
+	.jump-link-button[data-team="1"]:active {
+		box-shadow:
+			3px 6px 12px rgb(0, 29, 92) inset,
+			-3px -6px 12px rgb(0, 29, 92) inset;
+		transform: translateY(-2px);
+	}
+	.active-list[data-team="0"] {
+		box-shadow: 0px 0px 5px 5px rgb(255, 108, 108);
+	}
+	.active-list[data-team="1"] {
+		box-shadow: 0px 0px 5px 5px rgb(21, 95, 255);
 	}
 	.list-scroll-container {
 		display: flex;
 		overflow-y: auto;
-		overflow-x: hidden;
+		overflow-x: auto;
 		scroll-snap-type: x mandatory;
 		scroll-behavior: smooth;
 		flex: 1;
+		gap: 8px;
 	}
 	.list-scroll-slide {
+		width: 90%;
+		height: 100%;
+		scroll-snap-align: center;
+		flex-shrink: 0;
+		opacity: 0.5;
+		position: relative;
+	}
+	.list-scroll-slide:first-of-type {
+		margin-left: 5%;
+	}
+
+	.list-scroll-slide:last-of-type {
+		margin-right: 5%;
+	}
+	.list-scroll-slide-active {
+		opacity: 1;
+	}
+	.list-scroll-overlay {
 		width: 100%;
 		height: 100%;
-		scroll-snap-align: start;
-		display: grid;
-		grid-template-columns: 3% 1fr 3%;
-		flex-shrink: 0;
+		position: absolute;
+		top: 0px;
 	}
 	.list {
 		overflow-x: auto;
 	}
-	.list-scroll-button {
-		background-color: var(--button);
-		padding: 6px;
-		border-radius: 50%;
-		align-self: center;
-		justify-self: center;
-		aspect-ratio: 1/1;
+
+	@media (max-width: 600px) {
+		.team-name-red,
+		.team-name-blue {
+			display: grid;
+			grid-template-columns: subgrid;
+			grid-column: span 2;
+			gap: 8px;
+		}
+		.match-list-bar {
+			grid-template-columns: 1fr 2fr;
+		}
+		.round-counter {
+			gap: 4px;
+		}
 	}
-	.list-scroll-button-disabled {
-		background-color: gray;
-		cursor: default;
+	@media (min-width: 600px) {
+		.team-name-red,
+		.team-name-blue {
+			display: flex;
+			gap: 8px;
+		}
+		.team-name-red {
+			border-bottom: 2px solid red;
+			justify-content: end;
+			margin-right: 16px;
+		}
+		.team-name-blue {
+			border-bottom: 2px solid blue;
+			margin-left: 16px;
+			justify-content: start;
+			flex-direction: row-reverse;
+		}
+		.match-list-bar {
+			grid-template-columns: 1fr max-content 1fr;
+		}
 	}
 </style>

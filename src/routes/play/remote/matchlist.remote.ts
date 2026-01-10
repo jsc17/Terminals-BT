@@ -13,7 +13,7 @@ import { nanoid, customAlphabet } from "nanoid";
 import { nothing } from "$lib/remote/utilities.remote";
 import { invalid } from "@sveltejs/kit";
 
-const stringId = customAlphabet("123456789abcdefghijklmnopqrstuvwxyz", 5);
+const stringId = customAlphabet("123456789abcdefghijklmnopqrstuvwxyz", 3);
 
 export const getNickname = query(async () => {
 	const { locals } = getRequestEvent();
@@ -230,15 +230,15 @@ export const joinPrivateMatchWithList = form(JoinPrivateMatchWithListSchema, asy
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
 
-	const match = await prisma.match.findUnique({ where: { id: data.matchId }, select: { joinCode: true } });
+	const match = await prisma.match.findUnique({ where: { id: data.matchId }, select: { joinCode: true, currentRound: true } });
 	if (match?.joinCode != data.joinCode) invalid(issue.joinCode("Invalid Join Code"));
 
-	const user = await prisma.usersInMatch.upsert({
+	const player = await prisma.usersInMatch.upsert({
 		where: { match_player: { playerId: locals.user.id, matchId: data.matchId } },
 		update: {
 			lists: {
 				create: {
-					name: data.nickname,
+					name: data.listName,
 					team: { connect: { id: data.teamId } },
 					formations: {
 						create: data.formations.map((f) => {
@@ -270,7 +270,7 @@ export const joinPrivateMatchWithList = form(JoinPrivateMatchWithListSchema, asy
 			team: { connect: { id: data.teamId } },
 			lists: {
 				create: {
-					name: data.nickname,
+					name: data.listName,
 					team: { connect: { id: data.teamId } },
 					formations: {
 						create: data.formations.map((f) => {
@@ -293,6 +293,16 @@ export const joinPrivateMatchWithList = form(JoinPrivateMatchWithListSchema, asy
 					}
 				}
 			}
+		},
+		select: { id: true, lists: true }
+	});
+	await prisma.matchLog.create({
+		data: {
+			type: "PLAYER_ADDED_LIST",
+			round: match?.currentRound ?? 0,
+			match: { connect: { id: data.matchId } },
+			submitter: { connect: { id: player.id } },
+			details: player.lists.at(-1)?.id
 		}
 	});
 	await nothing().refresh();

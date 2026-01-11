@@ -24,6 +24,7 @@
 		{...endRound.enhance(async ({ submit, data }) => {
 			if (!data.endMatch || confirm("Are you sure you wish to end the match?")) {
 				await submit();
+				endRound.fields.teamScores.set(teams.map(() => 0));
 				open = false;
 			}
 		})}

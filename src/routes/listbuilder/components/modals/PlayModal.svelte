@@ -63,7 +63,8 @@
 			name: formation ? formation.name : list.details.name,
 			hostNickname: nickname,
 			teamNames: ["Red", "Blue"],
-			formations: formationStrings
+			formations: formationStrings,
+			listName: formation ? formation.name : list.details.name
 		});
 		joinPrivateMatchWithList.fields.nickname.set(nickname);
 		joinPrivateMatchWithList.fields.listName.set(list.details.name);
@@ -81,7 +82,8 @@
 		<Tabs.Content value="newMatch">
 			<form
 				class="create-match"
-				{...createMatchWithList.preflight(CreateMatchWithListSchema).enhance(async ({ submit }) => {
+				{...createMatchWithList.preflight(CreateMatchWithListSchema).enhance(async ({ submit, data }) => {
+					console.log(data);
 					console.log("submitting");
 					await submit();
 					if (createMatchWithList.result?.status == "success") {
@@ -125,6 +127,8 @@
 						<p class="error">{issue.message}</p>
 					{/each}
 				</div>
+				<label>List Name: <input {...createMatchWithList.fields.listName.as("text")} /></label>
+
 				<hr />
 				<p>Creating match with <span class="primary">{listName}</span></p>
 

@@ -22,8 +22,10 @@
 	{/snippet}
 	<form
 		{...endRound.enhance(async ({ submit, data }) => {
-			await submit();
-			open = false;
+			if (!data.endMatch || confirm("Are you sure you wish to end the match?")) {
+				await submit();
+				open = false;
+			}
 		})}
 		class="dialog-body"
 	>
@@ -49,7 +51,10 @@
 				</tbody>
 			</table>
 		</fieldset>
-		<button>Submit</button>
+		<div class="space-between">
+			<label><input {...endRound.fields.endMatch.as("checkbox")} /> End Match?</label>
+			<button>Submit</button>
+		</div>
 	</form>
 </Dialog>
 

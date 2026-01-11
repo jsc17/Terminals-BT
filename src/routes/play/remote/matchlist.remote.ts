@@ -116,7 +116,7 @@ export const createMatchWithList = form(CreateMatchWithListSchema, async (data) 
 				team: { connect: { id: match.teams[0].id } },
 				lists: {
 					create: {
-						name: data.name,
+						name: data.listName,
 						team: { connect: { id: match.teams[0].id } },
 						formations: {
 							create: data.formations.map((f) => {

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { PlayFormations, DisplayOptionsPopover, EndRoundModal, MatchJoinModal, MatchManagementModal } from "./components";
-	import { PersistedState } from "runed";
+	import { PersistedState, watch } from "runed";
 	import { type PlayList, type PlayUnit } from "../types/types";
 	import { PlaymodeOptionsSchema, type PlaymodeOptionsOutput } from "../schema/playmode";
 	import DropdownMenu from "$lib/generic/components/DropdownMenu.svelte";
@@ -18,7 +18,7 @@
 	import LoadListModal from "./components/ui/LoadListModal.svelte";
 	import type { Attachment } from "svelte/attachments";
 	import { appWindow } from "$lib/stores";
-	import { Popover } from "$lib/generic";
+	import MatchResults from "./components/ui/MatchResults.svelte";
 
 	let { data } = $props();
 
@@ -48,7 +48,10 @@
 	});
 	getLogs({ matchId: data.matchId, lastLogId: 0 }).then((results) => (matchLogs = matchLogs.concat(results)));
 
-	const componentsOpen = $state({ join: false, addList: false, management: false, matchLog: false });
+	const componentsOpen = $state({ join: false, addList: false, management: false, matchLog: false, matchResults: false });
+	$effect(() => {
+		if (matchData?.gameCompleted) componentsOpen.matchResults = true;
+	});
 
 	const menuOptions: MenuItem[] = $derived.by(() => {
 		let options: MenuItem[] = [];
@@ -68,7 +71,6 @@
 			options = options.concat([
 				{ type: "separator" },
 				{ type: "item", label: "Manage Match", onSelect: () => (componentsOpen.management = true) },
-				{ type: "item", label: "End Match", onSelect: () => {} },
 				{
 					type: "item",
 					label: "Delete Match",
@@ -224,6 +226,8 @@
 <LoadListModal bind:open={componentsOpen.addList} matchId={matchData?.id.toString() ?? ""} teams={teamData.map((t) => ({ id: t.id, name: t.name }))} />
 
 <MatchManagementModal bind:open={componentsOpen.management} {matchData} {teamData} {matchPlayers} {matchLists} />
+
+<MatchResults bind:open={componentsOpen.matchResults} {teamData} {matchData} {matchLists} {matchUnits} />
 
 <style>
 	.play-body {

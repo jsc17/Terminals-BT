@@ -63,6 +63,9 @@ export function processMessage(
 			playerList = playerList.filter((p) => p.id != Number(update.details));
 			getMyData(update.matchId).refresh();
 			break;
+		case "MATCH_END":
+			getMatchDetails(update.matchId).refresh();
+			break;
 		default:
 			console.log("Unhandled Event");
 	}

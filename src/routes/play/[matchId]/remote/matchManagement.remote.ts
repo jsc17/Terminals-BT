@@ -20,9 +20,10 @@ export const startGame = command(v.string(), async (matchId) => {
 export const endRound = form(
 	v.object({
 		matchId: v.string(),
-		teamScores: v.array(v.number())
+		teamScores: v.array(v.number()),
+		endMatch: v.optional(v.boolean(), false)
 	}),
-	async ({ matchId, teamScores }) => {
+	async ({ matchId, teamScores, endMatch }) => {
 		const { locals } = getRequestEvent();
 		if (!locals.user) return { status: "failure", message: "User is not logged in" };
 
@@ -31,9 +32,10 @@ export const endRound = form(
 		const existingUnits = await prisma.matchUnit.findMany({ where: { formation: { list: { matchId } } } });
 
 		//update match data
+		const matchUpdate = endMatch ? { gameCompleted: true } : { currentRound: { increment: 1 } };
 		const match = await prisma.match.update({
 			where: { id: matchId },
-			data: { currentRound: { increment: 1 } },
+			data: matchUpdate,
 			include: { players: { where: { player: { id: locals.user.id } } } }
 		});
 		const updatedTeams = await Promise.all(
@@ -53,6 +55,16 @@ export const endRound = form(
 			})
 		);
 
+		if (endMatch) {
+			await prisma.matchLog.create({
+				data: {
+					type: "MATCH_END",
+					round: match?.currentRound ?? 0,
+					match: { connect: { id: matchId } },
+					submitter: { connect: { id: match?.players[0].id } }
+				}
+			});
+		}
 		await prisma.matchLog.create({
 			data: {
 				type: "ROUND_END",

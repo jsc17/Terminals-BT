@@ -2,7 +2,7 @@ import { toastController } from "$lib/stores";
 import { safeParseJSON } from "$lib/utilities/utilities";
 import { nanoid } from "nanoid";
 import { getPlayerData, getMatchUnitData, getMatchDetails, getTeamData, getMyData, getMatchList } from "../remote/matchData.remote";
-import type { PlayFormation, PlayList, PlayUnit } from "../../types/types";
+import type { PlayFormation, PlayList, PlayUnit, PlayUnitData } from "../../types/types";
 import type { MulUnit } from "$lib/types/listTypes";
 import { SvelteMap } from "svelte/reactivity";
 import { getMulImage } from "$lib/remote/mulImages.remote";
@@ -78,11 +78,10 @@ export async function initializePlayerList(
 	const playerFormationList: PlayFormation[] = [];
 	const duplicateMap = new SvelteMap<string, number[]>();
 
-	console.log("loading list");
 	for (const formation of list.formations) {
 		await Promise.all(
 			formation.units.map(async (u) => {
-				const unitData = {
+				const unitData: PlayUnitData = {
 					id: u.id,
 					mulId: u.mulId,
 					skill: u.skill,
@@ -104,7 +103,8 @@ export async function initializePlayerList(
 								return { id: c.id, round: c.round, type: c.type, roundsRemaining: c.roundsRemaining ?? undefined };
 							}),
 						disabledAbilities: []
-					}
+					},
+					customization: { spa: u.spas?.split(","), ammo: u.ammo?.split(",") }
 				};
 				const reference = await getMULDataFromId(u.mulId);
 				const image = await getMulImage(reference?.imageLink ?? "");

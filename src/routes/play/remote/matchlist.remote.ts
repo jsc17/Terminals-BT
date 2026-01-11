@@ -12,6 +12,7 @@ import {
 import { nanoid, customAlphabet } from "nanoid";
 import { nothing } from "$lib/remote/utilities.remote";
 import { invalid } from "@sveltejs/kit";
+import type { UnitCustomization } from "$lib/types/listTypes";
 
 const stringId = customAlphabet("123456789abcdefghijklmnopqrstuvwxyz", 3);
 
@@ -126,13 +127,17 @@ export const createMatchWithList = form(CreateMatchWithListSchema, async (data) 
 									type: formationData.type,
 									secondaryType: formationData.secondary,
 									units: {
-										create: formationData.units.map(({ mulId, skill, secondary }: { mulId: number; skill: number; secondary: boolean }) => {
-											return {
-												mulId,
-												skill,
-												secondary
-											};
-										})
+										create: formationData.units.map(
+											({ mulId, skill, secondary, customization }: { mulId: number; skill: number; secondary: boolean; customization?: UnitCustomization }) => {
+												return {
+													mulId,
+													skill,
+													secondary,
+													spas: customization?.spa?.join(","),
+													ammo: customization?.ammo?.join(",")
+												};
+											}
+										)
 									}
 								};
 							})
@@ -248,13 +253,17 @@ export const joinPrivateMatchWithList = form(JoinPrivateMatchWithListSchema, asy
 								type: formationData.type,
 								secondaryType: formationData.secondary,
 								units: {
-									create: formationData.units.map(({ mulId, skill, secondary }: { mulId: number; skill: number; secondary: boolean }) => {
-										return {
-											mulId,
-											skill,
-											secondary
-										};
-									})
+									create: formationData.units.map(
+										({ mulId, skill, secondary, customization }: { mulId: number; skill: number; secondary: boolean; customization?: UnitCustomization }) => {
+											return {
+												mulId,
+												skill,
+												secondary,
+												spas: customization?.spa?.join(","),
+												ammo: customization?.ammo?.join(",")
+											};
+										}
+									)
 								}
 							};
 						})
@@ -280,13 +289,17 @@ export const joinPrivateMatchWithList = form(JoinPrivateMatchWithListSchema, asy
 								type: formationData.type,
 								secondaryType: formationData.secondary,
 								units: {
-									create: formationData.units.map(({ mulId, skill, secondary }: { mulId: number; skill: number; secondary: boolean }) => {
-										return {
-											mulId,
-											skill,
-											secondary
-										};
-									})
+									create: formationData.units.map(
+										({ mulId, skill, secondary, customization }: { mulId: number; skill: number; secondary: boolean; customization?: UnitCustomization }) => {
+											return {
+												mulId,
+												skill,
+												secondary,
+												spas: customization?.spa?.join(","),
+												ammo: customization?.ammo?.join(",")
+											};
+										}
+									)
 								}
 							};
 						})

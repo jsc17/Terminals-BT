@@ -91,13 +91,11 @@
 	let observer = $state<IntersectionObserver>();
 
 	onMount(() => {
-		console.log("mounting component");
 		const es = new EventSource(`/play/${data.matchId}/stream`);
 		es.onmessage = ({ data }) => processMessage(data, matchPlayers, matchUnits, matchLogs, matchLists);
 
 		observer = new IntersectionObserver(
 			(entries) => {
-				console.log(entries);
 				for (const entry of entries) {
 					if (entry.isIntersecting) {
 						activeList = entry.target.id.split("-")[1];

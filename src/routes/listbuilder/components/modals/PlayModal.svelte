@@ -23,12 +23,12 @@
 					units: formation.units
 						.map((uId) => {
 							const unitData = list.getUnit(uId);
-							return { mulId: unitData!.baseUnit.mulId, skill: unitData?.skill, secondary: false };
+							return { mulId: unitData!.baseUnit.mulId, skill: unitData?.skill, secondary: false, customization: unitData?.customization };
 						})
 						.concat(
 							formation.secondary?.units.map((unit) => {
 								const unitData = list.getUnit(unit);
-								return { mulId: unitData!.baseUnit.mulId, skill: unitData?.skill, secondary: true };
+								return { mulId: unitData!.baseUnit.mulId, skill: unitData?.skill, secondary: true, customization: unitData?.customization };
 							}) ?? []
 						)
 				})
@@ -45,12 +45,12 @@
 						units: f.units
 							.map((unit) => {
 								const unitData = list.getUnit(unit.id);
-								return { mulId: unitData!.baseUnit.mulId, skill: unitData?.skill, secondary: false };
+								return { mulId: unitData!.baseUnit.mulId, skill: unitData?.skill, secondary: false, customization: unitData?.customization };
 							})
 							.concat(
 								f.secondary?.units.map((unit) => {
 									const unitData = list.getUnit(unit.id);
-									return { mulId: unitData!.baseUnit.mulId, skill: unitData?.skill, secondary: true };
+									return { mulId: unitData!.baseUnit.mulId, skill: unitData?.skill, secondary: true, customization: unitData?.customization };
 								}) ?? []
 							)
 					});

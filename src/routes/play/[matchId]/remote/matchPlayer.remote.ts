@@ -100,12 +100,12 @@ export const loadList = form(
 									create: formation.units
 										.map((f: { id: string }) => {
 											const unit = units.find((u: { id: string }) => u.id == f.id);
-											return { mulId: unit.mulId, skill: unit.skill ?? 4, secondary: false };
+											return { mulId: unit.mulId, skill: unit.skill ?? 4, secondary: false, spas: unit.customization?.spa?.join(","), ammo: unit.customization?.ammo?.join(",") };
 										})
 										.concat(
 											(formation.secondary?.units ?? []).map((f: { id: string }) => {
 												const unit = units.find((u: { id: string }) => u.id == f.id);
-												return { mulId: unit.mulId, skill: unit.skill ?? 4, secondary: true };
+												return { mulId: unit.mulId, skill: unit.skill ?? 4, secondary: true, spas: unit.customization?.spa?.join(","), ammo: unit.customization?.ammo?.join(",") };
 											})
 										)
 								}

@@ -237,6 +237,7 @@
 									measurementUnits={printOptions.measurementUnits}
 									numbering={counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) ?? -1}
 									numberingType={printOptions.printDuplicateMarkingsType}
+									printDuplicateMarkings={printOptions.printDuplicateMarkings}
 								/>
 							{/if}
 						{/each}
@@ -270,6 +271,7 @@
 										measurementUnits={printOptions.measurementUnits}
 										numbering={counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) ?? -1}
 										numberingType={printOptions.printDuplicateMarkingsType}
+										printDuplicateMarkings={printOptions.printDuplicateMarkings}
 									/>
 								{/if}
 							{/each}
@@ -292,6 +294,7 @@
 							measurementUnits={printOptions.measurementUnits}
 							numbering={counts.has(unit!.mulId) ? counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) : undefined}
 							numberingType={printOptions.printDuplicateMarkingsType}
+							printDuplicateMarkings={printOptions.printDuplicateMarkings}
 						/>
 					{/if}
 				{/each}

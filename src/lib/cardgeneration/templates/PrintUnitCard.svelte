@@ -13,10 +13,11 @@
 		image: string;
 		formationSPAs: number[];
 		measurementUnits: "inches" | "hexes";
+		printDuplicateMarkings: boolean;
 		numbering?: number;
 		numberingType: "none" | "numbers" | "letters" | "roman";
 	};
-	let { unit, image, formationSPAs, measurementUnits, numbering, numberingType }: Props = $props();
+	let { unit, image, formationSPAs, measurementUnits, numbering, numberingType, printDuplicateMarkings }: Props = $props();
 
 	let formationBonuses = $derived.by(() => {
 		const bonusAbilities: string[] = [];
@@ -165,7 +166,7 @@
 						{/if}
 					</div>
 				{/if}
-				{#if numberingType != "none" && numbering != -1}
+				{#if printDuplicateMarkings && numberingType != "none" && numbering != -1}
 					<p class={{ numbering: true, "numbering-roman": numberingType == "roman" }}>{createMarking()}</p>
 				{/if}
 			</div>

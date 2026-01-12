@@ -1,5 +1,5 @@
 :root {
-	--radius: 0.5rem;
+	--radius: 6px;
 	--responsive-padding: clamp(4px, 1dvh, 8px) clamp(4px, 1dvw, 8px) clamp(4px, 1dvh, 8px) clamp(4px, 1dvw, 8px);
 
 	/* Light Mode */

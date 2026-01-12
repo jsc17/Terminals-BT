@@ -14,7 +14,6 @@
 	import { type ListFormation, List } from "$lib/types/list.svelte";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { ruleSets } from "$lib/types/rulesets";
-	import { sendListToPlay } from "$lib/playmode/playmode";
 	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
 	import { appWindow, toastController } from "$lib/stores";
 	import { Dialog } from "$lib/generic";
@@ -28,6 +27,7 @@
 	import type { SettingsOutput } from "../types/settings";
 	import { getContext } from "svelte";
 	import { goto } from "$app/navigation";
+	import PlayModal from "./modals/PlayModal.svelte";
 
 	type Props = {
 		listCloseCallback: (id: string) => void;
@@ -39,6 +39,7 @@
 	let printModal = $state<PrintModal>();
 	let saveModal = $state<SaveModal>();
 	let loadModal = $state<LoadModal>();
+	let playModal = $state<PlayModal>();
 	let unitCustomizationModal = $state<UnitCustomizationModal>();
 	let availabilityModal = $state<FindUnitAvailabilityModal>();
 	let battlefieldSupportModal = $state<BattlefieldSupportModal>();
@@ -207,7 +208,7 @@
 						{ type: "separator" },
 						{ type: "item", label: "Check List Availability", onSelect: () => availabilityModal?.show() },
 						{ type: "item", label: "Generate Sublists", onSelect: () => (sublistModalOpen = true) },
-						{ type: "item", label: "Play List", onSelect: () => sendListToPlay(list.details.name, list.formations, list.units) },
+						{ type: "item", label: "Play List", onSelect: () => playModal?.open(list) },
 						{ type: "item", label: "Submit List to Tournament", onSelect: () => submitList() },
 						{ type: "separator" },
 						{ type: "item", label: "Clear Units/Formations", onSelect: () => clearList() },
@@ -278,7 +279,7 @@
 			onfinalize={handleDndFinalize}
 		>
 			{#each list.formations as formation (formation.id)}
-				<FormationCard {formation} {draggingColumns} {unitCustomizationModal} bind:list></FormationCard>
+				<FormationCard {formation} {draggingColumns} {unitCustomizationModal} bind:list {playModal}></FormationCard>
 			{/each}
 		</div>
 	{:else}
@@ -357,7 +358,7 @@
 			onfinalize={handleDndFinalize}
 		>
 			{#each list.formations as formation, index (formation.id)}
-				<FormationCard bind:formation={list.formations[index]} {draggingColumns} {unitCustomizationModal} bind:list></FormationCard>
+				<FormationCard bind:formation={list.formations[index]} {draggingColumns} {unitCustomizationModal} bind:list {playModal}></FormationCard>
 			{/each}
 		</div>
 	{/if}
@@ -366,11 +367,13 @@
 <ScaModal bind:open={scaModalOpen} bind:list></ScaModal>
 <PrintModal bind:this={printModal} bind:list></PrintModal>
 <FindUnitAvailabilityModal bind:this={availabilityModal} bind:list />
-<SublistModal bind:list bind:open={sublistModalOpen} />
+<SublistModal bind:list bind:open={sublistModalOpen} {playModal} />
 <BattlefieldSupportModal bind:this={battlefieldSupportModal} bind:list />
 <LoadModal bind:this={loadModal} bind:list></LoadModal>
 <SaveModal bind:this={saveModal} bind:list></SaveModal>
 <UnitCustomizationModal bind:this={unitCustomizationModal} bind:list></UnitCustomizationModal>
+
+<PlayModal bind:this={playModal} />
 
 <style>
 	.listbuilder {

@@ -1,64 +1,43 @@
 <script lang="ts">
 	import { Collapsible } from "$lib/generic";
-	import type { PlayUnit, PlayFormation, LogRound, Options } from "$lib/playmode/types";
+	import type { PlayUnit, PlayFormation, LogRound } from "../../types/types";
 	import { PlayUnitCard } from "./";
 	import { SvelteMap } from "svelte/reactivity";
+	import type { PlaymodeOptionsOutput } from "../../schema/playmode";
 	import type { MulUnit } from "$lib/types/listTypes";
-	import PlayFormationBonuses from "./PlayFormationBonuses.svelte";
-	import { innerWidth } from "svelte/reactivity/window";
-	import { Popover } from "$lib/generic";
 
 	type Props = {
 		formation: PlayFormation;
-		units: PlayUnit[];
-		options: Options;
-		currentRoundLog: LogRound;
-		unitReferences: SvelteMap<string, MulUnit>;
+		options: PlaymodeOptionsOutput;
+		matchUnits: SvelteMap<number, PlayUnit>;
 	};
 
-	let { formation, units, options, currentRoundLog, unitReferences }: Props = $props();
+	let { formation, options, matchUnits }: Props = $props();
 	let openPrimary = $state(true),
 		openSecondary = $state(true);
 	let formationWidth = $state<number>();
 	let cardWidth = $derived((formationWidth! - 16 - 8 * (options.cardsPerRow ?? 3)) / (options.cardsPerRow ?? 3));
 
 	let assignedBonuses = $state<SvelteMap<number, SvelteMap<string, number>>>(new SvelteMap());
-	let bonusesOpen = $state(false);
 </script>
 
-{#snippet drawFormationUnits(formationUnits: string[])}
+{#snippet drawFormationUnits(formationUnits: number[])}
 	<div class="play-formation-unit-list" bind:clientWidth={formationWidth}>
 		{#each formationUnits as unitId}
-			{@const unit = units.find((unit) => {
-				return unit.id == unitId;
-			})}
-			{#if unit}
-				<div class="unit-card-container" style="width: {cardWidth}px; height:{(cardWidth * 5) / 7}px">
-					<PlayUnitCard {unit} {options} {currentRoundLog} {assignedBonuses}></PlayUnitCard>
-				</div>
-			{/if}
+			<div class="unit-card-container" style="width: {cardWidth}px; height:{(cardWidth * 5) / 7}px">
+				{#if matchUnits.has(unitId)}
+					<PlayUnitCard unit={matchUnits.get(unitId)!} {options} {assignedBonuses}></PlayUnitCard>
+				{:else}
+					<p>Unit Loading</p>
+				{/if}
+			</div>
 		{/each}
 	</div>
 {/snippet}
 <div class="play-formation-container">
 	<div class="play-formation-header">
-		<p>{formation.name}{formation.type != "none" ? `- ${formation.type}` : ""}</p>
-		<div class="play-formation-header-bonus">
-			{#if formation.type != "none"}
-				{#if innerWidth?.current && innerWidth.current > 500}
-					<PlayFormationBonuses {formation} bind:assignedBonuses {units} {unitReferences} />
-				{:else}
-					<Popover bind:open={bonusesOpen}>
-						{#snippet trigger()}
-							<p class="primary">Bonuses</p>
-						{/snippet}
-						<div class="bonus-wrapper">
-							<PlayFormationBonuses {formation} bind:assignedBonuses {units} {unitReferences} />
-						</div>
-					</Popover>
-				{/if}
-			{/if}
-		</div>
+		<p>{formation.name != "Unassigned units" ? formation.name : ""}{formation.type != "none" ? `- ${formation.type}` : ""}</p>
+		<div></div>
 		<button
 			onclick={() => {
 				openPrimary = !openPrimary;
@@ -106,13 +85,13 @@
 		width: 100%;
 		border: 1px solid var(--primary-dark);
 		border-radius: var(--radius);
+		margin-bottom: 8px;
 	}
 	.play-formation-header,
 	.secondary-header {
 		width: 100%;
 		display: grid;
 		grid-template-columns: 1fr 1fr 1fr;
-		justify-content: space-between;
 		align-items: center;
 		border-bottom: 1px solid var(--border);
 		background-color: var(--surface-color);
@@ -123,10 +102,10 @@
 		border-top-left-radius: var(--radius);
 		border-top-right-radius: var(--radius);
 	}
-	.play-formation-header-bonus {
+	/* .play-formation-header-bonus {
 		display: flex;
 		justify-content: center;
-	}
+	} */
 	.secondary-header {
 		padding: 2px 16px;
 	}
@@ -151,7 +130,7 @@
 	.unit-card-container {
 		container: unit-card / size;
 	}
-	.bonus-wrapper {
+	/* .bonus-wrapper {
 		padding: 16px;
-	}
+	} */
 </style>

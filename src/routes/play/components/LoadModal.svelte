@@ -1,8 +1,8 @@
-<script lang="ts">
+<!-- <script lang="ts">
 	import { deserialize } from "$app/forms";
 	import { Dialog } from "$lib/generic";
 	import { db } from "$lib/offline/db";
-	import type { PlayList } from "$lib/playmode/types";
+	import type { PlayList } from "../../types/types";
 	import { getUsersLists } from "$lib/remote/list.remote";
 	import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 	import { nanoid } from "nanoid";
@@ -95,4 +95,4 @@
 		display: flex;
 		flex-direction: column;
 	}
-</style>
+</style> -->

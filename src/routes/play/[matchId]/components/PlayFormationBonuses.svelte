@@ -1,9 +1,9 @@
-<script lang="ts">
-	import type { PlayFormation, PlayUnit } from "$lib/playmode/types";
+<!-- <script lang="ts">
+	import type { PlayFormation, PlayUnit } from "../../types/types";
 	import { calculateBonusAmount } from "$lib/utilities/formationUtilities";
 	import { onMount } from "svelte";
 	import { SvelteMap } from "svelte/reactivity";
-	import PlayFormationBonusAssignment from "./PlayFormationBonusAssignment.svelte";
+	// import PlayFormationBonusAssignment from "./PlayFormationBonusAssignment.svelte";
 	import type { MulUnit } from "$lib/types/listTypes";
 
 	type Props = {
@@ -23,7 +23,7 @@
 			const unit = units.find((unit) => unit.id == unitId);
 			const unitReference = unitReferences.get(unitId);
 			if (unit && unitReference) {
-				return unit.current.damage >= (unitReference.health ?? 0) || unit.current.crits.find((crit) => crit.type == "destroyed");
+				return unit.data.current.damage >= (unitReference.health ?? 0) || unit.data.current.crits.find((crit) => crit.type == "destroyed");
 			}
 			return false;
 		})
@@ -141,4 +141,4 @@
 	.used-pip {
 		background-color: var(--primary);
 	}
-</style>
+</style> -->

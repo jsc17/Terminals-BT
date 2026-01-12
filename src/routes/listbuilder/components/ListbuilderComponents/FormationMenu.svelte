@@ -1,20 +1,21 @@
 <script lang="ts">
 	import { toastController } from "$lib/stores";
 	import { List, type ListFormation } from "$lib/types/list.svelte";
-	import { sendListToPlay } from "$lib/playmode/playmode";
 	import { exportToJeff } from "../../utilities/export.svelte";
 	import FindUnitAvailabilityModal from "../modals/FindUnitAvailabilityModal.svelte";
 	import { DropdownMenu } from "$lib/generic";
 	import type { MenuItem } from "$lib/generic/types";
+	import PlayModal from "../modals/PlayModal.svelte";
 
 	type Props = {
 		formation: ListFormation;
 		list: List;
 		editModalOpen: boolean;
 		availabilityModal: FindUnitAvailabilityModal;
+		playModal?: PlayModal;
 	};
 
-	let { formation, list, editModalOpen = $bindable(false), availabilityModal }: Props = $props();
+	let { formation, list, editModalOpen = $bindable(false), availabilityModal, playModal }: Props = $props();
 
 	function exportFormationToJeff() {
 		if (formation.units.length == 0) {
@@ -45,7 +46,17 @@
 		}
 		items.push({ type: "item", label: "Check Formation Availability", onSelect: availabilityModal.show });
 		items.push({ type: "separator", classes: "muted" });
-		items.push({ type: "item", label: "Play Formation", onSelect: () => sendListToPlay(list.details.name, [formation], list.units) });
+		items.push({
+			type: "item",
+			label: "Play Formation",
+			onSelect: () =>
+				playModal?.open(list, {
+					name: formation.name,
+					type: formation.type,
+					units: formation.units.map((u) => u.id),
+					secondary: formation.secondary ? { type: formation.secondary.type, units: formation.secondary.units.map((u) => u.id) } : undefined
+				})
+		});
 		items.push({ type: "item", label: "Export Formation", onSelect: exportFormationToJeff });
 		items.push({ type: "separator", classes: "muted" });
 		items.push({ type: "item", label: "Clear Formation", onSelect: clearFormation });

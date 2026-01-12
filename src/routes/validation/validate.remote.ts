@@ -8,6 +8,7 @@ import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 import type { ValidationUnitData } from "./types";
 import { nanoid } from "nanoid";
 import * as v from "valibot";
+import { nothing } from "$lib/remote/utilities.remote";
 
 export const getUnitData = form(v.object({ listFile: v.file(), selectedEra: v.string(), selectedFaction: v.string() }), async ({ listFile, selectedEra, selectedFaction }) => {
 	const era = Number(selectedEra);
@@ -96,5 +97,3 @@ export const fixUnitData = form(
 		}
 	}
 );
-
-export const nothing = query(async () => {});

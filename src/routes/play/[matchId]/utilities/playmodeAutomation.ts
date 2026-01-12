@@ -1,10 +1,10 @@
 import type { MulUnit } from "$lib/types/listTypes";
-import type { PlayUnit } from "../../../../lib/playmode/types";
-import { mechTypes, typeIncludes, vTypes } from "$lib/playmode/unitTypeUtilities";
+import type { PlayUnitData } from "../../types/types";
+import { mechTypes, typeIncludes, vTypes } from "$lib/cardgeneration/unitTypeUtilities";
 
 export type CritList = { [key: string]: any; engine: number; firecontrol: number; mp: number; weapon: number; destroyed: number; mhit: number; mhalf: number; mimm: number };
 
-export function countCrits(unit: PlayUnit) {
+export function countCrits(unit: PlayUnitData) {
 	let current: CritList = {
 		engine: 0,
 		firecontrol: 0,
@@ -36,7 +36,7 @@ export function countCrits(unit: PlayUnit) {
 	return { current, pending };
 }
 
-export function calculateHealth(unit: PlayUnit, reference?: MulUnit) {
+export function calculateHealth(unit: PlayUnitData, reference?: MulUnit) {
 	const totalArmor = reference?.armor ?? 0;
 	const totalStructure = reference?.structure ?? 0;
 
@@ -55,7 +55,7 @@ export function calculateHealth(unit: PlayUnit, reference?: MulUnit) {
 	return { armorRemaining, structRemaining };
 }
 
-export function calculateFirepower(unit: PlayUnit, reference?: MulUnit) {
+export function calculateFirepower(unit: PlayUnitData, reference?: MulUnit) {
 	const firePower: { damaged: boolean; m: number; mMin: boolean; l: number; lMin: boolean; e: number; eMin: boolean; s: number; sMin: boolean; ov: number } = {
 		damaged: false,
 		s: reference?.damageS ?? 0,
@@ -97,7 +97,7 @@ export function calculateFirepower(unit: PlayUnit, reference?: MulUnit) {
 	return firePower;
 }
 
-export function calculateSkill(unit: PlayUnit, critCount: CritList, reference?: MulUnit) {
+export function calculateSkill(unit: PlayUnitData, critCount: CritList, reference?: MulUnit) {
 	if (unit.current.heat >= 4) {
 		return { ranged: "S" };
 	}
@@ -125,7 +125,7 @@ export function calculateSkill(unit: PlayUnit, critCount: CritList, reference?: 
 	};
 }
 
-export function calculateMovement(unit: PlayUnit, measurementUnits: "inches" | "hexes", reference?: MulUnit) {
+export function calculateMovement(unit: PlayUnitData, measurementUnits: "inches" | "hexes", reference?: MulUnit) {
 	if (unit.current.heat >= 4) {
 		return [{ speed: 0, type: "I", tmm: -4, damaged: true }];
 	}

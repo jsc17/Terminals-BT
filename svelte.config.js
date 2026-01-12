@@ -21,6 +21,9 @@ const config = {
 		},
 		experimental: {
 			remoteFunctions: true
+		},
+		alias: {
+			$routes: "src/routes"
 		}
 	}
 };

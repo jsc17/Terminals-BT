@@ -1,22 +1,22 @@
 <script lang="ts">
-	import { db } from "$lib/offline/db";
-	import type { PlayList } from "$lib/playmode/types";
-	import { onMount } from "svelte";
-	import Trash from "phosphor-svelte/lib/Trash";
-	import LoadModal from "./components/LoadModal.svelte";
+	import { getContext, onMount } from "svelte";
+	import EditNicknameModal from "./components/EditNicknameModal.svelte";
+	import { getMatches, getNickname, findPrivateMatch, refreshMatches } from "./remote/matchlist.remote";
+	import CreateMatchModal from "./components/CreateMatchModal.svelte";
+	import { convertLocalMatchesToServerMatches } from "./utilities/localToServerConversion";
+	import { toastController } from "$lib/stores";
 
-	let matches = $state<PlayList[]>([]);
+	let [myMatches, publicMatches] = $derived(getMatches().current ?? [[], []]);
+	let nickname = $derived(getNickname().current);
 
-	onMount(async () => {
-		matches = await db.localMatches.toArray();
+	let user: { username: string | undefined } = getContext("user");
+
+	onMount(() => {
+		convertLocalMatchesToServerMatches();
+		setInterval(() => {
+			refreshMatches();
+		}, 5000);
 	});
-
-	function endMatch(match: PlayList) {
-		if (confirm(`Delete Match ${match.name}?`)) {
-			db.localMatches.delete(match.id);
-			matches = matches?.filter((l) => l.id != match.id);
-		}
-	}
 </script>
 
 <svelte:boundary>
@@ -25,24 +25,59 @@
 	{/snippet}
 
 	<main>
-		<section class="card">
+		{#if user.username && nickname}
 			<div class="flex-between">
-				<h2 class="section-header">My Matches</h2>
-				<LoadModal bind:matches />
+				<div class="inline">
+					<p>Nickname: <span class="muted">{nickname}</span></p>
+					<EditNicknameModal currentNickname={nickname} />
+				</div>
+
+				<CreateMatchModal {nickname} />
 			</div>
+		{/if}
+		<section class="card">
+			<h2 class="section-header">My Matches</h2>
 			<div class="match-list">
-				{#each matches as list}
+				{#each myMatches as list}
 					<div class="match-card">
 						<a href={`/play/${list.id}`} class="match-link">
 							<p class="primary">{list.name}</p>
-							<p class="muted">{list.date}</p>
+							<p class="muted">{list.createdAt.toLocaleDateString("en-US", { timeZone: "UTC", weekday: "long", month: "long", day: "numeric", year: "numeric" })}</p>
 						</a>
-						<button class="end-match" onclick={() => endMatch(list)}>
-							<Trash color="black" width="20px" height="20px" />
-						</button>
 					</div>
 				{:else}
 					<p class="muted">You have no currently active matches</p>
+				{/each}
+			</div>
+		</section>
+
+		<section class="card">
+			<div class="space-between">
+				<h2 class="section-header">Public Matches</h2>
+				<form
+					{...findPrivateMatch.enhance(async ({ submit }) => {
+						await submit();
+						if (findPrivateMatch.result?.status == "success") {
+							window.location.href = `/play/${findPrivateMatch.result.data!.id}`;
+						} else {
+							toastController.addToast("No match with that id found");
+						}
+					})}
+				>
+					<label>Private Match Id: <input {...findPrivateMatch.fields.matchId.as("text")} /></label>
+					<button>Join</button>
+				</form>
+			</div>
+			<div class="match-list">
+				{#each publicMatches as list}
+					<div class="match-card">
+						<a href={`/play/${list.id}`} class="match-link">
+							<p class="primary">{list.name}</p>
+							<p class="muted">{list.createdAt.toLocaleDateString("en-US", { timeZone: "UTC", weekday: "long", month: "long", day: "numeric", year: "numeric" })}</p>
+						</a>
+					</div>
+				{:else}
+					<p class="muted">There are currently no active public matches</p>
 				{/each}
 			</div>
 		</section>
@@ -88,10 +123,5 @@
 	}
 	.match-link:hover {
 		background-color: var(--surface-color-extra-light);
-	}
-	.end-match {
-		height: max-content;
-		padding: 4px;
-		background-color: var(--error);
 	}
 </style>

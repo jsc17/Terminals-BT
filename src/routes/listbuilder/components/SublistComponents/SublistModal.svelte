@@ -9,13 +9,15 @@
 	import AutogenerationModal from "./AutogenerationModal.svelte";
 	import { Dialog, Popover } from "$lib/generic";
 	import type { SettingsOutput } from "../../types/settings";
+	import PlayModal from "../modals/PlayModal.svelte";
 
 	type Props = {
 		list: List;
 		open: boolean;
+		playModal?: PlayModal;
 	};
 
-	let { list = $bindable(), open = $bindable() }: Props = $props();
+	let { list = $bindable(), open = $bindable(), playModal }: Props = $props();
 	let settings: SettingsOutput = getContext("listbuilderSettings");
 
 	let scenarioFilter = $state<string>("All");
@@ -45,7 +47,7 @@
 	{#each list.sublists as sublist (sublist.id)}
 		{#if sublist.scenario == scenarioFilter || scenarioFilter == "All"}
 			<div class:panel-vertical={layout == "vertical" && !appWindow.isMobile} class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}>
-				<SublistCard {sublist} {list} {scenarioList} unitSortOrder={settings.sublistUI.sublistSortOrder} {layout} {openSublistEditModal}></SublistCard>
+				<SublistCard {sublist} {list} {scenarioList} unitSortOrder={settings.sublistUI.sublistSortOrder} {layout} {openSublistEditModal} {playModal}></SublistCard>
 			</div>
 		{/if}
 	{/each}

@@ -37,6 +37,7 @@
 	border-radius: 0;
 	border: none;
 	background-color: transparent;
+	color: var(--button-dark-text-color);
 }
 .generic-popover-trigger:hover {
 	cursor: pointer;
@@ -132,6 +133,12 @@
 	border-radius: var(--radius);
 	text-align: center;
 }
+[data-dropdown-menu-item].dropdown-info {
+	color: var(--text-color);
+	padding: 8px 24px;
+	border-radius: var(--radius);
+	text-align: center;
+}
 [data-dropdown-menu-item].dropdown-button:hover {
 	color: var(--primary);
 	background-color: var(--surface-color-light);
@@ -188,7 +195,17 @@
 [data-dropdown-menu-radio-item][data-state="checked"] .radio-check {
 	border: 5px solid var(--primary);
 }
-
+[data-dropdown-menu-sub-trigger] {
+	padding: 8px 24px;
+	border-radius: var(--radius);
+	text-align: center;
+}
+[data-dropdown-menu-sub-trigger]:hover {
+	background-color: var(--surface-color-light);
+}
+[data-dropdown-menu-sub-content] {
+	padding: 8px 24px;
+}
 /* Switch */
 [data-switch-root] {
 	box-sizing: border-box;

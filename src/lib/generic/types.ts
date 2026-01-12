@@ -7,7 +7,18 @@ type Item = {
 type MenuSimpleItem = {
 	type: "item";
 	label: string;
-	onSelect: () => void;
+	onSelect?: () => void;
+};
+
+type MenuInfoItem = {
+	type: "info";
+	label: string;
+};
+
+type MenuHiddenInfoItem = {
+	type: "hiddenInfo";
+	label: string;
+	hidden: string;
 };
 
 type MenuCheck = {
@@ -45,7 +56,7 @@ type Submenu = {
 	subitems: MenuItem[];
 };
 
-type MenuItem = MenuSimpleItem | MenuSeparator | MenuCheck | MenuRadioGroup | Submenu;
+type MenuItem = MenuSimpleItem | MenuSeparator | MenuCheck | MenuRadioGroup | Submenu | MenuInfoItem | MenuHiddenInfoItem;
 
 type Notification = {
 	date: Date;

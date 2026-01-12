@@ -3,7 +3,6 @@ import { getSCAfromId, calculateListStats } from "$lib/utilities/listUtilities";
 import { getGeneralList, getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 import { getRulesByName } from "$lib/types/rulesets";
 import { nanoid } from "nanoid";
-import { loadMULUnit } from "$lib/utilities/loadUtilities";
 import { getCustomUnitData, getMULDataFromId, getUnitAvailability } from "$lib/remote/unit.remote";
 import { db } from "$lib/offline/db";
 import { validateRules } from "$lib/rules/validateList";
@@ -12,7 +11,7 @@ export type { ListCode, ListCodeUnit, ListUnit, ListFormation, SCA, MulUnit, Sub
 
 export class List {
 	units: ListUnit[] = $state([]);
-	formations: ListFormation[] = $state([{ id: "unassigned", name: "Unassigned units", type: "none", units: [] }]);
+	formations = $state<ListFormation[]>([{ id: "unassigned", name: "Unassigned units", type: "none", units: [] }]);
 	sublists: Sublist[] = $state([]);
 	scaList: SCA[] = $state([]);
 	bsList = $state<number[]>([]);
@@ -47,14 +46,14 @@ export class List {
 		const newListCode: ListCode = {
 			id: this.id,
 			lcVersion: 2,
-			name: this.details.name,
-			eras: this.details.eras,
-			factions: this.details.factions,
-			rules: this.rules,
+			name: $state.snapshot(this.details.name),
+			eras: $state.snapshot(this.details.eras),
+			factions: $state.snapshot(this.details.factions),
+			rules: $state.snapshot(this.rules),
 			units: unitList,
-			formations: this.formations,
-			sublists: this.sublists,
-			bs: this.bsList
+			formations: $state.snapshot(this.formations),
+			sublists: $state.snapshot(this.sublists),
+			bs: $state.snapshot(this.bsList)
 		};
 		if (this.scaList.length) {
 			newListCode.scas = this.scaList.map(({ id }) => {
@@ -207,14 +206,6 @@ export class List {
 			tempUnitArray.push();
 		});
 		return `{${tempUnitArray.join(",")}}`;
-	}
-	async loadUnit(mulId: number) {
-		let unitToAdd!: MulUnit;
-
-		unitToAdd = await loadMULUnit(mulId.toString());
-		unitToAdd.rulesLevel = "Standard";
-
-		return unitToAdd;
 	}
 	async loadList(data: ListCode) {
 		const listCode: ListCode = data;

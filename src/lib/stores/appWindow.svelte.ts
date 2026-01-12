@@ -3,7 +3,7 @@ import { innerWidth } from "svelte/reactivity/window";
 function createAppWindow() {
 	let isMobile = $derived.by(() => {
 		if (innerWidth.current) {
-			return innerWidth.current < 500;
+			return innerWidth.current < 600;
 		} else {
 			return false;
 		}

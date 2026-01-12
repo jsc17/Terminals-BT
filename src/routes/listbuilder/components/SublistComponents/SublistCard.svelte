@@ -3,10 +3,11 @@
 	import { getRulesByName } from "$lib/types/rulesets";
 	import { DropdownMenu, Popover, Separator } from "$lib/generic";
 	import { dragHandle } from "svelte-dnd-action";
-	import { loadSublistForPlay } from "../../utilities/sublist-utilities";
 	import ExportSublistModal from "./ExportSublistModal.svelte";
 	import type { MenuItem } from "$lib/generic/types";
 	import { List as MenuIcon } from "phosphor-svelte";
+	import PlayModal from "../modals/PlayModal.svelte";
+	import { toastController } from "$lib/stores";
 
 	type Props = {
 		sublist: Sublist;
@@ -15,9 +16,10 @@
 		openSublistEditModal: (id: string, newSublist: boolean) => void;
 		unitSortOrder: "name" | "pv";
 		layout: string;
+		playModal?: PlayModal;
 	};
 
-	const { sublist, list, scenarioList, openSublistEditModal, unitSortOrder, layout }: Props = $props();
+	const { sublist, list, scenarioList, openSublistEditModal, unitSortOrder, layout, playModal }: Props = $props();
 
 	let exportSublistModalOpen = $state(false);
 
@@ -72,9 +74,7 @@
 		{
 			type: "item",
 			label: "Edit Sublist",
-			onSelect: () => {
-				openSublistEditModal(sublist.id, false);
-			}
+			onSelect: () => openSublistEditModal(sublist.id, false)
 		},
 		{
 			type: "separator",
@@ -83,15 +83,21 @@
 		{
 			type: "item",
 			label: "Export / Print Sublist",
-			onSelect: () => {
-				exportSublistModalOpen = true;
-			}
+			onSelect: () => (exportSublistModalOpen = true)
 		},
 		{
 			type: "item",
 			label: "Play Sublist",
 			onSelect: () => {
-				loadSublistForPlay(sublist, list);
+				if (sublist.checked.length) {
+					playModal?.open(list, {
+						name: `${sublist.scenario != "-" ? `${sublist.scenario} ` : ""}Sublist`,
+						type: "none",
+						units: sublist.checked
+					});
+				} else {
+					toastController.addToast("Cannot play an empty sublist");
+				}
 			}
 		},
 		{
@@ -101,16 +107,12 @@
 		{
 			type: "item",
 			label: "Copy Sublist",
-			onSelect: () => {
-				list.copySublist(sublist.id);
-			}
+			onSelect: () => list.copySublist(sublist.id)
 		},
 		{
 			type: "item",
 			label: "Delete Sublist",
-			onSelect: () => {
-				list.deleteSublist(sublist.id);
-			}
+			onSelect: () => list.deleteSublist(sublist.id)
 		}
 	];
 </script>
@@ -211,17 +213,6 @@
 		background-color: var(--primary);
 		border-radius: var(--radius);
 		padding: 0px 12px;
-
-		& img {
-			height: 20px;
-			width: 20px;
-		}
-	}
-	.sublist-menu-body {
-		display: flex;
-		flex-direction: column;
-		padding: 16px;
-		gap: 8px;
 	}
 	.sublist-body {
 		display: grid;

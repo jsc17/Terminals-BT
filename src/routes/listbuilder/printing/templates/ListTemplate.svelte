@@ -391,7 +391,7 @@
 	.formation-side {
 		display: grid;
 		grid-template-columns: 0.95in 7.05in;
-		margin-bottom: 15pt;
+		margin-bottom: 5pt;
 	}
 	.formation-line {
 		font-weight: bold;

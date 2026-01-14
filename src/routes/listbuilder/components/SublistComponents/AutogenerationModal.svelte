@@ -4,6 +4,7 @@
 	import { nanoid } from "nanoid";
 	import { appWindow } from "$lib/stores";
 	import { watch } from "runed";
+	import AutoGenerationStatsDialog from "./AutoGenerationStatsDialog.svelte";
 
 	type AutoSublist = {
 		id: string;
@@ -19,6 +20,7 @@
 	};
 
 	let { open = $bindable(), list }: Props = $props();
+	let statsDialog = $state<AutoGenerationStatsDialog>();
 
 	let autosublists = $state<AutoSublist[]>([]);
 	let showFilters = $state<boolean>(true);
@@ -125,7 +127,7 @@
 		<input id="autoMinUnitCost" type="number" bind:value={options.autoMinUnitCost} />
 	</div>
 	<Separator classes="separator-card" />
-	<button class="auto-sublist-generate-button" onclick={generatesublists}>Generate sublists</button>
+	<button class="detailed-button auto-sublist-generate-button" onclick={generatesublists}>Generate sublists</button>
 	<Separator classes="separator-card" />
 
 	<div class="auto-sublist-unit-filter-container">
@@ -152,7 +154,7 @@
 				{#each filteredUnits as unit}
 					<p>{unit.name}</p>
 					<RadioGroup
-						items={[{ value: "excluded", selectedColor: "error" }, { value: "allowed", selectedColor: "muted-text-color" }, { value: "required" }]}
+						items={[{ value: "excluded", selectedColor: "error" }, { value: "allowed", selectedColor: "surface-color-light-text-color" }, { value: "required" }]}
 						bind:value={unit.included}
 						orientation={"horizontal"}
 					/>
@@ -186,13 +188,15 @@
 				<div class="center">Unit Count</div>
 				<div class="center">PV</div>
 				<div></div>
+				<div></div>
 				{#each autosublists as sublist}
 					<div class="auto-sublist-row">
 						<p>{sublist.unitString}</p>
 						<p class="center">{sublist.count}</p>
 						<p class="center">{sublist.pv}</p>
+						<AutoGenerationStatsDialog {list} sublist={sublist.sublist} />
 						<button
-							class="auto-sublist-add-button center"
+							class="detailed-button center"
 							onclick={() => {
 								sublist.sublist.id = nanoid(6);
 								list.addSublist($state.snapshot(sublist.sublist));
@@ -209,8 +213,9 @@
 						<div class="auto-sublist-mobile-stat-line">
 							<p><span class="muted">Unit Count:</span> {sublist.count}</p>
 							<p><span class="muted">PV:</span> {sublist.pv}</p>
+							<AutoGenerationStatsDialog {list} sublist={sublist.sublist} />
 							<button
-								class="auto-sublist-add-button center"
+								class="detailed-button center"
 								onclick={() => {
 									sublist.sublist.id = nanoid(6);
 									list.addSublist($state.snapshot(sublist.sublist));
@@ -269,9 +274,7 @@
 		}
 	}
 	.auto-sublist-generate-button {
-		margin: 8px 0px;
 		width: fit-content;
-		padding: 4px 16px;
 		justify-self: center;
 		align-self: center;
 	}
@@ -318,7 +321,7 @@
 		height: fit-content;
 		max-height: 100%;
 		overflow: auto;
-		grid-template-columns: 1fr max-content max-content max-content;
+		grid-template-columns: 1fr repeat(4, max-content);
 		gap: 4px 16px;
 	}
 	.auto-list-container-mobile {
@@ -328,7 +331,7 @@
 	.auto-sublist-row {
 		display: grid;
 		grid-template-columns: subgrid;
-		grid-column: span 4;
+		grid-column: span 5;
 		padding: 4px;
 		border-bottom: 1px solid var(--border);
 	}
@@ -348,10 +351,23 @@
 		align-items: center;
 		justify-content: space-between;
 	}
-	.auto-sublist-add-button {
-		height: max-content;
-		width: max-content;
-		padding: 4px 16px;
+	.detailed-button {
+		background-color: var(--button);
+		color: var(--button-text-color);
+		border-radius: var(--radius);
+		padding: 8px 12px;
+		box-shadow:
+			0px -3px 0px var(--button-dark) inset,
+			0px 4px 5px -3px var(--button-dark);
+	}
+	.detailed-button:hover {
+		transform: translateY(-2px);
+	}
+	.detailed-button:active {
+		box-shadow:
+			3px 6px 12px var(--button-dark) inset,
+			-3px -6px 12px var(--button-dark) inset;
+		transform: translateY(-2px);
 	}
 	input {
 		max-width: 150px;

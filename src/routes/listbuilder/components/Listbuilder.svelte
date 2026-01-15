@@ -27,7 +27,7 @@
 	import type { SettingsOutput } from "../types/settings";
 	import { getContext } from "svelte";
 	import { goto } from "$app/navigation";
-	import PlayModal from "./modals/PlayModal.svelte";
+	import PlayModal from "../../../lib/sharedDialogs/PlayModal.svelte";
 
 	type Props = {
 		listCloseCallback: (id: string) => void;
@@ -36,7 +36,6 @@
 	};
 
 	let { listCloseCallback, resultList = $bindable(), list = $bindable() }: Props = $props();
-	let printModal = $state<PrintModal>();
 	let saveModal = $state<SaveModal>();
 	let loadModal = $state<LoadModal>();
 	let playModal = $state<PlayModal>();
@@ -48,6 +47,7 @@
 	let scaListOpen = $state(true);
 	let bsListOpen = $state(true);
 	let sublistModalOpen = $state(false);
+	let printModalOpen = $state(false);
 
 	let dropTargetStyle = { outline: "solid var(--primary)" };
 	let flipDurationMs = 100;
@@ -74,9 +74,9 @@
 		formData.append("list", JSON.stringify(list.getListCode()));
 		const id: string = crypto.randomUUID();
 		formData.append("id", id);
-		let sharedUrl = `https://terminal.tools/listbuilder?share=${id}`;
+		let sharedUrl = `https://terminal.tools/share?share=${id}`;
 		if (dev) {
-			sharedUrl = `https://localhost:5173/listbuilder?share=${id}`;
+			sharedUrl = `https://localhost:5173/share?share=${id}`;
 		}
 		navigator.clipboard.writeText(sharedUrl);
 
@@ -203,7 +203,7 @@
 					items={[
 						{ type: "item", label: "Load / Import List", onSelect: () => loadModal?.show() },
 						{ type: "item", label: "Save / Export List", onSelect: () => saveModal?.show() },
-						{ type: "item", label: "Print List", onSelect: () => printModal?.open() },
+						{ type: "item", label: "Print List", onSelect: () => (printModalOpen = true) },
 						{ type: "item", label: "Share List Link", onSelect: () => shareList() },
 						{ type: "separator" },
 						{ type: "item", label: "Check List Availability", onSelect: () => availabilityModal?.show() },
@@ -365,7 +365,7 @@
 </div>
 
 <ScaModal bind:open={scaModalOpen} bind:list></ScaModal>
-<PrintModal bind:this={printModal} bind:list></PrintModal>
+<PrintModal bind:list bind:open={printModalOpen}></PrintModal>
 <FindUnitAvailabilityModal bind:this={availabilityModal} bind:list />
 <SublistModal bind:list bind:open={sublistModalOpen} {playModal} />
 <BattlefieldSupportModal bind:this={battlefieldSupportModal} bind:list />

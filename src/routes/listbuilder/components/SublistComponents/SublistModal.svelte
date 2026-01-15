@@ -9,7 +9,7 @@
 	import AutogenerationModal from "./AutogenerationModal.svelte";
 	import { Dialog, Popover } from "$lib/generic";
 	import type { SettingsOutput } from "../../types/settings";
-	import PlayModal from "../modals/PlayModal.svelte";
+	import PlayModal from "../../../../lib/sharedDialogs/PlayModal.svelte";
 
 	type Props = {
 		list: List;

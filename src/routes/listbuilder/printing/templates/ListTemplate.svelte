@@ -230,15 +230,17 @@
 							{#if printOptions.cardStyle == "mul" || unit!.mulId < 0}
 								<img src={unitCardImages?.get(`${unit!.mulId}-${unit!.skill}`)} class="unit-card" alt="unit card" />
 							{:else}
-								<PrintUnitCard
-									unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
-									image={unitImages?.get(mulData!.imageLink ?? "") ?? ""}
-									formationSPAs={[]}
-									measurementUnits={printOptions.measurementUnits}
-									numbering={counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) ?? -1}
-									numberingType={printOptions.printDuplicateMarkingsType}
-									printDuplicateMarkings={printOptions.printDuplicateMarkings}
-								/>
+								<div class="unit-card-wrapper">
+									<PrintUnitCard
+										unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
+										image={unitImages?.get(mulData!.imageLink ?? "") ?? ""}
+										formationSPAs={[]}
+										measurementUnits={printOptions.measurementUnits}
+										numbering={counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) ?? -1}
+										numberingType={printOptions.printDuplicateMarkingsType}
+										printDuplicateMarkings={printOptions.printDuplicateMarkings}
+									/>
+								</div>
 							{/if}
 						{/each}
 					</div>
@@ -264,15 +266,17 @@
 								{#if printOptions.cardStyle == "mul" || unit!.mulId < 0}
 									<img src={unitCardImages?.get(`${unit!.mulId}-${unit!.skill}`)} class="unit-card" alt="unit card" />
 								{:else}
-									<PrintUnitCard
-										unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
-										image={unitImages?.get(mulData!.imageLink ?? "") ?? ""}
-										formationSPAs={[]}
-										measurementUnits={printOptions.measurementUnits}
-										numbering={counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) ?? -1}
-										numberingType={printOptions.printDuplicateMarkingsType}
-										printDuplicateMarkings={printOptions.printDuplicateMarkings}
-									/>
+									<div class="unit-card-wrapper">
+										<PrintUnitCard
+											unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
+											image={unitImages?.get(mulData!.imageLink ?? "") ?? ""}
+											formationSPAs={[]}
+											measurementUnits={printOptions.measurementUnits}
+											numbering={counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) ?? -1}
+											numberingType={printOptions.printDuplicateMarkingsType}
+											printDuplicateMarkings={printOptions.printDuplicateMarkings}
+										/>
+									</div>
 								{/if}
 							{/each}
 						</div>
@@ -287,15 +291,17 @@
 					{#if printOptions.cardStyle == "mul" || unit!.mulId < 0}
 						<img src={unitCardImages?.get(`${unit!.mulId}-${unit!.skill}`)} class="unit-card" alt="unit card" />
 					{:else}
-						<PrintUnitCard
-							unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
-							image={unitImages?.get(mulData!.imageLink ?? "") ?? ""}
-							formationSPAs={[]}
-							measurementUnits={printOptions.measurementUnits}
-							numbering={counts.has(unit!.mulId) ? counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) : undefined}
-							numberingType={printOptions.printDuplicateMarkingsType}
-							printDuplicateMarkings={printOptions.printDuplicateMarkings}
-						/>
+						<div class="unit-card-wrapper">
+							<PrintUnitCard
+								unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
+								image={unitImages?.get(mulData!.imageLink ?? "") ?? ""}
+								formationSPAs={[]}
+								measurementUnits={printOptions.measurementUnits}
+								numbering={counts.has(unit!.mulId) ? counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) : undefined}
+								numberingType={printOptions.printDuplicateMarkingsType}
+								printDuplicateMarkings={printOptions.printDuplicateMarkings}
+							/>
+						</div>
 					{/if}
 				{/each}
 			</div>
@@ -304,6 +310,14 @@
 </div>
 
 <style>
+	.unit-card-wrapper {
+		aspect-ratio: 7 / 5;
+		width: 268pt;
+		container: unit-card / size;
+		font-family: Arial, Helvetica, sans-serif;
+		padding: 0;
+		margin: 0;
+	}
 	h1 {
 		color: black;
 		font-size: 16pt;

@@ -10,11 +10,49 @@
 	import { ModeWatcher } from "mode-watcher";
 	import { IconContext } from "phosphor-svelte";
 	import { innerWidth } from "svelte/reactivity/window";
+	import { PersistedState } from "runed";
+	import { SettingsSchema, type SettingsOutput } from "./listbuilder/types/settings.js";
+	import { parse } from "valibot";
 
 	const { data, children } = $props();
 	let user = $state({ username: data.username });
 	let notifications: Notification[] = $derived(data.notifications ?? []);
 	setContext("user", user);
+
+	let settings = new PersistedState<SettingsOutput>("listbuilderSettings", {
+		print: {
+			printStyle: "detailed",
+			printFormations: true,
+			printCardsByFormation: false,
+			printFormationBonuses: true,
+			cardStyle: "generated",
+			formationHeaderStyle: "inline",
+			measurementUnits: "inches",
+			printReferences: true,
+			printDuplicateMarkings: true,
+			printDuplicateMarkingsType: "numbers"
+		},
+		sublistUI: {
+			sublistOrientation: "vertical",
+			sublistSortOrder: "pv",
+			sublistPrintListSettings: {
+				printStyle: "detailed",
+				printFormations: true,
+				printCardsByFormation: false,
+				printFormationBonuses: true,
+				cardStyle: "generated",
+				formationHeaderStyle: "inline",
+				measurementUnits: "inches",
+				printReferences: true,
+				printDuplicateMarkings: true,
+				printDuplicateMarkingsType: "numbers"
+			},
+			sublistPrintAllOrientation: "vertical",
+			sublistPrintAllGroupByScenario: false
+		}
+	});
+	settings.current = parse(SettingsSchema, settings.current);
+	settings.current = setContext("listbuilderSettings", settings.current);
 </script>
 
 <Toast></Toast>

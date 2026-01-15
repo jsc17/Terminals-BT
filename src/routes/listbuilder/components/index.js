@@ -1,5 +1,5 @@
 import Listbuilder from "./Listbuilder.svelte";
-import PrintModal from "./modals/PrintModal.svelte";
+import PrintModal from "../../../lib/sharedDialogs/PrintModal.svelte";
 import LoadModal from "./modals/LoadModal.svelte";
 import SaveModal from "./modals/SaveModal.svelte";
 import ScaModal from "./modals/SCAModal.svelte";

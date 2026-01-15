@@ -5,7 +5,7 @@
 	import FindUnitAvailabilityModal from "../modals/FindUnitAvailabilityModal.svelte";
 	import { DropdownMenu } from "$lib/generic";
 	import type { MenuItem } from "$lib/generic/types";
-	import PlayModal from "../modals/PlayModal.svelte";
+	import PlayModal from "../../../../lib/sharedDialogs/PlayModal.svelte";
 
 	type Props = {
 		formation: ListFormation;

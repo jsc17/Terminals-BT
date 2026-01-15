@@ -1,50 +1,13 @@
 <script lang="ts">
-	import { PersistedState, watch } from "runed";
+	import { watch } from "runed";
 	import ListTab from "./components/ListTab.svelte";
-	import { onMount, setContext } from "svelte";
+	import { onMount } from "svelte";
 	import { type ListCode, List } from "$lib/types/list.svelte";
 	import { Tabs, ContextMenu } from "bits-ui";
 	import { loadExistingListsFromLocalStorage } from "$lib/utilities/listImport";
 	import { toastController } from "$lib/stores";
 	import { db } from "$lib/offline/db";
-	import { SettingsSchema, type SettingsOutput } from "./types/settings";
-	import { parse } from "valibot";
 	import { FilePlus } from "phosphor-svelte";
-
-	let settings = new PersistedState<SettingsOutput>("listbuilderSettings", {
-		print: {
-			printStyle: "detailed",
-			printFormations: true,
-			printCardsByFormation: false,
-			printFormationBonuses: true,
-			cardStyle: "generated",
-			formationHeaderStyle: "inline",
-			measurementUnits: "inches",
-			printReferences: true,
-			printDuplicateMarkings: true,
-			printDuplicateMarkingsType: "numbers"
-		},
-		sublistUI: {
-			sublistOrientation: "vertical",
-			sublistSortOrder: "pv",
-			sublistPrintListSettings: {
-				printStyle: "detailed",
-				printFormations: true,
-				printCardsByFormation: false,
-				printFormationBonuses: true,
-				cardStyle: "generated",
-				formationHeaderStyle: "inline",
-				measurementUnits: "inches",
-				printReferences: true,
-				printDuplicateMarkings: true,
-				printDuplicateMarkingsType: "numbers"
-			},
-			sublistPrintAllOrientation: "vertical",
-			sublistPrintAllGroupByScenario: false
-		}
-	});
-	settings.current = parse(SettingsSchema, settings.current);
-	settings.current = setContext("listbuilderSettings", settings.current);
 
 	let activeLists = $state<List[]>([]);
 	let selectedList = $state<string>("");
@@ -55,7 +18,6 @@
 		() => listCodes,
 		() => {
 			if (listCodes.length != 0) {
-				// db.previousLists.clear();
 				Promise.all(
 					$state.snapshot(listCodes).map(async (lc) => {
 						if (lc) {

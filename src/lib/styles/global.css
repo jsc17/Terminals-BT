@@ -65,3 +65,22 @@
 	width: 100%;
 	box-shadow: 1px 3px 3px var(--surface-color-shadow);
 }
+
+.detailed-button {
+	background-color: var(--button);
+	color: var(--button-text-color);
+	border-radius: var(--radius);
+	padding: 8px 12px;
+	box-shadow:
+		0px -3px 0px var(--button-dark) inset,
+		0px 4px 5px -3px var(--button-dark);
+}
+.detailed-button:hover {
+	transform: translateY(-2px);
+}
+.detailed-button:active {
+	box-shadow:
+		3px 6px 12px var(--button-dark) inset,
+		-3px -6px 12px var(--button-dark) inset;
+	transform: translateY(-2px);
+}

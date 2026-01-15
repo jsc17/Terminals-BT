@@ -6,7 +6,7 @@
 	import ExportSublistModal from "./ExportSublistModal.svelte";
 	import type { MenuItem } from "$lib/generic/types";
 	import { List as MenuIcon } from "phosphor-svelte";
-	import PlayModal from "../modals/PlayModal.svelte";
+	import PlayModal from "../../../../lib/sharedDialogs/PlayModal.svelte";
 	import { toastController } from "$lib/stores";
 
 	type Props = {

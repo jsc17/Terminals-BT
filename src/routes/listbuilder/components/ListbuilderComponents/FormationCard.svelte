@@ -6,7 +6,7 @@
 	import { getFormationStats } from "$lib/utilities/formationUtilities";
 	import { UnitCard, UnitCustomizationModal, EditFormationModal, FormationInfoPopover, FormationMenu, FindUnitAvailabilityModal } from "../";
 	import { validateFormation } from "$lib/utilities/formationRequirementValidation.svelte";
-	import PlayModal from "../modals/PlayModal.svelte";
+	import PlayModal from "../../../../lib/sharedDialogs/PlayModal.svelte";
 
 	type Props = { formation: ListFormation; draggingColumns: boolean; unitCustomizationModal?: UnitCustomizationModal; list: List; playModal?: PlayModal };
 

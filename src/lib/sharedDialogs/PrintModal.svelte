@@ -3,24 +3,19 @@
 	import { type List } from "$lib/types/list.svelte";
 	import { Dialog } from "$lib/generic";
 	import { getContext } from "svelte";
-	import { printList } from "../../printing/print.remote";
-	import type { SettingsOutput } from "../../types/settings";
-	import type { PrintListOutput } from "../../printing/types";
+	import { printList } from "../../routes/listbuilder/printing/print.remote";
+	import type { SettingsOutput } from "../../routes/listbuilder/types/settings";
+	import type { PrintListOutput } from "../../routes/listbuilder/printing/types";
 
 	type Props = {
 		list: List;
+		open: boolean;
 	};
 
-	let { list = $bindable() }: Props = $props();
+	let { list = $bindable(), open = $bindable() }: Props = $props();
 
 	let settings: SettingsOutput = getContext("listbuilderSettings");
-
-	let openState = $state(false);
 	let printName = $derived(list.details.name);
-
-	export function open() {
-		openState = true;
-	}
 
 	async function handlePrint() {
 		let listData: PrintListOutput = {
@@ -45,11 +40,11 @@
 			toastController.addToast("PDF Generation Complete");
 		});
 
-		openState = false;
+		open = false;
 	}
 </script>
 
-<Dialog bind:open={openState} title="Print">
+<Dialog bind:open title="Print">
 	<div class="dialog-body">
 		<div class="print-form">
 			<label>List Name <input bind:value={printName} /></label>
@@ -132,7 +127,7 @@
 				</fieldset>
 			</fieldset>
 			<div class="print-buttons">
-				<button onclick={() => (openState = false)}>Cancel</button>
+				<button onclick={() => (open = false)}>Cancel</button>
 				<button onclick={() => handlePrint()}>Print</button>
 			</div>
 		</div>

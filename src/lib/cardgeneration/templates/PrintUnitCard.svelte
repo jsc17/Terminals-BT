@@ -40,160 +40,150 @@
 	}
 </script>
 
-<div class="wrapper">
-	<div class="play-unit-card-container">
-		<div class="name-container">
-			<div class="flex-between">
-				<p class="unit-variant">{unit.baseUnit.variant}</p>
-				<p class="unit-pv bold">PV: {unit.cost}</p>
-			</div>
-			<div class="flex-between">
-				<p class="unit-name bold">{unit.baseUnit.class}</p>
-			</div>
+<div class="play-unit-card-container">
+	<div class="name-container">
+		<div class="flex-between">
+			<p class="unit-variant">{unit.baseUnit.variant}</p>
+			<p class="unit-pv bold">PV: {unit.cost}</p>
 		</div>
-		<div class="play-unit-card-body">
-			<div class="unit-card-left" class:no-heat={!typeIncludes([...mechTypes, ...aeroTypes], unit.baseUnit)}>
-				<div class="unit-card-block unit-stat-block">
-					<div class="stat-block-first-row">
-						<p>
-							TP:
-							<span class="bold">{unit.baseUnit?.subtype ?? ""}</span>
-						</p>
-						<p>SZ: <span class="bold">{unit.baseUnit?.size}</span></p>
-						{#if typeIncludes([...aeroTypes], unit.baseUnit)}
-							<p>
-								THR: <span class="bold">{unit.baseUnit.move![0].speed}{unit.baseUnit.move![0].type}</span>
-							</p>
-						{:else}
-							<p>
-								TMM: <span class="bold">{unit.baseUnit.tmm}</span>
-							</p>
-							<p>
-								MV: {#each unit.baseUnit.move ?? [] as { speed, type }, index}
-									<span class="bold"
-										>{measurementUnits == "inches" ? speed : speed / 2}{#if measurementUnits == "inches"}"{:else}<span class="hex-symbol">⬢</span>{/if}{type}</span
-									>{#if index + 1 != unit.baseUnit.move?.length}/{/if}
-								{/each}
-							</p>
-						{/if}
-					</div>
-					<div class="stat-block-second-row">
-						<p>Role: <span class="bold">{unit.baseUnit?.role}</span></p>
-						<p>
-							Skill: <span class="bold">{unit.skill}</span>
-						</p>
-					</div>
-				</div>
-				<div class="unit-card-block unit-damage-block">
-					<div>
-						<p>S (+0)</p>
-						<p class="bold damage-value">{unit.baseUnit.damageS}{unit.baseUnit.damageSMin ? "*" : ""}</p>
-					</div>
-					<div>
-						<p>M (+2)</p>
-						<p class="bold damage-value">{unit.baseUnit.damageM}{unit.baseUnit.damageMMin ? "*" : ""}</p>
-					</div>
-					<div>
-						<p>L (+4)</p>
-						<p class="bold damage-value">{unit.baseUnit.damageL}{unit.baseUnit.damageLMin ? "*" : ""}</p>
-					</div>
-					{#if typeIncludes([...aeroTypes], unit.baseUnit)}
-						<div>
-							<p>E (+6)</p>
-							<p class="bold damage-value">{unit.baseUnit.damageE}{unit.baseUnit.damageEMin ? "*" : ""}</p>
-						</div>
-					{/if}
-				</div>
-				{#if typeIncludes([...mechTypes, ...aeroTypes], unit.baseUnit)}
-					<div class="unit-card-block unit-heat-block">
-						<p>OV:<span class="bold"> {unit.baseUnit.overheat}</span></p>
-						<div class="heatscale">
-							<p>Heat Scale:</p>
-							<div class="heat-level heat-level-first">1</div>
-							<div class="heat-level">2</div>
-							<div class="heat-level">3</div>
-							<div class="heat-level heat-level-last">S</div>
-						</div>
-					</div>
-				{/if}
-				<div class="unit-card-block unit-health-block" class:aero-health-block={typeIncludes([...aeroTypes], unit.baseUnit)}>
-					<p class="health-header bold">A({unit.baseUnit?.armor}):</p>
-					<div class="health-pips">
-						{#each { length: unit.baseUnit?.armor ?? 0 }, index}
-							<div class="pip"></div>
-						{/each}
-					</div>
-					{#if typeIncludes([...aeroTypes], unit.baseUnit)}
-						<p class="bold threshold">TH</p>
-					{/if}
-					<p class="health-header bold">
-						S({unit.baseUnit?.structure}):
+		<div class="flex-between">
+			<p class="unit-name bold">{unit.baseUnit.class}</p>
+		</div>
+	</div>
+	<div class="play-unit-card-body">
+		<div class="unit-card-left" class:no-heat={!typeIncludes([...mechTypes, ...aeroTypes], unit.baseUnit)}>
+			<div class="unit-card-block unit-stat-block">
+				<div class="stat-block-first-row">
+					<p>
+						TP:
+						<span class="bold">{unit.baseUnit?.subtype ?? ""}</span>
 					</p>
-					<div class="health-pips">
-						{#each { length: unit.baseUnit?.structure ?? 0 }, index}
-							<div class="pip"></div>
-						{/each}
-					</div>
+					<p>SZ: <span class="bold">{unit.baseUnit?.size}</span></p>
 					{#if typeIncludes([...aeroTypes], unit.baseUnit)}
-						<p class="bold threshold">{unit.baseUnit?.threshold}</p>
+						<p>
+							THR: <span class="bold">{unit.baseUnit.move![0].speed}{unit.baseUnit.move![0].type}</span>
+						</p>
+					{:else}
+						<p>
+							TMM: <span class="bold">{unit.baseUnit.tmm}</span>
+						</p>
+						<p>
+							MV: {#each unit.baseUnit.move ?? [] as { speed, type }, index}
+								<span class="bold"
+									>{measurementUnits == "inches" ? speed : speed / 2}{#if measurementUnits == "inches"}"{:else}<span class="hex-symbol">⬢</span>{/if}{type}</span
+								>{#if index + 1 != unit.baseUnit.move?.length}/{/if}
+							{/each}
+						</p>
 					{/if}
 				</div>
-				<div class="unit-card-block unit-abilities-block">
-					<div class="ability-names">
-						{#each unit.baseUnit.abilities ?? [] as ability, index}
-							{@const abilityString = createSingleAbilityString($state.snapshot(ability))}
-							<div>
-								<p class="ability-reference">
-									{`${abilityString}${index != unit.baseUnit.abilities.length - 1 ? "," : ""}`}&nbsp;
-								</p>
-							</div>
-						{/each}
-					</div>
+				<div class="stat-block-second-row">
+					<p>Role: <span class="bold">{unit.baseUnit?.role}</span></p>
+					<p>
+						Skill: <span class="bold">{unit.skill}</span>
+					</p>
 				</div>
 			</div>
-			<div class="unit-card-right" class:unit-card-right-inf={typeIncludes(infTypes, unit.baseUnit)}>
-				<img src={image} alt="unit" class="unit-image" />
-				{#if !typeIncludes(infTypes, unit.baseUnit)}
-					<div class="unit-card-block">
-						{#if typeIncludes(mechTypes, unit.baseUnit)}
-							<MechCritBox></MechCritBox>
-						{:else if typeIncludes(aeroTypes, unit.baseUnit)}
-							<AeroCritBox></AeroCritBox>
-						{:else if typeIncludes(vTypes, unit.baseUnit)}
-							<CvCritBox></CvCritBox>
-						{:else if unit.baseUnit?.subtype == "PM"}
-							<ProtoCritBox></ProtoCritBox>
-						{/if}
+			<div class="unit-card-block unit-damage-block">
+				<div>
+					<p>S (+0)</p>
+					<p class="bold damage-value">{unit.baseUnit.damageS}{unit.baseUnit.damageSMin ? "*" : ""}</p>
+				</div>
+				<div>
+					<p>M (+2)</p>
+					<p class="bold damage-value">{unit.baseUnit.damageM}{unit.baseUnit.damageMMin ? "*" : ""}</p>
+				</div>
+				<div>
+					<p>L (+4)</p>
+					<p class="bold damage-value">{unit.baseUnit.damageL}{unit.baseUnit.damageLMin ? "*" : ""}</p>
+				</div>
+				{#if typeIncludes([...aeroTypes], unit.baseUnit)}
+					<div>
+						<p>E (+6)</p>
+						<p class="bold damage-value">{unit.baseUnit.damageE}{unit.baseUnit.damageEMin ? "*" : ""}</p>
 					</div>
 				{/if}
-				{#if printDuplicateMarkings && numberingType != "none" && numbering != -1}
-					<p class={{ numbering: true, "numbering-roman": numberingType == "roman" }}>{createMarking()}</p>
+			</div>
+			{#if typeIncludes([...mechTypes, ...aeroTypes], unit.baseUnit)}
+				<div class="unit-card-block unit-heat-block">
+					<p>OV:<span class="bold"> {unit.baseUnit.overheat}</span></p>
+					<div class="heatscale">
+						<p>Heat Scale:</p>
+						<div class="heat-level heat-level-first">1</div>
+						<div class="heat-level">2</div>
+						<div class="heat-level">3</div>
+						<div class="heat-level heat-level-last">S</div>
+					</div>
+				</div>
+			{/if}
+			<div class="unit-card-block unit-health-block" class:aero-health-block={typeIncludes([...aeroTypes], unit.baseUnit)}>
+				<p class="health-header bold">A({unit.baseUnit?.armor}):</p>
+				<div class="health-pips">
+					{#each { length: unit.baseUnit?.armor ?? 0 }, index}
+						<div class="pip"></div>
+					{/each}
+				</div>
+				{#if typeIncludes([...aeroTypes], unit.baseUnit)}
+					<p class="bold threshold">TH</p>
+				{/if}
+				<p class="health-header bold">
+					S({unit.baseUnit?.structure}):
+				</p>
+				<div class="health-pips">
+					{#each { length: unit.baseUnit?.structure ?? 0 }, index}
+						<div class="pip"></div>
+					{/each}
+				</div>
+				{#if typeIncludes([...aeroTypes], unit.baseUnit)}
+					<p class="bold threshold">{unit.baseUnit?.threshold}</p>
 				{/if}
 			</div>
+			<div class="unit-card-block unit-abilities-block">
+				<div class="ability-names">
+					{#each unit.baseUnit.abilities ?? [] as ability, index}
+						{@const abilityString = createSingleAbilityString($state.snapshot(ability))}
+						<div>
+							<p class="ability-reference">
+								{`${abilityString}${index != unit.baseUnit.abilities.length - 1 ? "," : ""}`}&nbsp;
+							</p>
+						</div>
+					{/each}
+				</div>
+			</div>
 		</div>
-		<div class="unit-card-block unit-custom-block">
-			{#if unit.customization?.spa?.length || formationBonuses.length}
-				<p>
-					<span class="bold">SPA:</span>
-					{unit.customization?.spa?.join(", ")}{`${formationBonuses.length && unit.customization?.spa?.length ? ", " : ""}`}{formationBonuses.join(", ")}
-				</p>
+		<div class="unit-card-right" class:unit-card-right-inf={typeIncludes(infTypes, unit.baseUnit)}>
+			<img src={image} alt="unit" class="unit-image" />
+			{#if !typeIncludes(infTypes, unit.baseUnit)}
+				<div class="unit-card-block">
+					{#if typeIncludes(mechTypes, unit.baseUnit)}
+						<MechCritBox></MechCritBox>
+					{:else if typeIncludes(aeroTypes, unit.baseUnit)}
+						<AeroCritBox></AeroCritBox>
+					{:else if typeIncludes(vTypes, unit.baseUnit)}
+						<CvCritBox></CvCritBox>
+					{:else if unit.baseUnit?.subtype == "PM"}
+						<ProtoCritBox></ProtoCritBox>
+					{/if}
+				</div>
 			{/if}
-			{#if unit.customization?.ammo && unit.customization.ammo.length}
-				<p><span class="bold">Alt. ammo:</span> {unit.customization.ammo.join(", ")}</p>
+			{#if printDuplicateMarkings && numberingType != "none" && numbering != -1}
+				<p class={{ numbering: true, "numbering-roman": numberingType == "roman" }}>{createMarking()}</p>
 			{/if}
 		</div>
+	</div>
+	<div class="unit-card-block unit-custom-block">
+		{#if unit.customization?.spa?.length || formationBonuses.length}
+			<p>
+				<span class="bold">SPA:</span>
+				{unit.customization?.spa?.join(", ")}{`${formationBonuses.length && unit.customization?.spa?.length ? ", " : ""}`}{formationBonuses.join(", ")}
+			</p>
+		{/if}
+		{#if unit.customization?.ammo && unit.customization.ammo.length}
+			<p><span class="bold">Alt. ammo:</span> {unit.customization.ammo.join(", ")}</p>
+		{/if}
 	</div>
 </div>
 
 <style>
-	.wrapper {
-		aspect-ratio: 7 / 5;
-		width: 268pt;
-		container: unit-card / size;
-		font-family: Arial, Helvetica, sans-serif;
-		padding: 0;
-		margin: 0;
-	}
 	* {
 		padding: 0;
 		margin: 0;

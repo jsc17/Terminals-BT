@@ -74,9 +74,9 @@
 		formData.append("list", JSON.stringify(list.getListCode()));
 		const id: string = crypto.randomUUID();
 		formData.append("id", id);
-		let sharedUrl = `https://terminal.tools/share?share=${id}`;
+		let sharedUrl = `https://terminal.tools/listbuilder?share=${id}`;
 		if (dev) {
-			sharedUrl = `https://localhost:5173/share?share=${id}`;
+			sharedUrl = `https://localhost:5173/listbuilder?share=${id}`;
 		}
 		navigator.clipboard.writeText(sharedUrl);
 

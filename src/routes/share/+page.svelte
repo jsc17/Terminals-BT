@@ -12,6 +12,7 @@
 	import PlayModal from "$lib/sharedDialogs/PlayModal.svelte";
 	import PrintModal from "$lib/sharedDialogs/PrintModal.svelte";
 	import { db } from "$lib/offline/db";
+	import DisplayOptionsPopover from "./DisplayOptionsPopover.svelte";
 
 	const shareCode = page.url.searchParams.get("share");
 	const sharedListCode = $derived(shareCode ? await loadSharedList(shareCode) : undefined);
@@ -68,19 +69,26 @@
 
 {#if sharedListCode && list.unitCount > 0}
 	<div class="share-header-bar">
-		<h1>{list.details.name}</h1>
-		<div>
-			<DropdownMenu
-				items={[
-					{ type: "item", label: "Load List in Listbuilder", onSelect: () => loadInListBuilder() },
-					{ type: "item", label: "Print List", onSelect: () => (printDialogOpen = true) },
-					{ type: "item", label: "Play List", onSelect: () => playDialog?.open(list) }
-				]}
-			>
-				{#snippet trigger()}
-					Menu
-				{/snippet}
-			</DropdownMenu>
+		<h1 class="share-list-name">{list.details.name} - {list.unitCount} units - {list.pv}pv</h1>
+
+		<div class="share-list-buttons">
+			<div>
+				<DisplayOptionsPopover options={options.current} />
+			</div>
+
+			<div>
+				<DropdownMenu
+					items={[
+						{ type: "item", label: "Load List in Listbuilder", onSelect: () => loadInListBuilder() },
+						{ type: "item", label: "Print List", onSelect: () => (printDialogOpen = true) },
+						{ type: "item", label: "Play List", onSelect: () => playDialog?.open(list) }
+					]}
+				>
+					{#snippet trigger()}
+						Menu
+					{/snippet}
+				</DropdownMenu>
+			</div>
 		</div>
 	</div>
 	{#each list.formations as formation}
@@ -114,6 +122,14 @@
 		display: flex;
 		justify-content: space-between;
 		padding: var(--responsive-padding);
+	}
+	.share-list-name {
+		font-size: clamp(16px, 2dvw, 30px);
+	}
+	.share-list-buttons {
+		display: flex;
+		gap: min(16px, 2dvw);
+		
 	}
 	.formation-container {
 		width: 100%;

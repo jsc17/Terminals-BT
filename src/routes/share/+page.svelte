@@ -65,49 +65,53 @@
 	</div>
 {/snippet}
 
-{#if sharedListCode && list.unitCount > 0}
-	<div class="share-header-bar">
-		<h1 class="share-list-name">{list.details.name} - {list.unitCount} units - {list.pv}pv</h1>
+{#if sharedListCode}
+	{#if list.unitCount > 0}
+		<div class="share-header-bar">
+			<h1 class="share-list-name">{list.details.name} - {list.unitCount} units - {list.pv}pv</h1>
 
-		<div class="share-list-buttons">
-			<div>
-				<DisplayOptionsPopover options={options.current} />
-			</div>
+			<div class="share-list-buttons">
+				<div>
+					<DisplayOptionsPopover options={options.current} />
+				</div>
 
-			<div>
-				<DropdownMenu
-					items={[
-						{ type: "item", label: "Load List in Listbuilder", onSelect: () => loadInListBuilder() },
-						{ type: "item", label: "Print List", onSelect: () => (printDialogOpen = true) },
-						{ type: "item", label: "Play List", onSelect: () => playDialog?.open(list) }
-					]}
-				>
-					{#snippet trigger()}
-						Menu
-					{/snippet}
-				</DropdownMenu>
+				<div>
+					<DropdownMenu
+						items={[
+							{ type: "item", label: "Load List in Listbuilder", onSelect: () => loadInListBuilder() },
+							{ type: "item", label: "Print List", onSelect: () => (printDialogOpen = true) },
+							{ type: "item", label: "Play List", onSelect: () => playDialog?.open(list) }
+						]}
+					>
+						{#snippet trigger()}
+							Menu
+						{/snippet}
+					</DropdownMenu>
+				</div>
 			</div>
 		</div>
-	</div>
-	{#each list.formations as formation}
-		{#if formation.units.length || formation.secondary?.units.length}
-			<div class="formation-container">
-				{#if formation.units.length}
-					<div class="formation-header">
-						<p>{formation.name != "Unassigned units" ? formation.name : ""}{formation.type != "none" ? `- ${formation.type}` : ""}</p>
-						<div></div>
-					</div>
-				{/if}
-				{@render drawFormationUnits(formation.units.map((u) => u.id))}
-				{#if formation.secondary?.units?.length}
-					<div class="secondary-header">
-						<p>{formation.secondary.type}</p>
-					</div>
-					{@render drawFormationUnits(formation.secondary.units.map((u) => u.id))}
-				{/if}
-			</div>
-		{/if}
-	{/each}
+		{#each list.formations as formation}
+			{#if formation.units.length || formation.secondary?.units.length}
+				<div class="formation-container">
+					{#if formation.units.length}
+						<div class="formation-header">
+							<p>{formation.name != "Unassigned units" ? formation.name : ""}{formation.type != "none" ? `- ${formation.type}` : ""}</p>
+							<div></div>
+						</div>
+					{/if}
+					{@render drawFormationUnits(formation.units.map((u) => u.id))}
+					{#if formation.secondary?.units?.length}
+						<div class="secondary-header">
+							<p>{formation.secondary.type}</p>
+						</div>
+						{@render drawFormationUnits(formation.secondary.units.map((u) => u.id))}
+					{/if}
+				</div>
+			{/if}
+		{/each}
+	{:else}
+		<p>Loading units</p>
+	{/if}
 {:else}
 	<p>No list loaded</p>
 {/if}

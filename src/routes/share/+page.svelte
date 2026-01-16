@@ -50,12 +50,10 @@
 	<div class="formation-unit-list" bind:clientWidth={formationWidth}>
 		{#each formationUnits as unitId}
 			{@const unitData = list.getUnit(unitId)}
-			{@const image = await getMulImage(unitData?.baseUnit.imageLink ?? "")}
 			{#if unitData}
 				<div class="unit-card-container" style="width: {cardWidth}px; height:{(cardWidth * 5) / 7}px">
 					<PrintUnitCard
 						unit={unitData}
-						image={image.image ?? ""}
 						formationSPAs={[]}
 						measurementUnits={options.current.measurementUnits}
 						printDuplicateMarkings={false}
@@ -129,7 +127,6 @@
 	.share-list-buttons {
 		display: flex;
 		gap: min(16px, 2dvw);
-		
 	}
 	.formation-container {
 		width: 100%;

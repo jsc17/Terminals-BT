@@ -7,10 +7,11 @@
 	import { createSingleAbilityString } from "$lib/utilities/abilityUtilities";
 	import { getSPAfromId } from "$lib/utilities/listUtilities";
 	import { numberToRomanNumeral } from "$lib/utilities/utilities";
+	import { getMulImage } from "$lib/remote/mulImages.remote";
 
 	type Props = {
 		unit: ListUnit;
-		image: string;
+		image?: string;
 		formationSPAs: number[];
 		measurementUnits: "inches" | "hexes";
 		printDuplicateMarkings: boolean;
@@ -38,6 +39,8 @@
 				return numberToRomanNumeral(numbering + 1);
 		}
 	}
+
+	let imageString = $derived(image ?? getMulImage(unit.baseUnit.imageLink ?? "").current?.image);
 </script>
 
 <div class="play-unit-card-container">
@@ -151,7 +154,7 @@
 			</div>
 		</div>
 		<div class="unit-card-right" class:unit-card-right-inf={typeIncludes(infTypes, unit.baseUnit)}>
-			<img src={image} alt="unit" class="unit-image" />
+			<img src={imageString} alt="unit" class="unit-image" />
 			{#if !typeIncludes(infTypes, unit.baseUnit)}
 				<div class="unit-card-block">
 					{#if typeIncludes(mechTypes, unit.baseUnit)}

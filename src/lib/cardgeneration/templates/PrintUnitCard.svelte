@@ -40,7 +40,7 @@
 		}
 	}
 
-	let imageString = $derived(image ?? getMulImage(unit.baseUnit.imageLink ?? "").current?.image);
+	let imageString = $derived(image ?? getMulImage(unit.baseUnit.imageLink ?? "").current);
 </script>
 
 <div class="play-unit-card-container">

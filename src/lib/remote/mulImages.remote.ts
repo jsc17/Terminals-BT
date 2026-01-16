@@ -39,39 +39,63 @@ export const getMulCard = query.batch(v.object({ mulId: v.number(), skill: v.num
 });
 
 //gets the unit image when provided with an mulId and a unit image link. Attempts to access cached image first, before downloading it from the mul and caching it for future use.
-export const getMulImage = query.batch(v.string(), async (data) => {
-	const lookup = new Map<string, string>();
-	await Promise.allSettled(
-		data.map(async (link) => {
-			if (link == "") {
-				lookup.set(link, "");
-				return;
-			}
-			const imageId = await prisma.unitImage.findFirst({ where: { link } });
-			if (imageId != null && existsSync(`./files/unit-images/${imageId.id}.png`)) {
-				const localPath = `./files/unit-images/${imageId.id}.png`;
-				const data = await fs.readFile(localPath, { encoding: "base64" });
-				lookup.set(link, "data:image/png;base64," + data);
-			} else {
-				try {
-					console.log("Downloading new png from MUL");
-					const response = await fetch(link);
-					const buffer = new Uint8Array(await response.arrayBuffer());
-					const newImage = await prisma.unitImage.create({
-						data: {
-							link
-						}
-					});
-					const localPath = `./files/unit-images/${newImage.id}.png`;
-					await fs.writeFile(localPath, buffer);
-					lookup.set(link, "data:image/png;base64," + Buffer.from(buffer).toString("base64"));
-				} catch (error) {
-					console.log(error);
-					lookup.set(link, "");
+export const getMulImage = query(v.string(), async (link) => {
+	const imageId = await prisma.unitImage.findFirst({ where: { link } });
+	if (imageId != null && existsSync(`./files/unit-images/${imageId.id}.png`)) {
+		const localPath = `./files/unit-images/${imageId.id}.png`;
+		const data = await fs.readFile(localPath, { encoding: "base64" });
+		return "data:image/png;base64," + data;
+	} else {
+		try {
+			console.log("Downloading new png from MUL");
+			const response = await fetch(link);
+			const buffer = new Uint8Array(await response.arrayBuffer());
+			const newImage = await prisma.unitImage.create({
+				data: {
+					link
 				}
-			}
-		})
-	);
+			});
+			const localPath = `./files/unit-images/${newImage.id}.png`;
+			await fs.writeFile(localPath, buffer);
+			return "data:image/png;base64," + Buffer.from(buffer).toString("base64");
+		} catch (error) {
+			console.log(error);
+			return undefined;
+		}
+	}
 
-	return (link) => ({ link, image: lookup.get(link) });
+	// const lookup = new Map<string, string>();
+	// await Promise.allSettled(
+	// 	data.map(async (link) => {
+	// 		if (link == "") {
+	// 			lookup.set(link, "");
+	// 			return;
+	// 		}
+	// 		const imageId = await prisma.unitImage.findFirst({ where: { link } });
+	// 		if (imageId != null && existsSync(`./files/unit-images/${imageId.id}.png`)) {
+	// 			const localPath = `./files/unit-images/${imageId.id}.png`;
+	// 			const data = await fs.readFile(localPath, { encoding: "base64" });
+	// 			lookup.set(link, "data:image/png;base64," + data);
+	// 		} else {
+	// 			try {
+	// 				console.log("Downloading new png from MUL");
+	// 				const response = await fetch(link);
+	// 				const buffer = new Uint8Array(await response.arrayBuffer());
+	// 				const newImage = await prisma.unitImage.create({
+	// 					data: {
+	// 						link
+	// 					}
+	// 				});
+	// 				const localPath = `./files/unit-images/${newImage.id}.png`;
+	// 				await fs.writeFile(localPath, buffer);
+	// 				lookup.set(link, "data:image/png;base64," + Buffer.from(buffer).toString("base64"));
+	// 			} catch (error) {
+	// 				console.log(error);
+	// 				lookup.set(link, "");
+	// 			}
+	// 		}
+	// 	})
+	// );
+
+	// return (link) => ({ link, image: lookup.get(link) });
 });

@@ -64,11 +64,15 @@ type UnitTypeRequirement = {
 type FactionRequirement = {
 	type: "Faction";
 	description: string;
-	allowedFactions: number;
 };
 
 type UniqueRequirement = {
 	type: "Commander" | "Transport" | "AerospacePair" | "SameModel";
+	description: string;
+};
+
+type UnimplementedRequirement = {
+	type: "Phalanx" | "Rogue" | "Strategic Command Star" | "Skill" | "Max Size" | "Urban Combat";
 	description: string;
 };
 
@@ -81,7 +85,8 @@ export type Requirement =
 	| AbilityRequirement
 	| UnitTypeRequirement
 	| FactionRequirement
-	| UniqueRequirement;
+	| UniqueRequirement
+	| UnimplementedRequirement;
 
 //timing: start of play, start of turn, at will
 //ability granted: does it grant a set ability, or something that is chosen?
@@ -97,7 +102,7 @@ type FormationWideBonus = {
 	type: "FormationWide";
 	abilityType: "SPA" | "SCA" | "Unique";
 	grantedAbility: string[];
-	uses?: { plus?: number };
+	uses?: { plus?: number; flat?: number };
 };
 
 export type AssignedBonus = {

@@ -278,6 +278,17 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 							{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Speed Demon"], assignedNumber: { portion: 0.75, rounding: "normal" }, assignmentTiming: "playStart" }
 						],
 						referencedSPAs: ["Speed Demon"]
+					},
+					{
+						id: 43,
+						name: "Ranger",
+						ideal: "Skirmisher",
+						requirements: [{ type: "Size", description: "No units may be Size 4 or greater", size: 3, limit: "equalOrLess", amount: 1, flatAmount: false }],
+						page: "Campaign Operations pg.66",
+						bonuses: [
+							{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Terrain Master"], assignedNumber: { portion: 0.75, rounding: "normal" }, assignmentTiming: "playStart" }
+						],
+						referencedSPAs: ["Terrain Master"]
 					}
 				]
 			},
@@ -646,6 +657,36 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 				referencedSPAs: ["Antagonizer", "Blood Stalker", "Combat Intuition", "Eagle's Eyes", "Marksman", "Multi-Tasker", "Tactical Genius"],
 				variations: [
 					{
+						id: 41,
+						name: "Strategic Command Star",
+						requirements: [
+							{ type: "Faction", description: "This is a clan formation" },
+							{ type: "Commander", description: "At least 1 unit must be designated as a force commander or key lieutenant" },
+							{ type: "Strategic Command Star", description: "At least 4 units must be BM or BA" },
+							{ type: "Strategic Command Star", description: "At least 2 units must be AF" },
+							{ type: "Strategic Command Star", description: "If Units are mechs, At least 2 must be size 3+, no size 1" },
+							{ type: "Skill", description: "All units must be at least skill 3 or better" }
+						],
+						page: "Battle of Tukayyid pg.27",
+						bonuses: [
+							{
+								type: "Assigned",
+								abilityType: "SPA",
+								grantedAbility: ["Antagonizer", "Blood Stalker", "Combat Intuition", "Eagle's Eyes", "Marksman", "Multi-Tasker"],
+								assignedNumber: { portion: 0.5, rounding: "up" },
+								assignmentTiming: "playStart"
+							},
+							{
+								type: "Assigned",
+								abilityType: "SPA",
+								grantedAbility: ["Tactical Genius"],
+								assignedNumber: { flat: 1 },
+								assignmentTiming: "playStart"
+							}
+						],
+						referencedSPAs: ["Antagonizer", "Blood Stalker", "Combat Intuition", "Eagle's Eyes", "Marksman", "Multi-Tasker", "Tactical Genius"]
+					},
+					{
 						id: 23,
 						name: "Vehicle Command",
 						requirements: [
@@ -789,6 +830,74 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 						type: "Unique",
 						description: "Enemy Units in base-to-base contact with an Anti-'Mech Lance suffer a -1 To-Hit Modifier penalty to any weapon attacks made by that enemy Unit"
 					}
+				]
+			},
+			{
+				id: 39,
+				name: "Phalanx Star",
+				requirements: [
+					{ type: "Faction", description: "This is a clan formation" },
+					{ type: "Phalanx", description: "At least 2 units must be BM or CV" },
+					{ type: "Phalanx", description: "Formation must include at least 2 different unit types from BM/CV/BA/CI" },
+					{ type: "Types", description: "Formation can only contain units from the BM/CV/BA/CI unit types", allowedTypes: ["CV", "BM", "BA", "CI"] }
+				],
+				page: "Battle of Tukayyid pg.27",
+				bonuses: [
+					{
+						type: "FormationWide",
+						abilityType: "SPA",
+						grantedAbility: ["Float Like A Butterfly"],
+						uses: { flat: 4 }
+					}
+				]
+			},
+			{
+				id: 40,
+				name: "Rogue Star",
+				requirements: [
+					{ type: "Faction", description: "This is a clan formation" },
+					{ type: "Rogue", description: "At Least 2 units in the formation must be the same model" }
+				],
+				page: "Battle of Tukayyid pg.27",
+				bonuses: [
+					{
+						type: "Assigned",
+						abilityType: "SPA",
+						grantedAbility: ["Combat Intuition"],
+						sameAbility: true,
+						assignedNumber: { flat: 2 },
+						assignmentTiming: "turnStart"
+					}
+				]
+			},
+			{
+				id: 44,
+				name: "Security",
+				requirements: [
+					{ type: "Role", description: "At Least 1 unit must have the Scout or Striker role", roles: ["Scout", "Striker"], amount: 1, flatAmount: true },
+					{ type: "Role", description: "At Least 1 unit must have the Sniper or Missile Boat role", roles: ["Sniper", "Missile Boat"], amount: 1, flatAmount: true },
+					{ type: "Max Size", description: "No more than 1 unit may be of Size 4 or greater" }
+				],
+				page: "Campaign Operations pg.65",
+				bonuses: [
+					{ type: "Unique", description: "If defending, 75% of units may be assigned either the Environmental Specialist or Terrain Master SPA's" },
+					{ type: "Unique", description: "If Attacking, 75% of units may be assigned the Speed Demon SPA" }
+				]
+			},
+			{
+				id: 45,
+				name: "Urban Combat",
+				ideal: "Ambusher",
+				requirements: [
+					{ type: "Urban Combat", description: "At Least 50% of units in the formation must have jump movement or be infantry" },
+					{ type: "Urban Combat", description: "At Least 50% of units in the formation must have a maximum movement of 8" }
+				],
+				page: "Campaign Operations pg.67",
+				bonuses: [
+					{ type: "Unique", description: "At the beginning of the turn, 75% of units in the formation get the following bonuses:" },
+					{ type: "Unique", description: "'Mech or Protomech - Street Fighter SPA" },
+					{ type: "Unique", description: "Infantry - Urban Guerrilla" },
+					{ type: "Unique", description: "Vehicles - 1pt Lucky and one-time use Marksman SPA" }
 				]
 			}
 		]
@@ -957,7 +1066,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 				id: 37,
 				name: "Rifle (House Davion)",
 				requirements: [
-					{ type: "Faction", description: "Unique to House Davion", allowedFactions: 29 },
+					{ type: "Faction", description: "Unique to House Davion" },
 					{ type: "Size", description: "At least 75% of units must be of Size 2 or 3", size: 3, limit: "equalOrLess", amount: 0.75, flatAmount: false },
 					{ type: "Size", description: "No unit may be Size 1", size: 2, limit: "equalOrGreater", amount: 1, flatAmount: false },
 					{
@@ -986,7 +1095,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 				id: 38,
 				name: "Order (House Kurita)",
 				requirements: [
-					{ type: "Faction", description: "Unique to House Kurita", allowedFactions: 27 },
+					{ type: "Faction", description: "Unique to House Kurita" },
 					{
 						type: "SameModel",
 						description: "All Units must be the same size and model"
@@ -998,6 +1107,45 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 					{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Iron Will", "Speed Demon"], assignedNumber: { portion: 1 }, assignmentTiming: "playStart", sameAbility: true }
 				],
 				referencedSPAs: ["Tactical Genius", "Antagonizer", "Sniper", "Iron Will", "Speed Demon"]
+			},
+			{
+				id: 42,
+				name: "Hammer (House Marik)",
+				ideal: "Striker",
+				requirements: [
+					{ type: "Faction", description: "Unique to House Marik" },
+					{
+						type: "Movement",
+						description: 'All units must have a minimum ground-based Move of 10"',
+						speed: 10,
+						amount: 1,
+						flatAmount: false
+					}
+				],
+				page: "Campaign Operations pg.66",
+				bonuses: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Jumping Jack", "Speed Demon"], assignedNumber: { flat: 2 }, assignmentTiming: "playStart" }],
+				referencedSPAs: ["Jumping Jack", "Speed Demon"]
+			},
+			{
+				id: 43,
+				name: "Anvil (House Marik)",
+				ideal: "Juggernaut",
+				requirements: [
+					{ type: "Faction", description: "Unique to House Marik" },
+					{ type: "Size", description: "Entire formation must be Size 2 or higher", size: 2, limit: "equalOrGreater", amount: 1, flatAmount: false },
+					{ type: "Armor", description: "All units must have an Armor value of 4 or greater", armor: 4, amount: 1, flatAmount: false },
+					{
+						type: "Ability",
+						description: "At least 50% of units must possess the AC, LRM, or SRM special abilities",
+						abilities: ["ART", "FLK", "AC"],
+						amount: 2,
+						flatAmount: true
+					}
+				],
+
+				page: "Campaign Operations pg.62",
+				bonuses: [{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Cluster Hitter", "Sandblaster"], assignedNumber: { flat: 2 }, assignmentTiming: "playStart" }],
+				referencedSPAs: ["Cluster Hitter", "Sandblaster"]
 			}
 		]
 	}

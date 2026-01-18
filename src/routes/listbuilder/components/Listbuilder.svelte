@@ -28,6 +28,7 @@
 	import { getContext } from "svelte";
 	import { goto } from "$app/navigation";
 	import PlayModal from "../../../lib/sharedDialogs/PlayModal.svelte";
+	import { page } from "$app/state";
 
 	type Props = {
 		listCloseCallback: (id: string) => void;
@@ -74,10 +75,8 @@
 		formData.append("list", JSON.stringify(list.getListCode()));
 		const id: string = crypto.randomUUID();
 		formData.append("id", id);
-		let sharedUrl = `https://terminal.tools/listbuilder?share=${id}`;
-		if (dev) {
-			sharedUrl = `https://localhost:5173/listbuilder?share=${id}`;
-		}
+		const sharedUrl = `${page.url.origin}/share?share=${id}`;
+
 		navigator.clipboard.writeText(sharedUrl);
 
 		const response: any = deserialize(await (await fetch("?/shareList", { method: "POST", body: formData })).text());

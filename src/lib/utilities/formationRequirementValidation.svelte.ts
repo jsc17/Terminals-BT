@@ -75,10 +75,8 @@ export function validateFormation(formation: ListFormation, list: List) {
 						primaryRequirements.push({ requirement: requirement.description, met: checkAbility(units, requirement.abilities, amount) });
 						break;
 					case "Commander":
-						primaryRequirements.push({ requirement: requirement.description, met: 0 });
-						break;
 					case "Faction":
-						primaryRequirements.push({ requirement: requirement.description, met: list.details.factions.includes(requirement.allowedFactions) ? 1 : -1 });
+						primaryRequirements.push({ requirement: requirement.description, met: 0 });
 						break;
 					case "Types":
 						primaryRequirements.push({ requirement: requirement.description, met: checkTypes(units, requirement.allowedTypes) });
@@ -90,6 +88,14 @@ export function validateFormation(formation: ListFormation, list: List) {
 						primaryRequirements.push({ requirement: requirement.description, met: checkAerospacePair(units) });
 					case "Transport":
 						primaryRequirements.push({ requirement: requirement.description, met: -1 });
+						break;
+					case "Phalanx":
+					case "Rogue":
+					case "Strategic Command Star":
+					case "Skill":
+					case "Max Size":
+					case "Urban Combat":
+						primaryRequirements.push({ requirement: `${requirement.description} (Not currently validated)`, met: 0 });
 						break;
 				}
 			}
@@ -169,10 +175,8 @@ export function validateFormation(formation: ListFormation, list: List) {
 							secondaryRequirements.push({ requirement: requirement.description, met: checkAbility(secondaryUnits, requirement.abilities, amount) });
 							break;
 						case "Commander":
-							secondaryRequirements.push({ requirement: requirement.description, met: 0 });
-							break;
 						case "Faction":
-							secondaryRequirements.push({ requirement: requirement.description, met: list.details.factions.includes(requirement.allowedFactions) ? 1 : -1 });
+							secondaryRequirements.push({ requirement: requirement.description, met: 0 });
 							break;
 						case "Types":
 							secondaryRequirements.push({ requirement: requirement.description, met: checkTypes(secondaryUnits, requirement.allowedTypes) });
@@ -185,6 +189,14 @@ export function validateFormation(formation: ListFormation, list: List) {
 							break;
 						case "AerospacePair":
 							secondaryRequirements.push({ requirement: requirement.description, met: checkAerospacePair(secondaryUnits) });
+						case "Phalanx":
+						case "Rogue":
+						case "Strategic Command Star":
+						case "Skill":
+						case "Max Size":
+						case "Urban Combat":
+							primaryRequirements.push({ requirement: `${requirement.description} (Not currently validated)`, met: 0 });
+							break;
 					}
 				}
 				const valid = secondaryUnits.length >= (secondaryData?.minimumUnits ?? 3) && (idealMet || secondaryRequirements.filter((req) => req.met == -1).length == 0);

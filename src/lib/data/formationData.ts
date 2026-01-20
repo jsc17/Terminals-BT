@@ -283,7 +283,10 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 						id: 43,
 						name: "Ranger",
 						ideal: "Skirmisher",
-						requirements: [{ type: "Size", description: "No units may be Size 4 or greater", size: 3, limit: "equalOrLess", amount: 1, flatAmount: false }],
+						requirements: [
+							{ type: "Notice", description: "Campaign Operations is a Classic source, but the formation works just as well in Alpha Strike with no modifications" },
+							{ type: "Size", description: "No units may be Size 4 or greater", size: 3, limit: "equalOrLess", amount: 1, flatAmount: false }
+						],
 						page: "Campaign Operations pg.66",
 						bonuses: [
 							{ type: "Assigned", abilityType: "SPA", grantedAbility: ["Terrain Master"], assignedNumber: { portion: 0.75, rounding: "normal" }, assignmentTiming: "playStart" }
@@ -874,6 +877,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 				id: 44,
 				name: "Security",
 				requirements: [
+					{ type: "Notice", description: "Campaign Operations is a Classic source, but the formation works just as well in Alpha Strike with no conversions" },
 					{ type: "Role", description: "At Least 1 unit must have the Scout or Striker role", roles: ["Scout", "Striker"], amount: 1, flatAmount: true },
 					{ type: "Role", description: "At Least 1 unit must have the Sniper or Missile Boat role", roles: ["Sniper", "Missile Boat"], amount: 1, flatAmount: true },
 					{ type: "Max Size", description: "No more than 1 unit may be of Size 4 or greater" }
@@ -889,6 +893,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 				name: "Urban Combat",
 				ideal: "Ambusher",
 				requirements: [
+					{ type: "Notice", description: "Campaign Operations is a Classic source, but the formation works just as well in Alpha Strike with minimal conversions" },
 					{ type: "Urban Combat", description: "At Least 50% of units in the formation must have jump movement or be infantry" },
 					{ type: "Urban Combat", description: "At Least 50% of units in the formation must have a maximum movement of 8" }
 				],
@@ -1113,6 +1118,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 				name: "Hammer (House Marik)",
 				ideal: "Striker",
 				requirements: [
+					{ type: "Notice", description: "Campaign Operations is a Classic source, but the formation works just as well in Alpha Strike with minimal conversions" },
 					{ type: "Faction", description: "Unique to House Marik" },
 					{
 						type: "Movement",
@@ -1131,6 +1137,7 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 				name: "Anvil (House Marik)",
 				ideal: "Juggernaut",
 				requirements: [
+					{ type: "Notice", description: "Campaign Operations is a Classic source, but the formation works just as well in Alpha Strike with minimal conversions" },
 					{ type: "Faction", description: "Unique to House Marik" },
 					{ type: "Size", description: "Entire formation must be Size 2 or higher", size: 2, limit: "equalOrGreater", amount: 1, flatAmount: false },
 					{ type: "Armor", description: "All units must have an Armor value of 4 or greater", armor: 4, amount: 1, flatAmount: false },

@@ -76,6 +76,7 @@ export function validateFormation(formation: ListFormation, list: List) {
 						break;
 					case "Commander":
 					case "Faction":
+					case "Notice":
 						primaryRequirements.push({ requirement: requirement.description, met: 0 });
 						break;
 					case "Types":
@@ -176,6 +177,7 @@ export function validateFormation(formation: ListFormation, list: List) {
 							break;
 						case "Commander":
 						case "Faction":
+						case "Notice":
 							secondaryRequirements.push({ requirement: requirement.description, met: 0 });
 							break;
 						case "Types":

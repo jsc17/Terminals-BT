@@ -67,7 +67,7 @@ type FactionRequirement = {
 };
 
 type UniqueRequirement = {
-	type: "Commander" | "Transport" | "AerospacePair" | "SameModel";
+	type: "Commander" | "Transport" | "AerospacePair" | "SameModel" | "Notice";
 	description: string;
 };
 

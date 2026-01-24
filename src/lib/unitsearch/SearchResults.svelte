@@ -218,6 +218,7 @@
 		{#each availabilityResults as result}
 			<p class="availability-result-era">{result.era}:</p>
 			<p>{result.factionList.join(", ")}</p>
+
 			<div class="availability-separator-container">
 				<Separator classes={"separator-border"} />
 			</div>
@@ -343,17 +344,18 @@
 	}
 	.availability-result-container {
 		padding: 16px;
+		max-height: 80dvh;
 		row-gap: 8px;
 		column-gap: 24px;
 		display: grid;
-		grid-template-columns: max-content 1fr;
-		max-height: 90dvh;
+		grid-template-columns: fit-content(40%) 1fr;
+		grid-auto-rows: max-content;
 		overflow: auto;
 	}
 	.availability-result-era {
-		display: flex;
-		justify-content: end;
+		justify-self: end;
 		color: var(--primary);
+		text-align: end;
 	}
 	.availability-separator-container {
 		display: flex;

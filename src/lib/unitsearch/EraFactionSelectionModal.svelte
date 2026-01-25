@@ -17,12 +17,11 @@
 
 	let eraList = $derived(getErasAndFactions());
 
-	let selectedEra = $state<string>();
 	let selectedEras = new SvelteSet<number>();
-	let selectedFaction = $state<string>();
 	let selectedFactions = new SvelteSet<number>();
 	let eraSelectMode = $state<"any" | "every">("any");
 	let factionSelectMode = $state<"any" | "every">("any");
+	let factionFilter = $state<string>();
 
 	let availableFactions = $derived.by(() => {
 		let factions = new Set<number>();
@@ -98,23 +97,6 @@
 		<div class="selection-row inline">
 			{#if eraList.current}
 				<label for="eraSelect">Era: </label>
-				<div class="select-container">
-					<Select
-						name="eraSelect"
-						bind:value={selectedEra}
-						items={[...eraList.current.keys()].map((v) => ({ value: v.toString(), label: eraLookup.get(v) ?? "" }))}
-						type="single"
-						placeholder="Select era"
-					/>
-				</div>
-				<button
-					onclick={() => {
-						if (selectedEra) {
-							selectedEras.add(Number(selectedEra));
-							changed = true;
-						}
-					}}>Add</button
-				>
 
 				<Switch
 					checked={eraSelectMode == "every"}
@@ -136,45 +118,50 @@
 				</Switch>
 			{/if}
 		</div>
-		<div class="selection-box">
-			{#each selectedEras as era}
-				<div class="selection-box-row">
-					<button
-						class="transparent-button"
-						onclick={() => {
-							selectedEras.delete(era);
-							changed = true;
-						}}
-					>
-						<X size="15" />
-					</button>
-					<p>{eraLookup.get(era)}</p>
-				</div>
-			{:else}
-				<div class="selection-box-row">
-					<p style="margin-left: 16px">Any - Select an era above to restrict results</p>
-				</div>
-			{/each}
+		<div class="selection-box-wrapper">
+			<div class="selection-box">
+				{#each eraList.current?.keys() as era}
+					<div class="selection-box-row">
+						<input
+							type="checkbox"
+							id={"era" + era}
+							bind:checked={
+								() => selectedEras.has(era),
+								(checked) => {
+									checked ? selectedEras.add(era) : selectedEras.delete(era);
+									changed = true;
+								}
+							}
+						/>
+						<label for={"era" + era}>{eraLookup.get(era)}</label>
+					</div>
+				{/each}
+			</div>
+			<div class="selection-box">
+				{#each selectedEras as era}
+					<div class="selection-box-row">
+						<button
+							class="transparent-button"
+							onclick={() => {
+								selectedEras.delete(era);
+								changed = true;
+							}}
+						>
+							<X size="15" />
+						</button>
+						<p>{eraLookup.get(era)}</p>
+					</div>
+				{:else}
+					<div class="selection-box-row">
+						<p>•</p>
+						<p>Any Era</p>
+					</div>
+				{/each}
+			</div>
 		</div>
 		<div class="selection-row inline">
 			<label for="factionSelect">Faction:</label>
-			<div class="select-container">
-				<Select
-					name="factionSelect"
-					bind:value={selectedFaction}
-					items={[...availableFactions].map((f) => ({ value: f.toString(), label: factionLookup.get(f) ?? "" })).sort((a, b) => a.label.localeCompare(b.label))}
-					type="single"
-					placeholder="Select faction"
-				/>
-			</div>
-			<button
-				onclick={() => {
-					if (selectedFaction) {
-						selectedFactions.add(Number(selectedFaction));
-						changed = true;
-					}
-				}}>Add</button
-			>
+			<label>Filter <input type="text" bind:value={factionFilter} placeholder="Filter Factions..." /></label>
 			<Switch
 				checked={factionSelectMode == "every"}
 				height={20}
@@ -194,25 +181,49 @@
 				{/snippet}
 			</Switch>
 		</div>
-		<div class="selection-box">
-			{#each selectedFactions as faction}
-				<div class="selection-box-row">
-					<button
-						class="transparent-button"
-						onclick={() => {
-							selectedFactions.delete(faction);
-							changed = true;
-						}}
-					>
-						<X size="15" />
-					</button>
-					<p>{factionLookup.get(faction)}</p>
-				</div>
-			{:else}
-				<div class="selection-box-row">
-					<p style="margin-left: 16px">Any - Select a faction above to restrict results</p>
-				</div>
-			{/each}
+		<div class="selection-box-wrapper">
+			<div class="selection-box">
+				{#each availableFactions as faction}
+					{@const factionName = factionLookup.get(faction) ?? ""}
+					{#if !factionFilter || factionName.toLowerCase().includes(factionFilter.toLowerCase())}
+						<div class="selection-box-row">
+							<input
+								type="checkbox"
+								id={"faction" + faction}
+								bind:checked={
+									() => selectedFactions.has(faction),
+									(checked) => {
+										checked ? selectedFactions.add(faction) : selectedFactions.delete(faction);
+										changed = true;
+									}
+								}
+							/>
+							<label for={"faction" + faction}>{factionName}</label>
+						</div>
+					{/if}
+				{/each}
+			</div>
+			<div class="selection-box">
+				{#each selectedFactions as faction}
+					<div class="selection-box-row">
+						<button
+							class="transparent-button"
+							onclick={() => {
+								selectedFactions.delete(faction);
+								changed = true;
+							}}
+						>
+							<X size="15" />
+						</button>
+						<p>{factionLookup.get(faction)}</p>
+					</div>
+				{:else}
+					<div class="selection-box-row">
+						<p>•</p>
+						<p>Any Faction</p>
+					</div>
+				{/each}
+			</div>
 		</div>
 
 		<div class="inline">
@@ -239,8 +250,8 @@
 				}}>Apply</button
 			>
 		</div>
-	</div>
-</Dialog>
+	</div></Dialog
+>
 
 <style>
 	.selection-body {
@@ -251,20 +262,27 @@
 		display: flex;
 		gap: 8px;
 	}
-	.select-container {
-		width: 200px;
+	.selection-box-wrapper {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+		padding: 4px;
 	}
 	.selection-box {
 		display: grid;
+		grid-template-columns: min-content 1fr;
 		grid-auto-rows: min-content;
 		border: 1px solid var(--border);
 		background-color: var(--surface-color);
 		height: 8em;
 		overflow: auto;
+		max-width: 305px;
 	}
 	.selection-box-row {
-		padding: 4px 8px;
-		display: flex;
+		padding: 2px 8px;
+		display: grid;
+		grid-template-columns: subgrid;
+		grid-column: 1 / -1;
 		gap: 4px;
 		height: min-content;
 		border-bottom: 1px solid var(--border);

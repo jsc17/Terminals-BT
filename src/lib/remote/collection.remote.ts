@@ -1,5 +1,6 @@
 import { form, getRequestEvent, query } from "$app/server";
 import { prisma } from "$lib/server/prisma";
+import { addTagToUnitSchema } from "$lib/types/collection";
 import * as v from "valibot";
 
 export const getTags = query(async () => {
@@ -54,25 +55,23 @@ export const updateTag = form(v.object({ tagToUpdate: v.string(), newName: v.str
 	return { status: "success", message: "Tag updated successfully" };
 });
 
-export const addTagToUnit = form(
-	v.object({ unitId: v.array(v.pipe(v.string(), v.transform(Number))), tag: v.array(v.pipe(v.string(), v.transform(Number))) }),
-	async ({ unitId: units, tag: tags }) => {
-		const { locals } = getRequestEvent();
-		if (!locals.user) return { status: "failed", message: "Invalid User" };
+export const addTagToUnit = form(addTagToUnitSchema, async ({ unitId: units, tag: tags }) => {
+	console.log(units, tags);
+	const { locals } = getRequestEvent();
+	if (!locals.user) return { status: "failed", message: "Invalid User" };
 
-		await Promise.all(
-			units.map(async (id) => {
-				const existingTags = (await prisma.collectionModel.findUnique({ where: { id }, select: { unitTags: { select: { tagId: true } } } }))?.unitTags.map((v) => v.tagId);
-				return prisma.collectionModel.update({
-					where: { id },
-					data: { unitTags: { create: tags.filter((t) => !existingTags?.includes(t)).map((id) => ({ tag: { connect: { id } } })) } }
-				});
-			})
-		);
+	await Promise.all(
+		units.map(async (id) => {
+			const existingTags = (await prisma.collectionModel.findUnique({ where: { id }, select: { unitTags: { select: { tagId: true } } } }))?.unitTags.map((v) => v.tagId);
+			return prisma.collectionModel.update({
+				where: { id },
+				data: { unitTags: { create: tags.filter((t) => !existingTags?.includes(t)).map((id) => ({ tag: { connect: { id } } })) } }
+			});
+		})
+	);
 
-		return { status: "success", message: `${tags.length == 1 ? "Tag" : "Tags"} successfully added to ${units.length == 1 ? "model" : "models"}` };
-	}
-);
+	return { status: "success", message: `${tags.length == 1 ? "Tag" : "Tags"} successfully added to ${units.length == 1 ? "model" : "models"}` };
+});
 
 export const removeTagfromUnit = form(v.object({ unitId: v.string(), tagToRemove: v.string() }), async ({ unitId, tagToRemove }) => {
 	const { locals } = getRequestEvent();

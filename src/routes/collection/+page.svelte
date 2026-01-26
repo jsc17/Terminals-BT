@@ -6,12 +6,14 @@
 	import TagEditModal from "./TagEditModal.svelte";
 	import EditUnitModal from "./EditUnitModal.svelte";
 	import { toastController } from "$lib/stores";
+	import { addTagToUnitSchema } from "$lib/types/collection";
 
 	let user: { username: string | undefined } = getContext("user");
 
 	let nameFilter = $state("");
 	let filteredTags = new SvelteMap<number, string>();
 	let addUnitTags = new SvelteMap<number, string>([[1, "Owned"]]);
+	let checkedUnitIds = new SvelteSet<number>();
 
 	let taggedUnits = getTaggedUnits();
 	let userTags = getTags();
@@ -81,7 +83,17 @@
 						<VirtualList items={filteredUnits} itemsClass="test-collection">
 							{#snippet renderItem(item)}
 								<div class="collection-model-row">
-									<input type="checkbox" name="unitId[]" value={item.id} form="unit-management" />
+									<input
+										type="checkbox"
+										bind:checked={
+											() => checkedUnitIds.has(item.id),
+											(checked) => {
+												checked ? checkedUnitIds.add(item.id) : checkedUnitIds.delete(item.id);
+												console.log(checkedUnitIds);
+											}
+										}
+										form="unit-management"
+									/>
 									<p class="tagged-unit-name">{item.label}</p>
 									<p class="tagged-unit-quantity">x{item.quantity}</p>
 									<div class="selected-tags">
@@ -149,19 +161,28 @@
 						{/each}
 					</div>
 				</div>
-				<div class="inline">
-					<p class="muted">Add selected tags to all checked models:</p>
-					<button
-						{...addTagToUnit.buttonProps.enhance(async ({ submit }) => {
-							try {
-								await submit();
-								toastController.addToast(addTagToUnit.result?.message ?? "Invalid message recieved");
-							} catch (error) {
-								console.log(error);
-							}
-						})}>Add</button
-					>
-				</div>
+			</form>
+
+			<form
+				{...addTagToUnit.preflight(addTagToUnitSchema).enhance(async ({ data, submit }) => {
+					console.log(data);
+					try {
+						await submit();
+						toastController.addToast(addTagToUnit.result?.message ?? "Invalid message recieved");
+					} catch (error) {
+						console.log(error);
+					}
+				})}
+				class="inline"
+			>
+				<p class="muted">Add selected tags to all checked models:</p>
+				<button>Add</button>
+				{#each addUnitTags as [tagId], index}
+					<input {...addTagToUnit.fields.tag[index].as("hidden", tagId.toString())} />
+				{/each}
+				{#each checkedUnitIds as unitId, index}
+					<input {...addTagToUnit.fields.unitId[index].as("hidden", unitId.toString())} />
+				{/each}
 			</form>
 		</section>
 	{/if}
@@ -188,6 +209,8 @@
 		padding: 16px;
 		background-color: var(--surface-color);
 		border: 1px solid var(--border);
+		display: flex;
+		gap: 24px;
 	}
 	.unit-list {
 		flex: 1;
@@ -233,10 +256,14 @@
 			align-self: center;
 		}
 	}
-	.filter-bar,
-	.manage-bar {
+	.filter-bar {
 		display: grid;
 		grid-template-columns: 1fr 1fr 1fr;
+		column-gap: 24px;
+	}
+	.manage-bar {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
 		column-gap: 24px;
 	}
 	.collection-model-row {

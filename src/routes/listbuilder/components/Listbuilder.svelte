@@ -20,7 +20,6 @@
 	import { deserialize } from "$app/forms";
 	import { Collapsible, DropdownMenu } from "$lib/generic";
 	import { getBSCbyId } from "$lib/data/battlefieldSupport";
-	import { dev } from "$app/environment";
 	import { submittedList } from "$lib/stores/listSubmission.svelte";
 	import type { PrintListOutput } from "../printing/types";
 	import { printList } from "../printing/print.remote";

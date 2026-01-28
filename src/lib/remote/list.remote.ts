@@ -1,4 +1,4 @@
-import { getRequestEvent, query } from "$app/server";
+import { command, getRequestEvent, query } from "$app/server";
 import { prisma } from "$lib/server/prisma";
 import { List, type ListCode } from "$lib/types/list.svelte";
 import * as v from "valibot";
@@ -31,6 +31,13 @@ export const loadUserList = query(v.string(), async (listId) => {
 	};
 
 	return listCode;
+});
+
+export const deleteUsersLists = command(v.array(v.string()), async (listsToDelete) => {
+	const { locals } = getRequestEvent();
+	if (!locals.user) return { status: "failed", message: "User not logged in" };
+	await prisma.listV3.deleteMany({ where: { id: { in: listsToDelete }, userId: locals.user.id } });
+	return { status: "success", message: "Lists deleted" };
 });
 
 export const loadSharedList = query(v.string(), async (sharedListId) => {

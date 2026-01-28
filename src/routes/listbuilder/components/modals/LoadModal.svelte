@@ -6,7 +6,7 @@
 	import { getListCodeFromString } from "$lib/utilities/listImport";
 	import { Dialog } from "$lib/generic";
 	import { getRulesByName } from "$lib/types/rulesets";
-	import { getUsersLists, loadUserList } from "$lib/remote/list.remote";
+	import { deleteUsersLists, getUsersLists, loadUserList } from "$lib/remote/list.remote";
 
 	let user: any = getContext("user");
 	type Props = {
@@ -19,6 +19,8 @@
 	let usersLists = $state<{ name: string; rules?: string; id: string; local: boolean }[]>([]);
 	let selectedList = $state<string>();
 	let localListsExist = $state(false);
+	let managingLists = $state(false);
+	let listsToDelete = $state<string[]>([]);
 
 	export function show() {
 		open = true;
@@ -50,29 +52,19 @@
 		return localLists;
 	}
 
-	async function deleteList(idToRemove: string) {
-		// let listToRemove = usersLists.find((list) => {
-		// 	return list.id == idToRemove;
-		// })!;
-		// if (localLists.includes(listToRemove.name)) {
-		// 	localStorage.removeItem(listToRemove.name);
-		// 	localLists = localLists.filter((listName) => {
-		// 		return listName != listToRemove.name;
-		// 	});
-		// 	localStorage.setItem("lists", JSON.stringify(localLists));
-		// 	usersLists = usersLists.filter((list) => {
-		// 		return list.id != idToRemove;
-		// 	});
-		// } else {
-		// 	const response: any = deserialize(await (await fetch("?/deleteList", { method: "POST", body: JSON.stringify({ id: idToRemove }) })).text());
-		// 	if (response.status == 200) {
-		// 		usersLists = usersLists.filter((list) => {
-		// 			return list.id != idToRemove;
-		// 		});
-		// 	} else {
-		// 		alert("List deletion failed. Please try again");
-		// 	}
-		// }
+	async function deleteSelectedLists() {
+		if (confirm(`Are you sure you want to delete ${listsToDelete.length} lists?`)) {
+			const serverListsToDelete = usersLists.filter((list) => !list.local && listsToDelete.includes(list.id));
+			const localListsToDelete = usersLists.filter((list) => list.local && listsToDelete.includes(list.id));
+			deleteUsersLists(serverListsToDelete.map((list) => list.id));
+			localListsToDelete.forEach((list) => {
+				localStorage.removeItem(list.name);
+			});
+
+			localStorage.setItem("lists", JSON.stringify(usersLists.filter((list) => list.local).map((list) => list.name)));
+			usersLists = usersLists.filter((list) => !listsToDelete.includes(list.id));
+			managingLists = false;
+		}
 	}
 
 	async function importList() {
@@ -107,31 +99,56 @@
 		{#if !user.username}
 			<p class="muted">Login to load lists saved to account</p>
 		{/if}
+		{#if localListsExist}
+			<p class="muted">Lists with red names are saved to local device storage . Please consider creating an account to sync them between devices.</p>
+		{/if}
 	{/snippet}
 
 	<div class="load-modal-body">
 		<div class="list-container">
 			<div class="list-item-header">
+				<div></div>
 				<div class="list-item-name center">List Name</div>
 				<div class="center">Rules</div>
 			</div>
-			{#each usersLists as savedList}
-				<input type="radio" class="load-dialog-list-radio" name="selectedList" id={"LoadDialogList" + savedList.id} value={savedList.id} bind:group={selectedList} />
-				<label for={"LoadDialogList" + savedList.id} class="load-dialog-list-label" ondblclick={() => loadList()}>
-					<span class="list-item-name">{savedList.name}</span>
-					<span class="center">{getRulesByName(savedList.rules ?? "noRes")?.shortDisplay ?? "-"}</span>
-				</label>
-			{/each}
+			{#if !managingLists}
+				{#each usersLists as savedList}
+					<div class={{ "list-item-row": true, selected: savedList.id == selectedList }}>
+						<input type="radio" class="load-dialog-list-radio" name="selectedList" id={"LoadDialogList" + savedList.id} value={savedList.id} bind:group={selectedList} />
+						<label for={"LoadDialogList" + savedList.id} class={{ "load-dialog-list-label": true }} ondblclick={() => loadList()}>
+							<span class={{ "list-item-name": true, local: savedList.local }}>{savedList.name}</span>
+							<span class="center">{getRulesByName(savedList.rules ?? "noRes")?.shortDisplay ?? "-"}</span>
+						</label>
+					</div>
+				{/each}
+			{:else}
+				{#each usersLists as savedList}
+					<div class="list-item-row">
+						<input type="checkbox" name="selectedList" id={"LoadDialogList" + savedList.id} value={savedList.id} bind:group={listsToDelete} />
+						<label for={"LoadDialogList" + savedList.id} class={{ "load-dialog-list-label": true, local: savedList.local }} ondblclick={() => loadList()}>
+							<span class="list-item-name">{savedList.name}</span>
+							<span class="center">{getRulesByName(savedList.rules ?? "noRes")?.shortDisplay ?? "-"}</span>
+						</label>
+					</div>
+				{/each}
+			{/if}
 		</div>
-		<button
-			class="load-button"
-			onclick={() => {
-				loadList();
-			}}>Load</button
-		>
-		{#if localListsExist}
-			<p>Lists with red names are saved to local device storage . Please consider creating an account to sync them between devices.</p>
-		{/if}
+		<div class="space-between">
+			{#if !managingLists}
+				<button onclick={() => (managingLists = true)}>Manage Lists</button>
+				<button
+					class="load-button"
+					onclick={() => {
+						loadList();
+					}}>Load</button
+				>
+			{:else}
+				<div>
+					<button onclick={() => (managingLists = false)}>Cancel</button>
+					<button onclick={deleteSelectedLists}>Delete</button>
+				</div>
+			{/if}
+		</div>
 		<br />
 		<p>Paste a list code into the box below to import a saved code:</p>
 		<div class="load-bar">
@@ -156,10 +173,6 @@
 		justify-content: center;
 		align-items: center;
 	}
-
-	.selected {
-		box-shadow: 5px 0px 5px var(--primary) inset;
-	}
 	.local {
 		color: var(--error);
 	}
@@ -174,13 +187,12 @@
 		overflow-y: auto;
 		background-color: var(--surface-color);
 		display: grid;
-		grid-template-columns: 1fr 25%;
+		grid-template-columns: max-content 1fr max-content;
 	}
-	.list-item,
 	.list-item-header {
 		display: grid;
 		grid-template-columns: subgrid;
-		grid-column: span 2;
+		grid-column: span 3;
 		background-color: var(--surface-color);
 		padding: 2px 8px;
 		border-radius: 0;
@@ -192,31 +204,36 @@
 	}
 	.list-item-name {
 		text-align: start;
-		white-space: nowrap;
-		text-overflow: ellipsis;
-		overflow: hidden;
 		width: 100%;
 	}
-	.list-item:hover {
-		background-color: var(--surface-color-extra-light);
+	.list-item-row {
+		display: grid;
+		grid-template-columns: subgrid;
+		grid-column: span 3;
+		padding: 2px;
+	}
+	.list-item-row:nth-of-type(even) {
+		background-color: var(--surface-color-light);
 	}
 	.load-dialog-list-radio {
-		display: none;
+		visibility: hidden;
+		height: 0;
+		width: 0;
 	}
 	.load-dialog-list-label {
-		padding-left: 4px;
 		display: grid;
 		grid-template-columns: subgrid;
 		grid-column: span 2;
 	}
-	.load-dialog-list-label:nth-of-type(even) {
-		background-color: var(--surface-color-light);
-	}
 	.load-dialog-list-label:hover {
 		background-color: var(--surface-color-extra-light);
 	}
-	.load-dialog-list-radio:checked + .load-dialog-list-label {
-		background-color: var(--primary);
-		color: var(--primary-text);
+	input[type="checkbox"],
+	input[type="radio"] {
+		margin: 0;
+		margin-right: 8px;
+	}
+	.selected {
+		box-shadow: inset 0 0 0 1px var(--primary);
 	}
 </style>

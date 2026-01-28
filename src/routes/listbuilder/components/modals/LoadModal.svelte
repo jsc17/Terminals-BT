@@ -5,6 +5,8 @@
 	import { List, type ListCode } from "$lib/types/list.svelte";
 	import { getListCodeFromString } from "$lib/utilities/listImport";
 	import { Dialog } from "$lib/generic";
+	import { getRulesByName } from "$lib/types/rulesets";
+	import { getUsersLists, loadUserList } from "$lib/remote/list.remote";
 
 	let user: any = getContext("user");
 	type Props = {
@@ -14,79 +16,63 @@
 	let { list = $bindable() }: Props = $props();
 
 	let importCode = $state("");
-	let savedLists = $state<ListCode[]>([]);
-	let selectedListIndex = $state(-1);
+	let usersLists = $state<{ name: string; rules?: string; id: string; local: boolean }[]>([]);
+	let selectedList = $state<string>();
 	let localListsExist = $state(false);
-	let localLists = $state<string[]>([]);
 
 	export function show() {
 		open = true;
 		importCode = "";
-		getLists();
-	}
-
-	async function getLists() {
-		savedLists = [];
-		localListsExist = false;
-		//attempt to load saved lists from server
-		if (user.username) {
-			const response: any = deserialize(await (await fetch("?/loadList", { method: "POST", body: "" })).text());
-			if (response.status == 200) {
-				const responseLists = JSON.parse(response.data.lists);
-				for (const tempList of responseLists) {
-					savedLists.push({
-						id: tempList.id,
-						name: tempList.name,
-						eras: JSON.parse(tempList.eras),
-						factions: JSON.parse(tempList.factions),
-						units: JSON.parse(tempList.units),
-						formations: JSON.parse(tempList.formations),
-						sublists: JSON.parse(tempList.sublists),
-						rules: tempList.rules ?? "noRes",
-						lcVersion: tempList.lcVersion,
-						scas: tempList.scas ? JSON.parse(tempList.scas) : undefined,
-						bs: tempList.bs ? JSON.parse(tempList.bs) : undefined
-					});
-				}
+		selectedList = undefined;
+		usersLists = getLocalLists();
+		getUsersLists().then((lists) => {
+			if (lists.status == "success") {
+				usersLists = usersLists.concat(lists.data!.map((list) => ({ ...list, rules: list.rules ?? undefined, local: false })));
+				usersLists = usersLists.sort((a, b) => a.name.localeCompare(b.name));
 			} else {
 				toastController.addToast("Failed to load lists from server, please try again");
 			}
-		}
+		});
+	}
+
+	function getLocalLists() {
 		// load local storage saved sublists
-		localLists = JSON.parse(localStorage.getItem("lists") ?? "[]");
-		if (localLists.length) {
+		let localLists: { name: string; rules?: string; id: string; local: boolean }[] = [];
+		let localListNames = JSON.parse(localStorage.getItem("lists") ?? "[]");
+		if (localListNames.length) {
 			localListsExist = true;
-			for (const localListName of localLists) {
+			for (const localListName of localListNames) {
 				const localData = localStorage.getItem(localListName)!;
 				const listCode = getListCodeFromString(localData);
-				if (listCode) savedLists.push(listCode);
+				if (listCode) localLists.push({ ...listCode, local: true });
 			}
 		}
+		return localLists;
 	}
 
 	async function deleteList(idToRemove: string) {
-		let listToRemove = savedLists.find((list) => {
-			return list.id == idToRemove;
-		})!;
-		if (localLists.includes(listToRemove.name)) {
-			localStorage.removeItem(listToRemove.name);
-			localLists = localLists.filter((listName) => {
-				return listName != listToRemove.name;
-			});
-			localStorage.setItem("lists", JSON.stringify(localLists));
-			savedLists = savedLists.filter((list) => {
-				return list.id != idToRemove;
-			});
-		} else {
-			const response: any = deserialize(await (await fetch("?/deleteList", { method: "POST", body: JSON.stringify({ id: idToRemove }) })).text());
-			if (response.status == 200) {
-				savedLists = savedLists.filter((list) => {
-					return list.id != idToRemove;
-				});
-			} else {
-				alert("List deletion failed. Please try again");
-			}
-		}
+		// let listToRemove = usersLists.find((list) => {
+		// 	return list.id == idToRemove;
+		// })!;
+		// if (localLists.includes(listToRemove.name)) {
+		// 	localStorage.removeItem(listToRemove.name);
+		// 	localLists = localLists.filter((listName) => {
+		// 		return listName != listToRemove.name;
+		// 	});
+		// 	localStorage.setItem("lists", JSON.stringify(localLists));
+		// 	usersLists = usersLists.filter((list) => {
+		// 		return list.id != idToRemove;
+		// 	});
+		// } else {
+		// 	const response: any = deserialize(await (await fetch("?/deleteList", { method: "POST", body: JSON.stringify({ id: idToRemove }) })).text());
+		// 	if (response.status == 200) {
+		// 		usersLists = usersLists.filter((list) => {
+		// 			return list.id != idToRemove;
+		// 		});
+		// 	} else {
+		// 		alert("List deletion failed. Please try again");
+		// 	}
+		// }
 	}
 
 	async function importList() {
@@ -101,7 +87,16 @@
 	}
 
 	async function loadList() {
-		await list.loadList(savedLists[selectedListIndex]);
+		const listData = usersLists.find((list) => {
+			return list.id == selectedList;
+		})!;
+		if (listData.local) {
+			const listCode = getListCodeFromString(localStorage.getItem(listData.name)!);
+			if (listCode) list.loadList(listCode);
+		} else {
+			const listCode = await loadUserList(listData.id);
+			if (listCode) list.loadList(listCode);
+		}
 		open = false;
 	}
 	let open = $state(false);
@@ -115,30 +110,18 @@
 	{/snippet}
 
 	<div class="load-modal-body">
-		<div class="table-container">
-			<table class="saved-lists">
-				<colgroup>
-					<col />
-					<col style="width:20px" />
-				</colgroup>
-				<tbody>
-					{#each savedLists as savedList, index}
-						<tr
-							id={index.toString()}
-							class:selected={selectedListIndex == index}
-							onclick={() => {
-								selectedListIndex = index;
-							}}
-							ondblclick={() => {
-								loadList();
-							}}
-						>
-							<td class:local={localLists.includes(savedList.name)}>{savedList.name}</td>
-							<td><button onclick={() => deleteList(savedList.id)}>-</button></td>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
+		<div class="list-container">
+			<div class="list-item-header">
+				<div class="list-item-name center">List Name</div>
+				<div class="center">Rules</div>
+			</div>
+			{#each usersLists as savedList}
+				<input type="radio" class="load-dialog-list-radio" name="selectedList" id={"LoadDialogList" + savedList.id} value={savedList.id} bind:group={selectedList} />
+				<label for={"LoadDialogList" + savedList.id} class="load-dialog-list-label" ondblclick={() => loadList()}>
+					<span class="list-item-name">{savedList.name}</span>
+					<span class="center">{getRulesByName(savedList.rules ?? "noRes")?.shortDisplay ?? "-"}</span>
+				</label>
+			{/each}
 		</div>
 		<button
 			class="load-button"
@@ -173,34 +156,67 @@
 		justify-content: center;
 		align-items: center;
 	}
-	.table-container {
-		min-width: 100%;
-		min-height: 200px;
-		max-height: 30em;
-		overflow-y: auto;
-		background-color: var(--surface-color);
-	}
-	table,
-	tbody {
-		width: 100%;
-		border-collapse: separate;
-		border-spacing: 0 4px;
-	}
 
-	tbody tr:nth-child(even) {
-		background-color: var(--surface-color-light);
-	}
 	.selected {
 		box-shadow: 5px 0px 5px var(--primary) inset;
-	}
-	td {
-		overflow: hidden;
-		padding-left: 8px;
 	}
 	.local {
 		color: var(--error);
 	}
 	.load-button {
 		width: fit-content;
+	}
+
+	.list-container {
+		min-width: 100%;
+		min-height: 200px;
+		max-height: 30em;
+		overflow-y: auto;
+		background-color: var(--surface-color);
+		display: grid;
+		grid-template-columns: 1fr 25%;
+	}
+	.list-item,
+	.list-item-header {
+		display: grid;
+		grid-template-columns: subgrid;
+		grid-column: span 2;
+		background-color: var(--surface-color);
+		padding: 2px 8px;
+		border-radius: 0;
+		border-bottom: 1px solid var(--border);
+	}
+	.list-item-header {
+		background-color: var(--surface-color-dark);
+		border-bottom: 3px solid var(--border);
+	}
+	.list-item-name {
+		text-align: start;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		width: 100%;
+	}
+	.list-item:hover {
+		background-color: var(--surface-color-extra-light);
+	}
+	.load-dialog-list-radio {
+		display: none;
+	}
+	.load-dialog-list-label {
+		padding-left: 4px;
+		display: grid;
+		grid-template-columns: subgrid;
+		grid-column: span 2;
+	}
+	.load-dialog-list-label:nth-of-type(even) {
+		background-color: var(--surface-color-light);
+	}
+	.load-dialog-list-label:hover {
+		background-color: var(--surface-color-extra-light);
+	}
+	.load-dialog-list-radio:checked + .load-dialog-list-label {
+		background-color: var(--primary);
+		color: var(--primary-text);
 	}
 </style>

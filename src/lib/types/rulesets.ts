@@ -10,6 +10,7 @@ type Limit = {
 export type Ruleset = {
 	name: string;
 	display: string;
+	shortDisplay: string;
 	singleEraFaction?: boolean;
 	eraFactionRestriction?: boolean;
 	maxPv?: number;
@@ -39,6 +40,7 @@ export const ruleSets: Ruleset[] = [
 	{
 		name: "noRes",
 		display: "No Restrictions",
+		shortDisplay: "-",
 		eraFactionRestriction: true,
 		sublistScenarios: []
 	},
@@ -74,6 +76,7 @@ export const ruleSets: Ruleset[] = [
 	{
 		name: "wn350v3",
 		display: "Wolfnet 350 v3.0",
+		shortDisplay: "WN350v3",
 		singleEraFaction: true,
 		eraFactionRestriction: true,
 		maxPv: 350,
@@ -118,6 +121,7 @@ export const ruleSets: Ruleset[] = [
 	{
 		name: "wn350v3d",
 		display: "Wolfnet 350 v3.0 Doubles",
+		shortDisplay: "WN350v3 Dbls",
 		singleEraFaction: true,
 		eraFactionRestriction: true,
 		maxPv: 250,
@@ -162,6 +166,7 @@ export const ruleSets: Ruleset[] = [
 	{
 		name: "wn350v3e",
 		display: "Wolfnet 350 v3.0 Epic",
+		shortDisplay: "WN350v3 Epic",
 		singleEraFaction: true,
 		eraFactionRestriction: true,
 		maxPv: 600,
@@ -208,6 +213,7 @@ export const ruleSets: Ruleset[] = [
 	{
 		name: "asopen",
 		display: "Alpha Strike Open",
+		shortDisplay: "ASOpen",
 		singleEraFaction: true,
 		eraFactionRestriction: true,
 		maxPv: 400,

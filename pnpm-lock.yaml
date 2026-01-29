@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@humanspeak/svelte-virtual-list':
-        specifier: ^0.2.6
-        version: 0.2.6(svelte@5.48.2)
+        specifier: ^0.3.6
+        version: 0.3.6(svelte@5.48.2)
       '@node-rs/argon2':
         specifier: ^2.0.2
         version: 2.0.2
@@ -579,8 +579,8 @@ packages:
     resolution: {integrity: sha512-/zUx+yOsIrG4Y43Eh2peDeKCxlRt/gET6aHfaKpuq267qXdYDFViVHfMaLyygZOnl0kGWxFIgsBy8QFuTLUXEQ==}
     engines: {node: '>=18.18.0'}
 
-  '@humanspeak/svelte-virtual-list@0.2.6':
-    resolution: {integrity: sha512-nfD81b4LQw2bTSFYV/M0ky/pnUkfI0KYr5qCVJHZe6h3dUtXoNIhoxypI6JGBcpW3D8jN5Y53NOkfDggJNb5nA==}
+  '@humanspeak/svelte-virtual-list@0.3.6':
+    resolution: {integrity: sha512-ls5FicD5b8nXi87GG7mj9nIoTkIl0M/JkmmE21KWnTabtDRnqEjZ7kOsU3ZEAWc0/HW8PlRwF50yqKwpaLeBMw==}
     peerDependencies:
       svelte: ^5.0.0
 
@@ -3843,7 +3843,7 @@ snapshots:
       '@humanfs/core': 0.19.1
       '@humanwhocodes/retry': 0.4.3
 
-  '@humanspeak/svelte-virtual-list@0.2.6(svelte@5.48.2)':
+  '@humanspeak/svelte-virtual-list@0.3.6(svelte@5.48.2)':
     dependencies:
       esm-env: 1.2.2
       svelte: 5.48.2

@@ -36,7 +36,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@humanspeak/svelte-virtual-list": "^0.2.6",
+		"@humanspeak/svelte-virtual-list": "^0.3.6",
 		"@node-rs/argon2": "^2.0.2",
 		"@oslojs/crypto": "^1.0.1",
 		"@oslojs/encoding": "^1.1.0",

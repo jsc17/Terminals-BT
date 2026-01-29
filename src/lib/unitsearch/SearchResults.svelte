@@ -292,7 +292,6 @@
 		width: 100%;
 		grid-template-columns: 5% 1fr repeat(5, 7%) 12% 15%;
 		grid-template-rows: 1fr 1fr;
-		overflow-x: hidden;
 		padding-top: 4px;
 		border-bottom: 1px solid var(--border);
 		border-left: 1px solid var(--border);

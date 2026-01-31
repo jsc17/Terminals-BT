@@ -27,14 +27,16 @@
 		importCode = "";
 		selectedList = undefined;
 		usersLists = getLocalLists();
-		getUsersLists().then((lists) => {
-			if (lists.status == "success") {
-				usersLists = usersLists.concat(lists.data!.map((list) => ({ ...list, rules: list.rules ?? undefined, local: false })));
-				usersLists = usersLists.sort((a, b) => a.name.localeCompare(b.name));
-			} else {
-				toastController.addToast("Failed to load lists from server, please try again");
-			}
-		});
+		if (user.username) {
+			getUsersLists().then((lists) => {
+				if (lists.status == "success") {
+					usersLists = usersLists.concat(lists.data!.map((list) => ({ ...list, rules: list.rules ?? undefined, local: false })));
+					usersLists = usersLists.sort((a, b) => a.name.localeCompare(b.name));
+				} else {
+					toastController.addToast("Failed to load lists from server, please try again");
+				}
+			});
+		}
 	}
 
 	function getLocalLists() {

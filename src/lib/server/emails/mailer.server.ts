@@ -1,22 +1,23 @@
 import nodemailer from "nodemailer";
 import { render } from "svelty-email";
 import { ResetPassword } from "./templates";
+import { env } from "$env/dynamic/private";
 
 export const transporter = nodemailer.createTransport({
-	host: process.env.EMAIL_HOST,
+	host: env.EMAIL_HOST,
 	port: 587,
 	auth: {
-		user: process.env.EMAIL,
-		pass: process.env.EMAIL_PASSWORD
+		user: env.EMAIL,
+		pass: env.EMAIL_PASSWORD
 	}
 });
 
 export const tournamentEmailTransporter = nodemailer.createTransport({
-	host: process.env.TOURNAMENT_EMAIL_HOST,
+	host: env.TOURNAMENT_EMAIL_HOST,
 	port: 587,
 	auth: {
-		user: process.env.TOURNAMENT_EMAIL_SENDER,
-		pass: process.env.TOURNAMENT_EMAIL_PASSWORD
+		user: env.TOURNAMENT_EMAIL_SENDER,
+		pass: env.TOURNAMENT_EMAIL_PASSWORD
 	}
 });
 

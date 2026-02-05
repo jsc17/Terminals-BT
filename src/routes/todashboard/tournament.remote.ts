@@ -27,11 +27,26 @@ export const createTournament = form(FormCreationSchema, async (data) => {
 		});
 
 		await tournamentEmailTransporter.sendMail({
-			from: process.env.TOURNAMENT_EMAIL_SENDER, // sender address
-			to: "jonathan.colton@yahoo.com", // list of receivers
+			from: env.TOURNAMENT_EMAIL_SENDER, // sender address
+			to: env.ADMIN_EMAIL_ADDRESS, // list of receivers
 			subject: `New Tournament pending approval`, // Subject line
 			html: `<p>A new tournament has been created: ${tournament.id}</p>`
 		});
+
+		if (env.NEW_TOURNAMENT_WEBHOOK) {
+			await fetch(env.NEW_TOURNAMENT_WEBHOOK, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({
+					content: `@here: New tournament created: ${tournament.id}`,
+					allowed_mentions: {
+						parse: ["everyone"]
+					}
+				})
+			});
+		}
 
 		return { status: "success", data: tournament.id };
 	} catch (error) {

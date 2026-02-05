@@ -11,6 +11,7 @@ import { nanoid } from "nanoid";
 import ListApproval from "$lib/server/emails/templates/ListApproval.svelte";
 import ListSubmissionConfirmation from "$lib/server/emails/templates/ListSubmissionConfirmation.svelte";
 import { SubmitListSchema } from "./schema/submitList";
+import { env } from "$env/dynamic/private";
 
 export const getApprovedTournamentList = query(async () => {
 	const data = await prisma.tournament.findMany({
@@ -61,7 +62,7 @@ export const submitList = form(SubmitListSchema, async ({ tournamentId, playerNa
 			}
 		});
 		const info = await tournamentEmailTransporter.sendMail({
-			from: process.env.TOURNAMENT_EMAIL_SENDER, // sender address
+			from: env.TOURNAMENT_EMAIL_SENDER, // sender address
 			to: tournament.email, // list of receivers
 			subject: tournament.emailSubject ?? `${tournament.name} submission`, // Subject line
 			html: emailHTML,
@@ -80,7 +81,7 @@ export const submitList = form(SubmitListSchema, async ({ tournamentId, playerNa
 			}
 		});
 		await tournamentEmailTransporter.sendMail({
-			from: process.env.TOURNAMENT_EMAIL_SENDER, // sender address
+			from: env.TOURNAMENT_EMAIL_SENDER, // sender address
 			to: playerEmail, // list of receivers
 			subject: `${tournament.name} submission confirmation`, // Subject line
 			html: confirmationHTML,
@@ -105,7 +106,7 @@ export const sendApproval = query(v.string(), async (id) => {
 	});
 
 	await tournamentEmailTransporter.sendMail({
-		from: process.env.TOURNAMENT_EMAIL_SENDER, // sender address
+		from: env.TOURNAMENT_EMAIL_SENDER, // sender address
 		to: participant.email, // list of receivers
 		subject: `${participant.tournament.name} submission`, // Subject line
 		html: emailHTML

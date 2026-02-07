@@ -72,6 +72,10 @@ export class List {
 		)
 	);
 
+	setName(name: string) {
+		this.details.name = name;
+	}
+
 	setOptions(newRules: string) {
 		this.rules = newRules;
 	}

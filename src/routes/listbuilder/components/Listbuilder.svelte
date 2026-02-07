@@ -13,7 +13,7 @@
 	} from "./";
 	import { type ListFormation, List } from "$lib/types/list.svelte";
 	import { ResultList } from "$lib/types/resultList.svelte";
-	import { ruleSets } from "$lib/types/rulesets";
+	import { getRulesByName, ruleSets } from "$lib/types/rulesets";
 	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
 	import { appWindow, toastController } from "$lib/stores";
 	import { Dialog } from "$lib/generic";
@@ -28,6 +28,7 @@
 	import { goto } from "$app/navigation";
 	import PlayModal from "../../../lib/sharedDialogs/PlayModal.svelte";
 	import { page } from "$app/state";
+	import EditListModal from "./modals/EditListModal.svelte";
 
 	type Props = {
 		listCloseCallback: (id: string) => void;
@@ -48,6 +49,7 @@
 	let bsListOpen = $state(true);
 	let sublistModalOpen = $state(false);
 	let printModalOpen = $state(false);
+	let editModalOpen = $state(false);
 
 	let dropTargetStyle = { outline: "solid var(--primary)" };
 	let flipDurationMs = 100;
@@ -134,20 +136,8 @@
 <div class="card listbuilder">
 	<div class="list-header">
 		<div class="list-info">
-			<input id="listName" type="text" placeholder="List name" bind:value={list.details.name} />
-			<div class="inline">
-				<label for="rules">Rules:</label>
-				<select
-					bind:value={list.rules}
-					onchange={() => {
-						resultList.setOptions(list.rules);
-					}}
-				>
-					{#each ruleSets as rules}
-						<option value={rules.name}>{rules.display}</option>
-					{/each}
-				</select>
-			</div>
+			<p>{list.details.name}</p>
+			<p><span class="muted">Rules:</span> {getRulesByName(list.rules ?? "noRes")?.display}</p>
 		</div>
 		<div class="list-info">
 			<div class="list-stats">
@@ -199,6 +189,7 @@
 
 				<DropdownMenu
 					items={[
+						{ type: "item", label: "Edit List", onSelect: () => (editModalOpen = true) },
 						{ type: "item", label: "Load / Import List", onSelect: () => loadModal?.show() },
 						{ type: "item", label: "Save / Export List", onSelect: () => saveModal?.show() },
 						{ type: "item", label: "Print List", onSelect: () => (printModalOpen = true) },
@@ -370,6 +361,7 @@
 <LoadModal bind:this={loadModal} bind:list></LoadModal>
 <SaveModal bind:this={saveModal} bind:list></SaveModal>
 <UnitCustomizationModal bind:this={unitCustomizationModal} bind:list></UnitCustomizationModal>
+<EditListModal bind:open={editModalOpen} {list} />
 
 <PlayModal bind:this={playModal} />
 

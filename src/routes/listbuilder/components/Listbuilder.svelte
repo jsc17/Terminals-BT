@@ -140,6 +140,9 @@
 			<p><span class="muted">Rules:</span> {getRulesByName(list.rules ?? "noRes")?.display}</p>
 		</div>
 		<div class="list-info">
+			<p class="muted" style="font-size: 0.8em;">List renaming and rules selection is now in the list dropdown menu</p>
+		</div>
+		<div class="list-info">
 			<div class="list-stats">
 				{#if list.options?.maxPv}
 					<p class:errors={list.pv > list.options.maxPv}>PV: {list.pv}/{list.options.maxPv}</p>
@@ -378,7 +381,7 @@
 		flex-direction: column;
 		border-bottom: 1px solid var(--border);
 		padding-bottom: 4px;
-		gap: 8px;
+		gap: 2px;
 	}
 	.list-scas {
 		display: flex;

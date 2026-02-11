@@ -165,6 +165,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
+		overflow-y: auto;
 	}
 	input[type="text"] {
 		width: 75%;
@@ -185,11 +186,11 @@
 	.list-container {
 		min-width: 100%;
 		min-height: 200px;
-		max-height: 30em;
 		overflow-y: auto;
 		background-color: var(--surface-color);
 		display: grid;
 		grid-template-columns: max-content 1fr max-content;
+		grid-auto-rows: max-content;
 	}
 	.list-item-header {
 		display: grid;

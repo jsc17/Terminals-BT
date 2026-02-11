@@ -54,6 +54,8 @@
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		z-index: 50;
+		display: flex;
+		flex-direction: column;
 	}
 	:global([data-dialog-overlay][data-state="open"]) {
 		position: fixed;

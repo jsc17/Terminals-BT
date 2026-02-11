@@ -68,7 +68,8 @@
 {#if sharedListCode}
 	{#if list.unitCount > 0}
 		<div class="share-header-bar">
-			<h1 class="share-list-name">{list.details.name} - {list.unitCount} units - {list.pv}pv</h1>
+			<h1 class="share-list-name">{list.details.name}</h1>
+			<h2>{list.rules} - {list.unitCount} units - {list.pv}pv</h2>
 
 			<div class="share-list-buttons">
 				<div>

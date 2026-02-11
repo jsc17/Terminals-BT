@@ -1,6 +1,6 @@
 import { query, prerender } from "$app/server";
 import { prisma } from "$lib/server/prisma";
-import * as z from "zod";
+import * as v from "valibot";
 
 export const getErasAndFactions = query(async () => {
 	const results = await prisma.factionInEra.findMany({ select: { eraId: true, faction: true }, orderBy: [{ era: { order: "asc" } }, { faction: { name: "asc" } }] });
@@ -31,7 +31,7 @@ export const getFactions = prerender(async () => {
 	return factions;
 });
 
-export const getFactionsInEra = query(z.number().array(), async (eras: number[]) => {
+export const getFactionsInEra = query(v.array(v.number()), async (eras: number[]) => {
 	const factionList = await prisma.factionInEra.findMany({
 		where: {
 			eraId: { in: eras }
@@ -50,7 +50,7 @@ export const getFactionsInEra = query(z.number().array(), async (eras: number[])
 	return factionList;
 });
 
-export const getGeneralId = query(z.object({ era: z.number(), faction: z.number() }), async (data) => {
+export const getGeneralId = query(v.object({ era: v.number(), faction: v.number() }), async (data) => {
 	const id = await prisma.factionInEra.findFirst({
 		where: { eraId: data.era, factionId: data.faction },
 		select: {
@@ -60,12 +60,12 @@ export const getGeneralId = query(z.object({ era: z.number(), faction: z.number(
 	return id;
 });
 
-export const getEraName = query(z.number(), async (idToFind) => {
+export const getEraName = query(v.number(), async (idToFind) => {
 	const result = await prisma.era.findUnique({ where: { id: idToFind }, select: { name: true } });
 	return result?.name ?? "Not Found";
 });
 
-export const getFactionName = query(z.number(), async (idToFind) => {
+export const getFactionName = query(v.number(), async (idToFind) => {
 	const result = await prisma.faction.findUnique({ where: { id: idToFind }, select: { name: true } });
 	return result?.name ?? "Not Found";
 });

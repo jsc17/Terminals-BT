@@ -162,8 +162,8 @@
 
 <style>
 	.load-modal-body {
-		display: flex;
-		flex-direction: column;
+		display: grid;
+		grid-auto-rows: max-content;
 		gap: 8px;
 		overflow-y: auto;
 	}
@@ -185,12 +185,12 @@
 
 	.list-container {
 		min-width: 100%;
-		min-height: 200px;
 		overflow-y: auto;
 		background-color: var(--surface-color);
 		display: grid;
 		grid-template-columns: max-content 1fr max-content;
 		grid-auto-rows: max-content;
+		max-height: 50dvh;
 	}
 	.list-item-header {
 		display: grid;

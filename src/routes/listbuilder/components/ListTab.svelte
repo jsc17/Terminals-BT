@@ -27,9 +27,12 @@
 		resultList.loadResults(list.details.eras, list.details.factions, list.details.general);
 	});
 
-	onMount(() => {
-		resultList.setOptions(list.rules);
-	});
+	watch(
+		() => list.rules,
+		() => {
+			resultList.setOptions(list.rules);
+		}
+	);
 </script>
 
 <main>

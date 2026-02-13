@@ -42,7 +42,7 @@
 		"@oslojs/encoding": "^1.1.0",
 		"@prisma/adapter-mariadb": "^7.1.0",
 		"@prisma/client": "^7.2.0",
-		"@sqlite.org/sqlite-wasm": "3.51.1-build2",
+		"@sqlite.org/sqlite-wasm": "3.51.2-build6",
 		"@sveltejs/adapter-node": "^5.4.0",
 		"@sveltejs/vite-plugin-svelte": "^6.2.1",
 		"@types/blob-stream": "^0.1.33",
@@ -72,8 +72,7 @@
 		"v8": "^0.1.0",
 		"valibot": "^1.2.0",
 		"virtua": "^0.41.5",
-		"vite-plugin-cross-origin-isolation": "^0.1.6",
-		"zod": "^4.2.0"
+		"vite-plugin-cross-origin-isolation": "^0.1.6"
 	},
 	"pnpm": {
 		"onlyBuiltDependencies": [

@@ -292,10 +292,6 @@
 </main>
 
 <style>
-	.validation-body {
-		display: grid;
-		height: max-content;
-	}
 	.contents {
 		display: flex;
 		flex-direction: column;
@@ -318,7 +314,6 @@
 		margin-right: 16px;
 	}
 	main {
-		overflow-y: auto;
 		scrollbar-gutter: stable;
 		padding: 16px;
 	}

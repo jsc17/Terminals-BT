@@ -27,8 +27,8 @@ importers:
         specifier: ^7.2.0
         version: 7.2.0(prisma@7.2.0(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(typescript@5.9.3))(typescript@5.9.3)
       '@sqlite.org/sqlite-wasm':
-        specifier: 3.51.1-build2
-        version: 3.51.1-build2
+        specifier: 3.51.2-build6
+        version: 3.51.2-build6
       '@sveltejs/adapter-node':
         specifier: ^5.4.0
         version: 5.4.0(@sveltejs/kit@2.50.1(@sveltejs/vite-plugin-svelte@6.2.1(svelte@5.48.2)(vite@7.3.0(@types/node@22.19.3)(jiti@2.6.1)))(svelte@5.48.2)(typescript@5.9.3)(vite@7.3.0(@types/node@22.19.3)(jiti@2.6.1)))
@@ -119,9 +119,6 @@ importers:
       vite-plugin-cross-origin-isolation:
         specifier: ^0.1.6
         version: 0.1.6
-      zod:
-        specifier: ^4.2.0
-        version: 4.2.0
     devDependencies:
       '@eslint/compat':
         specifier: ^1.4.1
@@ -1190,9 +1187,9 @@ packages:
     resolution: {integrity: sha512-4aUIteuyxtBUhVdiQqcDhKFitwfd9hqoSDYY2KRXiWtgoWJ9Bmise+KfEPDiVHWeJepvF8xJO9/9+WDIciMFFw==}
     engines: {node: '>=18.0.0'}
 
-  '@sqlite.org/sqlite-wasm@3.51.1-build2':
-    resolution: {integrity: sha512-lVPTBlFsEijJ3wuoIbMfC9QMZKfL8huHN8D/lijNKoVxPqUDNvDtXse0wafe7USSmyfKAMb1JZ3ISSr/Vgbn5w==}
-    hasBin: true
+  '@sqlite.org/sqlite-wasm@3.51.2-build6':
+    resolution: {integrity: sha512-5ibsgipkqcLINZ5qNSp5KfrtL6KwiNVtwBksNO6zhTghhLmEf3/u1sPoAkgH5RzuLpMw7zi50IWgkZ0WhfqpaA==}
+    engines: {node: '>=22'}
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
@@ -3006,9 +3003,6 @@ packages:
   zimmerframe@1.1.4:
     resolution: {integrity: sha512-B58NGBEoc8Y9MWWCQGl/gq9xBCe4IiKM0a2x7GZdQKOW5Exr8S1W24J6OgM1njK8xCRGvAJIL/MxXHf6SkmQKQ==}
 
-  zod@4.2.0:
-    resolution: {integrity: sha512-Bd5fw9wlIhtqCCxotZgdTOMwGm1a0u75wARVEY9HMs1X17trvA/lMi4+MGK5EUfYkXVTbX8UDiDKW4OgzHVUZw==}
-
 snapshots:
 
   '@aws-crypto/sha256-browser@5.2.0':
@@ -4263,7 +4257,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@sqlite.org/sqlite-wasm@3.51.1-build2': {}
+  '@sqlite.org/sqlite-wasm@3.51.2-build6': {}
 
   '@standard-schema/spec@1.1.0': {}
 
@@ -6175,5 +6169,3 @@ snapshots:
       grammex: 3.1.12
 
   zimmerframe@1.1.4: {}
-
-  zod@4.2.0: {}

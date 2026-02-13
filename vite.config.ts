@@ -3,7 +3,6 @@ import { defineConfig } from "vite";
 import { sveltePhosphorOptimize } from "phosphor-svelte/vite";
 // @ts-ignore
 import crossOriginIsolation from "vite-plugin-cross-origin-isolation";
-
 import fs from "fs";
 
 export default defineConfig({

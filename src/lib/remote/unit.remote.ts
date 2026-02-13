@@ -1,11 +1,10 @@
 import { query } from "$app/server";
-import * as z from "zod";
 import * as v from "valibot";
 import { prisma } from "$lib/server/prisma";
 import type { MulUnit } from "$lib/types/listTypes";
 import { handleParse } from "$lib/utilities/abilityUtilities";
 
-export const getMULDataFromId = query.batch(z.number(), async (ids) => {
+export const getMULDataFromId = query.batch(v.number(), async (ids) => {
 	const mulData = await prisma.unit.findMany({ where: { mulId: { in: ids } } });
 	const lookup = new Map(mulData.map((d) => [d.mulId, d]));
 
@@ -88,7 +87,7 @@ export const getCustomUnitData = query.batch(v.number(), async (ids) => {
 	};
 });
 
-export const getMULDataFromName = query(z.string(), async (name) => {
+export const getMULDataFromName = query(v.string(), async (name) => {
 	const custom = await prisma.customCard.findFirst({ where: { name }, select: { mulId: true } });
 	if (custom) return getCustomUnitData(custom.mulId);
 	const unit = await prisma.unit.findFirst({ where: { name }, select: { mulId: true } });

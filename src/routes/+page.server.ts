@@ -62,7 +62,7 @@ export const actions = {
 		await fs.writeFile(`./files/cached/${filename}`, JSON.stringify(units));
 	},
 	getAllUnits: async () => {
-		const unitList = await prisma.unit.findMany();
+		const unitList = await prisma.unit.findMany({ orderBy: [{ tonnage: { sort: "asc", nulls: "last" } }, { name: "asc" }] });
 		return { unitList };
 	},
 	getCustomUnits: async (event) => {
@@ -183,7 +183,7 @@ export const actions = {
 
 		try {
 			if (eras.length == 0 && factions.length == 0) {
-				unitList = await prisma.unit.findMany({});
+				unitList = await prisma.unit.findMany({ orderBy: [{ tonnage: { sort: "asc", nulls: "last" } }, { name: "asc" }] });
 				uniqueList = await prisma.unit.findMany({
 					where: {
 						availability: {
@@ -194,7 +194,7 @@ export const actions = {
 			} else {
 				unitList = await prisma.unit.findMany({
 					where: searchConditions,
-					orderBy: { tonnage: "asc" }
+					orderBy: [{ tonnage: { sort: "asc", nulls: "last" } }, { name: "asc" }]
 				});
 				uniqueList = await prisma.unit.findMany({
 					where: uniqueConditions,
@@ -210,7 +210,7 @@ export const actions = {
 								}
 							}
 						},
-						orderBy: { tonnage: "asc" }
+						orderBy: [{ tonnage: { sort: "asc", nulls: "last" } }, { name: "asc" }]
 					});
 				}
 			}

@@ -3,6 +3,7 @@ import DatabaseWorker from "./db.worker.ts?worker";
 import { WorkerMessageType, type WorkerMessage, type WorkerResponse } from "./types";
 import * as v from "valibot";
 import { getAllUnits } from "$lib/remote/unit.remote";
+import type { MulUnit } from "$lib/types/listTypes";
 
 const log = (...args: any[]) => console.log("Main:", ...args);
 
@@ -13,7 +14,7 @@ export async function initWorker() {
 	log("Initializing worker");
 	worker = new DatabaseWorker();
 	worker.onmessage = (e: MessageEvent<WorkerResponse>) => {
-		log(e.data);
+		// log(e.data);
 		const cb = cbMap.get(e.data.id);
 		if (cb) {
 			cb(e.data.result);
@@ -47,15 +48,19 @@ export function getCount() {
 	});
 }
 
-export function getUnitByMulId(mulId: number) {
-	return new Promise((resolve) => {
+export async function getMULDataFromIdLocal(mulId: number) {
+	return new Promise<MulUnit>(async (resolve) => {
 		const id = crypto.randomUUID();
+
 		cbMap.set(id, resolve);
 		const message: WorkerMessage = {
 			id,
 			type: WorkerMessageType.DB_GET_UNIT,
 			payload: mulId
 		};
+		while (!worker) {
+			await new Promise((resolve) => setTimeout(resolve, 50));
+		}
 		worker.postMessage(message);
 	});
 }

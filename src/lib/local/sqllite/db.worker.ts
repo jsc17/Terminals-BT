@@ -1,5 +1,8 @@
 import sqlite3InitModule from "@sqlite.org/sqlite-wasm";
 import { WorkerMessageType, type WorkerMessage, type WorkerResponse } from "./types";
+import type { MulUnit } from "$lib/types/listTypes";
+import { handleParse } from "$lib/utilities/abilityUtilities";
+import { convertUnitDataToMulUnit } from "$lib/utilities/unitData";
 
 const log = (...args: any[]) => console.log("Worker:", ...args);
 const error = (...args: any[]) => console.error("Worker:", ...args);
@@ -7,7 +10,6 @@ const error = (...args: any[]) => console.error("Worker:", ...args);
 let db: any;
 
 async function initDb() {
-	console.log("initializing");
 	try {
 		// @ts-ignore
 		const sqlite3 = await sqlite3InitModule({
@@ -30,10 +32,11 @@ async function initDb() {
 	}
 }
 
+initDb();
+
 self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
-	console.log("message received");
 	if (!db) await initDb();
-	log(e.data);
+	// log(e.data);
 	switch (e.data.type) {
 		case WorkerMessageType.DB_INIT:
 			const units = e.data.payload;
@@ -53,6 +56,11 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
 		case WorkerMessageType.DB_COUNT:
 			const result = db.exec(`SELECT COUNT(*) FROM Unit`, { returnValue: "resultRows" })[0][0];
 			self.postMessage({ id: e.data.id, result });
+			break;
+		case WorkerMessageType.DB_GET_UNIT:
+			const unitData = db.exec(`SELECT * FROM Unit WHERE mulId = ${e.data.payload}`, { rowMode: "object", returnValue: "resultRows" })[0];
+			const mulUnit = convertUnitDataToMulUnit(unitData);
+			self.postMessage({ id: e.data.id, result: mulUnit });
 			break;
 		default:
 			log(`Unknown message type: ${e.data.type}`);

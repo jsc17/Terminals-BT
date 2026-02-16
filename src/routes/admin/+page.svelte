@@ -4,6 +4,7 @@
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import SendNotification from "./SendNotification.svelte";
 	import { cacheImages, uploadAmmo, getImage } from "./admin.remote";
+	import { getMULDataFromIdLocal } from "$lib/local/sqllite/local-db";
 
 	async function loadUnits() {
 		const links: { type: string; link: string }[] = [];
@@ -99,6 +100,8 @@
 	}
 
 	let imageData = $derived(getImage.result?.image);
+	let mulId = $state(0);
+	let unitData = $state<any>(null);
 </script>
 
 <main>
@@ -136,6 +139,19 @@
 	<button onclick={() => uploadAmmo()}>Upload Ammo</button>
 
 	<button onclick={() => cacheImages()}>Cache Images</button>
+
+	<input type="number" bind:value={mulId} />
+	<button
+		onclick={() => {
+			getMULDataFromIdLocal(mulId)
+				.then((data) => {
+					console.log(data);
+				})
+				.catch((error) => {
+					console.error(error);
+				});
+		}}>Get Unit Data</button
+	>
 </main>
 
 <style>

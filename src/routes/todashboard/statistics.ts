@@ -1,4 +1,5 @@
-import { getCustomUnitData, getMULDataFromId } from "$lib/remote/unit.remote";
+import { getCustomUnitData } from "$lib/remote/unit.remote";
+import { getMULDataFromIdLocal } from "$lib/local/sqllite/local-db";
 import type { MulUnit } from "$lib/types/listTypes";
 import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 import { type TournamentStatistics } from "./types";
@@ -13,7 +14,7 @@ export async function calculateTournamentStatistics(participants: { name: string
 			let tempId = unit.id;
 			if (tempId == -1) tempId = -3;
 			if (tempId == -2) tempId = -4;
-			const data = tempId >= 0 ? await getMULDataFromId(tempId) : await getCustomUnitData(tempId);
+			const data = tempId >= 0 ? await getMULDataFromIdLocal(tempId) : await getCustomUnitData(tempId);
 			const cost = getNewSkillCost(unit.sk, data!.pv);
 			unitData.push({ player: participant.name, data: data!, skill: unit.sk, pv: cost });
 			listPV += cost;

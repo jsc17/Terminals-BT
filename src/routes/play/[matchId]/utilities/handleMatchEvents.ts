@@ -1,14 +1,12 @@
 import { toastController } from "$lib/stores";
-import { safeParseJSON } from "$lib/utilities/utilities";
 import { nanoid } from "nanoid";
 import { getPlayerData, getMatchUnitData, getMatchDetails, getTeamData, getMyData, getMatchList } from "../remote/matchData.remote";
 import type { PlayFormation, PlayList, PlayUnit, PlayUnitData } from "../../types/types";
-import type { MulUnit } from "$lib/types/listTypes";
 import { SvelteMap } from "svelte/reactivity";
 import { getMulImage } from "$lib/remote/mulImages.remote";
-import { getMULDataFromId } from "$lib/remote/unit.remote";
 import type { MatchCrit, MatchFormation, MatchLog, MatchUnit, UsersInMatch, MatchList } from "$lib/generated/prisma/browser";
 import { goto } from "$app/navigation";
+import { getMULDataFromIdLocal } from "$lib/local/sqllite/local-db";
 
 export function processMessage(
 	message: string,
@@ -106,7 +104,7 @@ export async function initializePlayerList(
 					},
 					customization: { spa: u.spas?.split(","), ammo: u.ammo?.split(",") }
 				};
-				const reference = await getMULDataFromId(u.mulId);
+				const reference = await getMULDataFromIdLocal(u.mulId);
 				const image = await getMulImage(reference?.imageLink ?? "");
 				matchUnits.set(u.id, { data: unitData, reference, image: image.image, owner: list.player.playerNickname });
 

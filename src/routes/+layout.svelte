@@ -56,7 +56,6 @@
 	settings.current = setContext("listbuilderSettings", settings.current);
 
 	onMount(() => {
-		console.log(crossOriginIsolated);
 		initWorker();
 	});
 </script>

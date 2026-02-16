@@ -11,7 +11,7 @@
 	import { DropdownMenu } from "$lib/generic";
 	import PlayModal from "$lib/sharedDialogs/PlayModal.svelte";
 	import PrintModal from "$lib/sharedDialogs/PrintModal.svelte";
-	import { db } from "$lib/offline/db";
+	import { db } from "$lib/local/dexie/db";
 	import DisplayOptionsPopover from "./DisplayOptionsPopover.svelte";
 
 	const shareCode = page.url.searchParams.get("share");

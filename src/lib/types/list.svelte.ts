@@ -4,7 +4,7 @@ import { getGeneralList, getNewSkillCost } from "$lib/utilities/genericBattletec
 import { getRulesByName } from "$lib/types/rulesets";
 import { nanoid } from "nanoid";
 import { getCustomUnitData, getMULDataFromId, getUnitAvailability } from "$lib/remote/unit.remote";
-import { db } from "$lib/offline/db";
+import { db } from "$lib/local/dexie/db";
 import { validateRules } from "$lib/rules/validateList";
 
 export type { ListCode, ListCodeUnit, ListUnit, ListFormation, SCA, MulUnit, Sublist, SublistStats };

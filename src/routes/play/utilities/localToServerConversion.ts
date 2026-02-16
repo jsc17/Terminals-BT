@@ -1,4 +1,4 @@
-import { db } from "$lib/offline/db";
+import { db } from "$lib/local/dexie/db";
 import { type ConvertMatchInput } from "../schema/matchlistSchema";
 import { convertLocalMatchToServer } from "../remote/matchlist.remote";
 import { toastController } from "$lib/stores";

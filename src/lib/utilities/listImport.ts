@@ -1,7 +1,7 @@
 import { nanoid } from "nanoid";
 import type { ListFormation, ListCode, ListCodeUnit, Sublist } from "$lib/types/listTypes";
 import { List } from "$lib/types/list.svelte";
-import { db } from "$lib/offline/db";
+import { db } from "$lib/local/dexie/db";
 
 export async function loadExistingListsFromLocalStorage(): Promise<List[]> {
 	const activeLists: List[] = [];

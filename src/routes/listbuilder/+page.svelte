@@ -6,7 +6,7 @@
 	import { Tabs, ContextMenu } from "bits-ui";
 	import { loadExistingListsFromLocalStorage } from "$lib/utilities/listImport";
 	import { toastController } from "$lib/stores";
-	import { db } from "$lib/offline/db";
+	import { db } from "$lib/local/dexie/db";
 	import { FilePlus } from "phosphor-svelte";
 
 	let activeLists = $state<List[]>([]);

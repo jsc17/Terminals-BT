@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { setContext } from "svelte";
+	import { onMount, setContext } from "svelte";
 	import "$lib/styles/global.css";
 	import "$lib/styles/generic.css";
 	import "$lib/styles/theme.css";
@@ -13,6 +13,7 @@
 	import { PersistedState } from "runed";
 	import { SettingsSchema, type SettingsOutput } from "./listbuilder/types/settings.js";
 	import { parse } from "valibot";
+	import { initWorker } from "$lib/local/sqllite/local-db.js";
 
 	const { data, children } = $props();
 	let user = $state({ username: data.username });
@@ -53,6 +54,11 @@
 	});
 	settings.current = parse(SettingsSchema, settings.current);
 	settings.current = setContext("listbuilderSettings", settings.current);
+
+	onMount(() => {
+		console.log(crossOriginIsolated);
+		initWorker();
+	});
 </script>
 
 <Toast></Toast>

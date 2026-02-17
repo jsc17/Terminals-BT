@@ -61,10 +61,6 @@ export const actions = {
 
 		await fs.writeFile(`./files/cached/${filename}`, JSON.stringify(units));
 	},
-	getAllUnits: async () => {
-		const unitList = await prisma.unit.findMany({ orderBy: [{ tonnage: { sort: "asc", nulls: "last" } }, { name: "asc" }] });
-		return { unitList };
-	},
 	getCustomUnits: async (event) => {
 		let { unitPacks } = await event.request.json();
 		if (!unitPacks) return { customUnits: [] };

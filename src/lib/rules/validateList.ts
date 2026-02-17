@@ -1,8 +1,8 @@
-import { isAvailable, isUnique } from "$lib/remote/unit.remote";
 import type { MulUnit } from "$lib/types/listTypes";
 import { getRulesByName } from "$lib/types/rulesets";
 import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 import { failsMax, failsMin } from "./utilities";
+import { isUnitAvailableLocal, isUnitUniqueLocal } from "$lib/local/sqllite/local-db";
 
 export async function validateRules(unitList: { id: string; skill: number; data: MulUnit }[], eras: number[], factions: number[], selectedRules: string) {
 	const rulesData = getRulesByName(selectedRules)!;
@@ -16,7 +16,8 @@ export async function validateRules(unitList: { id: string; skill: number; data:
 		for (const unit of unitList) {
 			const cost = getNewSkillCost(unit.skill, unit.data.pv);
 			listTotalPv += cost;
-			if (rulesData.eraFactionRestriction && unit.data.mulId > 0 && !(await isAvailable({ mulId: unit.data.mulId, eras, factions }))) {
+			const available = await isUnitAvailableLocal({ unitId: unit.data.id, eras, factions });
+			if (rulesData.eraFactionRestriction && unit.data.mulId > 0 && !available) {
 				if (unit.data.mulId < 0) {
 					issueMessage = "If a battlefield support unit is showing as unavailable, it might have been added using a different rules selection. Remove and re-add the unit";
 				}
@@ -43,7 +44,7 @@ export async function validateRules(unitList: { id: string; skill: number; data:
 				}
 				issueUnits.add(unit.id!);
 			}
-			if (rulesData.disallowUnique && (await isUnique({ mulId: unit.data.mulId, eras }))) {
+			if (rulesData.disallowUnique && (await isUnitUniqueLocal({ unitId: unit.data.id, eras }))) {
 				if (issueList.has("Unique Units")) {
 					issueList.get("Unique Units")?.add(unit.data.name);
 				} else {
@@ -294,11 +295,11 @@ export async function validateRules(unitList: { id: string; skill: number; data:
 		if (rulesData.uniqueMaxLimit) {
 			const uniquesInList: { id: string; skill: number; data: MulUnit }[] = [];
 			for (const unit of unitList) {
-				if (await isUnique({ mulId: unit.data.mulId, eras })) {
+				if (await isUnitUniqueLocal({ unitId: unit.data.id, eras })) {
 					uniquesInList.push(unit);
 				}
 			}
-			if (uniquesInList.length > 1) {
+			if (uniquesInList.length > rulesData.uniqueMaxLimit) {
 				for (const unit of uniquesInList) {
 					if (issueList.has("Unique Unit limit")) {
 						issueList.get("Unique Unit limit")?.add(unit.data.name);

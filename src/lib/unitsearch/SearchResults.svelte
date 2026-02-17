@@ -5,12 +5,13 @@
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import type { List } from "$lib/types/list.svelte";
 	import DamageSortPopover from "./DamageSortPopover.svelte";
-	import { eraLookup } from "$lib/data/erasFactionLookup";
+	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
 	import { Dialog, Separator, DropdownMenu } from "$lib/generic";
 	import { exportArrayToCSV } from "$lib/utilities/export";
 	import VirtualList from "@humanspeak/svelte-virtual-list";
 	import { GearSix } from "phosphor-svelte";
+	import { getUnitAvailabilityLocal } from "$lib/local/sqllite/local-db";
 
 	type Props = {
 		list?: List;
@@ -41,7 +42,7 @@
 	let listWidth = $state(0);
 
 	let availabilityDialogOpen = $state(false);
-	let availabilityResults = $state<{ era: string; factionList: string[] }[]>([]);
+	let availabilityResults = $state<{ era: string; factions: string[] }[]>([]);
 
 	function sort(key: string) {
 		if (resultList.sort.key != key) {
@@ -55,22 +56,12 @@
 			}
 		}
 	}
-	async function showAvailability() {
-		return async ({ result }: { result: ActionResult }) => {
-			if (result.type == "success") {
-				const order = [...eraLookup].map(([key, value]) => {
-					return value;
-				});
-				availabilityResults = result.data?.unitAvailability
-					.sort((a: any, b: any) => {
-						return order.indexOf(a.era) - order.indexOf(b.era);
-					})
-					.map((list: { era: string; factionList: string[] }) => {
-						return { era: list.era, factionList: list.factionList.sort() };
-					});
-				availabilityDialogOpen = true;
-			}
-		};
+	async function showAvailability(id: number) {
+		const result = await getUnitAvailabilityLocal(id);
+		availabilityResults = result.map((r) => {
+			return { era: eraLookup.get(r.era) ?? `Unknown Era ${r.era}`, factions: r.factions.map((f) => factionLookup.get(f) ?? `Unknown Faction ${f}`) };
+		});
+		availabilityDialogOpen = true;
 	}
 </script>
 
@@ -187,10 +178,7 @@
 											<p>{createAbilityLineString(item.abilities ?? [])}</p>
 										</div>
 										<p class="role-text">Role: <span class="muted">{item.role}</span></p>
-										<form method="post" action="/?/getUnitAvailability" use:enhance={showAvailability} class="align-center">
-											<input type="hidden" name="mulId" value={item.mulId ?? 0} />
-											<button class="availability-button">Availability</button>
-										</form>
+										<button class="availability-button" onclick={() => showAvailability(item.id)}>Availability</button>
 									</div>
 								{:else}
 									<p>Unit didn't load correctly. You should probably never see this message. If you do, refresh the page</p>
@@ -217,7 +205,7 @@
 	<div class="availability-result-container">
 		{#each availabilityResults as result}
 			<p class="availability-result-era">{result.era}:</p>
-			<p>{result.factionList.join(", ")}</p>
+			<p>{result.factions.join(", ")}</p>
 
 			<div class="availability-separator-container">
 				<Separator classes={"separator-border"} />

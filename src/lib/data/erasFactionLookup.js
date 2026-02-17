@@ -14,6 +14,8 @@ export const eraLookup = new Map([
 	[257, "ilClan"]
 ]);
 
+export const eraOrder = [10, 11, 255, 256, 13, 247, 14, 15, 254, 16, 257];
+
 export const factionLookup = new Map([
 	[102, "Alyina Mercantile League"],
 	[78, "Calderon Protectorate"],

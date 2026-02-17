@@ -1,11 +1,9 @@
 <script lang="ts">
 	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import { enhance } from "$app/forms";
-	import { type ActionResult } from "@sveltejs/kit";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import type { List } from "$lib/types/list.svelte";
 	import DamageSortPopover from "./DamageSortPopover.svelte";
-	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
+	import { eraLookup, factionLookup, eraOrder } from "$lib/data/erasFactionLookup";
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
 	import { Dialog, Separator, DropdownMenu } from "$lib/generic";
 	import { exportArrayToCSV } from "$lib/utilities/export";
@@ -58,9 +56,14 @@
 	}
 	async function showAvailability(id: number) {
 		const result = await getUnitAvailabilityLocal(id);
-		availabilityResults = result.map((r) => {
-			return { era: eraLookup.get(r.era) ?? `Unknown Era ${r.era}`, factions: r.factions.map((f) => factionLookup.get(f) ?? `Unknown Faction ${f}`) };
-		});
+		availabilityResults = result
+			.sort((a, b) => eraOrder.indexOf(a.era) - eraOrder.indexOf(b.era))
+			.map((r) => {
+				return {
+					era: eraLookup.get(r.era) ?? `Unknown Era ${r.era}`,
+					factions: r.factions.map((f) => factionLookup.get(f) ?? `Unknown Faction ${f}`).sort((a, b) => a.localeCompare(b))
+				};
+			});
 		availabilityDialogOpen = true;
 	}
 </script>

@@ -83,21 +83,33 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
 		case WorkerMessageType.IS_AVAILABLE:
 			const { unitId, factions, eras } = payload;
 			const available =
-				db.exec(`SELECT * FROM Availability WHERE unitId = ${unitId} AND faction IN (${factions}) AND era IN (${eras})`, {
-					rowMode: "object",
-					returnValue: "resultRows"
-				})[0] != undefined;
+				db.exec(`SELECT * FROM Availability WHERE unitId = ${unitId} AND faction IN (${factions}) AND era IN (${eras})`, { rowMode: "object", returnValue: "resultRows" })[0] !=
+				undefined;
 			self.postMessage({ type: WorkerMessageType.IS_AVAILABLE_RESPONSE, id: e.data.id, payload: available });
 			break;
 		case WorkerMessageType.GET_UNIT_AVAILABILITY:
 			const unitAvailability = db
-				.exec(`SELECT era, group_concat(faction) as "factions" FROM Availability WHERE unitId = ${payload} group by era`, {
-					rowMode: "object",
-					returnValue: "resultRows"
-				})
+				.exec(
+					`SELECT Availability.era, group_concat(Availability.faction) as "factions" FROM Availability INNER join Era on Availability.era = Era.id WHERE Availability.unitId = ${payload} group by Availability.era order by Era."order"`,
+					{ rowMode: "object", returnValue: "resultRows" }
+				)
 				.map((row: { era: number; factions: string }) => ({ era: row.era, factions: row.factions.split(",").map((f) => Number(f)) }));
 			self.postMessage({ type: WorkerMessageType.GET_UNIT_AVAILABILITY_RESPONSE, id: e.data.id, payload: unitAvailability });
 			break;
+		case WorkerMessageType.GET_RESULT_LIST: {
+			const { factions, eras, eraSearchType, factionSearchType } = payload;
+			let sql = `SELECT * FROM Unit`;
+			if (factions.length || eras.length) {
+				sql += ` WHERE id IN (SELECT unitId FROM Availability WHERE `;
+				if (factions.length) sql += `faction IN (${factions.join(",")})`;
+				if (factions.length && eras.length) sql += ` AND `;
+				if (eras.length) sql += `era IN (${eras.join(",")})`;
+				sql += `)`;
+			}
+			const result = db.exec(sql, { rowMode: "object", returnValue: "resultRows" });
+			self.postMessage({ type: WorkerMessageType.GET_RESULT_LIST_RESPONSE, id: e.data.id, payload: result.length });
+			break;
+		}
 		default:
 			log(`Unknown message type: ${e.data.type}`);
 	}

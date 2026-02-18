@@ -89,3 +89,7 @@ export async function isUnitUniqueLocal(data: { unitId: number; eras: number[] }
 export async function getUnitAvailabilityLocal(unitId: number) {
 	return sendMessage<{ era: number; factions: number[] }[]>({ type: WorkerMessageType.GET_UNIT_AVAILABILITY, payload: unitId });
 }
+export async function getResultListLocal(data: { factions: number[]; eras: number[]; eraSearchType: "any" | "every"; factionSearchType: "any" | "every" }) {
+	log(data);
+	return sendMessage<MulUnit[]>({ type: WorkerMessageType.GET_RESULT_LIST, payload: data });
+}

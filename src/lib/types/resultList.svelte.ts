@@ -1,10 +1,10 @@
 import type { MulUnit } from "$lib/types/listTypes";
-import { getGeneralList } from "$lib/utilities/genericBattletechUtilities";
 import type { Filter } from "./filter";
 import { deserialize } from "$app/forms";
 import { filters as filtersImport, additionalFilters as additionalFiltersImport } from "$lib/data/filters";
 import type { Ruleset } from "./rulesets";
 import { ruleSets } from "./rulesets";
+import { getResultListLocal } from "$lib/local/sqllite/local-db";
 
 type SearchConstraint = {
 	equals?: number;
@@ -215,6 +215,19 @@ export class ResultList {
 			).text()
 		);
 
+		console.log(response);
+		getResultListLocal({
+			eras: $state.snapshot(this.#eras),
+			factions: $state.snapshot(this.#factions).concat($state.snapshot(this.general)),
+			eraSearchType: this.eraSearchType,
+			factionSearchType: this.factionSearchType
+		}).then((result) => {
+			console.log(result);
+		});
+		getResultListLocal({ eras: $state.snapshot(this.#eras), factions: [4], eraSearchType: this.eraSearchType, factionSearchType: this.factionSearchType }).then((result) => {
+			console.log(result);
+		});
+
 		this.resultList = [];
 		this.uniqueList = [];
 
@@ -227,6 +240,7 @@ export class ResultList {
 
 			const availableUnits = this.loadUnitsFromResponse(unitList).concat(this.loadUnitsFromResponse(generalList));
 			this.resultList = [...new Map(availableUnits.map((u) => [u.id, u]))].map((v) => v[1]);
+			console.log(this.resultList.length);
 		}
 
 		return response.data.message;

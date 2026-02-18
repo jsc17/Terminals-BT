@@ -83,7 +83,6 @@ export const actions = {
 		let generalList: any[] = [];
 
 		let searchConditions: any;
-		let uniqueConditions: any;
 
 		if (!eras.length) {
 			eraSearchType = "any";
@@ -101,14 +100,6 @@ export const actions = {
 					}
 				}
 			};
-			uniqueConditions = {
-				availability: {
-					some: {
-						era: eras.length == 0 ? undefined : { in: eras },
-						faction: 4
-					}
-				}
-			};
 		} else if (eraSearchType == "every" && factionSearchType == "any") {
 			searchConditions = {
 				AND: eras.map((era: number) => {
@@ -121,14 +112,6 @@ export const actions = {
 						}
 					};
 				})
-			};
-			uniqueConditions = {
-				availability: {
-					some: {
-						era: eras.length == 0 ? undefined : { in: eras },
-						faction: 4
-					}
-				}
 			};
 		} else if (eraSearchType == "every" && factionSearchType == "every") {
 			searchConditions = {
@@ -145,15 +128,6 @@ export const actions = {
 					});
 				})
 			};
-
-			uniqueConditions = {
-				availability: {
-					some: {
-						era: eras.length == 0 ? undefined : { in: eras },
-						faction: 4
-					}
-				}
-			};
 		} else if (eraSearchType == "any" && factionSearchType == "every") {
 			searchConditions = {
 				AND: factions.map((faction: number) => {
@@ -167,16 +141,16 @@ export const actions = {
 					};
 				})
 			};
-			uniqueConditions = {
-				availability: {
-					some: {
-						era: eras.length == 0 ? undefined : { in: eras },
-						faction: 4
-					}
-				}
-			};
 		}
 
+		const uniqueConditions = {
+			availability: {
+				some: {
+					era: eras.length == 0 ? undefined : { in: eras },
+					faction: 4
+				}
+			}
+		};
 		try {
 			if (eras.length == 0 && factions.length == 0) {
 				unitList = await prisma.unit.findMany({ orderBy: [{ tonnage: { sort: "asc", nulls: "last" } }, { name: "asc" }] });

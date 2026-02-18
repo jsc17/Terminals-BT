@@ -83,16 +83,16 @@
 	}
 </script>
 
-{#snippet damageValue(original: number, min: boolean, current: number)}
+{#snippet damageValue(original: number, min: boolean, current: number, currentMin?: boolean)}
 	{#if options.renderOriginal || options.renderOriginal === undefined}
 		<p class="damage-value">
 			<span class="bold">{original}{min ? "*" : ""}</span>
 			{#if critCount.current.weapon || ((reference?.subtype == "CV" || reference?.subtype == "SV") && critCount.current.engine)}
-				(<span class="damaged-stat">{current}</span>)
+				(<span class="damaged-stat">{current}{currentMin ? "*" : ""}</span>)
 			{/if}
 		</p>
 	{:else}
-		<p class="bold" class:damaged-stat={critCount.current.weapon}>{current}{min && !critCount.current.weapon ? "*" : ""}</p>
+		<p class="bold" class:damaged-stat={critCount.current.weapon}>{current}{currentMin ? "*" : ""}</p>
 	{/if}
 {/snippet}
 
@@ -180,28 +180,27 @@
 					{/if}
 					<div>
 						<p>S (+0)</p>
-						{@render damageValue(reference.damageS ?? 0, reference.damageSMin ?? false, firepowerRemaining.s)}
+						{@render damageValue(reference.damageS ?? 0, reference.damageSMin ?? false, firepowerRemaining.s, firepowerRemaining.sMin)}
 					</div>
 					<div>
 						<p>M (+2)</p>
-						{@render damageValue(reference.damageM ?? 0, reference.damageMMin ?? false, firepowerRemaining.m)}
+						{@render damageValue(reference.damageM ?? 0, reference.damageMMin ?? false, firepowerRemaining.m, firepowerRemaining.mMin)}
 					</div>
 					<div>
 						<p>L (+4)</p>
-						{@render damageValue(reference.damageL ?? 0, reference.damageLMin ?? false, firepowerRemaining.l)}
+						{@render damageValue(reference.damageL ?? 0, reference.damageLMin ?? false, firepowerRemaining.l, firepowerRemaining.lMin)}
 					</div>
 					{#if typeIncludes([...aeroTypes], reference)}
 						<div>
 							<p>E (+6)</p>
-							{@render damageValue(reference.damageE ?? 0, reference.damageEMin ?? false, firepowerRemaining.e)}
+							{@render damageValue(reference.damageE ?? 0, reference.damageEMin ?? false, firepowerRemaining.e, firepowerRemaining.eMin)}
 						</div>
 					{/if}
 				</div>
 				{#if typeIncludes([...mechTypes, ...aeroTypes], reference)}
 					<button onclick={handleHeat} class="unit-card-block unit-heat-block">
 						<div class="flex-4">
-							<p>OV:</p>
-							{@render damageValue(reference.overheat ?? 0, false, firepowerRemaining.ov)}
+							<p>OV: <span class="bold">{reference.overheat}</span></p>
 						</div>
 						<div class="heatscale">
 							<p>Heat Scale:</p>

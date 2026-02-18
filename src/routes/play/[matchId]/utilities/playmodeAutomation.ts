@@ -56,7 +56,7 @@ export function calculateHealth(unit: PlayUnitData, reference?: MulUnit) {
 }
 
 export function calculateFirepower(unit: PlayUnitData, reference?: MulUnit) {
-	const firePower: { damaged: boolean; m: number; mMin: boolean; l: number; lMin: boolean; e: number; eMin: boolean; s: number; sMin: boolean; ov: number } = {
+	const firePower: { damaged: boolean; m: number; mMin: boolean; l: number; lMin: boolean; e: number; eMin: boolean; s: number; sMin: boolean } = {
 		damaged: false,
 		s: reference?.damageS ?? 0,
 		sMin: reference?.damageSMin ?? false,
@@ -65,21 +65,39 @@ export function calculateFirepower(unit: PlayUnitData, reference?: MulUnit) {
 		l: reference?.damageL ?? 0,
 		lMin: reference?.damageLMin ?? false,
 		e: reference?.damageE ?? 0,
-		eMin: reference?.damageEMin ?? false,
-		ov: reference?.damageOV ?? 0
+		eMin: reference?.damageEMin ?? false
 	};
 	for (const crit of unit.current.crits) {
 		if (crit.type == "weapon") {
 			firePower.damaged = true;
-			firePower.s = firePower.s == 0 ? 0 : firePower.s - 1;
-			firePower.sMin = false;
-			firePower.m = firePower.m == 0 ? 0 : firePower.m - 1;
-			firePower.mMin = false;
-			firePower.l = firePower.l == 0 ? 0 : firePower.l - 1;
-			firePower.lMin = false;
-			firePower.e = firePower.e == 0 ? 0 : firePower.e - 1;
-			firePower.eMin = false;
-			firePower.ov = firePower.ov == 0 ? 0 : firePower.ov - 1;
+			if (firePower.s == 1) {
+				firePower.s = 0;
+				firePower.sMin = true;
+			} else {
+				firePower.s = firePower.s == 0 ? 0 : firePower.s - 1;
+				firePower.sMin = false;
+			}
+			if (firePower.m == 1) {
+				firePower.m = 0;
+				firePower.mMin = true;
+			} else {
+				firePower.m = firePower.m == 0 ? 0 : firePower.m - 1;
+				firePower.mMin = false;
+			}
+			if (firePower.l == 1) {
+				firePower.l = 0;
+				firePower.lMin = true;
+			} else {
+				firePower.l = firePower.l == 0 ? 0 : firePower.l - 1;
+				firePower.lMin = false;
+			}
+			if (firePower.e == 1) {
+				firePower.e = 0;
+				firePower.eMin = true;
+			} else {
+				firePower.e = firePower.e == 0 ? 0 : firePower.e - 1;
+				firePower.eMin = false;
+			}
 		}
 		if ((crit.type == "engine" && reference?.subtype == "CV") || reference?.subtype == "SV") {
 			firePower.damaged = true;

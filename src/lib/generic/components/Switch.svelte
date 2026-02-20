@@ -8,15 +8,16 @@
 		rightValue: Snippet;
 		onCheckedChange?: () => void;
 		height?: number;
+		disabled?: boolean;
 	};
 
-	let { checked = $bindable(), leftValue, rightValue, onCheckedChange, height = 15 }: Props = $props();
+	let { checked = $bindable(), leftValue, rightValue, onCheckedChange, height = 15, disabled = false }: Props = $props();
 </script>
 
 <div class="switch-body">
 	{@render leftValue()}
 	<div class="switch-container" style={`height: ${height}px`}>
-		<Switch.Root bind:checked {onCheckedChange}>
+		<Switch.Root bind:checked {onCheckedChange} {disabled}>
 			<Switch.Thumb></Switch.Thumb>
 		</Switch.Root>
 	</div>

@@ -4,7 +4,8 @@ import { deserialize } from "$app/forms";
 import { filters as filtersImport, additionalFilters as additionalFiltersImport } from "$lib/data/filters";
 import type { Ruleset } from "./rulesets";
 import { ruleSets } from "./rulesets";
-import { getResultListLocal } from "$lib/local/sqllite/local-db";
+import { getResultListLocal, getUniqueListLocal } from "$lib/local/sqllite/local-db";
+import { convertUnitDataToMulUnit } from "$lib/utilities/unitData";
 
 type SearchConstraint = {
 	equals?: number;
@@ -64,7 +65,7 @@ function compareValues(searchTerm?: SearchConstraint, unitAbilityValue?: number)
 export class ResultList {
 	#eras = $state<number[]>([]);
 	#factions = $state<number[]>([]);
-	general = $state<number>(-1);
+	general = $state<number>();
 
 	eraSearchType = $state<"any" | "every">("any");
 	factionSearchType = $state<"any" | "every">("any");
@@ -129,15 +130,7 @@ export class ResultList {
 		this.general = general;
 
 		this.status = new Promise((resolve, reject) => {
-			this.loadUnits().then((message) => {
-				if (message == "Units Loaded") {
-					resolve(message);
-				} else if (message == "No Units Found") {
-					resolve(message);
-				} else {
-					reject("Units failed to load");
-				}
-			});
+			this.loadUnits().then((result) => resolve("Units Loaded"));
 		});
 	}
 
@@ -200,50 +193,21 @@ export class ResultList {
 	}
 
 	async loadUnits() {
-		const response: any = deserialize(
-			await (
-				await fetch("/?/getUnits", {
-					method: "POST",
-					body: JSON.stringify({
-						eras: this.#eras,
-						factions: this.#factions,
-						general: this.general,
-						eraSearchType: this.eraSearchType,
-						factionSearchType: this.factionSearchType
-					})
-				})
-			).text()
-		);
-
-		console.log(response);
-		getResultListLocal({
-			eras: $state.snapshot(this.#eras),
-			factions: $state.snapshot(this.#factions).concat($state.snapshot(this.general)),
-			eraSearchType: this.eraSearchType,
-			factionSearchType: this.factionSearchType
-		}).then((result) => {
-			console.log(result);
-		});
-		getResultListLocal({ eras: $state.snapshot(this.#eras), factions: [4], eraSearchType: this.eraSearchType, factionSearchType: this.factionSearchType }).then((result) => {
-			console.log(result);
-		});
-
 		this.resultList = [];
-		this.uniqueList = [];
-
-		if (response.data.message == "Units Loaded") {
-			const unitList = response.data.unitList;
-			this.uniqueList = response.data.uniqueList.map((unit: any) => {
-				return unit.mulId;
-			});
-			const generalList = response.data.generalList;
-
-			const availableUnits = this.loadUnitsFromResponse(unitList).concat(this.loadUnitsFromResponse(generalList));
-			this.resultList = [...new Map(availableUnits.map((u) => [u.id, u]))].map((v) => v[1]);
-			console.log(this.resultList.length);
-		}
-
-		return response.data.message;
+		await getResultListLocal({
+			eras: $state.snapshot(this.#eras),
+			factions: $state
+				.snapshot(this.#factions)
+				.concat($state.snapshot(this.general) ?? [])
+				.filter((f) => f != -1),
+			eraSearchType: this.#eras.length > 1 ? this.eraSearchType : "any",
+			factionSearchType: this.#factions.length > 1 ? this.factionSearchType : "any"
+		}).then((result) => {
+			for (const unit of result) {
+				this.resultList.push(convertUnitDataToMulUnit(unit));
+			}
+		});
+		this.uniqueList = await getUniqueListLocal($state.snapshot(this.#eras));
 	}
 
 	async setOptions(newRules: string) {

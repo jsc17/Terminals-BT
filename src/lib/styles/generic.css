@@ -227,3 +227,6 @@
 [data-switch-thumb][data-state="checked"] {
 	transform: translateX(calc(92cqw - 90cqh));
 }
+[data-switch-thumb][data-disabled] {
+	background-color: var(--surface-color-light-text-color);
+}

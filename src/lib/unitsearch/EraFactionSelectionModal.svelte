@@ -94,28 +94,29 @@
 		Edit Era/Faction Selection
 	{/snippet}
 	<div class="selection-body">
-		<div class="selection-row inline">
+		<div class="space-between">
 			{#if eraList.current}
 				<label for="eraSelect">Era: </label>
-
-				<Switch
-					checked={eraSelectMode == "every"}
-					height={20}
-					onCheckedChange={() => {
-						if (eraSelectMode == "any") {
-							eraSelectMode = "every";
-						} else {
-							eraSelectMode = "any";
-						}
-					}}
-				>
-					{#snippet leftValue()}
-						<p>Any</p>
-					{/snippet}
-					{#snippet rightValue()}
-						<p>Every</p>
-					{/snippet}
-				</Switch>
+				{#if selectedEras.size > 1}
+					<Switch
+						checked={eraSelectMode == "every"}
+						height={20}
+						onCheckedChange={() => {
+							if (eraSelectMode == "any") {
+								eraSelectMode = "every";
+							} else {
+								eraSelectMode = "any";
+							}
+						}}
+					>
+						{#snippet leftValue()}
+							<p>Any</p>
+						{/snippet}
+						{#snippet rightValue()}
+							<p>Every</p>
+						{/snippet}
+					</Switch>
+				{/if}
 			{/if}
 		</div>
 		<div class="selection-box-wrapper">
@@ -159,27 +160,31 @@
 				{/each}
 			</div>
 		</div>
-		<div class="selection-row inline">
-			<label for="factionSelect">Faction:</label>
-			<label>Filter <input type="text" bind:value={factionFilter} placeholder="Filter Factions..." /></label>
-			<Switch
-				checked={factionSelectMode == "every"}
-				height={20}
-				onCheckedChange={() => {
-					if (factionSelectMode == "any") {
-						factionSelectMode = "every";
-					} else {
-						factionSelectMode = "any";
-					}
-				}}
-			>
-				{#snippet leftValue()}
-					<p>Any</p>
-				{/snippet}
-				{#snippet rightValue()}
-					<p>Every</p>
-				{/snippet}
-			</Switch>
+		<div class="space-between">
+			<div class="inline center">
+				<p>Faction:</p>
+				<label>Filter <input type="text" bind:value={factionFilter} placeholder="Filter Factions..." /></label>
+			</div>
+			{#if selectedFactions.size > 1}
+				<Switch
+					checked={factionSelectMode == "every"}
+					height={20}
+					onCheckedChange={() => {
+						if (factionSelectMode == "any") {
+							factionSelectMode = "every";
+						} else {
+							factionSelectMode = "any";
+						}
+					}}
+				>
+					{#snippet leftValue()}
+						<p>Any</p>
+					{/snippet}
+					{#snippet rightValue()}
+						<p>Every</p>
+					{/snippet}
+				</Switch>
+			{/if}
 		</div>
 		<div class="selection-box-wrapper">
 			<div class="selection-box">
@@ -257,10 +262,6 @@
 	.selection-body {
 		display: grid;
 		gap: 6px;
-	}
-	.selection-row {
-		display: flex;
-		gap: 8px;
 	}
 	.selection-box-wrapper {
 		display: grid;

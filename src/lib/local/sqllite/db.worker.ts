@@ -32,6 +32,7 @@ async function initDb(id: string) {
 			db.exec(
 				"CREATE TABLE IF NOT EXISTS Availability (unitId INTEGER, faction INTEGER, era INTEGER, PRIMARY KEY (unitId, faction, era), FOREIGN KEY(unitId) REFERENCES Unit(id), FOREIGN KEY(faction, era) REFERENCES FactionInEra(factionId, eraId))"
 			);
+			db.exec(`CREATE INDEX IF NOT EXISTS idx_availability_lookup  ON availability(unitId, era, faction);`);
 			let emptyTables: string[] = [];
 
 			for (const table of ["Unit", "Faction", "Era", "FactionInEra", "Availability"]) {
@@ -96,21 +97,57 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
 				.map((row: { era: number; factions: string }) => ({ era: row.era, factions: row.factions.split(",").map((f) => Number(f)) }));
 			self.postMessage({ type: WorkerMessageType.GET_UNIT_AVAILABILITY_RESPONSE, id: e.data.id, payload: unitAvailability });
 			break;
-		case WorkerMessageType.GET_RESULT_LIST: {
-			const { factions, eras, eraSearchType, factionSearchType } = payload;
-			let sql = `SELECT * FROM Unit`;
-			if (factions.length || eras.length) {
-				sql += ` WHERE id IN (SELECT unitId FROM Availability WHERE `;
-				if (factions.length) sql += `faction IN (${factions.join(",")})`;
-				if (factions.length && eras.length) sql += ` AND `;
-				if (eras.length) sql += `era IN (${eras.join(",")})`;
-				sql += `)`;
-			}
-			const result = db.exec(sql, { rowMode: "object", returnValue: "resultRows" });
-			self.postMessage({ type: WorkerMessageType.GET_RESULT_LIST_RESPONSE, id: e.data.id, payload: result.length });
+		case WorkerMessageType.GET_RESULT_LIST:
+			const resultQuery = buildResultListQuery(payload.factions, payload.eras, payload.eraSearchType, payload.factionSearchType);
+			const result = db.exec(resultQuery, { rowMode: "object", returnValue: "resultRows" });
+			self.postMessage({ type: WorkerMessageType.GET_RESULT_LIST_RESPONSE, id: e.data.id, payload: result });
 			break;
-		}
+		case WorkerMessageType.GET_UNIQUE_LIST:
+			const unique = db.exec(`SELECT distinct unitId FROM Availability a WHERE a.era IN (${payload.join(",")}) and a.faction = 4`, {
+				rowMode: "object",
+				returnValue: "resultRows"
+			});
+			self.postMessage({ type: WorkerMessageType.GET_UNIQUE_LIST_RESPONSE, id: e.data.id, payload: unique });
+			break;
+
 		default:
 			log(`Unknown message type: ${e.data.type}`);
 	}
 };
+
+function buildResultListQuery(factions: number[], eras: number[], eraSearchType: "any" | "every", factionSearchType: "any" | "every") {
+	let sql = `SELECT * FROM Unit u`;
+	const clauses: string[] = [];
+
+	if (factions.length == 0 && eras.length == 0) return sql;
+
+	sql += ` WHERE `;
+
+	if (eraSearchType == "any" && factionSearchType == "any") {
+		clauses.push(
+			`EXISTS (SELECT 1 FROM Availability a WHERE u.id = a.unitId AND ${eras.length ? `a.era IN (${eras.join(",")})` : ""} ${eras.length && factions.length ? `AND` : ""} ${factions.length ? `a.faction IN (${factions.join(",")})` : ""})`
+		);
+	} else if (eraSearchType == "any" && factionSearchType == "every") {
+		for (const faction of factions) {
+			clauses.push(
+				`EXISTS (SELECT 1 FROM Availability a WHERE u.id = a.unitId AND ${eras.length ? `a.era IN (${eras.join(",")})` : ""} ${eras.length ? `AND` : ""} AND a.faction = ${faction})`
+			);
+		}
+	} else if (eraSearchType == "every" && factionSearchType == "any") {
+		for (const era of eras) {
+			clauses.push(
+				`EXISTS (SELECT 1 FROM Availability a WHERE u.id = a.unitId AND a.era = ${era} ${factions.length ? `AND` : ""} ${factions.length ? `a.faction IN (${factions.join(",")})` : ""})`
+			);
+		}
+	} else if (eraSearchType == "every" && factionSearchType == "every") {
+		for (const era of eras) {
+			for (const faction of factions) {
+				clauses.push(`EXISTS (SELECT 1 FROM Availability a WHERE u.id = a.unitId AND a.era = ${era} AND a.faction = ${faction})`);
+			}
+		}
+	}
+
+	sql += clauses.join(" AND ");
+	sql += " ORDER BY u.tonnage nulls last, u.name";
+	return sql;
+}

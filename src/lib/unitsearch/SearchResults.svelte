@@ -10,6 +10,7 @@
 	import VirtualList from "@humanspeak/svelte-virtual-list";
 	import { GearSix } from "phosphor-svelte";
 	import { getUnitAvailabilityLocal } from "$lib/local/sqllite/local-db";
+	import { getContext } from "svelte";
 
 	type Props = {
 		list?: List;
@@ -17,6 +18,7 @@
 	};
 
 	let { list = $bindable(), resultList = $bindable() }: Props = $props();
+	let workerInitialized = getContext<Promise<void>>("workerInitialized");
 
 	let headers = $derived(
 		appWindow.isMobile
@@ -109,9 +111,9 @@
 		{/each}
 		<DamageSortPopover {resultList}></DamageSortPopover>
 	</div>
-	{#await resultList.status}
+	{#await Promise.all([workerInitialized, resultList.status])}
 		<div class="loading-message">Loading units. Please wait ...</div>
-	{:then result}
+	{:then [_, result]}
 		{#if result == "No Units Found"}
 			<p class="loading-message">No Units found for the selected Era and Faction Combination.</p>
 		{:else}

@@ -41,6 +41,7 @@ async function initDb(id: string) {
 			postMessage({ id, type: WorkerMessageType.DB_INIT_RESPONSE, payload: emptyTables });
 			dbStarted = true;
 		} else {
+			postMessage({ id, type: WorkerMessageType.LOG, payload: "Could not create OPFS database" });
 			log("Could not create OPFS database");
 		}
 	} catch (err: any) {
@@ -83,9 +84,8 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
 			break;
 		case WorkerMessageType.IS_AVAILABLE:
 			const { unitId, factions, eras } = payload;
-			const available =
-				db.exec(`SELECT * FROM Availability WHERE unitId = ${unitId} AND faction IN (${factions}) AND era IN (${eras})`, { rowMode: "object", returnValue: "resultRows" })[0] !=
-				undefined;
+			const sql = `SELECT * FROM Availability WHERE unitId = ${unitId} ${factions.length ? `AND faction IN (${factions.join(",")})` : ""} ${eras.length ? `AND era IN (${eras.join(",")})` : ""}`;
+			const available = db.exec(sql, { rowMode: "object", returnValue: "resultRows" })[0] != undefined;
 			self.postMessage({ type: WorkerMessageType.IS_AVAILABLE_RESPONSE, id: e.data.id, payload: available });
 			break;
 		case WorkerMessageType.GET_UNIT_AVAILABILITY:
@@ -103,7 +103,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
 			self.postMessage({ type: WorkerMessageType.GET_RESULT_LIST_RESPONSE, id: e.data.id, payload: result });
 			break;
 		case WorkerMessageType.GET_UNIQUE_LIST:
-			const unique = db.exec(`SELECT distinct unitId FROM Availability a WHERE a.era IN (${payload.join(",")}) and a.faction = 4`, {
+			const unique = db.exec(`SELECT distinct unitId FROM Availability a WHERE ${payload.length ? `a.era IN (${payload.join(",")}) AND` : ""} a.faction = 4`, {
 				rowMode: "object",
 				returnValue: "resultRows"
 			});

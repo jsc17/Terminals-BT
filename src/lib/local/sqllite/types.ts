@@ -12,7 +12,8 @@ export enum WorkerMessageType {
 	GET_RESULT_LIST,
 	GET_RESULT_LIST_RESPONSE,
 	GET_UNIQUE_LIST,
-	GET_UNIQUE_LIST_RESPONSE
+	GET_UNIQUE_LIST_RESPONSE,
+	LOG
 }
 
 export type WorkerMessage = {

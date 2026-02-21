@@ -29,4 +29,15 @@ self.addEventListener("activate", (event) => {
 });
 
 //listen to fetch events
-self.addEventListener("fetch", (event) => {});
+self.addEventListener("fetch", (event) => {
+	if (event.request.method !== "GET" || event.request.url.includes("localhost")) return;
+	async function handleFetch() {
+		const cache = await caches.open(CACHE);
+		const cachedResponse = await cache.match(event.request);
+		if (cachedResponse) return cachedResponse;
+		const response = await fetch(event.request);
+		cache.put(event.request, response.clone());
+		return response;
+	}
+	event.respondWith(handleFetch());
+});

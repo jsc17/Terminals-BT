@@ -13,12 +13,13 @@
 	import { PersistedState } from "runed";
 	import { SettingsSchema, type SettingsOutput } from "./listbuilder/types/settings.js";
 	import { parse } from "valibot";
-	import { initWorker } from "$lib/local/sqllite/local-db.js";
+	import { initWorker, workerInitialized } from "$lib/local/sqllite/local-db.js";
 
 	const { data, children } = $props();
 	let user = $state({ username: data.username });
 	let notifications: Notification[] = $derived(data.notifications ?? []);
 	setContext("user", user);
+	setContext("workerInitialized", workerInitialized);
 
 	let settings = new PersistedState<SettingsOutput>("listbuilderSettings", {
 		print: {

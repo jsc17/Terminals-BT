@@ -39,6 +39,7 @@ class ToastController {
 		const id: string = crypto.randomUUID();
 		this.toasts.set(id, toast);
 		this.timeout(id, timeout);
+		return id;
 	}
 
 	dismissToast(id: string) {

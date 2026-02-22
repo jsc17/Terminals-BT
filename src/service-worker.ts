@@ -30,7 +30,7 @@ self.addEventListener("activate", (event) => {
 
 //listen to fetch events
 self.addEventListener("fetch", (event) => {
-	if (event.request.method !== "GET" || event.request.url.includes("localhost")) return;
+	if (event.request.method !== "GET") return;
 	async function handleFetch() {
 		const cache = await caches.open(CACHE);
 		const cachedResponse = await cache.match(event.request);
@@ -40,4 +40,10 @@ self.addEventListener("fetch", (event) => {
 		return response;
 	}
 	event.respondWith(handleFetch());
+});
+
+self.addEventListener("message", (event) => {
+	if (event.data && event.data.type === "SKIP_WAITING") {
+		self.skipWaiting();
+	}
 });

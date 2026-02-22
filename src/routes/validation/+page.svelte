@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getEraName, getEraNames, getErasAndFactions, getGeneralId } from "$lib/remote/era-faction.remote";
+	import { getEraName, getEraNames, getGeneralId } from "$lib/remote/era-faction.remote";
 	import { getApprovedTournamentList, submitList } from "./tournament.remote";
 	import { validateRules } from "$lib/rules/validateList";
 	import { toastController } from "$lib/stores";
@@ -15,10 +15,11 @@
 	import { innerWidth } from "svelte/reactivity/window";
 	import { SubmitListSchema } from "./schema/submitList";
 	import { logError } from "$lib/remote/error";
+	import { getErasAndFactionsLocal } from "$lib/local/sqllite/local-db";
 
 	let files = $state<FileList>();
 
-	const eraList = $derived(await getErasAndFactions());
+	const eraList = $derived(await getErasAndFactionsLocal());
 	const eraNames = $derived(await getEraNames());
 	const tournamentList = $derived((await getApprovedTournamentList()).data);
 
@@ -65,7 +66,7 @@
 	watch(
 		() => selectedEra,
 		() => {
-			if (!eraList.get(selectedEra)!.find((f) => f.id == selectedFaction)) selectedFaction = 5;
+			if (!eraList.get(selectedEra)?.factions.find((f) => f.id == selectedFaction)) selectedFaction = 5;
 		}
 	);
 
@@ -157,7 +158,7 @@
 				<label
 					>Faction:
 					<select name="selectedFaction" bind:value={selectedFaction} required disabled={lockSelections}>
-						{#each eraList.get(selectedEra) as faction}
+						{#each eraList.get(selectedEra)?.factions as faction}
 							<option value={faction.id}>{faction.name}</option>
 						{/each}
 					</select>

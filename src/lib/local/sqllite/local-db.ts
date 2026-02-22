@@ -26,18 +26,12 @@ export async function initWorker() {
 		}
 	};
 	sendMessage<string[]>({ type: WorkerMessageType.DB_INIT }).then((result) => {
-		if (result.length > 0) {
-			const toastId = toastController.addToast(`Loading Data: ${result.join(", ")}`, 10000, false);
-			initializeTables(result).then(() => {
-				workerStart();
-				toastController.dismissToast(toastId);
-			});
-		} else workerStart();
+		if (result.length > 0) initializeTables(result).then(() => workerStart());
+		else workerStart();
 	});
 }
 
 async function sendMessage<T>(message: Omit<WorkerMessage, "id">) {
-	log(message);
 	return new Promise<T>(async (resolve) => {
 		const id = nanoid();
 		cbMap.set(id, resolve);
@@ -47,7 +41,6 @@ async function sendMessage<T>(message: Omit<WorkerMessage, "id">) {
 }
 
 async function initializeTables(emptyTables: string[]) {
-	log("Initializing Data Caches: ", emptyTables);
 	const tablePromises: Promise<void>[] = [];
 	for (const table of emptyTables) {
 		let payloadData: any;
@@ -105,4 +98,7 @@ export async function getResultListLocal(data: { factions: number[]; eras: numbe
 }
 export async function getUniqueListLocal(eras: number[]) {
 	return sendMessage<number[]>({ type: WorkerMessageType.GET_UNIQUE_LIST, payload: eras });
+}
+export async function getErasAndFactionsLocal() {
+	return sendMessage<Map<number, { name: string; order: number; factions: { id: number; name: string }[] }>>({ type: WorkerMessageType.GET_ERAS_AND_FACTIONS });
 }

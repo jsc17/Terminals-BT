@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { Dialog, Select, Switch } from "$lib/generic";
-	import { getErasAndFactions } from "$lib/remote/era-faction.remote";
 	import type { ResultList } from "$lib/types/resultList.svelte";
 	import { X } from "phosphor-svelte";
 	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup.js";
 	import { getGeneralList } from "$lib/utilities/genericBattletechUtilities";
 	import { SvelteSet } from "svelte/reactivity";
 	import type { List } from "$lib/types/list.svelte";
+	import { getErasAndFactionsLocal } from "$lib/local/sqllite/local-db";
 
 	type Props = {
 		list?: List;
@@ -15,7 +15,7 @@
 
 	let { resultList, list }: Props = $props();
 
-	let eraList = $derived(getErasAndFactions());
+	let eraList = $derived(await getErasAndFactionsLocal());
 
 	let selectedEras = new SvelteSet<number>();
 	let selectedFactions = new SvelteSet<number>();
@@ -24,23 +24,23 @@
 	let factionFilter = $state<string>();
 
 	let availableFactions = $derived.by(() => {
-		let factions = new Set<number>();
-		if (!eraList.current) return factions;
+		let factions = new Map<number, string>();
+		if (!eraList) return [];
 
 		if (selectedEras.size == 0) {
-			for (const era of eraList.current) {
-				for (const faction of era[1]) {
-					factions.add(faction.id);
+			for (const era of eraList.values()) {
+				for (const faction of era.factions) {
+					factions.set(faction.id, faction.name);
 				}
 			}
 		} else {
 			for (const era of selectedEras) {
-				eraList.current.get(era)?.forEach((f) => {
-					factions.add(f.id);
+				eraList.get(era)?.factions.forEach((f) => {
+					factions.set(f.id, f.name);
 				});
 			}
 		}
-		return factions;
+		return [...factions.entries()].map(([id, name]) => ({ id, name }));
 	});
 
 	let includeGeneral = $state(true);
@@ -95,7 +95,7 @@
 	{/snippet}
 	<div class="selection-body">
 		<div class="space-between">
-			{#if eraList.current}
+			{#if eraList}
 				<label for="eraSelect">Era: </label>
 				{#if selectedEras.size > 1}
 					<Switch
@@ -121,7 +121,7 @@
 		</div>
 		<div class="selection-box-wrapper">
 			<div class="selection-box">
-				{#each eraList.current?.keys() as era}
+				{#each eraList as [era, details]}
 					<div class="selection-box-row">
 						<input
 							type="checkbox"
@@ -134,7 +134,7 @@
 								}
 							}
 						/>
-						<label for={"era" + era}>{eraLookup.get(era)}</label>
+						<label for={"era" + era}>{details.name}</label>
 					</div>
 				{/each}
 			</div>
@@ -189,21 +189,20 @@
 		<div class="selection-box-wrapper">
 			<div class="selection-box">
 				{#each availableFactions as faction}
-					{@const factionName = factionLookup.get(faction) ?? ""}
-					{#if !factionFilter || factionName.toLowerCase().includes(factionFilter.toLowerCase())}
+					{#if !factionFilter || faction.name.toLowerCase().includes(factionFilter.toLowerCase())}
 						<div class="selection-box-row">
 							<input
 								type="checkbox"
-								id={"faction" + faction}
+								id={"faction" + faction.id}
 								bind:checked={
-									() => selectedFactions.has(faction),
+									() => selectedFactions.has(faction.id),
 									(checked) => {
-										checked ? selectedFactions.add(faction) : selectedFactions.delete(faction);
+										checked ? selectedFactions.add(faction.id) : selectedFactions.delete(faction.id);
 										changed = true;
 									}
 								}
 							/>
-							<label for={"faction" + faction}>{factionName}</label>
+							<label for={"faction" + faction.id}>{faction.name}</label>
 						</div>
 					{/if}
 				{/each}

@@ -109,7 +109,21 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
 			});
 			self.postMessage({ type: WorkerMessageType.GET_UNIQUE_LIST_RESPONSE, id: e.data.id, payload: unique });
 			break;
-
+		case WorkerMessageType.GET_ERAS_AND_FACTIONS:
+			const eraFactionList = db.exec(
+				`SELECT a.eraId, a.factionId, e.name as eraName, e."order", f.name as factionName FROM FactionInEra a inner join era e on e.id = a.eraId inner join faction f on f.id = a.factionId order by e."order", f.name`,
+				{ rowMode: "object", returnValue: "resultRows" }
+			);
+			const groupedResults = new Map<number, { name: string; order: number; factions: { id: number; name: string }[] }>();
+			eraFactionList.forEach((r: { eraId: number; factionId: number; eraName: string; order: number; factionName: string }) => {
+				if (groupedResults.has(r.eraId)) {
+					groupedResults.get(r.eraId)!.factions.push({ id: r.factionId, name: r.factionName });
+				} else {
+					groupedResults.set(r.eraId, { name: r.eraName, order: r.order, factions: [{ id: r.factionId, name: r.factionName }] });
+				}
+			});
+			self.postMessage({ type: WorkerMessageType.GET_ERAS_AND_FACTIONS_RESPONSE, id: e.data.id, payload: groupedResults });
+			break;
 		default:
 			log(`Unknown message type: ${e.data.type}`);
 	}
@@ -125,19 +139,15 @@ function buildResultListQuery(factions: number[], eras: number[], eraSearchType:
 
 	if (eraSearchType == "any" && factionSearchType == "any") {
 		clauses.push(
-			`EXISTS (SELECT 1 FROM Availability a WHERE u.id = a.unitId AND ${eras.length ? `a.era IN (${eras.join(",")})` : ""} ${eras.length && factions.length ? `AND` : ""} ${factions.length ? `a.faction IN (${factions.join(",")})` : ""})`
+			`EXISTS (SELECT 1 FROM Availability a WHERE u.id = a.unitId ${eras.length ? `AND a.era IN (${eras.join(",")})` : ""} ${factions.length ? `AND a.faction IN (${factions.join(",")})` : ""})`
 		);
 	} else if (eraSearchType == "any" && factionSearchType == "every") {
 		for (const faction of factions) {
-			clauses.push(
-				`EXISTS (SELECT 1 FROM Availability a WHERE u.id = a.unitId AND ${eras.length ? `a.era IN (${eras.join(",")})` : ""} ${eras.length ? `AND` : ""} AND a.faction = ${faction})`
-			);
+			clauses.push(`EXISTS (SELECT 1 FROM Availability a WHERE u.id = a.unitId ${eras.length ? `AND a.era IN (${eras.join(",")})` : ""} AND a.faction = ${faction})`);
 		}
 	} else if (eraSearchType == "every" && factionSearchType == "any") {
 		for (const era of eras) {
-			clauses.push(
-				`EXISTS (SELECT 1 FROM Availability a WHERE u.id = a.unitId AND a.era = ${era} ${factions.length ? `AND` : ""} ${factions.length ? `a.faction IN (${factions.join(",")})` : ""})`
-			);
+			clauses.push(`EXISTS (SELECT 1 FROM Availability a WHERE u.id = a.unitId AND a.era = ${era} ${factions.length ? `AND a.faction IN (${factions.join(",")})` : ""})`);
 		}
 	} else if (eraSearchType == "every" && factionSearchType == "every") {
 		for (const era of eras) {

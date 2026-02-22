@@ -58,7 +58,29 @@
 
 	onMount(() => {
 		initWorker();
+		detectSWUpdate();
 	});
+
+	async function detectSWUpdate() {
+		if (!navigator.serviceWorker) return;
+		const registration = await navigator.serviceWorker.getRegistration();
+		if (!registration) return;
+		registration.addEventListener("updatefound", () => {
+			const newWorker = registration.installing;
+			if (newWorker) {
+				newWorker.addEventListener("statechange", () => {
+					if (newWorker.state === "installed") {
+						if (confirm("New version of the app is available. Reload to update?")) {
+							registration.addEventListener("controllerchange", () => {
+								window.location.reload();
+							});
+							newWorker.postMessage({ type: "SKIP_WAITING" });
+						}
+					}
+				});
+			}
+		});
+	}
 </script>
 
 <Toast></Toast>

@@ -57,29 +57,27 @@
 	settings.current = setContext("listbuilderSettings", settings.current);
 
 	onMount(() => {
-		initWorker();
 		detectSWUpdate();
+		initWorker();
 	});
 
 	async function detectSWUpdate() {
-		if (!navigator.serviceWorker) return;
-		const registration = await navigator.serviceWorker.getRegistration();
-		if (!registration) return;
-		registration.addEventListener("updatefound", () => {
+		const registration = await navigator.serviceWorker.ready;
+		registration.onupdatefound = () => {
 			const newWorker = registration.installing;
+			console.log(newWorker);
 			if (newWorker) {
 				newWorker.addEventListener("statechange", () => {
 					if (newWorker.state === "installed") {
 						if (confirm("New version of the app is available. Reload to update?")) {
-							registration.addEventListener("controllerchange", () => {
-								window.location.reload();
-							});
 							newWorker.postMessage({ type: "SKIP_WAITING" });
+							console.log("Service worker installed");
+							window.location.reload();
 						}
 					}
 				});
 			}
-		});
+		};
 	}
 </script>
 

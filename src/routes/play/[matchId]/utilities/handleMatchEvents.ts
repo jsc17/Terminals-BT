@@ -59,6 +59,13 @@ export function processMessage(
 			toastController.addToast("Host deleted the match. Redirecting you to match selection.");
 			goto("/play");
 			break;
+		case "MATCH_RESET":
+			getMatchDetails(update.matchId).refresh();
+			getTeamData(update.matchId).refresh();
+			matchUnits.forEach((u) => {
+				handleUnitUpdate(u.data.id, matchUnits);
+			});
+			break;
 		case "REMOVE_PLAYER":
 			playerList = playerList.filter((p) => p.id != Number(update.details));
 			getMyData(update.matchId).refresh();

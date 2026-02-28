@@ -8,7 +8,7 @@
 	import { safeParseJSON } from "$lib/utilities/utilities";
 	import { onMount, setContext } from "svelte";
 	import { getAllPlayerData, getTeamData, getMyData, getMatchDetails, deleteMatch, getPlayerData, getLogs } from "./remote/matchData.remote";
-	import { startGame } from "./remote/matchManagement.remote";
+	import { resetMatch, startGame } from "./remote/matchManagement.remote";
 	import { SvelteMap } from "svelte/reactivity";
 	import { initializePlayerList, processMessage } from "./utilities/handleMatchEvents";
 	import type { MenuItem } from "$lib/generic/types";
@@ -76,6 +76,13 @@
 					label: "Delete Match",
 					onSelect: () => {
 						if (confirm("Delete match immediately and end without showing summary screen?")) deleteMatch(data.matchId);
+					}
+				},
+				{
+					type: "item",
+					label: "Reset Match",
+					onSelect: () => {
+						if (confirm("Reset match? This will remove all damage and criticals, and set the round and scores to zero")) resetMatch(data.matchId);
 					}
 				},
 				{ type: "separator" },

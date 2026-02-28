@@ -4,6 +4,7 @@ import { prisma } from "$lib/server/prisma";
 import { getSubmitter } from "./utilities";
 import { nothing } from "$lib/remote/utilities.remote";
 import { UpdateMatchSchema } from "../../schema/matchlistSchema";
+import { getAllPlayerData } from "./matchData.remote";
 
 export const startGame = command(v.string(), async (matchId) => {
 	const { locals } = getRequestEvent();
@@ -111,6 +112,31 @@ export const kickPlayer = command(v.object({ matchId: v.string(), playerId: v.nu
 		await prisma.match.update({
 			where: { id: matchId },
 			data: { logEntries: { create: { round: matchData.currentRound, type: "REMOVE_PLAYER", details: playerId, submitter: { connect: { id: matchData.players[0].id } } } } }
+		});
+	}
+});
+
+export const resetMatch = command(v.string(), async (matchId) => {
+	const { locals } = getRequestEvent();
+	if (!locals.user) return { status: "failure", message: "User is not logged in" };
+
+	const matchData = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { playerRole: "HOST" } } } });
+	if (matchData != null && matchData.players[0].playerId == locals.user.id) {
+		await prisma.match.update({
+			where: { id: matchId },
+			data: { currentRound: 1, gameCompleted: false }
+		});
+		await prisma.matchTeam.updateMany({ where: { matchId }, data: { objectivePoints: 0 } });
+		await prisma.matchUnit.updateMany({ where: { formation: { list: { matchId } } }, data: { currentDamage: 0, pendingDamage: 0, currentHeat: 0, pendingHeat: 0 } });
+		await prisma.matchCrit.deleteMany({ where: { unit: { formation: { list: { matchId } } } } });
+		await prisma.matchLog.deleteMany({ where: { matchId } });
+		await prisma.matchLog.create({
+			data: {
+				type: "MATCH_RESET",
+				round: matchData?.currentRound ?? 0,
+				match: { connect: { id: matchId } },
+				submitter: { connect: { id: matchData?.players[0].id } }
+			}
 		});
 	}
 });

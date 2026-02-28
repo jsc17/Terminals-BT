@@ -51,6 +51,7 @@
 		</Tabs.List>
 		<Tabs.Content value="add">
 			<div class="damage-modal-body">
+				<h2>Damage to Take:</h2>
 				<div class="input-row">
 					<button class="damage-amount-button" onclick={() => updateDamageToTake(-5)}>-5</button>
 					<button class="damage-amount-button" onclick={() => updateDamageToTake(-1)}>-1</button>
@@ -108,6 +109,10 @@
 		flex-direction: column;
 		gap: 16px;
 		min-width: 400px;
+	}
+	h2 {
+		font-size: 1.25rem;
+		margin: 0;
 	}
 	.input-row {
 		display: flex;

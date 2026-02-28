@@ -33,6 +33,14 @@
 			open = false;
 		}
 	}
+
+	function updateDamageToTake(amount: number) {
+		damageToTake += amount;
+		if (damageToTake < 0) damageToTake = 0;
+	}
+	$effect(() => {
+		console.log(damageToTake);
+	});
 </script>
 
 <Dialog bind:open title={`Damage ${reference.name}`}>
@@ -44,11 +52,11 @@
 		<Tabs.Content value="add">
 			<div class="damage-modal-body">
 				<div class="input-row">
-					<button class="damage-amount-button" onclick={() => (damageToTake -= 5)}>-5</button>
-					<button class="damage-amount-button" onclick={() => (damageToTake -= 1)}>-1</button>
+					<button class="damage-amount-button" onclick={() => updateDamageToTake(-5)}>-5</button>
+					<button class="damage-amount-button" onclick={() => updateDamageToTake(-1)}>-1</button>
 					<input type="number" class="damage-amount" bind:value={damageToTake} min={0} max={16} />
-					<button class="damage-amount-button" onclick={() => (damageToTake += 1)}>+1</button>
-					<button class="damage-amount-button" onclick={() => (damageToTake += 5)}>+5</button>
+					<button class="damage-amount-button" onclick={() => updateDamageToTake(1)}>+1</button>
+					<button class="damage-amount-button" onclick={() => updateDamageToTake(5)}>+5</button>
 				</div>
 				<div class="apply-buttons">
 					<Switch bind:checked={takePending} height={25}>

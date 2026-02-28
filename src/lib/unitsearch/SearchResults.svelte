@@ -58,12 +58,14 @@
 	}
 	async function showAvailability(id: number) {
 		const result = await getUnitAvailabilityLocal(id);
-		availabilityResults = result.map((r) => {
-			return {
-				era: eraLookup.get(r.era) ?? `Unknown Era ${r.era}`,
-				factions: r.factions.map((f) => factionLookup.get(f) ?? `Unknown Faction ${f}`).sort((a, b) => a.localeCompare(b))
-			};
-		});
+
+		// if (!result) return;
+		// availabilityResults = result.map((r) => {
+		// 	return {
+		// 		era: eraLookup.get(r.era) ?? `Unknown Era ${r.era}`,
+		// 		factions: r.factions.map((f) => factionLookup.get(f) ?? `Unknown Faction ${f}`).sort((a, b) => a.localeCompare(b))
+		// 	};
+		// });
 		availabilityDialogOpen = true;
 	}
 </script>

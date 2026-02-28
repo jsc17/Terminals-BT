@@ -14,6 +14,7 @@
 	import { SettingsSchema, type SettingsOutput } from "./listbuilder/types/settings.js";
 	import { parse } from "valibot";
 	import { initWorker, workerInitialized } from "$lib/local/sqllite/local-db.js";
+	import { toastController } from "$lib/stores/toastController.svelte.js";
 
 	const { data, children } = $props();
 	let user = $state({ username: data.username });
@@ -57,28 +58,9 @@
 	settings.current = setContext("listbuilderSettings", settings.current);
 
 	onMount(() => {
-		detectSWUpdate();
+		toastController.addToast("Starting initWorker");
 		initWorker();
 	});
-
-	async function detectSWUpdate() {
-		const registration = await navigator.serviceWorker.ready;
-		registration.onupdatefound = () => {
-			const newWorker = registration.installing;
-			console.log(newWorker);
-			if (newWorker) {
-				newWorker.addEventListener("statechange", () => {
-					if (newWorker.state === "installed") {
-						if (confirm("New version of the app is available. Reload to update?")) {
-							newWorker.postMessage({ type: "SKIP_WAITING" });
-							console.log("Service worker installed");
-							window.location.reload();
-						}
-					}
-				});
-			}
-		};
-	}
 </script>
 
 <Toast></Toast>

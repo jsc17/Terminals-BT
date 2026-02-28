@@ -2,18 +2,18 @@ import { query, prerender } from "$app/server";
 import { prisma } from "$lib/server/prisma";
 import * as v from "valibot";
 
-// export const getErasAndFactions = query(async () => {
-// 	const results = await prisma.factionInEra.findMany({ select: { eraId: true, faction: true }, orderBy: [{ era: { order: "asc" } }, { faction: { name: "asc" } }] });
-// 	const groupedResults = new Map<number, { id: number; name: string }[]>();
-// 	results.forEach((r) => {
-// 		if (groupedResults.has(r.eraId)) {
-// 			groupedResults.set(r.eraId, groupedResults.get(r.eraId)!.concat([r.faction]));
-// 		} else {
-// 			groupedResults.set(r.eraId, [r.faction]);
-// 		}
-// 	});
-// 	return groupedResults;
-// });
+export const getErasAndFactions = query(async () => {
+	const results = await prisma.factionInEra.findMany({ select: { era: true, faction: true }, orderBy: [{ era: { order: "asc" } }, { faction: { name: "asc" } }] });
+	const groupedResults = new Map<number, { name: string; order: number; factions: { id: number; name: string }[] }>();
+	results.forEach((r) => {
+		if (groupedResults.has(r.era.id)) {
+			groupedResults.get(r.era.id)!.factions.push(r.faction);
+		} else {
+			groupedResults.set(r.era.id, { name: r.era.name, order: r.era.order, factions: [r.faction] });
+		}
+	});
+	return groupedResults;
+});
 
 export const getEraNames = query(async () => {
 	const eraNames = await prisma.era.findMany({ select: { id: true, name: true } });

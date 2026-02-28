@@ -4,6 +4,8 @@
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
 	import EraFactionSelectionModal from "./EraFactionSelectionModal.svelte";
+	import { browser } from "$app/environment";
+	import { workerInitialized } from "$lib/local/sqllite/local-db";
 
 	type Props = {
 		list?: List;
@@ -33,7 +35,7 @@
 				{/each}
 				{#if resultList.general != -1}
 					<div class="selected-block">
-						{factionLookup.get(resultList.general)}
+						{factionLookup.get(resultList.general ?? 0)}
 					</div>
 				{/if}
 			</div>

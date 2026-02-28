@@ -4,9 +4,10 @@
 	import { X } from "phosphor-svelte";
 	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup.js";
 	import { getGeneralList } from "$lib/utilities/genericBattletechUtilities";
-	import { SvelteSet } from "svelte/reactivity";
+	import { SvelteMap, SvelteSet } from "svelte/reactivity";
 	import type { List } from "$lib/types/list.svelte";
 	import { getErasAndFactionsLocal } from "$lib/local/sqllite/local-db";
+	import { onMount } from "svelte";
 
 	type Props = {
 		list?: List;
@@ -15,13 +16,17 @@
 
 	let { resultList, list }: Props = $props();
 
-	let eraList = $derived(await getErasAndFactionsLocal());
+	let eraList = $state<SvelteMap<number, { name: string; order: number; factions: { id: number; name: string }[] }>>();
 
 	let selectedEras = new SvelteSet<number>();
 	let selectedFactions = new SvelteSet<number>();
 	let eraSelectMode = $state<"any" | "every">("any");
 	let factionSelectMode = $state<"any" | "every">("any");
 	let factionFilter = $state<string>();
+
+	onMount(async () => {
+		getErasAndFactionsLocal().then((result) => (eraList = new SvelteMap(result)));
+	});
 
 	let availableFactions = $derived.by(() => {
 		let factions = new Map<number, string>();

@@ -96,15 +96,15 @@ export const getMULDataFromName = query(v.string(), async (name) => {
 	return undefined;
 });
 
-export const isUnique = query(v.object({ mulId: v.number(), eras: v.array(v.number()) }), async (data) => {
-	const unit = await prisma.unit.findUnique({ where: { mulId: data.mulId, availability: { some: { era: data.eras.length ? { in: data.eras } : undefined, faction: 4 } } } });
+export const isUnitUnique = query(v.object({ unitId: v.number(), eras: v.array(v.number()) }), async (data) => {
+	const unit = await prisma.unit.findUnique({ where: { id: data.unitId, availability: { some: { era: data.eras.length ? { in: data.eras } : undefined, faction: 4 } } } });
 	return unit != null;
 });
 
-export const isAvailable = query(v.object({ mulId: v.number(), eras: v.array(v.number()), factions: v.array(v.number()) }), async (data) => {
+export const isUnitAvailable = query(v.object({ unitId: v.number(), eras: v.array(v.number()), factions: v.array(v.number()) }), async (data) => {
 	const unit = await prisma.unit.findUnique({
 		where: {
-			mulId: data.mulId,
+			id: data.unitId,
 			availability: { some: { era: data.eras.length ? { in: data.eras } : undefined, faction: data.factions.length ? { in: data.factions } : undefined } }
 		}
 	});
@@ -154,4 +154,33 @@ export const getSingleUnitAvailability = query.batch(v.number(), async (mulIds) 
 export const getUnitAvailability = query(v.array(v.number()), async (ids) => {
 	const units = await prisma.unit.findMany({ where: { mulId: { in: ids } }, select: { mulId: true, availability: true } });
 	return new Map(units.map((u) => [u.mulId, u]));
+});
+
+const resultListSchema = v.object({
+	factions: v.array(v.number()),
+	eras: v.array(v.number()),
+	eraSearchType: v.union([v.literal("any"), v.literal("every")]),
+	factionSearchType: v.union([v.literal("any"), v.literal("every")])
+});
+export const getResultList = query(resultListSchema, async ({ eras, eraSearchType, factions, factionSearchType }) => {
+	if (!eras.length) eraSearchType = "any";
+	if (!factions.length) factionSearchType = "any";
+
+	if (factions.length == 0 && eras.length == 0) return prisma.unit.findMany({ orderBy: [{ tonnage: { sort: "asc", nulls: "last" } }, { name: "asc" }] });
+
+	let searchConditions: any;
+
+	const eraParts = eraSearchType === "every" ? eras.map((era: number) => ({ era })) : [{ era: eras.length ? { in: eras } : undefined }];
+	const factionParts = factionSearchType === "every" ? factions.map((faction: number) => ({ faction })) : [{ faction: factions.length ? { in: factions } : undefined }];
+	const requirements = eraParts.flatMap((e: any) =>
+		factionParts.map((f: any) => ({
+			availability: { some: { ...e, ...f } }
+		}))
+	);
+
+	searchConditions = requirements.length === 1 ? requirements[0] : { AND: requirements };
+	return prisma.unit.findMany({
+		where: searchConditions,
+		orderBy: [{ tonnage: { sort: "asc", nulls: "last" } }, { name: "asc" }]
+	});
 });

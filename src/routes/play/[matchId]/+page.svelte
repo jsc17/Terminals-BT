@@ -97,7 +97,7 @@
 				<div class="toolbar-item">{teamData?.[0]?.objectivePoints}</div>
 			</div>
 			<div class="match-details">
-				<p>Round: {matchData?.currentRound}</p>
+				<p>Round: {matchData?.currentRound} {matchData?.gameCompleted ? "(Match Ended)" : ""}</p>
 				<RoundTimer {matchData} />
 			</div>
 			<div class="team-name-blue">

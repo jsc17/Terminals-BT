@@ -30,15 +30,13 @@
 			remainingMS = totalDurationMs;
 			return;
 		}
-		if (remainingMS == 0 || matchData.timeEnded) {
-			clearInterval(interval);
-			return;
-		}
 
 		if (matchData.timePaused && remainingMS !== undefined) return;
 
 		const elapsed = Date.now() - matchData!.timeStarted!.getTime() - matchData!.timePausedDurationMs;
 		remainingMS = Math.max(0, totalDurationMs - elapsed);
+
+		if (remainingMS == 0 || matchData.timeEnded) clearInterval(interval);
 	}
 
 	watch.pre(
@@ -51,11 +49,7 @@
 </script>
 
 {#if matchData?.matchDuration}
-	{#if remainingMS != undefined}
-		<p class={{ paused: matchData.timePaused, ended: remainingMS == 0 }}>{remainingHours}:{remainingMinutes}:{remainingSeconds}</p>
-	{:else}
-		<p>{matchData?.matchDuration}:00</p>
-	{/if}
+	<p class={{ paused: matchData.timePaused, ended: remainingMS == 0 }}>{remainingHours}:{remainingMinutes}:{remainingSeconds}</p>
 {/if}
 
 <style>
@@ -67,7 +61,6 @@
 		color: red;
 		animation: blink 1s infinite;
 	}
-
 	@keyframes blink {
 		0% {
 			opacity: 1;

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Match } from "$lib/generated/prisma/browser";
-	import { onMount } from "svelte";
+	import { watch } from "runed";
 
 	type Props = {
 		matchData?: Match;
@@ -12,7 +12,12 @@
 
 	const totalDurationMs = $derived((matchData?.matchDuration ?? 0) * 60 * 1000);
 	let remainingMS = $state<number>();
-	const remainingMinutes = $derived(Math.floor((remainingMS ?? totalDurationMs) / 60000));
+	const remainingHours = $derived(Math.floor((remainingMS ?? totalDurationMs) / 3600000));
+	const remainingMinutes = $derived(
+		Math.floor(((remainingMS ?? totalDurationMs) % 3600000) / 60000)
+			.toString()
+			.padStart(2, "0")
+	);
 	const remainingSeconds = $derived(
 		Math.floor(((remainingMS ?? totalDurationMs) % 60000) / 1000)
 			.toString()
@@ -20,32 +25,34 @@
 	);
 
 	function calculateRemainingMs() {
-		if (remainingMS == 0) return;
 		if (!matchData?.timeStarted) {
+			clearInterval(interval);
 			remainingMS = totalDurationMs;
 			return;
 		}
+		if (remainingMS == 0 || matchData.timeEnded) {
+			clearInterval(interval);
+			return;
+		}
+
 		if (matchData.timePaused && remainingMS !== undefined) return;
 
 		const elapsed = Date.now() - matchData!.timeStarted!.getTime() - matchData!.timePausedDurationMs;
 		remainingMS = Math.max(0, totalDurationMs - elapsed);
 	}
 
-	$effect(() => {
-		if (!matchData?.timeStarted) {
-			remainingMS = undefined;
-			return;
+	watch.pre(
+		() => matchData?.timeStarted,
+		() => {
+			calculateRemainingMs();
+			interval = setInterval(calculateRemainingMs, 250);
 		}
-		calculateRemainingMs();
-
-		interval = setInterval(calculateRemainingMs, 250);
-		return () => clearInterval(interval);
-	});
+	);
 </script>
 
 {#if matchData?.matchDuration}
 	{#if remainingMS != undefined}
-		<p class={{ paused: matchData.timePaused, ended: remainingMS == 0 }}>{remainingMinutes}:{remainingSeconds}</p>
+		<p class={{ paused: matchData.timePaused, ended: remainingMS == 0 }}>{remainingHours}:{remainingMinutes}:{remainingSeconds}</p>
 	{:else}
 		<p>{matchData?.matchDuration}:00</p>
 	{/if}

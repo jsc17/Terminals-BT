@@ -130,5 +130,5 @@ enum LogType {
     UNIT_HEAT
     UNIT_CRIT
     UNIT_CRIT_REMOVED
-
+    HEARTBEAT
 }

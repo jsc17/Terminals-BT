@@ -1,3 +1,4 @@
+import type { MatchLog } from "$lib/generated/prisma/browser";
 import { prisma } from "$lib/server/prisma";
 import { getWatcher, removeWatcher } from "./watchers.server";
 
@@ -24,6 +25,24 @@ export async function startWatcher(matchId: string, intervalMs = 1000) {
 			for (const message of messages) {
 				for (const send of watcher.clients) {
 					send(message);
+				}
+			}
+		} else {
+			const lastMessage = await prisma.matchLog.findMany({ where: { matchId }, orderBy: { updated_at: "desc" }, take: 1 });
+			if (lastMessage) {
+				const heartbeat: MatchLog = {
+					id: lastMessage[0].id,
+					type: "HEARTBEAT",
+					matchId,
+					submitterId: -1,
+					unitId: null,
+					updated_at: new Date(),
+					round: -1,
+					applied: false,
+					details: null
+				};
+				for (const send of watcher.clients) {
+					send(heartbeat);
 				}
 			}
 		}

@@ -33,7 +33,7 @@ export const endRound = form(
 		const existingUnits = await prisma.matchUnit.findMany({ where: { formation: { list: { matchId } } } });
 
 		//update match data
-		const matchUpdate = endMatch ? { gameCompleted: true, timeEnded: new Date() } : { currentRound: { increment: 1 } };
+		const matchUpdate = endMatch ? { gameCompleted: true, timeEnded: new Date(), timePaused: null } : { currentRound: { increment: 1 } };
 		const match = await prisma.match.update({
 			where: { id: matchId },
 			data: matchUpdate,

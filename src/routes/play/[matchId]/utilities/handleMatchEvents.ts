@@ -1,14 +1,10 @@
-import { toastController } from "$lib/stores";
-import { safeParseJSON } from "$lib/utilities/utilities";
 import { nanoid } from "nanoid";
-import { getPlayerData, getMatchUnitData, getMatchDetails, getTeamData, getMyData, getMatchList } from "../remote/matchData.remote";
+import { getPlayerData, getMatchUnitData, getMatchDetails, getTeamData, getMyData, getMatchList, getLogs } from "../remote/matchData.remote";
 import type { PlayFormation, PlayList, PlayUnit, PlayUnitData } from "../../types/types";
-import type { MulUnit } from "$lib/types/listTypes";
 import { SvelteMap } from "svelte/reactivity";
 import { getMulImage } from "$lib/remote/mulImages.remote";
 import { getMULDataFromId } from "$lib/remote/unit.remote";
 import type { MatchCrit, MatchFormation, MatchLog, MatchUnit, UsersInMatch, MatchList } from "$lib/generated/prisma/browser";
-import { goto } from "$app/navigation";
 
 export function processMessage(
 	message: string,
@@ -17,8 +13,18 @@ export function processMessage(
 	matchLogs: MatchLog[],
 	matchLists: PlayList[]
 ) {
-	console.log("recieving message");
 	const update: MatchLog = JSON.parse(message, (key, value) => (key == "updated_at" ? new Date(value) : value));
+
+	if (update.type == "HEARTBEAT" && matchLogs.length) {
+		const lastLogId = matchLogs.at(-1)!.id;
+		if (update.id > lastLogId) {
+			getLogs({ matchId: update.matchId, lastLogId: lastLogId }).then((r) => {
+				for (const log of r) processMessage(JSON.stringify(log), playerList, matchUnits, matchLogs, matchLists);
+			});
+		}
+		return;
+	}
+
 	matchLogs.push(update);
 	switch (update.type) {
 		case "PLAYER_JOINED":
@@ -58,10 +64,6 @@ export function processMessage(
 			getMatchDetails(update.matchId).refresh();
 			getTeamData(update.matchId).refresh();
 			break;
-		case "MATCH_DELETE":
-			toastController.addToast("Host deleted the match. Redirecting you to match selection.");
-			goto("/play");
-			break;
 		case "MATCH_RESET":
 			getMatchDetails(update.matchId).refresh();
 			getTeamData(update.matchId).refresh();
@@ -77,7 +79,7 @@ export function processMessage(
 			getMatchDetails(update.matchId).refresh();
 			break;
 		default:
-			console.log("Unhandled Event");
+			console.log("Unhandled Event:", update.type);
 	}
 }
 

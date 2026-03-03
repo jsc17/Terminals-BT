@@ -2,18 +2,19 @@
 	import { goto } from "$app/navigation";
 	import { DropdownMenu } from "$lib/generic";
 	import type { MenuItem } from "$lib/generic/types";
-	import { genericGetSet } from "$lib/utilities/utilities";
 	import type { PlaymodeOptionsOutput } from "$routes/play/schema/playmode";
 	import * as v from "valibot";
+	import type { PlayList } from "$routes/play/types/types";
 
 	type Props = {
 		options: PlaymodeOptionsOutput;
 		username?: string;
-		myData?: { playerNickname: string };
-		componentsOpen: { join: boolean };
+		myData?: { playerNickname: string; id: number };
+		componentsOpen: { join: boolean; addList: boolean };
+		matchLists: PlayList[];
 	};
 
-	let { options = $bindable(), username, myData, componentsOpen }: Props = $props();
+	let { options = $bindable(), username, myData, componentsOpen, matchLists }: Props = $props();
 
 	const settingsMenuOptions = $state<MenuItem[]>([
 		{ type: "number", label: "Cards Per Row", value: options.cardsPerRow, onValueChange: (v: number) => (options.cardsPerRow = v) },
@@ -77,11 +78,14 @@
 
 		if (!username) options.push({ type: "info", label: `Please login to join match` });
 		if (!myData) options.push({ type: "item", label: "Join Match", onSelect: () => (componentsOpen.join = true) });
-		else options.push({ type: "info", label: `Joined match as ${myData.playerNickname}` });
+		else
+			options = options.concat([
+				{ type: "info", label: `Joined match as ${myData.playerNickname}` },
+				{ type: "item", label: matchLists.find((l) => l.owner == myData?.id) ? "Load Additional List" : "Load List", onSelect: () => (componentsOpen.addList = true) }
+			]);
 
 		options = options.concat([
 			{ type: "submenu", label: "Display Settings", subitems: [...settingsMenuOptions] },
-			{ type: "separator" },
 			{ type: "item", label: "Return to match selection", onSelect: () => goto("/play") }
 		]);
 

@@ -107,7 +107,7 @@
 		</div>
 		<div class="match-list-bar">
 			<div class="toolbar-section" style="justify-self: start;">
-				<MenuPlayer bind:options={options.current} username={data.username} {myData} {componentsOpen} />
+				<MenuPlayer bind:options={options.current} username={data.username} {myData} {componentsOpen} {matchLists} />
 			</div>
 			{#if !appWindow.isMobile}
 				<div class="team-lists">

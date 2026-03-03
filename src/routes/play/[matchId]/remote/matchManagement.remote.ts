@@ -14,7 +14,7 @@ export const startGame = command(v.string(), async (matchId) => {
 
 	await prisma.match.update({
 		where: { id: matchId },
-		data: { currentRound: 1, logEntries: { create: { submitter: { connect: { id: submitter.id } }, round: 1, type: "MATCH_START" } } }
+		data: { currentRound: 1, timeStarted: new Date(), logEntries: { create: { submitter: { connect: { id: submitter.id } }, round: 1, type: "MATCH_START" } } }
 	});
 });
 
@@ -33,7 +33,7 @@ export const endRound = form(
 		const existingUnits = await prisma.matchUnit.findMany({ where: { formation: { list: { matchId } } } });
 
 		//update match data
-		const matchUpdate = endMatch ? { gameCompleted: true } : { currentRound: { increment: 1 } };
+		const matchUpdate = endMatch ? { gameCompleted: true, timeEnded: new Date() } : { currentRound: { increment: 1 } };
 		const match = await prisma.match.update({
 			where: { id: matchId },
 			data: matchUpdate,
@@ -124,7 +124,7 @@ export const resetMatch = command(v.string(), async (matchId) => {
 	if (matchData != null && matchData.players[0].playerId == locals.user.id) {
 		await prisma.match.update({
 			where: { id: matchId },
-			data: { currentRound: 1, gameCompleted: false }
+			data: { currentRound: 0, gameCompleted: false, timeStarted: null, timeEnded: null, timePausedDurationMs: 0, timePaused: null }
 		});
 		await prisma.matchTeam.updateMany({ where: { matchId }, data: { objectivePoints: 0 } });
 		await prisma.matchUnit.updateMany({ where: { formation: { list: { matchId } } }, data: { currentDamage: 0, pendingDamage: 0, currentHeat: 0, pendingHeat: 0 } });

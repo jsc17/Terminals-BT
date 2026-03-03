@@ -38,6 +38,7 @@
 	let critCount = $derived(automation.countCrits(data));
 	let moveSpeeds = $derived(automation.calculateMovement(data, options.measurementUnits, reference));
 	let { armorRemaining, structRemaining } = $derived(automation.calculateHealth(data, reference));
+
 	let firepowerRemaining = $derived(automation.calculateFirepower(data, reference));
 	let currentSkill = $derived(automation.calculateSkill(data, critCount.current, reference));
 	let physical = $derived(automation.calculatePhysical(moveSpeeds[0].tmm, firepowerRemaining.s, reference));
@@ -105,7 +106,7 @@
 			</div>
 			<div class="flex-between">
 				<p class="unit-name bold">{reference?.class}</p>
-				{#if structRemaining.current < (reference?.structure ?? 0) / 2}
+				{#if options.showCrippled && reference.armor && reference.structure && (structRemaining.current <= reference.structure / 2 || (armorRemaining.current == 0 && reference.structure == 1))}
 					<p class="unit-half-pv">Half: {Math.round(getNewSkillCost(data.skill, reference.pv) / 2)}</p>
 				{/if}
 			</div>
@@ -293,7 +294,13 @@
 				</div>
 			</div>
 			<div class="unit-card-right">
-				<div class="unit-image-block" class:unit-crippled={options.showCrippled && reference.structure && structRemaining.current < reference.structure / 2}>
+				<div
+					class="unit-image-block"
+					class:unit-crippled={options.showCrippled &&
+						reference.armor &&
+						reference.structure &&
+						(structRemaining.current <= reference.structure / 2 || (armorRemaining.current == 0 && reference.structure == 1))}
+				>
 					<img src={image} alt="unit" class="unit-image" />
 
 					{#if structRemaining.current <= 0 || critCount.current.engine >= 2 || critCount.current.destroyed}

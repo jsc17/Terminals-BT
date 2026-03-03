@@ -1,28 +1,31 @@
 <script lang="ts">
-	import { PlayFormations, DisplayOptionsPopover, EndRoundModal, MatchJoinModal, MatchManagementModal } from "./components";
-	import { PersistedState, watch } from "runed";
+	import { PlayFormations, EndRoundModal, MatchJoinModal, MatchManagementModal } from "./components";
+	import { PersistedState } from "runed";
 	import { type PlayList, type PlayUnit } from "../types/types";
 	import { PlaymodeOptionsSchema, type PlaymodeOptionsOutput } from "../schema/playmode";
-	import DropdownMenu from "$lib/generic/components/DropdownMenu.svelte";
 	import * as v from "valibot";
 	import { safeParseJSON } from "$lib/utilities/utilities";
 	import { onMount, setContext } from "svelte";
-	import { getAllPlayerData, getTeamData, getMyData, getMatchDetails, deleteMatch, getPlayerData, getLogs } from "./remote/matchData.remote";
-	import { resetMatch, startGame } from "./remote/matchManagement.remote";
+	import { getAllPlayerData, getTeamData, getMyData, getMatchDetails, getLogs } from "./remote/matchData.remote";
 	import { SvelteMap } from "svelte/reactivity";
 	import { initializePlayerList, processMessage } from "./utilities/handleMatchEvents";
-	import type { MenuItem } from "$lib/generic/types";
 	import type { MatchLog } from "$lib/generated/prisma/browser";
-	import MatchLogWindow from "./components/ui/MatchLogWindow.svelte";
-	import { goto } from "$app/navigation";
 	import LoadListModal from "./components/ui/LoadListModal.svelte";
 	import type { Attachment } from "svelte/attachments";
 	import { appWindow } from "$lib/stores";
 	import MatchResults from "./components/ui/MatchResults.svelte";
+	import Dialog from "$lib/generic/components/Dialog.svelte";
+	import MenuPlayer from "./components/ui/MenuPlayer.svelte";
+	import MenuHost from "./components/ui/MenuHost.svelte";
+	import type { PageProps } from "./$types";
+	import RoundTimer from "./components/ui/RoundTimer.svelte";
 
-	let { data } = $props();
+	let { params, data }: PageProps = $props();
 
-	setContext("matchId", data.matchId);
+	const matchId = $derived(params.matchId);
+
+	// svelte-ignore state_referenced_locally
+	setContext("matchId", matchId);
 
 	const options = new PersistedState<PlaymodeOptionsOutput>("playOptions", v.parse(PlaymodeOptionsSchema, {}), {
 		serializer: {
@@ -36,69 +39,28 @@
 	let matchUnits = new SvelteMap<number, PlayUnit>();
 	let matchLogs = $state<MatchLog[]>([]);
 
-	const matchData = $derived(await getMatchDetails(data.matchId));
-	const myData = $derived(await getMyData(data.matchId));
-	const teamData = $derived(await getTeamData(data.matchId));
+	const matchData = $derived(await getMatchDetails(matchId));
+	const myData = $derived(await getMyData(matchId));
+	const teamData = $derived(await getTeamData(matchId));
 
-	getAllPlayerData(data.matchId).then((results) => {
+	// svelte-ignore state_referenced_locally
+	getAllPlayerData(matchId).then((results) => {
 		results.forEach(async (r) => {
 			matchPlayers.push({ id: r.id, team: r.teamId ?? undefined, nickname: r.playerNickname, role: r.playerRole });
 			for (const list of r.lists) matchLists.push(await initializePlayerList(list, matchUnits));
 		});
 	});
-	getLogs({ matchId: data.matchId, lastLogId: 0 }).then((results) => (matchLogs = matchLogs.concat(results)));
+	// svelte-ignore state_referenced_locally
+	getLogs({ matchId, lastLogId: 0 }).then((results) => (matchLogs = matchLogs.concat(results)));
 
-	const componentsOpen = $state({ join: false, addList: false, management: false, matchLog: false, matchResults: false });
-	$effect(() => {
-		if (matchData?.gameCompleted) componentsOpen.matchResults = true;
-	});
-
-	const menuOptions: MenuItem[] = $derived.by(() => {
-		let options: MenuItem[] = [];
-
-		if (!data.username)
-			return [{ type: "info", label: `Please login to join match` }, { type: "separator" }, { type: "item", label: "Return to match selection", onSelect: () => goto("/play") }];
-
-		if (!myData)
-			return [
-				{ type: "item", label: "Join Match", onSelect: () => (componentsOpen.join = true) },
-				{ type: "separator" },
-				{ type: "item", label: "Return to match selection", onSelect: () => goto("/play") }
-			];
-
-		options.push({ type: "item", label: matchLists.find((l) => l.owner == myData.id) ? "Load Additional List" : "Load List", onSelect: () => (componentsOpen.addList = true) });
-		if (myData.playerRole == "HOST" || myData.playerRole == "MODERATOR")
-			options = options.concat([
-				{ type: "separator" },
-				{ type: "item", label: "Manage Match", onSelect: () => (componentsOpen.management = true) },
-				{
-					type: "item",
-					label: "Delete Match",
-					onSelect: () => {
-						if (confirm("Delete match immediately and end without showing summary screen?")) deleteMatch(data.matchId);
-					}
-				},
-				{
-					type: "item",
-					label: "Reset Match",
-					onSelect: () => {
-						if (confirm("Reset match? This will remove all damage and criticals, and set the round and scores to zero")) resetMatch(data.matchId);
-					}
-				},
-				{ type: "separator" },
-				{ type: "info", label: `Match Id: ${data.matchId}` },
-				{ type: "hiddenInfo", label: `Join Code`, hidden: `${matchData?.joinCode}` }
-			]);
-
-		return options.concat([{ type: "separator" }, { type: "item", label: "Return to match selection", onSelect: () => goto("/play") }]);
-	});
+	const componentsOpen = $state({ join: false, addList: false, management: false, matchLog: false, matchResults: false, matchOverAlert: false, endRound: false });
 
 	let listContainer = $state<HTMLDivElement>();
 	let activeList = $state<string>();
 	let observer = $state<IntersectionObserver>();
 
 	onMount(() => {
-		const es = new EventSource(`/play/${data.matchId}/stream`);
+		const es = new EventSource(`/play/${matchId}/stream`);
 		es.onmessage = ({ data }) => processMessage(data, matchPlayers, matchUnits, matchLogs, matchLists);
 
 		observer = new IntersectionObserver(
@@ -130,34 +92,31 @@
 <div class="play-body">
 	<div class="match-bars">
 		<div class="match-header">
-			<div class="toolbar-section">
-				<DropdownMenu items={menuOptions} triggerClasses="transparent-button">
-					{#snippet trigger()}
-						<div class="toolbar-button">Menu</div>
-					{/snippet}
-				</DropdownMenu>
+			<div class="team-name-red">
+				<div class="toolbar-item">{teamData?.[0]?.name}</div>
+				<div class="toolbar-item">{teamData?.[0]?.objectivePoints}</div>
 			</div>
-			<div class="team-names">
-				<div class="team-name-red">
-					<div class="toolbar-item">{teamData?.[0]?.name}</div>
-					<div class="toolbar-item">{teamData?.[0]?.objectivePoints}</div>
-				</div>
-				<div class="team-name-blue">
-					<div class="toolbar-item">{teamData?.[1]?.name}</div>
-					<div class="toolbar-item">{teamData?.[1]?.objectivePoints}</div>
-				</div>
+			<div class="match-details">
+				<p>Round: {matchData?.currentRound}</p>
+				<RoundTimer {matchData} />
 			</div>
-
-			<div class="toolbar-section">
-				<div>
-					<DisplayOptionsPopover bind:options={options.current} />
-				</div>
+			<div class="team-name-blue">
+				<div class="toolbar-item">{teamData?.[1]?.name}</div>
+				<div class="toolbar-item">{teamData?.[1]?.objectivePoints}</div>
 			</div>
 		</div>
 		<div class="match-list-bar">
+			<div class="toolbar-section" style="justify-self: start;">
+				<MenuPlayer bind:options={options.current} username={data.username} {myData} {componentsOpen} />
+			</div>
 			{#if !appWindow.isMobile}
-				<div class="team-lists team-lists-red">
-					{#each matchLists.filter((l) => l.team == teamData?.[0].id) as list, index (list.id)}
+				<div class="team-lists">
+					{#each matchLists.filter((l) => l.team == teamData?.[0].id) as list (list.id)}
+						<a class={{ "jump-link-button": true, "active-list": list.id == activeList }} data-team={teamData.findIndex((t) => t.id == list.team)} href={`#list-${list.id}`}>
+							{list.name}
+						</a>
+					{/each}
+					{#each matchLists.filter((l) => l.team == teamData?.[1].id) as list}
 						<a class={{ "jump-link-button": true, "active-list": list.id == activeList }} data-team={teamData.findIndex((t) => t.id == list.team)} href={`#list-${list.id}`}>
 							{list.name}
 						</a>
@@ -167,36 +126,11 @@
 				{@const list = matchLists.find((l) => l.id == activeList)}
 				<button class="jump-link-button" data-team={teamData.findIndex((t) => t.id == (list?.team ?? 0))}>{list?.name}</button>
 			{/if}
-			<div class="round-counter">
-				<p>{appWindow.isMobile ? "" : "Current"} Round: {matchData?.currentRound ? matchData.currentRound : "Pregame"}</p>
+			<div class="toolbar-section" style="justify-self: end;">
 				{#if myData?.playerRole == "HOST"}
-					<div class="toolbar-section">
-						{#if matchData?.currentRound == 0}
-							<button
-								class="toolbar-button"
-								onclick={() => {
-									startGame(data.matchId);
-								}}>Start Game</button
-							>
-						{:else}
-							<EndRoundModal matchData={matchData!} teams={teamData}>
-								{#snippet trigger()}
-									<div class="toolbar-button">End Round</div>
-								{/snippet}
-							</EndRoundModal>
-						{/if}
-					</div>
+					<MenuHost {matchData} {componentsOpen} />
 				{/if}
 			</div>
-			{#if !appWindow.isMobile}
-				<div class="team-lists team-lists-blue">
-					{#each matchLists.filter((l) => l.team == teamData?.[1].id) as list}
-						<a class={{ "jump-link-button": true, "active-list": list.id == activeList }} data-team={teamData.findIndex((t) => t.id == list.team)} href={`#list-${list.id}`}>
-							{list.name}
-						</a>
-					{/each}
-				</div>
-			{/if}
 		</div>
 	</div>
 
@@ -229,10 +163,12 @@
 />
 
 <LoadListModal bind:open={componentsOpen.addList} matchId={matchData?.id.toString() ?? ""} teams={teamData.map((t) => ({ id: t.id, name: t.name }))} />
-
 <MatchManagementModal bind:open={componentsOpen.management} {matchData} {teamData} {matchPlayers} {matchLists} />
-
+<EndRoundModal matchData={matchData!} teams={teamData} bind:open={componentsOpen.endRound} />
 <MatchResults bind:open={componentsOpen.matchResults} {teamData} {matchData} {matchLists} {matchUnits} />
+<Dialog bind:open={componentsOpen.matchOverAlert} title="Match Timer Expired" contentProps={{ interactOutsideBehavior: "ignore" }}>
+	<p>The match has run out of time. You may still continue playing.</p>
+</Dialog>
 
 <style>
 	.play-body {
@@ -251,35 +187,34 @@
 	}
 	.match-header {
 		display: grid;
-		grid-template-columns: max-content 1fr max-content;
+		grid-template-columns: 1fr max-content 1fr;
 		column-gap: 24px;
-		border-bottom: 2px solid var(--border);
+		/* border-bottom: 2px solid var(--border); */
 		flex-shrink: 0;
 	}
-	.team-names {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-	}
-
 	.match-list-bar {
 		display: grid;
 		flex-shrink: 0;
 		padding: var(--responsive-padding);
-		gap: 36px;
+		gap: 32px;
+		margin-top: 8px;
 	}
 
 	.team-lists {
 		display: flex;
-		gap: 8px;
+		gap: 48px;
+		justify-content: center;
 	}
-	.team-lists-red {
-		justify-content: end;
-	}
-	.round-counter {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
+	.match-details {
+		display: flex;
+		flex-direction: column;
 		align-items: center;
-		gap: 24px;
+		justify-content: center;
+		gap: 4px;
+
+		p {
+			font-size: 20px;
+		}
 	}
 	.toolbar-section {
 		display: flex;
@@ -293,18 +228,6 @@
 		font-size: 24px;
 		text-align: center;
 		width: max-content;
-	}
-	.toolbar-button {
-		padding: var(--responsive-padding);
-		font-size: 16px;
-		background-color: transparent;
-		border-radius: 0;
-		color: var(--text-color);
-		min-width: min(25dvw, 100px);
-	}
-	.toolbar-button:hover {
-		background-color: var(--surface-color-light);
-		color: var(--surface-color-light-text-color);
 	}
 	.jump-link-button {
 		padding: 4px 6px;
@@ -382,9 +305,6 @@
 		position: absolute;
 		top: 0px;
 	}
-	.list {
-		overflow-x: auto;
-	}
 
 	@media (max-width: 600px) {
 		.team-name-red,
@@ -394,18 +314,24 @@
 			grid-column: span 2;
 			gap: 8px;
 		}
-		.match-list-bar {
-			grid-template-columns: 1fr 2fr;
+		.team-name-red {
+			border-bottom: 1px solid red;
 		}
-		.round-counter {
-			gap: 4px;
+		.team-name-blue {
+			border-bottom: 1px solid blue;
+		}
+		.match-list-bar {
+			grid-template-columns: 1fr auto 1fr;
+		}
+		.match-details {
+			grid-row: span 2;
 		}
 	}
 	@media (min-width: 600px) {
 		.team-name-red,
 		.team-name-blue {
 			display: flex;
-			gap: 8px;
+			gap: 24px;
 		}
 		.team-name-red {
 			border-bottom: 2px solid red;
@@ -419,7 +345,7 @@
 			flex-direction: row-reverse;
 		}
 		.match-list-bar {
-			grid-template-columns: 1fr max-content 1fr;
+			grid-template-columns: 1fr auto 1fr;
 		}
 	}
 </style>

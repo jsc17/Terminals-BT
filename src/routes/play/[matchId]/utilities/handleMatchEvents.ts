@@ -17,6 +17,7 @@ export function processMessage(
 	matchLogs: MatchLog[],
 	matchLists: PlayList[]
 ) {
+	console.log("recieving message");
 	const update: MatchLog = JSON.parse(message, (key, value) => (key == "updated_at" ? new Date(value) : value));
 	matchLogs.push(update);
 	switch (update.type) {
@@ -32,6 +33,8 @@ export function processMessage(
 			});
 			break;
 		case "MATCH_START":
+		case "MATCH_PAUSED":
+		case "MATCH_RESUMED":
 			getMatchDetails(update.matchId).refresh();
 			break;
 		case "UNIT_DAMAGE":

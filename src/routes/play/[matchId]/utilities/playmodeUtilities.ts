@@ -13,15 +13,12 @@ export function createDamagedAbilityString(ability: UnitAbility, currentCritical
 		disabled = true;
 	}
 
-	console.log("creating ability string", ability);
 	if (weaponAbilityReference.includes(ability.name)) {
 		for (const critical of currentCriticals) {
 			if (critical == "weapon") {
 				damaged = true;
 				for (const key of ["v", "vhid", "s", "m", "l", "e"]) {
 					if (ability[key] != undefined) {
-						console.log(ability[key]);
-
 						if (ability[key] == 1) {
 							ability[key] = 0;
 							ability[key + "min"] = true;

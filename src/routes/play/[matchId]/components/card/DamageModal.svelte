@@ -38,9 +38,6 @@
 		damageToTake += amount;
 		if (damageToTake < 0) damageToTake = 0;
 	}
-	$effect(() => {
-		console.log(damageToTake);
-	});
 </script>
 
 <Dialog bind:open title={`Damage ${reference.name}`}>

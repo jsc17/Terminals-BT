@@ -7,16 +7,15 @@
 	type Props = {
 		matchData: Match;
 		teams: MatchTeam[];
-		trigger: Snippet;
+		open: boolean;
 	};
 
-	let { matchData, teams, trigger }: Props = $props();
+	let { matchData, teams, open = $bindable() }: Props = $props();
 
-	let open = $state(false);
 	endRound.fields.teamScores.set(teams.map(() => 0));
 </script>
 
-<Dialog title="End Round {matchData.currentRound}" bind:open {trigger} triggerClasses="transparent-button">
+<Dialog title="End Round {matchData.currentRound}" bind:open triggerClasses="transparent-button">
 	{#snippet description()}
 		End of the round. Scores will be updated and all pending damage and effects will be applied.
 	{/snippet}

@@ -87,7 +87,6 @@
 		min-height: 0;
 		scrollbar-color: var(--scrollbar-slide) var(--scrollbar-background);
 		scrollbar-width: thin;
-		overscroll-behavior: contain;
 	}
 	:global(body) {
 		margin: 0;

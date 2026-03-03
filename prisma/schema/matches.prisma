@@ -9,6 +9,11 @@ model Match {
     currentRound Int @default(0)
     gameCompleted Boolean @default(false)
     teams MatchTeam[]
+    timeStarted DateTime?
+    timeEnded DateTime?
+    timePaused DateTime?
+    timePausedDurationMs Int @default(0)
+    matchDuration Int?
 }
 
 model UsersInMatch {
@@ -112,6 +117,8 @@ enum LogType {
     MATCH_END
     MATCH_DELETE
     MATCH_RESET
+    MATCH_PAUSED
+    MATCH_RESUMED
     PLAYER_JOINED
     PLAYER_ADDED_LIST
     PLAYER_LEFT
@@ -123,4 +130,5 @@ enum LogType {
     UNIT_HEAT
     UNIT_CRIT
     UNIT_CRIT_REMOVED
+
 }

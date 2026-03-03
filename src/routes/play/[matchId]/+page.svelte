@@ -305,7 +305,10 @@
 		position: absolute;
 		top: 0px;
 	}
-
+	.list {
+		height: 100%;
+		overflow-y: auto;
+	}
 	@media (max-width: 600px) {
 		.team-name-red,
 		.team-name-blue {

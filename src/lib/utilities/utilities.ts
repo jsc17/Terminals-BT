@@ -43,8 +43,18 @@ export function numberToRomanNumeral(num: number) {
 	return romanNumeral;
 }
 
-function delay(milliseconds: number) {
+export function delay(milliseconds: number) {
 	return new Promise(function run(resolve) {
 		setTimeout(resolve, milliseconds);
 	});
+}
+
+export function genericGetSet(e: any) {
+	return {
+		get: () => e,
+		set: (v: any) => {
+			e = v;
+			console.log(e);
+		}
+	};
 }

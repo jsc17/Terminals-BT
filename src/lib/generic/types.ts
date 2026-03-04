@@ -4,6 +4,11 @@ type Item = {
 	disabled?: boolean;
 };
 
+type MenuGetSet<T> = {
+	get: () => T;
+	set: (v: T) => void;
+};
+
 type MenuSimpleItem = {
 	type: "item";
 	label: string;
@@ -26,7 +31,7 @@ type MenuCheck = {
 	label: string;
 	checked: boolean;
 	closeOnSelect?: boolean;
-	onCheckedChange?: () => void;
+	onCheckedChange?: (v: boolean) => void;
 	disabled?: boolean;
 };
 
@@ -39,15 +44,15 @@ type MenuRadio = {
 	label: string;
 	value: string;
 	disabled?: boolean;
-	closeOnSelect?: boolean;
 };
 
 type MenuRadioGroup = {
 	type: "radio";
 	groupLabel: string;
 	radios: MenuRadio[];
-	get: () => string;
-	set: (v: string) => void;
+	onValueChange: (v: string) => void;
+	closeOnSelect?: boolean;
+	value: string;
 };
 
 type Submenu = {
@@ -56,7 +61,17 @@ type Submenu = {
 	subitems: MenuItem[];
 };
 
-type MenuItem = MenuSimpleItem | MenuSeparator | MenuCheck | MenuRadioGroup | Submenu | MenuInfoItem | MenuHiddenInfoItem;
+type MenuNumber = {
+	type: "number";
+	label: string;
+	value: number;
+	onValueChange: (v: number) => void;
+	min?: number;
+	max?: number;
+	step?: number;
+};
+
+type MenuItem = MenuSimpleItem | MenuSeparator | MenuCheck | MenuRadioGroup | Submenu | MenuInfoItem | MenuHiddenInfoItem | MenuNumber;
 
 type Notification = {
 	date: Date;

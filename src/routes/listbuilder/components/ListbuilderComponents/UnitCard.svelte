@@ -11,7 +11,7 @@
 	import type { MenuItem } from "$lib/generic/types";
 	import { getSingleUnitAvailability } from "$lib/remote/unit.remote";
 	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
-	import { List as ListButton } from "phosphor-svelte";
+	import { DotsSixVertical, List as ListButton } from "phosphor-svelte";
 
 	type Props = {
 		unit: { id: string; bonus?: { ind: number; abil: number }[] };
@@ -65,9 +65,9 @@
 </script>
 
 <div class="unit-card">
-	{#if appWindow.isMobile}
+	{#if appWindow.isNarrow}
 		<div class="drag-handles" use:dragHandle>
-			<img class="combobox-img" src="/icons/chevron-updown.svg" alt="expand list chevrons" />
+			<DotsSixVertical color="var(--text-color)" size="25" />
 		</div>
 	{/if}
 	<div class="unit-row-container">
@@ -182,7 +182,7 @@
 		background-color: var(--surface-color);
 		display: flex;
 		flex-shrink: 0;
-		padding: 0px 4px;
+		padding: 0px 4px 0px 0px;
 	}
 	.unit-card:nth-child(odd) {
 		background-color: var(--surface-color-light);
@@ -198,6 +198,7 @@
 		display: flex;
 		align-items: center;
 		justify-items: center;
+		padding: 0px 2px;
 	}
 	.unit-row-container {
 		flex: 1;

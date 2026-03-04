@@ -38,10 +38,11 @@ async function initDb(id: string) {
 			for (const table of ["Unit", "Faction", "Era", "FactionInEra", "Availability"]) {
 				if (db.exec(`SELECT COUNT(*) FROM ${table}`, { returnValue: "resultRows" })[0][0] == 0) emptyTables.push(table);
 			}
-			postMessage({ id, type: WorkerMessageType.DB_INIT_RESPONSE, payload: { initialized: true, emptyTables } });
+			postMessage({ id, type: WorkerMessageType.DB_INIT_RESPONSE, payload: emptyTables });
 			dbStarted = true;
+			log("DB Created");
 		} else {
-			postMessage({ id, type: WorkerMessageType.DB_INIT_RESPONSE, payload: { initialized: false, error: "Could not create OPFS database" } });
+			postMessage({ id, type: WorkerMessageType.LOG, payload: "Could not create OPFS database" });
 			log("Could not create OPFS database");
 		}
 	} catch (err: any) {

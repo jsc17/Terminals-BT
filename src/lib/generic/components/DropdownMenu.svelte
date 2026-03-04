@@ -51,11 +51,11 @@
 			{item.label}
 		</DropdownMenu.CheckboxItem>
 	{:else if item.type == "radio"}
-		<DropdownMenu.RadioGroup bind:value={item.get, item.set}>
+		<DropdownMenu.RadioGroup bind:value={item.value} onValueChange={item.onValueChange}>
 			<fieldset>
 				<legend>{item.groupLabel}</legend>
 				{#each item.radios as radio}
-					<DropdownMenu.RadioItem class="inline" value={radio.value} closeOnSelect={radio.closeOnSelect} disabled={radio.disabled}>
+					<DropdownMenu.RadioItem class="inline" value={radio.value} closeOnSelect={item.closeOnSelect} disabled={radio.disabled}>
 						<div class="radio-check"></div>
 						<p class="muted">{radio.label}</p>
 					</DropdownMenu.RadioItem>
@@ -64,7 +64,7 @@
 		</DropdownMenu.RadioGroup>
 	{:else if item.type == "submenu"}
 		<DropdownMenu.Sub>
-			<DropdownMenu.SubTrigger>{item.label}</DropdownMenu.SubTrigger>
+			<DropdownMenu.SubTrigger class="dropdown-button">{item.label}</DropdownMenu.SubTrigger>
 			<DropdownMenu.SubContent>
 				{#each item.subitems as subitem}
 					{@render renderItem(subitem)}
@@ -73,6 +73,25 @@
 		</DropdownMenu.Sub>
 	{:else if item.type == "separator"}
 		<DropdownMenu.Separator class={item.classes} />
+	{:else if item.type == "number"}
+		<div class="dropdown-number" data-dropdown-menu-item>
+			{item.label}:
+			<button
+				style="margin: 0px 6px"
+				onclick={() => {
+					if (item.min == undefined || item.value > item.min) item.value = item.value - (item.step ?? 1);
+					item.onValueChange(item.value);
+				}}>-</button
+			>
+			{item.value}
+			<button
+				style="margin: 0px 6px"
+				onclick={() => {
+					if (item.max == undefined || item.value < item.max) item.value = item.value + (item.step ?? 1);
+					item.onValueChange(item.value);
+				}}>+</button
+			>
+		</div>
 	{/if}
 {/snippet}
 

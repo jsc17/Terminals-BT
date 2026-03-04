@@ -18,8 +18,14 @@ export function createDamagedAbilityString(ability: UnitAbility, currentCritical
 			if (critical == "weapon") {
 				damaged = true;
 				for (const key of ["v", "vhid", "s", "m", "l", "e"]) {
-					if (ability[key]) {
-						ability[key] -= 1;
+					if (ability[key] != undefined) {
+						if (ability[key] == 1) {
+							ability[key] = 0;
+							ability[key + "min"] = true;
+						} else {
+							ability[key] -= ability[key] == 0 ? 0 : 1;
+							ability[key + "min"] = false;
+						}
 					}
 				}
 			}
@@ -40,8 +46,14 @@ export function createDamagedAbilityString(ability: UnitAbility, currentCritical
 				if (critical == "weapon") {
 					damaged = true;
 					for (const key of ["v", "vhid", "s", "m", "l", "e"]) {
-						if (turretAbility[key]) {
-							turretAbility[key] -= 1;
+						if (turretAbility[key] != undefined) {
+							if (turretAbility[key] == 1) {
+								turretAbility[key] = 0;
+								turretAbility[key + "min"] = true;
+							} else {
+								turretAbility[key] -= turretAbility[key] == 0 ? 0 : 1;
+								turretAbility[key + "min"] = false;
+							}
 						}
 					}
 				}

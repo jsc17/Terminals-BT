@@ -4,7 +4,8 @@
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import SendNotification from "./SendNotification.svelte";
 	import { cacheImages, uploadAmmo, getImage } from "./admin.remote";
-	import { getMULDataFromIdLocal } from "$lib/local/sqllite/local-db";
+	import { dataInitialized, getResultListLocal, initWorker, workerInitialized } from "$lib/local/sqllite/local-db.svelte";
+	import type { MulUnit } from "$lib/types/listTypes";
 
 	async function loadUnits() {
 		const links: { type: string; link: string }[] = [];
@@ -100,8 +101,7 @@
 	}
 
 	let imageData = $derived(getImage.result?.image);
-	let mulId = $state(0);
-	let unitData = $state<any>(null);
+	let unitData = $state<Promise<MulUnit[]> | undefined>();
 </script>
 
 <main>
@@ -126,32 +126,43 @@
 			<button>Submit</button>
 		</form>
 	</div>
-	<div class="card">
-		<button onclick={sendResetEmail}>Send Reset</button>
-	</div>
-
-	<div class="card">
-		<button onclick={uploadCustomUnits}>Upload custom</button>
-	</div>
 
 	<SendNotification />
 
-	<button onclick={() => uploadAmmo()}>Upload Ammo</button>
-
-	<button onclick={() => cacheImages()}>Cache Images</button>
-
-	<input type="number" bind:value={mulId} />
-	<button
-		onclick={() => {
-			getMULDataFromIdLocal(mulId)
-				.then((data) => {
-					console.log(data);
-				})
-				.catch((error) => {
-					console.error(error);
-				});
-		}}>Get Unit Data</button
-	>
+	<div class="card">
+		<h2>Test SQLite Local DB</h2>
+		<div>
+			<button onclick={() => initWorker()}>Initialize SQLite</button>
+			<div class="inline">
+				<p>Worker</p>
+				{#await workerInitialized.promise}
+					❌
+				{:then result}
+					✅
+				{/await}
+			</div>
+			<div class="inline">
+				<p>Data</p>
+				{#await dataInitialized.promise}
+					❌
+				{:then result}
+					✅
+				{/await}
+			</div>
+		</div>
+		<div>
+			<button onclick={() => (unitData = getResultListLocal({ factions: [], eras: [], eraSearchType: "any", factionSearchType: "any" }))}>Get Result List</button>
+			{#if unitData}
+				{#await unitData}
+					Loading...
+				{:then result}
+					{result.length}
+				{/await}
+			{:else}
+				Waiting
+			{/if}
+		</div>
+	</div>
 </main>
 
 <style>
@@ -161,5 +172,6 @@
 		gap: 24px;
 		justify-content: flex-start;
 		align-items: start;
+		padding: var(--responsive-padding);
 	}
 </style>

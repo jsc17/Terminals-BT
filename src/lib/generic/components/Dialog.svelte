@@ -23,7 +23,7 @@
 	{/if}
 	<Dialog.Portal>
 		<Dialog.Overlay />
-		<Dialog.Content>
+		<Dialog.Content {...contentProps}>
 			<Dialog.Title>
 				{title}
 				<Dialog.Close

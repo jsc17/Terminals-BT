@@ -59,6 +59,12 @@
 				<p class="error">{issue.message}</p>
 			{/each}
 		</div>
+		<div>
+			<label>Match Duration (minutes): <input {...createMatch.fields.matchDuration.as("number")} placeholder="No Timer" /></label>
+			{#each createMatch.fields.matchDuration.issues() as issue}
+				<p class="error">{issue.message}</p>
+			{/each}
+		</div>
 		<hr />
 		<div>
 			<label>Host Nickname: <input {...createMatch.fields.hostNickname.as("text")} /></label>

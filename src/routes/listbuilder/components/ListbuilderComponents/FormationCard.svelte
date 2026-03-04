@@ -7,6 +7,7 @@
 	import { UnitCard, UnitCustomizationModal, EditFormationModal, FormationInfoPopover, FormationMenu, FindUnitAvailabilityModal } from "../";
 	import { validateFormation } from "$lib/utilities/formationRequirementValidation.svelte";
 	import PlayModal from "../../../../lib/sharedDialogs/PlayModal.svelte";
+	import { DotsSixVertical } from "phosphor-svelte";
 
 	type Props = { formation: ListFormation; draggingColumns: boolean; unitCustomizationModal?: UnitCustomizationModal; list: List; playModal?: PlayModal };
 
@@ -32,9 +33,9 @@
 <div class="formation-card">
 	{#if list.formations.length != 1}
 		<div class="formation-header">
-			{#if appWindow.isMobile}
+			{#if appWindow.isNarrow}
 				<div class="drag-handles" use:dragHandle>
-					<img class="combobox-img" src="/icons/chevron-updown.svg" alt="Drag handle chevrons" />
+					<DotsSixVertical color="var(--text-color)" size="25" />
 				</div>
 			{/if}
 			<div class="formation-header-details">
@@ -62,12 +63,12 @@
 			<div class="formation-header-buttons">
 				<FormationInfoPopover {formationStats} />
 				<FormationMenu {formation} {list} bind:editModalOpen availabilityModal={availabilityModal!} {playModal} />
-				<!-- <button
+				<button
 					onclick={() => {
 						open = !open;
 					}}
 					class="transparent-button expand-collapse">{open ? "collapse" : "expand"}</button
-				> -->
+				>
 			</div>
 		</div>
 	{/if}
@@ -76,26 +77,26 @@
 			<div class="drop-message">Drop units here to add them to this formation</div>
 		{/if}
 		{#if appWindow.isMobile}
-			<!-- <Collapsible bind:open> -->
-			<div
-				class="unit-cards"
-				use:dragHandleZone={{ items: formation.units, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
-				onconsider={handleSort}
-				onfinalize={handleSort}
-			>
-				{#each formation.units as unit (unit.id)}
-					<UnitCard {unit} {unitCustomizationModal} {list}></UnitCard>
-				{/each}
-			</div>
-			<!-- </Collapsible> -->
-			<!-- {#if !open}
+			<Collapsible bind:open>
+				<div
+					class="unit-cards"
+					use:dragHandleZone={{ items: formation.units, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
+					onconsider={handleSort}
+					onfinalize={handleSort}
+				>
+					{#each formation.units as unit (unit.id)}
+						<UnitCard {unit} {unitCustomizationModal} {list}></UnitCard>
+					{/each}
+				</div>
+			</Collapsible>
+			{#if !open}
 				<button
 					class="transparent-button expand-button"
 					onclick={() => {
 						open = true;
 					}}>Expand collapsed formation <img src="/icons/expand.svg" alt="Expand formation" /></button
 				>
-			{/if} -->
+			{/if}
 			{#if formation.secondary && !draggingColumns}
 				<div class="secondary-formation-header">
 					<p>{formation.secondary.type}</p>
@@ -119,58 +120,58 @@
 							</Popover>
 						{/if}
 					</div>
-					<!-- <button
+					<button
 						onclick={() => {
 							secondaryOpen = !secondaryOpen;
 						}}
 						class="transparent-button expand-collapse">{secondaryOpen ? "collapse" : "expand"}</button
-					> -->
+					>
 				</div>
-				<!-- <Collapsible bind:open={secondaryOpen}> -->
-				{#if !formation.secondary.units.length}
-					<div class="drop-message">Drop units here to add them to this sub-formation</div>
-				{/if}
-				<div
-					class="unit-cards"
-					use:dragHandleZone={{ items: formation.secondary.units, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
-					onconsider={handleSecondarySort}
-					onfinalize={handleSecondarySort}
-				>
-					{#each formation.secondary.units as unit (unit.id)}
-						<UnitCard {unit} {unitCustomizationModal} {list}></UnitCard>
-					{/each}
-				</div>
-				<!-- </Collapsible> -->
-				<!-- {#if !secondaryOpen}
+				<Collapsible bind:open={secondaryOpen}>
+					{#if !formation.secondary.units.length}
+						<div class="drop-message">Drop units here to add them to this sub-formation</div>
+					{/if}
+					<div
+						class="unit-cards"
+						use:dragHandleZone={{ items: formation.secondary.units, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
+						onconsider={handleSecondarySort}
+						onfinalize={handleSecondarySort}
+					>
+						{#each formation.secondary.units as unit (unit.id)}
+							<UnitCard {unit} {unitCustomizationModal} {list}></UnitCard>
+						{/each}
+					</div>
+				</Collapsible>
+				{#if !secondaryOpen}
 					<button
 						class="transparent-button expand-button"
 						onclick={() => {
 							secondaryOpen = true;
 						}}>Expand collapsed formation <img src="/icons/expand.svg" alt="Expand formation" /></button
 					>
-				{/if} -->
+				{/if}
 			{/if}
 		{:else}
-			<!-- <Collapsible bind:open> -->
-			<div
-				class="unit-cards"
-				use:dndzone={{ items: formation.units, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
-				onconsider={handleSort}
-				onfinalize={handleSort}
-			>
-				{#each formation.units as unit (unit.id)}
-					<UnitCard {unit} {unitCustomizationModal} {list}></UnitCard>
-				{/each}
-			</div>
-			<!-- </Collapsible> -->
-			<!-- {#if !open}
+			<Collapsible bind:open>
+				<div
+					class="unit-cards"
+					use:dndzone={{ items: formation.units, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
+					onconsider={handleSort}
+					onfinalize={handleSort}
+				>
+					{#each formation.units as unit (unit.id)}
+						<UnitCard {unit} {unitCustomizationModal} {list}></UnitCard>
+					{/each}
+				</div>
+			</Collapsible>
+			{#if !open}
 				<button
 					class="transparent-button expand-button"
 					onclick={() => {
 						open = true;
 					}}>Expand collapsed formation <img src="/icons/expand.svg" alt="Expand formation" /></button
 				>
-			{/if} -->
+			{/if}
 			{#if formation.secondary && !draggingColumns}
 				<div class="secondary-formation-header">
 					<p>{formation.secondary.type}</p>
@@ -194,36 +195,36 @@
 							return (total += list.units.find((unit) => unit.id == current.id)?.cost ?? 0);
 						}, 0)}
 					</p>
-					<!-- <button
+					<button
 						onclick={() => {
 							secondaryOpen = !secondaryOpen;
 						}}
 						class="transparent-button expand-collapse">{secondaryOpen ? "collapse" : "expand"}</button
-					> -->
+					>
 				</div>
-				<!-- <Collapsible bind:open={secondaryOpen}> -->
-				{#if !formation.secondary.units.length}
-					<div class="drop-message">Drop units here to add them to this sub-formation</div>
-				{/if}
-				<div
-					class="unit-cards"
-					use:dndzone={{ items: formation.secondary.units, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
-					onconsider={handleSecondarySort}
-					onfinalize={handleSecondarySort}
-				>
-					{#each formation.secondary.units as unit (unit.id)}
-						<UnitCard {unit} {unitCustomizationModal} {list}></UnitCard>
-					{/each}
-				</div>
-				<!-- </Collapsible> -->
-				<!-- {#if !secondaryOpen}
+				<Collapsible bind:open={secondaryOpen}>
+					{#if !formation.secondary.units.length}
+						<div class="drop-message">Drop units here to add them to this sub-formation</div>
+					{/if}
+					<div
+						class="unit-cards"
+						use:dndzone={{ items: formation.secondary.units, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
+						onconsider={handleSecondarySort}
+						onfinalize={handleSecondarySort}
+					>
+						{#each formation.secondary.units as unit (unit.id)}
+							<UnitCard {unit} {unitCustomizationModal} {list}></UnitCard>
+						{/each}
+					</div>
+				</Collapsible>
+				{#if !secondaryOpen}
 					<button
 						class="transparent-button expand-button"
 						onclick={() => {
 							secondaryOpen = true;
 						}}>Expand collapsed formation <img src="/icons/expand.svg" alt="Expand formation" /></button
 					>
-				{/if} -->
+				{/if}
 			{/if}
 		{/if}
 	{:else}
@@ -322,6 +323,7 @@
 		display: flex;
 		align-items: center;
 		justify-items: center;
+		padding: 0px 2px;
 	}
 	.expand-button {
 		display: flex;

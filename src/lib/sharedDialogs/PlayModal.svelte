@@ -117,6 +117,13 @@
 				<label>Team 1 Name: <input {...createMatchWithList.fields.teamNames[0].as("text")} /></label>
 				<label>Team 2 Name: <input {...createMatchWithList.fields.teamNames[1].as("text")} /></label>
 
+				<div>
+					<label>Match Duration (minutes): <input {...createMatchWithList.fields.matchDuration.as("number")} placeholder="No Timer" /></label>
+					{#each createMatchWithList.fields.matchDuration.issues() as issue}
+						<p class="error">{issue.message}</p>
+					{/each}
+				</div>
+
 				{#each createMatchWithList.fields.hostNickname.issues() as issue}
 					<p class="error">{issue.message}</p>
 				{/each}

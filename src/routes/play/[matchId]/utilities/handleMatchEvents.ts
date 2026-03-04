@@ -1,6 +1,6 @@
 import { toastController } from "$lib/stores";
 import { nanoid } from "nanoid";
-import { getPlayerData, getMatchUnitData, getMatchDetails, getTeamData, getMyData, getMatchList } from "../remote/matchData.remote";
+import { getPlayerData, getMatchUnitData, getMatchDetails, getTeamData, getMyData, getMatchList, getLogs } from "../remote/matchData.remote";
 import type { PlayFormation, PlayList, PlayUnit, PlayUnitData } from "../../types/types";
 import { SvelteMap } from "svelte/reactivity";
 import { getMulImage } from "$lib/remote/mulImages.remote";
@@ -16,6 +16,17 @@ export function processMessage(
 	matchLists: PlayList[]
 ) {
 	const update: MatchLog = JSON.parse(message, (key, value) => (key == "updated_at" ? new Date(value) : value));
+
+	if (update.type == "HEARTBEAT" && matchLogs.length) {
+		const lastLogId = matchLogs.at(-1)!.id;
+		if (update.id > lastLogId) {
+			getLogs({ matchId: update.matchId, lastLogId: lastLogId }).then((r) => {
+				for (const log of r) processMessage(JSON.stringify(log), playerList, matchUnits, matchLogs, matchLists);
+			});
+		}
+		return;
+	}
+
 	matchLogs.push(update);
 	switch (update.type) {
 		case "PLAYER_JOINED":
@@ -30,6 +41,8 @@ export function processMessage(
 			});
 			break;
 		case "MATCH_START":
+		case "MATCH_PAUSED":
+		case "MATCH_RESUMED":
 			getMatchDetails(update.matchId).refresh();
 			break;
 		case "UNIT_DAMAGE":
@@ -53,9 +66,12 @@ export function processMessage(
 			getMatchDetails(update.matchId).refresh();
 			getTeamData(update.matchId).refresh();
 			break;
-		case "MATCH_DELETE":
-			toastController.addToast("Host deleted the match. Redirecting you to match selection.");
-			goto("/play");
+		case "MATCH_RESET":
+			getMatchDetails(update.matchId).refresh();
+			getTeamData(update.matchId).refresh();
+			matchUnits.forEach((u) => {
+				handleUnitUpdate(u.data.id, matchUnits);
+			});
 			break;
 		case "REMOVE_PLAYER":
 			playerList = playerList.filter((p) => p.id != Number(update.details));
@@ -65,7 +81,7 @@ export function processMessage(
 			getMatchDetails(update.matchId).refresh();
 			break;
 		default:
-			console.log("Unhandled Event");
+			console.log("Unhandled Event:", update.type);
 	}
 }
 

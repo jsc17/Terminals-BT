@@ -1,0 +1,84 @@
+<script lang="ts">
+	import type { Match } from "$lib/generated/prisma/browser";
+	import { watch } from "runed";
+	import { Dialog } from "$lib/generic";
+
+	type Props = {
+		matchData?: Match;
+		componentsOpen: { matchOverAlert: boolean };
+	};
+
+	let { matchData, componentsOpen }: Props = $props();
+
+	let interval = $state<NodeJS.Timeout>();
+
+	const totalDurationMs = $derived((matchData?.matchDuration ?? 0) * 60 * 1000);
+	let remainingMS = $state<number>();
+	const remainingHours = $derived(Math.floor((remainingMS ?? totalDurationMs) / 3600000));
+	const remainingMinutes = $derived(
+		Math.floor(((remainingMS ?? totalDurationMs) % 3600000) / 60000)
+			.toString()
+			.padStart(2, "0")
+	);
+	const remainingSeconds = $derived(
+		Math.floor(((remainingMS ?? totalDurationMs) % 60000) / 1000)
+			.toString()
+			.padStart(2, "0")
+	);
+
+	function calculateRemainingMs() {
+		if (!matchData?.timeStarted) {
+			clearInterval(interval);
+			remainingMS = totalDurationMs;
+			return;
+		}
+
+		if (matchData.timePaused && remainingMS !== undefined) return;
+
+		const elapsed = Date.now() - matchData!.timeStarted!.getTime() - matchData!.timePausedDurationMs;
+		remainingMS = Math.max(0, totalDurationMs - elapsed);
+
+		if (remainingMS == 0) componentsOpen.matchOverAlert = true;
+		if (remainingMS == 0 || matchData.timeEnded) clearInterval(interval);
+	}
+
+	watch.pre(
+		() => matchData?.timeStarted,
+		() => {
+			calculateRemainingMs();
+			interval = setInterval(calculateRemainingMs, 250);
+		}
+	);
+</script>
+
+{#if matchData?.matchDuration}
+	<p class={{ paused: matchData.timePaused, ended: remainingMS == 0 }}>{remainingHours}:{remainingMinutes}:{remainingSeconds}</p>
+	<Dialog bind:open={componentsOpen.matchOverAlert} title="Match Timer Expired" contentProps={{ interactOutsideBehavior: "ignore" }}>
+		<p>The match has run out of time, but you may still continue playing.</p>
+		<div class="center" style="margin: 1rem">
+			<button class="detailed-button" onclick={() => (componentsOpen.matchOverAlert = false)}>Close</button>
+		</div>
+	</Dialog>
+{/if}
+
+<style>
+	.paused {
+		color: yellow;
+		animation: blink 1s infinite;
+	}
+	.ended {
+		color: red;
+		animation: blink 1s infinite;
+	}
+	@keyframes blink {
+		0% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.5;
+		}
+		100% {
+			opacity: 1;
+		}
+	}
+</style>

@@ -24,8 +24,11 @@ export async function initWorker() {
 			cbMap.delete(e.data.id);
 		}
 	};
-	sendMessage<{ emptyTables?: string[]; error?: string }>({ type: WorkerMessageType.DB_INIT }).then((result) => {
-		if (result.error) {
+
+	const initPromise = sendMessage<{ status: "success" | "error"; emptyTables?: string[]; error?: string }>({ type: WorkerMessageType.DB_INIT });
+	const timeoutPromise = new Promise<{ status: "error"; error: string }>((resolve) => setTimeout(() => resolve({ status: "error", error: "timed out" }), 1000));
+	await Promise.race([timeoutPromise, initPromise]).then((result) => {
+		if (result.status === "error") {
 			log(result.error);
 			workerInitialized.resolve({ status: "error", error: result.error });
 			return;

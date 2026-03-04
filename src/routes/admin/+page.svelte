@@ -3,9 +3,7 @@
 	import { calculateTMM } from "$lib/utilities/genericBattletechUtilities";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import SendNotification from "./SendNotification.svelte";
-	import { cacheImages, uploadAmmo, getImage } from "./admin.remote";
-	import { dataInitialized, getResultListLocal, initWorker, workerInitialized } from "$lib/local/sqllite/local-db.svelte";
-	import type { MulUnit } from "$lib/types/listTypes";
+	import { getImage } from "./admin.remote";
 
 	async function loadUnits() {
 		const links: { type: string; link: string }[] = [];
@@ -99,9 +97,6 @@
 	async function uploadCustomUnits() {
 		const result: any = deserialize(await (await fetch("?/uploadCustom", { method: "POST", body: "" })).text());
 	}
-
-	let imageData = $derived(getImage.result?.image);
-	let unitData = $state<Promise<MulUnit[]> | undefined>();
 </script>
 
 <main>
@@ -128,41 +123,6 @@
 	</div>
 
 	<SendNotification />
-
-	<div class="card">
-		<h2>Test SQLite Local DB</h2>
-		<div>
-			<button onclick={() => initWorker()}>Initialize SQLite</button>
-			<div class="inline">
-				<p>Worker</p>
-				{#await workerInitialized.promise}
-					❌
-				{:then result}
-					✅
-				{/await}
-			</div>
-			<div class="inline">
-				<p>Data</p>
-				{#await dataInitialized.promise}
-					❌
-				{:then result}
-					✅
-				{/await}
-			</div>
-		</div>
-		<div>
-			<button onclick={() => (unitData = getResultListLocal({ factions: [], eras: [], eraSearchType: "any", factionSearchType: "any" }))}>Get Result List</button>
-			{#if unitData}
-				{#await unitData}
-					Loading...
-				{:then result}
-					{result.length}
-				{/await}
-			{:else}
-				Waiting
-			{/if}
-		</div>
-	</div>
 </main>
 
 <style>

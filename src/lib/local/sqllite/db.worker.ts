@@ -38,16 +38,16 @@ async function initDb(id: string) {
 			for (const table of ["Unit", "Faction", "Era", "FactionInEra", "Availability"]) {
 				if (db.exec(`SELECT COUNT(*) FROM ${table}`, { returnValue: "resultRows" })[0][0] == 0) emptyTables.push(table);
 			}
-			postMessage({ id, type: WorkerMessageType.DB_INIT_RESPONSE, payload: emptyTables });
+			postMessage({ id, type: WorkerMessageType.DB_INIT_RESPONSE, payload: { status: "success", emptyTables } });
 			dbStarted = true;
 			log("DB Created");
 		} else {
-			postMessage({ id, type: WorkerMessageType.LOG, payload: "Could not create OPFS database" });
+			postMessage({ id, type: WorkerMessageType.DB_INIT_RESPONSE, payload: { status: "error", error: "Could not create OPFS database" } });
 			log("Could not create OPFS database");
 		}
 	} catch (err: any) {
 		error("Initialization error:", err.name, err.message);
-		postMessage({ id, type: WorkerMessageType.DB_INIT_RESPONSE, payload: { initialized: false, error: err.message } });
+		postMessage({ id, type: WorkerMessageType.DB_INIT_RESPONSE, payload: { status: "error", error: err.message } });
 	}
 }
 
@@ -135,7 +135,7 @@ function buildResultListQuery(factions: number[], eras: number[], eraSearchType:
 	let sql = `SELECT * FROM Unit u`;
 	const clauses: string[] = [];
 
-	if (factions.length == 0 && eras.length == 0) return sql;
+	if (factions.length == 0 && eras.length == 0) return (sql += ` order by tonnage nulls last, name`);
 
 	sql += ` WHERE `;
 
@@ -160,6 +160,6 @@ function buildResultListQuery(factions: number[], eras: number[], eraSearchType:
 	}
 
 	sql += clauses.join(" AND ");
-	sql += " ORDER BY u.tonnage nulls last, u.name";
+	sql += ` order by tonnage nulls last, name`;
 	return sql;
 }

@@ -98,7 +98,7 @@
 			</div>
 			<div class="match-details">
 				<p>Round: {matchData?.currentRound} {matchData?.gameCompleted ? "(Match Ended)" : ""}</p>
-				<RoundTimer {matchData} />
+				<RoundTimer {matchData} {componentsOpen} />
 			</div>
 			<div class="team-name-blue">
 				<div class="toolbar-item">{teamData?.[1]?.name}</div>
@@ -166,9 +166,6 @@
 <MatchManagementModal bind:open={componentsOpen.management} {matchData} {teamData} {matchPlayers} {matchLists} />
 <EndRoundModal matchData={matchData!} teams={teamData} bind:open={componentsOpen.endRound} />
 <MatchResults bind:open={componentsOpen.matchResults} {teamData} {matchData} {matchLists} {matchUnits} />
-<Dialog bind:open={componentsOpen.matchOverAlert} title="Match Timer Expired" contentProps={{ interactOutsideBehavior: "ignore" }}>
-	<p>The match has run out of time. You may still continue playing.</p>
-</Dialog>
 
 <style>
 	.play-body {

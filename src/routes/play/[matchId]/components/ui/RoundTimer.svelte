@@ -1,12 +1,14 @@
 <script lang="ts">
 	import type { Match } from "$lib/generated/prisma/browser";
 	import { watch } from "runed";
+	import { Dialog } from "$lib/generic";
 
 	type Props = {
 		matchData?: Match;
+		componentsOpen: { matchOverAlert: boolean };
 	};
 
-	let { matchData }: Props = $props();
+	let { matchData, componentsOpen }: Props = $props();
 
 	let interval = $state<NodeJS.Timeout>();
 
@@ -36,6 +38,7 @@
 		const elapsed = Date.now() - matchData!.timeStarted!.getTime() - matchData!.timePausedDurationMs;
 		remainingMS = Math.max(0, totalDurationMs - elapsed);
 
+		if (remainingMS == 0) componentsOpen.matchOverAlert = true;
 		if (remainingMS == 0 || matchData.timeEnded) clearInterval(interval);
 	}
 
@@ -50,6 +53,12 @@
 
 {#if matchData?.matchDuration}
 	<p class={{ paused: matchData.timePaused, ended: remainingMS == 0 }}>{remainingHours}:{remainingMinutes}:{remainingSeconds}</p>
+	<Dialog bind:open={componentsOpen.matchOverAlert} title="Match Timer Expired" contentProps={{ interactOutsideBehavior: "ignore" }}>
+		<p>The match has run out of time, but you may still continue playing.</p>
+		<div class="center" style="margin: 1rem">
+			<button class="detailed-button" onclick={() => (componentsOpen.matchOverAlert = false)}>Close</button>
+		</div>
+	</Dialog>
 {/if}
 
 <style>

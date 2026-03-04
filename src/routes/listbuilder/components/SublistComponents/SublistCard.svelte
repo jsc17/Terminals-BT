@@ -5,7 +5,7 @@
 	import { dragHandle } from "svelte-dnd-action";
 	import ExportSublistModal from "./ExportSublistModal.svelte";
 	import type { MenuItem } from "$lib/generic/types";
-	import { List as MenuIcon } from "phosphor-svelte";
+	import { DotsSixVertical, List as MenuIcon } from "phosphor-svelte";
 	import PlayModal from "../../../../lib/sharedDialogs/PlayModal.svelte";
 	import { toastController } from "$lib/stores";
 
@@ -120,7 +120,7 @@
 <div class="sublist-container" class:sublist-container-mobile={layout == "mobile"}>
 	{#if layout == "mobile"}
 		<div class="mobile-sublist-drag-handle" use:dragHandle>
-			<img class="combobox-img" src="/icons/chevron-updown.svg" alt="expand list chevrons" />
+			<DotsSixVertical color="var(--text-color)" size="25" />
 		</div>
 	{/if}
 
@@ -203,6 +203,7 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
+		padding: 0px 2px;
 	}
 	.sublist-header {
 		display: flex;

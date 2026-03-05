@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getEraName, getEraNames, getGeneralId } from "$lib/remote/era-faction.remote";
+	import { getEraName, getEraNames, getErasAndFactions, getGeneralId } from "$lib/remote/era-faction.remote";
 	import { getApprovedTournamentList, submitList } from "./tournament.remote";
 	import { validateRules } from "$lib/rules/validateList";
 	import { toastController } from "$lib/stores";
@@ -15,11 +15,10 @@
 	import { innerWidth } from "svelte/reactivity/window";
 	import { SubmitListSchema } from "./schema/submitList";
 	import { logError } from "$lib/remote/error";
-	import { getErasAndFactionsLocal } from "$lib/local/sqllite/local-db";
 
 	let files = $state<FileList>();
 
-	const eraList = $derived(await getErasAndFactionsLocal());
+	const eraList = $derived(await getErasAndFactions());
 	const eraNames = $derived(await getEraNames());
 	const tournamentList = $derived((await getApprovedTournamentList()).data);
 
@@ -171,7 +170,7 @@
 				</div>
 			</div>
 		</form>
-		<div class="section">
+		<div class={{ section: true, "locked-section": unitData.length == 0 }}>
 			<h2>3. Review Unit Data (You shouldn't have to do anything here unless it misread any of the units from the uploaded pdf)</h2>
 			<table>
 				<thead>
@@ -216,7 +215,7 @@
 			</table>
 		</div>
 
-		<div class="section">
+		<div class={{ section: true, "locked-section": unfoundUnits > 0 || unitData.length == 0 }}>
 			<h2 class="no-margin">4. Check for any list issues</h2>
 			<div class="inline">
 				<button onclick={handleValidation} disabled={unfoundUnits > 0 || unitData.length == 0}>Validate</button>
@@ -256,7 +255,7 @@
 		</div>
 
 		<form
-			class="section"
+			class={{ section: true, "locked-section": !selectedTournament || issues == undefined || issues?.issueList.size > 0 }}
 			enctype="multipart/form-data"
 			{...submitList.preflight(SubmitListSchema).enhance(async ({ submit }) => {
 				if (files) {
@@ -351,5 +350,9 @@
 	}
 	h2 {
 		font-size: 1.1rem;
+	}
+	.locked-section {
+		opacity: 0.3;
+		pointer-events: none;
 	}
 </style>

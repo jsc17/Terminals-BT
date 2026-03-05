@@ -109,11 +109,7 @@ export async function getUnitAvailabilityLocal(unitId: number) {
 }
 export async function getResultListLocal(data: { factions: number[]; eras: number[]; eraSearchType: "any" | "every"; factionSearchType: "any" | "every" }) {
 	const status = (await workerInitialized.promise).status;
-	if (status === "error") {
-		toastController.addToast("Using remote data");
-		return getResultList(data);
-	}
-	toastController.addToast("Using local data");
+	if (status === "error") return getResultList(data);
 	return sendMessage<MulUnit[]>({ type: WorkerMessageType.GET_RESULT_LIST, payload: data });
 }
 export async function getUniqueListLocal(eras: number[]) {
@@ -122,7 +118,6 @@ export async function getUniqueListLocal(eras: number[]) {
 	return sendMessage<number[]>({ type: WorkerMessageType.GET_UNIQUE_LIST, payload: eras });
 }
 export async function getErasAndFactionsLocal() {
-	log("getErasAndFactionsLocal");
 	const status = (await workerInitialized.promise).status;
 	if (status === "error") return getErasAndFactions();
 	return sendMessage<Map<number, { name: string; order: number; factions: { id: number; name: string }[] }>>({ type: WorkerMessageType.GET_ERAS_AND_FACTIONS });

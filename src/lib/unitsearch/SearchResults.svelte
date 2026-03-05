@@ -57,15 +57,14 @@
 		}
 	}
 	async function showAvailability(id: number) {
-		const result = await getUnitAvailabilityLocal(id);
-
-		// if (!result) return;
-		// availabilityResults = result.map((r) => {
-		// 	return {
-		// 		era: eraLookup.get(r.era) ?? `Unknown Era ${r.era}`,
-		// 		factions: r.factions.map((f) => factionLookup.get(f) ?? `Unknown Faction ${f}`).sort((a, b) => a.localeCompare(b))
-		// 	};
-		// });
+		const results = await getUnitAvailabilityLocal(id);
+		if (!results) return;
+		availabilityResults = results.map((e) => {
+			return {
+				era: eraLookup.get(e.era) ?? `Unknown Era ${e.era}`,
+				factions: e.factions.map((f) => factionLookup.get(f) ?? `Unknown Faction ${f}`).sort((a, b) => a.localeCompare(b))
+			};
+		});
 		availabilityDialogOpen = true;
 	}
 </script>

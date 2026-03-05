@@ -58,7 +58,6 @@
 	settings.current = setContext("listbuilderSettings", settings.current);
 
 	onMount(() => {
-		toastController.addToast("Starting initWorker");
 		initWorker();
 	});
 </script>

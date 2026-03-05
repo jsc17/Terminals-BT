@@ -136,19 +136,28 @@ export const getListAvailability = query(v.object({ units: v.array(v.number()), 
 	return responseData;
 });
 
-export const getSingleUnitAvailability = query.batch(v.number(), async (mulIds) => {
-	const units = await prisma.unit.findMany({ where: { mulId: { in: mulIds } }, select: { mulId: true, availability: { orderBy: { factionAndEra: { era: { order: "asc" } } } } } });
-	const lookup = new Map(
-		units.map((u) => [
-			u.mulId,
-			u.availability.reduce((map, { era, faction }) => {
-				if (!map.has(era)) map.set(era, []);
-				map.get(era)!.push(faction);
-				return map;
-			}, new Map<number, number[]>())
-		])
-	);
-	return (mulId) => lookup.get(mulId);
+export const getSingleUnitAvailability = query.batch(v.number(), async (ids) => {
+	const units = await prisma.unit.findMany({
+		where: { id: { in: ids } },
+		select: { id: true, availability: { orderBy: { factionAndEra: { era: { order: "asc" } } } } }
+	});
+	const lookup = new Map<number, { era: number; factions: number[] }[]>();
+
+	for (const unit of units) {
+		const availability = new Map<number, number[]>();
+		for (const row of unit.availability) {
+			if (availability.has(row.era)) {
+				availability.get(row.era)!.push(row.faction);
+			} else {
+				availability.set(row.era, [row.faction]);
+			}
+		}
+		lookup.set(
+			unit.id,
+			Array.from(availability.entries()).map(([era, factions]) => ({ era, factions }))
+		);
+	}
+	return (id) => lookup.get(id);
 });
 
 export const getUnitAvailability = query(v.array(v.number()), async (ids) => {

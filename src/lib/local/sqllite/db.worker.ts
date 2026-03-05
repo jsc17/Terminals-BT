@@ -40,7 +40,6 @@ async function initDb(id: string) {
 			}
 			postMessage({ id, type: WorkerMessageType.DB_INIT_RESPONSE, payload: { status: "success", emptyTables } });
 			dbStarted = true;
-			log("DB Created");
 		} else {
 			postMessage({ id, type: WorkerMessageType.DB_INIT_RESPONSE, payload: { status: "error", error: "Could not create OPFS database" } });
 			log("Could not create OPFS database");
@@ -97,6 +96,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
 					{ rowMode: "object", returnValue: "resultRows" }
 				)
 				.map((row: { era: number; factions: string }) => ({ era: row.era, factions: row.factions.split(",").map((f) => Number(f)) }));
+			console.log("unitAvailability", unitAvailability);
 			self.postMessage({ type: WorkerMessageType.GET_UNIT_AVAILABILITY_RESPONSE, id: e.data.id, payload: unitAvailability });
 			break;
 		case WorkerMessageType.GET_RESULT_LIST:

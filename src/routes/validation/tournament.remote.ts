@@ -95,14 +95,14 @@ export const submitList = form(SubmitListSchema, async ({ tournamentId, playerNa
 	}
 });
 
-export const sendApproval = query(v.string(), async (id) => {
+export const sendApproval = query(v.object({ id: v.string(), comment: v.string() }), async ({ id, comment }) => {
 	const participant = await prisma.participant.findUnique({ where: { id }, include: { tournament: true } });
 	if (!participant || participant === null) return { status: "failed", message: "Invalid Participant Id" };
 
 	const emailHTML = render({
 		//@ts-ignore
 		template: ListApproval,
-		props: { tournamentName: participant.tournament.name, playerName: participant.name }
+		props: { tournamentName: participant.tournament.name, playerName: participant.name, comment }
 	});
 
 	await tournamentEmailTransporter.sendMail({
@@ -112,5 +112,11 @@ export const sendApproval = query(v.string(), async (id) => {
 		html: emailHTML
 	});
 
+	await prisma.participant.update({ where: { id }, data: { approved: true } });
 	return { status: "success", message: "Approval Email Sent" };
+});
+
+export const getPlayerData = query(v.object({ playerId: v.string() }), async ({ playerId }) => {
+	const player = await prisma.participant.findUnique({ where: { id: playerId } });
+	return player;
 });

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { dev } from "$app/environment";
 	import { Html, Text, Head, Section, Link, Hr } from "svelty-email";
 
 	type Props = {
@@ -29,6 +30,6 @@
 			<Text style={fixedStyle}>Units were manually edited. Please Review the list carefully before approval.</Text>
 		{/if}
 		<Hr />
-		<Link href={`https://terminal.tools/validation/approve/${id}`}>Approve List and send response</Link>
+		<Link href={`${dev ? `https://localhost:5173` : `https://terminal.tools`}/validation/approve/${id}`}>Approve List and send response</Link>
 	</Section>
 </Html>

@@ -86,7 +86,7 @@
 							{/snippet}
 						</DropdownMenu>
 					</td>
-					<td class={{ last: true, fixed: participant.fixed }}>{participant.fixed ? "List was manually fixed" : ""}</td>
+					<td class={{ last: true, warning: participant.fixed }}>{participant.fixed ? "List was manually fixed" : ""}</td>
 				</tr>
 			{/each}
 		</tbody>
@@ -119,8 +119,5 @@
 	td.last {
 		font-size: 0.85rem;
 		max-width: 100px;
-	}
-	td.fixed {
-		color: var(--warning);
 	}
 </style>

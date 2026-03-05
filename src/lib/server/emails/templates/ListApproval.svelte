@@ -4,8 +4,9 @@
 	type Props = {
 		tournamentName: string;
 		playerName: string;
+		comment: string;
 	};
-	const { tournamentName, playerName }: Props = $props();
+	const { tournamentName, playerName, comment }: Props = $props();
 </script>
 
 <Html>
@@ -14,5 +15,8 @@
 		<Text>
 			{playerName}, your list for {tournamentName} has been approved by the tournament organizer.
 		</Text>
+		{#if comment}
+			<Text>Comment from the TO: <br />{comment}</Text>
+		{/if}
 	</Section>
 </Html>

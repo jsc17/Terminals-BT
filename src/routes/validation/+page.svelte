@@ -49,7 +49,7 @@
 						return { id: data.id, skill: data.skill, data: data.mulData! };
 					}) ?? [];
 			if (unitList?.length == unitData?.length) {
-				const general = (await getGeneralId({ era: selectedEra, faction: selectedFaction! }))?.general;
+				const general = await getGeneralId({ era: selectedEra, faction: selectedFaction! });
 				const factions = general ? [selectedFaction, general] : [selectedFaction];
 				issues = await validateRules(
 					unitList,
@@ -94,10 +94,7 @@
 
 <main>
 	<div class="validation-body">
-		<p class="muted">
-			MUL or Terminal PDF's only, others will probably error out, but at the very least will not read correctly. I recently (10-17-25) updated list printing. If you have a list
-			older than that and it doesn't read correctly, please try reprinting the list.
-		</p>
+		<p class="muted">MUL or Terminal PDF's only, others will probably error out, but at the very least will not read correctly</p>
 		<form
 			enctype="multipart/form-data"
 			{...getUnitData.enhance(async ({ submit }) => {
@@ -112,7 +109,10 @@
 			})}
 		>
 			<div class="section">
-				<h2>1. Select a tournament to autofill details and allow for submission to the Tournament Organizer, or skip this step if you just want to validate a list</h2>
+				<h2 class="tournament-select-header">
+					1. Select a tournament to autofill details and allow for submission to the Tournament Organizer, or skip this step if you just want to validate a list
+				</h2>
+				<a class="tournament-select-link" href="/todashboard">Click here to create or manage a tournament</a>
 				<label
 					>Tournament <span class="muted">(Optional)</span>:
 					<select bind:value={selectedTournament} disabled={lockSelections}>
@@ -308,8 +308,12 @@
 		gap: 8px;
 		margin-top: 16px;
 	}
-	.section-header {
-		font-size: 1.25em;
+	h2.tournament-select-header {
+		margin-bottom: 0px;
+	}
+	.tournament-select-link {
+		margin-bottom: 16px;
+		width: max-content;
 	}
 	select {
 		margin-right: 16px;

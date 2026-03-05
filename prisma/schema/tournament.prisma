@@ -25,4 +25,5 @@ model Participant {
   tournament Tournament @relation(references: [id], fields: [tournamentId], onDelete: Cascade)
   fixed Boolean
   units String @db.Text
+  approved Boolean @default(false)
 }

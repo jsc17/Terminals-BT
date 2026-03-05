@@ -51,13 +51,14 @@ export const getFactionsInEra = query(v.array(v.number()), async (eras: number[]
 });
 
 export const getGeneralId = query(v.object({ era: v.number(), faction: v.number() }), async (data) => {
-	const id = await prisma.factionInEra.findFirst({
+	const result = await prisma.factionInEra.findFirst({
 		where: { eraId: data.era, factionId: data.faction },
 		select: {
 			general: true
 		}
 	});
-	return id;
+	if (!result) return -1;
+	return result.general;
 });
 
 export const getEraName = query(v.number(), async (idToFind) => {
@@ -68,4 +69,14 @@ export const getEraName = query(v.number(), async (idToFind) => {
 export const getFactionName = query(v.number(), async (idToFind) => {
 	const result = await prisma.faction.findUnique({ where: { id: idToFind }, select: { name: true } });
 	return result?.name ?? "Not Found";
+});
+
+export const getEraId = query(v.string(), async (nameToFind) => {
+	const result = await prisma.era.findFirst({ where: { name: nameToFind }, select: { id: true } });
+	return result?.id ?? -1;
+});
+
+export const getFactionId = query(v.string(), async (nameToFind) => {
+	const result = await prisma.faction.findFirst({ where: { name: nameToFind }, select: { id: true } });
+	return result?.id ?? -1;
 });

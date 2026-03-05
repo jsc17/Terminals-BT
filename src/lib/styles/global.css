@@ -36,6 +36,9 @@
 .error {
 	color: var(--error);
 }
+.warning {
+	color: var(--warning);
+}
 .transparent-button {
 	background-color: transparent;
 	color: var(--primary);

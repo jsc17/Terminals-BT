@@ -157,7 +157,7 @@
 			<form method="post" action="?/deleteUser" use:enhance={deleteUser}>
 				<div>
 					<input type="checkbox" name="delete" id="delete" bind:checked={allowDelete} /> Delete this user account and all associated data
-					<span class="warning">(cannot be undone)</span>
+					<span class="error">(cannot be undone)</span>
 				</div>
 				<button disabled={!allowDelete}>Delete user</button>
 			</form>
@@ -213,9 +213,6 @@
 		color: var(--button-dark-text-color);
 		border-radius: 3px;
 		margin: 4px 16px 0px;
-	}
-	.warning {
-		color: var(--error);
 	}
 	button:disabled {
 		background-color: var(--surface-color-light);

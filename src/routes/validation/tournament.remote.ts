@@ -108,7 +108,7 @@ export const sendApproval = query(v.object({ id: v.string(), comment: v.string()
 	await tournamentEmailTransporter.sendMail({
 		from: env.TOURNAMENT_EMAIL_SENDER, // sender address
 		to: participant.email, // list of receivers
-		subject: `${participant.tournament.name} submission`, // Subject line
+		subject: `${participant.tournament.name} submission approved`, // Subject line
 		html: emailHTML
 	});
 

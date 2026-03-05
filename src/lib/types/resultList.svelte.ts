@@ -246,7 +246,7 @@ export class ResultList {
 				if (this.options.allowedRules && !this.options.allowedRules?.includes(unit.rulesLevel)) {
 					continue;
 				}
-				if (this.options.disallowUnique && this.uniqueList.includes(unit.mulId)) {
+				if (this.options.disallowUnique && this.uniqueList.includes(unit.id)) {
 					continue;
 				}
 				if (this.options.disallowedAbilities) {
@@ -514,7 +514,7 @@ export class ResultList {
 						}
 						break;
 					case "unique":
-						if (!filter.checked && this.uniqueList.includes(unit.mulId)) meetsAllFilters = false;
+						if (!filter.checked && this.uniqueList.includes(unit.id)) meetsAllFilters = false;
 						break;
 				}
 			});

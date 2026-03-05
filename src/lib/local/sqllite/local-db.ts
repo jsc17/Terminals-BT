@@ -114,7 +114,7 @@ export async function getResultListLocal(data: { factions: number[]; eras: numbe
 }
 export async function getUniqueListLocal(eras: number[]) {
 	const status = (await workerInitialized.promise).status;
-	if (status === "error") return getResultList({ eras, eraSearchType: "any", factions: [4], factionSearchType: "every" });
+	if (status === "error") return (await getResultList({ eras, eraSearchType: "any", factions: [4], factionSearchType: "every" })).map((u) => u.id);
 	return sendMessage<number[]>({ type: WorkerMessageType.GET_UNIQUE_LIST, payload: eras });
 }
 export async function getErasAndFactionsLocal() {

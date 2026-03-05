@@ -18,7 +18,7 @@ export const createTournament = form(FormCreationSchema, async (data) => {
 				name: data.tournamentName,
 				email: data.tournamentEmail,
 				location: data.tournamentLocation,
-				emailSubject: data.tournamentEmailSubject,
+				emailSubject: data.tournamentEmailSubject && data.tournamentEmailSubject.length > 0 ? data.tournamentEmailSubject : undefined,
 				tournament_date: new Date(data.tournamentDate),
 				era: data.tournamentEra ? Number(data.tournamentEra) : undefined,
 				tournamentRules: data.tournamentRules,

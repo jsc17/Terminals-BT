@@ -96,7 +96,6 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
 					{ rowMode: "object", returnValue: "resultRows" }
 				)
 				.map((row: { era: number; factions: string }) => ({ era: row.era, factions: row.factions.split(",").map((f) => Number(f)) }));
-			console.log("unitAvailability", unitAvailability);
 			self.postMessage({ type: WorkerMessageType.GET_UNIT_AVAILABILITY_RESPONSE, id: e.data.id, payload: unitAvailability });
 			break;
 		case WorkerMessageType.GET_RESULT_LIST:
@@ -105,10 +104,12 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
 			self.postMessage({ type: WorkerMessageType.GET_RESULT_LIST_RESPONSE, id: e.data.id, payload: result });
 			break;
 		case WorkerMessageType.GET_UNIQUE_LIST:
-			const unique = db.exec(`SELECT distinct unitId FROM Availability a WHERE ${payload.length ? `a.era IN (${payload.join(",")}) AND` : ""} a.faction = 4`, {
-				rowMode: "object",
-				returnValue: "resultRows"
-			});
+			const unique = db
+				.exec(`SELECT distinct unitId FROM Availability a WHERE ${payload.length ? `a.era IN (${payload.join(",")}) AND` : ""} a.faction = 4`, {
+					rowMode: "object",
+					returnValue: "resultRows"
+				})
+				.map((r: { unitId: number }) => r.unitId);
 			self.postMessage({ type: WorkerMessageType.GET_UNIQUE_LIST_RESPONSE, id: e.data.id, payload: unique });
 			break;
 		case WorkerMessageType.GET_ERAS_AND_FACTIONS:

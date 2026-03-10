@@ -11,7 +11,9 @@
 	import { DotsSixVertical, GearSix, SortAscending, SortDescending, XCircle } from "phosphor-svelte";
 	import { getUnitAvailabilityLocal } from "$lib/local/sqllite/local-db";
 	import { getContext } from "svelte";
-	import AdvancedSortDialog from "./AdvancedSortDialog.svelte";
+	import { DragDropProvider } from "@dnd-kit/svelte";
+	import { createSortable } from "@dnd-kit/svelte/sortable";
+	import { move } from "@dnd-kit/helpers";
 
 	type Props = {
 		list?: List;
@@ -46,6 +48,7 @@
 	let availabilityResults = $state<{ era: string; factions: string[] }[]>([]);
 
 	function sort({ key, label }: { key: string; label: string }) {
+		console.log(key);
 		const sortKeyIndex = resultList.getSortKeyIndex(key);
 		if (sortKeyIndex != -1) {
 			if (resultList.sortKeys[sortKeyIndex].order == "asc") {
@@ -54,7 +57,7 @@
 				resultList.sortKeys.splice(sortKeyIndex, 1);
 			}
 		} else {
-			resultList.sortKeys.push({ key, label, order: "asc" });
+			resultList.sortKeys.push({ id: key, label, order: "asc" });
 		}
 	}
 	async function showAvailability(id: number) {
@@ -68,28 +71,33 @@
 		});
 		availabilityDialogOpen = true;
 	}
+
+	function onDragEnd(event: any) {
+		console.log(event);
+		resultList.sortKeys = move(resultList.sortKeys, event);
+	}
 </script>
 
 <div class="search-results card">
 	<div class="search-results-multisort-tags">
-		<div class="multisort-draggable-container">
-			{#each resultList.sortKeys as sortKey}
-				<div class="sort-tag">
-					<DotsSixVertical color="var(--button-text-color)" size="17" weight="bold" />
-					<div style="display:flex; align-items:center">
-						<p>{sortKey.label}</p>
-						{#if sortKey.order == "asc"}
-							<SortAscending color="var(--button-text-color)" size="15" />
-						{:else}
-							<SortDescending color="var(--button-text-color)" size="15" />
-						{/if}
+		<DragDropProvider {onDragEnd}>
+			<div class="multisort-draggable-container">
+				{#each resultList.sortKeys as sortKey, index (sortKey.id)}
+					{@const sortable = createSortable({ id: sortKey.id, index })}
+					<div class="sort-tag" {@attach sortable.attach}>
+						<DotsSixVertical color="var(--button-text-color)" size="17" weight="bold" />
+						<div style="display:flex; align-items:center">
+							<p>{sortKey.label}</p>
+							{#if sortKey.order == "asc"}
+								<SortAscending color="var(--button-text-color)" size="15" />
+							{:else}
+								<SortDescending color="var(--button-text-color)" size="15" />
+							{/if}
+						</div>
 					</div>
-					<!-- <button class="transparent-button" onclick={() => resultList.sortKeys.splice(resultList.getSortKeyIndex(sortKey.key), 1)}>
-						<XCircle color="var(--button-text-color)" size="15" />
-					</button> -->
-				</div>
-			{/each}
-		</div>
+				{/each}
+			</div>
+		</DragDropProvider>
 		{#if resultList.sortKeys.length > 1}
 			<button onclick={() => (resultList.sortKeys = [])} class="clear-sort-button">Clear All</button>
 		{/if}

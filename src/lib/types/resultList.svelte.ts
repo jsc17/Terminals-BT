@@ -116,7 +116,7 @@ export class ResultList {
 	filters = $state<Filter[]>(filtersImport);
 	additionalFilters = $state<Filter[]>(additionalFiltersImport);
 	filteredList = $derived(this.filterList(this.filters, this.additionalFilters));
-	sortKeys = $state<{ key: string; label: string; order: "asc" | "desc"; extra?: any }[]>([]);
+	sortKeys = $state<{ id: string; label: string; order: "asc" | "desc"; extra?: any }[]>([]);
 	sortedList = $derived(this.sortList(this.filteredList, this.sortKeys));
 
 	status = $state();
@@ -482,12 +482,12 @@ export class ResultList {
 			}
 		});
 	}
-	sortList(filteredUnits: MulUnit[], sortKeys: { key: string; label: string; order: "asc" | "desc"; extra?: any }[]) {
+	sortList(filteredUnits: MulUnit[], sortKeys: { id: string; label: string; order: "asc" | "desc"; extra?: any }[]) {
 		return filteredUnits.toSorted((a, b) => {
 			let first;
 			let second;
 			for (const sort of sortKeys) {
-				if (sort.key == "move") {
+				if (sort.id == "move") {
 					if (a.move == undefined) {
 						first = 0;
 					} else {
@@ -498,7 +498,7 @@ export class ResultList {
 					} else {
 						second = b.move[0].speed;
 					}
-				} else if (sort.key == "damage") {
+				} else if (sort.id == "damage") {
 					if (sort.extra.type == "damageTotal") {
 						first = (a.damageS ?? 0) + (a.damageM ?? 0) + (a.damageL ?? 0);
 						second = (b.damageS ?? 0) + (b.damageM ?? 0) + (b.damageL ?? 0);
@@ -520,8 +520,8 @@ export class ResultList {
 						}
 					}
 				} else {
-					first = a[sort.key];
-					second = b[sort.key];
+					first = a[sort.id];
+					second = b[sort.id];
 				}
 				if (first > second) return sort.order == "asc" ? 1 : -1;
 				if (first < second) return sort.order == "asc" ? -1 : 1;
@@ -531,7 +531,7 @@ export class ResultList {
 	}
 
 	getSortKeyIndex(key: string): number {
-		return this.sortKeys.findIndex((sort) => sort.key == key);
+		return this.sortKeys.findIndex((sort) => sort.id == key);
 	}
 
 	clear() {

@@ -10,19 +10,31 @@
 	let { resultList }: Props = $props();
 
 	let open = $state(false);
-	let order = $state("asc");
-	let type = $state("damageS");
+	let order = $state<"asc" | "desc">("asc");
+	let type = $state<"damageS" | "damageM" | "damageL" | "damageTotal" | "overheat">("damageS");
 	let includeOV = $state(false);
-
-	function clearSort() {
-		open = false;
-		resultList.sort = { key: "", order: "asc", extra: "" };
-	}
 
 	function setSort() {
 		open = false;
-		resultList.sort = { key: "damage", order, extra: { type, includeOV } };
+		let label = "Damage ";
+		if (type == "damageTotal") label += "Total";
+		else if (type == "overheat") label += "OV";
+		else label += type.slice(-1);
+		if (includeOV) label += " + OV";
+
+		const existingSortIndex = resultList.sortKeys.findIndex((sort) => sort.key == "damage" && sort.extra?.type == type);
+		if (existingSortIndex != -1) {
+			resultList.sortKeys[existingSortIndex] = { key: "damage", order, label, extra: { type, includeOV } };
+			return;
+		}
+		resultList.sortKeys.push({ key: "damage", order, label, extra: { type, includeOV } });
 	}
+
+	let damageSIndex = $derived(resultList.sortKeys.findIndex((sort) => sort.key == "damage" && sort.extra?.type == "damageS"));
+	let damageMIndex = $derived(resultList.sortKeys.findIndex((sort) => sort.key == "damage" && sort.extra?.type == "damageM"));
+	let damageLIndex = $derived(resultList.sortKeys.findIndex((sort) => sort.key == "damage" && sort.extra?.type == "damageL"));
+	let damageTotalIndex = $derived(resultList.sortKeys.findIndex((sort) => sort.key == "damage" && sort.extra?.type == "damageTotal"));
+	let overheatIndex = $derived(resultList.sortKeys.findIndex((sort) => sort.key == "damage" && sort.extra?.type == "overheat"));
 </script>
 
 <Popover.Root bind:open>
@@ -30,20 +42,33 @@
 		{#if appWindow.isNarrow}
 			<p>DMG</p>
 		{:else}
-			<p>
-				<span class:span-highlight={resultList.sort.extra?.type == "damageTotal"}>DMG</span>
-				<span class:span-highlight={resultList.sort.extra?.type == "damageS" || resultList.sort.extra?.type == "damageTotal"}>S</span>/<span
-					class:span-highlight={resultList.sort.extra?.type == "damageM" || resultList.sort.extra?.type == "damageTotal"}>M</span
-				>/<span class:span-highlight={resultList.sort.extra?.type == "damageL" || resultList.sort.extra?.type == "damageTotal"}>L</span> -
-				<span class:span-highlight={resultList.sort.extra?.type == "overheat" || resultList.sort.extra?.includeOV}>OV</span>
+			<p class="center">
+				<span class:span-highlight={damageTotalIndex != -1}>DMG</span>
+				<span class:span-highlight={damageSIndex != -1}>S</span>{#if damageSIndex != -1}
+					<img class="sort-selected button-icon" src={resultList.sortKeys[damageSIndex].order == "asc" ? "/icons/sort-ascending.svg" : "/icons/sort-descending.svg"} alt="sort" />
+				{/if}
+				/<span class:span-highlight={damageMIndex != -1}>M</span>{#if damageMIndex != -1}
+					<img class="sort-selected button-icon" src={resultList.sortKeys[damageMIndex].order == "asc" ? "/icons/sort-ascending.svg" : "/icons/sort-descending.svg"} alt="sort" />
+				{/if}
+				/<span class:span-highlight={damageLIndex != -1}>L</span>{#if damageLIndex != -1}
+					<img class="sort-selected button-icon" src={resultList.sortKeys[damageLIndex].order == "asc" ? "/icons/sort-ascending.svg" : "/icons/sort-descending.svg"} alt="sort" />
+				{/if}
+				-
+				<span class:span-highlight={overheatIndex != -1}
+					>OV{#if overheatIndex != -1}
+						<img
+							class="sort-selected button-icon"
+							src={resultList.sortKeys[overheatIndex].order == "asc" ? "/icons/sort-ascending.svg" : "/icons/sort-descending.svg"}
+							alt="sort"
+						/>
+					{/if}</span
+				>
 			</p>
 		{/if}
-		{#if resultList.sort.key == "damage"}
-			<img class="sort-selected button-icon" src={resultList.sort.order == "asc" ? "/icons/sort-ascending.svg" : "/icons/sort-descending.svg"} alt="sort" />
-		{:else}
+		{#if damageTotalIndex == -1 && damageSIndex == -1 && damageMIndex == -1 && damageLIndex == -1 && overheatIndex == -1}
 			<img class="sort button-icon" src="/icons/sort.svg" alt="sort" />
-		{/if}</Popover.Trigger
-	>
+		{/if}
+	</Popover.Trigger>
 	<Popover.Content class="damage-sort-content">
 		<div class="damage-sort-content-container">
 			<label
@@ -65,10 +90,7 @@
 			</label>
 			<label><input type="checkbox" name="damage-sort-include-ov" id="damage-sort-include-ov" bind:checked={includeOV} /> Include Overheat</label>
 			<Separator.Root decorative={true} class="muted-separator" />
-			<div class="space-between">
-				<button onclick={clearSort}>Clear</button>
-				<button onclick={setSort}>Sort</button>
-			</div>
+			<button onclick={setSort}>Add Damage Sort</button>
 		</div>
 	</Popover.Content>
 </Popover.Root>

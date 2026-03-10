@@ -113,11 +113,11 @@ export class ResultList {
 	});
 
 	restrictedList = $derived.by(() => this.applyOptions());
-
 	filters = $state<Filter[]>(filtersImport);
 	additionalFilters = $state<Filter[]>(additionalFiltersImport);
-	sort = $state<{ key: string; order: string; extra?: any }>({ key: "", order: "asc" });
 	filteredList = $derived(this.filterList(this.filters, this.additionalFilters));
+	sortKeys = $state<{ key: string; label: string; order: "asc" | "desc"; extra?: any }[]>([]);
+	sortedList = $derived(this.sortList(this.filteredList, this.sortKeys));
 
 	status = $state();
 	loadResults(selectedEras: number[], selectedFactions: number[], general: number = -1) {
@@ -133,65 +133,6 @@ export class ResultList {
 			this.loadUnits().then((result) => resolve("Units Loaded"));
 		});
 	}
-
-	loadUnitsFromResponse(unitList: any[]) {
-		let tempResultList: MulUnit[] = [];
-		unitList.forEach((unit: any) => {
-			let tempMovement: { speed: number; type: string }[] = [];
-			unit.move.split("/").forEach((movement: string) => {
-				let moveSpeed = movement.replaceAll('"', "").match(/\d+/) ?? "0";
-				let moveType = movement.replaceAll('"', "").match(/\D+/) ?? "";
-				tempMovement.push({ speed: parseInt(moveSpeed[0]), type: moveType[0] });
-			});
-			try {
-				//{"speed": 6,"type": "t" }
-
-				let formattedUnit: MulUnit = {
-					id: unit.id,
-					mulId: unit.mulId,
-					name: unit.name,
-					group: unit.group,
-					class: unit.class,
-					variant: unit.variant,
-					type: unit.type,
-					subtype: unit.subtype.toUpperCase(),
-					pv: unit.pv,
-					cost: unit.pv,
-					skill: 4,
-					size: unit.size,
-					move: tempMovement,
-					tmm: unit.tmm,
-					health: unit.armor + unit.structure,
-					armor: unit.armor,
-					structure: unit.structure,
-					damageS: unit.damage_s,
-					damageSMin: unit.damage_s_min,
-					damageM: unit.damage_m,
-					damageMMin: unit.damage_m_min,
-					damageL: unit.damage_l,
-					damageLMin: unit.damage_l_min,
-					damageE: unit.damage_e,
-					damageEMin: unit.damage_e_min,
-					overheat: unit.overheat,
-					abilities: unit.abilities != "-" ? JSON.parse(unit.abilities) : [],
-					imageLink: unit.image_url,
-					rulesLevel: unit.rules,
-					tonnage: unit.tonnage,
-					date: unit.date_introduced,
-					role: unit.role,
-					availability: unit.availability,
-					technology: unit.technology,
-					threshold: unit.threshold
-				};
-				tempResultList.push(formattedUnit);
-			} catch (error) {
-				console.log(error);
-				console.log(`${unit.Name} could not be added to result list`);
-			}
-		});
-		return tempResultList;
-	}
-
 	async loadUnits() {
 		this.resultList = [];
 		await getResultListLocal({
@@ -209,7 +150,6 @@ export class ResultList {
 		});
 		this.uniqueList = await getUniqueListLocal($state.snapshot(this.#eras));
 	}
-
 	async setOptions(newRules: string) {
 		this.options = ruleSets.find((rules) => rules.name == newRules) ?? ruleSets[0];
 		const response: any = deserialize(await (await fetch("/?/getCustomUnits", { method: "POST", body: JSON.stringify({ unitPacks: this.options.customUnitPacks }) })).text());
@@ -520,53 +460,6 @@ export class ResultList {
 			});
 			if (meetsAllFilters) tempResultList.push(unit);
 		}
-		if (this.sort.key != "") {
-			tempResultList = tempResultList.sort((a, b) => {
-				let first;
-				let second;
-				if (this.sort.key == "move") {
-					if (a.move == undefined) {
-						first = 0;
-					} else {
-						first = a.move[0].speed;
-					}
-					if (b.move == undefined) {
-						second = 0;
-					} else {
-						second = b.move[0].speed;
-					}
-				} else if (this.sort.key == "damage") {
-					if (this.sort.extra.type == "damageTotal") {
-						first = (a.damageS ?? 0) + (a.damageM ?? 0) + (a.damageL ?? 0);
-						second = (b.damageS ?? 0) + (b.damageM ?? 0) + (b.damageL ?? 0);
-					} else {
-						first = a[this.sort.extra.type];
-						second = b[this.sort.extra.type];
-					}
-					if (this.sort.extra.includeOV) {
-						if (this.sort.extra.type == "damageL") {
-							if (a.abilities.find(({ name }) => name == "OVL")) {
-								first += a.overheat ?? 0;
-							}
-							if (b.abilities.find(({ name }) => name == "OVL")) {
-								second += b.overheat ?? 0;
-							}
-						} else {
-							first += a.overheat ?? 0;
-							second += b.overheat ?? 0;
-						}
-					}
-				} else {
-					first = a[this.sort.key];
-					second = b[this.sort.key];
-				}
-				if (this.sort.order == "asc") {
-					return first > second ? 1 : -1;
-				} else {
-					return first < second ? 1 : -1;
-				}
-			});
-		}
 		return tempResultList;
 	}
 	async resetFilters() {
@@ -589,10 +482,63 @@ export class ResultList {
 			}
 		});
 	}
+	sortList(filteredUnits: MulUnit[], sortKeys: { key: string; label: string; order: "asc" | "desc"; extra?: any }[]) {
+		return filteredUnits.toSorted((a, b) => {
+			let first;
+			let second;
+			for (const sort of sortKeys) {
+				if (sort.key == "move") {
+					if (a.move == undefined) {
+						first = 0;
+					} else {
+						first = a.move[0].speed;
+					}
+					if (b.move == undefined) {
+						second = 0;
+					} else {
+						second = b.move[0].speed;
+					}
+				} else if (sort.key == "damage") {
+					if (sort.extra.type == "damageTotal") {
+						first = (a.damageS ?? 0) + (a.damageM ?? 0) + (a.damageL ?? 0);
+						second = (b.damageS ?? 0) + (b.damageM ?? 0) + (b.damageL ?? 0);
+					} else {
+						first = a[sort.extra.type];
+						second = b[sort.extra.type];
+					}
+					if (sort.extra.includeOV) {
+						if (sort.extra.type == "damageL") {
+							if (a.abilities.find(({ name }) => name == "OVL")) {
+								first += a.overheat ?? 0;
+							}
+							if (b.abilities.find(({ name }) => name == "OVL")) {
+								second += b.overheat ?? 0;
+							}
+						} else {
+							first += a.overheat ?? 0;
+							second += b.overheat ?? 0;
+						}
+					}
+				} else {
+					first = a[sort.key];
+					second = b[sort.key];
+				}
+				if (first > second) return sort.order == "asc" ? 1 : -1;
+				if (first < second) return sort.order == "asc" ? -1 : 1;
+			}
+			return 0;
+		});
+	}
+
+	getSortKeyIndex(key: string): number {
+		return this.sortKeys.findIndex((sort) => sort.key == key);
+	}
+
 	clear() {
 		this.resultList = [];
 		this.uniqueList = [];
 		this.#eras = [];
 		this.#factions = [];
+		this.sortKeys = [];
 	}
 }

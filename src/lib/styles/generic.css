@@ -8,6 +8,7 @@
 	height: max-content;
 	width: 100%;
 	background-color: transparent;
+	box-shadow: none;
 }
 
 [data-collapsible-content] {
@@ -38,6 +39,7 @@
 	border: none;
 	background-color: transparent;
 	color: var(--button-dark-text-color);
+	box-shadow: none;
 }
 .generic-popover-trigger:hover {
 	cursor: pointer;
@@ -203,6 +205,7 @@
 	padding: 8px 24px;
 	border-radius: var(--radius);
 	text-align: center;
+	box-shadow: none;
 }
 [data-dropdown-menu-sub-trigger]:hover {
 	background-color: var(--surface-color-light);

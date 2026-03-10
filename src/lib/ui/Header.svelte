@@ -89,12 +89,12 @@
 </script>
 
 <header>
-	<button bind:this={openNavButton} class="link-button" onclick={openNav} aria-label="Open navigation sidebar" aria-expanded="false" aria-controls="navbar">
+	<button bind:this={openNavButton} class="link-button no-hover" onclick={openNav} aria-label="Open navigation sidebar" aria-expanded="false" aria-controls="navbar">
 		<ListIcon />
 		{pageList.get(basePath)}
 	</button>
 	<nav bind:this={navbar} id="navbar">
-		<button class="link-button close-menu-button" onclick={closeNav} aria-label="Close navigation sidebar"><X /></button>
+		<button class="link-button close-menu-button no-hover" onclick={closeNav} aria-label="Close navigation sidebar"><X /></button>
 		<ul>
 			<li><a href="/" aria-current={basePath === "/"} onclick={closeNav}>Home</a></li>
 			<li><a href="/about" aria-current={basePath === "/"} onclick={closeNav}>About</a></li>
@@ -128,11 +128,11 @@
 				}}>Login/Register</button
 			>
 		{/if}
-		<button class="link-button" onclick={openUserMenu}>
+		<button class="link-button no-hover" onclick={openUserMenu}>
 			<GearSix weight="fill" />
 		</button>
 		<menu bind:this={userMenu} id="usermenu">
-			<button class="link-button close-user-button" onclick={closeUserMenu} aria-label="Close user menu sidebar"><X /></button>
+			<button class="link-button close-user-button no-hover" onclick={closeUserMenu} aria-label="Close user menu sidebar"><X /></button>
 			<ul>
 				{#if user.username}
 					<li><a href="/settings" onclick={closeUserMenu}>User Settings</a></li>
@@ -158,7 +158,7 @@
 				<li class="theme-buttons">
 					<button
 						class="theme-button"
-						style="background-color: green"
+						style="background-color: green; box-shadow: none;"
 						aria-label="Green Theme"
 						onclick={() => {
 							setTheme("green");
@@ -166,7 +166,7 @@
 					></button>
 					<button
 						class="theme-button"
-						style="background-color: blue"
+						style="background-color: blue; box-shadow: none;	"
 						aria-label="Blue Theme"
 						onclick={() => {
 							setTheme("blue");
@@ -174,7 +174,7 @@
 					></button>
 					<button
 						class="theme-button"
-						style="background-color: oklch(0.7003 0.1603 48.07)"
+						style="background-color: oklch(0.7003 0.1603 48.07); box-shadow: none;"
 						aria-label="Brown Theme"
 						onclick={() => {
 							setTheme("brown");
@@ -186,7 +186,7 @@
 					<hr />
 					<li>
 						<form method="post" action="/auth/?/logout" use:enhance={handleLogout} class="inline user-logout">
-							<button class="link-button" onclick={closeUserMenu}>Log out</button>
+							<button class="link-button no-hover" onclick={closeUserMenu}>Log out</button>
 						</form>
 					</li>
 				{/if}
@@ -227,6 +227,7 @@
 		gap: 8px;
 		color: var(--primary);
 		font-size: 16px;
+		box-shadow: none;
 	}
 	button {
 		height: 25px;

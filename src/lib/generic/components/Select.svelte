@@ -170,6 +170,8 @@ from the perspective of the consumer of this component, it will be typed appropr
 		width: 100%;
 		background-color: var(--input);
 		color: var(--surface-color-light-text-color);
+		box-shadow: unset;
+		padding: 0;
 	}
 	:global(.select-trigger) {
 		display: grid;

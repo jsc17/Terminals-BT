@@ -39,9 +39,41 @@
 .warning {
 	color: var(--warning);
 }
+
+button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: var(--button);
+	color: var(--button-text-color);
+	border-radius: 4px;
+	border: unset;
+	padding: 4px;
+	box-shadow:
+		0px -3px 0px var(--button-dark) inset,
+		0px 4px 5px -3px var(--button-dark);
+}
+/* button:hover:not(.transparent-button) {
+	transform: translateY(-2px);
+	background-color: var(--primary);
+} */
+button:active:not(.transparent-button) {
+	box-shadow:
+		3px 6px 12px var(--button-dark) inset,
+		-3px -6px 12px var(--button-dark) inset;
+	transform: translateY(-2px);
+}
+button:disabled {
+	background-color: var(--surface-color-light);
+	color: var(--surface-color-light-text-color);
+	box-shadow: none;
+}
 .transparent-button {
 	background-color: transparent;
 	color: var(--primary);
+	border: unset;
+	box-shadow: unset;
+	padding: 0;
 }
 .transparent-button:hover {
 	cursor: pointer;
@@ -67,23 +99,4 @@
 	border-radius: var(--radius);
 	width: 100%;
 	box-shadow: 1px 3px 3px var(--surface-color-shadow);
-}
-
-.detailed-button {
-	background-color: var(--button);
-	color: var(--button-text-color);
-	border-radius: var(--radius);
-	padding: 8px 12px;
-	box-shadow:
-		0px -3px 0px var(--button-dark) inset,
-		0px 4px 5px -3px var(--button-dark);
-}
-.detailed-button:hover {
-	transform: translateY(-2px);
-}
-.detailed-button:active {
-	box-shadow:
-		3px 6px 12px var(--button-dark) inset,
-		-3px -6px 12px var(--button-dark) inset;
-	transform: translateY(-2px);
 }

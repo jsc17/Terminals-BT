@@ -74,6 +74,7 @@
 	}
 	:global([data-dialog-close]) {
 		background-color: transparent;
+		box-shadow: none;
 	}
 
 	:global([data-dialog-description], .dialog-children-wrapper) {

@@ -255,6 +255,7 @@
 						<div class="list-sca-row">
 							<p>{sca.name}</p>
 							<button
+								class="transparent-button"
 								onclick={() => {
 									list.removeSCA(index);
 								}}>Remove</button
@@ -293,6 +294,7 @@
 						<div class="list-sca-row">
 							<p>{sca.name}</p>
 							<button
+								class="transparent-button"
 								onclick={() => {
 									list.removeSCA(index);
 								}}>Remove</button
@@ -404,12 +406,6 @@
 		justify-content: space-between;
 		align-items: center;
 		padding: 2px 16px;
-
-		button {
-			background-color: transparent;
-			border: none;
-			color: var(--primary);
-		}
 	}
 	.list-sca-row:not(:last-child) {
 		border-bottom: 1px solid var(--border);

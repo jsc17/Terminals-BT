@@ -72,6 +72,8 @@
 }
 :root.dark[data-theme="green"] {
 	--primary: hsl(142, 69%, 44%);
+	--button: hsl(143, 24%, 44%);
+	--button-text-color: hsl(0, 0%, 0%);
 }
 :root[data-theme="blue"] {
 	--primary: oklch(0.457 0.191 261);

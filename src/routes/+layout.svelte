@@ -114,12 +114,6 @@
 	:global(h1) {
 		margin: 0;
 	}
-	:global(button) {
-		background-color: var(--button);
-		color: var(--button-text-color);
-		border: none;
-		border-radius: var(--radius);
-	}
 	:global(input) {
 		background-color: var(--input);
 		border: 1px solid var(--border);
@@ -211,10 +205,6 @@
 		height: 20px;
 		width: 20px;
 		position: relative;
-	}
-	:global(button:disabled) {
-		background-color: var(--surface-color-light);
-		color: var(--surface-color-light-text-color);
 	}
 	:global(.hidden) {
 		display: none;

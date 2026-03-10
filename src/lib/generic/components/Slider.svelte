@@ -17,7 +17,7 @@
 		<div class="bar"><Slider.Range /></div>
 
 		{#each thumbItems as { index, value }}
-			<Slider.Thumb {index} />
+			<Slider.Thumb {index} class="no-hover" />
 		{/each}
 
 		{#each tickItems as { index, value }}

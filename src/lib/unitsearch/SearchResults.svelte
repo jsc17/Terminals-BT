@@ -8,9 +8,12 @@
 	import { Dialog, Separator, DropdownMenu } from "$lib/generic";
 	import { exportArrayToCSV } from "$lib/utilities/export";
 	import VirtualList from "@humanspeak/svelte-virtual-list";
-	import { GearSix } from "phosphor-svelte";
+	import { DotsSixVertical, GearSix, SortAscending, SortDescending, XCircle } from "phosphor-svelte";
 	import { getUnitAvailabilityLocal } from "$lib/local/sqllite/local-db";
 	import { getContext } from "svelte";
+	import { DragDropProvider } from "@dnd-kit/svelte";
+	import { createSortable } from "@dnd-kit/svelte/sortable";
+	import { move } from "@dnd-kit/helpers";
 
 	type Props = {
 		list?: List;
@@ -44,16 +47,17 @@
 	let availabilityDialogOpen = $state(false);
 	let availabilityResults = $state<{ era: string; factions: string[] }[]>([]);
 
-	function sort(key: string) {
-		if (resultList.sort.key != key) {
-			resultList.sort.key = key;
-			resultList.sort.order = "asc";
-		} else {
-			if (resultList.sort.order == "asc") {
-				resultList.sort.order = "des";
+	function sort({ key, label }: { key: string; label: string }) {
+		console.log(key);
+		const sortKeyIndex = resultList.getSortKeyIndex(key);
+		if (sortKeyIndex != -1) {
+			if (resultList.sortKeys[sortKeyIndex].order == "asc") {
+				resultList.sortKeys[sortKeyIndex].order = "desc";
 			} else {
-				resultList.sort.key = "";
+				resultList.sortKeys.splice(sortKeyIndex, 1);
 			}
+		} else {
+			resultList.sortKeys.push({ id: key, label, order: "asc" });
 		}
 	}
 	async function showAvailability(id: number) {
@@ -67,14 +71,43 @@
 		});
 		availabilityDialogOpen = true;
 	}
+
+	function onDragEnd(event: any) {
+		resultList.sortKeys = move(resultList.sortKeys, event);
+	}
 </script>
 
 <div class="search-results card">
-	{#if list && list.rules != "noRes"}
-		<p class="rules-notice">Some units may be filtered out due to the selected ruleset</p>
-	{/if}
+	<div class="search-results-multisort-tags">
+		{#if resultList.sortKeys.length > 1}
+			<DragDropProvider {onDragEnd}>
+				<div class="multisort-draggable-container">
+					{#each resultList.sortKeys as sortKey, index (sortKey.id)}
+						{@const sortable = createSortable({ id: sortKey.id, index })}
+						<div class="sort-tag" {@attach sortable.attach}>
+							<DotsSixVertical color="var(--button-text-color)" size="17" weight="bold" />
+							<div style="display:flex; align-items:center">
+								<p>{sortKey.label}</p>
+								{#if sortKey.order == "asc"}
+									<SortAscending color="var(--button-text-color)" size="15" />
+								{:else}
+									<SortDescending color="var(--button-text-color)" size="15" />
+								{/if}
+							</div>
+						</div>
+					{/each}
+				</div>
+			</DragDropProvider>
+			<button onclick={() => (resultList.sortKeys = [])} class="clear-sort-button">Clear All</button>
+		{/if}
+	</div>
 	<div class:result-list-header={!appWindow.isMobile} class:result-list-header-mobile={appWindow.isMobile}>
-		<div class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile}>
+		<div
+			class={{
+				"sort-header-button": !appWindow.isMobile,
+				"sort-header-button-mobile": appWindow.isMobile
+			}}
+		>
 			<DropdownMenu
 				items={[
 					{
@@ -92,22 +125,48 @@
 				{/snippet}
 			</DropdownMenu>
 		</div>
-		<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile} onclick={() => sort("name")} bind:clientWidth={listWidth}>
-			{appWindow.isNarrow ? `Name` : `Name - ${resultList.filteredList.length}/${resultList.restrictedList.length} results shown`}
-			{#if resultList.sort.key == "name"}
-				<img class="sort-selected button-icon" src={resultList.sort.order == "asc" ? "/icons/sort-ascending.svg" : "/icons/sort-descending.svg"} alt="sort" />
-			{:else}
-				<img class="sort button-icon" src="/icons/sort.svg" alt="sort" />
-			{/if}
-		</button>
-		{#each headers as header}
-			<button class:sort-header-button={!appWindow.isMobile} class:sort-header-button-mobile={appWindow.isMobile} onclick={() => sort(header.key)}>
-				{header.label}
-				{#if resultList.sort.key == header.key}
-					<img class="sort-selected button-icon" src={resultList.sort.order == "asc" ? "/icons/sort-ascending.svg" : "/icons/sort-descending.svg"} alt="sort" />
+		<button
+			class={{
+				"sort-header-button": !appWindow.isMobile,
+				"sort-header-button-mobile": appWindow.isMobile
+			}}
+			onclick={() => sort({ key: "name", label: "Name" })}
+			bind:clientWidth={listWidth}
+		>
+			<div
+				class="center sort-header-text"
+				data-sort-index={resultList.sortKeys.length > 1 && resultList.getSortKeyIndex("name") != -1 ? resultList.getSortKeyIndex("name") + 1 : undefined}
+			>
+				{appWindow.isNarrow ? `Name` : `Name - ${resultList.filteredList.length}/${resultList.restrictedList.length} results shown`}
+				{#if resultList.getSortKeyIndex("name") != -1}
+					{@const sortKey = resultList.sortKeys[resultList.getSortKeyIndex("name")]}
+					<img class="sort-selected button-icon" src={sortKey.order == "asc" ? "/icons/sort-ascending.svg" : "/icons/sort-descending.svg"} alt="sort" />
 				{:else}
 					<img class="sort button-icon" src="/icons/sort.svg" alt="sort" />
 				{/if}
+			</div>
+		</button>
+		{#each headers as header}
+			{@const sortKeyIndex = resultList.getSortKeyIndex(header.key)}
+			<button
+				class={{
+					"sort-header-button": !appWindow.isMobile,
+					"sort-header-button-mobile": appWindow.isMobile
+				}}
+				onclick={() => sort({ key: header.key, label: header.label })}
+			>
+				<div class="center sort-header-text" data-sort-index={resultList.sortKeys.length > 1 && sortKeyIndex != -1 ? sortKeyIndex + 1 : undefined}>
+					{header.label}
+					{#if sortKeyIndex != -1}
+						{#if resultList.sortKeys[sortKeyIndex].order == "asc"}
+							<SortAscending size="15" />
+						{:else}
+							<SortDescending size="15" />
+						{/if}
+					{:else}
+						<img class="sort button-icon" src="/icons/sort.svg" alt="sort" />
+					{/if}
+				</div>
 			</button>
 		{/each}
 		<DamageSortPopover {resultList}></DamageSortPopover>
@@ -130,7 +189,7 @@
 
 						<p>{error}</p>
 					{/snippet}
-					<VirtualList items={resultList.filteredList ?? []}>
+					<VirtualList items={resultList.sortedList ?? []}>
 						{#snippet renderItem(item)}
 							<div class={{ "virtual-list-row": !appWindow.isMobile, "virtual-list-row-mobile": appWindow.isMobile }}>
 								{#if item}
@@ -224,6 +283,42 @@
 		flex-direction: column;
 		flex: 1;
 	}
+	.search-results-multisort-tags,
+	.multisort-draggable-container {
+		display: flex;
+		gap: 8px;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+	.search-results-multisort-tags {
+		margin-bottom: 4px;
+	}
+	.sort-tag {
+		display: flex;
+		background-color: var(--button);
+		align-items: center;
+		border-radius: 4px;
+		height: 100%;
+		cursor: grab;
+		font-size: 0.85rem;
+		padding: 4px 4px;
+		gap: 4px;
+
+		p {
+			color: var(--button-text-color);
+			font-size: 0.85rem;
+		}
+	}
+	/* .sort-tag:active {
+		cursor: grabbing;
+	} */
+	.clear-sort-button {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 100%;
+		cursor: pointer;
+	}
 	.result-list-header {
 		display: grid;
 		grid-template-columns: 5% 1fr repeat(5, 7%) 12% 15%;
@@ -251,7 +346,7 @@
 		font-size: x-large;
 	}
 	:global(.sort-header-button, .sort-header-button-mobile) {
-		background-color: var(--surface-color);
+		background-color: transparent;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -261,6 +356,7 @@
 		gap: 4px;
 		border: 1px solid var(--border);
 		border-radius: 0%;
+		box-shadow: unset;
 	}
 	:global(.sort-header-button-mobile) {
 		display: flex;
@@ -271,7 +367,17 @@
 		width: 10px;
 		height: 10px;
 	}
-
+	.sort-header-text {
+		position: relative;
+	}
+	.sort-header-text::after {
+		content: attr(data-sort-index);
+		position: absolute;
+		right: -4px;
+		top: 0px;
+		color: var(--primary);
+		font-size: 0.6rem;
+	}
 	:global(.sort) {
 		filter: var(--surface-color-light-filter);
 	}
@@ -332,6 +438,7 @@
 		background-color: transparent;
 		color: var(--primary);
 		border-radius: 3px;
+		box-shadow: none;
 	}
 	.availability-result-container {
 		padding: 16px;
@@ -362,10 +469,5 @@
 	.role-text {
 		font-size: 0.8em;
 		align-self: center;
-	}
-	.rules-notice {
-		align-self: center;
-		justify-self: center;
-		margin-bottom: 4px;
 	}
 </style>

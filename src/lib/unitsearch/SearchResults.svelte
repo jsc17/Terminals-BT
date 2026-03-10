@@ -73,32 +73,31 @@
 	}
 
 	function onDragEnd(event: any) {
-		console.log(event);
 		resultList.sortKeys = move(resultList.sortKeys, event);
 	}
 </script>
 
 <div class="search-results card">
 	<div class="search-results-multisort-tags">
-		<DragDropProvider {onDragEnd}>
-			<div class="multisort-draggable-container">
-				{#each resultList.sortKeys as sortKey, index (sortKey.id)}
-					{@const sortable = createSortable({ id: sortKey.id, index })}
-					<div class="sort-tag" {@attach sortable.attach}>
-						<DotsSixVertical color="var(--button-text-color)" size="17" weight="bold" />
-						<div style="display:flex; align-items:center">
-							<p>{sortKey.label}</p>
-							{#if sortKey.order == "asc"}
-								<SortAscending color="var(--button-text-color)" size="15" />
-							{:else}
-								<SortDescending color="var(--button-text-color)" size="15" />
-							{/if}
-						</div>
-					</div>
-				{/each}
-			</div>
-		</DragDropProvider>
 		{#if resultList.sortKeys.length > 1}
+			<DragDropProvider {onDragEnd}>
+				<div class="multisort-draggable-container">
+					{#each resultList.sortKeys as sortKey, index (sortKey.id)}
+						{@const sortable = createSortable({ id: sortKey.id, index })}
+						<div class="sort-tag" {@attach sortable.attach}>
+							<DotsSixVertical color="var(--button-text-color)" size="17" weight="bold" />
+							<div style="display:flex; align-items:center">
+								<p>{sortKey.label}</p>
+								{#if sortKey.order == "asc"}
+									<SortAscending color="var(--button-text-color)" size="15" />
+								{:else}
+									<SortDescending color="var(--button-text-color)" size="15" />
+								{/if}
+							</div>
+						</div>
+					{/each}
+				</div>
+			</DragDropProvider>
 			<button onclick={() => (resultList.sortKeys = [])} class="clear-sort-button">Clear All</button>
 		{/if}
 	</div>
@@ -134,15 +133,21 @@
 			onclick={() => sort({ key: "name", label: "Name" })}
 			bind:clientWidth={listWidth}
 		>
-			{appWindow.isNarrow ? `Name` : `Name - ${resultList.filteredList.length}/${resultList.restrictedList.length} results shown`}
-			{#if resultList.getSortKeyIndex("name") != -1}
-				{@const sortKey = resultList.sortKeys[resultList.getSortKeyIndex("name")]}
-				<img class="sort-selected button-icon" src={sortKey.order == "asc" ? "/icons/sort-ascending.svg" : "/icons/sort-descending.svg"} alt="sort" />
-			{:else}
-				<img class="sort button-icon" src="/icons/sort.svg" alt="sort" />
-			{/if}
+			<div
+				class="center sort-header-text"
+				data-sort-index={resultList.sortKeys.length > 1 && resultList.getSortKeyIndex("name") != -1 ? resultList.getSortKeyIndex("name") + 1 : undefined}
+			>
+				{appWindow.isNarrow ? `Name` : `Name - ${resultList.filteredList.length}/${resultList.restrictedList.length} results shown`}
+				{#if resultList.getSortKeyIndex("name") != -1}
+					{@const sortKey = resultList.sortKeys[resultList.getSortKeyIndex("name")]}
+					<img class="sort-selected button-icon" src={sortKey.order == "asc" ? "/icons/sort-ascending.svg" : "/icons/sort-descending.svg"} alt="sort" />
+				{:else}
+					<img class="sort button-icon" src="/icons/sort.svg" alt="sort" />
+				{/if}
+			</div>
 		</button>
 		{#each headers as header}
+			{@const sortKeyIndex = resultList.getSortKeyIndex(header.key)}
 			<button
 				class={{
 					"sort-header-button": !appWindow.isMobile,
@@ -150,13 +155,18 @@
 				}}
 				onclick={() => sort({ key: header.key, label: header.label })}
 			>
-				{header.label}
-				{#if resultList.getSortKeyIndex(header.key) != -1}
-					{@const sortKey = resultList.sortKeys[resultList.getSortKeyIndex(header.key)]}
-					<img class="sort-selected button-icon" src={sortKey.order == "asc" ? "/icons/sort-ascending.svg" : "/icons/sort-descending.svg"} alt="sort" />
-				{:else}
-					<img class="sort button-icon" src="/icons/sort.svg" alt="sort" />
-				{/if}
+				<div class="center sort-header-text" data-sort-index={resultList.sortKeys.length > 1 && sortKeyIndex != -1 ? sortKeyIndex + 1 : undefined}>
+					{header.label}
+					{#if sortKeyIndex != -1}
+						{#if resultList.sortKeys[sortKeyIndex].order == "asc"}
+							<SortAscending size="15" />
+						{:else}
+							<SortDescending size="15" />
+						{/if}
+					{:else}
+						<img class="sort button-icon" src="/icons/sort.svg" alt="sort" />
+					{/if}
+				</div>
 			</button>
 		{/each}
 		<DamageSortPopover {resultList}></DamageSortPopover>
@@ -281,7 +291,7 @@
 		flex-wrap: wrap;
 	}
 	.search-results-multisort-tags {
-		margin-bottom: 8px;
+		margin-bottom: 4px;
 	}
 	.sort-tag {
 		display: flex;
@@ -357,7 +367,17 @@
 		width: 10px;
 		height: 10px;
 	}
-
+	.sort-header-text {
+		position: relative;
+	}
+	.sort-header-text::after {
+		content: attr(data-sort-index);
+		position: absolute;
+		right: -4px;
+		top: 0px;
+		color: var(--primary);
+		font-size: 0.6rem;
+	}
 	:global(.sort) {
 		filter: var(--surface-color-light-filter);
 	}

@@ -41,9 +41,6 @@
 }
 
 button {
-	display: flex;
-	align-items: center;
-	justify-content: center;
 	background-color: var(--button-background);
 	color: var(--button-text);
 	border-radius: 4px;

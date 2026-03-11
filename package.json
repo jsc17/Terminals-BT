@@ -36,9 +36,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@dnd-kit-svelte/svelte": "^0.1.6",
 		"@dnd-kit/helpers": "^0.3.2",
-		"@dnd-kit/modifiers": "^9.0.0",
 		"@dnd-kit/svelte": "^0.3.2",
 		"@humanspeak/svelte-virtual-list": "^0.3.6",
 		"@node-rs/argon2": "^2.0.2",

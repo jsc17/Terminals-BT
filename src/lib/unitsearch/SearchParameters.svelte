@@ -71,7 +71,6 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 6px;
-		padding: 4px 0px;
 	}
 	.selected-block {
 		background-color: var(--input);

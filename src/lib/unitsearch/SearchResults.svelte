@@ -3,17 +3,17 @@
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import type { List } from "$lib/types/list.svelte";
 	import DamageSortPopover from "./DamageSortPopover.svelte";
-	import { eraLookup, factionLookup, eraOrder } from "$lib/data/erasFactionLookup";
+	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
 	import { Dialog, Separator, DropdownMenu } from "$lib/generic";
 	import { exportArrayToCSV } from "$lib/utilities/export";
 	import VirtualList from "@humanspeak/svelte-virtual-list";
-	import { DotsSixVertical, GearSix, SortAscending, SortDescending, XCircle } from "phosphor-svelte";
 	import { getUnitAvailabilityLocal } from "$lib/local/sqllite/local-db";
 	import { getContext } from "svelte";
 	import { DragDropProvider } from "@dnd-kit/svelte";
 	import { createSortable } from "@dnd-kit/svelte/sortable";
 	import { move } from "@dnd-kit/helpers";
+	import { SettingsIcon, SortIcon, SortAscendingIcon, SortDescendingIcon, DragIndicatorIcon } from "$lib/icons";
 
 	type Props = {
 		list?: List;
@@ -85,15 +85,14 @@
 					{#each resultList.sortKeys as sortKey, index (sortKey.id)}
 						{@const sortable = createSortable({ id: sortKey.id, index })}
 						<div class="sort-tag" {@attach sortable.attach}>
-							<DotsSixVertical color="var(--button-text-color)" size="17" weight="bold" />
-							<div style="display:flex; align-items:center">
-								<p>{sortKey.label}</p>
-								{#if sortKey.order == "asc"}
-									<SortAscending color="var(--button-text-color)" size="15" />
-								{:else}
-									<SortDescending color="var(--button-text-color)" size="15" />
-								{/if}
-							</div>
+							<DragIndicatorIcon width="20" height="20" />
+							{index + 1} -
+							{sortKey.label}
+							{#if sortKey.order == "asc"}
+								<SortAscendingIcon width="20" height="20" />
+							{:else}
+								<SortDescendingIcon width="20" height="20" />
+							{/if}
 						</div>
 					{/each}
 				</div>
@@ -121,7 +120,7 @@
 				triggerClasses="transparent-button"
 			>
 				{#snippet trigger()}
-					<GearSix weight="fill" size="20" />
+					<SettingsIcon fill="var(--primary)" />
 				{/snippet}
 			</DropdownMenu>
 		</div>
@@ -133,18 +132,22 @@
 			onclick={() => sort({ key: "name", label: "Name" })}
 			bind:clientWidth={listWidth}
 		>
-			<div
-				class="center sort-header-text"
-				data-sort-index={resultList.sortKeys.length > 1 && resultList.getSortKeyIndex("name") != -1 ? resultList.getSortKeyIndex("name") + 1 : undefined}
-			>
-				{appWindow.isNarrow ? `Name` : `Name - ${resultList.filteredList.length}/${resultList.restrictedList.length} results shown`}
-				{#if resultList.getSortKeyIndex("name") != -1}
-					{@const sortKey = resultList.sortKeys[resultList.getSortKeyIndex("name")]}
-					<img class="sort-selected button-icon" src={sortKey.order == "asc" ? "/icons/sort-ascending.svg" : "/icons/sort-descending.svg"} alt="sort" />
-				{:else}
-					<img class="sort button-icon" src="/icons/sort.svg" alt="sort" />
-				{/if}
-			</div>
+			{appWindow.isNarrow ? `Name` : `Name - ${resultList.filteredList.length}/${resultList.restrictedList.length} results shown`}
+			{#if resultList.getSortKeyIndex("name") != -1}
+				{@const sortKey = resultList.sortKeys[resultList.getSortKeyIndex("name")]}
+				<div
+					class="sort-header-superscript"
+					data-sort-index={resultList.sortKeys.length > 1 && resultList.getSortKeyIndex("name") != -1 ? resultList.getSortKeyIndex("name") + 1 : undefined}
+				>
+					{#if sortKey.order == "asc"}
+						<SortAscendingIcon fill="var(--primary)" width="20" height="20" />
+					{:else}
+						<SortDescendingIcon fill="var(--primary)" width="20" height="20" />
+					{/if}
+				</div>
+			{:else}
+				<SortIcon fill="var(--surface-color-light-text-color)" width="20" height="20" />
+			{/if}
 		</button>
 		{#each headers as header}
 			{@const sortKeyIndex = resultList.getSortKeyIndex(header.key)}
@@ -155,18 +158,18 @@
 				}}
 				onclick={() => sort({ key: header.key, label: header.label })}
 			>
-				<div class="center sort-header-text" data-sort-index={resultList.sortKeys.length > 1 && sortKeyIndex != -1 ? sortKeyIndex + 1 : undefined}>
-					{header.label}
-					{#if sortKeyIndex != -1}
+				{header.label}
+				{#if sortKeyIndex != -1}
+					<div class="center sort-header-superscript" data-sort-index={resultList.sortKeys.length > 1 && sortKeyIndex != -1 ? sortKeyIndex + 1 : undefined}>
 						{#if resultList.sortKeys[sortKeyIndex].order == "asc"}
-							<SortAscending size="15" />
+							<SortAscendingIcon fill="var(--primary)" width="20" height="20" />
 						{:else}
-							<SortDescending size="15" />
+							<SortDescendingIcon fill="var(--primary)" width="20" height="20" />
 						{/if}
-					{:else}
-						<img class="sort button-icon" src="/icons/sort.svg" alt="sort" />
-					{/if}
-				</div>
+					</div>
+				{:else}
+					<SortIcon fill="var(--surface-color-light-text-color)" width="20" height="20" />
+				{/if}
 			</button>
 		{/each}
 		<DamageSortPopover {resultList}></DamageSortPopover>
@@ -283,7 +286,7 @@
 		flex-direction: column;
 		flex: 1;
 	}
-	.search-results-multisort-tags,
+
 	.multisort-draggable-container {
 		display: flex;
 		gap: 8px;
@@ -291,33 +294,39 @@
 		flex-wrap: wrap;
 	}
 	.search-results-multisort-tags {
+		display: flex;
+		gap: 4px 32px;
+		align-items: center;
 		margin-bottom: 4px;
 	}
 	.sort-tag {
 		display: flex;
-		background-color: var(--button);
+		background-color: var(--button-background);
+		color: var(--button-text);
 		align-items: center;
+		text-align: center;
 		border-radius: 4px;
 		height: 100%;
 		cursor: grab;
 		font-size: 0.85rem;
-		padding: 4px 4px;
-		gap: 4px;
-
-		p {
-			color: var(--button-text-color);
-			font-size: 0.85rem;
-		}
+		padding: 0px 4px;
+		gap: 6px;
+		font-weight: 500;
+		line-height: 1;
+		color: var(--button-text);
+		font-size: 0.85rem;
 	}
-	/* .sort-tag:active {
+	.sort-tag:active {
 		cursor: grabbing;
-	} */
+	}
 	.clear-sort-button {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		height: 100%;
 		cursor: pointer;
+		height: max-content;
+		padding: 0px 8px;
+		line-height: 1;
 	}
 	.result-list-header {
 		display: grid;
@@ -329,7 +338,6 @@
 	.result-list-header-mobile {
 		display: grid;
 		grid-template-columns: 25px 1fr repeat(4, 10%) 15%;
-		height: 30px;
 	}
 	.virtual-list-container {
 		width: 100%;
@@ -363,14 +371,10 @@
 		flex-direction: column;
 		gap: 0px;
 	}
-	:global(.sort-header-button-mobile img) {
-		width: 10px;
-		height: 10px;
-	}
-	.sort-header-text {
+	.sort-header-superscript {
 		position: relative;
 	}
-	.sort-header-text::after {
+	.sort-header-superscript::after {
 		content: attr(data-sort-index);
 		position: absolute;
 		right: -4px;
@@ -380,9 +384,6 @@
 	}
 	:global(.sort) {
 		filter: var(--surface-color-light-filter);
-	}
-	:global(.sort-selected) {
-		filter: var(--primary-filter);
 	}
 	.virtual-list-row {
 		display: grid;
@@ -420,6 +421,7 @@
 	}
 	.unit-name {
 		padding-left: 8px;
+		align-self: center;
 	}
 	.abilities {
 		padding-left: 16px;

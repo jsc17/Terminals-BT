@@ -213,7 +213,7 @@
 	}
 	:global([data-tabs-trigger].matchUnitTrigger[data-state="active"]) {
 		background-color: var(--button);
-		color: var(--button-text-color);
+		color: var(--button-text);
 	}
 	p.muted {
 		margin-top: 4px;

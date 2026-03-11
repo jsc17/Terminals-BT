@@ -2,7 +2,7 @@
 	import { Popover, Separator } from "bits-ui";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import type { ResultList } from "$lib/types/resultList.svelte";
-	import { SortAscending, SortDescending } from "phosphor-svelte";
+	import { SortAscendingIcon, SortDescendingIcon, SortIcon } from "$lib/icons";
 
 	type Props = {
 		resultList: ResultList;
@@ -46,7 +46,20 @@
 <Popover.Root bind:open>
 	<Popover.Trigger class={appWindow.isMobile ? "sort-header-button-mobile" : "sort-header-button"}>
 		{#if appWindow.isNarrow}
+			{@const firstDamageIndex = resultList.sortKeys.findIndex((sort) => sort.id == "overheat" || sort.id.slice(0, 6) == "damage")}
+
 			<p>DMG</p>
+			{#if firstDamageIndex == -1}
+				<SortIcon fill="var(--surface-color-light-text-color)" width="20" height="20" />
+			{:else}
+				<div class="sort-header-text" data-sort-index={resultList.sortKeys.length > 1 && firstDamageIndex != -1 ? firstDamageIndex + 1 : undefined}>
+					{#if resultList.sortKeys[firstDamageIndex].order == "asc"}
+						<SortAscendingIcon fill="var(--primary)" width="20" height="20" />
+					{:else}
+						<SortDescendingIcon fill="var(--primary)" width="20" height="20" />
+					{/if}
+				</div>
+			{/if}
 		{:else}
 			<div class="damage-header-text">
 				<span class={{ primary: damageTotalIndex != -1 }}>DMG&nbsp;</span>
@@ -54,9 +67,9 @@
 					<span class={{ primary: damageSIndex != -1 || damageTotalIndex != -1 }}>S</span>
 					{#if damageSIndex != -1}
 						{#if resultList.sortKeys[damageSIndex].order == "asc"}
-							<SortAscending size="15" />
+							<SortAscendingIcon fill="var(--primary)" width="20" height="20" />
 						{:else}
-							<SortDescending size="15" />
+							<SortDescendingIcon fill="var(--primary)" width="20" height="20" />
 						{/if}
 					{/if}
 				</div>
@@ -65,9 +78,9 @@
 					<span class={{ primary: damageMIndex != -1 || damageTotalIndex != -1 }}>M</span>
 					{#if damageMIndex != -1}
 						{#if resultList.sortKeys[damageMIndex].order == "asc"}
-							<SortAscending size="15" />
+							<SortAscendingIcon fill="var(--primary)" width="20" height="20" />
 						{:else}
-							<SortDescending size="15" />
+							<SortDescendingIcon fill="var(--primary)" width="20" height="20" />
 						{/if}
 					{/if}
 				</div>
@@ -76,9 +89,9 @@
 					<span class={{ primary: damageLIndex != -1 || damageTotalIndex != -1 }}>L</span>
 					{#if damageLIndex != -1}
 						{#if resultList.sortKeys[damageLIndex].order == "asc"}
-							<SortAscending size="15" />
+							<SortAscendingIcon fill="var(--primary)" width="20" height="20" />
 						{:else}
-							<SortDescending size="15" />
+							<SortDescendingIcon fill="var(--primary)" width="20" height="20" />
 						{/if}
 					{/if}
 				</div>
@@ -87,24 +100,24 @@
 					<span class={{ primary: overheatIndex != -1 }}>OV</span>
 					{#if overheatIndex != -1}
 						{#if resultList.sortKeys[overheatIndex].order == "asc"}
-							<SortAscending size="15" />
+							<SortAscendingIcon fill="var(--primary)" width="20" height="20" />
 						{:else}
-							<SortDescending size="15" />
+							<SortDescendingIcon fill="var(--primary)" width="20" height="20" />
 						{/if}
 					{/if}
 				</div>
 			</div>
-		{/if}
-		{#if damageTotalIndex == -1 && damageSIndex == -1 && damageMIndex == -1 && damageLIndex == -1 && overheatIndex == -1}
-			<img class="sort button-icon" src="/icons/sort.svg" alt="sort" />
-		{:else if damageTotalIndex != -1}
-			<div class="sort-header-text" data-sort-index={resultList.sortKeys.length > 1 && damageTotalIndex != -1 ? damageTotalIndex + 1 : undefined}>
-				{#if resultList.sortKeys[damageTotalIndex].order == "asc"}
-					<SortAscending size="15" />
-				{:else}
-					<SortDescending size="15" />
-				{/if}
-			</div>
+			{#if damageTotalIndex == -1 && damageSIndex == -1 && damageMIndex == -1 && damageLIndex == -1 && overheatIndex == -1}
+				<SortIcon width="20" height="20" />
+			{:else if damageTotalIndex != -1}
+				<div class="sort-header-text" data-sort-index={resultList.sortKeys.length > 1 && damageTotalIndex != -1 ? damageTotalIndex + 1 : undefined}>
+					{#if resultList.sortKeys[damageTotalIndex].order == "asc"}
+						<SortAscendingIcon fill="var(--primary)" width="20" height="20" />
+					{:else}
+						<SortDescendingIcon fill="var(--primary)" width="20" height="20" />
+					{/if}
+				</div>
+			{/if}
 		{/if}
 	</Popover.Trigger>
 	<Popover.Content class="damage-sort-content">

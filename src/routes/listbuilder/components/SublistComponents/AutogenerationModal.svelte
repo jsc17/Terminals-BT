@@ -353,7 +353,7 @@
 	}
 	.detailed-button {
 		background-color: var(--button);
-		color: var(--button-text-color);
+		color: var(--button-text);
 		border-radius: var(--radius);
 		padding: 8px 12px;
 		box-shadow:

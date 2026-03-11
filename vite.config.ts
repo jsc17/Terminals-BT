@@ -4,9 +4,10 @@ import { sveltePhosphorOptimize } from "phosphor-svelte/vite";
 // @ts-ignore
 import crossOriginIsolation from "vite-plugin-cross-origin-isolation";
 import fs from "fs";
+import svg from "@poppanator/sveltekit-svg";
 
 export default defineConfig({
-	plugins: [crossOriginIsolation(), sveltekit(), sveltePhosphorOptimize()],
+	plugins: [crossOriginIsolation(), sveltekit(), sveltePhosphorOptimize(), svg()],
 	server: {
 		headers: {
 			"Cross-Origin-Opener-Policy": "same-origin",

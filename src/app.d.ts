@@ -1,6 +1,7 @@
 // See https://kit.svelte.dev/docs/types#app
 
 import type { PrismaClient } from "$lib/generated/prisma/browser";
+import "@poppanator/sveltekit-svg/dist/svg.d.ts";
 
 // for information about these interfaces
 declare global {

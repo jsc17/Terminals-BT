@@ -14,7 +14,6 @@
 	import { SettingsSchema, type SettingsOutput } from "./listbuilder/types/settings.js";
 	import { parse } from "valibot";
 	import { initWorker, workerInitialized } from "$lib/local/sqllite/local-db.js";
-	import { toastController } from "$lib/stores/toastController.svelte.js";
 
 	const { data, children } = $props();
 	let user = $state({ username: data.username });
@@ -94,6 +93,7 @@
 		min-height: 0;
 		scrollbar-color: var(--scrollbar-slide) var(--scrollbar-background);
 		scrollbar-width: thin;
+		font-family: "Roboto", Arial, Helvetica, sans-serif;
 	}
 	:global(body) {
 		margin: 0;
@@ -102,7 +102,6 @@
 		min-height: 100dvh;
 		overflow-x: hidden;
 		background-color: var(--background);
-		font-family: Arial, Helvetica, sans-serif;
 		display: flex;
 		flex-direction: column;
 		scrollbar-gutter: stable;

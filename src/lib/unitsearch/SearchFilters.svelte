@@ -226,7 +226,7 @@
 	.filter-list {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 12px;
+		gap: 4px 12px;
 	}
 	.filter {
 		display: flex;
@@ -248,7 +248,7 @@
 		appearance: none;
 	}
 	.filter-buttons {
-		margin: 8px;
+		margin: 0px 8px;
 	}
 	label {
 		margin-left: 4px;

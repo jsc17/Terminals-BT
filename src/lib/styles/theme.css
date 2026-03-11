@@ -8,7 +8,7 @@
 	--text-color: black;
 	--surface-color-light-text-color: black;
 	--table-border: hsl(240, 4%, 28%);
-	--button-text-color: black;
+	--button-text: black;
 	--button-dark-text-color: hsl(0, 0%, 80%);
 	--error: red;
 	--error-text-color: black;
@@ -42,7 +42,7 @@
 	--surface-color-light-text-color: hsl(240 5% 64.9%);
 	--border: hsl(240, 3.7%, 15.9%);
 	--table-border: hsl(240, 4%, 28%);
-	--button-text-color: black;
+	--button-text: black;
 	--button-dark-text-color: hsl(0, 0%, 80%);
 	--input: hsl(240, 3.7%, 15.9%);
 	--error: lightcoral;
@@ -69,21 +69,31 @@
 
 :root[data-theme="green"] {
 	--primary: hsl(142, 67%, 30%);
+	--button-background: oklch(from var(--primary) calc(l * 1.5) c h);
+	--button-text: hsl(0, 0%, 9%);
 }
 :root.dark[data-theme="green"] {
 	--primary: hsl(142, 69%, 44%);
-	--button: hsl(143, 24%, 44%);
-	--button-text-color: hsl(0, 0%, 0%);
+	--button-background: oklch(from var(--primary) calc(l * 0.9) c h);
+	--button-text: hsl(0, 0%, 9%);
 }
 :root[data-theme="blue"] {
 	--primary: oklch(0.457 0.191 261);
+	--button-background: oklch(from var(--primary) calc(l * 1.5) c h);
+	--button-text: hsl(0, 0%, 0%);
 }
 :root.dark[data-theme="blue"] {
 	--primary: oklch(0.6 0.191 261);
+	--button-background: oklch(from var(--primary) calc(l * 0.9) c h);
+	--button-text: hsl(0, 0%, 9%);
 }
 :root[data-theme="brown"] {
 	--primary: oklch(0.6 0.1603 48.07);
+	--button-background: oklch(from var(--primary) calc(l * 1.5) c h);
+	--button-text: hsl(0, 0%, 9%);
 }
 :root.dark[data-theme="brown"] {
 	--primary: oklch(0.7003 0.1603 48.07);
+	--button-background: oklch(from var(--primary) calc(l * 0.9) c h);
+	--button-text: hsl(0, 0%, 9%);
 }

@@ -4,7 +4,6 @@
 	import { UpdateMatchSchema } from "../../../schema/matchlistSchema";
 	import type { PlayList } from "../../../types/types";
 	import { kickPlayer, updateMatchData } from "../../remote/matchManagement.remote";
-	import { filter } from "d3";
 
 	type Props = {
 		open: boolean;

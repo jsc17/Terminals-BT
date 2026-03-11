@@ -146,7 +146,7 @@
 	}
 	:global([data-tabs-trigger].matchUnitTrigger[data-state="active"]) {
 		background-color: var(--button);
-		color: var(--button-text-color);
+		color: var(--button-text);
 	}
 	.crit-modal-body {
 		margin-top: 16px;
@@ -169,7 +169,7 @@
 	}
 	.critical-radio:checked + label {
 		background-color: var(--button);
-		color: var(--button-text-color);
+		color: var(--button-text);
 	}
 	.critical-range,
 	.critical-label {

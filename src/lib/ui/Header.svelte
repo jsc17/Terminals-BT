@@ -10,7 +10,7 @@
 	import type { Notification } from "$lib/generic/types";
 	import { SvelteMap } from "svelte/reactivity";
 	import { toggleMode, mode, setTheme } from "mode-watcher";
-	import { List as ListIcon, GearSix, X, Sun, Moon } from "phosphor-svelte";
+	import { ListIcon, GearSixIcon, XIcon, SunIcon, MoonIcon } from "phosphor-svelte";
 	import { Switch } from "$lib/generic";
 
 	type Props = {
@@ -94,7 +94,7 @@
 		{pageList.get(basePath)}
 	</button>
 	<nav bind:this={navbar} id="navbar">
-		<button class="link-button close-menu-button no-hover" onclick={closeNav} aria-label="Close navigation sidebar"><X /></button>
+		<button class="link-button close-menu-button no-hover" onclick={closeNav} aria-label="Close navigation sidebar"><XIcon /></button>
 		<ul>
 			<li><a href="/" aria-current={basePath === "/"} onclick={closeNav}>Home</a></li>
 			<li><a href="/about" aria-current={basePath === "/"} onclick={closeNav}>About</a></li>
@@ -129,10 +129,10 @@
 			>
 		{/if}
 		<button class="link-button no-hover" onclick={openUserMenu}>
-			<GearSix weight="fill" />
+			<GearSixIcon weight="fill" />
 		</button>
 		<menu bind:this={userMenu} id="usermenu">
-			<button class="link-button close-user-button no-hover" onclick={closeUserMenu} aria-label="Close user menu sidebar"><X /></button>
+			<button class="link-button close-user-button no-hover" onclick={closeUserMenu} aria-label="Close user menu sidebar"><XIcon /></button>
 			<ul>
 				{#if user.username}
 					<li><a href="/settings" onclick={closeUserMenu}>User Settings</a></li>
@@ -148,10 +148,10 @@
 						}}
 					>
 						{#snippet leftValue()}
-							<Moon color={mode.current == "dark" ? "gold" : "var(--text-color)"} weight={mode.current == "dark" ? "fill" : "regular"} />
+							<MoonIcon color={mode.current == "dark" ? "gold" : "var(--text-color)"} weight={mode.current == "dark" ? "fill" : "regular"} />
 						{/snippet}
 						{#snippet rightValue()}
-							<Sun color={mode.current == "light" ? "gold" : "var(--text-color)"} weight={mode.current == "light" ? "fill" : "regular"} />
+							<SunIcon color={mode.current == "light" ? "gold" : "var(--text-color)"} weight={mode.current == "light" ? "fill" : "regular"} />
 						{/snippet}
 					</Switch>
 				</li>

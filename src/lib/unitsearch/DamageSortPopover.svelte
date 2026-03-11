@@ -108,7 +108,7 @@
 				</div>
 			</div>
 			{#if damageTotalIndex == -1 && damageSIndex == -1 && damageMIndex == -1 && damageLIndex == -1 && overheatIndex == -1}
-				<SortIcon width="20" height="20" />
+				<SortIcon fill="var(--surface-color-light-text-color)" width="20" height="20" />
 			{:else if damageTotalIndex != -1}
 				<div class="sort-header-text" data-sort-index={resultList.sortKeys.length > 1 && damageTotalIndex != -1 ? damageTotalIndex + 1 : undefined}>
 					{#if resultList.sortKeys[damageTotalIndex].order == "asc"}

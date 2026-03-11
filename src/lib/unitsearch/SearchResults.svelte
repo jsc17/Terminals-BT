@@ -13,7 +13,7 @@
 	import { DragDropProvider } from "@dnd-kit/svelte";
 	import { createSortable } from "@dnd-kit/svelte/sortable";
 	import { move } from "@dnd-kit/helpers";
-	import { SettingsIcon, SortIcon, SortAscendingIcon, SortDescendingIcon, DragIndicatorIcon } from "$lib/icons";
+	import { GearIcon, SortIcon, SortAscendingIcon, SortDescendingIcon, DragIndicatorIcon } from "$lib/icons";
 
 	type Props = {
 		list?: List;
@@ -120,7 +120,7 @@
 				triggerClasses="transparent-button"
 			>
 				{#snippet trigger()}
-					<SettingsIcon fill="var(--primary)" />
+					<GearIcon fill="var(--primary)" width="20" height="20" />
 				{/snippet}
 			</DropdownMenu>
 		</div>
@@ -324,6 +324,7 @@
 		align-items: center;
 		justify-content: center;
 		cursor: pointer;
+		min-height: 20px;
 		height: max-content;
 		padding: 0px 8px;
 		line-height: 1;

@@ -3,7 +3,7 @@
 	import { calculateTMM } from "$lib/utilities/genericBattletechUtilities";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import SendNotification from "./SendNotification.svelte";
-	import { getImage } from "./admin.remote";
+	import { getImage, setCollectionTypes } from "./admin.remote";
 
 	async function loadUnits() {
 		const links: { type: string; link: string }[] = [];
@@ -123,6 +123,7 @@
 	</div>
 
 	<SendNotification />
+	<button onclick={() => setCollectionTypes()}>Set Collection Types</button>
 </main>
 
 <style>

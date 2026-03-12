@@ -82,12 +82,13 @@ export const removeTagfromUnit = form(v.object({ unitId: v.string(), tagToRemove
 	return { status: "success", message: "Tag successfully removed from unit" };
 });
 
-export const addUnitToCollection = form(v.object({ newUnitName: v.string(), tag: v.array(v.pipe(v.string(), v.transform(Number))) }), async ({ newUnitName, tag }) => {
+export const addUnitToCollection = form(v.object({ newUnit: v.string(), tag: v.array(v.pipe(v.string(), v.transform(Number))) }), async ({ newUnit, tag }) => {
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failed", message: "Invalid User" };
 
+	const { group, type } = JSON.parse(newUnit);
 	await prisma.collectionModel.create({
-		data: { label: newUnitName, user: { connect: { id: locals.user.id } }, unitTags: { create: tag.map((id) => ({ tag: { connect: { id } } })) } }
+		data: { label: group, type: type, user: { connect: { id: locals.user.id } }, unitTags: { create: tag.map((id) => ({ tag: { connect: { id } } })) } }
 	});
 
 	await getTaggedUnits().refresh();
@@ -125,15 +126,21 @@ export const getTaggedUnits = query(async () => {
 });
 
 export const getUnitGroups = query(async () => {
-	const unitList = await prisma.unit.findMany({ select: { class: true, group: true } });
-	const groupList = new Set(
-		unitList
-			.map((unit) => {
-				return unit.group != "" && unit.group != null ? unit.group : unit.class;
-			})
-			.sort()
-	);
-	return [...groupList];
+	let unitList = await prisma.unit.findMany({ select: { class: true, group: true, subtype: true } });
+	const existingKeys = new Set<string>();
+
+	unitList = unitList.filter((unit) => {
+		const key = JSON.stringify(unit);
+		if (existingKeys.has(key)) return false;
+		existingKeys.add(key);
+		return true;
+	});
+
+	return unitList
+		.map((unit) => {
+			return { group: unit.group != "" && unit.group != null ? unit.group : unit.class, type: unit.subtype ?? "" };
+		})
+		.sort();
 });
 
 export const getUnitsWithTags = form(v.object({ tagId: v.array(v.pipe(v.string(), v.transform(Number))) }), async ({ tagId }) => {

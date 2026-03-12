@@ -28,7 +28,9 @@
 
 	let unitGroupListPromise = getUnitGroups();
 	let unitFilter = $state<string>();
-	let unitGroupList = $derived<string[]>(unitGroupListPromise.current?.filter((v) => v.toLowerCase().includes(unitFilter?.toLowerCase() ?? "")) ?? []);
+	let unitGroupList = $derived<{ group: string; type?: string }[]>(
+		unitGroupListPromise.current?.filter((v) => v.group.toLowerCase().includes(unitFilter?.toLowerCase() ?? "")) ?? []
+	);
 
 	function filterUnit(item: any) {
 		if (!item.label.toLowerCase().includes(nameFilter.toLowerCase())) return false;
@@ -89,12 +91,12 @@
 											() => checkedUnitIds.has(item.id),
 											(checked) => {
 												checked ? checkedUnitIds.add(item.id) : checkedUnitIds.delete(item.id);
-												console.log(checkedUnitIds);
 											}
 										}
 										form="unit-management"
 									/>
 									<p class="tagged-unit-name">{item.label}</p>
+									<p>{item.type ? `${item.type}` : "-"}</p>
 									<p class="tagged-unit-quantity">x{item.quantity}</p>
 									<div class="selected-tags">
 										{#each item.unitTags as { tag }}
@@ -118,8 +120,9 @@
 		<section>
 			<form
 				id="unit-management"
-				{...addUnitToCollection.enhance(async ({ submit }) => {
+				{...addUnitToCollection.enhance(async ({ submit, data }) => {
 					try {
+						console.log(data);
 						await submit();
 						toastController.addToast(addUnitToCollection.result?.message ?? "Invalid message recieved");
 					} catch (error) {
@@ -132,9 +135,9 @@
 					<p class="muted">Adds the selected model to your collection with the currently selected tags</p>
 					<div class="justify-end">
 						<label>Filter: <input type="text" bind:value={unitFilter} style="width: 150px;" /></label>
-						<select name="newUnitName" id="new-unit-name" style="width: 250px;">
+						<select name="newUnit" id="new-unit-name" style="width: 250px;">
 							{#each unitGroupList as group}
-								<option value={group}>{group}</option>
+								<option value={JSON.stringify(group)}>{group.group} {group.type ? `(${group.type})` : ""}</option>
 							{/each}
 						</select>
 						<button>Add</button>
@@ -191,13 +194,13 @@
 <style>
 	:global(.test-collection) {
 		display: grid;
-		grid-template-columns: max-content fit-content(30%) max-content 1fr max-content;
+		grid-template-columns: max-content fit-content(30%) max-content max-content 1fr max-content;
 		column-gap: 16px;
 	}
 	:global(.test-collection > div) {
 		display: grid;
 		grid-template-columns: subgrid;
-		grid-column: span 5;
+		grid-column: span 6;
 	}
 	main {
 		display: flex;
@@ -271,7 +274,7 @@
 		border-bottom: 1px solid var(--border);
 		display: grid;
 		grid-template-columns: subgrid;
-		grid-column: span 5;
+		grid-column: span 6;
 
 		& * {
 			align-self: center;

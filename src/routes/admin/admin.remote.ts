@@ -40,3 +40,25 @@ export const getImage = form(v.object({ mulId: v.string() }), async (data) => {
 	const image = await getMulImage(unit?.imageLink ?? "");
 	return image;
 });
+
+export const setCollectionTypes = command(async () => {
+	const unitsToUpdate = await prisma.collectionModel.findMany({ where: { type: null } });
+	console.log(unitsToUpdate.length);
+	for (const unit of unitsToUpdate) {
+		const matchingGroups = (await prisma.unit.findMany({ where: { OR: [{ class: unit.label }, { group: unit.label }] }, select: { subtype: true }, distinct: ["subtype"] }))
+			.filter((v) => v.subtype != null)
+			.map((v) => v.subtype);
+		let type = "";
+		if (matchingGroups.length == 1) {
+			type = matchingGroups[0]!;
+		} else {
+			if (matchingGroups.includes("BM")) type = "BM";
+			else if (matchingGroups.includes("CV")) type = "CV";
+			else type = matchingGroups[0]!;
+		}
+		await prisma.collectionModel.update({
+			where: { id: unit.id },
+			data: { type: type }
+		});
+	}
+});

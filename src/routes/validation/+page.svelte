@@ -7,7 +7,7 @@
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
 	import FixModal from "./FixModal.svelte";
 	import type { ValidationUnitData, TournamentData } from "./types";
-	import { getUnitData } from "./validate.remote";
+	import { addAdditionalUnit, getUnitData } from "./validate.remote";
 	import { page } from "$app/state";
 	import { submittedList } from "$lib/stores/listSubmission.svelte";
 	import { nanoid } from "nanoid";
@@ -15,6 +15,7 @@
 	import { innerWidth } from "svelte/reactivity/window";
 	import { SubmitListSchema } from "./schema/submitList";
 	import { logError } from "$lib/remote/error";
+	import { getAllUnitNamesWithCustom } from "$lib/remote/unit.remote";
 
 	let files = $state<FileList>();
 
@@ -26,10 +27,12 @@
 	let selectedEra = $state<number>(10);
 	let selectedFaction = $state<number>(5);
 	let selectedRules = $state<string>("noRes");
+	let rulesDetails = $derived(getRulesByName(selectedRules));
 	let lockSelections = $state(false);
 
 	let unitData = $state<ValidationUnitData[]>([]);
 	let unfoundUnits = $derived(unitData.filter((u) => !u.mulData).length);
+	let addedUnits = $state<ValidationUnitData[]>([]);
 	let fixedData = $state(false);
 
 	let issues = $state<{ issueList: Map<string, Set<string>> }>();
@@ -131,7 +134,7 @@
 					<p class="muted tournament-detail">Era:</p>
 					<p class="tournament-detail">{selectedTournament ? (selectedTournament.era ? await getEraName(selectedTournament.era) : "Any Era") : "-"}</p>
 					<p class="muted tournament-detail">Rules:</p>
-					<p class="tournament-detail">{selectedTournament?.tournamentRules ? getRulesByName(selectedTournament.tournamentRules)?.display : "-"}</p>
+					<p class="tournament-detail">{selectedTournament?.tournamentRules ? rulesDetails?.display : "-"}</p>
 				</div>
 			</div>
 
@@ -199,7 +202,7 @@
 									{unit.name}
 								{/if}
 							</td>
-							{#each innerWidth.current! >= 600 ? [unit.skill, unit.pv, unit.mulData?.rulesLevel, unit.mulData?.subtype, createAbilityLineString(unit.mulData?.abilities ?? []), unit.available, unit.unique] : [unit.skill] as data}
+							{#each innerWidth.current! >= 600 ? [unit.skill, unit.pv, unit.mulData?.rulesLevel, unit.mulData?.subtype, createAbilityLineString(unit.mulData?.abilities ?? []), (unit.mulData?.mulId ?? 0) < 0 ? true : unit.available, unit.unique] : [unit.skill] as data}
 								<td>{data ?? "-"}</td>
 							{/each}
 							<td>
@@ -213,6 +216,30 @@
 					{/each}
 				</tbody>
 			</table>
+			<p class="muted">If a unit wasn't detected from the pdf, or you need to add a custom unit that wasn't included in the pdf, you can do so here:</p>
+			<form
+				class="inline"
+				{...addAdditionalUnit.enhance(async ({ submit }) => {
+					issues = undefined;
+					await submit();
+					if (addAdditionalUnit.result?.status == "success") {
+						unitData.push(addAdditionalUnit.result.data!);
+						addedUnits.push(addAdditionalUnit.result.data!);
+					} else {
+						toastController.addToast(addAdditionalUnit.result?.message ?? "Invalid message recieved");
+					}
+				})}
+			>
+				<select {...addAdditionalUnit.fields.unitName.as("select")}>
+					{#each await getAllUnitNamesWithCustom(selectedRules) as unit}
+						<option value={unit.name}>{unit.name}</option>
+					{/each}
+				</select>
+				<label>Skill:<input {...addAdditionalUnit.fields.unitSkill.as("number")} value={4} min={rulesDetails?.minSkill ?? 0} max={rulesDetails?.maxSkill ?? 8} /></label>
+				<button>Add</button>
+				<input type="hidden" name="eraId" value={selectedEra} />
+				<input type="hidden" name="factionId" value={selectedFaction} />
+			</form>
 		</div>
 
 		<div class={{ section: true, "locked-section": unfoundUnits > 0 || unitData.length == 0 }}>
@@ -278,7 +305,7 @@
 				><input type="checkbox" name="permission" bind:checked={submitApproval} required disabled={issues == undefined || issues?.issueList.size > 0} /> By submitting this list, you
 				acknowledge your email address and name will be provided to the tournament organizer. Any personal data stored Terminal.tools will be removed after the tournament has completed.</label
 			>
-			<button class="submit" disabled={!selectedTournament || !submitApproval || issues == undefined || issues?.issueList.size > 0 || submitted}>Submit</button>
+			<button class="submit" disabled={!selectedTournament || !submitApproval || issues == undefined || issues?.issueList.size > 0}>Submit</button>
 			<input type="file" name="listFile" bind:files class="hidden" aria-hidden="true" />
 			<input type="hidden" name="tournamentId" value={selectedTournament?.id} />
 			<input type="hidden" name="eraId" value={selectedEra} />
@@ -286,6 +313,9 @@
 			<input type="hidden" name="fixedData" value={fixedData} />
 			{#each unitData as unit}
 				<input type="hidden" name="unit[]" value={JSON.stringify({ id: unit.mulData?.mulId, sk: unit.skill })} />
+			{/each}
+			{#each addedUnits as unit}
+				<input type="hidden" name="addedUnits[]" value={JSON.stringify({ id: unit.mulData?.mulId, sk: unit.skill })} />
 			{/each}
 		</form>
 	</div>

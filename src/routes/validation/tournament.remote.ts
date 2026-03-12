@@ -12,6 +12,7 @@ import ListApproval from "$lib/server/emails/templates/ListApproval.svelte";
 import ListSubmissionConfirmation from "$lib/server/emails/templates/ListSubmissionConfirmation.svelte";
 import { SubmitListSchema } from "./schema/submitList";
 import { env } from "$env/dynamic/private";
+import { getCustomUnitData, getMULDataFromId } from "$lib/remote/unit.remote";
 
 export const getApprovedTournamentList = query(async () => {
 	const data = await prisma.tournament.findMany({
@@ -21,7 +22,7 @@ export const getApprovedTournamentList = query(async () => {
 	return { status: "success", data };
 });
 
-export const submitList = form(SubmitListSchema, async ({ tournamentId, playerName, playerEmail, listFile, eraId, factionId, fixedData, unit }) => {
+export const submitList = form(SubmitListSchema, async ({ tournamentId, playerName, playerEmail, listFile, eraId, factionId, fixedData, unit, addedUnits }) => {
 	const tournament = await prisma.tournament.findUnique({
 		where: {
 			id: Number(tournamentId)
@@ -36,17 +37,24 @@ export const submitList = form(SubmitListSchema, async ({ tournamentId, playerNa
 		const base64String = buffer.toString("base64");
 
 		const id = nanoid();
-		console.log(id);
 		const filename = `./files/tournament-lists/${id}.pdf`;
 		await fs.writeFile(filename, buffer);
 		await prisma.tournament.update({
 			where: { id: Number(tournamentId) },
 			data: {
 				participants: {
-					create: { id, name: playerName, email: playerEmail, era, faction, fixed: fixedData == "true", units: JSON.stringify(unit) }
+					create: { id, name: playerName, email: playerEmail, era, faction, fixed: fixedData == "true", units: JSON.stringify(unit), addedUnits: JSON.stringify(addedUnits) }
 				}
 			}
 		});
+
+		const parsedAddedUnits = [];
+		for (const unit of addedUnits) {
+			const parsedUnit = JSON.parse(unit);
+			const name = parsedUnit.id > 0 ? ((await getMULDataFromId(parsedUnit.id))?.name ?? "Unknown") : ((await getCustomUnitData(parsedUnit.id))?.name ?? "Unknown");
+			const skill = parsedUnit.sk;
+			parsedAddedUnits.push({ name, skill });
+		}
 		const emailHTML = render({
 			//@ts-ignore
 			template: ListSubmission,
@@ -58,7 +66,8 @@ export const submitList = form(SubmitListSchema, async ({ tournamentId, playerNa
 				era,
 				faction,
 				tournamentRules: getRulesByName(tournament.tournamentRules)?.display ?? "Not Found",
-				fixedData
+				fixedData,
+				parsedAddedUnits
 			}
 		});
 		const info = await tournamentEmailTransporter.sendMail({
@@ -77,7 +86,8 @@ export const submitList = form(SubmitListSchema, async ({ tournamentId, playerNa
 				playerEmail,
 				era,
 				faction,
-				tournamentRules: getRulesByName(tournament.tournamentRules)?.display ?? "Not Found"
+				tournamentRules: getRulesByName(tournament.tournamentRules)?.display ?? "Not Found",
+				parsedAddedUnits
 			}
 		});
 		await tournamentEmailTransporter.sendMail({

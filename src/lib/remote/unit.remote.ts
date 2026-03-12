@@ -3,6 +3,7 @@ import * as v from "valibot";
 import { prisma } from "$lib/server/prisma";
 import type { MulUnit } from "$lib/types/listTypes";
 import { handleParse } from "$lib/utilities/abilityUtilities";
+import { getRulesByName } from "$lib/types/rulesets";
 
 export const getMULDataFromId = query.batch(v.number(), async (ids) => {
 	const mulData = await prisma.unit.findMany({ where: { mulId: { in: ids } } });
@@ -192,4 +193,11 @@ export const getResultList = query(resultListSchema, async ({ eras, eraSearchTyp
 		where: searchConditions,
 		orderBy: [{ tonnage: { sort: "asc", nulls: "last" } }, { name: "asc" }]
 	});
+});
+
+export const getAllUnitNamesWithCustom = query(v.string(), async (ruleset) => {
+	const customPacks = getRulesByName(ruleset)?.customUnitPacks ?? [];
+	const units = await prisma.unit.findMany({ orderBy: [{ tonnage: { sort: "asc", nulls: "last" } }, { name: "asc" }], select: { name: true, mulId: true } });
+	const customUnits = await prisma.customCard.findMany({ where: { pack: { in: customPacks } }, select: { name: true, mulId: true } });
+	return [...customUnits, ...units];
 });

@@ -11,8 +11,9 @@
 		faction: string;
 		tournamentRules: string;
 		fixed: boolean;
+		parsedAddedUnits: { name: string; skill: number }[];
 	};
-	const { id, tournamentName, playerName, playerEmail, era, faction, tournamentRules, fixed }: Props = $props();
+	const { id, tournamentName, playerName, playerEmail, era, faction, tournamentRules, fixed, parsedAddedUnits }: Props = $props();
 
 	const fixedStyle = { color: "#FF0000" };
 </script>
@@ -28,6 +29,13 @@
 		<Text>The attached list has passed all validation checks for {tournamentRules}</Text>
 		{#if fixed}
 			<Text style={fixedStyle}>Units were manually edited. Please Review the list carefully before approval.</Text>
+		{/if}
+		<Hr />
+		{#if parsedAddedUnits.length > 0}
+			<Text>The following units were not found in the pdf and were added manually to the list: (list was validated while including these units)</Text>
+			{#each parsedAddedUnits as unit}
+				<Text>{unit.name} - Skill {unit.skill}</Text>
+			{/each}
 		{/if}
 		<Hr />
 		<Link href={`${dev ? `https://localhost:5173` : `https://terminal.tools`}/validation/approve/${id}`}>Approve List and send response</Link>

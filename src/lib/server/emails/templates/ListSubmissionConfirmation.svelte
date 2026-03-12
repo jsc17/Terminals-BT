@@ -10,8 +10,9 @@
 		faction: string;
 		tournamentRules: string;
 		fixed: boolean;
+		parsedAddedUnits: { name: string; skill: number }[];
 	};
-	const { tournamentName, playerName, playerEmail, era, faction, tournamentRules }: Props = $props();
+	const { tournamentName, playerName, playerEmail, era, faction, tournamentRules, parsedAddedUnits }: Props = $props();
 </script>
 
 <Html>
@@ -27,5 +28,12 @@
 		<Text>Era: {era}</Text>
 		<Text>Faction: {faction}</Text>
 		<Text>The attached list has passed all validation checks for {tournamentRules}</Text>
+		<Hr />
+		{#if parsedAddedUnits.length > 0}
+			<Text>The following units were not found in the pdf and were added manually to the list: (list was validated while including these units)</Text>
+			{#each parsedAddedUnits as unit}
+				<Text>{unit.name} - Skill {unit.skill}</Text>
+			{/each}
+		{/if}
 	</Section>
 </Html>

@@ -97,3 +97,37 @@ export const fixUnitData = form(
 		}
 	}
 );
+
+export const addAdditionalUnit = form(
+	v.object({ unitName: v.string(), eraId: v.string(), factionId: v.string(), unitSkill: v.number() }),
+	async ({ unitName, eraId, factionId, unitSkill }) => {
+		const mulData = await getMULDataFromName(unitName);
+		console.log(mulData?.mulId);
+		if (mulData) {
+			const skill = Number(unitSkill);
+			const era = Number(eraId);
+			const faction = Number(factionId);
+
+			await nothing().refresh();
+			if (mulData == undefined) {
+				return { status: "failed", message: "Invalid Unit Id" };
+			} else {
+				const unique = await isUnitUnique({ unitId: mulData.id, eras: [era] });
+				const general = await getGeneralId({ era, faction });
+				const available = await isUnitAvailable({ unitId: mulData.id, eras: [era], factions: [faction, general ?? 0] });
+
+				let unitData: ValidationUnitData = {
+					id: crypto.randomUUID(),
+					name: mulData.name,
+					skill,
+					pv: getNewSkillCost(skill, mulData.pv),
+					mulData: mulData,
+					link: mulData.mulId > 0 ? `http://masterunitlist.info/Unit/Details/${mulData.mulId}` : undefined,
+					unique,
+					available
+				};
+				return { status: "success", data: unitData };
+			}
+		}
+	}
+);

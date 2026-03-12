@@ -90,7 +90,7 @@ export class ResultList {
 	resultList = $state<MulUnit[]>([]);
 	uniqueList = $state<number[]>([]);
 	customUnits = $state<MulUnit[]>([]);
-	taggedUnits = $state<string[]>([]);
+	taggedUnits = $state<{ group: string; type: string }[]>([]);
 
 	options = $state<Ruleset>();
 	filterByRules = $state(true);
@@ -101,9 +101,9 @@ export class ResultList {
 		if (this.taggedUnits.length) {
 			availableUnits = availableUnits.filter((u) => {
 				if (u.group && u.group != "") {
-					return this.taggedUnits.includes(u.group);
+					return this.taggedUnits.find((t) => t.group == u.group && t.type == u.subtype);
 				}
-				return this.taggedUnits.includes(u.class);
+				return this.taggedUnits.find((t) => t.group == u.class && t.type == u.subtype);
 			});
 		}
 		availableUnits.sort((a, b) => {

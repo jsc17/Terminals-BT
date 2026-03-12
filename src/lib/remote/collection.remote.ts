@@ -56,7 +56,6 @@ export const updateTag = form(v.object({ tagToUpdate: v.string(), newName: v.str
 });
 
 export const addTagToUnit = form(addTagToUnitSchema, async ({ unitId: units, tag: tags }) => {
-	console.log(units, tags);
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failed", message: "Invalid User" };
 
@@ -149,8 +148,8 @@ export const getUnitsWithTags = form(v.object({ tagId: v.array(v.pipe(v.string()
 
 	const units = await prisma.collectionModel.findMany({
 		where: { userId: locals.user.id, AND: tagId.map((t) => ({ unitTags: { some: { tagId: t } } })) },
-		select: { label: true }
+		select: { label: true, type: true }
 	});
 
-	return { status: "success", data: units.map((u) => u.label) };
+	return { status: "success", data: units.map((u) => ({ group: u.label, type: u.type! })) };
 });

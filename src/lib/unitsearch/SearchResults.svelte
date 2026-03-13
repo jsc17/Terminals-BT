@@ -13,7 +13,8 @@
 	import { DragDropProvider } from "@dnd-kit/svelte";
 	import { createSortable } from "@dnd-kit/svelte/sortable";
 	import { move } from "@dnd-kit/helpers";
-	import { GearIcon, SortIcon, SortAscendingIcon, SortDescendingIcon, DragIndicatorIcon } from "$lib/icons";
+	import { createDroppable } from "@dnd-kit/svelte";
+	import { GearIcon, SortIcon, SortAscendingIcon, SortDescendingIcon, DragIndicatorIcon, TrashIcon } from "$lib/icons";
 
 	type Props = {
 		list?: List;
@@ -43,12 +44,12 @@
 
 	let listHeight = $state(500);
 	let listWidth = $state(0);
+	let draggingSortTag = $state(false);
 
 	let availabilityDialogOpen = $state(false);
 	let availabilityResults = $state<{ era: string; factions: string[] }[]>([]);
 
 	function sort({ key, label }: { key: string; label: string }) {
-		console.log(key);
 		const sortKeyIndex = resultList.getSortKeyIndex(key);
 		if (sortKeyIndex != -1) {
 			if (resultList.sortKeys[sortKeyIndex].order == "asc") {
@@ -72,7 +73,20 @@
 		availabilityDialogOpen = true;
 	}
 
+	function onDragStart() {
+		draggingSortTag = true;
+	}
 	function onDragEnd(event: any) {
+		if (event.canceled) return;
+
+		draggingSortTag = false;
+		const sourceId = event.operation.source.id;
+		const targetId = event.operation.target?.id;
+
+		if (targetId == "trash") {
+			resultList.sortKeys = resultList.sortKeys.filter((e) => e.id != sourceId);
+			return;
+		}
 		resultList.sortKeys = move(resultList.sortKeys, event);
 	}
 </script>
@@ -80,7 +94,7 @@
 <div class="search-results card">
 	<div class="search-results-multisort-tags">
 		{#if resultList.sortKeys.length > 1}
-			<DragDropProvider {onDragEnd}>
+			<DragDropProvider {onDragEnd} {onDragStart}>
 				<div class="multisort-draggable-container">
 					{#each resultList.sortKeys as sortKey, index (sortKey.id)}
 						{@const sortable = createSortable({ id: sortKey.id, index })}
@@ -96,8 +110,15 @@
 						</div>
 					{/each}
 				</div>
+				{#if draggingSortTag}
+					{@const trash = createDroppable({ id: "trash" })}
+					<div class="clear-sort-droppable" {@attach trash.attach}>
+						<TrashIcon width="20" height="20" />
+					</div>
+				{:else}
+					<button onclick={() => (resultList.sortKeys = [])} class="clear-sort-button">Clear All</button>
+				{/if}
 			</DragDropProvider>
-			<button onclick={() => (resultList.sortKeys = [])} class="clear-sort-button">Clear All</button>
 		{/if}
 	</div>
 	<div class:result-list-header={!appWindow.isMobile} class:result-list-header-mobile={appWindow.isMobile}>
@@ -327,7 +348,16 @@
 		min-height: 20px;
 		height: max-content;
 		padding: 0px 8px;
-		line-height: 1;
+	}
+	.clear-sort-droppable {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 20px;
+		width: 64px;
+		background-color: palevioletred;
+		border: 1px solid red;
+		border-radius: 2px;
 	}
 	.result-list-header {
 		display: grid;

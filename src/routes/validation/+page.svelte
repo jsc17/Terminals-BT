@@ -284,7 +284,7 @@
 		<form
 			class={{ section: true, "locked-section": !selectedTournament || issues == undefined || issues?.issueList.size > 0 }}
 			enctype="multipart/form-data"
-			{...submitList.preflight(SubmitListSchema).enhance(async ({ submit }) => {
+			{...submitList.enhance(async ({ submit, data }) => {
 				if (files) {
 					toastController.addToast("Submitting list. Please Wait..");
 					submitted = true;
@@ -305,7 +305,7 @@
 				><input type="checkbox" name="permission" bind:checked={submitApproval} required disabled={issues == undefined || issues?.issueList.size > 0} /> By submitting this list, you
 				acknowledge your email address and name will be provided to the tournament organizer. Any personal data stored Terminal.tools will be removed after the tournament has completed.</label
 			>
-			<button class="submit" disabled={!selectedTournament || !submitApproval || issues == undefined || issues?.issueList.size > 0}>Submit</button>
+			<button class="submit" disabled={!selectedTournament || !submitApproval || issues == undefined || issues?.issueList.size > 0 || submitted}>Submit</button>
 			<input type="file" name="listFile" bind:files class="hidden" aria-hidden="true" />
 			<input type="hidden" name="tournamentId" value={selectedTournament?.id} />
 			<input type="hidden" name="eraId" value={selectedEra} />

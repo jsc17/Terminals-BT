@@ -9,5 +9,5 @@ export const SubmitListSchema = v.object({
 	factionId: v.string(),
 	fixedData: v.string(),
 	unit: v.array(v.string()),
-	addedUnits: v.array(v.string())
+	addedUnits: v.optional(v.array(v.string()))
 });

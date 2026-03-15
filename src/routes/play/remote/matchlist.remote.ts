@@ -172,7 +172,7 @@ export const convertLocalMatchToServer = command(ConvertMatchSchema, async (data
 	if (!locals.user) return { status: "failed", message: "User is not logged in" };
 
 	let matchName = data.name;
-	if (await prisma.match.findUnique({ where: { name: matchName } })) matchName = matchName + `(${nanoid(3)})`;
+	if (await prisma.match.findFirst({ where: { name: matchName } })) matchName = matchName + `(${nanoid(3)})`;
 
 	const nickname = await getNickname();
 	let id = stringId();

@@ -1,6 +1,6 @@
 model Match {
     id String @id 
-    name String? @unique
+    name String?
     private Boolean
     joinCode String? 
     players UsersInMatch[]

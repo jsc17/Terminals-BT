@@ -49,7 +49,7 @@ export const submitList = form(SubmitListSchema, async ({ tournamentId, playerNa
 		});
 
 		const parsedAddedUnits = [];
-		for (const unit of addedUnits) {
+		for (const unit of addedUnits ?? []) {
 			const parsedUnit = JSON.parse(unit);
 			const name = parsedUnit.id > 0 ? ((await getMULDataFromId(parsedUnit.id))?.name ?? "Unknown") : ((await getCustomUnitData(parsedUnit.id))?.name ?? "Unknown");
 			const skill = parsedUnit.sk;

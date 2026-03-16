@@ -4,6 +4,7 @@
 	import { ruleSets } from "$lib/types/rulesets";
 	import { toastController } from "$lib/stores/toastController.svelte.js";
 	import { FormCreationSchema } from "./schema.js";
+	import { goto } from "$app/navigation";
 
 	let { data } = $props();
 
@@ -28,7 +29,7 @@
 					</select>
 					<button
 						onclick={() => {
-							window.location.href = `/todashboard/${selectedTournament}`;
+							goto(`/todashboard/${selectedTournament}`);
 						}}
 						disabled={selectedTournament == undefined}>Load</button
 					>
@@ -46,7 +47,7 @@
 					console.log(createTournament.result?.status);
 					if (createTournament.result?.status == "success") {
 						toastController.addToast("Tournament created");
-						window.location.href = `/todashboard/${createTournament.result.data}`;
+						goto(`/todashboard/${createTournament.result.data}`);
 					}
 				})}
 			>

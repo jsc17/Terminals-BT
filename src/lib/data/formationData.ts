@@ -877,12 +877,11 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 				id: 44,
 				name: "Security",
 				requirements: [
-					{ type: "Notice", description: "Campaign Operations is a Classic source, but the formation works just as well in Alpha Strike with no conversions" },
 					{ type: "Role", description: "At Least 1 unit must have the Scout or Striker role", roles: ["Scout", "Striker"], amount: 1, flatAmount: true },
 					{ type: "Role", description: "At Least 1 unit must have the Sniper or Missile Boat role", roles: ["Sniper", "Missile Boat"], amount: 1, flatAmount: true },
 					{ type: "Max Size", description: "No more than 1 unit may be of Size 4 or greater" }
 				],
-				page: "Campaign Operations pg.65",
+				page: "FM:Mercs pg.91",
 				bonuses: [
 					{ type: "Unique", description: "If defending, 75% of units may be assigned either the Environmental Specialist or Terrain Master SPA's" },
 					{ type: "Unique", description: "If Attacking, 75% of units may be assigned the Speed Demon SPA" }
@@ -903,6 +902,23 @@ export const formationDataList: { type: string; formations: FormationData[] }[] 
 					{ type: "Unique", description: "'Mech or Protomech - Street Fighter SPA" },
 					{ type: "Unique", description: "Infantry - Urban Guerrilla" },
 					{ type: "Unique", description: "Vehicles - 1pt Lucky and one-time use Marksman SPA" }
+				]
+			},
+			{
+				id: 46,
+				name: "Swarm",
+				requirements: [
+					{ type: "Size", description: "No Unit may be of Size 3 or greater", size: 3, limit: "equalOrLess", amount: 1, flatAmount: false },
+					{ type: "MovementType", description: "All units must be VTOLs", movementType: "v", amount: 1, flatAmount: false }
+				],
+
+				page: "FM:Mercs pg.52",
+				bonuses: [
+					{
+						type: "FormationWide",
+						abilityType: "Unique",
+						grantedAbility: ["Coordinated Fire (FM:Mercs pg.52)"]
+					}
 				]
 			}
 		]

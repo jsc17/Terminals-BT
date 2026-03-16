@@ -71,6 +71,9 @@ export function validateFormation(formation: ListFormation, list: List) {
 					case "Movement":
 						primaryRequirements.push({ requirement: requirement.description, met: checkMovement(units, requirement.speed, amount, requirement.jumpException) });
 						break;
+					case "MovementType":
+						primaryRequirements.push({ requirement: requirement.description, met: checkMovementType(units, requirement.movementType, amount) });
+						break;
 					case "Ability":
 						primaryRequirements.push({ requirement: requirement.description, met: checkAbility(units, requirement.abilities, amount) });
 						break;
@@ -288,6 +291,18 @@ function checkMovement(units: ListUnit[], speed: number, amount: number, jumpExc
 					if (jumpException !== undefined && movement.speed >= jumpException) {
 						return true;
 					}
+				}
+			}
+		}).length >= amount
+		? 1
+		: -1;
+}
+function checkMovementType(units: ListUnit[], movementType: string, amount: number) {
+	return units.length != 0 &&
+		units.filter((unit) => {
+			for (const movement of unit.baseUnit.move ?? []) {
+				if (movement.type == movementType) {
+					return true;
 				}
 			}
 		}).length >= amount

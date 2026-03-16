@@ -46,6 +46,14 @@ type MovementRequirement = {
 	flatAmount: boolean;
 };
 
+type MovementTypeRequirement = {
+	type: "MovementType";
+	description: string;
+	movementType: "v" | "j";
+	amount: number;
+	flatAmount: boolean;
+};
+
 type AbilityRequirement = {
 	type: "Ability";
 	description: string;
@@ -82,6 +90,7 @@ export type Requirement =
 	| ArmorRequirement
 	| DamageRequirement
 	| MovementRequirement
+	| MovementTypeRequirement
 	| AbilityRequirement
 	| UnitTypeRequirement
 	| FactionRequirement

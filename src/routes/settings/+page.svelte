@@ -104,7 +104,7 @@
 				{#if !data.googleLinked}
 					<button
 						onclick={() => {
-							window.location.href = "/auth/oauth/google";
+							goto("/auth/oauth/google");
 						}}
 						class="gsi-material-button"
 					>
@@ -134,7 +134,7 @@
 				{#if !data.discordLinked}
 					<button
 						onclick={() => {
-							window.location.href = "/auth/oauth/discord";
+							goto("/auth/oauth/discord");
 						}}
 						class="gsi-material-button"
 					>

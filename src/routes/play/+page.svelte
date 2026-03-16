@@ -5,6 +5,7 @@
 	import CreateMatchModal from "./components/CreateMatchModal.svelte";
 	import { convertLocalMatchesToServerMatches } from "./utilities/localToServerConversion";
 	import { toastController } from "$lib/stores";
+	import { goto } from "$app/navigation";
 
 	let [myMatches, publicMatches] = $derived(getMatches().current ?? [[], []]);
 	let nickname = $derived(getNickname().current);
@@ -58,7 +59,7 @@
 					{...findPrivateMatch.enhance(async ({ submit }) => {
 						await submit();
 						if (findPrivateMatch.result?.status == "success") {
-							window.location.href = `/play/${findPrivateMatch.result.data!.id}`;
+							goto(`/play/${findPrivateMatch.result.data!.id}`);
 						} else {
 							toastController.addToast("No match with that id found");
 						}

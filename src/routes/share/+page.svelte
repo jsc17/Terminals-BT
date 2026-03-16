@@ -13,6 +13,7 @@
 	import PrintModal from "$lib/sharedDialogs/PrintModal.svelte";
 	import { db } from "$lib/local/dexie/db";
 	import DisplayOptionsPopover from "./DisplayOptionsPopover.svelte";
+	import { goto } from "$app/navigation";
 
 	const shareCode = page.url.searchParams.get("share");
 	const sharedListCode = $derived(shareCode ? await loadSharedList(shareCode) : undefined);
@@ -41,7 +42,7 @@
 	async function loadInListBuilder() {
 		if (sharedListCode) {
 			await db.previousLists.put(sharedListCode);
-			window.location.href = "/listbuilder";
+			goto("/listbuilder");
 		}
 	}
 </script>

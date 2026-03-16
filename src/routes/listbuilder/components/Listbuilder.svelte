@@ -120,7 +120,7 @@
 			bs: list.bsList
 		};
 		toastController.addToast("Preparing list for submission. Please wait until you are redirected.");
-		printList({ listData, printOptions: settings.print }).then((pdf) => {
+		printList({ listData, printOptions: { ...settings.print, cardStyle: "mul" } }).then((pdf) => {
 			const blob = new Blob([new Uint8Array(pdf)], { type: "application/pdf" });
 
 			submittedList.name = list.details.name;

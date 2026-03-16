@@ -3,6 +3,7 @@
 	import { getContext } from "svelte";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { Dialog } from "$lib/generic/";
+	import { goto } from "$app/navigation";
 
 	let usernameElement = $state<HTMLInputElement>();
 	let loginDisplay = $state<"login" | "register">("login");
@@ -82,7 +83,7 @@
 			<div class="separator muted">Or</div>
 			<button
 				onclick={() => {
-					window.location.href = "/auth/oauth/google";
+					goto("/auth/oauth/google");
 				}}
 				class="gsi-material-button"
 			>
@@ -106,7 +107,7 @@
 
 			<button
 				onclick={() => {
-					window.location.href = "/auth/oauth/discord";
+					goto("/auth/oauth/discord");
 				}}
 				class="gsi-material-button"
 			>
@@ -146,7 +147,7 @@
 				<div class="separator muted">Or</div>
 				<button
 					onclick={() => {
-						window.location.href = "/auth/oauth/google";
+						goto("/auth/oauth/google");
 					}}
 					class="gsi-material-button"
 				>
@@ -170,7 +171,7 @@
 
 				<button
 					onclick={() => {
-						window.location.href = "/auth/oauth/discord";
+						goto("/auth/oauth/discord");
 					}}
 					class="gsi-material-button"
 				>

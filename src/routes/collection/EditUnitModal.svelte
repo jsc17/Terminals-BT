@@ -35,7 +35,7 @@
 			<input type="hidden" name="unitId" value={unit.id} />
 		</form>
 		<form
-			{...addTagToUnit.enhance(async ({ submit, data }) => {
+			{...addTagToUnit.for(unit.id).enhance(async ({ submit, data }) => {
 				console.log(data);
 				try {
 					await submit();

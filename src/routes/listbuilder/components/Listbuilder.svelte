@@ -468,10 +468,6 @@
 		gap: 20px;
 		flex: 1;
 	}
-
-	input[type="text"] {
-		width: min(250px, 50%);
-	}
 	.errors {
 		color: var(--error);
 	}

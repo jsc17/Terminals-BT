@@ -163,9 +163,9 @@
 		<p>Getting Unit Availability</p>
 	{:then availabilityResults}
 		<div class="availability-result-container">
-			{#each availabilityResults?.entries() as [era, factionList]}
+			{#each availabilityResults as { era, factions }}
 				<p class="availability-result-era">{eraLookup.get(era)}:</p>
-				<p>{factionList.map((f) => factionLookup.get(f)).join(", ")}</p>
+				<p>{factions.map((f) => factionLookup.get(f)).join(", ")}</p>
 				<div class="availability-separator-container">
 					<Separator classes={"separator-border"} />
 				</div>

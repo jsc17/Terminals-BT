@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Popover } from "bits-ui";
+	import { Popover, type PopoverContentProps } from "bits-ui";
 	import type { Snippet } from "svelte";
 
 	type Props = {
@@ -8,14 +8,15 @@
 		children?: Snippet;
 		title?: Snippet;
 		onOpenChange?: () => void;
+		contentProps?: PopoverContentProps;
 	};
 
-	let { open = $bindable(false), trigger, children, title, onOpenChange }: Props = $props();
+	let { open = $bindable(false), trigger, children, title, onOpenChange, contentProps }: Props = $props();
 </script>
 
 <Popover.Root bind:open {onOpenChange}>
 	<Popover.Trigger class="generic-popover-trigger">{@render trigger?.()}</Popover.Trigger>
-	<Popover.Content class="generic-popover-content" interactOutsideBehavior="ignore">
+	<Popover.Content class="generic-popover-content" {...contentProps}>
 		{@render title?.()}
 		{@render children?.()}
 	</Popover.Content>

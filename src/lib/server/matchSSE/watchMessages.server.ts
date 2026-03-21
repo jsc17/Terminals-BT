@@ -29,7 +29,7 @@ export async function startWatcher(matchId: string, intervalMs = 1000) {
 			}
 		} else {
 			const lastMessage = await prisma.matchLog.findMany({ where: { matchId }, orderBy: { updated_at: "desc" }, take: 1 });
-			if (lastMessage) {
+			if (lastMessage.length > 0) {
 				const heartbeat: MatchLog = {
 					id: lastMessage[0].id,
 					type: "HEARTBEAT",

@@ -15,7 +15,6 @@ let workerInitializing = false;
 let cbMap = new Map<string, (value: any) => void>();
 
 export async function initWorker() {
-	log("initWorker");
 	if (workerInitializing) return;
 	workerInitializing = true;
 	worker = new DatabaseWorker();
@@ -44,7 +43,6 @@ export async function initWorker() {
 }
 
 async function sendMessage<T>(message: Omit<WorkerMessage, "id">) {
-	log("sending message: " + JSON.stringify(message));
 	return new Promise<T>(async (resolve) => {
 		const id = nanoid();
 		cbMap.set(id, resolve);

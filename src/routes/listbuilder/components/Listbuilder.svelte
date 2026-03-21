@@ -26,7 +26,7 @@
 	import type { SettingsOutput } from "../types/settings";
 	import { getContext } from "svelte";
 	import { goto } from "$app/navigation";
-	import PlayModal from "../../../lib/sharedDialogs/PlayModal.svelte";
+	import PlayModal from "$lib/sharedDialogs/PlayModal.svelte";
 	import { page } from "$app/state";
 	import EditListModal from "./modals/EditListModal.svelte";
 

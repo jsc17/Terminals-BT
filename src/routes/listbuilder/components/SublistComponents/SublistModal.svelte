@@ -91,8 +91,10 @@
 						{/if}
 						<fieldset>
 							<legend>Sublist unit sorting</legend>
-							<label><input type="radio" name="unitSortOrder" bind:group={settings.sublistUI.sublistSortOrder} value="pv" /> PV</label>
-							<label><input type="radio" name="unitSortOrder" bind:group={settings.sublistUI.sublistSortOrder} value="name" /> Name</label>
+							<label><input type="radio" name="unitSortOrder" bind:group={settings.sublistUI.sublistSortOrder} value="pv" /> PV (High to Low)</label>
+							<label><input type="radio" name="unitSortOrder" bind:group={settings.sublistUI.sublistSortOrder} value="pv-reverse" /> PV (Low to High)</label>
+							<label><input type="radio" name="unitSortOrder" bind:group={settings.sublistUI.sublistSortOrder} value="name" /> Name (A-Z)</label>
+							<label><input type="radio" name="unitSortOrder" bind:group={settings.sublistUI.sublistSortOrder} value="name-reverse" /> Name (Z-A)</label>
 						</fieldset>
 					</div>
 				</Popover>

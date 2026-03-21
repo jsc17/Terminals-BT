@@ -13,6 +13,7 @@
 	let formationStrings = $state<string[]>([]);
 
 	export function open(list: List, formation?: { name: string; type: string; units: string[]; secondary?: { type: string; units: string[] } }) {
+		formationStrings = [];
 		if (formation) {
 			listName = `${list.details.name} - ${formation.name}`;
 			formationStrings.push(

@@ -17,7 +17,7 @@ export type PrintOptionsOutput = v.InferOutput<typeof PrintOptionsSchema>;
 
 export const SublistOptionsSchema = v.object({
 	sublistOrientation: v.fallback(v.picklist(["vertical", "horizontal"]), "vertical"),
-	sublistSortOrder: v.fallback(v.picklist(["pv", "name"]), "pv"),
+	sublistSortOrder: v.fallback(v.picklist(["pv", "name", "pv-reverse", "name-reverse"]), "pv"),
 	sublistPrintListSettings: PrintOptionsSchema,
 	sublistPrintAllOrientation: v.fallback(v.picklist(["vertical", "horizontal", "card"]), "vertical"),
 	sublistPrintAllGroupByScenario: v.fallback(v.boolean(), false)

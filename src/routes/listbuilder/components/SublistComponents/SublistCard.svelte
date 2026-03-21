@@ -14,7 +14,7 @@
 		list: List;
 		scenarioList: string[];
 		openSublistEditModal: (id: string, newSublist: boolean) => void;
-		unitSortOrder: "name" | "pv";
+		unitSortOrder: "name" | "name-reverse" | "pv" | "pv-reverse";
 		layout: string;
 		playModal?: PlayModal;
 	};
@@ -32,10 +32,17 @@
 				return unit !== undefined;
 			})
 			.toSorted((a, b) => {
-				if (unitSortOrder == "name") {
-					return a.baseUnit.name.localeCompare(b.baseUnit.name);
-				} else {
-					return b.cost - a.cost;
+				switch (unitSortOrder) {
+					case "name":
+						return a.baseUnit.name.localeCompare(b.baseUnit.name);
+					case "name-reverse":
+						return b.baseUnit.name.localeCompare(a.baseUnit.name);
+					case "pv":
+						return b.cost - a.cost;
+					case "pv-reverse":
+						return a.cost - b.cost;
+					default:
+						return 0;
 				}
 			});
 	});
@@ -93,7 +100,7 @@
 					playModal?.open(list, {
 						name: `${sublist.scenario != "-" ? `${sublist.scenario} ` : ""}Sublist`,
 						type: "none",
-						units: sublist.checked
+						units: sortedUnits.map((unit) => unit.id)
 					});
 				} else {
 					toastController.addToast("Cannot play an empty sublist");

@@ -83,7 +83,6 @@
 		if (observer && node) observer.observe(node);
 		return () => observer?.unobserve(node);
 	};
-	$inspect(matchLists);
 </script>
 
 <svelte:head>

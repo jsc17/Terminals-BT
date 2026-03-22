@@ -297,6 +297,8 @@
 			<div class="availability-separator-container">
 				<Separator classes={"separator-border"} />
 			</div>
+		{:else}
+			<p style="grid-column: span 2;">Unit is not available in any Era to any Faction</p>
 		{/each}
 	</div>
 </Dialog>

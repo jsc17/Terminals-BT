@@ -9,7 +9,6 @@
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
 	import { getSPAfromId } from "$lib/utilities/listUtilities";
 	import type { MenuItem } from "$lib/generic/types";
-	import { getSingleUnitAvailability } from "$lib/remote/unit.remote";
 	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
 	import { DotsSixVertical, List as ListButton } from "phosphor-svelte";
 	import { getUnitAvailabilityLocal } from "$lib/local/sqllite/local-db";
@@ -170,6 +169,8 @@
 				<div class="availability-separator-container">
 					<Separator classes={"separator-border"} />
 				</div>
+			{:else}
+				<p style="grid-column: span 2;">Unit is not available in any Era to any Faction</p>
 			{/each}
 		</div>
 	{/await}

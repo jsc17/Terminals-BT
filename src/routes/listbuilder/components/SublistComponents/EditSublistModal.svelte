@@ -16,6 +16,14 @@
 		}, 0);
 	});
 
+	let count = $derived.by(() => {
+		return sublist?.checked.reduce((total, unitId) => {
+			const unit = list.getUnit(unitId);
+			if (unit?.baseUnit.mulId && unit?.baseUnit?.mulId > 0) return total + 1;
+			return total;
+		}, 0);
+	});
+
 	function cancelSublist() {
 		let existingSublist = list.getSublist(sublist!.id);
 		if (existingSublist && existingSublist.checked.length == 0) {
@@ -68,7 +76,7 @@
 				{/each}
 			</div>
 			<div class="edit-sublist-stats">
-				<p><span class="muted">Units:</span> {`${sublist.checked.length}${list.options?.sublistMaxUnits ? `/${list.options.sublistMaxUnits}` : ""}`}</p>
+				<p><span class="muted">Units:</span> {`${count}${list.options?.sublistMaxUnits ? `/${list.options.sublistMaxUnits}` : ""}`}</p>
 				<p><span class="muted">PV:</span> {`${pv}${list.options?.sublistMaxPv ? `/${list.options.sublistMaxPv}` : ""}`}</p>
 			</div>
 			<div class="edit-sublist-buttons">

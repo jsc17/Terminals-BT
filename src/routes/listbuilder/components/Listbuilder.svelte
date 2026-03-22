@@ -215,7 +215,7 @@
 			</div>
 		</div>
 	</div>
-	{#if list.unitCount == 0 && list.formations.length == 1}
+	{#if list.units.length == 0 && list.formations.length == 1}
 		<div class="info">
 			<p class="muted">Check the <a href="/changelog" target="_blank">changelog</a> for a list of recent changes</p>
 			<p class="muted">

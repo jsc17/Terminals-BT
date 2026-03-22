@@ -87,6 +87,7 @@ type SublistStats = {
 	medium: number;
 	long: number;
 	size: number;
+	count: number;
 };
 
 type ListCodeUnit = {

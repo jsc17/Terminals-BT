@@ -61,7 +61,8 @@
 			short = 0,
 			medium = 0,
 			long = 0,
-			size = 0;
+			size = 0,
+			count = 0;
 		for (const unitId of sublist.checked) {
 			const unit = list.getUnit(unitId);
 			pv += unit?.cost ?? 0;
@@ -70,8 +71,9 @@
 			short += unit?.baseUnit.damageS ?? 0;
 			long += unit?.baseUnit.damageL ?? 0;
 			size += unit?.baseUnit.size ?? 0;
+			if (unit?.baseUnit.mulId && unit?.baseUnit?.mulId > 0) count++;
 		}
-		return { pv, health, short, medium, long, size };
+		return { pv, health, short, medium, long, size, count };
 	});
 
 	let sublistMaxPv = $derived(getRulesByName(list.rules)?.sublistMaxPv);
@@ -141,7 +143,7 @@
 			{#if layout == "mobile"}
 				<div class="mobile-sublist-stats">
 					<p><span class="muted">PV:</span> {`${stats.pv ?? 0}`}{sublistMaxPv ? `/${sublistMaxPv}` : ""}</p>
-					<p><span class="muted">Units:</span> {`${sublist.checked?.length ?? 0}`}{sublistMaxUnits ? `/${sublistMaxUnits}` : ""}</p>
+					<p><span class="muted">Units:</span> {`${stats.count ?? 0}`}{sublistMaxUnits ? `/${sublistMaxUnits}` : ""}</p>
 				</div>
 			{/if}
 			<div>
@@ -174,8 +176,8 @@
 					{`${stats.pv ?? 0}`}{sublistMaxPv ? `/${sublistMaxPv}` : ``}
 				</p>
 				<p class="muted">Units:</p>
-				<p class:error={sublistMaxUnits && sublist.checked?.length > sublistMaxUnits}>
-					{`${sublist.checked?.length ?? 0}`}{sublistMaxUnits ? `/${sublistMaxUnits}` : ``}
+				<p class:error={sublistMaxUnits && stats.count > sublistMaxUnits}>
+					{`${stats.count ?? 0}`}{sublistMaxUnits ? `/${sublistMaxUnits}` : ``}
 				</p>
 				<p class="muted">Total Health:</p>
 				<p>{stats.health ?? 0}</p>

@@ -33,7 +33,7 @@
 
 	function clearDamageSorts() {
 		const damageKeys = ["damageS", "damageM", "damageL", "damageTotal", "overheat"];
-		resultList.sortKeys = resultList.sortKeys.filter((k) => damageKeys.includes(k.id));
+		resultList.sortKeys = resultList.sortKeys.filter((k) => !damageKeys.includes(k.id));
 	}
 
 	let damageSIndex = $derived(resultList.sortKeys.findIndex((sort) => sort.id == "damageS"));

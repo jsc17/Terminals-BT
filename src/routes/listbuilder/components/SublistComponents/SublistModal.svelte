@@ -7,9 +7,12 @@
 	import SublistCard from "./SublistCard.svelte";
 	import EditSublistModal from "./EditSublistModal.svelte";
 	import AutogenerationModal from "./AutogenerationModal.svelte";
-	import { Dialog, Popover } from "$lib/generic";
+	import { Dialog, Popover, DropdownMenu } from "$lib/generic";
 	import type { SettingsOutput } from "../../types/settings";
-	import PlayModal from "../../../../lib/sharedDialogs/PlayModal.svelte";
+	import PlayModal from "$lib/sharedDialogs/PlayModal.svelte";
+	import type { MenuItem } from "$lib/generic/types";
+	import { GearIcon, MenuIcon } from "$lib/icons";
+	import * as v from "valibot";
 
 	type Props = {
 		list: List;
@@ -41,6 +44,60 @@
 		currentSublist = $state.snapshot(list.getSublist(id));
 		sublistEditModalOpen = true;
 	}
+
+	let menuItems: MenuItem[] = [
+		{
+			type: "item",
+			label: "Add Sublist",
+			onSelect: () => {
+				const idAdded = list.addSublist();
+				openSublistEditModal(idAdded);
+			}
+		},
+		{
+			type: "item",
+			label: "Print All Sublists",
+			onSelect: () => {
+				sublistPrintModalOpen = true;
+			}
+		},
+		{
+			type: "item",
+			label: "Automatically Generate Sublists",
+			onSelect: () => {
+				sublistAutoModalOpen = true;
+			}
+		}
+	];
+
+	const settingsMenuItems: MenuItem[] = [
+		{
+			type: "radio",
+			groupLabel: "Display",
+			radios: [
+				{ label: "Vertical", value: "vertical" },
+				{ label: "Horizontal", value: "horizontal" }
+			],
+			value: settings.sublistUI.sublistOrientation,
+			onValueChange: (value) => {
+				settings.sublistUI.sublistOrientation = v.parse(v.fallback(v.picklist(["vertical", "horizontal"]), "vertical"), value);
+			}
+		},
+		{
+			type: "radio",
+			groupLabel: "Sublist unit sorting",
+			radios: [
+				{ label: "PV (High to Low)", value: "pv" },
+				{ label: "PV (Low to High)", value: "pv-reverse" },
+				{ label: "Name (A-Z)", value: "name" },
+				{ label: "Name (Z-A)", value: "name-reverse" }
+			],
+			value: settings.sublistUI.sublistSortOrder,
+			onValueChange: (value) => {
+				settings.sublistUI.sublistSortOrder = v.parse(v.fallback(v.picklist(["pv", "pv-reverse", "name", "name-reverse"]), "pv"), value);
+			}
+		}
+	];
 </script>
 
 {#snippet sublists()}
@@ -65,7 +122,7 @@
 
 <Dialog title="Sublists" triggerClasses="transparent-button" bind:open>
 	{#snippet description()}
-		<div class="space-between">
+		<div class="space-between" style="gap: 32px">
 			<div>
 				<label for="scenarioFilter">Scenario:</label>
 				<select id="scenarioFilter" bind:value={scenarioFilter}>
@@ -75,48 +132,20 @@
 				</select>
 			</div>
 			<div class="sublist-menus">
-				<Popover>
+				<DropdownMenu items={settingsMenuItems}>
 					{#snippet trigger()}
-						<div class="sublist-modal-menu-button">
-							<img src="/icons/settings.svg" alt="settings menu" />
+						<div class="sublist-menu-button">
+							<GearIcon width="15" height="15" />
 						</div>
 					{/snippet}
-					<div class="sublist-modal-menu-body">
-						{#if !appWindow.isMobile}
-							<fieldset>
-								<legend>Display</legend>
-								<label><input type="radio" name="layout" bind:group={settings.sublistUI.sublistOrientation} value="vertical" /> Vertical</label>
-								<label><input type="radio" name="layout" bind:group={settings.sublistUI.sublistOrientation} value="horizontal" /> Horizontal</label>
-							</fieldset>
-						{/if}
-						<fieldset>
-							<legend>Sublist unit sorting</legend>
-							<label><input type="radio" name="unitSortOrder" bind:group={settings.sublistUI.sublistSortOrder} value="pv" /> PV (High to Low)</label>
-							<label><input type="radio" name="unitSortOrder" bind:group={settings.sublistUI.sublistSortOrder} value="pv-reverse" /> PV (Low to High)</label>
-							<label><input type="radio" name="unitSortOrder" bind:group={settings.sublistUI.sublistSortOrder} value="name" /> Name (A-Z)</label>
-							<label><input type="radio" name="unitSortOrder" bind:group={settings.sublistUI.sublistSortOrder} value="name-reverse" /> Name (Z-A)</label>
-						</fieldset>
-					</div>
-				</Popover>
-				<Popover>
+				</DropdownMenu>
+				<DropdownMenu items={menuItems}>
 					{#snippet trigger()}
-						<div class="sublist-modal-menu-button">
-							<img src="/icons/menu.svg" alt="sublist menu" />
+						<div class="sublist-menu-button">
+							<MenuIcon width="15" height="15" />
 						</div>
 					{/snippet}
-					<div class="sublist-modal-menu-body">
-						<button
-							class="transparent-button"
-							onclick={() => {
-								const idAdded = list.addSublist();
-								openSublistEditModal(idAdded);
-							}}
-							>Add Sublist
-						</button>
-						<button class="transparent-button" onclick={() => (sublistPrintModalOpen = true)}>Print All Sublists</button>
-						<button class="transparent-button" onclick={() => (sublistAutoModalOpen = true)}>Automatically Generate Sublists</button>
-					</div>
-				</Popover>
+				</DropdownMenu>
 			</div>
 		</div>
 	{/snippet}
@@ -181,21 +210,11 @@
 		gap: 4px;
 		align-items: center;
 	}
-	.sublist-modal-menu-button {
-		background-color: var(--primary);
-		border-radius: var(--radius);
-		padding: 0px 16px;
-
-		& img {
-			height: 20px;
-			width: 20px;
-		}
-	}
-	.sublist-modal-menu-body {
+	.sublist-menu-button {
 		display: flex;
-		flex-direction: column;
-		padding: 16px;
-		gap: 8px;
+		align-items: center;
+		justify-content: center;
+		padding: 0px 12px;
 	}
 	.add-panel {
 		flex-shrink: 0;
@@ -216,16 +235,5 @@
 		width: 100%;
 		flex-shrink: 0;
 		min-height: 100px;
-	}
-	fieldset {
-		border: 2px solid var(--border);
-		display: flex;
-		flex-direction: column;
-	}
-	legend {
-		color: var(--surface-color-light-text-color);
-	}
-	fieldset label {
-		color: var(--surface-color-light-text-color);
 	}
 </style>

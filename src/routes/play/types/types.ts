@@ -37,7 +37,7 @@ type PlayFormation = {
 };
 
 type PlayList = {
-	id: string;
+	id: number;
 	name: string;
 	owner: number;
 	team: number;

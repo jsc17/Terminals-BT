@@ -73,10 +73,17 @@ export function processMessage(
 				handleUnitUpdate(u.data.id, matchUnits);
 			});
 			break;
-		case "REMOVE_PLAYER":
-			playerList = playerList.filter((p) => p.id != Number(update.details));
+		case "REMOVE_PLAYER": {
+			const index = playerList.findIndex((p) => p.id == Number(update.details));
+			if (index !== -1) playerList.splice(index, 1);
 			getMyData(update.matchId).refresh();
 			break;
+		}
+		case "REMOVE_LIST": {
+			const index = matchLists.findIndex((l) => l.id == Number(update.details));
+			if (index !== -1) matchLists.splice(index, 1);
+			break;
+		}
 		case "MATCH_END":
 			getMatchDetails(update.matchId).refresh();
 			break;
@@ -146,7 +153,7 @@ export async function initializePlayerList(
 			});
 		});
 	}
-	const newPlaylist: PlayList = { id: nanoid(10).replaceAll("-", "*"), name: list.name, owner: list.player.id, team: list.teamId, formations: playerFormationList };
+	const newPlaylist: PlayList = { id: list.id, name: list.name, owner: list.player.id, team: list.teamId, formations: playerFormationList };
 	return newPlaylist;
 }
 

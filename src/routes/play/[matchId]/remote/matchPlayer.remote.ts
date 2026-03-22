@@ -72,12 +72,12 @@ export const loadList = form(
 		const match = await prisma.match.findUnique({ where: { id: matchId } });
 		if (!match) throw invalid(issue.matchId("Invalid Match Id"));
 
-		const list = await prisma.listV3.findUnique({ where: { userId: locals.user.id, id: listId }, select: { units: true, formations: true } });
+		const list = await prisma.listV3.findUnique({ where: { userId: locals.user.id, id: listId }, select: { units: true, name: true, formations: true } });
 		if (list == null) throw invalid(issue.listId("List could not be loaded. Please try again"));
 
 		const newList = await prisma.matchList.create({
 			data: {
-				name: listName,
+				name: listName.length > 0 ? listName : list.name,
 				team: { connect: { id: teamId } },
 				player: { connect: { match_player: { matchId, playerId: locals.user.id } } }
 			},

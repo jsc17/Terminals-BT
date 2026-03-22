@@ -5,5 +5,6 @@ import SortDescendingIcon from "$lib/icons/sort-descending.svg?component";
 import DragIndicatorIcon from "$lib/icons/drag-indicator.svg?component";
 import TrashIcon from "$lib/icons/trash.svg?component";
 import InformationIcon from "$lib/icons/information.svg?component";
+import MenuIcon from "$lib/icons/menu.svg?component";
 
-export { GearIcon, SortIcon, SortAscendingIcon, SortDescendingIcon, DragIndicatorIcon, TrashIcon, InformationIcon };
+export { GearIcon, SortIcon, SortAscendingIcon, SortDescendingIcon, DragIndicatorIcon, TrashIcon, InformationIcon, MenuIcon };

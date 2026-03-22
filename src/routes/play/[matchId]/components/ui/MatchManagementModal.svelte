@@ -3,17 +3,16 @@
 	import type { Match, MatchTeam } from "$lib/generated/prisma/browser";
 	import { UpdateMatchSchema } from "../../../schema/matchlistSchema";
 	import type { PlayList } from "../../../types/types";
-	import { kickPlayer, updateMatchData } from "../../remote/matchManagement.remote";
+	import { kickPlayer, updateMatchData, removeList } from "../../remote/matchManagement.remote";
 
 	type Props = {
 		open: boolean;
 		matchData?: Match;
 		teamData: MatchTeam[];
-		matchPlayers: { id: number; team?: number; nickname: string; role: string }[];
 		matchLists: PlayList[];
 	};
 
-	let { open = $bindable(), matchData, teamData, matchPlayers: playerList, matchLists }: Props = $props();
+	let { open = $bindable(), matchData, teamData, matchLists }: Props = $props();
 
 	$effect(() => {
 		if (open && matchData) {
@@ -28,10 +27,6 @@
 			});
 		}
 	});
-
-	function removePlayer(player: { id: number; team?: number; nickname: string; list?: PlayList }) {
-		if (confirm(`Remove player ${player.nickname} from the game?`)) kickPlayer({ matchId: matchData!.id, playerId: player.id });
-	}
 </script>
 
 <Dialog title="Join Match" bind:open>
@@ -67,24 +62,16 @@
 	<table>
 		<thead>
 			<tr>
-				<th>Player</th>
+				<th>List</th>
 				<th>Team</th>
-				<th>Lists</th>
 			</tr>
 		</thead>
 		<tbody>
-			{#each playerList as player}
+			{#each matchLists as list}
 				<tr>
-					<td>{player.nickname}</td>
-					<td>{player.team ? teamData.find((t) => t.id == player.team)?.name : "Neutral"}</td>
-					<td>
-						{#each matchLists.filter((l) => l.owner == player.id) as list}
-							<p>{list.name} ({teamData.find((t) => t.id == list.team)?.name})</p>
-						{/each}
-					</td>
-					<td>
-						<button class="transparent-button" onclick={() => removePlayer(player)}>Remove</button>
-					</td>
+					<td>{list.name} {list.id}</td>
+					<td>{teamData.find((t) => t.id == list.team)?.name}</td>
+					<td><button class="transparent-button" onclick={() => removeList({ matchId: matchData!.id, listId: Number(list.id) })}>Remove</button></td>
 				</tr>
 			{/each}
 		</tbody>

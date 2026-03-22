@@ -5,9 +5,9 @@
 	import { dragHandle } from "svelte-dnd-action";
 	import ExportSublistModal from "./ExportSublistModal.svelte";
 	import type { MenuItem } from "$lib/generic/types";
-	import { DotsSixVertical, List as MenuIcon } from "phosphor-svelte";
-	import PlayModal from "../../../../lib/sharedDialogs/PlayModal.svelte";
+	import PlayModal from "$lib/sharedDialogs/PlayModal.svelte";
 	import { toastController } from "$lib/stores";
+	import { DragIndicatorIcon, MenuIcon } from "$lib/icons";
 
 	type Props = {
 		sublist: Sublist;
@@ -127,7 +127,7 @@
 <div class="sublist-container" class:sublist-container-mobile={layout == "mobile"}>
 	{#if layout == "mobile"}
 		<div class="mobile-sublist-drag-handle" use:dragHandle>
-			<DotsSixVertical color="var(--text-color)" size="25" />
+			<DragIndicatorIcon fill="var(--text-color)" />
 		</div>
 	{/if}
 
@@ -148,7 +148,7 @@
 				<DropdownMenu items={dropdownOptions}>
 					{#snippet trigger()}
 						<div class="sublist-menu-button">
-							<MenuIcon fill="var(--button-text)" size="16"></MenuIcon>
+							<MenuIcon width="15" height="15" />
 						</div>
 					{/snippet}
 				</DropdownMenu>
@@ -218,8 +218,9 @@
 		align-items: center;
 	}
 	.sublist-menu-button {
-		background-color: var(--primary);
-		border-radius: var(--radius);
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		padding: 0px 12px;
 	}
 	.sublist-body {

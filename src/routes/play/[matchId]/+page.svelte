@@ -56,7 +56,7 @@
 	const componentsOpen = $state({ join: false, addList: false, management: false, matchLog: false, matchResults: false, matchOverAlert: false, endRound: false });
 
 	let listContainer = $state<HTMLDivElement>();
-	let activeList = $state<string>();
+	let activeList = $state<number>();
 	let observer = $state<IntersectionObserver>();
 
 	onMount(() => {
@@ -67,7 +67,7 @@
 			(entries) => {
 				for (const entry of entries) {
 					if (entry.isIntersecting) {
-						activeList = entry.target.id.split("-")[1];
+						activeList = Number(entry.target.id.split("-")[1]);
 					}
 				}
 			},
@@ -83,6 +83,7 @@
 		if (observer && node) observer.observe(node);
 		return () => observer?.unobserve(node);
 	};
+	$inspect(matchLists);
 </script>
 
 <svelte:head>
@@ -142,12 +143,12 @@
 						<PlayFormations {formation} {matchUnits} options={options.current} />
 					{/each}
 				</div>
-				{#if activeList?.length && list.id != activeList}
+				{#if activeList && list.id != activeList}
 					<a href={`#list-${list.id}`} class="list-scroll-overlay" aria-label="scroll list"></a>
 				{/if}
 			</div>
 		{:else}
-			<p class="center">No Lists have been loaded yet</p>
+			<p class="center" style="width: 100%;">No Lists have been loaded yet</p>
 		{/each}
 	</div>
 
@@ -163,7 +164,7 @@
 />
 
 <LoadListModal bind:open={componentsOpen.addList} matchId={matchData?.id.toString() ?? ""} teams={teamData.map((t) => ({ id: t.id, name: t.name }))} />
-<MatchManagementModal bind:open={componentsOpen.management} {matchData} {teamData} {matchPlayers} {matchLists} />
+<MatchManagementModal bind:open={componentsOpen.management} {matchData} {teamData} {matchLists} />
 <EndRoundModal matchData={matchData!} teams={teamData} bind:open={componentsOpen.endRound} />
 <MatchResults bind:open={componentsOpen.matchResults} {teamData} {matchData} {matchLists} {matchUnits} />
 

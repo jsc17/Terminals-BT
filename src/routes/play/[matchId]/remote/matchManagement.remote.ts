@@ -116,6 +116,20 @@ export const kickPlayer = command(v.object({ matchId: v.string(), playerId: v.nu
 	}
 });
 
+export const removeList = command(v.object({ matchId: v.string(), listId: v.number() }), async ({ matchId, listId }) => {
+	const { locals } = getRequestEvent();
+	if (!locals.user) return { status: "failure", message: "User is not logged in" };
+
+	const matchData = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { playerRole: "HOST" } } } });
+	if (matchData != null && matchData.players[0].playerId == locals.user.id) {
+		await prisma.matchList.delete({ where: { id: listId } });
+		await prisma.match.update({
+			where: { id: matchId },
+			data: { logEntries: { create: { round: matchData.currentRound, type: "REMOVE_LIST", details: listId, submitter: { connect: { id: matchData.players[0].id } } } } }
+		});
+	}
+});
+
 export const resetMatch = command(v.string(), async (matchId) => {
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };

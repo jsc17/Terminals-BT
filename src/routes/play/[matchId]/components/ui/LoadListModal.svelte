@@ -21,6 +21,9 @@
 			}
 		}
 	);
+
+	let selectedListId = $derived(lists.data?.[0]?.id ?? 0);
+	let selectedListName = $derived(lists.data?.find((l) => l.id == selectedListId)?.name ?? undefined);
 </script>
 
 <Dialog title="Load List" bind:open>
@@ -33,10 +36,10 @@
 		})}
 	>
 		<input {...loadList.fields.matchId.as("hidden", matchId)} />
-		<label>List Name <input {...loadList.fields.listName.as("text")} /></label>
+		<label>List Name <input {...loadList.fields.listName.as("text")} placeholder={selectedListName} /></label>
 		<label
 			>List
-			<select {...loadList.fields.listId.as("select")}>
+			<select {...loadList.fields.listId.as("select")} bind:value={selectedListId}>
 				{#each lists.data as list}
 					<option value={list.id}>{list.name}</option>
 				{/each}
@@ -61,5 +64,8 @@
 		flex-direction: column;
 		gap: 8px;
 		align-items: start;
+	}
+	.no-custom-name {
+		color: var(--text-muted);
 	}
 </style>

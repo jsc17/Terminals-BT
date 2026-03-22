@@ -69,7 +69,7 @@
 		<tbody>
 			{#each matchLists as list}
 				<tr>
-					<td>{list.name} {list.id}</td>
+					<td>{list.name}</td>
 					<td>{teamData.find((t) => t.id == list.team)?.name}</td>
 					<td><button class="transparent-button" onclick={() => removeList({ matchId: matchData!.id, listId: Number(list.id) })}>Remove</button></td>
 				</tr>

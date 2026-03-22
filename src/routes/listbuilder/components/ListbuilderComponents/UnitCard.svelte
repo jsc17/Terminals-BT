@@ -12,6 +12,7 @@
 	import { getSingleUnitAvailability } from "$lib/remote/unit.remote";
 	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
 	import { DotsSixVertical, List as ListButton } from "phosphor-svelte";
+	import { getUnitAvailabilityLocal } from "$lib/local/sqllite/local-db";
 
 	type Props = {
 		unit: { id: string; bonus?: { ind: number; abil: number }[] };
@@ -159,7 +160,7 @@
 </div>
 
 <Dialog title="Unit Availability" bind:open={availabilityOpen}>
-	{#await getSingleUnitAvailability(unitDetails?.baseUnit.mulId ?? 0)}
+	{#await getUnitAvailabilityLocal(unitDetails?.baseUnit.id ?? 0)}
 		<p>Getting Unit Availability</p>
 	{:then availabilityResults}
 		<div class="availability-result-container">

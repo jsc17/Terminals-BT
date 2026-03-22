@@ -26,24 +26,13 @@
 	let showFilters = $state<boolean>(true);
 	let showUnitFilters = $state<boolean>(!appWindow.isMobile);
 
-	let options = $state({
+	let options = $derived({
 		autoMaxPV: list.options?.sublistMaxPv ?? 0,
 		autoMinPV: list.options?.sublistMaxPv ? list.options.sublistMaxPv - 10 : 0,
 		autoMaxUnits: list.options?.sublistMaxUnits ?? 0,
 		autoMinUnits: 0,
-		autoMinUnitCost: list.options?.unitMinPV ?? 0
+		autoMinUnitCost: 0
 	});
-
-	watch(
-		() => list.options,
-		() => {
-			options.autoMaxPV = list.options?.sublistMaxPv ?? 0;
-			options.autoMinPV = list.options?.sublistMaxPv ? list.options.sublistMaxPv - 10 : 0;
-			options.autoMaxUnits = list.options?.sublistMaxUnits ?? 0;
-			options.autoMinUnits = 0;
-			options.autoMinUnitCost = list.options?.unitMinPV ?? 0;
-		}
-	);
 
 	let filteredUnits = $state<{ id: string; name: string; included: string }[]>([]);
 
@@ -90,7 +79,10 @@
 								id: newId,
 								unitString: subsetString,
 								sublist: { id: newId, scenario: "-", checked },
-								count: subset.length,
+								count: subset.filter((unit: any) => {
+									const listUnit = list.getUnit(unit.id);
+									return listUnit?.baseUnit.mulId && listUnit?.baseUnit.mulId > 0;
+								}).length,
 								pv
 							});
 

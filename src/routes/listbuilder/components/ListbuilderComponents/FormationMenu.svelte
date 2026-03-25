@@ -41,9 +41,7 @@
 
 	const dropdownItems = $derived.by(() => {
 		const items: MenuItem[] = [];
-		if (formation.id != "unassigned") {
-			items.push({ type: "item", label: "Edit Formation", onSelect: () => (editModalOpen = true) });
-		}
+		if (formation.id != "unassigned") items.push({ type: "item", label: "Edit Formation", onSelect: () => (editModalOpen = true) });
 		items.push({ type: "item", label: "Check Formation Availability", onSelect: availabilityModal.show });
 		items.push({ type: "separator", classes: "muted" });
 		items.push({
@@ -60,7 +58,7 @@
 		items.push({ type: "item", label: "Export Formation", onSelect: exportFormationToJeff });
 		items.push({ type: "separator", classes: "muted" });
 		items.push({ type: "item", label: "Clear Formation", onSelect: clearFormation });
-		items.push({ type: "item", label: "Remove Formation", onSelect: removeFormation });
+		if (formation.id != "unassigned") items.push({ type: "item", label: "Remove Formation", onSelect: removeFormation });
 
 		return items;
 	});

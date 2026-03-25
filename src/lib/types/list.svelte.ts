@@ -293,6 +293,8 @@ export class List {
 			}
 			formationIDs.add(formation.id);
 		});
+		if (this.formations.find((f) => f.id == "unassigned") == undefined) this.formations.push({ id: "unassigned", name: "Unassigned units", type: "none", units: [] });
+
 		this.units.forEach((listUnit) => {
 			let assigned = false;
 			this.formations.forEach((formation) => {

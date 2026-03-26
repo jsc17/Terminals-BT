@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Popover } from "$lib/generic";
 	import type { Notification } from "$lib/generic/types";
-	import { Bell } from "phosphor-svelte";
+	import { BellIcon } from "$lib/icons";
 
 	type Props = {
 		notifications: Notification[];
@@ -46,7 +46,7 @@
 <Popover {onOpenChange} bind:open>
 	{#snippet trigger()}
 		<div class={{ "notification-trigger": true, "notification-shake": unreadCount }}>
-			<Bell />
+			<BellIcon fill="var(--primary)" height={25} width={25} />
 			{#if unreadCount}
 				<div class="notification-unread"></div>
 			{/if}

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Select, type WithoutChildren } from "bits-ui";
-	import { CaretUpDown, CaretUp, CaretDown, Check } from "phosphor-svelte";
+	import { CaretUpDownIcon, CaretUpIcon, CaretDownIcon, CheckIcon } from "$lib/icons";
 
 	type Item = {
 		value: string;
@@ -88,19 +88,19 @@ from the perspective of the consumer of this component, it will be typed appropr
 	<Select.Trigger>
 		<div class="select-trigger">
 			<p class="select-trigger-text">{valueString}</p>
-			<CaretUpDown color="var(--text-color)" size="15" />
+			<CaretUpDownIcon fill="var(--text-color)" width="15" height="15" />
 		</div>
 	</Select.Trigger>
 	<Select.Portal>
 		<Select.Content {...contentProps}>
-			<Select.ScrollUpButton><CaretUp size="15" color="var(--text-color)" /></Select.ScrollUpButton>
+			<Select.ScrollUpButton><CaretUpIcon fill="var(--text-color)" width="15" height="15" /></Select.ScrollUpButton>
 			<Select.Viewport>
 				{#each items ?? [] as { value, label, disabled, subitems } (value)}
 					<Select.Item {value} {label} {disabled}>
 						{#snippet children({ selected })}
 							<div class="select-item">
 								{#if selected}
-									<Check size="15" color="var(--text-color)" />
+									<CheckIcon fill="var(--text-color)" width="15" height="15" />
 								{:else}
 									<div></div>
 								{/if}
@@ -113,7 +113,7 @@ from the perspective of the consumer of this component, it will be typed appropr
 							{#snippet children({ selected })}
 								<div class="select-subitem">
 									{#if selected}
-										<Check size="15" color="var(--text-color)" />
+										<CheckIcon fill="var(--text-color)" width="15" height="15" />
 									{:else}
 										<div></div>
 									{/if}
@@ -133,7 +133,7 @@ from the perspective of the consumer of this component, it will be typed appropr
 								{#snippet children({ selected })}
 									<div class="select-item">
 										{#if selected}
-											<Check size="15" color="var(--text-color)" />
+											<CheckIcon fill="var(--text-color)" width="15" height="15" />
 										{:else}
 											<div></div>
 										{/if}
@@ -146,7 +146,7 @@ from the perspective of the consumer of this component, it will be typed appropr
 									{#snippet children({ selected })}
 										<div class="select-subitem">
 											{#if selected}
-												<Check size="15" color="var(--text-color)" />
+												<CheckIcon fill="var(--text-color)" width="15" height="15" />
 											{:else}
 												<div></div>
 											{/if}
@@ -159,7 +159,7 @@ from the perspective of the consumer of this component, it will be typed appropr
 					</Select.Group>
 				{/each}
 			</Select.Viewport>
-			<Select.ScrollDownButton><CaretDown size="15" color="var(--text-color)" /></Select.ScrollDownButton>
+			<Select.ScrollDownButton><CaretDownIcon fill="var(--text-color)" width="15" height="15" /></Select.ScrollDownButton>
 		</Select.Content>
 	</Select.Portal>
 </Select.Root>

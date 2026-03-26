@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { Dialog, Select, Switch } from "$lib/generic";
 	import type { ResultList } from "$lib/types/resultList.svelte";
-	import { X } from "phosphor-svelte";
 	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup.js";
 	import { getGeneralList } from "$lib/utilities/genericBattletechUtilities";
 	import { SvelteMap, SvelteSet } from "svelte/reactivity";
 	import type { List } from "$lib/types/list.svelte";
 	import { getErasAndFactionsLocal } from "$lib/local/sqllite/local-db";
 	import { onMount } from "svelte";
+	import { CloseIcon } from "$lib/icons";
 
 	type Props = {
 		list?: List;
@@ -153,7 +153,7 @@
 								changed = true;
 							}}
 						>
-							<X size="15" />
+							<CloseIcon fill="var(--primary)" width="20" height="20" />
 						</button>
 						<p>{eraLookup.get(era)}</p>
 					</div>
@@ -222,7 +222,7 @@
 								changed = true;
 							}}
 						>
-							<X size="15" />
+							<CloseIcon fill="var(--primary)" width="20" height="20" />
 						</button>
 						<p>{factionLookup.get(faction)}</p>
 					</div>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Dialog, type WithoutChildren } from "bits-ui";
 	import { type Snippet } from "svelte";
-	import { X } from "phosphor-svelte";
+	import { CloseIcon } from "$lib/icons";
 
 	type Props = Dialog.RootProps & {
 		title: string;
@@ -29,8 +29,10 @@
 				<Dialog.Close
 					onclick={(event) => {
 						if (cancelClose && cancelClose()) event.preventDefault();
-					}}><X /></Dialog.Close
+					}}
 				>
+					<CloseIcon fill="var(--primary)" width="25" height="25" />
+				</Dialog.Close>
 			</Dialog.Title>
 			{#if description}
 				<Dialog.Description>{@render description()}</Dialog.Description>
@@ -75,6 +77,7 @@
 	:global([data-dialog-close]) {
 		background-color: transparent;
 		box-shadow: none;
+		padding: 0;
 	}
 
 	:global([data-dialog-description], .dialog-children-wrapper) {

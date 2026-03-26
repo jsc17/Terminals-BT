@@ -10,8 +10,8 @@
 	import { getSPAfromId } from "$lib/utilities/listUtilities";
 	import type { MenuItem } from "$lib/generic/types";
 	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
-	import { DotsSixVertical, List as ListButton } from "phosphor-svelte";
 	import { getUnitAvailabilityLocal } from "$lib/local/sqllite/local-db";
+	import { DragIndicatorIcon, MenuIcon } from "$lib/icons";
 
 	type Props = {
 		unit: { id: string; bonus?: { ind: number; abil: number }[] };
@@ -67,7 +67,7 @@
 <div class="unit-card">
 	{#if appWindow.isNarrow}
 		<div class="drag-handles" use:dragHandle>
-			<DotsSixVertical color="var(--text-color)" size="25" />
+			<DragIndicatorIcon fill="var(--text-color)" width="25" height="25" />
 		</div>
 	{/if}
 	<div class="unit-row-container">
@@ -82,7 +82,7 @@
 			<DropdownMenu items={unitMenuItems}>
 				{#snippet trigger()}
 					<div class="unit-menu-trigger">
-						<ListButton color="black" size="15" />
+						<MenuIcon fill="var(--button-text-color)" width="20" height="20" />
 					</div>
 				{/snippet}
 			</DropdownMenu>
@@ -275,7 +275,6 @@
 		justify-content: center;
 		height: 100%;
 		width: 100%;
-		padding: 0px 16px;
 		border-radius: var(--radius);
 	}
 	.muted-text-color {

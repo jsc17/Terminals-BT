@@ -4,7 +4,7 @@
 	import { type ActionResult } from "@sveltejs/kit";
 	import { goto } from "$app/navigation";
 	import { getContext } from "svelte";
-	import { DiscordLogo } from "phosphor-svelte";
+	import { DiscordLogoIcon } from "$lib/icons";
 
 	const { data } = $props();
 	let allowDelete = $state(false);
@@ -141,7 +141,7 @@
 						<div class="gsi-material-button-state"></div>
 						<div class="gsi-material-button-content-wrapper">
 							<div class="gsi-material-button-icon">
-								<DiscordLogo />
+								<DiscordLogoIcon fill="var(--text-color)" width="24" height="24" />
 							</div>
 							<span class="gsi-material-button-contents">Sign in with Discord</span>
 							<span style="display: none;">Sign in with Discord</span>

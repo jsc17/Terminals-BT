@@ -7,7 +7,7 @@
 	import { loadExistingListsFromLocalStorage } from "$lib/utilities/listImport";
 	import { toastController } from "$lib/stores";
 	import { db } from "$lib/local/dexie/db";
-	import { FilePlus } from "phosphor-svelte";
+	import { AddNotesIcon } from "$lib/icons";
 
 	let activeLists = $state<List[]>([]);
 	let selectedList = $state<string>("");
@@ -131,7 +131,7 @@
 				</ContextMenu.Portal>
 			</ContextMenu.Root>
 		{/each}
-		<button class="listbuilder-tabs-add-button" onclick={handleAddListButton}><FilePlus /></button>
+		<button class="listbuilder-tabs-add-button" onclick={handleAddListButton}><AddNotesIcon fill="var(--primary)" width="20" height="20" /></button>
 	</Tabs.List>
 	{#each activeLists as list, index}
 		<Tabs.Content value={index.toString()} class="listbuilder-tabs-content">

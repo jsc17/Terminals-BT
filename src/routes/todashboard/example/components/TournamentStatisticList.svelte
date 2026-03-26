@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Popover } from "$lib/generic";
-	import Trophy from "phosphor-svelte/lib/Trophy";
+	import { TrophyIcon } from "$lib/icons";
 
 	type Props = {
 		title: string;
@@ -28,11 +28,11 @@
 		{#each data.slice(0, placeLimit) as row, index}
 			<div class="list-row">
 				{#if index == 0}
-					<Trophy color="gold" weight="fill" />
+					<TrophyIcon fill="gold" width="20" height="20" />
 				{:else if index == 1}
-					<Trophy color="silver" weight="fill" />
+					<TrophyIcon fill="silver" width="20" height="20" />
 				{:else if index == 2}
-					<Trophy color="#cd7f32" weight="fill" />
+					<TrophyIcon fill="#cd7f32" width="20" height="20" />
 				{:else}
 					<p>{index + 1}th</p>
 				{/if}

@@ -89,9 +89,6 @@ importers:
       pdfmake:
         specifier: ^0.2.20
         version: 0.2.20
-      phosphor-svelte:
-        specifier: ^3.1.0
-        version: 3.1.0(svelte@5.53.5)(vite@7.3.0(@types/node@22.19.3)(jiti@2.6.1))
       playwright:
         specifier: ^1.57.0
         version: 1.57.0
@@ -1976,9 +1973,6 @@ packages:
   estree-walker@2.0.2:
     resolution: {integrity: sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==}
 
-  estree-walker@3.0.3:
-    resolution: {integrity: sha512-7RUKfXgSMMkzt6ZuXmqapOurLGPPfgj6l9uRZ7lRGolvk0y2yocc35LdcxKC5PQZdn2DMqioAQ2NoWcrTKmm6g==}
-
   esutils@2.0.3:
     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
     engines: {node: '>=0.10.0'}
@@ -2509,15 +2503,6 @@ packages:
 
   perfect-debounce@1.0.0:
     resolution: {integrity: sha512-xCy9V055GLEqoFaHoC1SoLIaLmWctgCUaBaWxDZ7/Zx4CTyX7cJQLJOok/orfjZAh9kEYpjJa4d0KcJmCbctZA==}
-
-  phosphor-svelte@3.1.0:
-    resolution: {integrity: sha512-nldtxx+XCgNREvrb7O5xgDsefytXpSkPTx8Rnu3f2qQCUZLDV1rLxYSd2Jcwckuo9lZB1qKMqGR17P4UDC0PrA==}
-    peerDependencies:
-      svelte: ^5.0.0 || ^5.0.0-next.96
-      vite: '>=5'
-    peerDependenciesMeta:
-      vite:
-        optional: true
 
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
@@ -5185,10 +5170,6 @@ snapshots:
 
   estree-walker@2.0.2: {}
 
-  estree-walker@3.0.3:
-    dependencies:
-      '@types/estree': 1.0.8
-
   esutils@2.0.3: {}
 
   exsolve@1.0.8: {}
@@ -5676,14 +5657,6 @@ snapshots:
   peberminta@0.9.0: {}
 
   perfect-debounce@1.0.0: {}
-
-  phosphor-svelte@3.1.0(svelte@5.53.5)(vite@7.3.0(@types/node@22.19.3)(jiti@2.6.1)):
-    dependencies:
-      estree-walker: 3.0.3
-      magic-string: 0.30.21
-      svelte: 5.53.5
-    optionalDependencies:
-      vite: 7.3.0(@types/node@22.19.3)(jiti@2.6.1)
 
   picocolors@1.1.1: {}
 

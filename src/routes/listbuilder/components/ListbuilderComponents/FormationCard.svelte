@@ -7,7 +7,7 @@
 	import { UnitCard, UnitCustomizationModal, EditFormationModal, FormationInfoPopover, FormationMenu, FindUnitAvailabilityModal } from "../";
 	import { validateFormation } from "$lib/utilities/formationRequirementValidation.svelte";
 	import PlayModal from "$lib/sharedDialogs/PlayModal.svelte";
-	import { DotsSixVertical } from "phosphor-svelte";
+	import { DragIndicatorIcon } from "$lib/icons";
 
 	type Props = { formation: ListFormation; draggingColumns: boolean; unitCustomizationModal?: UnitCustomizationModal; list: List; playModal?: PlayModal };
 
@@ -35,7 +35,7 @@
 		<div class="formation-header">
 			{#if appWindow.isNarrow}
 				<div class="drag-handles" use:dragHandle>
-					<DotsSixVertical color="var(--text-color)" size="25" />
+					<DragIndicatorIcon fill="var(--text-color)" width="25" height="25" />
 				</div>
 			{/if}
 			<div class="formation-header-details">

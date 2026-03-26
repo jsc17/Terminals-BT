@@ -2,7 +2,7 @@
 	import type { Snippet } from "svelte";
 	import { DropdownMenu, type WithChild } from "bits-ui";
 	import type { MenuItem } from "$lib/generic/types";
-	import Check from "phosphor-svelte/lib/Check";
+	import { CheckIcon } from "$lib/icons";
 
 	type Props = {
 		items: MenuItem[];
@@ -45,7 +45,7 @@
 		>
 			<div class={{ checkbox: true, center: true, "checkbox-checked": item.checked }}>
 				{#if item.checked}
-					<Check color="dark green" />
+					<CheckIcon fill="var(--primary)" />
 				{/if}
 			</div>
 			{item.label}

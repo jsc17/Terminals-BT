@@ -10,8 +10,8 @@
 	import type { Notification } from "$lib/generic/types";
 	import { SvelteMap } from "svelte/reactivity";
 	import { toggleMode, mode, setTheme } from "mode-watcher";
-	import { ListIcon, GearSixIcon, XIcon, SunIcon, MoonIcon } from "phosphor-svelte";
 	import { Switch } from "$lib/generic";
+	import { MenuIcon, GearIcon, CloseIcon, SunIcon, MoonIcon } from "$lib/icons";
 
 	type Props = {
 		notifications: Notification[];
@@ -90,11 +90,13 @@
 
 <header>
 	<button bind:this={openNavButton} class="link-button no-hover" onclick={openNav} aria-label="Open navigation sidebar" aria-expanded="false" aria-controls="navbar">
-		<ListIcon />
+		<MenuIcon fill="var(--primary)" height={25} width={25} />
 		{pageList.get(basePath)}
 	</button>
 	<nav bind:this={navbar} id="navbar">
-		<button class="link-button close-menu-button no-hover" onclick={closeNav} aria-label="Close navigation sidebar"><XIcon /></button>
+		<button class="link-button close-menu-button no-hover" onclick={closeNav} aria-label="Close navigation sidebar"
+			><CloseIcon fill="var(--primary)" height={25} width={25} /></button
+		>
 		<ul>
 			<li><a href="/" aria-current={basePath === "/"} onclick={closeNav}>Home</a></li>
 			<li><a href="/about" aria-current={basePath === "/"} onclick={closeNav}>About</a></li>
@@ -129,10 +131,12 @@
 			>
 		{/if}
 		<button class="link-button no-hover" onclick={openUserMenu}>
-			<GearSixIcon weight="fill" />
+			<GearIcon fill="var(--primary)" height={25} width={25} />
 		</button>
 		<menu bind:this={userMenu} id="usermenu">
-			<button class="link-button close-user-button no-hover" onclick={closeUserMenu} aria-label="Close user menu sidebar"><XIcon /></button>
+			<button class="link-button close-user-button no-hover" onclick={closeUserMenu} aria-label="Close user menu sidebar"
+				><CloseIcon fill="var(--primary)" height={25} width={25} /></button
+			>
 			<ul>
 				{#if user.username}
 					<li><a href="/settings" onclick={closeUserMenu}>User Settings</a></li>
@@ -148,10 +152,10 @@
 						}}
 					>
 						{#snippet leftValue()}
-							<MoonIcon color={mode.current == "dark" ? "gold" : "var(--text-color)"} weight={mode.current == "dark" ? "fill" : "regular"} />
+							<MoonIcon fill={mode.current == "dark" ? "gold" : "var(--text-color)"} height={25} width={25} />
 						{/snippet}
 						{#snippet rightValue()}
-							<SunIcon color={mode.current == "light" ? "gold" : "var(--text-color)"} weight={mode.current == "light" ? "fill" : "regular"} />
+							<SunIcon fill={mode.current == "light" ? "gold" : "var(--text-color)"} height={25} width={25} />
 						{/snippet}
 					</Switch>
 				</li>

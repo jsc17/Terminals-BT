@@ -8,7 +8,6 @@
 	import { Footer, Header, Toast } from "$lib/ui";
 	import { type Notification } from "$lib/generic/types.js";
 	import { ModeWatcher } from "mode-watcher";
-	import { IconContext } from "phosphor-svelte";
 	import { innerWidth } from "svelte/reactivity/window";
 	import { PersistedState } from "runed";
 	import { SettingsSchema, type SettingsOutput } from "./listbuilder/types/settings.js";
@@ -63,15 +62,13 @@
 
 <Toast></Toast>
 <ModeWatcher defaultTheme="green" />
-<IconContext values={{ size: 25, color: `var(--primary)` }}>
-	<div class="main">
-		<Header {notifications} />
-		<div class="child-wrapper">{@render children()}</div>
-		{#if innerWidth.current && innerWidth.current >= 1000}
-			<Footer />
-		{/if}
-	</div>
-</IconContext>
+<div class="main">
+	<Header {notifications} />
+	<div class="child-wrapper">{@render children()}</div>
+	{#if innerWidth.current && innerWidth.current >= 1000}
+		<Footer />
+	{/if}
+</div>
 
 <style>
 	.main {

@@ -17,7 +17,6 @@ const vehicleCrits = [
 	{ id: 1, range: "3", label: "Crew Stunned", value: "crewstunned" },
 	{ id: 2, range: "4-5", label: "Fire Control", value: "firecontrol" },
 	{ id: 3, range: "6-8", label: "No Critical", value: "none" },
-	{ id: 4, range: "7", label: "MP", value: "mp" },
 	{ id: 5, range: "9-10", label: "Weapon", value: "weapon" },
 	{ id: 6, range: "11", label: "Crew Killed", value: "destroyed" },
 	{ id: 7, range: "12", label: "Engine", value: "engine" }

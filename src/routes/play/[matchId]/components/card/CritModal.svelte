@@ -2,7 +2,7 @@
 	import { Dialog, Switch } from "$lib/generic";
 	import type { MulUnit } from "$lib/types/listTypes";
 	import type { PlayUnitData } from "../../../types/types";
-	import { criticalLists } from "../../utilities/criticalList";
+	import { criticalLists, motiveModifiers } from "../../utilities/criticalList";
 	import { Tabs } from "bits-ui";
 	import { takeCritical, removeCritical } from "../../remote/matchUnitUpdates.remote";
 	import { getContext } from "svelte";
@@ -43,6 +43,12 @@
 </script>
 
 <Dialog bind:open title={`Critical Hit ${reference.name}`}>
+	{#snippet description()}
+		{#if reference.move?.some((m) => motiveModifiers.has(m.type))}
+			{@const motive = reference.move.find((m) => motiveModifiers.has(m.type))}
+			<p class="warning">Add +{motiveModifiers.get(motive!.type)} to the motive roll for movement type "{motive!.type}"</p>
+		{/if}
+	{/snippet}
 	<div class="crit-dialog">
 		<Tabs.Root value="add">
 			<Tabs.List class="matchUnitTabs">

@@ -38,6 +38,13 @@ const protoCrits = [
 	{ id: 7, range: "10", label: "Unit Destroyed", value: "destroyed" },
 	{ id: 8, range: "11-12", label: "Weapon", value: "weapon" }
 ];
+
+export const motiveModifiers = new Map<string, number>([
+	["w", 1],
+	["h", 1],
+	["v", 2],
+	["g", 2]
+]);
 const aeroCrits = [
 	{ id: 0, range: "2", label: "Fuel Hit", value: "destroyed" },
 	{ id: 1, range: "3", label: "Fire Control", value: "firecontrol" },

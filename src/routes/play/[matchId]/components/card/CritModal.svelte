@@ -43,12 +43,6 @@
 </script>
 
 <Dialog bind:open title={`Critical Hit ${reference.name}`}>
-	{#snippet description()}
-		{#if reference.move?.some((m) => motiveModifiers.has(m.type))}
-			{@const motive = reference.move.find((m) => motiveModifiers.has(m.type))}
-			<p class="warning">Add +{motiveModifiers.get(motive!.type)} to the motive roll for movement type "{motive!.type}"</p>
-		{/if}
-	{/snippet}
 	<div class="crit-dialog">
 		<Tabs.Root value="add">
 			<Tabs.List class="matchUnitTabs">
@@ -69,7 +63,12 @@
 					{:else}
 						<p>Unknown unit type, you shouldn't have been able to get here.</p>
 					{/if}
+
 					{#if criticalLists.get(reference.subtype)?.motive}
+						{#if reference.move?.some((m) => motiveModifiers.has(m.type))}
+							{@const motive = reference.move.find((m) => motiveModifiers.has(m.type))}
+							<p class="warning">Add +{motiveModifiers.get(motive!.type)} to the motive roll for movement type "{motive!.type}"</p>
+						{/if}
 						<fieldset class="crit-button-list">
 							<legend>Motive Hits</legend>
 							{#each criticalLists.get(reference.subtype)?.motive as motive, index}

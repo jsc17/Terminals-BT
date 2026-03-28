@@ -168,7 +168,7 @@
 					{/if}
 				</div>
 			{/if}
-			{#if printDuplicateMarkings && numberingType != "none" && numbering != -1}
+			{#if printDuplicateMarkings && numberingType != "none" && numbering != -1 && numbering != undefined}
 				<p class={{ numbering: true, "numbering-roman": numberingType == "roman" }}>{createMarking()}</p>
 			{/if}
 		</div>

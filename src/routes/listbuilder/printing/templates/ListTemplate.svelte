@@ -297,7 +297,7 @@
 								image={unitImages?.get(mulData!.imageLink ?? "") ?? ""}
 								formationSPAs={[]}
 								measurementUnits={printOptions.measurementUnits}
-								numbering={counts.has(unit!.mulId) ? counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) : undefined}
+								numbering={counts.has(unit!.mulId) ? counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) : -1}
 								numberingType={printOptions.printDuplicateMarkingsType}
 								printDuplicateMarkings={printOptions.printDuplicateMarkings}
 							/>

@@ -24,13 +24,13 @@ export const printList = query(
 
 		const totalCounts = Map.groupBy(listData.units, (u) => u.mulId);
 		const counts = new Map<number, string[]>();
-
 		for (const unit of listData.units) {
 			if ((totalCounts.get(unit.mulId)?.length ?? 0) > 1) {
 				if (!counts.has(unit.mulId)) counts.set(unit.mulId, []);
 				counts.get(unit.mulId)?.push(unit.id);
 			}
 		}
+		console.log(counts);
 
 		const ammoReferenceList = (
 			await Promise.allSettled(

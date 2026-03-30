@@ -40,6 +40,7 @@
 	background-color: transparent;
 	color: var(--button-dark-text-color);
 	box-shadow: none;
+	padding: 0;
 }
 .generic-popover-trigger:hover {
 	cursor: pointer;

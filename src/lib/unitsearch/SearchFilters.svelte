@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { type Filter } from "$lib/types/filter";
 	import { ResultList } from "$lib/types/resultList.svelte";
-	import { Select } from "$lib/generic";
+	import { Select, Popover } from "$lib/generic";
 	import { getTags, getUnitsWithTags } from "$lib/remote/collection.remote";
 	import { getContext } from "svelte";
 	import { toastController } from "$lib/stores";
 	import { watch } from "runed";
 	import { nanoid } from "nanoid";
+	import { InformationIcon } from "$lib/icons";
 
 	type Props = {
 		resultList: ResultList;
@@ -65,6 +66,37 @@
 		{#each filterList as filter}
 			<div class="filter">
 				<label for={filter.name}>{filter.label}</label>
+				{#if filter.name == "date"}
+					<Popover>
+						{#snippet trigger()}
+							<InformationIcon fill="var(--surface-color-light-text-color)" width="15" height="15" />
+						{/snippet}
+						<div class="era-dates-popover">
+							<p>Star League</p>
+							<p class="muted">2571-2780</p>
+							<p>Early Succession War</p>
+							<p class="muted">2781-2900</p>
+							<p>Late Succession War</p>
+							<p class="muted">2901-3019</p>
+							<p>Late Succession War - Renaissance</p>
+							<p class="muted">3020-3049</p>
+							<p>Clan Invasion</p>
+							<p class="muted">3050-3061</p>
+							<p>Civil War</p>
+							<p class="muted">3062-3067</p>
+							<p>Jihad</p>
+							<p class="muted">3068-3080</p>
+							<p>Early Republic</p>
+							<p class="muted">3081-3100</p>
+							<p>Late Republic</p>
+							<p class="muted">3101-3130</p>
+							<p>Dark Age</p>
+							<p class="muted">3131-3150</p>
+							<p>ilClan</p>
+							<p class="muted">3151-Present</p>
+						</div>
+					</Popover>
+				{/if}
 				{#if filter.type == "string"}
 					<input id={filter.name} type="text" bind:value={filter.value} placeholder={filter.label} />
 				{:else if filter.type == "number"}
@@ -309,5 +341,17 @@
 	.collection-link {
 		font-size: 0.85em;
 		height: max-content;
+	}
+	.era-dates-popover {
+		display: grid;
+		grid-template-columns: max-content max-content;
+		gap: 8px;
+		padding: 8px;
+	}
+	.era-dates-popover p {
+		font-size: 0.85em;
+	}
+	.era-dates-popover p:nth-child(odd) {
+		text-align: right;
 	}
 </style>

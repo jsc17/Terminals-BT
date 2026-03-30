@@ -8,6 +8,8 @@
 	import { toastController } from "$lib/stores";
 	import { db } from "$lib/local/dexie/db";
 	import { AddNotesIcon } from "$lib/icons";
+	import NewListDialog from "./components/modals/NewListDialog.svelte";
+	import { getNewListDialogContext, setNewListDialogContext } from "./utilities/context";
 
 	let activeLists = $state<List[]>([]);
 	let selectedList = $state<string>("");
@@ -34,6 +36,9 @@
 	);
 
 	let { data } = $props();
+	let newListDialog = $state<NewListDialog>();
+
+	setNewListDialogContext({ open: (tab) => newListDialog?.openDialog(tab) });
 
 	onMount(async () => {
 		activeLists = await loadExistingListsFromLocalStorage();
@@ -62,15 +67,6 @@
 		}
 		selectedList = (activeLists.length - 1).toString();
 	});
-
-	function handleAddListButton() {
-		if (activeLists.length < 5) {
-			activeLists.push(new List());
-			selectedList = (activeLists.length - 1).toString();
-		} else {
-			toastController.addToast("For performance reasons, active lists tabs have been limited to 5. Please save and close a list to open a new one.");
-		}
-	}
 	function listCloseCallback(id: string) {
 		const list = activeLists.find((list) => list.id == id);
 		if (list && (!list?.units.length || confirm("Are you sure you wish to close this list? Any unsaved changes will be lost."))) {
@@ -131,7 +127,7 @@
 				</ContextMenu.Portal>
 			</ContextMenu.Root>
 		{/each}
-		<button class="listbuilder-tabs-add-button" onclick={handleAddListButton}><AddNotesIcon fill="var(--primary)" width="20" height="20" /></button>
+		<button class="listbuilder-tabs-add-button" onclick={() => newListDialog?.openDialog("new")}><AddNotesIcon fill="var(--primary)" width="20" height="20" /></button>
 	</Tabs.List>
 	{#each activeLists as list, index}
 		<Tabs.Content value={index.toString()} class="listbuilder-tabs-content">
@@ -139,6 +135,8 @@
 		</Tabs.Content>
 	{/each}
 </Tabs.Root>
+
+<NewListDialog bind:this={newListDialog} {activeLists} bind:activeListTab={selectedList} />
 
 <style>
 	:global(.listbuilder-tabs-root) {

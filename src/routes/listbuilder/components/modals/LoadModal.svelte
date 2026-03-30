@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { getContext } from "svelte";
-	import { deserialize } from "$app/forms";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { List, type ListCode } from "$lib/types/list.svelte";
 	import { getListCodeFromString } from "$lib/utilities/listImport";

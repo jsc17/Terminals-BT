@@ -13,6 +13,8 @@
 	};
 
 	let { open = $bindable(false), children, title, description, contentProps, trigger, triggerClasses, onOpenChange, cancelClose, ...restProps }: Props = $props();
+
+	let contentHeight = $state<number>();
 </script>
 
 <Dialog.Root bind:open {...restProps} {onOpenChange}>
@@ -37,7 +39,9 @@
 			{#if description}
 				<Dialog.Description>{@render description()}</Dialog.Description>
 			{/if}
-			<div class="dialog-children-wrapper">{@render children?.()}</div>
+			<div class="height-wrapper" style="height: {contentHeight}px;">
+				<div class="dialog-children-wrapper" bind:offsetHeight={contentHeight}>{@render children?.()}</div>
+			</div>
 		</Dialog.Content>
 	</Dialog.Portal>
 </Dialog.Root>
@@ -73,6 +77,7 @@
 		justify-content: space-between;
 		border-bottom: 1px solid var(--border);
 		padding: 16px;
+		border-radius: var(--radius) var(--radius) 0 0;
 	}
 	:global([data-dialog-close]) {
 		background-color: transparent;
@@ -88,6 +93,13 @@
 		width: fit-content;
 	}
 
+	.height-wrapper {
+		transition:
+			height 0.3s ease-in-out,
+			width 0.3s ease-in-out;
+		overflow: auto;
+		scrollbar-gutter: stable;
+	}
 	.dialog-children-wrapper {
 		display: flex;
 		flex-direction: column;

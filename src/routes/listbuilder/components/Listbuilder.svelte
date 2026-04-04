@@ -29,6 +29,7 @@
 	import PlayModal from "$lib/sharedDialogs/PlayModal.svelte";
 	import { page } from "$app/state";
 	import EditListModal from "./modals/EditListModal.svelte";
+	import { MenuIcon } from "$lib/icons";
 
 	type Props = {
 		listCloseCallback: (id: string) => void;
@@ -135,85 +136,55 @@
 
 <div class="card listbuilder">
 	<div class="list-header">
-		<div class="list-info">
+		<div class="list-details">
 			<p>{list.details.name}</p>
-			<p><span class="muted">Rules:</span> {getRulesByName(list.rules ?? "noRes")?.display}</p>
-		</div>
-		<div class="list-info">
-			<p class="muted" style="font-size: 0.8em;">List renaming and rules selection is now in the list dropdown menu</p>
-		</div>
-		<div class="list-info">
-			<div class="list-stats">
-				{#if list.options?.maxPv}
-					<p class:errors={list.pv > list.options.maxPv}>PV: {list.pv}/{list.options.maxPv}</p>
-				{:else}
-					<p>PV: {list.pv}</p>
-				{/if}
-
-				{#if list.options?.maxUnits}
-					<p class:errors={list.unitCount > list.options.maxUnits}>Units: {list.unitCount}/{list.options.maxUnits}</p>
-				{:else}
-					<p>Units: {list.unitCount}</p>
-				{/if}
-				<ListInfoPopover bind:list />
-			</div>
-			{#await list.issues then issues}
-				{#if issues.issueList.size}
-					<Dialog title="List Rules Issues" triggerClasses="transparent-button">
-						{#snippet trigger()}
-							<div class="center"><img src="/icons/alert-outline.svg" alt="Error" class="error-icon" /> <span class="primary">Show issues</span></div>
-						{/snippet}
-						{#snippet description()}
-							{#if issues.issueMessage}
-								<p class="muted">{issues.issueMessage}</p>
-							{/if}
-						{/snippet}
-						<div class="error-dialog-body">
-							{#each issues.issueList as [issue, units]}
-								<div class="errors align-right">{issue}:</div>
-								<div>{Array.from(units).join(", ")}</div>
-							{/each}
-						</div>
-					</Dialog>
-				{/if}
-			{/await}
-			<div class="list-buttons">
-				<DropdownMenu
-					items={[
-						{ type: "item", label: "Add Formation", onSelect: () => list.addFormation() },
-						{ type: "item", label: "Add Special Command Ability", onSelect: () => (scaModalOpen = true) },
-						{ type: "item", label: "Add Battlefield Support", onSelect: () => battlefieldSupportModal?.show() }
-					]}
-				>
-					{#snippet trigger()}
-						<div class="dropdown-menu-wrapper"><img src="/icons/add.svg" alt="Add Menu Button" /></div>
-					{/snippet}
-				</DropdownMenu>
-
-				<DropdownMenu
-					items={[
-						{ type: "item", label: "Edit List", onSelect: () => (editModalOpen = true) },
-						{ type: "item", label: "Load / Import List", onSelect: () => loadModal?.show() },
-						{ type: "item", label: "Save / Export List", onSelect: () => saveModal?.show() },
-						{ type: "item", label: "Print List", onSelect: () => (printModalOpen = true) },
-						{ type: "item", label: "Share List Link", onSelect: () => shareList() },
-						{ type: "separator" },
-						{ type: "item", label: "Check List Availability", onSelect: () => availabilityModal?.show() },
-						{ type: "item", label: "Generate Sublists", onSelect: () => (sublistModalOpen = true) },
-						{ type: "item", label: "Play List", onSelect: () => playModal?.open(list) },
-						{ type: "item", label: "Submit List to Tournament", onSelect: () => submitList() },
-						{ type: "separator" },
-						{ type: "item", label: "Clear Units/Formations", onSelect: () => clearList() },
-						{ type: "item", label: "Reset List", onSelect: () => resetList() },
-						{ type: "item", label: "Close List", onSelect: () => listCloseCallback(list.id) }
-					]}
-				>
-					{#snippet trigger()}
-						<div class="dropdown-menu-wrapper"><img src="/icons/menu.svg" alt="Menu Button" /></div>
-					{/snippet}
-				</DropdownMenu>
+			<div class="flex-between">
+				<p class="list-info"><span class="muted">Rules:</span> {getRulesByName(list.rules ?? "noRes")?.display}</p>
+				{#await list.issues then issues}
+					{#if issues.issueList.size}
+						<Dialog title="List Rules Issues" triggerClasses="transparent-button">
+							{#snippet trigger()}
+								<div class="center"><img src="/icons/alert-outline.svg" alt="Error" class="error-icon" /> <span class="primary">Show issues</span></div>
+							{/snippet}
+							{#snippet description()}
+								{#if issues.issueMessage}
+									<p class="muted">{issues.issueMessage}</p>
+								{/if}
+							{/snippet}
+							<div class="error-dialog-body">
+								{#each issues.issueList as [issue, units]}
+									<div class="errors align-right">{issue}:</div>
+									<div>{Array.from(units).join(", ")}</div>
+								{/each}
+							</div>
+						</Dialog>
+					{/if}
+				{/await}
 			</div>
 		</div>
+		<ListInfoPopover bind:list />
+		<DropdownMenu
+			items={[
+				{ type: "item", label: "Edit List", onSelect: () => (editModalOpen = true) },
+				{ type: "item", label: "Load / Import List", onSelect: () => loadModal?.show() },
+				{ type: "item", label: "Save / Export List", onSelect: () => saveModal?.show() },
+				{ type: "item", label: "Print List", onSelect: () => (printModalOpen = true) },
+				{ type: "item", label: "Share List Link", onSelect: () => shareList() },
+				{ type: "separator" },
+				{ type: "item", label: "Check List Availability", onSelect: () => availabilityModal?.show() },
+				{ type: "item", label: "Generate Sublists", onSelect: () => (sublistModalOpen = true) },
+				{ type: "item", label: "Play List", onSelect: () => playModal?.open(list) },
+				{ type: "item", label: "Submit List to Tournament", onSelect: () => submitList() },
+				{ type: "separator" },
+				{ type: "item", label: "Clear Units/Formations", onSelect: () => clearList() },
+				{ type: "item", label: "Reset List", onSelect: () => resetList() },
+				{ type: "item", label: "Close List", onSelect: () => listCloseCallback(list.id) }
+			]}
+		>
+			{#snippet trigger()}
+				<MenuIcon fill="var(--button-text-color)" height="15" width="15" />
+			{/snippet}
+		</DropdownMenu>
 	</div>
 	{#if list.units.length == 0 && list.formations.length == 1}
 		<div class="info">
@@ -379,11 +350,20 @@
 		flex-direction: column;
 	}
 	.list-header {
+		display: grid;
+		grid-template-columns: 1fr max-content max-content;
+		border-bottom: 1px solid var(--border);
+		gap: 32px;
+		align-items: center;
+		padding: 0px 8px 4px 8px;
+	}
+	.list-details {
 		display: flex;
 		flex-direction: column;
-		border-bottom: 1px solid var(--border);
-		padding-bottom: 4px;
 		gap: 2px;
+	}
+	.list-info {
+		font-size: 0.8em;
 	}
 	.list-scas {
 		display: flex;
@@ -441,26 +421,7 @@
 		overflow: auto;
 		scrollbar-gutter: stable;
 	}
-	.list-info {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		height: max-content;
-	}
-	.list-buttons {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		grid-template-rows: 80%;
-		gap: 8px;
-		align-items: center;
-	}
-	.list-stats {
-		display: flex;
-		gap: 4px;
-		p {
-			margin-left: 4px;
-		}
-	}
+
 	.info {
 		padding: 16px;
 		display: flex;
@@ -486,14 +447,5 @@
 	}
 	:global(.drop-target-zone) {
 		outline: solid green;
-	}
-	.dropdown-menu-wrapper {
-		width: max-content;
-		padding: 0px 8px;
-
-		& img {
-			width: 20px;
-			height: 20px;
-		}
 	}
 </style>

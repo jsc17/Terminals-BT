@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Popover, Separator } from "$lib/generic";
+	import { InformationIcon } from "$lib/icons";
 	import type { List } from "$lib/types/list.svelte";
 
 	type Props = {
@@ -11,7 +12,19 @@
 
 <Popover>
 	{#snippet trigger()}
-		<img class="info-button-icon" src="/icons/information.svg" alt="information" />
+		<div class="list-info-trigger">
+			<div class="trigger-details">
+				<p class="list-info" class:errors={list.options?.maxUnits && list.unitCount > list.options.maxUnits}>
+					<span class="muted">Units:</span>
+					{list.unitCount}{list.options?.maxUnits ? `/${list.options.maxUnits}` : ""}
+				</p>
+				<p class="list-info" class:errors={list.options?.maxPv && list.pv > list.options.maxPv}>
+					<span class="muted">PV:</span>
+					{list.pv}{list.options?.maxPv ? `/${list.options.maxPv}` : ""}
+				</p>
+			</div>
+			<InformationIcon fill="var(--surface-color-light-text-color)" height="15" width="15" />
+		</div>
 	{/snippet}
 
 	<div class="list-info-content">
@@ -40,6 +53,16 @@
 </Popover>
 
 <style>
+	.list-info-trigger {
+		display: flex;
+		gap: 4px;
+		align-items: center;
+	}
+	.trigger-details {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
 	.list-info-content {
 		display: grid;
 		grid-template-columns: 1fr max-content;

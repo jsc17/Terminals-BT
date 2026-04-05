@@ -30,6 +30,7 @@
 	import { page } from "$app/state";
 	import EditListModal from "./modals/EditListModal.svelte";
 	import { MenuIcon } from "$lib/icons";
+	import FormationListPopover from "./ListbuilderComponents/FormationListPopover.svelte";
 
 	type Props = {
 		listCloseCallback: (id: string) => void;
@@ -138,13 +139,15 @@
 	<div class="list-header">
 		<div class="list-details">
 			<p>{list.details.name}</p>
-			<div class="flex-between">
+			<div class="list-rules-row">
 				<p class="list-info"><span class="muted">Rules:</span> {getRulesByName(list.rules ?? "noRes")?.display}</p>
 				{#await list.issues then issues}
 					{#if issues.issueList.size}
 						<Dialog title="List Rules Issues" triggerClasses="transparent-button">
 							{#snippet trigger()}
-								<div class="center"><img src="/icons/alert-outline.svg" alt="Error" class="error-icon" /> <span class="primary">Show issues</span></div>
+								<div class="center">
+									<img src="/icons/alert-outline.svg" alt="Error" class="error-icon" /> <span class="primary list-info">Show issues</span>
+								</div>
 							{/snippet}
 							{#snippet description()}
 								{#if issues.issueMessage}
@@ -185,6 +188,11 @@
 				<MenuIcon fill="var(--button-text-color)" height="15" width="15" />
 			{/snippet}
 		</DropdownMenu>
+	</div>
+	<div class="list-addition-buttons">
+		<FormationListPopover bind:list />
+		<button>BS</button>
+		<button>SCA</button>
 	</div>
 	{#if list.units.length == 0 && list.formations.length == 1}
 		<div class="info">
@@ -351,7 +359,7 @@
 	}
 	.list-header {
 		display: grid;
-		grid-template-columns: 1fr max-content max-content;
+		grid-template-columns: max-content 1fr max-content;
 		border-bottom: 1px solid var(--border);
 		gap: 32px;
 		align-items: center;
@@ -364,6 +372,19 @@
 	}
 	.list-info {
 		font-size: 0.8em;
+	}
+	.list-rules-row {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		column-gap: 8px;
+	}
+	.list-addition-buttons {
+		display: grid;
+		grid-auto-columns: 1fr;
+		grid-auto-flow: column;
+		gap: 2px;
+		padding: 2px 4px;
 	}
 	.list-scas {
 		display: flex;
@@ -420,6 +441,7 @@
 		flex: 1;
 		overflow: auto;
 		scrollbar-gutter: stable;
+		scroll-behavior: smooth;
 	}
 
 	.info {
@@ -447,5 +469,11 @@
 	}
 	:global(.drop-target-zone) {
 		outline: solid green;
+	}
+
+	@media (max-width: 600px) {
+		.list-header {
+			gap: 14px;
+		}
 	}
 </style>

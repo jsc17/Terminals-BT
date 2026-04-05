@@ -125,6 +125,7 @@ export class List {
 	addFormation() {
 		const id: string = crypto.randomUUID();
 		this.formations.push({ id, name: `New formation`, type: "Combat Group", units: [] });
+		return id;
 	}
 	getFormation(formationId: string) {
 		return this.formations.find(({ id }) => {

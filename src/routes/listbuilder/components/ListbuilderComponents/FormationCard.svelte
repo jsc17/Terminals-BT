@@ -30,7 +30,7 @@
 	}
 </script>
 
-<div class="formation-card">
+<div id={`formation-${formation.id}`} class="formation-card">
 	{#if list.formations.length != 1}
 		<div class="formation-header">
 			{#if appWindow.isNarrow}

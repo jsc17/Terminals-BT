@@ -9,13 +9,14 @@
 		title?: Snippet;
 		onOpenChange?: () => void;
 		contentProps?: PopoverContentProps;
+		triggerClasses?: string;
 	};
 
-	let { open = $bindable(false), trigger, children, title, onOpenChange, contentProps }: Props = $props();
+	let { open = $bindable(false), trigger, children, title, onOpenChange, contentProps, triggerClasses = "generic-popover-trigger" }: Props = $props();
 </script>
 
 <Popover.Root bind:open {onOpenChange}>
-	<Popover.Trigger class="generic-popover-trigger">{@render trigger?.()}</Popover.Trigger>
+	<Popover.Trigger class={triggerClasses}>{@render trigger?.()}</Popover.Trigger>
 	<Popover.Content class="generic-popover-content" {...contentProps}>
 		{@render title?.()}
 		{@render children?.()}

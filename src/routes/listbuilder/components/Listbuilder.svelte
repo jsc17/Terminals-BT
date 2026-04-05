@@ -21,6 +21,7 @@
 	import { MenuIcon } from "$lib/icons";
 	import FormationListPopover from "./ListbuilderComponents/FormationListPopover.svelte";
 	import BattlefieldSupportPopover from "./ListbuilderComponents/BattlefieldSupportPopover.svelte";
+	import SCAPopover from "./ListbuilderComponents/SCAPopover.svelte";
 
 	type Props = {
 		listCloseCallback: (id: string) => void;
@@ -37,7 +38,6 @@
 
 	let scaModalOpen = $state(false);
 	let scaListOpen = $state(true);
-	let bsListOpen = $state(true);
 	let sublistModalOpen = $state(false);
 	let printModalOpen = $state(false);
 	let editModalOpen = $state(false);
@@ -181,7 +181,7 @@
 	<div class="list-addition-buttons">
 		<FormationListPopover bind:list />
 		<BattlefieldSupportPopover bind:list />
-		<button>SCA</button>
+		<SCAPopover bind:list />
 	</div>
 	{#if list.units.length == 0 && list.formations.length == 1}
 		<div class="info">
@@ -205,34 +205,6 @@
 			</p>
 		</div>
 	{:else if appWindow.isMobile}
-		{#if list.scaList.length}
-			<div class="list-scas">
-				<div class="list-scas-header">
-					<div class="flex-between">
-						<p>Strategic Command Abilities</p>
-						<button
-							onclick={() => {
-								scaListOpen = !scaListOpen;
-							}}
-							class="transparent-button expand-collapse">{scaListOpen ? "collapse" : "expand"}</button
-						>
-					</div>
-				</div>
-				<Collapsible bind:open={scaListOpen}>
-					{#each list.scaList as sca, index}
-						<div class="list-sca-row">
-							<p>{sca.name}</p>
-							<button
-								class="transparent-button"
-								onclick={() => {
-									list.removeSCA(index);
-								}}>Remove</button
-							>
-						</div>
-					{/each}
-				</Collapsible>
-			</div>
-		{/if}
 		<div
 			class="list-units"
 			use:dragHandleZone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations", transformDraggedElement, dragDisabled: list.formations.length == 1 }}
@@ -244,75 +216,6 @@
 			{/each}
 		</div>
 	{:else}
-		{#if list.scaList.length}
-			<div class="list-scas">
-				<div class="list-scas-header">
-					<div class="flex-between">
-						<p>Strategic Command Abilities</p>
-						<button
-							onclick={() => {
-								scaListOpen = !scaListOpen;
-							}}
-							class="transparent-button expand-collapse">{scaListOpen ? "collapse" : "expand"}</button
-						>
-					</div>
-				</div>
-				<Collapsible bind:open={scaListOpen}>
-					{#each list.scaList as sca, index}
-						<div class="list-sca-row">
-							<p>{sca.name}</p>
-							<button
-								class="transparent-button"
-								onclick={() => {
-									list.removeSCA(index);
-								}}>Remove</button
-							>
-						</div>
-					{/each}
-				</Collapsible>
-			</div>
-		{/if}
-		{#if list.bsList.length}
-			<div class="list-scas">
-				<div class="list-scas-header">
-					<div class="flex-between">
-						<p>Battlefield Support</p>
-						<p>
-							<span class="muted">Total BSP:</span>
-							{list.bsList.reduce((totalCost, currentBS) => {
-								return (totalCost += getBSCbyId(currentBS)?.bspCost ?? 0);
-							}, 0)}
-						</p>
-						<button
-							onclick={() => {
-								bsListOpen = !bsListOpen;
-							}}
-							class="transparent-button expand-collapse">{bsListOpen ? "collapse" : "expand"}</button
-						>
-					</div>
-				</div>
-				<Collapsible bind:open={bsListOpen}>
-					<div class="list-bs-container">
-						{#each list.bsList as bs, index}
-							{@const support = getBSCbyId(bs)}
-							{#if support}
-								<div class="list-bs-row">
-									<p>{support.name}</p>
-									<p class="bs-stat"><span class="muted">TN:</span> {support.btn}</p>
-									<p class="bs-stat"><span class="muted">Dmg:</span> {support.dmg}</p>
-									<p class="bs-stat"><span class="muted">BSP Cost:</span> {support.bspCost}</p>
-									<button
-										onclick={() => {
-											list.removeBS(index);
-										}}>Remove</button
-									>
-								</div>
-							{/if}
-						{/each}
-					</div>
-				</Collapsible>
-			</div>
-		{/if}
 		<div
 			class="list-units"
 			use:dndzone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations", transformDraggedElement, dragDisabled: list.formations.length == 1 }}
@@ -374,54 +277,7 @@
 		gap: 2px;
 		padding: 2px 4px;
 	}
-	.list-scas {
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-		border-bottom: 2px solid var(--border);
-		border-left: 1px solid var(--border);
-		border-right: 1px solid var(--border);
-		margin-bottom: 2px;
-	}
-	.list-scas-header {
-		padding: 4px;
-		background-color: var(--background);
-		display: flex;
-		align-items: center;
-		border: 1px solid var(--border);
-	}
-	.list-sca-row {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 2px 16px;
-	}
-	.list-sca-row:not(:last-child) {
-		border-bottom: 1px solid var(--border);
-	}
-	.list-bs-container {
-		display: grid;
-		grid-template-columns: 1fr repeat(4, max-content);
-		column-gap: 16px;
-	}
-	.list-bs-row {
-		display: grid;
-		grid-template-columns: subgrid;
-		grid-column: span 5;
-		padding: 2px 16px;
 
-		button {
-			background-color: transparent;
-			border: none;
-			color: var(--primary);
-		}
-	}
-	.list-bs-row:not(:last-child) {
-		border-bottom: 1px solid var(--border);
-	}
-	.bs-stat {
-		font-size: 0.9em;
-	}
 	.list-units {
 		display: flex;
 		flex-direction: column;
@@ -430,6 +286,7 @@
 		overflow: auto;
 		scrollbar-gutter: stable;
 		scroll-behavior: smooth;
+		margin-top: 8px;
 	}
 
 	.info {

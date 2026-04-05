@@ -1,16 +1,5 @@
 <script lang="ts">
-	import {
-		PrintModal,
-		SaveModal,
-		LoadModal,
-		SublistModal,
-		UnitCustomizationModal,
-		ScaModal,
-		FormationCard,
-		ListInfoPopover,
-		FindUnitAvailabilityModal,
-		BattlefieldSupportModal
-	} from "./";
+	import { PrintModal, SaveModal, LoadModal, SublistModal, UnitCustomizationModal, ScaModal, FormationCard, ListInfoPopover, FindUnitAvailabilityModal } from "./";
 	import { type ListFormation, List } from "$lib/types/list.svelte";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { getRulesByName, ruleSets } from "$lib/types/rulesets";
@@ -31,6 +20,7 @@
 	import EditListModal from "./modals/EditListModal.svelte";
 	import { MenuIcon } from "$lib/icons";
 	import FormationListPopover from "./ListbuilderComponents/FormationListPopover.svelte";
+	import BattlefieldSupportPopover from "./ListbuilderComponents/BattlefieldSupportPopover.svelte";
 
 	type Props = {
 		listCloseCallback: (id: string) => void;
@@ -44,7 +34,6 @@
 	let playModal = $state<PlayModal>();
 	let unitCustomizationModal = $state<UnitCustomizationModal>();
 	let availabilityModal = $state<FindUnitAvailabilityModal>();
-	let battlefieldSupportModal = $state<BattlefieldSupportModal>();
 
 	let scaModalOpen = $state(false);
 	let scaListOpen = $state(true);
@@ -191,7 +180,7 @@
 	</div>
 	<div class="list-addition-buttons">
 		<FormationListPopover bind:list />
-		<button>BS</button>
+		<BattlefieldSupportPopover bind:list />
 		<button>SCA</button>
 	</div>
 	{#if list.units.length == 0 && list.formations.length == 1}
@@ -341,7 +330,6 @@
 <PrintModal bind:list bind:open={printModalOpen}></PrintModal>
 <FindUnitAvailabilityModal bind:this={availabilityModal} bind:list />
 <SublistModal bind:list bind:open={sublistModalOpen} {playModal} />
-<BattlefieldSupportModal bind:this={battlefieldSupportModal} bind:list />
 <LoadModal bind:this={loadModal} bind:list></LoadModal>
 <SaveModal bind:this={saveModal} bind:list></SaveModal>
 <UnitCustomizationModal bind:this={unitCustomizationModal} bind:list></UnitCustomizationModal>

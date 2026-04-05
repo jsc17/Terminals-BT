@@ -186,6 +186,7 @@ export class List {
 		const sca = getSCAfromId(idToAdd);
 		if (sca !== undefined) {
 			this.scaList.push(sca);
+			this.scaList = this.scaList.sort((a, b) => a.id - b.id);
 		}
 	}
 
@@ -195,6 +196,7 @@ export class List {
 
 	addBS(id: number) {
 		this.bsList.push(id);
+		this.bsList = this.bsList.sort((a, b) => a - b);
 	}
 	removeBS(indexToRemove: number) {
 		this.bsList.splice(indexToRemove, 1);
@@ -350,10 +352,12 @@ export class List {
 		if (listCode.scas !== undefined) {
 			for (const scaId of listCode.scas) {
 				this.addSCA(scaId);
+				this.scaList = this.scaList.sort((a, b) => a.id - b.id);
 			}
 		}
 		if (listCode.bs) {
 			this.bsList = listCode.bs;
+			this.bsList = this.bsList.sort((a, b) => a - b);
 		}
 	}
 }

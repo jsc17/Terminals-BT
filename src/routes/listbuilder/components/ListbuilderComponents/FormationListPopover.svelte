@@ -97,6 +97,7 @@
 		overflow-y: auto;
 		display: grid;
 		grid-template-columns: max-content 1fr repeat(3, max-content);
+		row-gap: 4px;
 	}
 	.formation-header {
 		padding: 4px;
@@ -128,7 +129,7 @@
 	.formation-row p:not(:nth-child(1)) {
 		justify-self: center;
 	}
-	.formation-row:nth-child(even) {
+	.formation-row:nth-child(odd) {
 		background-color: var(--surface-color);
 	}
 	.drag-handle:hover {

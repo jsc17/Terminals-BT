@@ -12,7 +12,6 @@ import ListInfoPopover from "./ListbuilderComponents/ListInfoPopover.svelte";
 import FormationInfoPopover from "./ListbuilderComponents/FormationInfoPopover.svelte";
 import FormationMenu from "./ListbuilderComponents/FormationMenu.svelte";
 import FindUnitAvailabilityModal from "./modals/FindUnitAvailabilityModal.svelte";
-import BattlefieldSupportModal from "./modals/BattlefieldSupportModal.svelte";
 
 export {
 	Listbuilder,
@@ -28,6 +27,5 @@ export {
 	ListInfoPopover,
 	FormationMenu,
 	FormationInfoPopover,
-	FindUnitAvailabilityModal,
-	BattlefieldSupportModal
+	FindUnitAvailabilityModal
 };

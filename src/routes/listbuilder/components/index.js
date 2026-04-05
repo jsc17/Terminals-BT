@@ -2,7 +2,6 @@ import Listbuilder from "./Listbuilder.svelte";
 import PrintModal from "$lib/sharedDialogs/PrintModal.svelte";
 import LoadModal from "./modals/LoadModal.svelte";
 import SaveModal from "./modals/SaveModal.svelte";
-import ScaModal from "./modals/SCAModal.svelte";
 import EditFormationModal from "./modals/EditFormationModal.svelte";
 import SublistModal from "./SublistComponents/SublistModal.svelte";
 import UnitCustomizationModal from "./modals/UnitCustomizationModal.svelte";
@@ -20,7 +19,6 @@ export {
 	LoadModal,
 	SublistModal,
 	EditFormationModal,
-	ScaModal,
 	UnitCustomizationModal,
 	UnitCard,
 	FormationCard,

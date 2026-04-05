@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PrintModal, SaveModal, LoadModal, SublistModal, UnitCustomizationModal, ScaModal, FormationCard, ListInfoPopover, FindUnitAvailabilityModal } from "./";
+	import { PrintModal, SaveModal, LoadModal, SublistModal, UnitCustomizationModal, FormationCard, ListInfoPopover, FindUnitAvailabilityModal } from "./";
 	import { type ListFormation, List } from "$lib/types/list.svelte";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { getRulesByName, ruleSets } from "$lib/types/rulesets";
@@ -229,7 +229,6 @@
 	{/if}
 </div>
 
-<ScaModal bind:open={scaModalOpen} bind:list></ScaModal>
 <PrintModal bind:list bind:open={printModalOpen}></PrintModal>
 <FindUnitAvailabilityModal bind:this={availabilityModal} bind:list />
 <SublistModal bind:list bind:open={sublistModalOpen} {playModal} />
@@ -250,7 +249,7 @@
 	}
 	.list-header {
 		display: grid;
-		grid-template-columns: max-content 1fr max-content;
+		grid-template-columns: 1fr max-content max-content;
 		border-bottom: 1px solid var(--border);
 		gap: 32px;
 		align-items: center;

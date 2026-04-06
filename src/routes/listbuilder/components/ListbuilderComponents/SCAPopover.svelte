@@ -32,6 +32,9 @@
 					<button class="transparent-button" onclick={() => list.removeSCA(index)}><TrashIcon height="15" width="15" fill="var(--primary)" /></button>
 				</div>
 			{/each}
+			{#if list.scaList.length == 0}
+				<p>No SCA's selected</p>
+			{/if}
 		</div>
 		<div class="popover-footer">
 			<div class="sca-footer-row">

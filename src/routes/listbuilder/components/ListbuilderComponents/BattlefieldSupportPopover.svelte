@@ -32,9 +32,13 @@
 
 <Popover triggerClasses="button" bind:open={popoverOpen}>
 	{#snippet trigger()}
-		{@const bsp = list.bsList.reduce((acc, bsId) => acc + getBSCbyId(bsId)!.bspCost, 0)}
-		{@const pv = list.bsList.reduce((acc, bsId) => acc + (getBSCbyId(bsId)!.pvCost ?? 0), 0)}
-		BF Sup - {bsp != 0 ? bsp + " BSP" : ""}{bsp != 0 && pv != 0 ? "/" : ""}{pv != 0 ? pv + " PV" : ""}
+		{#if list.bsList.length == 0}
+			Battlefield Support
+		{:else}
+			{@const bsp = list.bsList.reduce((acc, bsId) => acc + getBSCbyId(bsId)!.bspCost, 0)}
+			{@const pv = list.bsList.reduce((acc, bsId) => acc + (getBSCbyId(bsId)!.pvCost ?? 0), 0)}
+			BF Sup - {bsp != 0 ? bsp + " BSP" : ""}{bsp != 0 && pv != 0 ? "/" : ""}{pv != 0 ? pv + " PV" : ""}
+		{/if}
 	{/snippet}
 	<div class="popover-body">
 		<div class="formation-container">
@@ -58,6 +62,8 @@
 						<button class="transparent-button" onclick={() => list.removeBS(index)}><TrashIcon height="15" width="15" fill="var(--primary)" /></button>
 					</div>
 				{/if}
+			{:else}
+				<p>No battlefield support selected</p>
 			{/each}
 		</div>
 		<div class="popover-footer">

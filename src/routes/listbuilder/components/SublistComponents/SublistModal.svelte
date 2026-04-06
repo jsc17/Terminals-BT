@@ -67,6 +67,15 @@
 			onSelect: () => {
 				sublistAutoModalOpen = true;
 			}
+		},
+		{
+			type: "item",
+			label: "Clear All Sublists",
+			onSelect: () => {
+				if (confirm("Clear all sublists from the list?")) {
+					list.clearSublists();
+				}
+			}
 		}
 	];
 

@@ -76,7 +76,7 @@
 		{#if !formation.units.length}
 			<div class="drop-message">Drop units here to add them to this formation</div>
 		{/if}
-		{#if appWindow.isMobile}
+		{#if appWindow.isNarrow}
 			<Collapsible bind:open>
 				<div
 					class="unit-cards"

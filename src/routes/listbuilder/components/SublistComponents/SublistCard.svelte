@@ -7,7 +7,8 @@
 	import type { MenuItem } from "$lib/generic/types";
 	import PlayModal from "$lib/sharedDialogs/PlayModal.svelte";
 	import { toastController } from "$lib/stores";
-	import { DragIndicatorIcon, MenuIcon } from "$lib/icons";
+	import { DragIndicatorIcon, InformationIcon, MenuIcon } from "$lib/icons";
+	import { getBSCbyId } from "$lib/data/battlefieldSupport";
 
 	type Props = {
 		sublist: Sublist;
@@ -48,9 +49,19 @@
 	});
 
 	let unitString = $derived.by(() => {
+		if (sortedUnits.length == 0) return "No Units Selected";
 		return sortedUnits
 			.map((unit) => {
 				if (unit) return `${unit.baseUnit.name} (${unit.skill})`;
+			})
+			.join(", ");
+	});
+
+	let bsString = $derived.by(() => {
+		return [...sublist.checkedBS.entries()]
+			.map(([id, count]) => {
+				const bsData = getBSCbyId(id);
+				return `${bsData?.name} x${count}`;
 			})
 			.join(", ");
 	});
@@ -62,7 +73,8 @@
 			medium = 0,
 			long = 0,
 			size = 0,
-			count = 0;
+			count = 0,
+			bsp = 0;
 		for (const unitId of sublist.checked) {
 			const unit = list.getUnit(unitId);
 			pv += unit?.cost ?? 0;
@@ -73,7 +85,12 @@
 			size += unit?.baseUnit.size ?? 0;
 			if (unit?.baseUnit.mulId && unit?.baseUnit?.mulId > 0) count++;
 		}
-		return { pv, health, short, medium, long, size, count };
+		for (const [id, count] of sublist.checkedBS) {
+			const bsData = getBSCbyId(id);
+			bsp += (bsData?.bspCost ?? 0) * count;
+			pv += (bsData?.pvCost ?? 0) * count;
+		}
+		return { pv, health, short, medium, long, size, count, bsp };
 	});
 
 	let sublistMaxPv = $derived(getRulesByName(list.rules)?.sublistMaxPv);
@@ -141,10 +158,33 @@
 				{/each}
 			</select>
 			{#if layout == "mobile"}
-				<div class="mobile-sublist-stats">
-					<p><span class="muted">PV:</span> {`${stats.pv ?? 0}`}{sublistMaxPv ? `/${sublistMaxPv}` : ""}</p>
-					<p><span class="muted">Units:</span> {`${stats.count ?? 0}`}{sublistMaxUnits ? `/${sublistMaxUnits}` : ""}</p>
-				</div>
+				<Popover>
+					{#snippet trigger()}
+						<div class="inline">
+							<div class="mobile-sublist-stats">
+								<p><span class="muted">PV:</span> {`${stats.pv ?? 0}`}{sublistMaxPv ? `/${sublistMaxPv}` : ""}</p>
+								<p><span class="muted">Units:</span> {`${stats.count ?? 0}`}{sublistMaxUnits ? `/${sublistMaxUnits}` : ""}</p>
+							</div>
+							<InformationIcon width="15" height="15" fill="var(--text-color)" />
+						</div>
+					{/snippet}
+					<div class="stats-popover-body">
+						<p class="muted">Total Health:</p>
+						<p>{stats.health ?? 0}</p>
+						<p class="muted">Total Short:</p>
+						<p>{stats.short ?? 0}</p>
+						<p class="muted">Total Medium:</p>
+						<p>{stats.medium ?? 0}</p>
+						<p class="muted">Total Long:</p>
+						<p>{stats.long ?? 0}</p>
+						<p class="muted">Total Size:</p>
+						<p>{stats.size ?? 0}</p>
+						{#if stats.bsp > 0}
+							<p class="muted">BSP:</p>
+							<p>{stats.bsp ?? 0}</p>
+						{/if}
+					</div>
+				</Popover>
 			{/if}
 			<div>
 				<DropdownMenu items={dropdownOptions}>
@@ -158,16 +198,43 @@
 		</div>
 
 		{#if layout == "vertical"}
-			<div class="sublist-unit-container">
+			<div class="sublist-selected-container">
 				<div class="sublist-unit-list">
+					<div class="sublist-unit-row">
+						<p class="muted">Unit</p>
+						<p class="muted center">Skill</p>
+					</div>
 					{#each sortedUnits as unit}
-						<div>{unit.baseUnit.name}</div>
-						<div>{unit.skill}</div>
+						<div class="sublist-unit-row">
+							<div>{unit.baseUnit.name}</div>
+							<div class="center">{unit.skill}</div>
+						</div>
+					{:else}
+						<div class="sublist-unit-row">
+							<p>No Units Selected</p>
+						</div>
 					{/each}
 				</div>
+				{#if sublist.checkedBS.size > 0}
+					<div class="sublist-bs-list">
+						<div class="sublist-bs-row">
+							<p class="muted">Battlefield Support</p>
+						</div>
+						{#each sublist.checkedBS.entries() as [id, count]}
+							{@const bsData = getBSCbyId(id)}
+							<div class="sublist-bs-row">
+								<p>{bsData?.name}</p>
+								<p>x{count}</p>
+							</div>
+						{/each}
+					</div>
+				{/if}
 			</div>
 		{:else}
-			<div>{unitString}</div>
+			<p><span class="muted">Units:</span> {unitString}</p>
+			{#if sublist.checkedBS.size > 0}
+				<p><span class="muted">BF Sup:</span> {bsString}</p>
+			{/if}
 		{/if}
 		{#if layout == "vertical" || layout == "horizontal"}
 			<div class={layout == "vertical" ? "sublist-stats-vertical" : "sublist-stats-horizontal"}>
@@ -189,6 +256,10 @@
 				<p>{stats.long ?? 0}</p>
 				<p class="muted">Total Size:</p>
 				<p>{stats.size ?? 0}</p>
+				{#if stats.bsp > 0}
+					<p class="muted">BSP:</p>
+					<p>{stats.bsp ?? 0}</p>
+				{/if}
 			</div>
 		{/if}
 	</div>
@@ -231,15 +302,24 @@
 		gap: 8px;
 		padding: 8px;
 	}
-	.sublist-unit-list {
+	.sublist-selected-container {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+	.sublist-unit-list,
+	.sublist-bs-list {
 		display: grid;
-		grid-template-columns: auto max-content;
+		grid-template-columns: 1fr max-content;
 		gap: 4px;
-
-		div {
-			border-bottom: 1px solid var(--border);
-			padding: 4px 0px;
-		}
+	}
+	.sublist-unit-row,
+	.sublist-bs-row {
+		display: grid;
+		grid-template-columns: subgrid;
+		grid-column: span 2;
+		border-bottom: 1px solid var(--border);
+		padding: 4px 0px;
 	}
 	.sublist-stats-vertical {
 		display: grid;
@@ -253,6 +333,16 @@
 	.sublist-stats-horizontal {
 		display: flex;
 		gap: 8px;
+	}
+	.stats-popover-body {
+		display: grid;
+		grid-template-columns: max-content max-content;
+		column-gap: 16px;
+		row-gap: 4px;
+		padding: 8px;
+	}
+	.stats-popover-body > p:nth-child(odd) {
+		text-align: end;
 	}
 	.error {
 		color: var(--error);

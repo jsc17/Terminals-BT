@@ -19,7 +19,7 @@ export const PrintListSchema = v.object({
 		})
 	),
 	scas: v.optional(v.array(v.number())),
-	bs: v.optional(v.array(v.number()))
+	bs: v.optional(v.array(v.object({ id: v.number(), count: v.number() })))
 });
 
 export type PrintListOutput = v.InferOutput<typeof PrintListSchema>;

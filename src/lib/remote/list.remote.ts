@@ -27,7 +27,8 @@ export const loadUserList = query(v.string(), async (listId) => {
 		units: JSON.parse(listData.units),
 		formations: JSON.parse(listData.formations),
 		sublists: JSON.parse(listData.sublists ?? "[]"),
-		scas: listData.scas ? JSON.parse(listData.scas) : undefined
+		scas: listData.scas ? JSON.parse(listData.scas) : undefined,
+		bs: listData.bs ? JSON.parse(listData.bs) : undefined
 	};
 
 	return listCode;

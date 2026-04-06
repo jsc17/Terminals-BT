@@ -108,7 +108,7 @@
 				secondary: f.secondary && f.secondary.units.length ? { type: f.secondary?.type, units: f.secondary?.units.map((u) => u.id) } : undefined
 			})),
 			scas: list.scaList.map((v) => v.id),
-			bs: list.bsList
+			bs: Array.from(list.bsList.entries()).map(([id, count]) => ({ id, count }))
 		};
 		toastController.addToast("Preparing list for submission. Please wait until you are redirected.");
 		printList({ listData, printOptions: { ...settings.print, cardStyle: "mul" } }).then((pdf) => {
@@ -157,14 +157,13 @@
 		<ListInfoPopover bind:list />
 		<DropdownMenu
 			items={[
-				{ type: "item", label: "Edit List", onSelect: () => (editModalOpen = true) },
+				{ type: "item", label: "Edit List Details", onSelect: () => (editModalOpen = true) },
 				{ type: "item", label: "Load / Import List", onSelect: () => loadModal?.show() },
 				{ type: "item", label: "Save / Export List", onSelect: () => saveModal?.show() },
 				{ type: "item", label: "Print List", onSelect: () => (printModalOpen = true) },
 				{ type: "item", label: "Share List Link", onSelect: () => shareList() },
 				{ type: "separator" },
 				{ type: "item", label: "Check List Availability", onSelect: () => availabilityModal?.show() },
-				{ type: "item", label: "Generate Sublists", onSelect: () => (sublistModalOpen = true) },
 				{ type: "item", label: "Play List", onSelect: () => playModal?.open(list) },
 				{ type: "item", label: "Submit List to Tournament", onSelect: () => submitList() },
 				{ type: "separator" },
@@ -182,6 +181,7 @@
 		<FormationListPopover bind:list />
 		<BattlefieldSupportPopover bind:list />
 		<SCAPopover bind:list />
+		<button onclick={() => (sublistModalOpen = true)}>Sublists</button>
 	</div>
 	{#if list.units.length == 0 && list.formations.length == 1}
 		<div class="info">
@@ -204,7 +204,7 @@
 				creators.
 			</p>
 		</div>
-	{:else if appWindow.isMobile}
+	{:else if appWindow.isNarrow}
 		<div
 			class="list-units"
 			use:dragHandleZone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations", transformDraggedElement, dragDisabled: list.formations.length == 1 }}

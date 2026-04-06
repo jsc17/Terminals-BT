@@ -77,6 +77,7 @@ type SPA = {
 type Sublist = {
 	id: string;
 	checked: string[];
+	checkedBS: Map<number, number>;
 	scenario: string;
 };
 
@@ -88,6 +89,7 @@ type SublistStats = {
 	long: number;
 	size: number;
 	count: number;
+	bsp: number;
 };
 
 type ListCodeUnit = {
@@ -108,7 +110,7 @@ type ListCode = {
 	formations: ListFormation[];
 	sublists: Sublist[];
 	scas?: number[];
-	bs?: number[];
+	bs?: [number, number][];
 };
 
 export type { ListFormation, ListUnit, MulUnit, SCA, SPA, SublistStats, Sublist, UnitCustomization, ListCode, ListCodeUnit };

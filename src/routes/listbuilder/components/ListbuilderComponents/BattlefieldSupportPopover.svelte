@@ -8,7 +8,6 @@
 	let { list = $bindable() }: { list: List } = $props();
 
 	let popoverOpen = $state(false);
-	let selectedBS = $state("");
 
 	let groupedItems = $derived.by(() => {
 		const groupedItems: { groupLabel: string; items: Item[] }[] = [];
@@ -16,7 +15,7 @@
 			groupedItems.push({
 				groupLabel,
 				items: battlefieldSupport
-					.filter((item) => item.group == groupLabel)
+					.filter((item) => item.group == groupLabel && !list.bsList.has(item.id))
 					.map((item) => {
 						return { value: item.id.toString(), label: `${item.name} (${item.bspCost})` };
 					})
@@ -24,46 +23,65 @@
 		}
 		return groupedItems;
 	});
+	let selectedBS = $derived(groupedItems[0].items[0].value);
 
 	function handleAddButton() {
 		list.addBS(Number(selectedBS));
 	}
+
+	const bsCount = $derived(list.bsList.size);
 </script>
 
 <Popover triggerClasses="button" bind:open={popoverOpen}>
 	{#snippet trigger()}
-		{#if list.bsList.length == 0}
+		{#if bsCount == 0}
 			Battlefield Support
 		{:else}
-			{@const bsp = list.bsList.reduce((acc, bsId) => acc + getBSCbyId(bsId)!.bspCost, 0)}
-			{@const pv = list.bsList.reduce((acc, bsId) => acc + (getBSCbyId(bsId)!.pvCost ?? 0), 0)}
+			{@const bsp = list.bsList.entries().reduce((acc, [id, count]) => acc + (getBSCbyId(id)?.bspCost ?? 0) * count, 0)}
+			{@const pv = list.bsList.entries().reduce((acc, [id, count]) => acc + (getBSCbyId(id)?.pvCost ?? 0) * count, 0)}
 			BF Sup - {bsp != 0 ? bsp + " BSP" : ""}{bsp != 0 && pv != 0 ? "/" : ""}{pv != 0 ? pv + " PV" : ""}
 		{/if}
 	{/snippet}
 	<div class="popover-body">
 		<div class="formation-container">
 			<div class="formation-header">
+				<div></div>
 				<p>Name</p>
-				<p>BSP</p>
-				{#if list.bsList.find((bs) => getBSCbyId(bs)?.pvCost)}
+				{#if list.bsList.keys().find((bs) => getBSCbyId(bs)?.bspCost)}
+					<p>BSP</p>
+				{:else}
+					<div></div>
+				{/if}
+				{#if list.bsList.keys().find((bs) => getBSCbyId(bs)?.pvCost)}
 					<p>PV</p>
 				{:else}
 					<div></div>
 				{/if}
 				<div></div>
 			</div>
-			{#each list.bsList as bsId, index}
-				{@const bs = getBSCbyId(bsId)}
-				{#if bs}
+			{#each list.bsList.entries() as [id, count]}
+				{@const bsData = getBSCbyId(id)}
+				{#if bsData}
 					<div class="formation-row">
-						<p>{bs.name}</p>
-						<p class="muted">{bs.bspCost}</p>
-						<p class="muted">{bs.pvCost}</p>
-						<button class="transparent-button" onclick={() => list.removeBS(index)}><TrashIcon height="15" width="15" fill="var(--primary)" /></button>
+						<input type="number" min="1" bind:value={() => list.bsList.get(id), (v) => list.bsList.set(id, v ?? 1)} />
+						<p>{bsData.name}</p>
+						{#if bsData.bspCost}
+							<p class="muted">{bsData.bspCost}({count * bsData.bspCost})</p>
+						{:else}
+							<div></div>
+						{/if}
+						{#if bsData.pvCost}
+							<p class="muted">{bsData.pvCost}({count * bsData.pvCost})</p>
+						{:else}
+							<div></div>
+						{/if}
+						<button class="transparent-button" onclick={() => list.removeBS(id)}><TrashIcon height="15" width="15" fill="var(--primary)" /></button>
 					</div>
 				{/if}
 			{:else}
-				<p>No battlefield support selected</p>
+				<div class="formation-row">
+					<p class="muted">None selected</p>
+				</div>
 			{/each}
 		</div>
 		<div class="popover-footer">
@@ -85,7 +103,7 @@
 		max-height: 50dvh;
 		overflow-y: auto;
 		display: grid;
-		grid-template-columns: 1fr repeat(3, max-content);
+		grid-template-columns: max-content 1fr repeat(3, max-content);
 		margin: 8px 0px;
 		row-gap: 4px;
 	}
@@ -121,5 +139,8 @@
 		padding: 4px;
 		border-top: 1px solid var(--border);
 		gap: 16px;
+	}
+	input[type="number"] {
+		width: 50px;
 	}
 </style>

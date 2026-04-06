@@ -7,6 +7,7 @@ import { getCustomUnitData, getUnitAvailability } from "$lib/remote/unit.remote"
 import { getMULDataFromIdLocal } from "$lib/local/sqllite/local-db";
 import { db } from "$lib/local/dexie/db";
 import { validateRules } from "$lib/rules/validateList";
+import { SvelteMap } from "svelte/reactivity";
 
 export type { ListCode, ListCodeUnit, ListUnit, ListFormation, SCA, MulUnit, Sublist, SublistStats };
 
@@ -15,7 +16,7 @@ export class List {
 	formations = $state<ListFormation[]>([{ id: "unassigned", name: "Unassigned units", type: "none", units: [] }]);
 	sublists: Sublist[] = $state([]);
 	scaList: SCA[] = $state([]);
-	bsList = $state<number[]>([]);
+	bsList = new SvelteMap<number, number>();
 
 	details: { name: string; eras: number[]; factions: number[]; general: number } = $state({ name: "New List", eras: [], factions: [], general: -1 });
 	rules = $state<string>("noRes");
@@ -54,7 +55,7 @@ export class List {
 			units: unitList,
 			formations: $state.snapshot(this.formations),
 			sublists: $state.snapshot(this.sublists),
-			bs: $state.snapshot(this.bsList)
+			bs: $state.snapshot([...this.bsList.entries()])
 		};
 		if (this.scaList.length) {
 			newListCode.scas = this.scaList.map(({ id }) => {
@@ -150,12 +151,12 @@ export class List {
 		this.formations = [{ id: "unassigned", name: "Unassigned units", type: "none", units: [] }];
 		this.sublists = [];
 		this.scaList = [];
-		this.bsList = [];
+		this.bsList.clear();
 	}
 
 	addSublist(sublistToAdd?: Sublist): string {
 		const id = crypto.randomUUID();
-		this.sublists.push(sublistToAdd ?? { id, checked: [], scenario: "-" });
+		this.sublists.push(sublistToAdd ?? { id, checked: [], checkedBS: new Map(), scenario: "-" });
 		return id;
 	}
 
@@ -182,6 +183,10 @@ export class List {
 		});
 	}
 
+	clearSublists() {
+		this.sublists = [];
+	}
+
 	addSCA(idToAdd: number) {
 		const sca = getSCAfromId(idToAdd);
 		if (sca !== undefined) {
@@ -195,11 +200,13 @@ export class List {
 	}
 
 	addBS(id: number) {
-		this.bsList.push(id);
-		this.bsList = this.bsList.sort((a, b) => a - b);
+		this.bsList.set(id, 1);
 	}
-	removeBS(indexToRemove: number) {
-		this.bsList.splice(indexToRemove, 1);
+	removeBS(idToRemove: number) {
+		this.bsList.delete(idToRemove);
+	}
+	setBSCount(id: number, count: number) {
+		this.bsList.set(id, count);
 	}
 
 	getListCode() {
@@ -356,8 +363,9 @@ export class List {
 			}
 		}
 		if (listCode.bs) {
-			this.bsList = listCode.bs;
-			this.bsList = this.bsList.sort((a, b) => a - b);
+			for (const [id, count] of listCode.bs) {
+				this.bsList.set(id, count);
+			}
 		}
 	}
 }

@@ -30,7 +30,6 @@ export const printList = query(
 				counts.get(unit.mulId)?.push(unit.id);
 			}
 		}
-		console.log(counts);
 
 		const ammoReferenceList = (
 			await Promise.allSettled(
@@ -62,13 +61,12 @@ export const printList = query(
 				.filter((r) => r.status == "fulfilled")
 				.map((r) => [`${r.value.mulId}-${r.value.skill}`, r.value.image ?? ""])
 		);
-		const bsList = Map.groupBy(listData.bs ?? [], (v) => v);
 
 		const browser = await playwright.chromium.launch({ headless: true });
 
 		const page = await browser.newPage();
 		const html = render(ListTemplate, {
-			props: { listData, printOptions, mulUnitData, ammoReferenceList, unitImages, unitCardImages, bsList, scaList: listData.scas ?? [], counts }
+			props: { listData, printOptions, mulUnitData, ammoReferenceList, unitImages, unitCardImages, bsList: listData.bs ?? new Map(), scaList: listData.scas ?? [], counts }
 		});
 		await page.setContent(html.head + html.body);
 		const pdf = await page.pdf({ format: "Letter", printBackground: true, margin: { top: "0.125in", bottom: "0.125in", left: "0.125in", right: "0.125in" } });

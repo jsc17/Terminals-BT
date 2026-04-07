@@ -108,7 +108,7 @@
 				secondary: f.secondary && f.secondary.units.length ? { type: f.secondary?.type, units: f.secondary?.units.map((u) => u.id) } : undefined
 			})),
 			scas: list.scaList.map((v) => v.id),
-			bs: Array.from(list.bsList.entries()).map(([id, count]) => ({ id, count }))
+			bs: list.bsList
 		};
 		toastController.addToast("Preparing list for submission. Please wait until you are redirected.");
 		printList({ listData, printOptions: { ...settings.print, cardStyle: "mul" } }).then((pdf) => {

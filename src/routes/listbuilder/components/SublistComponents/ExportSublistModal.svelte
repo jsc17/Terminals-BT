@@ -45,9 +45,9 @@
 				const unitData = list.getUnit(c);
 				return { id: unitData!.id, mulId: unitData!.baseUnit.mulId, skill: unitData!.skill ?? 4, customization: unitData!.customization };
 			}),
-			formations: [{ name: "unassigned", type: "none", units: sublist.checked }]
-			// scas: list.scaList.map((v) => v.id),
-			// bs: list.bsList
+			formations: [{ name: "unassigned", type: "none", units: sublist.checked }],
+			scas: list.scaList.map((v) => v.id),
+			bs: list.bsList
 		};
 		toastController.addToast("Generating Pdf for download");
 		printList({ listData, printOptions: settings.sublistUI.sublistPrintListSettings }).then((pdf) => {

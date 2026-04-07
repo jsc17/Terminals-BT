@@ -17,7 +17,7 @@
 		ammoReferenceList: string[];
 		unitImages?: Map<string, string>;
 		unitCardImages?: Map<string, string>;
-		bsList: Map<number, number[]>;
+		bsList: Map<number, number>;
 		scaList: number[];
 		counts: Map<number, string[]>;
 	};
@@ -27,6 +27,14 @@
 	const unitData = new Map(listData.units.map((u) => [u.id, u]));
 
 	let tableHeaders = $derived(printOptions.printStyle == "simple" ? ["Unit", "Type", "Skill", "PV (Half)"] : ["Unit", "Type", "Move", "Damage", "Health", "Skill", "PV (Half)"]);
+
+	const bsArray = $derived([...bsList.entries()]);
+	const bsPV = $derived(
+		bsArray.reduce((a, v) => {
+			const bsData = getBSCbyId(v[0]);
+			return a + (bsData?.pvCost ?? 0) * v[1];
+		}, 0)
+	);
 
 	let abilityReferenceList = $derived.by(() => {
 		const referenceList: string[] = [];
@@ -165,22 +173,30 @@
 					<tr>
 						<th>Battlefield Support</th>
 						<th>Uses</th>
-						<th>Total BSP Cost</th>
+						<th>Source</th>
+						<th>BSP</th>
+						{#if bsPV > 0}
+							<th>PV</th>
+						{/if}
 					</tr>
 				</thead>
 				<tbody>
 					{#each bsList.entries() as [key, value]}
 						{@const bspData = getBSCbyId(key)}
 						<tr>
-							<td>{bspData?.name} ({bspData?.source})</td>
+							<td>{bspData?.name}</td>
 							<td>
 								<div class="inline">
-									{#each { length: value.length }}
+									{#each { length: value }}
 										<div class="pip"></div>
 									{/each}
 								</div>
 							</td>
-							<td>{(bspData?.bspCost ?? 0) * value.length}</td>
+							<td>{bspData?.source}</td>
+							<td>{(bspData?.bspCost ?? 0) * value}</td>
+							{#if bsPV > 0}
+								<td>{(bspData?.pvCost ?? 0) * value}</td>
+							{/if}
 						</tr>
 					{/each}
 				</tbody>
@@ -358,6 +374,7 @@
 		color: black;
 		font-size: 8pt;
 		background-color: rgb(170, 170, 170);
+		width: fit-content;
 	}
 	th:first-child {
 		text-align: start;
@@ -369,6 +386,7 @@
 		font-size: 8pt;
 		text-align: center;
 		padding: 2px 0px;
+		width: fit-content;
 	}
 	.unit-stat:first-child {
 		text-align: start;

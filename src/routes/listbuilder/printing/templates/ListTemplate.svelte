@@ -35,6 +35,12 @@
 			return a + (bsData?.pvCost ?? 0) * v[1];
 		}, 0)
 	);
+	const totalBSP = $derived(
+		bsArray.reduce((a, v) => {
+			const bsData = getBSCbyId(v[0]);
+			return a + (bsData?.bspCost ?? 0) * v[1];
+		}, 0)
+	);
 
 	let abilityReferenceList = $derived.by(() => {
 		const referenceList: string[] = [];
@@ -174,7 +180,9 @@
 						<th>Battlefield Support</th>
 						<th>Uses</th>
 						<th>Source</th>
-						<th>BSP</th>
+						{#if totalBSP > 0}
+							<th>BSP</th>
+						{/if}
 						{#if bsPV > 0}
 							<th>PV</th>
 						{/if}
@@ -193,13 +201,26 @@
 								</div>
 							</td>
 							<td>{bspData?.source}</td>
-							<td>{(bspData?.bspCost ?? 0) * value}</td>
+							{#if totalBSP > 0}
+								<td>{(bspData?.bspCost ?? 0) * value}</td>
+							{/if}
 							{#if bsPV > 0}
 								<td>{(bspData?.pvCost ?? 0) * value}</td>
 							{/if}
 						</tr>
 					{/each}
 				</tbody>
+				<tfoot>
+					<tr>
+						<td colspan="3"></td>
+						{#if totalBSP > 0}
+							<td>{totalBSP}</td>
+						{/if}
+						{#if bsPV > 0}
+							<td>{bsPV}</td>
+						{/if}
+					</tr>
+				</tfoot>
 			</table>
 		{/if}
 		<div>

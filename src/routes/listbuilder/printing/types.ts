@@ -1,3 +1,4 @@
+import type { ListUnit } from "$lib/types/listTypes";
 import * as v from "valibot";
 
 export const PrintListSchema = v.object({
@@ -23,3 +24,19 @@ export const PrintListSchema = v.object({
 });
 
 export type PrintListOutput = v.InferOutput<typeof PrintListSchema>;
+
+export type PrintableSublist = {
+	scenario: string;
+	pv: number;
+	unitList: ListUnit[];
+	bfs: [number, number][];
+};
+
+export const PrintSublistsSchema = v.object({
+	name: v.optional(v.string(), "Sublist"),
+	sublists: v.string(),
+	layout: v.optional(v.picklist(["vertical", "horizontal"]), "vertical"),
+	grouped: v.optional(v.boolean(), false)
+});
+
+export type PrintSublistsOutput = v.InferOutput<typeof PrintSublistsSchema>;

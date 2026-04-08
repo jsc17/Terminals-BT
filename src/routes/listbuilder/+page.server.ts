@@ -1,7 +1,10 @@
 import { fail } from "@sveltejs/kit";
 import { prisma } from "$lib/server/prisma.js";
 import { type ListCode } from "$lib/types/listTypes";
-import { createSublistsPdf } from "./printing/printSublists.js";
+import playwright from "playwright";
+import { render } from "svelte/server";
+import { SublistTemplate } from "./printing/templates";
+import { PDFDocument } from "pdf-lib";
 
 export const load = async ({ url }) => {
 	let sharedList;
@@ -118,16 +121,6 @@ export const actions = {
 			console.error(error);
 			return fail(400, { message: "Failed to delete list" });
 		}
-	},
-	printSublists: async ({ request }) => {
-		const formData = await request.formData();
-		const name = formData.get("name")?.toString() ?? "Sublist";
-		const sublists = JSON.parse(formData.get("sublists")!.toString());
-		const layout = formData.get("sublistPrintLayout")?.toString() ?? "vertical";
-		const grouped = formData.get("sublistPrintGrouping") != undefined;
-		const blob = await createSublistsPdf(sublists, layout, grouped, name);
-		const bytes = await blob.bytes();
-		return { pdf: JSON.stringify(bytes) };
 	},
 	shareList: async ({ request }) => {
 		const formData = await request.formData();

@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { enhance } from "$app/forms";
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import type { ListUnit, List } from "$lib/types/list.svelte";
 	import { Dialog } from "$lib/generic";
 	import { getContext } from "svelte";
 	import type { SettingsOutput } from "../../types/settings";
+	import { printAllSublists } from "$routes/listbuilder/printing/print.remote";
+	import { getBSCbyId } from "$lib/data/battlefieldSupport";
 
 	type Props = {
 		open: boolean;
@@ -15,13 +16,7 @@
 
 	let settings: SettingsOutput = getContext("listbuilderSettings");
 
-	function handlePrintForm({ formData, cancel, submitter }: any) {
-		if (submitter.innerText == "Cancel") {
-			cancel();
-			open = false;
-			return;
-		}
-
+	const sublistDataString = $derived.by(() => {
 		let sublistData = [];
 		for (const sublist of list.sublists) {
 			let unitList: ListUnit[] = [];
@@ -35,47 +30,58 @@
 					console.error("Sublist contains unit not found on list");
 				}
 			}
-			sublistData.push({ scenario: sublist.scenario, pv, unitList });
+			for (const [bfsId, count] of sublist.checkedBS.entries()) {
+				const bfs = getBSCbyId(bfsId);
+				if (bfs) {
+					pv += (bfs.pvCost ?? 0) * count;
+				} else {
+					console.error("Sublist contains BFS not found on list");
+				}
+			}
+			sublistData.push({ scenario: sublist.scenario, pv, unitList, bfs: Array.from(sublist.checkedBS.entries()) });
 		}
-		formData.append("sublists", JSON.stringify(sublistData));
-		formData.append("name", list.details.name);
-		toastController.addToast("Generating sublist printout");
-		open = false;
+		return JSON.stringify(sublistData);
+	});
 
-		return async ({ result }: any) => {
-			const blob = new Blob([new Uint8Array(Object.values(JSON.parse(result.data.pdf)))], { type: "application/pdf" });
+	async function enhancePrintSublists({ submit }: any) {
+		toastController.addToast("Generating sublist printout");
+		await submit();
+		if (printAllSublists.result) {
+			const blob = new Blob([new Uint8Array(printAllSublists.result)], { type: "application/pdf" });
 			const downloadElement = document.createElement("a");
 			downloadElement.download = `${list.details.name} sublists`;
 			downloadElement.href = URL.createObjectURL(blob);
 			downloadElement.click();
-		};
+			toastController.addToast("PDF Generation Complete");
+		}
 	}
 </script>
 
 <Dialog title="Print Sublists" triggerClasses="transparent-button" bind:open>
-	<form action="?/printSublists" method="post" use:enhance={handlePrintForm} class="printAllForm">
+	<form {...printAllSublists.enhance(enhancePrintSublists)} class="printAllForm">
+		<input {...printAllSublists.fields.sublists.as("hidden", sublistDataString)} />
+		<input {...printAllSublists.fields.name.as("hidden", list.details.name)} />
+
 		<fieldset>
 			<legend>Style</legend>
+			{#each ["vertical", "horizontal"] as layout}
+				<div class="inline gap8">
+					<input id={layout} {...printAllSublists.fields.layout.as("radio", layout)} bind:group={settings.sublistUI.sublistPrintAllOrientation} />
+					<label for={layout}>
+						{layout}
+					</label>
+				</div>
+			{/each}
+		</fieldset>
+		<fieldset>
+			<legend>Options</legend>
 			<div class="inline gap8">
-				<input type="radio" name="sublistPrintLayout" id="vertical" value="vertical" bind:group={settings.sublistUI.sublistPrintAllOrientation} /><label for="vertical"
-					>Vertical</label
-				>
-			</div>
-			<div class="inline gap8">
-				<input type="radio" name="sublistPrintLayout" id="horizontal" value="horizontal" bind:group={settings.sublistUI.sublistPrintAllOrientation} /><label for="horizontal"
-					>Horizontal</label
-				>
+				<!-- svelte error with remote form fields and bind:checked -->
+				<input type="checkbox" {...printAllSublists.fields.grouped.as("checkbox")} bind:checked={settings.sublistUI.sublistPrintAllGroupByScenario} />
+				<label for="sublistPrintGroup">Sort sublists by scenario</label>
 			</div>
 		</fieldset>
-
-		<div class="inline gap8">
-			<input type="checkbox" name="sublistPrintGrouping" id="sublistPrintGroup" bind:checked={settings.sublistUI.sublistPrintAllGroupByScenario} /><label for="sublistPrintGroup"
-				>Group sublists by scenario</label
-			>
-		</div>
-
 		<div class="center gap8">
-			<button>Cancel</button>
 			<button>Print</button>
 		</div>
 	</form>

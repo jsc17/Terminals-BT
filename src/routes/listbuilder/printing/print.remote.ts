@@ -1,9 +1,9 @@
-import { query } from "$app/server";
+import { form, query } from "$app/server";
 import * as v from "valibot";
-import { PrintListSchema } from "./types";
+import { PrintListSchema, PrintSublistsSchema } from "./types";
 import playwright from "playwright";
 import { render } from "svelte/server";
-import ListTemplate from "./templates/ListTemplate.svelte";
+import { ListTemplate, SublistTemplate } from "./templates";
 import { getAmmoByName } from "$lib/remote/ammo.remote";
 import { getCustomUnitData, getMULDataFromId } from "$lib/remote/unit.remote";
 import { getMulCard, getMulImage } from "$lib/remote/mulImages.remote";
@@ -77,3 +77,17 @@ export const printList = query(
 		return await doc.save();
 	}
 );
+
+export const printAllSublists = form(PrintSublistsSchema, async ({ name, sublists, layout, grouped }) => {
+	const sublistData = JSON.parse(sublists);
+	const browser = await playwright.chromium.launch({ headless: true });
+	const page = await browser.newPage();
+	const html = render(SublistTemplate, {
+		props: { sublists: sublistData, layout, grouped, name }
+	});
+	await page.setContent(html.head + html.body);
+	const pdf = await page.pdf({ format: "Letter", printBackground: true, margin: { top: "0.125in", bottom: "0.125in", left: "0.125in", right: "0.125in" } });
+	const doc = await PDFDocument.load(new Uint8Array(pdf));
+	browser.close();
+	return await doc.save();
+});

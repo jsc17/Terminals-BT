@@ -192,7 +192,7 @@
 					{#each bsList.entries() as [key, value]}
 						{@const bspData = getBSCbyId(key)}
 						<tr>
-							<td>{bspData?.name}</td>
+							<td>{bspData?.name} x{value}</td>
 							<td>
 								<div class="inline">
 									{#each { length: value }}

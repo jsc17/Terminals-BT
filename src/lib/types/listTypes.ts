@@ -1,4 +1,5 @@
 import type { UnitAbility } from "$lib/data/abilities";
+import * as v from "valibot";
 
 type ListFormation = {
 	id: string;
@@ -99,6 +100,13 @@ type ListCodeUnit = {
 	customization?: UnitCustomization;
 };
 
+type ListCodeSublist = {
+	id: string;
+	checked: string[];
+	checkedBS?: [number, number][];
+	scenario: string;
+};
+
 type ListCode = {
 	id: string;
 	lcVersion: number;
@@ -108,9 +116,9 @@ type ListCode = {
 	rules: string;
 	units: ListCodeUnit[];
 	formations: ListFormation[];
-	sublists: Sublist[];
+	sublists: ListCodeSublist[];
 	scas?: number[];
 	bs?: [number, number][];
 };
 
-export type { ListFormation, ListUnit, MulUnit, SCA, SPA, SublistStats, Sublist, UnitCustomization, ListCode, ListCodeUnit };
+export type { ListFormation, ListUnit, MulUnit, SCA, SPA, SublistStats, Sublist, UnitCustomization, ListCode, ListCodeUnit, ListCodeSublist };

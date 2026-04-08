@@ -41,7 +41,9 @@
 
 	function handleSaveList({ formData, cancel }: any) {
 		const saveLocation = formData.get("saveLocation");
+		const listCodeString = JSON.stringify(list.getListCode());
 
+		console.log(listCodeString);
 		if (list.details.name == "") {
 			alert("list must have a name");
 			cancel();
@@ -52,14 +54,14 @@
 
 			if (listNameExists) {
 				if (confirm("A list with that name already exists. Overwrite it?")) {
-					formData.append("body", JSON.stringify(list.getListCode()));
+					formData.append("body", listCodeString);
 					open = false;
 				} else {
 					cancel();
 				}
 			} else {
 				list.id = crypto.randomUUID();
-				formData.append("body", JSON.stringify(list.getListCode()));
+				formData.append("body", listCodeString);
 				open = false;
 			}
 		} else {
@@ -67,13 +69,13 @@
 			const listNameExists = listNames.includes(list.details.name.toLowerCase());
 			if (listNameExists) {
 				if (confirm("List with that name already exists in local storage. Overwrite it?")) {
-					localStorage.setItem(list.details.name.toLowerCase(), JSON.stringify(list.getListCode()));
+					localStorage.setItem(list.details.name.toLowerCase(), listCodeString);
 				}
 			} else {
 				list.id = crypto.randomUUID();
 				listNames.push(list.details.name.toLowerCase());
 				localStorage.setItem("lists", JSON.stringify(listNames));
-				localStorage.setItem(list.details.name.toLowerCase(), JSON.stringify(list.getListCode()));
+				localStorage.setItem(list.details.name.toLowerCase(), listCodeString);
 			}
 			cancel();
 			toastController.addToast(`${list.details.name} saved successfully to this device. Consider creating an account to sync lists between devices.`);

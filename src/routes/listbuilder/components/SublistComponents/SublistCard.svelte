@@ -85,7 +85,7 @@
 			size += unit?.baseUnit.size ?? 0;
 			if (unit?.baseUnit.mulId && unit?.baseUnit?.mulId > 0) count++;
 		}
-		for (const [id, count] of sublist.checkedBS) {
+		for (const [id, count] of sublist.checkedBS ?? []) {
 			const bsData = getBSCbyId(id);
 			bsp += (bsData?.bspCost ?? 0) * count;
 			pv += (bsData?.pvCost ?? 0) * count;

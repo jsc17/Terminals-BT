@@ -1,4 +1,4 @@
-import type { ListUnit, MulUnit, ListCode, ListCodeUnit, SCA, ListFormation, Sublist, SublistStats } from "$lib/types/listTypes";
+import { type ListUnit, type MulUnit, type ListCode, type ListCodeUnit, type SCA, type ListFormation, type Sublist, type SublistStats } from "$lib/types/listTypes";
 import { getSCAfromId, calculateListStats } from "$lib/utilities/listUtilities";
 import { getGeneralList, getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 import { getRulesByName } from "$lib/types/rulesets";
@@ -8,6 +8,7 @@ import { getMULDataFromIdLocal } from "$lib/local/sqllite/local-db";
 import { db } from "$lib/local/dexie/db";
 import { validateRules } from "$lib/rules/validateList";
 import { SvelteMap } from "svelte/reactivity";
+import * as v from "valibot";
 
 export type { ListCode, ListCodeUnit, ListUnit, ListFormation, SCA, MulUnit, Sublist, SublistStats };
 
@@ -54,9 +55,17 @@ export class List {
 			rules: $state.snapshot(this.rules),
 			units: unitList,
 			formations: $state.snapshot(this.formations),
-			sublists: $state.snapshot(this.sublists),
+			sublists: $state.snapshot(this.sublists).map((sublist) => {
+				return {
+					id: sublist.id,
+					checked: sublist.checked,
+					checkedBS: [...sublist.checkedBS.entries()],
+					scenario: sublist.scenario
+				};
+			}),
 			bs: $state.snapshot([...this.bsList.entries()])
 		};
+		console.log("listCode", newListCode);
 		if (this.scaList.length) {
 			newListCode.scas = this.scaList.map(({ id }) => {
 				return id;
@@ -234,14 +243,15 @@ export class List {
 		this.rules = listCode.rules;
 
 		this.clear();
-		this.sublists = listCode.sublists;
+
 		const sublistIds = new Set();
-		this.sublists.forEach((sublist) => {
+		for (const sublist of listCode.sublists) {
 			while (sublistIds.has(sublist.id) || sublist.id.length > 6) {
 				sublist.id = nanoid(6);
 			}
 			sublistIds.add(sublist.id);
-		});
+			this.sublists.push({ id: sublist.id, checked: sublist.checked, checkedBS: new Map(sublist.checkedBS), scenario: sublist.scenario });
+		}
 
 		const unitPromises = (
 			await Promise.allSettled(

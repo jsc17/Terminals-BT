@@ -44,7 +44,7 @@ export const actions = {
 		}
 
 		const parsedBody: ListCode = JSON.parse(body.toString());
-
+		console.log("parsedBody", parsedBody);
 		const data = {
 			userId: locals.user.id,
 			id: parsedBody.id,

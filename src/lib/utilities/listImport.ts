@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import type { ListFormation, ListCode, ListCodeUnit, Sublist } from "$lib/types/listTypes";
+import type { ListFormation, ListCode, ListCodeUnit, Sublist, ListCodeSublist } from "$lib/types/listTypes";
 import { List } from "$lib/types/list.svelte";
 import { db } from "$lib/local/dexie/db";
 
@@ -63,6 +63,7 @@ export function getListCodeFromString(data: string): ListCode | undefined {
 }
 
 function importListCodeV2(data: any): ListCode {
+	console.log(data);
 	return {
 		id: data.id ?? crypto.randomUUID(),
 		name: data.name ?? "Imported List",
@@ -103,7 +104,7 @@ function importListCodeV1(data: any): ListCode {
 function convertUnversionedJSONList(importedList: any): ListCode {
 	let importedUnits: ListCodeUnit[] = [];
 	let importedFormations: ListFormation[] = [];
-	let importedSublists: Sublist[] = [];
+	let importedSublists: ListCodeSublist[] = [];
 
 	importedFormations.push({ id: "unassigned", name: "Unassigned units", type: "none", units: [] });
 

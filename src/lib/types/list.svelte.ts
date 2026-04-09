@@ -9,6 +9,7 @@ import { db } from "$lib/local/dexie/db";
 import { validateRules } from "$lib/rules/validateList";
 import { SvelteMap } from "svelte/reactivity";
 import { getBSCbyId } from "$lib/data/battlefieldSupport";
+import { toastController } from "$lib/stores";
 
 export type { ListCode, ListCodeUnit, ListUnit, ListFormation, SCA, MulUnit, Sublist, SublistStats };
 
@@ -269,6 +270,11 @@ export class List {
 			sublistIds.add(sublist.id);
 			this.sublists.push({ id: sublist.id, checked: sublist.checked, checkedBS: new Map(sublist.checkedBS), scenario: sublist.scenario });
 		}
+		if (listCode.bs) {
+			for (const [id, count] of listCode.bs) {
+				this.bsList.set(id, count);
+			}
+		}
 
 		const unitPromises = (
 			await Promise.allSettled(
@@ -290,7 +296,33 @@ export class List {
 
 		const unitData = new Map(unitPromises.map((p) => [p.mulId, p.data]));
 
-		for (const unit of listCode.units) {
+		unitloop: for (const unit of listCode.units) {
+			//convert wolfnet OBA's to BFS
+			for (const [mulId, bfsId] of [
+				[-3, 13],
+				[-4, 14]
+			]) {
+				if (unit.mulId == mulId) {
+					if (this.bsList.has(bfsId)) {
+						this.bsList.set(bfsId, this.bsList.get(bfsId)! + 1);
+					} else {
+						this.bsList.set(bfsId, 1);
+					}
+					for (const sublist of this.sublists) {
+						const beforeCount = sublist.checked.length;
+						sublist.checked = sublist.checked.filter((unitId) => unitId != unit.id);
+						if (beforeCount > sublist.checked.length) {
+							sublist.checkedBS.set(bfsId, (sublist.checkedBS.get(bfsId) ?? 0) + beforeCount - sublist.checked.length);
+						}
+					}
+					for (const formation of listCode.formations) {
+						formation.units = formation.units.filter((u) => u.id != unit.id);
+						if (formation.secondary) formation.secondary.units = formation.secondary.units.filter((u) => u.id != unit.id);
+					}
+					continue unitloop;
+				}
+			}
+
 			while (
 				this.units.find((existingUnit) => {
 					return unit.id == existingUnit.id;
@@ -387,11 +419,6 @@ export class List {
 			for (const scaId of listCode.scas) {
 				this.addSCA(scaId);
 				this.scaList = this.scaList.sort((a, b) => a.id - b.id);
-			}
-		}
-		if (listCode.bs) {
-			for (const [id, count] of listCode.bs) {
-				this.bsList.set(id, count);
 			}
 		}
 	}

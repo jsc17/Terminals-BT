@@ -2,6 +2,7 @@ import { deserialize } from "$app/forms";
 import type { MulUnit } from "$lib/types/listTypes";
 import { handleParse } from "./abilityUtilities";
 import { prisma } from "$lib/server/prisma";
+import type { List } from "$lib/types/list.svelte";
 
 export async function loadMULUnit(mulId: string) {
 	let response: any = deserialize(await (await fetch("/?/getUnit", { method: "POST", body: JSON.stringify({ mulId }) })).text());

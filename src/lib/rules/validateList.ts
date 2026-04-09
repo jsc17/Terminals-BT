@@ -1,14 +1,22 @@
 import type { MulUnit } from "$lib/types/listTypes";
-import { getRulesByName } from "$lib/types/rulesets";
+import { getRulesByName } from "$lib/rules/rulesets";
 import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 import { failsMax, failsMin } from "./utilities";
 import { isUnitAvailableLocal, isUnitUniqueLocal } from "$lib/local/sqllite/local-db";
+import { getBSCbyId } from "$lib/data/battlefieldSupport";
 
-export async function validateRules(unitList: { id: string; skill: number; data: MulUnit }[], eras: number[], factions: number[], selectedRules: string) {
+export async function validateRules(
+	unitList: { id: string; skill: number; data: MulUnit }[],
+	eras: number[],
+	factions: number[],
+	selectedRules: string,
+	bfsList: Map<number, number>
+) {
 	const rulesData = getRulesByName(selectedRules)!;
 
 	const issueList = new Map<string, Set<string>>();
 	const issueUnits = new Set<string>();
+	const issueBFS = new Set<number>();
 	let issueMessage = "";
 
 	if (rulesData) {
@@ -313,7 +321,6 @@ export async function validateRules(unitList: { id: string; skill: number; data:
 		if (rulesData.maxPv && listTotalPv > rulesData.maxPv) {
 			issueList.set("Max PV", new Set([`${listTotalPv}/${rulesData.maxPv}`]));
 		}
-
 		if (rulesData.maxUnits && unitList.filter((u) => u.data.mulId >= 0).length > rulesData.maxUnits) {
 			issueList.set("Max unitList", new Set([`${unitList.length}/${rulesData.maxUnits}`]));
 		}
@@ -324,6 +331,34 @@ export async function validateRules(unitList: { id: string; skill: number; data:
 		if (rulesData.singleEraFaction && (eras.length != 1 || nonGeneralfactionList.length != 1 || factions.length > 2)) {
 			issueList.set("Era/Faction", new Set(["Must select a single era and faction"]));
 		}
+		if (rulesData.bfs) {
+			let totalBSP = 0;
+			let totalBFSPV = 0;
+			let totalBFSCount = 0;
+			for (const [id, count] of bfsList.entries()) {
+				const bsData = getBSCbyId(id);
+				totalBSP += bsData?.bspCost ?? 0 * count;
+				totalBFSPV += bsData?.pvCost ?? 0 * count;
+				totalBFSCount += count;
+				if (rulesData.bfs.maxCountPerType && count > rulesData.bfs.maxCountPerType) {
+					if (issueList.has("Maximum Duplicate BFS")) {
+						issueList.get("Maximum Duplicate BFS")?.add(bsData?.name ?? "Unknown");
+					} else {
+						issueList.set("Maximum Duplicate BFS", new Set([bsData?.name ?? "Unknown"]));
+					}
+					issueBFS.add(id);
+				}
+			}
+			if (rulesData.bfs.maxCount && totalBFSCount > rulesData.bfs.maxCount) {
+				issueList.set("Max Count exceeded", new Set([`${totalBFSCount}/${rulesData.bfs.maxCount}`]));
+			}
+			if (rulesData.bfs.maxBSP && totalBSP > rulesData.bfs.maxBSP) {
+				issueList.set("Max BSP exceeded", new Set([`${totalBSP}/${rulesData.bfs.maxBSP}`]));
+			}
+			if (rulesData.bfs.maxPv && totalBFSPV > rulesData.bfs.maxPv) {
+				issueList.set("Max PV exceeded", new Set([`${totalBFSPV}/${rulesData.bfs.maxPv}`]));
+			}
+		}
 	}
-	return { issueList, issueUnits, issueMessage };
+	return { issueList, issueUnits, issueBFS, issueMessage };
 }

@@ -4,36 +4,41 @@
 	import { TrashIcon } from "$lib/icons";
 	import type { List } from "$lib/types/list.svelte";
 	import type { Item } from "$lib/generic/types";
-	import { getRulesByName } from "$lib/types/rulesets";
+	import { getRulesByName } from "$lib/rules/rulesets";
 
 	let { list = $bindable() }: { list: List } = $props();
 
 	let popoverOpen = $state(false);
 
 	let groupedItems = $derived.by(() => {
-		const groupedItems: { groupLabel: string; items: Item[] }[] = [];
+		const groupedItems: { groupLabel: string; items: { value: number; label: string }[] }[] = [];
 
-		const availableBFS = getBFSPacks(getRulesByName(list.rules)?.allowedBFSPacks ?? []);
+		const availableBFS = getBFSPacks(getRulesByName(list.rules)?.bfs?.allowedPacks ?? []);
 
 		for (const [group, values] of availableBFS) {
 			groupedItems.push({
 				groupLabel: group,
-				items: values.map((item) => {
-					return { value: item.id.toString(), label: `${item.name}` };
-				})
+				items: values
+					.filter((item) => !list.bsList.has(item.id))
+					.map((item) => {
+						return { value: item.id, label: `${item.name}` };
+					})
 			});
 		}
 		return groupedItems;
 	});
-	let selectedBS = $derived(groupedItems[0].items[0].value);
+
+	let selectedBS = $derived(groupedItems.find((g) => g.items.find((i) => i.value != -1))?.items.find((i) => i.value != -1)?.value ?? -1);
 
 	function handleAddButton() {
-		list.addBS(Number(selectedBS));
+		if (selectedBS != -1) {
+			list.addBS(selectedBS);
+		}
 	}
 
 	const bsCount = $derived(list.bsList.size);
-	const hasBSP = $derived(list.bsList.keys().some((bs) => getBSCbyId(bs)?.bspCost != 0));
-	const hasPV = $derived(list.bsList.keys().some((bs) => getBSCbyId(bs)?.pvCost != 0));
+	const hasBSP = $derived(list.bsList.keys().some((bs) => (getBSCbyId(bs)?.bspCost ?? 0) != 0));
+	const hasPV = $derived(list.bsList.keys().some((bs) => (getBSCbyId(bs)?.pvCost ?? 0) != 0));
 </script>
 
 <Popover triggerClasses="button" bind:open={popoverOpen}>
@@ -68,7 +73,7 @@
 				{#if bsData}
 					<div class="formation-row">
 						<input type="number" min="1" bind:value={() => list.bsList.get(id), (v) => list.setBSCount(id, v ?? 1)} />
-						<p>{bsData.name}</p>
+						<p class={{ error: (await list.issues).issueBFS.has(id) }}>{bsData.name}</p>
 						{#if bsData.bspCost}
 							<p class="muted">{bsData.bspCost}({count * bsData.bspCost})</p>
 						{:else}
@@ -89,8 +94,18 @@
 			{/each}
 		</div>
 		<div class="popover-footer">
-			<Select bind:value={selectedBS} {groupedItems} type="single"></Select>
-			<button onclick={handleAddButton}>Add</button>
+			<select bind:value={selectedBS}>
+				{#each groupedItems as group}
+					<optgroup label={group.groupLabel} class="muted">
+						{#each group.items as item}
+							<option value={item.value}>{item.label}</option>
+						{:else}
+							<option value={-1} class="muted">No options remaining</option>
+						{/each}
+					</optgroup>
+				{/each}
+			</select>
+			<button onclick={handleAddButton} disabled={selectedBS == -1}>Add</button>
 		</div>
 	</div>
 </Popover>

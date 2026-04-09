@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { type List, type Sublist, type SublistStats, type ListUnit } from "$lib/types/list.svelte";
-	import { getRulesByName } from "$lib/types/rulesets";
+	import { getRulesByName } from "$lib/rules/rulesets";
 	import { DropdownMenu, Popover, Separator } from "$lib/generic";
 	import { dragHandle } from "svelte-dnd-action";
 	import ExportSublistModal from "./ExportSublistModal.svelte";

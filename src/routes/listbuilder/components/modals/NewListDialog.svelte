@@ -2,7 +2,7 @@
 	import { Dialog } from "$lib/generic/";
 	import { toastController } from "$lib/stores";
 	import { List, type ListCode } from "$lib/types/list.svelte";
-	import { ruleSets, getRulesByName } from "$lib/types/rulesets";
+	import { ruleSets, getRulesByName } from "$lib/rules/rulesets";
 	import { Tabs } from "bits-ui";
 	import { getListCodeFromString } from "$lib/utilities/listImport";
 	import { deleteUsersLists, getUsersLists, loadUserList } from "$lib/remote/list.remote";

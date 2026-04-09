@@ -2,8 +2,8 @@ import type { MulUnit } from "$lib/types/listTypes";
 import type { Filter } from "./filter";
 import { deserialize } from "$app/forms";
 import { filters as filtersImport, additionalFilters as additionalFiltersImport } from "$lib/data/filters";
-import type { Ruleset } from "./rulesets";
-import { ruleSets } from "./rulesets";
+import type { Ruleset } from "../rules/rulesets";
+import { ruleSets } from "../rules/rulesets";
 import { getResultListLocal, getUniqueListLocal } from "$lib/local/sqllite/local-db";
 import { convertUnitDataToMulUnit } from "$lib/utilities/unitData";
 

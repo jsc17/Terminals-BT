@@ -2,7 +2,7 @@
 	import { PrintModal, SaveModal, LoadModal, SublistModal, UnitCustomizationModal, FormationCard, ListInfoPopover, FindUnitAvailabilityModal } from "./";
 	import { type ListFormation, List } from "$lib/types/list.svelte";
 	import { ResultList } from "$lib/types/resultList.svelte";
-	import { getRulesByName, ruleSets } from "$lib/types/rulesets";
+	import { getRulesByName, ruleSets } from "$lib/rules/rulesets";
 	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
 	import { appWindow, toastController } from "$lib/stores";
 	import { Dialog } from "$lib/generic";

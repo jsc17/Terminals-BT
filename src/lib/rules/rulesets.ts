@@ -35,7 +35,15 @@ export type Ruleset = {
 	sublistMaxUnits?: number;
 	sublistMaxPv?: number;
 	sublistScenarios?: string[];
-	allowedBFSPacks?: string[];
+	bfs?: {
+		allowedPacks?: string[];
+		maxPv?: number;
+		maxBSP?: number;
+		maxCount?: number;
+		maxCountPerType?: number;
+	};
+	allowFormations: boolean;
+	allowSCA: boolean;
 };
 
 export const ruleSets: Ruleset[] = [
@@ -45,7 +53,11 @@ export const ruleSets: Ruleset[] = [
 		shortDisplay: "-",
 		eraFactionRestriction: true,
 		sublistScenarios: [],
-		allowedBFSPacks: ["core"]
+		bfs: {
+			allowedPacks: ["core"]
+		},
+		allowFormations: true,
+		allowSCA: true
 	},
 	{
 		name: "wn350v3",
@@ -91,7 +103,9 @@ export const ruleSets: Ruleset[] = [
 			"Pressure Plate",
 			"Stranglehold"
 		],
-		allowedBFSPacks: ["wn350v3"]
+		bfs: { allowedPacks: ["wn350v3"], maxCountPerType: 2 },
+		allowFormations: false,
+		allowSCA: false
 	},
 	{
 		name: "wn350v3d",
@@ -138,7 +152,9 @@ export const ruleSets: Ruleset[] = [
 			"Pressure Plate",
 			"Stranglehold"
 		],
-		allowedBFSPacks: ["wn350v3"]
+		bfs: { allowedPacks: ["wn350v3"], maxCountPerType: 2 },
+		allowFormations: true,
+		allowSCA: false
 	},
 	{
 		name: "wn350v3e",
@@ -187,7 +203,9 @@ export const ruleSets: Ruleset[] = [
 			"Pressure Plate",
 			"Stranglehold"
 		],
-		allowedBFSPacks: ["wn350v3"]
+		bfs: { allowedPacks: ["wn350v3"], maxCountPerType: 2 },
+		allowFormations: true,
+		allowSCA: false
 	},
 	{
 		name: "asopen",
@@ -210,7 +228,9 @@ export const ruleSets: Ruleset[] = [
 			{ types: ["JMPS"], max: 2 },
 			{ types: ["ART"], max: 2, requirements: { skill: { min: 4 } } }
 		],
-		uniqueMaxLimit: 1
+		uniqueMaxLimit: 1,
+		allowFormations: false,
+		allowSCA: false
 	}
 ];
 

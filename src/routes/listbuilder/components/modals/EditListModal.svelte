@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { List } from "$lib/types/list.svelte";
 	import { Dialog } from "$lib/generic";
-	import { ruleSets } from "$lib/types/rulesets";
+	import { ruleSets } from "$lib/rules/rulesets";
 
 	type Props = {
 		list: List;

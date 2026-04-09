@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getEras } from "$lib/remote/era-faction.remote.js";
 	import { createTournament, getUsersTournamentList } from "./tournament.remote.js";
-	import { ruleSets } from "$lib/types/rulesets";
+	import { ruleSets } from "$lib/rules/rulesets.js";
 	import { toastController } from "$lib/stores/toastController.svelte.js";
 	import { FormCreationSchema } from "./schema.js";
 	import { goto } from "$app/navigation";

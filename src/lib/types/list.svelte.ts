@@ -1,7 +1,7 @@
 import { type ListUnit, type MulUnit, type ListCode, type ListCodeUnit, type SCA, type ListFormation, type Sublist, type SublistStats } from "$lib/types/listTypes";
 import { getSCAfromId, calculateListStats } from "$lib/utilities/listUtilities";
 import { getGeneralList, getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
-import { getRulesByName } from "$lib/types/rulesets";
+import { getRulesByName } from "$lib/rules/rulesets";
 import { nanoid } from "nanoid";
 import { getCustomUnitData, getUnitAvailability } from "$lib/remote/unit.remote";
 import { getMULDataFromIdLocal } from "$lib/local/sqllite/local-db";
@@ -9,7 +9,6 @@ import { db } from "$lib/local/dexie/db";
 import { validateRules } from "$lib/rules/validateList";
 import { SvelteMap } from "svelte/reactivity";
 import { getBSCbyId } from "$lib/data/battlefieldSupport";
-import { toastController } from "$lib/stores";
 
 export type { ListCode, ListCodeUnit, ListUnit, ListFormation, SCA, MulUnit, Sublist, SublistStats };
 
@@ -25,7 +24,7 @@ export class List {
 	options = $derived(getRulesByName(this.rules));
 	id: string = $state(crypto.randomUUID());
 
-	unitCount = $derived(this.units.filter((u) => u.baseUnit.mulId >= 0).length);
+	unitCount = $derived(this.units.length);
 	pv = $derived(
 		this.units.reduce((total, current) => total + current.cost, 0) +
 			[...this.bsList.entries()].reduce((total, [id, count]) => {
@@ -81,7 +80,8 @@ export class List {
 			$state.snapshot(this.units.map((u) => ({ id: u.id, skill: u.skill ?? 4, data: u.baseUnit }))),
 			$state.snapshot(this.details.eras),
 			$state.snapshot(this.details.factions.concat(this.details.general == -1 ? [] : [this.details.general])),
-			$state.snapshot(this.rules)
+			$state.snapshot(this.rules),
+			$state.snapshot(this.bsList)
 		)
 	);
 
@@ -91,7 +91,7 @@ export class List {
 
 	setOptions(newRules: string) {
 		this.rules = newRules;
-		const allowedPacks = getRulesByName(newRules)?.allowedBFSPacks ?? [];
+		const allowedPacks = getRulesByName(newRules)?.bfs?.allowedPacks ?? [];
 		for (const id of this.bsList.keys()) {
 			const bsData = getBSCbyId(id);
 			if (bsData && !allowedPacks.includes(bsData.pack)) {

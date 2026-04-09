@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getEraName } from "$lib/remote/era-faction.remote";
-	import { getRulesByName } from "$lib/types/rulesets";
+	import { getRulesByName } from "$lib/rules/rulesets";
 
 	type Props = {
 		tournamentData: {

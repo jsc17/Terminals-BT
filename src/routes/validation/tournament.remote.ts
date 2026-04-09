@@ -3,7 +3,7 @@ import { tournamentEmailTransporter } from "$lib/server/emails/mailer.server";
 import { ListSubmission } from "$lib/server/emails/templates";
 import { render } from "svelty-email";
 import { getEraName, getFactionName } from "$lib/remote/era-faction.remote";
-import { getRulesByName } from "$lib/types/rulesets";
+import { getRulesByName } from "$lib/rules/rulesets";
 import * as fs from "fs/promises";
 import { prisma } from "$lib/server/prisma";
 import * as v from "valibot";

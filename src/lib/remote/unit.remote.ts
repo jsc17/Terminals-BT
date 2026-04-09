@@ -3,7 +3,7 @@ import * as v from "valibot";
 import { prisma } from "$lib/server/prisma";
 import type { MulUnit } from "$lib/types/listTypes";
 import { handleParse } from "$lib/utilities/abilityUtilities";
-import { getRulesByName } from "$lib/types/rulesets";
+import { getRulesByName } from "$lib/rules/rulesets";
 
 export const getMULDataFromId = query.batch(v.number(), async (ids) => {
 	const mulData = await prisma.unit.findMany({ where: { mulId: { in: ids } } });

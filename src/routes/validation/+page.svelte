@@ -3,7 +3,7 @@
 	import { getApprovedTournamentList, submitList } from "./tournament.remote";
 	import { validateRules } from "$lib/rules/validateList";
 	import { toastController } from "$lib/stores";
-	import { getRulesByName, ruleSets } from "$lib/types/rulesets";
+	import { getRulesByName, ruleSets } from "$lib/rules/rulesets";
 	import { createAbilityLineString } from "$lib/utilities/abilityUtilities";
 	import FixModal from "./FixModal.svelte";
 	import type { ValidationUnitData, TournamentData } from "./types";

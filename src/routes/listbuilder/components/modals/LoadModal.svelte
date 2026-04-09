@@ -4,7 +4,7 @@
 	import { List, type ListCode } from "$lib/types/list.svelte";
 	import { getListCodeFromString } from "$lib/utilities/listImport";
 	import { Dialog } from "$lib/generic";
-	import { getRulesByName } from "$lib/types/rulesets";
+	import { getRulesByName } from "$lib/rules/rulesets";
 	import { deleteUsersLists, getUsersLists, loadUserList } from "$lib/remote/list.remote";
 
 	let user: any = getContext("user");

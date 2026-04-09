@@ -8,7 +8,6 @@ import { getMULDataFromIdLocal } from "$lib/local/sqllite/local-db";
 import { db } from "$lib/local/dexie/db";
 import { validateRules } from "$lib/rules/validateList";
 import { SvelteMap } from "svelte/reactivity";
-import * as v from "valibot";
 import { getBSCbyId } from "$lib/data/battlefieldSupport";
 
 export type { ListCode, ListCodeUnit, ListUnit, ListFormation, SCA, MulUnit, Sublist, SublistStats };
@@ -91,6 +90,13 @@ export class List {
 
 	setOptions(newRules: string) {
 		this.rules = newRules;
+		const allowedPacks = getRulesByName(newRules)?.allowedBFSPacks ?? [];
+		for (const id of this.bsList.keys()) {
+			const bsData = getBSCbyId(id);
+			if (bsData && !allowedPacks.includes(bsData.pack)) {
+				this.removeBS(id);
+			}
+		}
 	}
 
 	addUnit(baseUnit: MulUnit) {

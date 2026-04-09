@@ -1,10 +1,9 @@
 export type battlefieldSupportCard = {
 	id: number;
+	pack: string;
 	source: string;
 	group: string;
 	name: string;
-	btn: string;
-	dmg: string;
-	bspCost: number;
+	bspCost?: number;
 	pvCost?: number;
 };

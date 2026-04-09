@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { battlefieldSupport, battlefieldSupportGroups, getBSCbyId } from "$lib/data/battlefieldSupport";
+	import { battlefieldSupport, battlefieldSupportGroups, getBFSPacks, getBSCbyId } from "$lib/data/battlefieldSupport";
 	import { Popover, Select } from "$lib/generic";
 	import { TrashIcon } from "$lib/icons";
 	import type { List } from "$lib/types/list.svelte";
 	import type { Item } from "$lib/generic/types";
+	import { getRulesByName } from "$lib/types/rulesets";
 
 	let { list = $bindable() }: { list: List } = $props();
 
@@ -11,14 +12,15 @@
 
 	let groupedItems = $derived.by(() => {
 		const groupedItems: { groupLabel: string; items: Item[] }[] = [];
-		for (const groupLabel of battlefieldSupportGroups) {
+
+		const availableBFS = getBFSPacks(getRulesByName(list.rules)?.allowedBFSPacks ?? []);
+
+		for (const [group, values] of availableBFS) {
 			groupedItems.push({
-				groupLabel,
-				items: battlefieldSupport
-					.filter((item) => item.group == groupLabel && !list.bsList.has(item.id))
-					.map((item) => {
-						return { value: item.id.toString(), label: `${item.name} (${item.bspCost})` };
-					})
+				groupLabel: group,
+				items: values.map((item) => {
+					return { value: item.id.toString(), label: `${item.name}` };
+				})
 			});
 		}
 		return groupedItems;

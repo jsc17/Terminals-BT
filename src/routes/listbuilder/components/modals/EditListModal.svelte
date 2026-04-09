@@ -14,7 +14,7 @@
 
 	function saveChanges() {
 		list.details.name = listName;
-		list.rules = rules;
+		list.setOptions(rules);
 		open = false;
 	}
 

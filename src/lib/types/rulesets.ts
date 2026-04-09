@@ -34,6 +34,7 @@ export type Ruleset = {
 	sublistMaxUnits?: number;
 	sublistMaxPv?: number;
 	sublistScenarios?: string[];
+	allowedBFSPacks?: string[];
 };
 
 export const ruleSets: Ruleset[] = [
@@ -42,37 +43,9 @@ export const ruleSets: Ruleset[] = [
 		display: "No Restrictions",
 		shortDisplay: "-",
 		eraFactionRestriction: true,
-		sublistScenarios: []
+		sublistScenarios: [],
+		allowedBFSPacks: ["core"]
 	},
-	// {
-	// 	name: "wn350",
-	// 	display: "Wolfnet 350 v2.3",
-	// 	singleEraFaction: true,
-	// 	eraFactionRestriction: true,
-	// 	maxPv: 350,
-	// 	maxUnits: 16,
-	// 	allowedTypes: ["BA", "BM", "CV", "CI", "IM", "PM", "BS"],
-	// 	allowedRules: ["Introductory", "Advanced", "Standard"],
-	// 	disallowUnique: true,
-	// 	disallowedAbilities: ["DRO"],
-	// 	customUnitPacks: ["wn350"],
-	// 	maxSkill: 6,
-	// 	minSkill: 2,
-	// 	unitLimits: [
-	// 		{ types: ["BM", "IM"], max: 12 },
-	// 		{ types: ["CV"], max: 8 },
-	// 		{ types: ["BA", "CI"], max: 5 },
-	// 		{ types: ["PM"], equal: [0, 5] }
-	// 	],
-	// 	chassisLimits: [{ types: ["All"], max: 2 }],
-	// 	variantLimits: [{ types: ["BM", "IM"], max: 1 }],
-	// 	skillLimits: [{ types: ["2", "6"], max: 2 }],
-	// 	requireHitch: true,
-	// 	abilityLimits: [{ types: ["JMPS"], max: 2 }],
-	// 	sublistMaxUnits: 10,
-	// 	sublistMaxPv: 250,
-	// 	sublistScenarios: ["Bunkers", "Capture the Flag", "Domination", "Headhunter", "Hold the Line", "King of the Hill", "Overrun", "Stand Up Fight"]
-	// },
 	{
 		name: "wn350v3",
 		display: "Wolfnet 350 v3.0",
@@ -116,7 +89,8 @@ export const ruleSets: Ruleset[] = [
 			"Stand Up Fight",
 			"Pressure Plate",
 			"Stranglehold"
-		]
+		],
+		allowedBFSPacks: ["wn350v3"]
 	},
 	{
 		name: "wn350v3d",
@@ -161,7 +135,8 @@ export const ruleSets: Ruleset[] = [
 			"Stand Up Fight",
 			"Pressure Plate",
 			"Stranglehold"
-		]
+		],
+		allowedBFSPacks: ["wn350v3"]
 	},
 	{
 		name: "wn350v3e",
@@ -208,7 +183,8 @@ export const ruleSets: Ruleset[] = [
 			"Stand Up Fight",
 			"Pressure Plate",
 			"Stranglehold"
-		]
+		],
+		allowedBFSPacks: ["wn350v3"]
 	},
 	{
 		name: "asopen",

@@ -2,20 +2,22 @@ import { type battlefieldSupportCard } from "$lib/types/battlefieldSupport";
 
 const battlefieldSupportGroups = ["Offensive Aerospace Support", "Defensive Aerospace Support", "Artillery Support", "Minefield Support"];
 
-const battlefieldSupport = [
-	{ id: 0, source: "AS:CE pg.54", group: "Offensive Aerospace Support", name: "Light Strike", btn: "5", dmg: "1", bspCost: 2, pvCost: 10 },
-	{ id: 1, source: "AS:CE pg.54", group: "Offensive Aerospace Support", name: "Light Bombing", btn: "5", dmg: "1", bspCost: 3 },
-	{ id: 2, source: "AS:CE pg.54", group: "Offensive Aerospace Support", name: "Heavy Strike", btn: "6", dmg: "2", bspCost: 3 },
-	{ id: 3, source: "AS:CE pg.54", group: "Offensive Aerospace Support", name: "Heavy Bombing", btn: "7", dmg: "2", bspCost: 4 },
-	{ id: 4, source: "AS:CE pg.55", group: "Offensive Aerospace Support", name: "Strafing", btn: "7", dmg: "2", bspCost: 5 },
-	{ id: 5, source: "AS:CE pg.55", group: "Defensive Aerospace Support", name: "Light Air Cover", btn: "Varies", dmg: "-", bspCost: 1 },
-	{ id: 6, source: "AS:CE pg.55", group: "Defensive Aerospace Support", name: "Heavy Air Cover", btn: "Varies", dmg: "-", bspCost: 2 },
-	{ id: 7, source: "AS:CE pg.56", group: "Artillery Support", name: "Thumper", btn: "7", dmg: "1", bspCost: 2 },
-	{ id: 8, source: "AS:CE pg.56", group: "Artillery Support", name: "Sniper", btn: "8", dmg: "2", bspCost: 3 },
-	{ id: 9, source: "AS:CE pg.56", group: "Artillery Support", name: "Long Tom", btn: "9", dmg: "3/1", bspCost: 5 },
-	{ id: 10, source: "AS:CE pg.56", group: "Minefield Support", name: "Light Density", btn: "9", dmg: "1", bspCost: 0.5 },
-	{ id: 11, source: "AS:CE pg.56", group: "Minefield Support", name: "Medium Density", btn: "8", dmg: "2", bspCost: 2 },
-	{ id: 12, source: "AS:CE pg.56", group: "Minefield Support", name: "Heavy Density", btn: "7", dmg: "3", bspCost: 5 }
+const battlefieldSupport: battlefieldSupportCard[] = [
+	{ id: 0, pack: "core", source: "AS:CE pg.54", group: "Offensive Aerospace Support", name: "Light Strike", bspCost: 2, pvCost: 10 },
+	{ id: 1, pack: "core", source: "AS:CE pg.54", group: "Offensive Aerospace Support", name: "Light Bombing", bspCost: 3 },
+	{ id: 2, pack: "core", source: "AS:CE pg.54", group: "Offensive Aerospace Support", name: "Heavy Strike", bspCost: 3 },
+	{ id: 3, pack: "core", source: "AS:CE pg.54", group: "Offensive Aerospace Support", name: "Heavy Bombing", bspCost: 4 },
+	{ id: 4, pack: "core", source: "AS:CE pg.55", group: "Offensive Aerospace Support", name: "Strafing", bspCost: 5 },
+	{ id: 5, pack: "core", source: "AS:CE pg.55", group: "Defensive Aerospace Support", name: "Light Air Cover", bspCost: 1 },
+	{ id: 6, pack: "core", source: "AS:CE pg.55", group: "Defensive Aerospace Support", name: "Heavy Air Cover", bspCost: 2 },
+	{ id: 7, pack: "core", source: "AS:CE pg.56", group: "Artillery Support", name: "Thumper", bspCost: 2 },
+	{ id: 8, pack: "core", source: "AS:CE pg.56", group: "Artillery Support", name: "Sniper", bspCost: 3 },
+	{ id: 9, pack: "core", source: "AS:CE pg.56", group: "Artillery Support", name: "Long Tom", bspCost: 5 },
+	{ id: 10, pack: "core", source: "AS:CE pg.56", group: "Minefield Support", name: "Light Density", bspCost: 0.5 },
+	{ id: 11, pack: "core", source: "AS:CE pg.56", group: "Minefield Support", name: "Medium Density", bspCost: 2 },
+	{ id: 12, pack: "core", source: "AS:CE pg.56", group: "Minefield Support", name: "Heavy Density", bspCost: 5 },
+	{ id: 13, pack: "wn350v3", source: "WN350 pg.13", group: "Off-Board Artillery", name: "Thumper", pvCost: 5 },
+	{ id: 14, pack: "wn350v3", source: "WN350 pg.13", group: "Off-Board Artillery", name: "Sniper", pvCost: 8 }
 ];
 
 function getBSCbyId(id: number): battlefieldSupportCard | undefined {
@@ -23,4 +25,9 @@ function getBSCbyId(id: number): battlefieldSupportCard | undefined {
 	return bs;
 }
 
-export { battlefieldSupportGroups, type battlefieldSupportCard, battlefieldSupport, getBSCbyId };
+function getBFSPacks(packNames: string[]) {
+	const availableBFS = battlefieldSupport.filter((bs) => packNames.includes(bs.pack));
+	return Map.groupBy(availableBFS, (bs) => bs.group);
+}
+
+export { battlefieldSupportGroups, type battlefieldSupportCard, battlefieldSupport, getBSCbyId, getBFSPacks };

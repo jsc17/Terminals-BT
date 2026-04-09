@@ -30,6 +30,8 @@
 	}
 
 	const bsCount = $derived(list.bsList.size);
+	const hasBSP = $derived(list.bsList.keys().some((bs) => getBSCbyId(bs)?.bspCost != 0));
+	const hasPV = $derived(list.bsList.keys().some((bs) => getBSCbyId(bs)?.pvCost != 0));
 </script>
 
 <Popover triggerClasses="button" bind:open={popoverOpen}>
@@ -47,12 +49,12 @@
 			<div class="formation-header">
 				<div></div>
 				<p>Name</p>
-				{#if list.bsList.keys().find((bs) => getBSCbyId(bs)?.bspCost)}
+				{#if hasBSP}
 					<p>BSP</p>
 				{:else}
 					<div></div>
 				{/if}
-				{#if list.bsList.keys().find((bs) => getBSCbyId(bs)?.pvCost)}
+				{#if hasPV}
 					<p>PV</p>
 				{:else}
 					<div></div>
@@ -63,7 +65,7 @@
 				{@const bsData = getBSCbyId(id)}
 				{#if bsData}
 					<div class="formation-row">
-						<input type="number" min="1" bind:value={() => list.bsList.get(id), (v) => list.bsList.set(id, v ?? 1)} />
+						<input type="number" min="1" bind:value={() => list.bsList.get(id), (v) => list.setBSCount(id, v ?? 1)} />
 						<p>{bsData.name}</p>
 						{#if bsData.bspCost}
 							<p class="muted">{bsData.bspCost}({count * bsData.bspCost})</p>

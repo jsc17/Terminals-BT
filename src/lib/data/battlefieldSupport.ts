@@ -3,7 +3,7 @@ import { type battlefieldSupportCard } from "$lib/types/battlefieldSupport";
 const battlefieldSupportGroups = ["Offensive Aerospace Support", "Defensive Aerospace Support", "Artillery Support", "Minefield Support"];
 
 const battlefieldSupport = [
-	{ id: 0, source: "AS:CE pg.54", group: "Offensive Aerospace Support", name: "Light Strike", btn: "5", dmg: "1", bspCost: 2 },
+	{ id: 0, source: "AS:CE pg.54", group: "Offensive Aerospace Support", name: "Light Strike", btn: "5", dmg: "1", bspCost: 2, pvCost: 10 },
 	{ id: 1, source: "AS:CE pg.54", group: "Offensive Aerospace Support", name: "Light Bombing", btn: "5", dmg: "1", bspCost: 3 },
 	{ id: 2, source: "AS:CE pg.54", group: "Offensive Aerospace Support", name: "Heavy Strike", btn: "6", dmg: "2", bspCost: 3 },
 	{ id: 3, source: "AS:CE pg.54", group: "Offensive Aerospace Support", name: "Heavy Bombing", btn: "7", dmg: "2", bspCost: 4 },

@@ -9,6 +9,7 @@ import { db } from "$lib/local/dexie/db";
 import { validateRules } from "$lib/rules/validateList";
 import { SvelteMap } from "svelte/reactivity";
 import * as v from "valibot";
+import { getBSCbyId } from "$lib/data/battlefieldSupport";
 
 export type { ListCode, ListCodeUnit, ListUnit, ListFormation, SCA, MulUnit, Sublist, SublistStats };
 
@@ -26,9 +27,11 @@ export class List {
 
 	unitCount = $derived(this.units.filter((u) => u.baseUnit.mulId >= 0).length);
 	pv = $derived(
-		Array.from(this.units.values()).reduce((total, current) => {
-			return total + current.cost;
-		}, 0)
+		this.units.reduce((total, current) => total + current.cost, 0) +
+			[...this.bsList.entries()].reduce((total, [id, count]) => {
+				const bfsData = getBSCbyId(id);
+				return total + (bfsData?.pvCost ?? 0) * count;
+			}, 0)
 	);
 
 	stats = $derived(calculateListStats(this.units));
@@ -65,7 +68,6 @@ export class List {
 			}),
 			bs: $state.snapshot([...this.bsList.entries()])
 		};
-		console.log("listCode", newListCode);
 		if (this.scaList.length) {
 			newListCode.scas = this.scaList.map(({ id }) => {
 				return id;
@@ -213,9 +215,18 @@ export class List {
 	}
 	removeBS(idToRemove: number) {
 		this.bsList.delete(idToRemove);
+		for (const sublist of this.sublists) {
+			sublist.checkedBS.delete(idToRemove);
+		}
 	}
 	setBSCount(id: number, count: number) {
 		this.bsList.set(id, count);
+		for (const sublist of this.sublists) {
+			const checkedCount = sublist.checkedBS.get(id);
+			if (checkedCount && checkedCount > count) {
+				sublist.checkedBS.set(id, count);
+			}
+		}
 	}
 
 	getListCode() {

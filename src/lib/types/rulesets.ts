@@ -10,6 +10,7 @@ type Limit = {
 export type Ruleset = {
 	name: string;
 	display: string;
+	notice?: string;
 	shortDisplay: string;
 	singleEraFaction?: boolean;
 	eraFactionRestriction?: boolean;
@@ -50,6 +51,7 @@ export const ruleSets: Ruleset[] = [
 		name: "wn350v3",
 		display: "Wolfnet 350 v3.0",
 		shortDisplay: "WN350v3",
+		notice: "Off-Board Artillery supports have been moved from units to the Battlefield Support tab",
 		singleEraFaction: true,
 		eraFactionRestriction: true,
 		maxPv: 350,
@@ -57,7 +59,6 @@ export const ruleSets: Ruleset[] = [
 		allowedTypes: ["BA", "BM", "CV", "CI", "IM", "PM", "BS"],
 		allowedRules: ["Introductory", "Advanced", "Standard"],
 		disallowedAbilities: ["DRO"],
-		customUnitPacks: ["wn350v3"],
 		maxSkill: 6,
 		minSkill: 2,
 		unitLimits: [
@@ -96,6 +97,8 @@ export const ruleSets: Ruleset[] = [
 		name: "wn350v3d",
 		display: "Wolfnet 350 v3.0 Doubles",
 		shortDisplay: "WN350v3 Dbls",
+		notice: "Off-Board Artillery supports have been moved from units to the Battlefield Support tab",
+
 		singleEraFaction: true,
 		eraFactionRestriction: true,
 		maxPv: 250,
@@ -103,7 +106,6 @@ export const ruleSets: Ruleset[] = [
 		allowedTypes: ["BA", "BM", "CV", "CI", "IM", "PM", "BS"],
 		allowedRules: ["Introductory", "Advanced", "Standard"],
 		disallowedAbilities: ["DRO"],
-		customUnitPacks: ["wn350v3"],
 		maxSkill: 6,
 		minSkill: 2,
 		unitLimits: [
@@ -142,6 +144,8 @@ export const ruleSets: Ruleset[] = [
 		name: "wn350v3e",
 		display: "Wolfnet 350 v3.0 Epic",
 		shortDisplay: "WN350v3 Epic",
+		notice: "Off-Board Artillery supports have been moved from units to the Battlefield Support tab",
+
 		singleEraFaction: true,
 		eraFactionRestriction: true,
 		maxPv: 600,
@@ -149,7 +153,6 @@ export const ruleSets: Ruleset[] = [
 		allowedTypes: ["BA", "BM", "CV", "CI", "IM", "PM", "BS"],
 		allowedRules: ["Introductory", "Advanced", "Standard"],
 		disallowedAbilities: ["DRO"],
-		customUnitPacks: ["wn350v3"],
 		maxSkill: 6,
 		minSkill: 1,
 		unitLimits: [

@@ -195,6 +195,11 @@
 		{/each}
 		<DamageSortPopover {resultList}></DamageSortPopover>
 	</div>
+	{#if resultList.options?.notice}
+		<div class="rules-notice">
+			<p class="muted">{resultList.options.notice}</p>
+		</div>
+	{/if}
 	{#await Promise.all([workerInitialized, resultList.status])}
 		<div class="loading-message">Loading units. Please wait ...</div>
 	{:then [_, result]}
@@ -417,6 +422,14 @@
 	}
 	:global(.sort) {
 		filter: var(--surface-color-light-filter);
+	}
+	.rules-notice {
+		padding: 4px;
+		border-left: 1px solid var(--border);
+		scrollbar-gutter: stable;
+	}
+	.rules-notice p {
+		text-align: center;
 	}
 	.virtual-list-row {
 		display: grid;

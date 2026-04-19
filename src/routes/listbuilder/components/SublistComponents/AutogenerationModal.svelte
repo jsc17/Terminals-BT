@@ -4,7 +4,7 @@
 	import { nanoid } from "nanoid";
 	import { appWindow } from "$lib/stores";
 	import AutoGenerationStatsDialog from "./AutoGenerationStatsDialog.svelte";
-	import { getBSCbyId } from "$lib/data/battlefieldSupport";
+	import { getBfsById } from "$lib/data/battlefieldSupport";
 	import { watch } from "runed";
 
 	type AutoSublist = {
@@ -144,7 +144,7 @@
 						return { id: unit.id, name: unit.baseUnit.name, included: "allowed", skill: unit.skill, pvcost: unit.cost };
 					});
 				filteredBS = [...list.bsList.entries()].map(([id, count]) => {
-					const bsData = getBSCbyId(id);
+					const bsData = getBfsById(id);
 					return { id, name: bsData?.name ?? "Not Found", bspcost: bsData?.bspCost, pvcost: bsData?.pvCost, listTotal: count, min: 0, max: count };
 				});
 			}

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { List, Sublist } from "$lib/types/list.svelte";
 	import { Dialog } from "$lib/generic";
-	import { getBSCbyId } from "$lib/data/battlefieldSupport";
+	import { getBfsById } from "$lib/data/battlefieldSupport";
 
 	type Props = {
 		list: List;
@@ -83,7 +83,7 @@
 				<p class="center">BSP</p>
 				<p class="center">PV</p>
 				{#each list.bsList.entries() as [id, count], index}
-					{@const bsData = getBSCbyId(id)}
+					{@const bsData = getBfsById(id)}
 					<div class="inline">
 						<input type="number" min="0" max={count} bind:value={() => sublist?.checkedBS.get(id) ?? 0, (v) => sublist?.checkedBS.set(id, v)} />
 						<p>/{count}x</p>

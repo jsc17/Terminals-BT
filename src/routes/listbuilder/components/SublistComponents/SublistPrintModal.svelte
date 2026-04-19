@@ -5,7 +5,7 @@
 	import { getContext } from "svelte";
 	import type { SettingsOutput } from "../../types/settings";
 	import { printAllSublists } from "$routes/listbuilder/printing/print.remote";
-	import { getBSCbyId } from "$lib/data/battlefieldSupport";
+	import { getBfsById } from "$lib/data/battlefieldSupport";
 
 	type Props = {
 		open: boolean;
@@ -31,7 +31,7 @@
 				}
 			}
 			for (const [bfsId, count] of sublist.checkedBS.entries()) {
-				const bfs = getBSCbyId(bfsId);
+				const bfs = getBfsById(bfsId);
 				if (bfs) {
 					pv += (bfs.pvCost ?? 0) * count;
 				} else {

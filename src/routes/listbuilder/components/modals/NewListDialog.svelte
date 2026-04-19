@@ -134,7 +134,9 @@
 				<label
 					>Rules: <select bind:value={rules} placeholder="Rules">
 						{#each ruleSets as ruleset}
-							<option value={ruleset.name}>{ruleset.display}</option>
+							{#if !ruleset.archived}
+								<option value={ruleset.name}>{ruleset.display}</option>
+							{/if}
 						{/each}
 					</select>
 				</label>

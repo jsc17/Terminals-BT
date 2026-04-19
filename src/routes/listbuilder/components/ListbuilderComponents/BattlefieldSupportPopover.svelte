@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { battlefieldSupport, battlefieldSupportGroups, getBFSPacks, getBSCbyId } from "$lib/data/battlefieldSupport";
+	import { battlefieldSupport, battlefieldSupportGroups, getBFSPacks, getBfsById } from "$lib/data/battlefieldSupport";
 	import { Popover, Select } from "$lib/generic";
 	import { TrashIcon } from "$lib/icons";
 	import type { List } from "$lib/types/list.svelte";
@@ -37,8 +37,8 @@
 	}
 
 	const bsCount = $derived(list.bsList.size);
-	const hasBSP = $derived(list.bsList.keys().some((bs) => (getBSCbyId(bs)?.bspCost ?? 0) != 0));
-	const hasPV = $derived(list.bsList.keys().some((bs) => (getBSCbyId(bs)?.pvCost ?? 0) != 0));
+	const hasBSP = $derived(list.bsList.keys().some((bs) => (getBfsById(bs)?.bspCost ?? 0) != 0));
+	const hasPV = $derived(list.bsList.keys().some((bs) => (getBfsById(bs)?.pvCost ?? 0) != 0));
 </script>
 
 <Popover triggerClasses="button" bind:open={popoverOpen}>
@@ -46,8 +46,8 @@
 		{#if bsCount == 0}
 			Battlefield Support
 		{:else}
-			{@const bsp = list.bsList.entries().reduce((acc, [id, count]) => acc + (getBSCbyId(id)?.bspCost ?? 0) * count, 0)}
-			{@const pv = list.bsList.entries().reduce((acc, [id, count]) => acc + (getBSCbyId(id)?.pvCost ?? 0) * count, 0)}
+			{@const bsp = list.bsList.entries().reduce((acc, [id, count]) => acc + (getBfsById(id)?.bspCost ?? 0) * count, 0)}
+			{@const pv = list.bsList.entries().reduce((acc, [id, count]) => acc + (getBfsById(id)?.pvCost ?? 0) * count, 0)}
 			BF Sup - {bsp != 0 ? bsp + " BSP" : ""}{bsp != 0 && pv != 0 ? "/" : ""}{pv != 0 ? pv + " PV" : ""}
 		{/if}
 	{/snippet}
@@ -69,7 +69,7 @@
 				<div></div>
 			</div>
 			{#each list.bsList.entries() as [id, count]}
-				{@const bsData = getBSCbyId(id)}
+				{@const bsData = getBfsById(id)}
 				{#if bsData}
 					<div class="formation-row">
 						<input type="number" min="1" bind:value={() => list.bsList.get(id), (v) => list.setBSCount(id, v ?? 1)} />

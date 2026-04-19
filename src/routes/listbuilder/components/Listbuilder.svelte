@@ -8,7 +8,7 @@
 	import { Dialog } from "$lib/generic";
 	import { deserialize } from "$app/forms";
 	import { Collapsible, DropdownMenu } from "$lib/generic";
-	import { getBSCbyId } from "$lib/data/battlefieldSupport";
+	import { getBfsById } from "$lib/data/battlefieldSupport";
 	import { submittedList } from "$lib/stores/listSubmission.svelte";
 	import type { PrintListOutput } from "../printing/types";
 	import { printList } from "../printing/print.remote";
@@ -122,6 +122,8 @@
 			goto(`/validation?redirect`);
 		});
 	}
+
+	let rules = $derived(getRulesByName(list.rules ?? "noRes"));
 </script>
 
 <div class="card listbuilder">
@@ -178,9 +180,15 @@
 		</DropdownMenu>
 	</div>
 	<div class="list-addition-buttons">
-		<FormationListPopover bind:list />
-		<BattlefieldSupportPopover bind:list />
-		<SCAPopover bind:list />
+		{#if rules && rules.allowFormations}
+			<FormationListPopover bind:list />
+		{/if}
+		{#if rules && rules.bfs?.allowedPacks?.length}
+			<BattlefieldSupportPopover bind:list />
+		{/if}
+		{#if rules && rules.allowSCA}
+			<SCAPopover bind:list />
+		{/if}
 		<button onclick={() => (sublistModalOpen = true)}>Sublists</button>
 	</div>
 	{#if list.units.length == 0 && list.formations.length == 1}
@@ -271,7 +279,7 @@
 	}
 	.list-addition-buttons {
 		display: grid;
-		grid-auto-columns: 1fr;
+		grid-auto-columns: minmax(0, 1fr);
 		grid-auto-flow: column;
 		gap: 2px;
 		padding: 2px 4px;

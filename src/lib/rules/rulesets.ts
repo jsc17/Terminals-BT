@@ -8,6 +8,7 @@ type Limit = {
 };
 
 export type Ruleset = {
+	archived?: boolean;
 	name: string;
 	display: string;
 	notice?: string;
@@ -58,6 +59,41 @@ export const ruleSets: Ruleset[] = [
 		},
 		allowFormations: true,
 		allowSCA: true
+	},
+	{
+		archived: true,
+		name: "wn350",
+		display: "Wolfnet 350 v2.3",
+		shortDisplay: "WN350v2.3",
+		notice: "Off-Board Artillery supports have been moved from units to the Battlefield Support tab",
+		singleEraFaction: true,
+		eraFactionRestriction: true,
+		maxPv: 350,
+		maxUnits: 16,
+		allowedTypes: ["BA", "BM", "CV", "CI", "IM", "PM", "BS"],
+		allowedRules: ["Introductory", "Advanced", "Standard"],
+		disallowUnique: true,
+		disallowedAbilities: ["DRO"],
+		customUnitPacks: ["wn350"],
+		maxSkill: 6,
+		minSkill: 2,
+		unitLimits: [
+			{ types: ["BM", "IM"], max: 12 },
+			{ types: ["CV"], max: 8 },
+			{ types: ["BA", "CI"], max: 5 },
+			{ types: ["PM"], equal: [0, 5] }
+		],
+		chassisLimits: [{ types: ["All"], max: 2 }],
+		variantLimits: [{ types: ["BM", "IM"], max: 1 }],
+		skillLimits: [{ types: ["2", "6"], max: 2 }],
+		requireHitch: true,
+		abilityLimits: [{ types: ["JMPS"], max: 2 }],
+		sublistMaxUnits: 10,
+		sublistMaxPv: 250,
+		sublistScenarios: ["Bunkers", "Capture the Flag", "Domination", "Headhunter", "Hold the Line", "King of the Hill", "Overrun", "Stand Up Fight"],
+		bfs: { allowedPacks: ["wn350"], maxCountPerType: 2 },
+		allowFormations: false,
+		allowSCA: false
 	},
 	{
 		name: "wn350v3",

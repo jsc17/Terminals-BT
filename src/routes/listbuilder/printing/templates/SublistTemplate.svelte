@@ -1,7 +1,7 @@
 <svelte:options css="injected" />
 
 <script lang="ts">
-	import { getBSCbyId } from "$lib/data/battlefieldSupport";
+	import { getBfsById } from "$lib/data/battlefieldSupport";
 	import type { PrintableSublist } from "../types";
 
 	type Props = {
@@ -22,7 +22,7 @@
 		{#each sublistsSorted as sublist}
 			{@const bfsTotals = sublist.bfs.reduce(
 				(total: { bsp: number; pv: number; count: number }, [bfsId, count]: [number, number]) => {
-					const bsData = getBSCbyId(bfsId);
+					const bsData = getBfsById(bfsId);
 					return { bsp: total.bsp + count * (bsData?.bspCost ?? 0), pv: total.pv + count * (bsData?.pvCost ?? 0), count: total.count + count };
 				},
 				{ bsp: 0, pv: 0, count: 0 }
@@ -69,7 +69,7 @@
 									<p class="bold center">{bfsTotals.bsp > 0 ? "BSP" : ""}{bfsTotals.bsp > 0 && bfsTotals.pv > 0 ? "/" : ""}{bfsTotals.pv > 0 ? "PV" : ""}</p>
 								</div>
 								{#each sublist.bfs as [bfsId, count]}
-									{@const bsData = getBSCbyId(bfsId)}
+									{@const bsData = getBfsById(bfsId)}
 									<p>{bsData?.name ?? "Unknown"} x{count}</p>
 									<p class="center">
 										{bfsTotals.bsp > 0 ? count * (bsData?.bspCost ?? 0) : ""}{bfsTotals.bsp > 0 && bfsTotals.pv > 0 ? "/" : ""}{bfsTotals.pv > 0
@@ -105,7 +105,7 @@
 							>
 							{sublist.bfs
 								.map(([bfsId, count]) => {
-									const bsData = getBSCbyId(bfsId);
+									const bsData = getBfsById(bfsId);
 									return `${bsData?.name ?? "Unknown"} x${count}`;
 								})
 								.join(", ")}

@@ -14,13 +14,15 @@
 	{#snippet trigger()}
 		<div class="list-info-trigger">
 			<div class="trigger-details">
-				<p class="list-info" class:errors={list.options?.maxUnits && list.unitCount > list.options.maxUnits}>
+				<p class="list-info">
 					<span class="muted">Units:</span>
-					{list.unitCount}{list.options?.maxUnits ? `/${list.options.maxUnits}` : ""}
+					<span class={{ error: list.options?.maxUnits && list.unitCount > list.options.maxUnits }}>{list.unitCount}</span>{list.options?.maxUnits
+						? `/${list.options.maxUnits}`
+						: ""}
 				</p>
-				<p class="list-info" class:errors={list.options?.maxPv && list.pv > list.options.maxPv}>
+				<p class="list-info">
 					<span class="muted">PV:</span>
-					{list.pv}{list.options?.maxPv ? `/${list.options.maxPv}` : ""}
+					<span class={{ error: list.options?.maxPv && list.pv > list.options.maxPv }}>{list.pv}</span>{list.options?.maxPv ? `/${list.options.maxPv}` : ""}
 				</p>
 			</div>
 			<InformationIcon fill="var(--surface-color-light-text-color)" height="15" width="15" />

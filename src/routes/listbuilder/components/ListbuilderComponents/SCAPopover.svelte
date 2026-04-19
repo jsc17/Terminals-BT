@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { battlefieldSupport, battlefieldSupportGroups, getBSCbyId } from "$lib/data/battlefieldSupport";
+	import { battlefieldSupport, battlefieldSupportGroups, getBfsById } from "$lib/data/battlefieldSupport";
 	import { Popover, Select } from "$lib/generic";
 	import { TrashIcon } from "$lib/icons";
 	import type { List } from "$lib/types/list.svelte";

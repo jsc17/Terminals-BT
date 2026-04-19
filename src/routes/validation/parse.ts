@@ -33,7 +33,7 @@ function parseMul(content: TextContent) {
 		const skill = Number((content.items[currIndex + 4] as TextItem).str);
 		parsedData.push({ name, pv, skill });
 	}
-	return parsedData;
+	return { parsedUnitData: parsedData, parsedBfsData: [] };
 }
 
 function parseTerminal(content: TextContent, style: "mul" | "detailed") {
@@ -73,7 +73,7 @@ function parseTerminal(content: TextContent, style: "mul" | "detailed") {
 		const skill = Number(chunk.at(-6)?.str);
 		unitData.push({ name, pv, skill });
 	}
-	return unitData;
+	return { parsedUnitData: unitData, parsedBfsData: [] };
 }
 
 function parseTerminalV2(content: TextContent, keywords: string) {
@@ -81,9 +81,9 @@ function parseTerminalV2(content: TextContent, keywords: string) {
 	const stepCount = keywords.includes("simple") ? 7 : 13;
 	const pvStep = keywords.includes("simple") ? 6 : 12;
 	const skillStep = keywords.includes("simple") ? 4 : 10;
-	const upperlimit = content.items.findIndex((i) => /^\d+ Units$/.test((i as TextItem).str)) - 1;
+	const upperlimit = content.items.findIndex((i) => /^\d+ Unit($|s$)/.test((i as TextItem).str)) - 1;
 
-	const parsedData: { name: string; pv: number; skill: number }[] = [];
+	const parsedUnitData: { name: string; pv: number; skill: number }[] = [];
 
 	for (let currIndex = startingIndex; currIndex < upperlimit; currIndex += stepCount) {
 		if ((content.items[currIndex] as TextItem).fontName.includes("f1")) {
@@ -100,7 +100,24 @@ function parseTerminalV2(content: TextContent, keywords: string) {
 		}
 		const pv = Number((content.items[currIndex + pvStep] as TextItem).str.split(" ")[0]);
 		const skill = Number((content.items[currIndex + skillStep] as TextItem).str);
-		parsedData.push({ name: name.trim(), pv, skill });
+		parsedUnitData.push({ name: name.trim(), pv, skill });
 	}
-	return parsedData;
+
+	const bfsStart = content.items.findIndex((i) => /Battlefield Support/.test((i as TextItem).str));
+	const bfsEnd = content.items.findIndex((i) => /^\d+ BFS Selection($|s$)/.test((i as TextItem).str));
+	const includesBSP = (content.items[bfsStart + 2] as TextItem).str == "BSP";
+	const includesPV = (content.items[bfsStart + (includesBSP ? 4 : 2)] as TextItem).str == "PV";
+	const bfsStepCount = 1 + (includesPV ? 2 : 0) + (includesBSP ? 2 : 0);
+	const parsedBfsData: { name: string; count: number }[] = [];
+
+	for (let currIndex = bfsStart + bfsStepCount + 1; currIndex < bfsEnd; currIndex += bfsStepCount) {
+		if ((content.items[currIndex] as TextItem).str == "") {
+			continue;
+		}
+		let match = (content.items[currIndex] as TextItem).str.match(/^(.*) x(\d+)$/);
+		let name = match?.[1]?.trim() ?? `Error: ${(content.items[currIndex] as TextItem).str}`;
+		let count = Number(match?.[2]?.trim() ?? 0);
+		parsedBfsData.push({ name, count });
+	}
+	return { parsedUnitData, parsedBfsData };
 }

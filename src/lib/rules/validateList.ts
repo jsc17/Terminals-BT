@@ -3,14 +3,16 @@ import { getRulesByName } from "$lib/rules/rulesets";
 import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 import { failsMax, failsMin } from "./utilities";
 import { isUnitAvailableLocal, isUnitUniqueLocal } from "$lib/local/sqllite/local-db";
-import { getBSCbyId } from "$lib/data/battlefieldSupport";
+import { getBfsById } from "$lib/data/battlefieldSupport";
 
 export async function validateRules(
 	unitList: { id: string; skill: number; data: MulUnit }[],
 	eras: number[],
 	factions: number[],
 	selectedRules: string,
-	bfsList: Map<number, number>
+	bfsList: Map<number, number>,
+	formationCount: number,
+	scaCount: number
 ) {
 	const rulesData = getRulesByName(selectedRules)!;
 
@@ -20,6 +22,20 @@ export async function validateRules(
 	let issueMessage = "";
 
 	if (rulesData) {
+		if (!rulesData.allowFormations && formationCount > 1) {
+			if (issueList.has("Formations")) {
+				issueList.get("Formations")?.add("Formations are disabled");
+			} else {
+				issueList.set("Formations", new Set(["Formations are disabled"]));
+			}
+		}
+		if (!rulesData.allowSCA && scaCount > 0) {
+			if (issueList.has("Special Command Abilities")) {
+				issueList.get("Special Command Abilities")?.add("SCA's are disabled");
+			} else {
+				issueList.set("Special Command Abilities", new Set(["SCA's are disabled"]));
+			}
+		}
 		let listTotalPv = 0;
 		for (const unit of unitList) {
 			const cost = getNewSkillCost(unit.skill, unit.data.pv);
@@ -318,27 +334,15 @@ export async function validateRules(
 				}
 			}
 		}
-		if (rulesData.maxPv && listTotalPv > rulesData.maxPv) {
-			issueList.set("Max PV", new Set([`${listTotalPv}/${rulesData.maxPv}`]));
-		}
-		if (rulesData.maxUnits && unitList.filter((u) => u.data.mulId >= 0).length > rulesData.maxUnits) {
-			issueList.set("Max unitList", new Set([`${unitList.length}/${rulesData.maxUnits}`]));
-		}
-		const nonGeneralfactionList = factions.filter((faction) => {
-			const generalLists = [-1, 55, 56, 57, 85, 90];
-			return !generalLists.includes(faction);
-		});
-		if (rulesData.singleEraFaction && (eras.length != 1 || nonGeneralfactionList.length != 1 || factions.length > 2)) {
-			issueList.set("Era/Faction", new Set(["Must select a single era and faction"]));
-		}
 		if (rulesData.bfs) {
 			let totalBSP = 0;
 			let totalBFSPV = 0;
 			let totalBFSCount = 0;
 			for (const [id, count] of bfsList.entries()) {
-				const bsData = getBSCbyId(id);
-				totalBSP += bsData?.bspCost ?? 0 * count;
-				totalBFSPV += bsData?.pvCost ?? 0 * count;
+				const bsData = getBfsById(id);
+				totalBSP += (bsData?.bspCost ?? 0) * count;
+				totalBFSPV += (bsData?.pvCost ?? 0) * count;
+				listTotalPv += (bsData?.pvCost ?? 0) * count;
 				totalBFSCount += count;
 				if (rulesData.bfs.maxCountPerType && count > rulesData.bfs.maxCountPerType) {
 					if (issueList.has("Maximum Duplicate BFS")) {
@@ -358,6 +362,23 @@ export async function validateRules(
 			if (rulesData.bfs.maxPv && totalBFSPV > rulesData.bfs.maxPv) {
 				issueList.set("Max PV exceeded", new Set([`${totalBFSPV}/${rulesData.bfs.maxPv}`]));
 			}
+		} else {
+			if (bfsList.size > 0) {
+				issueList.set("Battlefield Support", new Set(["Battlefield Support is not allowed"]));
+			}
+		}
+		if (rulesData.maxPv && listTotalPv > rulesData.maxPv) {
+			issueList.set("Max PV", new Set([`${listTotalPv}/${rulesData.maxPv}`]));
+		}
+		if (rulesData.maxUnits && unitList.filter((u) => u.data.mulId >= 0).length > rulesData.maxUnits) {
+			issueList.set("Max unitList", new Set([`${unitList.length}/${rulesData.maxUnits}`]));
+		}
+		const nonGeneralfactionList = factions.filter((faction) => {
+			const generalLists = [-1, 55, 56, 57, 85, 90];
+			return !generalLists.includes(faction);
+		});
+		if (rulesData.singleEraFaction && (eras.length != 1 || nonGeneralfactionList.length != 1 || factions.length > 2)) {
+			issueList.set("Era/Faction", new Set(["Must select a single era and faction"]));
 		}
 	}
 	return { issueList, issueUnits, issueBFS, issueMessage };

@@ -7,7 +7,7 @@
 	import PrintUnitCard from "$lib/cardgeneration/templates/PrintUnitCard.svelte";
 	import { abilityReferences, spaReferences } from "$lib/data";
 	import { getFormationDataFromName } from "$lib/utilities/formationUtilities";
-	import { getBSCbyId } from "$lib/data/battlefieldSupport";
+	import { getBfsById } from "$lib/data/battlefieldSupport";
 	import { type PrintOptionsOutput } from "../../types/settings";
 
 	type Props = {
@@ -29,17 +29,14 @@
 	let tableHeaders = $derived(printOptions.printStyle == "simple" ? ["Unit", "Type", "Skill", "PV (Half)"] : ["Unit", "Type", "Move", "Damage", "Health", "Skill", "PV (Half)"]);
 
 	const bsArray = $derived([...bsList.entries()]);
-	const bsPV = $derived(
-		bsArray.reduce((a, v) => {
-			const bsData = getBSCbyId(v[0]);
-			return a + (bsData?.pvCost ?? 0) * v[1];
-		}, 0)
-	);
-	const totalBSP = $derived(
-		bsArray.reduce((a, v) => {
-			const bsData = getBSCbyId(v[0]);
-			return a + (bsData?.bspCost ?? 0) * v[1];
-		}, 0)
+	const bfsTotals = $derived(
+		bsArray.reduce(
+			(a, v) => {
+				const bsData = getBfsById(v[0]);
+				return { bsp: a.bsp + (bsData?.bspCost ?? 0) * v[1], pv: a.pv + (bsData?.pvCost ?? 0) * v[1], count: a.count + v[1] };
+			},
+			{ bsp: 0, pv: 0, count: 0 }
+		)
 	);
 
 	let abilityReferenceList = $derived.by(() => {
@@ -168,30 +165,29 @@
 			</tbody>
 			<tfoot>
 				<tr>
-					<td colspan={printOptions.printStyle == "simple" ? 3 : 6}>{listData.units.length} Units</td>
+					<td colspan={printOptions.printStyle == "simple" ? 3 : 6}>{listData.units.length} {listData.units.length == 1 ? "Unit" : "Units"}</td>
 					<td>{listData.units.reduce((a, v) => a + getNewSkillCost(v.skill, mulUnitData.get(v.mulId)!.pv), 0)}</td>
 				</tr>
 			</tfoot>
 		</table>
 		{#if bsList.size > 0}
-			<table class="bs-container">
+			<table class="bfs-container">
 				<thead>
 					<tr>
 						<th>Battlefield Support</th>
-						<th>Uses</th>
-						<th>Source</th>
-						{#if totalBSP > 0}
+						<th></th>
+						{#if bfsTotals.bsp > 0}
 							<th>BSP</th>
 						{/if}
-						{#if bsPV > 0}
+						{#if bfsTotals.pv > 0}
 							<th>PV</th>
 						{/if}
 					</tr>
 				</thead>
 				<tbody>
 					{#each bsList.entries() as [key, value]}
-						{@const bspData = getBSCbyId(key)}
-						<tr>
+						{@const bspData = getBfsById(key)}
+						<tr class="bfs-row">
 							<td>{bspData?.name} x{value}</td>
 							<td>
 								<div class="inline">
@@ -200,11 +196,10 @@
 									{/each}
 								</div>
 							</td>
-							<td>{bspData?.source}</td>
-							{#if totalBSP > 0}
+							{#if bfsTotals.bsp > 0}
 								<td>{(bspData?.bspCost ?? 0) * value}</td>
 							{/if}
-							{#if bsPV > 0}
+							{#if bfsTotals.pv > 0}
 								<td>{(bspData?.pvCost ?? 0) * value}</td>
 							{/if}
 						</tr>
@@ -212,12 +207,12 @@
 				</tbody>
 				<tfoot>
 					<tr>
-						<td colspan="3"></td>
-						{#if totalBSP > 0}
-							<td>{totalBSP}</td>
+						<td colspan="2">{bfsTotals.count} BFS {bfsTotals.count == 1 ? "Selection" : "Selections"}</td>
+						{#if bfsTotals.bsp > 0}
+							<td>{bfsTotals.bsp}</td>
 						{/if}
-						{#if bsPV > 0}
-							<td>{bsPV}</td>
+						{#if bfsTotals.pv > 0}
+							<td>{bfsTotals.pv}</td>
 						{/if}
 					</tr>
 				</tfoot>
@@ -471,9 +466,9 @@
 		color: black;
 		font-size: 8pt;
 	}
-	.bs-container td:first-child {
+	.bfs-row td:first-child {
 		text-align: start;
-		padding-left: 4px;
+		padding-left: 12px;
 	}
 	.inline {
 		display: flex;

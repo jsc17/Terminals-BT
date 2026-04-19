@@ -19,7 +19,6 @@
 	}
 
 	function onOpenChange() {
-		console.log("open changed");
 		listName = list.details.name;
 		rules = list.rules;
 	}
@@ -33,7 +32,9 @@
 				<label
 					>Rules: <select bind:value={rules} placeholder="Rules">
 						{#each ruleSets as ruleset}
-							<option value={ruleset.name}>{ruleset.display}</option>
+							{#if !ruleset.archived}
+								<option value={ruleset.name}>{ruleset.display}</option>
+							{/if}
 						{/each}
 					</select>
 				</label>

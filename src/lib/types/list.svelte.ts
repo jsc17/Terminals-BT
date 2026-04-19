@@ -8,7 +8,7 @@ import { getMULDataFromIdLocal } from "$lib/local/sqllite/local-db";
 import { db } from "$lib/local/dexie/db";
 import { validateRules } from "$lib/rules/validateList";
 import { SvelteMap } from "svelte/reactivity";
-import { getBSCbyId } from "$lib/data/battlefieldSupport";
+import { getBfsById } from "$lib/data/battlefieldSupport";
 
 export type { ListCode, ListCodeUnit, ListUnit, ListFormation, SCA, MulUnit, Sublist, SublistStats };
 
@@ -28,7 +28,7 @@ export class List {
 	pv = $derived(
 		this.units.reduce((total, current) => total + current.cost, 0) +
 			[...this.bsList.entries()].reduce((total, [id, count]) => {
-				const bfsData = getBSCbyId(id);
+				const bfsData = getBfsById(id);
 				return total + (bfsData?.pvCost ?? 0) * count;
 			}, 0)
 	);
@@ -81,7 +81,9 @@ export class List {
 			$state.snapshot(this.details.eras),
 			$state.snapshot(this.details.factions.concat(this.details.general == -1 ? [] : [this.details.general])),
 			$state.snapshot(this.rules),
-			$state.snapshot(this.bsList)
+			$state.snapshot(this.bsList),
+			this.formations.length,
+			this.scaList.length
 		)
 	);
 
@@ -93,7 +95,7 @@ export class List {
 		this.rules = newRules;
 		const allowedPacks = getRulesByName(newRules)?.bfs?.allowedPacks ?? [];
 		for (const id of this.bsList.keys()) {
-			const bsData = getBSCbyId(id);
+			const bsData = getBfsById(id);
 			if (bsData && !allowedPacks.includes(bsData.pack)) {
 				this.removeBS(id);
 			}
@@ -300,7 +302,9 @@ export class List {
 			//convert wolfnet OBA's to BFS
 			for (const [mulId, bfsId] of [
 				[-3, 13],
-				[-4, 14]
+				[-4, 14],
+				[-1, 15],
+				[-2, 16]
 			]) {
 				if (unit.mulId == mulId) {
 					if (this.bsList.has(bfsId)) {

@@ -12,7 +12,8 @@ import ListApproval from "$lib/server/emails/templates/ListApproval.svelte";
 import ListSubmissionConfirmation from "$lib/server/emails/templates/ListSubmissionConfirmation.svelte";
 import { SubmitListSchema } from "./schema/submitList";
 import { env } from "$env/dynamic/private";
-import { getCustomUnitData, getMULDataFromId } from "$lib/remote/unit.remote";
+import { getMULDataFromId } from "$lib/remote/unit.remote";
+import { getBfsById } from "$lib/data/battlefieldSupport";
 
 export const getApprovedTournamentList = query(async () => {
 	const data = await prisma.tournament.findMany({
@@ -22,88 +23,125 @@ export const getApprovedTournamentList = query(async () => {
 	return { status: "success", data };
 });
 
-export const submitList = form(SubmitListSchema, async ({ tournamentId, playerName, playerEmail, listFile, eraId, factionId, fixedData, unit, addedUnits }) => {
-	const tournament = await prisma.tournament.findUnique({
-		where: {
-			id: Number(tournamentId)
-		}
-	});
-	if (tournament) {
-		const era = await getEraName(Number(eraId));
-		const faction = await getFactionName(Number(factionId));
+export const submitList = form(
+	SubmitListSchema,
+	async ({ tournamentId, playerName, playerEmail, listFile, eraId, factionId, unit, addedUnits, fixedUnits, bfs, addedBfs, fixedBfs }) => {
+		const tournament = await prisma.tournament.findUnique({
+			where: {
+				id: Number(tournamentId)
+			}
+		});
+		if (tournament) {
+			const era = await getEraName(Number(eraId));
+			const faction = await getFactionName(Number(factionId));
 
-		const pdfData = await listFile.arrayBuffer();
-		const buffer = Buffer.from(pdfData);
-		const base64String = buffer.toString("base64");
+			const pdfData = await listFile.arrayBuffer();
+			const buffer = Buffer.from(pdfData);
+			const base64String = buffer.toString("base64");
 
-		const id = nanoid();
-		const filename = `./files/tournament-lists/${id}.pdf`;
-		await fs.writeFile(filename, buffer);
-		await prisma.tournament.update({
-			where: { id: Number(tournamentId) },
-			data: {
-				participants: {
-					create: { id, name: playerName, email: playerEmail, era, faction, fixed: fixedData == "true", units: JSON.stringify(unit), addedUnits: JSON.stringify(addedUnits) }
+			const id = nanoid();
+			const filename = `./files/tournament-lists/${id}.pdf`;
+			await fs.writeFile(filename, buffer);
+			await prisma.tournament.update({
+				where: { id: Number(tournamentId) },
+				data: {
+					participants: {
+						create: {
+							id,
+							name: playerName,
+							email: playerEmail,
+							era,
+							faction,
+							units: JSON.stringify(unit),
+							addedUnits: JSON.stringify(addedUnits),
+							fixedUnits: JSON.stringify(fixedUnits),
+							bfs: JSON.stringify(bfs),
+							addedBfs: JSON.stringify(addedBfs),
+							fixedBfs: JSON.stringify(fixedBfs)
+						}
+					}
 				}
-			}
-		});
+			});
 
-		const parsedAddedUnits = [];
-		for (const unit of addedUnits ?? []) {
-			const parsedUnit = JSON.parse(unit);
-			const name = parsedUnit.id > 0 ? ((await getMULDataFromId(parsedUnit.id))?.name ?? "Unknown") : ((await getCustomUnitData(parsedUnit.id))?.name ?? "Unknown");
-			const skill = parsedUnit.sk;
-			parsedAddedUnits.push({ name, skill });
+			const parsedAddedUnits = [];
+			for (const unit of addedUnits ?? []) {
+				const { id, sk } = JSON.parse(unit);
+				const name = (await getMULDataFromId(id))?.name ?? "Unknown";
+				parsedAddedUnits.push({ name, skill: sk });
+			}
+			const parsedFixedUnits = [];
+			for (const unit of fixedUnits ?? []) {
+				const { id, sk } = JSON.parse(unit);
+				const name = (await getMULDataFromId(id))?.name ?? "Unknown";
+				parsedFixedUnits.push({ name, skill: sk });
+			}
+			const parsedFixedBfs = [];
+			for (const bfs of fixedBfs ?? []) {
+				const { id, count } = JSON.parse(bfs);
+				const bfsData = getBfsById(id);
+				if (bfsData) parsedFixedBfs.push({ name: bfsData.name, count });
+			}
+			const parsedAddedBfs = [];
+			for (const bfs of addedBfs ?? []) {
+				const { id, count } = JSON.parse(bfs);
+				const bfsData = getBfsById(id);
+				if (bfsData) parsedAddedBfs.push({ name: bfsData.name, count });
+			}
+			const emailHTML = render({
+				//@ts-ignore
+				template: ListSubmission,
+				props: {
+					id,
+					tournamentName: tournament.name,
+					playerName,
+					playerEmail,
+					era,
+					faction,
+					tournamentRules: getRulesByName(tournament.tournamentRules)?.display ?? "Not Found",
+					parsedAddedUnits,
+					parsedFixedUnits,
+					parsedAddedBfs,
+					parsedFixedBfs
+				}
+			});
+			const info = await tournamentEmailTransporter.sendMail({
+				from: env.TOURNAMENT_EMAIL_SENDER, // sender address
+				to: tournament.email, // list of receivers
+				subject: tournament.emailSubject != null ? tournament.emailSubject : `${tournament.name} submission`, // Subject line
+				html: emailHTML,
+				attachments: [{ filename: listFile.name, content: base64String, encoding: "base64" }]
+			});
+			const confirmationHTML = render({
+				//@ts-ignore
+				template: ListSubmissionConfirmation,
+				props: {
+					tournamentName: tournament.name,
+					playerName,
+					playerEmail,
+					era,
+					faction,
+					tournamentRules: getRulesByName(tournament.tournamentRules)?.display ?? "Not Found",
+					parsedAddedUnits: [],
+					parsedFixedUnits: [],
+					parsedAddedBfs: [],
+					parsedFixedBfs: []
+				}
+			});
+			await tournamentEmailTransporter.sendMail({
+				from: env.TOURNAMENT_EMAIL_SENDER, // sender address
+				to: playerEmail, // list of receivers
+				subject: `${tournament.name} submission confirmation`, // Subject line
+				html: confirmationHTML,
+				attachments: [{ filename: listFile.name, content: base64String, encoding: "base64" }]
+			});
+			console.log("Message sent: %s", info.messageId);
+			return { status: "success", message: "Email sent to tournament organizer" };
+		} else {
+			console.log("tournament not found");
+			return { status: "failed", message: "Please try submitting your list again" };
 		}
-		const emailHTML = render({
-			//@ts-ignore
-			template: ListSubmission,
-			props: {
-				id,
-				tournamentName: tournament.name,
-				playerName,
-				playerEmail,
-				era,
-				faction,
-				tournamentRules: getRulesByName(tournament.tournamentRules)?.display ?? "Not Found",
-				fixedData,
-				parsedAddedUnits
-			}
-		});
-		const info = await tournamentEmailTransporter.sendMail({
-			from: env.TOURNAMENT_EMAIL_SENDER, // sender address
-			to: tournament.email, // list of receivers
-			subject: tournament.emailSubject ?? `${tournament.name} submission`, // Subject line
-			html: emailHTML,
-			attachments: [{ filename: listFile.name, content: base64String, encoding: "base64" }]
-		});
-		const confirmationHTML = render({
-			//@ts-ignore
-			template: ListSubmissionConfirmation,
-			props: {
-				tournamentName: tournament.name,
-				playerName,
-				playerEmail,
-				era,
-				faction,
-				tournamentRules: getRulesByName(tournament.tournamentRules)?.display ?? "Not Found",
-				parsedAddedUnits
-			}
-		});
-		await tournamentEmailTransporter.sendMail({
-			from: env.TOURNAMENT_EMAIL_SENDER, // sender address
-			to: playerEmail, // list of receivers
-			subject: `${tournament.name} submission confirmation`, // Subject line
-			html: confirmationHTML,
-			attachments: [{ filename: listFile.name, content: base64String, encoding: "base64" }]
-		});
-		console.log("Message sent: %s", info.messageId);
-		return { status: "success", message: "Email sent to tournament organizer" };
-	} else {
-		console.log("tournament not found");
-		return { status: "failed", message: "Please try submitting your list again" };
 	}
-});
+);
 
 export const sendApproval = query(v.object({ id: v.string(), comment: v.string() }), async ({ id, comment }) => {
 	const participant = await prisma.participant.findUnique({ where: { id }, include: { tournament: true } });
@@ -129,4 +167,9 @@ export const sendApproval = query(v.object({ id: v.string(), comment: v.string()
 export const getPlayerData = query(v.object({ playerId: v.string() }), async ({ playerId }) => {
 	const player = await prisma.participant.findUnique({ where: { id: playerId } });
 	return player;
+});
+
+export const getTournamentData = query(v.object({ tournamentId: v.number() }), async ({ tournamentId }) => {
+	const tournament = await prisma.tournament.findUnique({ where: { id: tournamentId } });
+	return tournament;
 });

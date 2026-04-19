@@ -17,10 +17,12 @@ const battlefieldSupport: battlefieldSupportCard[] = [
 	{ id: 11, pack: "core", source: "AS:CE pg.56", group: "Minefield Support", name: "Medium Density", bspCost: 2 },
 	{ id: 12, pack: "core", source: "AS:CE pg.56", group: "Minefield Support", name: "Heavy Density", bspCost: 5 },
 	{ id: 13, pack: "wn350v3", source: "WN350 pg.13", group: "Off-Board Artillery", name: "Off-Board Artillery Support - Thumper", pvCost: 5 },
-	{ id: 14, pack: "wn350v3", source: "WN350 pg.13", group: "Off-Board Artillery", name: "Off-Board Artillery Support - Sniper", pvCost: 8 }
+	{ id: 14, pack: "wn350v3", source: "WN350 pg.13", group: "Off-Board Artillery", name: "Off-Board Artillery Support - Sniper", pvCost: 8 },
+	{ id: 15, pack: "wn350", source: "WN350v2.3", group: "Off-Board Artillery", name: "Off-Board Artillery Support - Thumper", pvCost: 6 },
+	{ id: 16, pack: "wn350", source: "WN350v2.3", group: "Off-Board Artillery", name: "Off-Board Artillery Support - Sniper", pvCost: 9 }
 ];
 
-function getBSCbyId(id: number): battlefieldSupportCard | undefined {
+function getBfsById(id: number): battlefieldSupportCard | undefined {
 	const bs = battlefieldSupport.find((bs) => bs.id == id);
 	return bs;
 }
@@ -30,4 +32,4 @@ function getBFSPacks(packNames: string[]) {
 	return Map.groupBy(availableBFS, (bs) => bs.group);
 }
 
-export { battlefieldSupportGroups, type battlefieldSupportCard, battlefieldSupport, getBSCbyId, getBFSPacks };
+export { battlefieldSupportGroups, type battlefieldSupportCard, battlefieldSupport, getBfsById, getBFSPacks };

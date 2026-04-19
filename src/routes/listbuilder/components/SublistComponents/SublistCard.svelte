@@ -8,7 +8,7 @@
 	import PlayModal from "$lib/sharedDialogs/PlayModal.svelte";
 	import { toastController } from "$lib/stores";
 	import { DragIndicatorIcon, InformationIcon, MenuIcon } from "$lib/icons";
-	import { getBSCbyId } from "$lib/data/battlefieldSupport";
+	import { getBfsById } from "$lib/data/battlefieldSupport";
 
 	type Props = {
 		sublist: Sublist;
@@ -60,7 +60,7 @@
 	let bsString = $derived.by(() => {
 		return [...sublist.checkedBS.entries()]
 			.map(([id, count]) => {
-				const bsData = getBSCbyId(id);
+				const bsData = getBfsById(id);
 				return `${bsData?.name} x${count}`;
 			})
 			.join(", ");
@@ -86,7 +86,7 @@
 			if (unit?.baseUnit.mulId && unit?.baseUnit?.mulId > 0) count++;
 		}
 		for (const [id, count] of sublist.checkedBS ?? []) {
-			const bsData = getBSCbyId(id);
+			const bsData = getBfsById(id);
 			bsp += (bsData?.bspCost ?? 0) * count;
 			pv += (bsData?.pvCost ?? 0) * count;
 		}
@@ -221,7 +221,7 @@
 							<p class="muted">Battlefield Support</p>
 						</div>
 						{#each sublist.checkedBS.entries() as [id, count]}
-							{@const bsData = getBSCbyId(id)}
+							{@const bsData = getBfsById(id)}
 							<div class="sublist-bs-row">
 								<p>{bsData?.name}</p>
 								<p>x{count}</p>

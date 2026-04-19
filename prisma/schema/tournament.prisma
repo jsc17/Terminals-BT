@@ -23,8 +23,11 @@ model Participant {
   faction String
   dateSubmitted DateTime @default(now())
   tournament Tournament @relation(references: [id], fields: [tournamentId], onDelete: Cascade)
-  fixed Boolean
   units String @db.Text
   addedUnits String? @db.Text
+  fixedUnits String? @db.Text
+  bfs String? @db.Text
+  addedBfs String? @db.Text
+  fixedBfs String? @db.Text
   approved Boolean @default(false)
 }

@@ -5,7 +5,7 @@ import playwright from "playwright";
 import { render } from "svelte/server";
 import { ListTemplate, SublistTemplate } from "./templates";
 import { getAmmoByName } from "$lib/remote/ammo.remote";
-import { getCustomUnitData, getMULDataFromId } from "$lib/remote/unit.remote";
+import { getMULDataFromId } from "$lib/remote/unit.remote";
 import { getMulCard, getMulImage } from "$lib/remote/mulImages.remote";
 import { PDFDocument } from "pdf-lib";
 import { PrintOptionsSchema } from "../types/settings";
@@ -17,9 +17,7 @@ export const printList = query(
 	}),
 	async ({ listData, printOptions }) => {
 		const mulUnitData = new Map(
-			(await Promise.allSettled(listData.units.map(async (u) => (u.mulId >= 0 ? getMULDataFromId(u.mulId) : getCustomUnitData(u.mulId)))))
-				.filter((u) => u.status == "fulfilled")
-				.map((u) => [u.value!.mulId, u.value!])
+			(await Promise.allSettled(listData.units.map(async (u) => getMULDataFromId(u.mulId)))).filter((u) => u.status == "fulfilled").map((u) => [u.value!.mulId, u.value!])
 		);
 
 		const totalCounts = Map.groupBy(listData.units, (u) => u.mulId);
@@ -66,7 +64,7 @@ export const printList = query(
 
 		const page = await browser.newPage();
 		const html = render(ListTemplate, {
-			props: { listData, printOptions, mulUnitData, ammoReferenceList, unitImages, unitCardImages, bsList: listData.bs ?? new Map(), scaList: listData.scas ?? [], counts }
+			props: { listData, printOptions, mulUnitData, ammoReferenceList, unitImages, unitCardImages, bfsList: listData.bs ?? new Map(), scaList: listData.scas ?? [], counts }
 		});
 		await page.setContent(html.head + html.body);
 		const pdf = await page.pdf({ format: "Letter", printBackground: true, margin: { top: "0.125in", bottom: "0.125in", left: "0.125in", right: "0.125in" } });

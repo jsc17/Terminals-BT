@@ -31,7 +31,8 @@
 			measurementUnits: "inches",
 			printReferences: true,
 			printDuplicateMarkings: true,
-			printDuplicateMarkingsType: "numbers"
+			printDuplicateMarkingsType: "numbers",
+			printBFSCards: true
 		},
 		sublistUI: {
 			sublistOrientation: "vertical",
@@ -46,7 +47,8 @@
 				measurementUnits: "inches",
 				printReferences: true,
 				printDuplicateMarkings: true,
-				printDuplicateMarkingsType: "numbers"
+				printDuplicateMarkingsType: "numbers",
+				printBFSCards: true
 			},
 			sublistPrintAllOrientation: "vertical",
 			sublistPrintAllGroupByScenario: false

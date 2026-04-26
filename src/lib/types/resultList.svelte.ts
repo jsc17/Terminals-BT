@@ -152,26 +152,6 @@ export class ResultList {
 	}
 	async setOptions(newRules: string) {
 		this.options = ruleSets.find((rules) => rules.name == newRules) ?? ruleSets[0];
-		const response: any = deserialize(await (await fetch("/?/getCustomUnits", { method: "POST", body: JSON.stringify({ unitPacks: this.options.customUnitPacks }) })).text());
-		this.customUnits = [];
-		if (response.type == "success") {
-			for (const unit of response.data.customUnits) {
-				this.customUnits.push({
-					id: unit.mulId,
-					mulId: unit.mulId,
-					type: unit.type,
-					subtype: unit.type,
-					name: unit.name,
-					group: unit.group ?? "",
-					class: unit.class,
-					variant: unit.variant,
-					pv: unit.pv,
-					cost: unit.pv,
-					abilities: unit.abilities != "-" ? JSON.parse(unit.abilities) : [],
-					rulesLevel: "Standard"
-				});
-			}
-		}
 	}
 	applyOptions() {
 		let tempRestrictedList: MulUnit[] = [];

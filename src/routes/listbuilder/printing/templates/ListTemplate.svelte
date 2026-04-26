@@ -8,7 +8,8 @@
 	import { abilityReferences, spaReferences } from "$lib/data";
 	import { getFormationDataFromName } from "$lib/utilities/formationUtilities";
 	import { getBfsById } from "$lib/data/battlefieldSupport";
-	import { type PrintOptionsOutput } from "../../types/settings";
+	import type { PrintOptionsOutput } from "../../types/settings";
+	import PrintBFSCard from "$lib/cardgeneration/templates/PrintBFSCard.svelte";
 
 	type Props = {
 		listData: PrintListOutput;
@@ -17,16 +18,16 @@
 		ammoReferenceList: string[];
 		unitImages?: Map<string, string>;
 		unitCardImages?: Map<string, string>;
-		bsList: Map<number, number>;
+		bfsList: Map<number, number>;
 		scaList: number[];
 		counts: Map<number, string[]>;
 	};
 
-	let { listData, printOptions, mulUnitData, ammoReferenceList, unitImages, unitCardImages, bsList, scaList, counts }: Props = $props();
+	let { listData, printOptions, mulUnitData, ammoReferenceList, unitImages, unitCardImages, bfsList: bsList, scaList, counts }: Props = $props();
 
 	const unitData = new Map(listData.units.map((u) => [u.id, u]));
 
-	let tableHeaders = $derived(printOptions.printStyle == "simple" ? ["Unit", "Type", "Skill", "PV (Half)"] : ["Unit", "Type", "Move", "Damage", "Health", "Skill", "PV (Half)"]);
+	const tableHeaders = $derived(printOptions.printStyle == "simple" ? ["Unit", "Type", "Skill", "PV (Half)"] : ["Unit", "Type", "Move", "Damage", "Health", "Skill", "PV (Half)"]);
 
 	const bsArray = $derived([...bsList.entries()]);
 	const bfsTotals = $derived(
@@ -38,8 +39,9 @@
 			{ bsp: 0, pv: 0, count: 0 }
 		)
 	);
+	const bfsReferenceList = $derived(bsArray.map(([id]) => `${getBfsById(id)!.name} (${getBfsById(id)!.source})`));
 
-	let abilityReferenceList = $derived.by(() => {
+	const abilityReferenceList = $derived.by(() => {
 		const referenceList: string[] = [];
 		abilityReferences.forEach((a) => {
 			for (const unit of mulUnitData.values()) {
@@ -51,7 +53,7 @@
 		});
 		return referenceList;
 	});
-	let formationReferenceList = $derived([
+	const formationReferenceList = $derived([
 		...new Set(
 			listData.formations
 				.filter((f) => f.type != "none")
@@ -60,7 +62,7 @@
 				)
 		)
 	]);
-	let spaReferenceList = $derived.by(() => {
+	const spaReferenceList = $derived.by(() => {
 		const spaList = new Set<string>();
 		unitData.values().forEach((u) => u.customization?.spa?.forEach((v) => spaList.add(v)));
 		return [...spaList].sort().map((v) => `${v} (${spaReferences.find((r) => r.name == v)?.page})`);
@@ -177,10 +179,10 @@
 						<th>Battlefield Support</th>
 						<th></th>
 						{#if bfsTotals.bsp > 0}
-							<th>BSP</th>
+							<th>BSP (Total)</th>
 						{/if}
 						{#if bfsTotals.pv > 0}
-							<th>PV</th>
+							<th>PV (Total)</th>
 						{/if}
 					</tr>
 				</thead>
@@ -197,10 +199,10 @@
 								</div>
 							</td>
 							{#if bfsTotals.bsp > 0}
-								<td>{(bspData?.bspCost ?? 0) * value}</td>
+								<td>{bspData?.bspCost ?? "-"} ({bspData?.bspCost ? bspData.bspCost * value : "-"}) </td>
 							{/if}
 							{#if bfsTotals.pv > 0}
-								<td>{(bspData?.pvCost ?? 0) * value}</td>
+								<td>{bspData?.pvCost ?? "-"} ({bspData?.pvCost ? bspData.pvCost * value : "-"}) </td>
 							{/if}
 						</tr>
 					{/each}
@@ -232,6 +234,9 @@
 				{/if}
 				{#if printOptions.printFormations && formationReferenceList.length}
 					{@render referenceList("Formations:", formationReferenceList)}
+				{/if}
+				{#if bfsReferenceList.length != 0}
+					{@render referenceList("Battlefield Support:", bfsReferenceList)}
 				{/if}
 			{/if}
 		</div>
@@ -320,7 +325,7 @@
 				{#each listData.formations.flatMap((f) => f.units.concat(f.secondary?.units ?? [])) as unitId}
 					{@const unit = unitData.get(unitId)}
 					{@const mulData = mulUnitData.get(unit!.mulId)}
-					{#if printOptions.cardStyle == "mul" || unit!.mulId < 0}
+					{#if printOptions.cardStyle == "mul"}
 						<img src={unitCardImages?.get(`${unit!.mulId}-${unit!.skill}`)} class="unit-card" alt="unit card" />
 					{:else}
 						<div class="unit-card-wrapper">

@@ -13,7 +13,8 @@
 			medium = 0,
 			long = 0,
 			size = 0,
-			count = 0;
+			count = 0,
+			bsp = 0;
 		for (const unitId of sublist.checked) {
 			const unit = list.getUnit(unitId);
 			pv += unit?.cost ?? 0;
@@ -24,7 +25,7 @@
 			size += unit?.baseUnit.size ?? 0;
 			if (unit?.baseUnit && unit.baseUnit.mulId >= 0) count += 1;
 		}
-		return { pv, health, short, medium, long, size, count };
+		return { pv, health, short, medium, long, size, count, bsp };
 	});
 </script>
 

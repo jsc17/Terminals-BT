@@ -3,7 +3,7 @@ import { getSCAfromId, calculateListStats } from "$lib/utilities/listUtilities";
 import { getGeneralList, getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 import { getRulesByName } from "$lib/rules/rulesets";
 import { nanoid } from "nanoid";
-import { getCustomUnitData, getUnitAvailability } from "$lib/remote/unit.remote";
+import { getUnitAvailability } from "$lib/remote/unit.remote";
 import { getMULDataFromIdLocal } from "$lib/local/sqllite/local-db";
 import { db } from "$lib/local/dexie/db";
 import { validateRules } from "$lib/rules/validateList";
@@ -278,17 +278,7 @@ export class List {
 			}
 		}
 
-		const unitPromises = (
-			await Promise.allSettled(
-				listCode.units.map((u) => {
-					if (u.mulId >= 0) {
-						return getMULDataFromIdLocal(u.mulId);
-					} else {
-						return getCustomUnitData(u.mulId);
-					}
-				})
-			)
-		)
+		const unitPromises = (await Promise.allSettled(listCode.units.map((u) => getMULDataFromIdLocal(u.mulId))))
 			.map((p) => {
 				if (p.status == "fulfilled" && p.value) {
 					return { mulId: p.value.mulId, data: p.value };

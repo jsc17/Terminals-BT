@@ -61,20 +61,6 @@ export const actions = {
 
 		await fs.writeFile(`./files/cached/${filename}`, JSON.stringify(units));
 	},
-	getCustomUnits: async (event) => {
-		let { unitPacks } = await event.request.json();
-		if (!unitPacks) return { customUnits: [] };
-
-		const customUnits = await prisma.customCard.findMany({
-			where: {
-				pack: { in: unitPacks }
-			}
-		});
-		customUnits.forEach((unit) => {
-			unit.abilities = unit.abilities ? JSON.stringify(handleParse(unit.abilities)) : "-";
-		});
-		return { customUnits };
-	},
 	getUnits: async ({ request }) => {
 		let { eras, factions, general, eraSearchType, factionSearchType } = await request.json();
 

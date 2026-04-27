@@ -6,5 +6,4 @@ export type battlefieldSupportCard = {
 	name: string;
 	bspCost?: number;
 	pvCost?: number;
-	image?: string;
 };

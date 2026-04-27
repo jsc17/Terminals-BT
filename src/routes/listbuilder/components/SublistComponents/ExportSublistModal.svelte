@@ -120,7 +120,13 @@
 					<label><input type="radio" name="measurementUnits" value="inches" bind:group={settings.sublistUI.sublistPrintListSettings.measurementUnits} /> Inches</label>
 					<label><input type="radio" name="measurementUnits" value="hexes" bind:group={settings.sublistUI.sublistPrintListSettings.measurementUnits} /> Hexes</label>
 				</fieldset>
-
+				<fieldset>
+					<legend>Battlefield Support</legend>
+					<div class="field-row">
+						<input type="checkbox" name="drawFormations" id="formations" bind:checked={settings.sublistUI.sublistPrintListSettings.printBFSCards} />
+						<label for="formations">Print cards for battlefield support selections?</label>
+					</div>
+				</fieldset>
 				<div><button onclick={() => handlePrint()}>Print</button></div>
 			</div>
 		</fieldset>

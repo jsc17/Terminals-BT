@@ -3,19 +3,11 @@
 	import { deleteParticipant, getParticipantsGameList } from "../../tournament.remote";
 	import { toastController } from "$lib/stores";
 	import { nanoid } from "nanoid";
+	import type { Participant } from "$lib/generated/prisma/browser";
 
 	type Props = {
 		fixedEra: boolean;
-		participants: {
-			id: string;
-			name: string;
-			email: string;
-			era: string;
-			faction: string;
-			dateSubmitted: Date;
-			fixed: boolean;
-			units: string;
-		}[];
+		participants: Participant[];
 	};
 
 	let { participants, fixedEra }: Props = $props();
@@ -86,7 +78,7 @@
 							{/snippet}
 						</DropdownMenu>
 					</td>
-					<td class={{ last: true, warning: participant.fixed }}>{participant.fixed ? "List was manually fixed" : ""}</td>
+					<td class={{ last: true, warning: participant.fixedUnits?.length }}>{participant.fixedUnits?.length ? "List was manually fixed" : ""}</td>
 				</tr>
 			{/each}
 		</tbody>

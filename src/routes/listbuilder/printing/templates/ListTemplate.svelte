@@ -23,13 +23,13 @@
 		counts: Map<number, string[]>;
 	};
 
-	let { listData, printOptions, mulUnitData, ammoReferenceList, unitImages, unitCardImages, bfsList: bsList, scaList, counts }: Props = $props();
+	let { listData, printOptions, mulUnitData, ammoReferenceList, unitImages, unitCardImages, bfsList, scaList, counts }: Props = $props();
 
-	const unitData = new Map(listData.units.map((u) => [u.id, u]));
+	const unitData = $derived(new Map(listData.units.map((u) => [u.id, u])));
 
 	const tableHeaders = $derived(printOptions.printStyle == "simple" ? ["Unit", "Type", "Skill", "PV (Half)"] : ["Unit", "Type", "Move", "Damage", "Health", "Skill", "PV (Half)"]);
 
-	const bsArray = $derived([...bsList.entries()]);
+	const bsArray = $derived([...bfsList.entries()]);
 	const bfsTotals = $derived(
 		bsArray.reduce(
 			(a, v) => {
@@ -172,7 +172,7 @@
 				</tr>
 			</tfoot>
 		</table>
-		{#if bsList.size > 0}
+		{#if bfsList.size > 0}
 			<table class="bfs-container">
 				<thead>
 					<tr>
@@ -187,7 +187,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each bsList.entries() as [key, value]}
+					{#each bfsList.entries() as [key, value]}
 						{@const bspData = getBfsById(key)}
 						<tr class="bfs-row">
 							<td>{bspData?.name} x{value}</td>
@@ -341,6 +341,14 @@
 						</div>
 					{/if}
 				{/each}
+				{#if printOptions.printBFSCards}
+					{#each bfsList.entries() as [bsfId, bfsCount]}
+						{@const bfsData = getBfsById(bsfId)}
+						{#each { length: bfsCount }}
+							<PrintBFSCard {bfsData} />
+						{/each}
+					{/each}
+				{/if}
 			</div>
 		{/if}
 	</div>

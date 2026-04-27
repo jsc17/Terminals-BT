@@ -125,6 +125,13 @@
 				</label>
 			</fieldset>
 		</fieldset>
+		<fieldset>
+			<legend>Battlefield Support</legend>
+			<div class="field-row">
+				<input type="checkbox" name="bfsCards" id="bfsCards" bind:checked={settings.print.printBFSCards} />
+				<label for="bfsCards">Print cards for battlefield support selections?</label>
+			</div>
+		</fieldset>
 		<div class="print-buttons">
 			<button onclick={() => (open = false)}>Cancel</button>
 			<button onclick={() => handlePrint()}>Print</button>

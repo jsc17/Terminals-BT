@@ -320,6 +320,19 @@
 					{/if}
 				</div>
 			{/each}
+			{#if printOptions.printBFSCards}
+				<div class={{ "formation-side": printOptions.formationHeaderStyle == "side" }}>
+					<h2 class={`formation-header-${printOptions.formationHeaderStyle}`}>Battlefield Support</h2>
+					<div class="unit-card-container">
+						{#each bfsList.entries() as [bsfId, bfsCount]}
+							{@const bfsData = getBfsById(bsfId)}
+							{#each { length: bfsCount }}
+								<PrintBFSCard {bfsData} />
+							{/each}
+						{/each}
+					</div>
+				</div>
+			{/if}
 		{:else}
 			<div class="unit-card-container">
 				{#each listData.formations.flatMap((f) => f.units.concat(f.secondary?.units ?? [])) as unitId}

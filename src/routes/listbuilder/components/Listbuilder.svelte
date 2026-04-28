@@ -180,9 +180,7 @@
 		</DropdownMenu>
 	</div>
 	<div class="list-addition-buttons">
-		{#if rules && rules.allowFormations}
-			<FormationListPopover bind:list />
-		{/if}
+		<FormationListPopover bind:list />
 		{#if rules && rules.bfs?.allowedPacks?.length}
 			<BattlefieldSupportPopover bind:list />
 		{/if}

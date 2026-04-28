@@ -62,11 +62,11 @@
 				const factions = general ? [selectedFaction, general] : [selectedFaction];
 				issues = await validateRules(
 					unitList,
+					[],
 					[selectedEra],
 					factions.filter((f) => f != undefined),
 					selectedRules,
 					new Map(bfsData.map((bfs) => [bfs.id ?? -1, bfs.count])),
-					formationCount,
 					scaCount
 				);
 			} else {

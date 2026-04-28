@@ -1,4 +1,4 @@
-import type { MulUnit } from "$lib/types/listTypes";
+import type { ListFormation, MulUnit } from "$lib/types/listTypes";
 import { getRulesByName } from "$lib/rules/rulesets";
 import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 import { failsMax, failsMin } from "./utilities";
@@ -7,11 +7,11 @@ import { getBfsById } from "$lib/data/battlefieldSupport";
 
 export async function validateRules(
 	unitList: { id: string; skill: number; data: MulUnit }[],
+	formationList: ListFormation[],
 	eras: number[],
 	factions: number[],
 	selectedRules: string,
 	bfsList: Map<number, number>,
-	formationCount: number,
 	scaCount: number
 ) {
 	const rulesData = getRulesByName(selectedRules)!;
@@ -22,11 +22,17 @@ export async function validateRules(
 	let issueMessage = "";
 
 	if (rulesData) {
-		if (!rulesData.allowFormations && formationCount > 1) {
-			if (issueList.has("Formations")) {
-				issueList.get("Formations")?.add("Formations are disabled");
-			} else {
-				issueList.set("Formations", new Set(["Formations are disabled"]));
+		if (!rulesData.allowFormations) {
+			for (const formation of formationList) {
+				if (issueList.has("Invalid Formation Types")) break;
+
+				if (formation.type != "none" && formation.type != "Combat Group") {
+					if (issueList.has("Invalid Formation Types")) {
+						issueList.get("Invalid Formation Types")?.add(formation.type);
+					} else {
+						issueList.set("Invalid Formation Types", new Set([formation.type]));
+					}
+				}
 			}
 		}
 		if (!rulesData.allowSCA && scaCount > 0) {

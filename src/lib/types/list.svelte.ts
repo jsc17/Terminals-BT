@@ -78,11 +78,11 @@ export class List {
 	issues = $derived(
 		validateRules(
 			$state.snapshot(this.units.map((u) => ({ id: u.id, skill: u.skill ?? 4, data: u.baseUnit }))),
+			$state.snapshot(this.formations),
 			$state.snapshot(this.details.eras),
 			$state.snapshot(this.details.factions.concat(this.details.general == -1 ? [] : [this.details.general])),
 			$state.snapshot(this.rules),
 			$state.snapshot(this.bsList),
-			this.formations.length,
 			this.scaList.length
 		)
 	);

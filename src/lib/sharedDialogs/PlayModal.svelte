@@ -11,9 +11,11 @@
 	const nickname = await getNickname();
 	let listName = $state<string>();
 	let formationStrings = $state<string[]>([]);
+	let bfsStrings = $state<string[]>([]);
 
 	export function open(list: List, formation?: { name: string; type: string; units: string[]; secondary?: { type: string; units: string[] } }) {
 		formationStrings = [];
+		bfsStrings = [];
 		if (formation) {
 			listName = `${list.details.name} - ${formation.name}`;
 			formationStrings.push(
@@ -56,6 +58,9 @@
 							)
 					});
 				});
+			bfsStrings = [...list.bsList.entries()].map(([id, count]) => {
+				return JSON.stringify({ id, count });
+			});
 		}
 
 		createMatchWithList.fields.set({
@@ -97,6 +102,9 @@
 			>
 				{#each formationStrings as formation, index}
 					<input {...createMatchWithList.fields.formations[index].as("hidden", formation)} />
+				{/each}
+				{#each bfsStrings as bfs, index}
+					<input {...createMatchWithList.fields.battlefieldSupport[index].as("hidden", bfs)} />
 				{/each}
 				<div>
 					<label>Match Name: <input {...createMatchWithList.fields.name.as("text")} /></label>
@@ -176,12 +184,16 @@
 				<label>Nickname: <input {...joinPrivateMatchWithList.fields.nickname.as("text")} disabled={!findPrivateMatch.result} /></label>
 				<label>List Name: <input {...joinPrivateMatchWithList.fields.listName.as("text")} disabled={!findPrivateMatch.result} /></label>
 
-				<p>Creating match with <span class="primary">{listName}</span></p>
+				<p>Joining match with <span class="primary">{listName}</span></p>
 				<div class="center"><button disabled={!findPrivateMatch.result}>Join</button></div>
 				{#if findPrivateMatch.result}
 					{#each formationStrings as formation, index}
 						<input {...joinPrivateMatchWithList.fields.formations[index].as("hidden", formation)} />
 					{/each}
+					{#each bfsStrings as bfs, index}
+						<input {...createMatchWithList.fields.battlefieldSupport[index].as("hidden", bfs)} />
+					{/each}
+
 					<input {...joinPrivateMatchWithList.fields.matchId.as("hidden", findPrivateMatch.result?.data?.id ?? "")} />
 				{/if}
 			</form>

@@ -12,7 +12,8 @@ export const CreateMatchSchema = v.object({
 export const CreateMatchWithListSchema = v.object({
 	...CreateMatchSchema.entries,
 	formations: v.array(v.string()),
-	listName: v.string()
+	listName: v.string(),
+	battlefieldSupport: v.array(v.string())
 });
 
 export const ConvertMatchSchema = v.object({
@@ -72,6 +73,7 @@ export const JoinPrivateMatchWithListSchema = v.object({
 		v.transform((input) => Number(input))
 	),
 	formations: v.array(v.string()),
+	battlefieldSupport: v.array(v.string()),
 	nickname: v.string(),
 	listName: v.string()
 });

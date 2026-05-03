@@ -4,7 +4,6 @@
 	import { PlayUnitCard } from "./";
 	import { SvelteMap } from "svelte/reactivity";
 	import type { PlaymodeOptionsOutput } from "../../schema/playmode";
-	import type { MulUnit } from "$lib/types/listTypes";
 
 	type Props = {
 		formation: PlayFormation;

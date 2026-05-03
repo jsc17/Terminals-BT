@@ -143,6 +143,15 @@ export const createMatchWithList = form(CreateMatchWithListSchema, async (data) 
 									}
 								};
 							})
+						},
+						battlefieldSupport: {
+							create: data.battlefieldSupport.map((bfs) => {
+								const { id, count } = JSON.parse(bfs);
+								return {
+									bfsId: id,
+									count: count
+								};
+							})
 						}
 					}
 				}
@@ -267,6 +276,15 @@ export const joinPrivateMatchWithList = form(JoinPrivateMatchWithListSchema, asy
 										}
 									)
 								}
+							};
+						})
+					},
+					battlefieldSupport: {
+						create: data.battlefieldSupport.map((bfs) => {
+							const { id, count } = JSON.parse(bfs);
+							return {
+								bfsId: id,
+								count: count
 							};
 						})
 					}

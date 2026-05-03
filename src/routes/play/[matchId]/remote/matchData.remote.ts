@@ -20,7 +20,7 @@ export const getMyData = query(v.string(), async (matchId) => {
 export const getPlayerData = query(v.object({ playerId: v.number() }), async ({ playerId }) => {
 	const results = await prisma.usersInMatch.findUnique({
 		where: { id: playerId },
-		include: { lists: { include: { formations: { include: { units: { include: { criticals: true } } } } } } }
+		include: { lists: { include: { formations: { include: { units: { include: { criticals: true } } } }, battlefieldSupport: true } } }
 	});
 	return results != null ? results : undefined;
 });
@@ -28,7 +28,9 @@ export const getPlayerData = query(v.object({ playerId: v.number() }), async ({ 
 export const getAllPlayerData = query(v.string(), async (matchId) => {
 	const results = await prisma.usersInMatch.findMany({
 		where: { matchId },
-		include: { lists: { include: { formations: { include: { units: { include: { criticals: true } } } }, player: { select: { id: true, playerNickname: true } } } } }
+		include: {
+			lists: { include: { formations: { include: { units: { include: { criticals: true } } } }, player: { select: { id: true, playerNickname: true } }, battlefieldSupport: true } }
+		}
 	});
 	return results != null ? results : [];
 });
@@ -41,7 +43,7 @@ export const getTeamData = query(v.string(), async (matchId) => {
 export const getMatchList = query(v.number(), async (listId) => {
 	const list = await prisma.matchList.findUnique({
 		where: { id: listId },
-		include: { formations: { include: { units: { include: { criticals: true } } } }, player: { select: { id: true, playerNickname: true } } }
+		include: { formations: { include: { units: { include: { criticals: true } } } }, player: { select: { id: true, playerNickname: true } }, battlefieldSupport: true }
 	});
 	return list;
 });
@@ -57,6 +59,10 @@ export const getMatchUnitData = query.batch(v.number(), async (data) => {
 	);
 
 	return (id) => lookup.get(id);
+});
+
+export const getMatchBFSData = query(v.number(), async (id) => {
+	return prisma.matchBFS.findUnique({ where: { id } });
 });
 
 export const deleteMatch = command(v.string(), async (matchId) => {

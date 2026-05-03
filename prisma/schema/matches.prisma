@@ -52,6 +52,7 @@ model MatchList {
     team MatchTeam @relation(references: [id], fields: [teamId], onDelete: Cascade)
     teamId Int
     formations MatchFormation[]
+    battlefieldSupport MatchBFS[]
 }
 
 model MatchFormation {
@@ -89,7 +90,14 @@ model MatchCrit {
     type String
     roundsRemaining Int?
 }
-
+model MatchBFS{
+    id Int @id @default(autoincrement())
+    list MatchList @relation(references: [id], fields: [listId], onDelete: Cascade)
+    listId Int
+    bfsId Int
+    count Int
+    used Int @default(0)
+}
 model MatchLog {
     id Int @id @default(autoincrement())
     match Match @relation(references: [id], fields: [matchId], onDelete: Cascade)
@@ -131,4 +139,6 @@ enum LogType {
     UNIT_CRIT
     UNIT_CRIT_REMOVED
     HEARTBEAT
+    BFS_USED
+    BFS_RESTORED
 }

@@ -1,10 +1,10 @@
 import { toastController } from "$lib/stores";
 import { nanoid } from "nanoid";
-import { getPlayerData, getMatchUnitData, getMatchDetails, getTeamData, getMyData, getMatchList, getLogs } from "../remote/matchData.remote";
-import type { PlayFormation, PlayList, PlayUnit, PlayUnitData } from "../../types/types";
+import { getPlayerData, getMatchUnitData, getMatchDetails, getTeamData, getMyData, getMatchList, getLogs, getMatchBFSData } from "../remote/matchData.remote";
+import type { PlayBFS, PlayFormation, PlayList, PlayUnit, PlayUnitData } from "../../types/types";
 import { SvelteMap } from "svelte/reactivity";
 import { getMulImage } from "$lib/remote/mulImages.remote";
-import type { MatchCrit, MatchFormation, MatchLog, MatchUnit, UsersInMatch, MatchList } from "$lib/generated/prisma/browser";
+import type { MatchCrit, MatchFormation, MatchLog, MatchUnit, UsersInMatch, MatchList, MatchBFS } from "$lib/generated/prisma/browser";
 import { goto } from "$app/navigation";
 import { getMULDataFromIdLocal } from "$lib/local/sqllite/local-db";
 
@@ -12,6 +12,7 @@ export function processMessage(
 	message: string,
 	playerList: { id: number; team?: number; nickname: string; role: string }[],
 	matchUnits: SvelteMap<number, PlayUnit>,
+	matchBFS: SvelteMap<number, PlayBFS>,
 	matchLogs: MatchLog[],
 	matchLists: PlayList[]
 ) {
@@ -21,7 +22,7 @@ export function processMessage(
 		const lastLogId = matchLogs.at(-1)!.id;
 		if (update.id > lastLogId) {
 			getLogs({ matchId: update.matchId, lastLogId: lastLogId }).then((r) => {
-				for (const log of r) processMessage(JSON.stringify(log), playerList, matchUnits, matchLogs, matchLists);
+				for (const log of r) processMessage(JSON.stringify(log), playerList, matchUnits, matchBFS, matchLogs, matchLists);
 			});
 		}
 		return;
@@ -37,7 +38,7 @@ export function processMessage(
 		case "PLAYER_ADDED_LIST":
 			const listId = Number(update.details);
 			getMatchList(listId).then(async (r) => {
-				if (r) matchLists.push(await initializePlayerList(r, matchUnits));
+				if (r) matchLists.push(await initializePlayerList(r, matchUnits, matchBFS));
 			});
 			break;
 		case "MATCH_START":
@@ -55,6 +56,11 @@ export function processMessage(
 			handleUnitUpdate(unitId, matchUnits);
 			break;
 		}
+		case "BFS_USED":
+		case "BFS_RESTORED":
+			const bfsId = Number(update.details);
+			handleBFSUpdate(bfsId, matchBFS);
+			break;
 		case "ROUND_END":
 			getMatchDetails(update.matchId).refresh();
 			getTeamData(update.matchId).refresh();
@@ -93,8 +99,13 @@ export function processMessage(
 }
 
 export async function initializePlayerList(
-	list: MatchList & { player: { id: number; playerNickname: string }; formations: (MatchFormation & { units: (MatchUnit & { criticals: MatchCrit[] })[] })[] },
-	matchUnits: SvelteMap<number, PlayUnit>
+	list: MatchList & {
+		player: { id: number; playerNickname: string };
+		formations: (MatchFormation & { units: (MatchUnit & { criticals: MatchCrit[] })[] })[];
+		battlefieldSupport: MatchBFS[];
+	},
+	matchUnits: SvelteMap<number, PlayUnit>,
+	matchBFS: SvelteMap<number, PlayBFS>
 ) {
 	const playerFormationList: PlayFormation[] = [];
 	const duplicateMap = new SvelteMap<string, number[]>();
@@ -153,7 +164,13 @@ export async function initializePlayerList(
 			});
 		});
 	}
-	const newPlaylist: PlayList = { id: list.id, name: list.name, owner: list.player.id, team: list.teamId, formations: playerFormationList };
+
+	const bfsIds: number[] = [];
+	list.battlefieldSupport.forEach(({ id, bfsId, count, used }) => {
+		matchBFS.set(id, { id, bfsId, count, used });
+		bfsIds.push(id);
+	});
+	const newPlaylist: PlayList = { id: list.id, name: list.name, owner: list.player.id, team: list.teamId, formations: playerFormationList, bfs: bfsIds };
 	return newPlaylist;
 }
 
@@ -188,4 +205,11 @@ async function handleUnitUpdate(unitId: number, matchUnits: SvelteMap<number, Pl
 				}
 			}
 		});
+}
+
+async function handleBFSUpdate(id: number, matchBFS: SvelteMap<number, PlayBFS>) {
+	const updatedBFSData = await getMatchBFSData(id);
+	if (!updatedBFSData) return;
+
+	matchBFS.set(id, { id: updatedBFSData.id, bfsId: updatedBFSData.bfsId, count: updatedBFSData.count, used: updatedBFSData.used });
 }

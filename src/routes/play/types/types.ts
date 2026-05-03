@@ -42,6 +42,14 @@ type PlayList = {
 	owner: number;
 	team: number;
 	formations: PlayFormation[];
+	bfs: number[];
+};
+
+type PlayBFS = {
+	id: number;
+	bfsId: number;
+	count: number;
+	used: number;
 };
 
 type LogRound = {
@@ -65,4 +73,4 @@ type PlayMatch = {
 	createdAt: Date;
 };
 
-export type { PlayMatch, PlayList, PlayFormation, PlayUnitData, PlayUnit, LogRound, LogEntry };
+export type { PlayMatch, PlayList, PlayFormation, PlayUnitData, PlayUnit, LogRound, LogEntry, PlayBFS };

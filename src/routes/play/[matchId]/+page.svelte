@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { PlayFormations, EndRoundModal, MatchJoinModal, MatchManagementModal } from "./components";
 	import { PersistedState } from "runed";
-	import { type PlayList, type PlayUnit } from "../types/types";
+	import { type PlayList, type PlayUnit, type PlayBFS } from "../types/types";
 	import { PlaymodeOptionsSchema, type PlaymodeOptionsOutput } from "../schema/playmode";
 	import * as v from "valibot";
 	import { safeParseJSON } from "$lib/utilities/utilities";
@@ -14,11 +14,11 @@
 	import type { Attachment } from "svelte/attachments";
 	import { appWindow } from "$lib/stores";
 	import MatchResults from "./components/ui/MatchResults.svelte";
-	import Dialog from "$lib/generic/components/Dialog.svelte";
 	import MenuPlayer from "./components/ui/MenuPlayer.svelte";
 	import MenuHost from "./components/ui/MenuHost.svelte";
 	import type { PageProps } from "./$types";
 	import RoundTimer from "./components/ui/RoundTimer.svelte";
+	import PlayBFSDialog from "./components/PlayBFSDialog.svelte";
 
 	let { params, data }: PageProps = $props();
 
@@ -37,6 +37,7 @@
 	let matchPlayers = $state<{ id: number; team?: number; nickname: string; role: string }[]>([]);
 	let matchLists = $state<PlayList[]>([]);
 	let matchUnits = new SvelteMap<number, PlayUnit>();
+	let matchBFS = new SvelteMap<number, PlayBFS>();
 	let matchLogs = $state<MatchLog[]>([]);
 
 	const matchData = $derived(await getMatchDetails(matchId));
@@ -47,7 +48,7 @@
 	getAllPlayerData(matchId).then((results) => {
 		results.forEach(async (r) => {
 			matchPlayers.push({ id: r.id, team: r.teamId ?? undefined, nickname: r.playerNickname, role: r.playerRole });
-			for (const list of r.lists) matchLists.push(await initializePlayerList(list, matchUnits));
+			for (const list of r.lists) matchLists.push(await initializePlayerList(list, matchUnits, matchBFS));
 		});
 	});
 	// svelte-ignore state_referenced_locally
@@ -61,7 +62,7 @@
 
 	onMount(() => {
 		const es = new EventSource(`/play/${matchId}/stream`);
-		es.onmessage = ({ data }) => processMessage(data, matchPlayers, matchUnits, matchLogs, matchLists);
+		es.onmessage = ({ data }) => processMessage(data, matchPlayers, matchUnits, matchBFS, matchLogs, matchLists);
 
 		observer = new IntersectionObserver(
 			(entries) => {
@@ -135,9 +136,18 @@
 	</div>
 
 	<div class="list-scroll-container" bind:this={listContainer}>
-		{#each matchLists.toSorted((a, b) => (a.team ?? 0) - (b.team ?? 0)) as list, index}
+		{#each matchLists.toSorted((a, b) => (a.team ?? 0) - (b.team ?? 0)) as list}
 			<div id={`slide-${list.id}`} class={{ "list-scroll-slide": true, "list-scroll-slide-active": list.id == activeList }} {@attach observeList}>
 				<div class="list" id={`list-${list.id}`}>
+					{#if list.bfs.length}
+						<div class="bfs-container">
+							{#each list.bfs as bfs}
+								{#if matchBFS.has(bfs)}
+									<PlayBFSDialog bfs={matchBFS.get(bfs)!}></PlayBFSDialog>
+								{/if}
+							{/each}
+						</div>
+					{/if}
 					{#each list!.formations as formation}
 						<PlayFormations {formation} {matchUnits} options={options.current} />
 					{/each}
@@ -306,6 +316,17 @@
 		height: 100%;
 		overflow-y: auto;
 	}
+	.bfs-container {
+		width: 100%;
+		border: 1px solid var(--primary-dark);
+		border-radius: var(--radius);
+		margin-bottom: 8px;
+		padding: 8px;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 16px;
+	}
+
 	@media (max-width: 600px) {
 		.team-name-red,
 		.team-name-blue {

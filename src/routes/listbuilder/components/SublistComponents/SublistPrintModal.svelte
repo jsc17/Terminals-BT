@@ -30,7 +30,7 @@
 					console.error("Sublist contains unit not found on list");
 				}
 			}
-			for (const [bfsId, count] of sublist.checkedBS.entries()) {
+			for (const [bfsId, count] of sublist.checkedBFS.entries()) {
 				const bfs = getBfsById(bfsId);
 				if (bfs) {
 					pv += (bfs.pvCost ?? 0) * count;
@@ -38,7 +38,7 @@
 					console.error("Sublist contains BFS not found on list");
 				}
 			}
-			sublistData.push({ scenario: sublist.scenario, pv, unitList, bfs: Array.from(sublist.checkedBS.entries()) });
+			sublistData.push({ scenario: sublist.scenario, pv, unitList, bfs: Array.from(sublist.checkedBFS.entries()) });
 		}
 		return JSON.stringify(sublistData);
 	});

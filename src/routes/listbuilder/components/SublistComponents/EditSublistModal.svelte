@@ -2,6 +2,7 @@
 	import type { List, Sublist } from "$lib/types/list.svelte";
 	import { Dialog } from "$lib/generic";
 	import { getBfsById } from "$lib/data/battlefieldSupport";
+	import { SvelteMap } from "svelte/reactivity";
 
 	type Props = {
 		list: List;
@@ -11,11 +12,19 @@
 
 	let { list, sublist, open = $bindable() }: Props = $props();
 
-	let pv = $derived.by(() => {
-		return sublist?.checked.reduce((total, unitId) => {
+	const tempBFSMap = $derived(new SvelteMap<number, number>([...sublist!.checkedBFS.entries()].map(([k, v]) => [structuredClone(k), structuredClone(v)])));
+
+	const unitPv = $derived(
+		sublist!.checked.reduce((total, unitId) => {
 			return (total += list.getUnit(unitId)?.cost ?? 0);
-		}, 0);
-	});
+		}, 0)
+	);
+	const bfsPv = $derived(
+		tempBFSMap.entries().reduce((total, [id, count]) => {
+			return total + (getBfsById(id)?.pvCost ?? 0) * count;
+		}, 0)
+	);
+	let pv = $derived(unitPv + bfsPv);
 
 	let count = $derived.by(() => {
 		return sublist?.checked.reduce((total, unitId) => {
@@ -27,7 +36,7 @@
 
 	function cancelSublist() {
 		let existingSublist = list.getSublist(sublist!.id);
-		if (existingSublist && existingSublist.checked.length == 0 && existingSublist.checkedBS.size == 0) {
+		if (existingSublist && existingSublist.checked.length == 0 && existingSublist.checkedBFS.size == 0) {
 			list.deleteSublist(existingSublist.id);
 		}
 		open = false;
@@ -36,11 +45,11 @@
 	function updateSublist() {
 		let existingSublist = list.getSublist(sublist!.id);
 		if (existingSublist && sublist) {
-			if (sublist?.checked.length == 0 && sublist?.checkedBS.size == 0) {
+			if (sublist?.checked.length == 0 && sublist?.checkedBFS.size == 0) {
 				list.deleteSublist(sublist.id);
 			} else {
 				existingSublist.checked = sublist.checked;
-				existingSublist.checkedBS = sublist.checkedBS;
+				existingSublist.checkedBFS = tempBFSMap;
 			}
 		}
 		open = false;
@@ -85,7 +94,18 @@
 				{#each list.bsList.entries() as [id, count], index}
 					{@const bsData = getBfsById(id)}
 					<div class="inline">
-						<input type="number" min="0" max={count} bind:value={() => sublist?.checkedBS.get(id) ?? 0, (v) => sublist?.checkedBS.set(id, v)} />
+						<input
+							type="number"
+							min="0"
+							max={count}
+							bind:value={
+								() => tempBFSMap.get(id) ?? 0,
+								(v) => {
+									if (v != 0) tempBFSMap.set(id, v);
+									else tempBFSMap.delete(id);
+								}
+							}
+						/>
 						<p>/{count}x</p>
 					</div>
 					<label for={`checkbox${index}`}>{bsData?.name}</label>
@@ -102,8 +122,15 @@
 				{/each}
 			</div>
 			<div class="edit-sublist-stats">
-				<p><span class="muted">Units:</span> {`${count}${list.options?.sublistMaxUnits ? `/${list.options.sublistMaxUnits}` : ""}`}</p>
-				<p><span class="muted">PV:</span> {`${pv}${list.options?.sublistMaxPv ? `/${list.options.sublistMaxPv}` : ""}`}</p>
+				<p>
+					<span class="muted">Units:</span>
+					<span class={{ error: list.options?.sublistMaxUnits && count > list.options.sublistMaxUnits }}>{count}</span
+					>{`${list.options?.sublistMaxUnits ? `/${list.options.sublistMaxUnits}` : ""}`}
+				</p>
+				<p>
+					<span class="muted">PV:</span>
+					<span class={{ error: list.options?.sublistMaxPv && pv > list.options.sublistMaxPv }}>{pv}</span>{`${list.options?.sublistMaxPv ? `/${list.options.sublistMaxPv}` : ""}`}
+				</p>
 			</div>
 			<div class="edit-sublist-buttons">
 				<button class="edit-sublist-button" onclick={cancelSublist}>Cancel</button>

@@ -78,7 +78,7 @@ type SPA = {
 type Sublist = {
 	id: string;
 	checked: string[];
-	checkedBS: Map<number, number>;
+	checkedBFS: Map<number, number>;
 	scenario: string;
 };
 
@@ -103,7 +103,7 @@ type ListCodeUnit = {
 type ListCodeSublist = {
 	id: string;
 	checked: string[];
-	checkedBS?: [number, number][];
+	checkedBFS?: [number, number][];
 	scenario: string;
 };
 

@@ -6,6 +6,7 @@
 	import { CreateMatchWithListSchema, JoinPrivateMatchWithListSchema } from "$routes/play/schema/matchlistSchema";
 	import { nanoid } from "nanoid";
 	import { toastController } from "$lib/stores";
+	import type { SvelteMap } from "svelte/reactivity";
 
 	let openState = $state(false);
 	const nickname = await getNickname();
@@ -13,7 +14,7 @@
 	let formationStrings = $state<string[]>([]);
 	let bfsStrings = $state<string[]>([]);
 
-	export function open(list: List, formation?: { name: string; type: string; units: string[]; secondary?: { type: string; units: string[] } }) {
+	export function open(list: List, formation?: { name: string; type: string; units: string[]; secondary?: { type: string; units: string[] }; bfs?: string[] }) {
 		formationStrings = [];
 		bfsStrings = [];
 		if (formation) {
@@ -36,6 +37,7 @@
 						)
 				})
 			);
+			bfsStrings = formation.bfs ?? [];
 		} else {
 			listName = list.details.name;
 			formationStrings = list.formations
@@ -89,8 +91,6 @@
 			<form
 				class="create-match"
 				{...createMatchWithList.preflight(CreateMatchWithListSchema).enhance(async ({ submit, data }) => {
-					console.log(data);
-					console.log("submitting");
 					await submit();
 					if (createMatchWithList.result?.status == "success") {
 						openState = false;

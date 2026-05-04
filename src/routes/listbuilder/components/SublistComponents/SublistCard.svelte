@@ -57,8 +57,8 @@
 			.join(", ");
 	});
 
-	let bsString = $derived.by(() => {
-		return [...sublist.checkedBS.entries()]
+	let bfsString = $derived.by(() => {
+		return [...sublist.checkedBFS.entries()]
 			.map(([id, count]) => {
 				const bsData = getBfsById(id);
 				return `${bsData?.name} x${count}`;
@@ -85,7 +85,7 @@
 			size += unit?.baseUnit.size ?? 0;
 			if (unit?.baseUnit.mulId && unit?.baseUnit?.mulId > 0) count++;
 		}
-		for (const [id, count] of sublist.checkedBS ?? []) {
+		for (const [id, count] of sublist.checkedBFS ?? []) {
 			const bsData = getBfsById(id);
 			bsp += (bsData?.bspCost ?? 0) * count;
 			pv += (bsData?.pvCost ?? 0) * count;
@@ -119,7 +119,8 @@
 					playModal?.open(list, {
 						name: `${sublist.scenario != "-" ? `${sublist.scenario} ` : ""}Sublist`,
 						type: "none",
-						units: sortedUnits.map((unit) => unit.id)
+						units: sortedUnits.map((unit) => unit.id),
+						bfs: [...sublist.checkedBFS].map(([id, count]) => JSON.stringify({ id, count }))
 					});
 				} else {
 					toastController.addToast("Cannot play an empty sublist");
@@ -215,12 +216,12 @@
 						</div>
 					{/each}
 				</div>
-				{#if sublist.checkedBS.size > 0}
+				{#if sublist.checkedBFS.size > 0}
 					<div class="sublist-bs-list">
 						<div class="sublist-bs-row">
 							<p class="muted">Battlefield Support</p>
 						</div>
-						{#each sublist.checkedBS.entries() as [id, count]}
+						{#each sublist.checkedBFS.entries() as [id, count]}
 							{@const bsData = getBfsById(id)}
 							<div class="sublist-bs-row">
 								<p>{bsData?.name}</p>
@@ -232,8 +233,8 @@
 			</div>
 		{:else}
 			<p><span class="muted">Units:</span> {unitString}</p>
-			{#if sublist.checkedBS.size > 0}
-				<p><span class="muted">BF Sup:</span> {bsString}</p>
+			{#if sublist.checkedBFS.size > 0}
+				<p><span class="muted">BF Sup:</span> {bfsString}</p>
 			{/if}
 		{/if}
 		{#if layout == "vertical" || layout == "horizontal"}

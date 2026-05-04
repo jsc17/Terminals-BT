@@ -116,7 +116,7 @@
 							id: newId,
 							unitString: unitNameArray.length ? unitNameArray.join(", ") : "No Units selected",
 							bsString: bsNameArray.join(", "),
-							sublist: { id: newId, scenario: "-", checked, checkedBS: countedBS },
+							sublist: { id: newId, scenario: "-", checked, checkedBFS: countedBS },
 							unitCount: subset.filter((unit: any) => unit.type == "unit").length,
 							bsCount: subset.filter((unit: any) => unit.type == "bs").length,
 							pv,

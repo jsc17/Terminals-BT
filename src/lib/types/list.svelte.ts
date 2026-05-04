@@ -61,7 +61,7 @@ export class List {
 				return {
 					id: sublist.id,
 					checked: sublist.checked,
-					checkedBS: [...sublist.checkedBS.entries()],
+					checkedBFS: [...sublist.checkedBFS.entries()],
 					scenario: sublist.scenario
 				};
 			}),
@@ -176,7 +176,7 @@ export class List {
 
 	addSublist(sublistToAdd?: Sublist): string {
 		const id = crypto.randomUUID();
-		this.sublists.push(sublistToAdd ?? { id, checked: [], checkedBS: new Map(), scenario: "-" });
+		this.sublists.push(sublistToAdd ?? { id, checked: [], checkedBFS: new Map(), scenario: "-" });
 		return id;
 	}
 
@@ -225,15 +225,15 @@ export class List {
 	removeBS(idToRemove: number) {
 		this.bsList.delete(idToRemove);
 		for (const sublist of this.sublists) {
-			sublist.checkedBS.delete(idToRemove);
+			sublist.checkedBFS.delete(idToRemove);
 		}
 	}
 	setBSCount(id: number, count: number) {
 		this.bsList.set(id, count);
 		for (const sublist of this.sublists) {
-			const checkedCount = sublist.checkedBS.get(id);
+			const checkedCount = sublist.checkedBFS.get(id);
 			if (checkedCount && checkedCount > count) {
-				sublist.checkedBS.set(id, count);
+				sublist.checkedBFS.set(id, count);
 			}
 		}
 	}
@@ -270,7 +270,7 @@ export class List {
 				sublist.id = nanoid(6);
 			}
 			sublistIds.add(sublist.id);
-			this.sublists.push({ id: sublist.id, checked: sublist.checked, checkedBS: new Map(sublist.checkedBS), scenario: sublist.scenario });
+			this.sublists.push({ id: sublist.id, checked: sublist.checked, checkedBFS: new Map(sublist.checkedBFS), scenario: sublist.scenario });
 		}
 		if (listCode.bs) {
 			for (const [id, count] of listCode.bs) {
@@ -306,7 +306,7 @@ export class List {
 						const beforeCount = sublist.checked.length;
 						sublist.checked = sublist.checked.filter((unitId) => unitId != unit.id);
 						if (beforeCount > sublist.checked.length) {
-							sublist.checkedBS.set(bfsId, (sublist.checkedBS.get(bfsId) ?? 0) + beforeCount - sublist.checked.length);
+							sublist.checkedBFS.set(bfsId, (sublist.checkedBFS.get(bfsId) ?? 0) + beforeCount - sublist.checked.length);
 						}
 					}
 					for (const formation of listCode.formations) {

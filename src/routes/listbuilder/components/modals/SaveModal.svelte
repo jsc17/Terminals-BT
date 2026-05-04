@@ -43,7 +43,6 @@
 		const saveLocation = formData.get("saveLocation");
 		const listCodeString = JSON.stringify(list.getListCode());
 
-		console.log(listCodeString);
 		if (list.details.name == "") {
 			alert("list must have a name");
 			cancel();

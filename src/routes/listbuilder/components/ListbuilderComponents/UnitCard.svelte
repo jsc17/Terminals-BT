@@ -46,6 +46,48 @@
 					unitCustomizationModal?.show(unit.id);
 				}
 			},
+			{ type: "separator", classes: "muted" },
+			{
+				type: "item",
+				label: "Move Unit Up",
+				onSelect: () => {
+					list.moveUnit(formation, index, index - 1, secondary ?? false);
+				}
+			},
+			{
+				type: "item",
+				label: "Move Unit Down",
+				onSelect: () => {
+					list.moveUnit(formation, index, index + 1, secondary ?? false);
+				}
+			},
+			{
+				type: "submenu",
+				label: "Move to Formation",
+				subitems: list.formations.flatMap((f) => {
+					const items: MenuItem[] = [];
+
+					if (f.id != formation || secondary)
+						items.push({
+							type: "item",
+							label: f.name,
+							onSelect: () => {
+								list.moveUnitToFormation(index, formation, f.id, secondary ?? false, false);
+							}
+						});
+
+					if (f.secondary && (!secondary || f.id != formation))
+						items.push({
+							type: "item",
+							label: f.name + " (Secondary)",
+							onSelect: () => {
+								list.moveUnitToFormation(index, formation, f.id, secondary ?? true, true);
+							}
+						});
+					return items;
+				})
+			},
+			{ type: "separator", classes: "muted" },
 			{
 				type: "item",
 				label: "Check Availability",

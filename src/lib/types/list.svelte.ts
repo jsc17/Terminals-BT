@@ -143,6 +143,21 @@ export class List {
 			});
 		});
 	}
+	moveUnit(formationId: string, startingIndex: number, endingIndex: number, secondary: boolean) {
+		const formation = this.getFormation(formationId);
+		if (!formation || endingIndex < 0 || endingIndex >= this.formations.length) return;
+		const moved = secondary ? formation.secondary?.units.splice(startingIndex, 1) : formation.units.splice(startingIndex, 1);
+		if (!secondary) formation.units.splice(endingIndex, 0, ...moved!);
+		else formation.secondary?.units.splice(endingIndex, 0, ...moved!);
+	}
+	moveUnitToFormation(index: number, currentFormationId: string, newFormationId: string, secondary: boolean, newSecondary: boolean) {
+		const formation = this.getFormation(currentFormationId);
+		const newFormation = this.getFormation(newFormationId);
+		if (!newFormation || !formation) return;
+		const moved = secondary ? formation.secondary?.units.splice(index, 1) : formation.units.splice(index, 1);
+		if (!newSecondary) newFormation.units.push(...moved!);
+		else newFormation.secondary?.units.push(...moved!);
+	}
 	addFormation() {
 		const id: string = crypto.randomUUID();
 		this.formations.push({ id, name: `New formation`, type: "Combat Group", units: [] });

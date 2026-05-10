@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { appWindow } from "$lib/stores/appWindow.svelte";
-	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
 	import SublistPrintModal from "./SublistPrintModal.svelte";
 	import { getContext } from "svelte";
 	import { List, type Sublist } from "$lib/types/list.svelte";
@@ -14,6 +13,9 @@
 	import { GearIcon, MenuIcon } from "$lib/icons";
 	import * as v from "valibot";
 
+	import { DragDropProvider, DragOverlay } from "@dnd-kit/svelte";
+	import { move } from "@dnd-kit/helpers";
+
 	type Props = {
 		list: List;
 		open: boolean;
@@ -24,7 +26,6 @@
 	let settings: SettingsOutput = getContext("listbuilderSettings");
 
 	let scenarioFilter = $state<string>("All");
-	let flipDurationMs = 300;
 
 	let sublistPrintModalOpen = $state(false);
 	let sublistEditModalOpen = $state(false);
@@ -32,11 +33,6 @@
 
 	let scenarioList = $derived.by(() => ["-"].concat(list.options?.sublistScenarios ?? []));
 	let layout: "mobile" | "vertical" | "horizontal" = $derived(appWindow.isMobile ? "mobile" : settings.sublistUI.sublistOrientation);
-
-	let dropTargetStyle = { outline: "none" };
-	function handleSort(e: CustomEvent<DndEvent<Sublist>>) {
-		list.sublists = e.detail.items;
-	}
 
 	let currentSublist = $state<Sublist>();
 
@@ -107,16 +103,39 @@
 			}
 		}
 	];
+
+	let snapshot: Sublist[] = [];
+	function onDragStart() {
+		snapshot = list.sublists.slice();
+	}
+
+	function onDragOver(event: any) {
+		list.sublists = move(list.sublists, event);
+	}
+
+	function onDragEnd(event: any) {
+		if (event.canceled) list.sublists = snapshot;
+	}
 </script>
 
 {#snippet sublists()}
-	{#each list.sublists as sublist (sublist.id)}
-		{#if sublist.scenario == scenarioFilter || scenarioFilter == "All"}
-			<div class:panel-vertical={layout == "vertical" && !appWindow.isMobile} class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}>
-				<SublistCard {sublist} {list} {scenarioList} unitSortOrder={settings.sublistUI.sublistSortOrder} {layout} {openSublistEditModal} {playModal}></SublistCard>
-			</div>
-		{/if}
-	{/each}
+	<DragDropProvider {onDragEnd} {onDragOver} {onDragStart}>
+		{#each list.sublists as sublist, index (sublist.id)}
+			{#if sublist.scenario == scenarioFilter || scenarioFilter == "All"}
+				<div class:panel-vertical={layout == "vertical" && !appWindow.isMobile} class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}>
+					<SublistCard {sublist} {list} {scenarioList} unitSortOrder={settings.sublistUI.sublistSortOrder} {layout} {openSublistEditModal} {playModal} {index} />
+				</div>
+			{/if}
+		{/each}
+		<DragOverlay>
+			{#snippet children(source)}
+				{@const sublist = list.getSublist(source.data.id)!}
+				<div class:panel-vertical={layout == "vertical" && !appWindow.isMobile} class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}>
+					<SublistCard {sublist} {list} {scenarioList} unitSortOrder={settings.sublistUI.sublistSortOrder} {layout} {openSublistEditModal} {playModal} index={0} isOverlay={true} />
+				</div>
+			{/snippet}
+		</DragOverlay>
+	</DragDropProvider>
 	<div class:panel-vertical={layout == "vertical" && !appWindow.isMobile} class:panel-horizontal={layout == "horizontal" || appWindow.isMobile}>
 		<button
 			class="add-panel"
@@ -160,30 +179,12 @@
 	{/snippet}
 	<div class="sublist-modal-content">
 		{#if appWindow.isMobile}
-			<div
-				class="sublist-modal-sublist-container sublist-modal-sublist-container-mobile"
-				use:dragHandleZone={{
-					items: list.sublists,
-					dropTargetStyle,
-					flipDurationMs,
-					dragDisabled: scenarioFilter != "All"
-				}}
-				onconsider={handleSort}
-				onfinalize={handleSort}
-			>
+			<div class="sublist-modal-sublist-container sublist-modal-sublist-container-mobile">
 				{@render sublists()}
 			</div>
 		{:else}
 			<div
 				class="sublist-modal-sublist-container"
-				use:dndzone={{
-					items: list.sublists,
-					dropTargetStyle,
-					flipDurationMs,
-					dragDisabled: scenarioFilter != "All"
-				}}
-				onconsider={handleSort}
-				onfinalize={handleSort}
 				class:sublist-modal-sublist-container-vertical={layout == "vertical"}
 				class:sublist-modal-sublist-container-horizontal={layout == "horizontal"}
 			>

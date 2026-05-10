@@ -3,7 +3,6 @@
 	import { type ListFormation, List } from "$lib/types/list.svelte";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { getRulesByName, ruleSets } from "$lib/rules/rulesets";
-	import { dndzone, dragHandleZone, type DndEvent } from "svelte-dnd-action";
 	import { appWindow, toastController } from "$lib/stores";
 	import { Dialog } from "$lib/generic";
 	import { deserialize } from "$app/forms";
@@ -22,6 +21,9 @@
 	import FormationListPopover from "./ListbuilderComponents/FormationListPopover.svelte";
 	import BattlefieldSupportPopover from "./ListbuilderComponents/BattlefieldSupportPopover.svelte";
 	import SCAPopover from "./ListbuilderComponents/SCAPopover.svelte";
+	import { DragDropProvider, DragOverlay } from "@dnd-kit/svelte";
+
+	import UnitCard from "./ListbuilderComponents/UnitCard.svelte";
 
 	type Props = {
 		listCloseCallback: (id: string) => void;
@@ -41,26 +43,6 @@
 	let sublistModalOpen = $state(false);
 	let printModalOpen = $state(false);
 	let editModalOpen = $state(false);
-
-	let dropTargetStyle = { outline: "solid var(--primary)" };
-	let flipDurationMs = 100;
-	let draggingColumns = $state(false);
-	function handleDndConsider(e: CustomEvent<DndEvent<ListFormation>>) {
-		draggingColumns = true;
-		list.formations = e.detail.items;
-	}
-	function handleDndFinalize(e: CustomEvent<DndEvent<ListFormation>>) {
-		draggingColumns = false;
-		list.formations = e.detail.items;
-	}
-	function transformDraggedElement(draggedEl: HTMLElement | undefined, data: any, index: number | undefined) {
-		const unitCardElement: HTMLElement | null | undefined = draggedEl?.querySelector(".unit-cards");
-		const dropMessageElement: HTMLElement | null | undefined = draggedEl?.querySelector(".drop-message");
-		if (unitCardElement) {
-			unitCardElement.innerHTML = "Unit list collapsed while dragging formations";
-		}
-		dropMessageElement?.remove();
-	}
 
 	async function shareList() {
 		const formData = new FormData();
@@ -124,6 +106,58 @@
 	}
 
 	let rules = $derived(getRulesByName(list.rules ?? "noRes"));
+
+	let formationSnapshot: any[] = [];
+	let draggingFormation = $state(false);
+	let draggingUnit = $state(false);
+
+	function onDragStart(event: any) {
+		if (event.operation.source.sortable.type == "formation") draggingFormation = true;
+		if (event.operation.source.sortable.type == "unit") draggingUnit = true;
+
+		formationSnapshot = list.formations.slice();
+	}
+	function onDragOver(event: any) {
+		const { source, target } = event.operation;
+		if (!source || !target) return;
+		if (source.type === "formation") {
+			if (!source.sortable || !target.sortable) return;
+			const sourceIndex = source.sortable.index;
+			const targetIndex = target.sortable.index;
+			if (sourceIndex == targetIndex) return;
+			list.moveFormation(sourceIndex, targetIndex);
+		} else {
+			const { index: sourceIndex, group: sourceGroup } = source.sortable;
+			let targetIndex: number;
+			let targetGroup: string;
+
+			if (target.type === "unit-drop") {
+				targetIndex = 0;
+				targetGroup = target.id;
+			} else {
+				targetIndex = target.sortable.index;
+				targetGroup = target.sortable.group;
+			}
+
+			if (sourceIndex == undefined || targetIndex == undefined || sourceGroup == undefined || targetGroup == undefined) return;
+			if (sourceGroup == targetGroup && sourceIndex == targetIndex) return;
+
+			const sourceColumn = list.formations.find((c) => c.id == sourceGroup.slice(0, -1));
+			const targetColumn = list.formations.find((c) => c.id == targetGroup.slice(0, -1));
+			if (!sourceColumn || !targetColumn) return;
+
+			const sourceUnits = sourceGroup.at(-1) == "p" ? sourceColumn.units : sourceColumn.secondary!.units;
+			const targetUnits = targetGroup.at(-1) == "p" ? targetColumn.units : targetColumn.secondary!.units;
+			const moved = sourceUnits.splice(sourceIndex, 1);
+			targetUnits.splice(targetIndex, 0, ...moved!);
+		}
+	}
+
+	function onDragEnd(event: any) {
+		if (event.canceled) list.formations = formationSnapshot;
+		draggingFormation = false;
+		draggingUnit = false;
+	}
 </script>
 
 <div class="card listbuilder">
@@ -210,28 +244,23 @@
 				creators.
 			</p>
 		</div>
-	{:else if appWindow.isNarrow}
-		<div
-			class="list-units"
-			use:dragHandleZone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations", transformDraggedElement, dragDisabled: list.formations.length == 1 }}
-			onconsider={handleDndConsider}
-			onfinalize={handleDndFinalize}
-		>
-			{#each list.formations as formation (formation.id)}
-				<FormationCard {formation} {draggingColumns} {unitCustomizationModal} bind:list {playModal}></FormationCard>
-			{/each}
-		</div>
 	{:else}
-		<div
-			class="list-units"
-			use:dndzone={{ items: list.formations, dropTargetStyle, flipDurationMs, type: "formations", transformDraggedElement, dragDisabled: list.formations.length == 1 }}
-			onconsider={handleDndConsider}
-			onfinalize={handleDndFinalize}
-		>
-			{#each list.formations as formation, index (formation.id)}
-				<FormationCard bind:formation={list.formations[index]} {draggingColumns} {unitCustomizationModal} bind:list {playModal}></FormationCard>
-			{/each}
-		</div>
+		<DragDropProvider {onDragStart} {onDragOver} {onDragEnd}>
+			<div class={{ "list-units": true, "list-units-dragging": draggingFormation }}>
+				{#each list.formations as formation, index (formation.id)}
+					<FormationCard formationId={formation.id} {draggingFormation} {draggingUnit} {unitCustomizationModal} bind:list {playModal} {index}></FormationCard>
+				{/each}
+			</div>
+			<DragOverlay>
+				{#snippet children(source: any)}
+					{#if source.type == "formation"}
+						<FormationCard formationId={source.id} {draggingFormation} {draggingUnit} {unitCustomizationModal} bind:list {playModal} isOverlay={true} index={100} />
+					{:else}
+						<UnitCard unit={{ id: source.id }} {unitCustomizationModal} {list} formation={source.formation} index={0} isOverlay={true} />
+					{/if}
+				{/snippet}
+			</DragOverlay>
+		</DragDropProvider>
 	{/if}
 </div>
 
@@ -286,12 +315,18 @@
 	.list-units {
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
+		gap: 6px;
 		flex: 1;
 		overflow: auto;
 		scrollbar-gutter: stable;
 		scroll-behavior: smooth;
-		margin-top: 8px;
+		border-top: 2px solid var(--border);
+		margin-top: 2px;
+	}
+	.list-units-dragging {
+		padding: 20px 0px;
+		gap: 12px;
+		box-shadow: 0 0 5px 3px var(--primary);
 	}
 
 	.info {
@@ -316,9 +351,6 @@
 		padding: 16px;
 		color: var(--error);
 		gap: 8px;
-	}
-	:global(.drop-target-zone) {
-		outline: solid green;
 	}
 
 	@media (max-width: 600px) {

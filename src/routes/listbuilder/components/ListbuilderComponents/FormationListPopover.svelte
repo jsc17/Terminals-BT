@@ -8,10 +8,13 @@
 	import { DragDropProvider, DragOverlay } from "@dnd-kit/svelte";
 	import { createSortable } from "@dnd-kit/svelte/sortable";
 
-	let { list = $bindable() }: { list: List } = $props();
+	type Props = { list: List };
+
+	let { list = $bindable() }: Props = $props();
 
 	let snapshot: ListFormation[] = [];
 	let popoverOpen = $state(false);
+
 	function onDragStart() {
 		snapshot = list.formations.slice();
 	}
@@ -47,20 +50,24 @@
 				{#each list.formations as formation, index}
 					{@const stats = getFormationStats(formation, list)}
 					{@const sortable = createSortable({
-						id: formation.id,
+						get id() {
+							return formation.id;
+						},
 						get index() {
 							return index;
 						},
 						data: { name: formation.name, type: formation.type, unitCount: stats.unitCount, totalPV: stats.totalPV }
 					})}
-					<div class="formation-row" {@attach sortable.attach}>
-						<div class="drag-handle" {@attach sortable.attachHandle}>
-							<DragIndicatorIcon height="15" width="15" fill="var(--text-color)" />
+					<div class={{ "formation-row": true, "drag-outline": sortable.isDragging }} {@attach sortable.attach}>
+						<div class={{ "drag-wrapper": true, "drag-wrapper-dragging": sortable.isDragging }}>
+							<div class="drag-handle" {@attach sortable.attachHandle}>
+								<DragIndicatorIcon height="15" width="15" fill="var(--text-color)" />
+							</div>
+							<a href={`#formation-${formation.id}`} onclick={() => (popoverOpen = false)}>{formation.name}</a>
+							<p class="muted">{formation.type}</p>
+							<p class="muted">{stats.unitCount}</p>
+							<p class="muted">{stats.totalPV}</p>
 						</div>
-						<a href={`#formation-${formation.id}`} onclick={() => (popoverOpen = false)}>{formation.name}</a>
-						<p class="muted">{formation.type}</p>
-						<p class="muted">{stats.unitCount}</p>
-						<p class="muted">{stats.totalPV}</p>
 					</div>
 				{/each}
 			</div>
@@ -129,7 +136,7 @@
 	.formation-row p:not(:nth-child(1)) {
 		justify-self: center;
 	}
-	.formation-row:nth-child(odd) {
+	.formation-row:nth-child(odd):not(.drag-outline) {
 		background-color: var(--surface-color);
 	}
 	.drag-handle:hover {
@@ -145,5 +152,15 @@
 	}
 	.popover-footer p {
 		font-size: 0.9em;
+	}
+	.drag-wrapper {
+		display: contents;
+	}
+	.drag-wrapper-dragging {
+		visibility: hidden;
+	}
+	.drag-outline {
+		background-color: hsl(from var(--primary) h s l / 30%);
+		border: 1px solid var(--primary);
 	}
 </style>

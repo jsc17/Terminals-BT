@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@dnd-kit/helpers':
-        specifier: ^0.3.2
-        version: 0.3.2
+        specifier: ^0.4.0
+        version: 0.4.0
       '@dnd-kit/svelte':
-        specifier: ^0.3.2
-        version: 0.3.2(svelte@5.53.5)
+        specifier: 0.4.1-beta-20260506012126
+        version: 0.4.1-beta-20260506012126(svelte@5.53.5)
       '@humanspeak/svelte-virtual-list':
         specifier: ^0.3.6
         version: 0.3.6(svelte@5.53.5)
@@ -168,9 +168,6 @@ importers:
       svelte-check:
         specifier: ^4.3.4
         version: 4.3.4(picomatch@4.0.3)(svelte@5.53.5)(typescript@5.9.3)
-      svelte-dnd-action:
-        specifier: 0.9.69
-        version: 0.9.69(svelte@5.53.5)
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
@@ -315,26 +312,35 @@ packages:
   '@chevrotain/utils@10.5.0':
     resolution: {integrity: sha512-hBzuU5+JjB2cqNZyszkDHZgOSrUUT8V3dhgRl8Q9Gp6dAj/H5+KILGjbhDpc3Iy9qmqlm/akuOI2ut9VUtzJxQ==}
 
-  '@dnd-kit/abstract@0.3.2':
-    resolution: {integrity: sha512-uvPVK+SZYD6Viddn9M0K0JQdXknuVSxA/EbMlFRanve3P/XTc18oLa5zGftKSGjfQGmuzkZ34E26DSbly1zi3Q==}
+  '@dnd-kit/abstract@0.4.0':
+    resolution: {integrity: sha512-loEEJxKT5oLOLeRBJVTO9qpgvvW/Qq902xO20v1JMbpANuN/NLurUdpxIwNpVz+RtOSyzznnbc7lO7psmOhc9A==}
 
-  '@dnd-kit/collision@0.3.2':
-    resolution: {integrity: sha512-pNmNSLCI8S9fNQ7QJ3fBCDjiT0sqBhUFcKgmyYaGvGCAU+kq0AP8OWlh0JSisc9k5mFyxmRpmFQcnJpILz/RPA==}
+  '@dnd-kit/abstract@0.4.1-beta-20260506012126':
+    resolution: {integrity: sha512-GLRY0PudcEP+PMpOwq55lYLLMYA14tK87Ea0C7n5Rw7/pNyJsM5e2ZLaFtCtqf8CKpivGHdBpSSlZEQMCEJ2kA==}
 
-  '@dnd-kit/dom@0.3.2':
-    resolution: {integrity: sha512-cIUAVgt2szQyz6JRy7I+0r+xeyOAGH21Y15hb5bIyHoDEaZBvIDH+OOlD9eoLjCbsxDLN9WloU2CBi3OE6LYDg==}
+  '@dnd-kit/collision@0.4.1-beta-20260506012126':
+    resolution: {integrity: sha512-zVhQ0a16QUQMtugWZJwrZfrX946bUyagfP/M2Ww0bHdvThFsYj9fk6iPxOJPsOrb4lDSMDOWHcmBNdpWqp9DFg==}
 
-  '@dnd-kit/geometry@0.3.2':
-    resolution: {integrity: sha512-3UBPuIS7E3oGiHxOE8h810QA+0pnrnCtGxl4Os1z3yy5YkC/BEYGY+TxWPTQaY1/OMV7GCX7ZNMlama2QN3n3w==}
+  '@dnd-kit/dom@0.4.1-beta-20260506012126':
+    resolution: {integrity: sha512-FXE2U2pwtzkbgrzyFnrI08NoJ3r8JaNt5R5XgKXz5KZxYNnM0CkZAbYFeSQsb+GDgRdn8Q5xexovNb9GOxTBkw==}
 
-  '@dnd-kit/helpers@0.3.2':
-    resolution: {integrity: sha512-pj7pCE6BiysNetpPnzb3BJOrcKiqueUr1LFg6wYoi2fIFYpz66n2Ojd7HTwfwkpv0oyC3QlvA6Dk8cOmi6VavA==}
+  '@dnd-kit/geometry@0.4.0':
+    resolution: {integrity: sha512-d1n+CU54V/qF/g792bmJK2oR4f5jOL7Pls2IfC+j9f5UBECpjsYbcPZ/krom/z8LgieqvMh1qrUkdcBjJJ7vpg==}
 
-  '@dnd-kit/state@0.3.2':
-    resolution: {integrity: sha512-dLUIkoYrIJhGXfF2wGLTfb46vUokEsO/OoE21TSfmahYrx7ysTmnwbePsznFaHlwgZhQEh6AlLvthLCeY21b1A==}
+  '@dnd-kit/geometry@0.4.1-beta-20260506012126':
+    resolution: {integrity: sha512-sUPKZ4Gb39T+BRx24GNp950Zy6GBlY7/7lxshb6rxDjnTM3MOgWiHWnYgbm5eeOoN/KXvCeEYdGOxXahoI+2JA==}
 
-  '@dnd-kit/svelte@0.3.2':
-    resolution: {integrity: sha512-HkTnx/3GnxfVNqHSojxhxp5r+KymL9Q7UI2gonXN2+bmdObw03FSQOjicOoRzlV2u9o5DtK1sU4YUQAfkLCGGQ==}
+  '@dnd-kit/helpers@0.4.0':
+    resolution: {integrity: sha512-9YOKevD6zOwKVvV4k3fQL//NF+UaN92sfqPpJhT0/7Jq5PLtfD+CTpzmFAjTt5o1qQpFj3xqjWnQl25ooW62wQ==}
+
+  '@dnd-kit/state@0.4.0':
+    resolution: {integrity: sha512-vVdwOY9VsYdMNa7Z0xQhTXlzHqCcCugGuoM1kzvZhnZ0tYVPRdmIhWfeO6Y2ZoN92JwYAyJRRNl4ICkEe2mneg==}
+
+  '@dnd-kit/state@0.4.1-beta-20260506012126':
+    resolution: {integrity: sha512-0H3Ynye3tXYKmzXNhDvldRbc39qL0/yNuLubsPi5lhl293nuAdvm5K/OElZoLf0jgkqKBTFQ0QMZQQEQoc0P3w==}
+
+  '@dnd-kit/svelte@0.4.1-beta-20260506012126':
+    resolution: {integrity: sha512-eaL3cKuO/57yHsjh7bKJjmdjJFT3bIc5ovSc2ZQYGWDEh+FjIg9WSSk1urvwhVGCCakGzUx6qDrzbcXL8qH7RA==}
     peerDependencies:
       svelte: ^5.29.0
 
@@ -842,8 +848,8 @@ packages:
       svelte: '>=5.x'
       vite: '>=5.x || >= 6.x'
 
-  '@preact/signals-core@1.13.0':
-    resolution: {integrity: sha512-slT6XeTCAbdql61GVLlGU4x7XHI7kCZV5Um5uhE4zLX4ApgiiXc0UYFvVOKq06xcovzp7p+61l68oPi563ARKg==}
+  '@preact/signals-core@1.14.1':
+    resolution: {integrity: sha512-vxPpfXqrwUe9lpjqfYNjAF/0RF/eFGeLgdJzdmIIZjpOnTmGmAB4BjWone562mJGMRP4frU6iZ6ei3PDsu52Ng==}
 
   '@prisma/adapter-mariadb@7.1.0':
     resolution: {integrity: sha512-my5vKT6J4zRi5nNmLxosMafdQCk7tZgQHZ11mfaeFKh8xrJSEjFn0TFa1py8khHvFMvnadKUWdctjPpoJuxSBQ==}
@@ -1300,8 +1306,8 @@ packages:
       svelte: ^5.0.0
       vite: ^6.3.0 || ^7.0.0
 
-  '@swc/helpers@0.5.19':
-    resolution: {integrity: sha512-QamiFeIK3txNjgUTNppE6MiG3p7TdninpZu0E0PbqVh1a9FNLT2FRhisaa4NcaX52XVhA5l7Pk58Ft7Sqi/2sA==}
+  '@swc/helpers@0.5.21':
+    resolution: {integrity: sha512-jI/VAmtdjB/RnI8GTnokyX7Ug8c+g+ffD6QRLa6XQewtnGyukKkKSk3wLTM3b5cjt1jNh9x0jfVlagdN2gDKQg==}
 
   '@texel/color@1.1.10':
     resolution: {integrity: sha512-0du+jhP68nvdXGoS/dxAyqkmWWzsogtU3chygmNf/u4QtDIbG1e5OfcVIWfx29B5ANCLEDOPEQIvOhrvwhlORg==}
@@ -2796,11 +2802,6 @@ packages:
     peerDependencies:
       svelte: ^3.54.0 || ^4.0.0 || ^5.0.0
 
-  svelte-dnd-action@0.9.69:
-    resolution: {integrity: sha512-NAmSOH7htJoYraTQvr+q5whlIuVoq88vEuHr4NcFgscDRUxfWPPxgie2OoxepBCQCikrXZV4pqV86aun60wVyw==}
-    peerDependencies:
-      svelte: '>=3.23.0 || ^5.0.0-next.0'
-
   svelte-eslint-parser@1.4.1:
     resolution: {integrity: sha512-1eqkfQ93goAhjAXxZiu1SaKI9+0/sxp4JIWQwUpsz7ybehRE5L8dNuz7Iry7K22R47p5/+s9EM+38nHV2OlgXA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0, pnpm: 10.24.0}
@@ -3411,46 +3412,62 @@ snapshots:
 
   '@chevrotain/utils@10.5.0': {}
 
-  '@dnd-kit/abstract@0.3.2':
+  '@dnd-kit/abstract@0.4.0':
     dependencies:
-      '@dnd-kit/geometry': 0.3.2
-      '@dnd-kit/state': 0.3.2
+      '@dnd-kit/geometry': 0.4.0
+      '@dnd-kit/state': 0.4.0
       tslib: 2.8.1
 
-  '@dnd-kit/collision@0.3.2':
+  '@dnd-kit/abstract@0.4.1-beta-20260506012126':
     dependencies:
-      '@dnd-kit/abstract': 0.3.2
-      '@dnd-kit/geometry': 0.3.2
+      '@dnd-kit/geometry': 0.4.1-beta-20260506012126
+      '@dnd-kit/state': 0.4.1-beta-20260506012126
       tslib: 2.8.1
 
-  '@dnd-kit/dom@0.3.2':
+  '@dnd-kit/collision@0.4.1-beta-20260506012126':
     dependencies:
-      '@dnd-kit/abstract': 0.3.2
-      '@dnd-kit/collision': 0.3.2
-      '@dnd-kit/geometry': 0.3.2
-      '@dnd-kit/state': 0.3.2
+      '@dnd-kit/abstract': 0.4.1-beta-20260506012126
+      '@dnd-kit/geometry': 0.4.1-beta-20260506012126
       tslib: 2.8.1
 
-  '@dnd-kit/geometry@0.3.2':
+  '@dnd-kit/dom@0.4.1-beta-20260506012126':
     dependencies:
-      '@dnd-kit/state': 0.3.2
+      '@dnd-kit/abstract': 0.4.1-beta-20260506012126
+      '@dnd-kit/collision': 0.4.1-beta-20260506012126
+      '@dnd-kit/geometry': 0.4.1-beta-20260506012126
+      '@dnd-kit/state': 0.4.1-beta-20260506012126
       tslib: 2.8.1
 
-  '@dnd-kit/helpers@0.3.2':
+  '@dnd-kit/geometry@0.4.0':
     dependencies:
-      '@dnd-kit/abstract': 0.3.2
+      '@dnd-kit/state': 0.4.0
       tslib: 2.8.1
 
-  '@dnd-kit/state@0.3.2':
+  '@dnd-kit/geometry@0.4.1-beta-20260506012126':
     dependencies:
-      '@preact/signals-core': 1.13.0
+      '@dnd-kit/state': 0.4.1-beta-20260506012126
       tslib: 2.8.1
 
-  '@dnd-kit/svelte@0.3.2(svelte@5.53.5)':
+  '@dnd-kit/helpers@0.4.0':
     dependencies:
-      '@dnd-kit/abstract': 0.3.2
-      '@dnd-kit/dom': 0.3.2
-      '@dnd-kit/state': 0.3.2
+      '@dnd-kit/abstract': 0.4.0
+      tslib: 2.8.1
+
+  '@dnd-kit/state@0.4.0':
+    dependencies:
+      '@preact/signals-core': 1.14.1
+      tslib: 2.8.1
+
+  '@dnd-kit/state@0.4.1-beta-20260506012126':
+    dependencies:
+      '@preact/signals-core': 1.14.1
+      tslib: 2.8.1
+
+  '@dnd-kit/svelte@0.4.1-beta-20260506012126(svelte@5.53.5)':
+    dependencies:
+      '@dnd-kit/abstract': 0.4.1-beta-20260506012126
+      '@dnd-kit/dom': 0.4.1-beta-20260506012126
+      '@dnd-kit/state': 0.4.1-beta-20260506012126
       svelte: 5.53.5
       tslib: 2.8.1
 
@@ -3669,7 +3686,7 @@ snapshots:
 
   '@internationalized/date@3.10.0':
     dependencies:
-      '@swc/helpers': 0.5.19
+      '@swc/helpers': 0.5.21
 
   '@isaacs/cliui@8.0.2':
     dependencies:
@@ -3859,7 +3876,7 @@ snapshots:
     transitivePeerDependencies:
       - rollup
 
-  '@preact/signals-core@1.13.0': {}
+  '@preact/signals-core@1.14.1': {}
 
   '@prisma/adapter-mariadb@7.1.0':
     dependencies:
@@ -4399,7 +4416,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@swc/helpers@0.5.19':
+  '@swc/helpers@0.5.21':
     dependencies:
       tslib: 2.8.1
 
@@ -5954,10 +5971,6 @@ snapshots:
   svelte-color-select@0.0.14(svelte@5.53.5):
     dependencies:
       '@texel/color': 1.1.10
-      svelte: 5.53.5
-
-  svelte-dnd-action@0.9.69(svelte@5.53.5):
-    dependencies:
       svelte: 5.53.5
 
   svelte-eslint-parser@1.4.1(svelte@5.53.5):

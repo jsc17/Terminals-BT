@@ -2,7 +2,6 @@
 	import { toastController } from "$lib/stores/toastController.svelte";
 	import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 	import type { List } from "$lib/types/list.svelte";
-	import { dragHandle } from "svelte-dnd-action";
 	import { appWindow } from "$lib/stores/appWindow.svelte";
 	import { Dialog, DropdownMenu, Separator } from "$lib/generic";
 	import { UnitCustomizationModal } from "../index";
@@ -12,16 +11,21 @@
 	import { eraLookup, factionLookup } from "$lib/data/erasFactionLookup";
 	import { getUnitAvailabilityLocal } from "$lib/local/sqllite/local-db";
 	import { DragIndicatorIcon, MenuIcon } from "$lib/icons";
+	import { createSortable } from "@dnd-kit/svelte/sortable";
 
 	type Props = {
 		unit: { id: string; bonus?: { ind: number; abil: number }[] };
 		unitCustomizationModal?: UnitCustomizationModal;
 		list: List;
+		formation: string;
+		secondary?: boolean;
+		index: number;
+		isOverlay?: boolean;
 	};
 
-	const { unit, unitCustomizationModal, list }: Props = $props();
+	const { unit, unitCustomizationModal, list, formation, index, isOverlay = false, secondary }: Props = $props();
 
-	let unitDetails = list.getUnit(unit.id);
+	let unitDetails = $derived(list.getUnit(unit.id));
 
 	let unitSpas = $derived.by(() => {
 		let spas: string[] = [];
@@ -62,99 +66,116 @@
 	});
 
 	let availabilityOpen = $state(false);
+
+	const sortable = createSortable({
+		get id() {
+			return unit.id;
+		},
+		get index() {
+			return index;
+		},
+		type: "unit",
+		get group() {
+			return `${formation}${secondary ? "s" : "p"}`;
+		},
+		get data() {
+			return { id: unit.id, formation, secondary };
+		}
+	});
 </script>
 
-<div class="unit-card">
-	{#if appWindow.isNarrow}
-		<div class="drag-handles" use:dragHandle>
-			<DragIndicatorIcon fill="var(--text-color)" width="25" height="25" />
-		</div>
-	{/if}
-	<div class="unit-row-container">
-		<div class="unit-name-row">
-			{#await list.issues}
-				<p class="name-row-name">{unitDetails?.baseUnit.name}</p>
-			{:then issues}
-				<p class="name-row-name" class:invalid-unit={issues.issueUnits.has(unitDetails?.id ?? "0")}>{unitDetails?.baseUnit.name}</p>
-			{/await}
-
-			<p class="name-row-pv"><span class="muted">PV:</span> {unitDetails?.cost}</p>
-			<DropdownMenu items={unitMenuItems}>
-				{#snippet trigger()}
-					<div class="unit-menu-trigger">
-						<MenuIcon fill="var(--button-text-color)" width="20" height="20" />
-					</div>
-				{/snippet}
-			</DropdownMenu>
-		</div>
-		<div class="unit-header-row">
-			<div class="unit-header">Type</div>
-			{#if unitDetails?.baseUnit.type != "BS"}
-				<div class="unit-header">Skill</div>
-				<div class="unit-header">Speed</div>
-				<div class="unit-header">Damage</div>
-				<div class="unit-header">Health</div>
-				<div class="unit-header">Size</div>
-				<div class="unit-header">Role</div>
-			{/if}
-		</div>
-		<div class="unit-stat-row">
-			<div class="unit-stat">{unitDetails?.baseUnit.subtype}</div>
-			{#if unitDetails?.baseUnit.type != "BS"}
-				<div class="unit-stat">
-					{#if unitDetails?.skill != undefined}
-						<select
-							bind:value={unitDetails.skill}
-							onchange={() => {
-								unitDetails.cost = getNewSkillCost(unitDetails.skill, unitDetails.baseUnit.pv);
-							}}
-						>
-							{#each [...Array(8).keys()] as skill}
-								<option value={skill}>{skill}</option>
-							{/each}
-						</select>
-					{:else}
-						-
-					{/if}
-				</div>
-				<div class="unit-stat">
-					{#each unitDetails?.baseUnit.move! as movement, index}
-						{#if index != 0}
-							{"/ "}
-						{/if}
-						{`${movement.speed}"${movement.type ?? ""}`}
-					{/each}
-					- TMM {unitDetails?.baseUnit.tmm}
-				</div>
-				<div class="unit-stat">
-					{unitDetails?.baseUnit.damageS}{unitDetails?.baseUnit.damageSMin ? "*" : ""}{"/" + unitDetails?.baseUnit.damageM}{unitDetails?.baseUnit.damageMMin ? "*" : ""}{"/" +
-						unitDetails?.baseUnit.damageL}{unitDetails?.baseUnit.damageLMin ? "*" : ""}{" - " + unitDetails?.baseUnit.overheat}
-				</div>
-				<div class="unit-stat">{unitDetails?.baseUnit.health + " (" + unitDetails?.baseUnit.armor + "+" + unitDetails?.baseUnit.structure + ")"}</div>
-				<div class="unit-stat">{unitDetails?.baseUnit.size}</div>
-				<div class="unit-stat unit-role">{unitDetails?.baseUnit.role}</div>
-			{/if}
-		</div>
-		<div class="unit-ability-row">
-			<div class="unit-abilities">
-				{#if unitDetails}
-					{createAbilityLineString(unitDetails?.baseUnit.abilities)}
-				{/if}
-			</div>
-		</div>
-		{#if unitDetails?.customization?.ammo || unitSpas.length}
-			<div class="unit-custom-row">
-				{#if unitDetails?.customization?.ammo?.length}
-					<p class="unit-abilities"><span class="muted-text-color">Alt. Ammo:</span> {unitDetails.customization.ammo?.join(", ")}</p>
-				{/if}
-				{#if unitSpas.length}
-					<p class="unit-abilities">
-						<span class="muted-text-color">SPA:</span>
-						{unitSpas}
-					</p>
-				{/if}
+<div class={{ "unit-card": true, "dragging-outline": sortable.isDragging && !isOverlay }} {@attach sortable.attach}>
+	<div class={{ content: true, "dragging-hidden": sortable.isDragging && !isOverlay }}>
+		{#if appWindow.isNarrow}
+			<div class="drag-handles" {@attach sortable.attachHandle}>
+				<DragIndicatorIcon fill="var(--text-color)" width="25" height="25" />
 			</div>
 		{/if}
+		<div class="unit-row-container">
+			<div class="unit-name-row">
+				{#await list.issues}
+					<p class="name-row-name">{unitDetails?.baseUnit.name}</p>
+				{:then issues}
+					<p class="name-row-name" class:invalid-unit={issues.issueUnits.has(unitDetails?.id ?? "0")}>{unitDetails?.baseUnit.name}</p>
+				{/await}
+				<p class="name-row-pv"><span class="muted">PV:</span> {unitDetails?.cost}</p>
+				<DropdownMenu items={unitMenuItems}>
+					{#snippet trigger()}
+						<div class="unit-menu-trigger">
+							<MenuIcon fill="var(--button-text-color)" width="20" height="20" />
+						</div>
+					{/snippet}
+				</DropdownMenu>
+			</div>
+			<div class="unit-header-row">
+				<div class="unit-header">Type</div>
+				{#if unitDetails?.baseUnit.type != "BS"}
+					<div class="unit-header">Skill</div>
+					<div class="unit-header">Speed</div>
+					<div class="unit-header">Damage</div>
+					<div class="unit-header">Health</div>
+					<div class="unit-header">Size</div>
+					<div class="unit-header">Role</div>
+				{/if}
+			</div>
+			<div class="unit-stat-row">
+				<div class="unit-stat">{unitDetails?.baseUnit.subtype}</div>
+				{#if unitDetails?.baseUnit.type != "BS"}
+					<div class="unit-stat">
+						{#if unitDetails?.skill != undefined}
+							<select
+								bind:value={unitDetails.skill}
+								onchange={() => {
+									unitDetails.cost = getNewSkillCost(unitDetails.skill, unitDetails.baseUnit.pv);
+								}}
+							>
+								{#each [...Array(8).keys()] as skill}
+									<option value={skill}>{skill}</option>
+								{/each}
+							</select>
+						{:else}
+							-
+						{/if}
+					</div>
+					<div class="unit-stat">
+						{#each unitDetails?.baseUnit.move! as movement, index}
+							{#if index != 0}
+								{"/ "}
+							{/if}
+							{`${movement.speed}"${movement.type ?? ""}`}
+						{/each}
+						- TMM {unitDetails?.baseUnit.tmm}
+					</div>
+					<div class="unit-stat">
+						{unitDetails?.baseUnit.damageS}{unitDetails?.baseUnit.damageSMin ? "*" : ""}{"/" + unitDetails?.baseUnit.damageM}{unitDetails?.baseUnit.damageMMin ? "*" : ""}{"/" +
+							unitDetails?.baseUnit.damageL}{unitDetails?.baseUnit.damageLMin ? "*" : ""}{" - " + unitDetails?.baseUnit.overheat}
+					</div>
+					<div class="unit-stat">{unitDetails?.baseUnit.health + " (" + unitDetails?.baseUnit.armor + "+" + unitDetails?.baseUnit.structure + ")"}</div>
+					<div class="unit-stat">{unitDetails?.baseUnit.size}</div>
+					<div class="unit-stat unit-role">{unitDetails?.baseUnit.role}</div>
+				{/if}
+			</div>
+			<div class="unit-ability-row">
+				<div class="unit-abilities">
+					{#if unitDetails}
+						{createAbilityLineString(unitDetails?.baseUnit.abilities)}
+					{/if}
+				</div>
+			</div>
+			{#if unitDetails?.customization?.ammo || unitSpas.length}
+				<div class="unit-custom-row">
+					{#if unitDetails?.customization?.ammo?.length}
+						<p class="unit-abilities"><span class="muted-text-color">Alt. Ammo:</span> {unitDetails.customization.ammo?.join(", ")}</p>
+					{/if}
+					{#if unitSpas.length}
+						<p class="unit-abilities">
+							<span class="muted-text-color">SPA:</span>
+							{unitSpas}
+						</p>
+					{/if}
+				</div>
+			{/if}
+		</div>
 	</div>
 </div>
 
@@ -186,26 +207,28 @@
 		flex-shrink: 0;
 		padding: 0px 4px 0px 0px;
 	}
-	.unit-card:nth-child(odd) {
+	.unit-card:nth-child(odd):not(.dragging-outline) {
 		background-color: var(--surface-color-light);
 	}
-	.unit-card:not(:last-of-type) {
+	.unit-card:not(:last-of-type):not(.dragging-outline) {
 		border-bottom: 1px solid var(--border);
 	}
 	.unit-card:hover {
 		box-shadow: 3px 0px 3px var(--primary) inset;
-		cursor: row-resize;
+		cursor: grab;
 	}
 	.drag-handles {
 		display: flex;
 		align-items: center;
 		justify-items: center;
-		padding: 0px 2px;
+		padding: 0px 4px;
+		border-right: 2px solid var(--border);
 	}
 	.unit-row-container {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
+		padding-left: 4px;
 	}
 	.unit-name-row {
 		display: grid;
@@ -299,5 +322,15 @@
 		align-items: center;
 		justify-content: center;
 		grid-column: span 2;
+	}
+	.content {
+		display: contents;
+	}
+	.dragging-hidden {
+		visibility: hidden;
+	}
+	.dragging-outline {
+		background-color: hsl(from var(--primary) h s l / 30%);
+		border: 1px solid var(--primary);
 	}
 </style>

@@ -10,10 +10,12 @@
 	import VirtualList from "@humanspeak/svelte-virtual-list";
 	import { getUnitAvailabilityLocal } from "$lib/local/sqllite/local-db";
 	import { getContext } from "svelte";
-	import { DragDropProvider } from "@dnd-kit/svelte";
+
+	import { DragDropProvider, DragOverlay } from "@dnd-kit/svelte";
 	import { createSortable } from "@dnd-kit/svelte/sortable";
-	import { move } from "@dnd-kit/helpers";
 	import { createDroppable } from "@dnd-kit/svelte";
+	import { move } from "@dnd-kit/helpers";
+
 	import { GearIcon, SortIcon, SortAscendingIcon, SortDescendingIcon, DragIndicatorIcon, TrashIcon } from "$lib/icons";
 
 	type Props = {
@@ -76,38 +78,48 @@
 	function onDragStart() {
 		draggingSortTag = true;
 	}
+	function onDragOver(event: any) {
+		const { source, target } = event.operation;
+
+		if (target?.id == "trash") return;
+
+		if (source?.sortable) {
+			resultList.sortKeys = move(resultList.sortKeys, event);
+		}
+	}
 	function onDragEnd(event: any) {
 		if (event.canceled) return;
+		const { source, target } = event.operation;
 
-		draggingSortTag = false;
-		const sourceId = event.operation.source.id;
-		const targetId = event.operation.target?.id;
-
-		if (targetId == "trash") {
-			resultList.sortKeys = resultList.sortKeys.filter((e) => e.id != sourceId);
-			return;
+		if (target?.id == "trash") {
+			resultList.sortKeys = resultList.sortKeys.filter((e) => e.id != source?.id);
 		}
-		resultList.sortKeys = move(resultList.sortKeys, event);
+		draggingSortTag = false;
 	}
 </script>
+
+{#snippet drawSortTag(id: string, index: number, label: string, order: "asc" | "desc", isOverlay: boolean, extra?: any)}
+	{@const sortable = createSortable({ id, index, data: { id, index, label, order } })}
+	<div class={{ "dragging-outline": sortable.isDragging && !isOverlay }} {@attach sortable.attach}>
+		<div class={{ "sort-tag": true, "dragging-hidden": sortable.isDragging && !isOverlay }}>
+			<DragIndicatorIcon width="20" height="20" />
+			{index + 1} -
+			{label}
+			{#if order == "asc"}
+				<SortAscendingIcon width="20" height="20" />
+			{:else}
+				<SortDescendingIcon width="20" height="20" />
+			{/if}
+		</div>
+	</div>{/snippet}
 
 <div class="search-results card">
 	<div class="search-results-multisort-tags">
 		{#if resultList.sortKeys.length > 1}
-			<DragDropProvider {onDragEnd} {onDragStart}>
+			<DragDropProvider {onDragStart} {onDragOver} {onDragEnd}>
 				<div class="multisort-draggable-container">
 					{#each resultList.sortKeys as sortKey, index (sortKey.id)}
-						{@const sortable = createSortable({ id: sortKey.id, index })}
-						<div class="sort-tag" {@attach sortable.attach}>
-							<DragIndicatorIcon width="20" height="20" />
-							{index + 1} -
-							{sortKey.label}
-							{#if sortKey.order == "asc"}
-								<SortAscendingIcon width="20" height="20" />
-							{:else}
-								<SortDescendingIcon width="20" height="20" />
-							{/if}
-						</div>
+						{@render drawSortTag(sortKey.id, index, sortKey.label, sortKey.order, false)}
 					{/each}
 				</div>
 				{#if draggingSortTag}
@@ -118,6 +130,11 @@
 				{:else}
 					<button onclick={() => (resultList.sortKeys = [])} class="clear-sort-button">Clear All</button>
 				{/if}
+				<DragOverlay>
+					{#snippet children(source: any)}
+						{@render drawSortTag(source.data.id, source.data.index, source.data.label, source.data.order, true)}
+					{/snippet}
+				</DragOverlay>
 			</DragDropProvider>
 		{/if}
 	</div>
@@ -355,6 +372,7 @@
 		min-height: 20px;
 		height: max-content;
 		padding: 0px 8px;
+		margin-left: 32px;
 	}
 	.clear-sort-droppable {
 		display: flex;
@@ -365,6 +383,7 @@
 		background-color: palevioletred;
 		border: 1px solid red;
 		border-radius: 2px;
+		margin-left: 32px;
 	}
 	.result-list-header {
 		display: grid;
@@ -517,5 +536,13 @@
 	.role-text {
 		font-size: 0.8em;
 		align-self: center;
+	}
+	.dragging-hidden {
+		visibility: hidden;
+	}
+	.dragging-outline {
+		background-color: hsl(from var(--primary) h s l / 30%);
+		border: 1px solid var(--primary);
+		border-radius: 4px;
 	}
 </style>

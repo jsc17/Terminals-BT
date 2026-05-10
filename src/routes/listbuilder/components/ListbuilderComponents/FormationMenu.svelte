@@ -34,8 +34,8 @@
 	}
 	function removeFormation() {
 		if (formation.units.length == 0 || confirm("Formation is not empty and removing it will remove all units it contains. Continue?")) {
-			list.removeFormation(formation.id);
 			toastController.addToast(`${formation.name} removed from list`);
+			list.removeFormation(formation.id);
 		}
 	}
 

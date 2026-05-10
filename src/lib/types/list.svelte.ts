@@ -166,6 +166,10 @@ export class List {
 			return formation.id != idToRemove;
 		});
 	}
+	moveFormation(startingIndex: number, endingIndex: number) {
+		const moved = this.formations.splice(startingIndex, 1);
+		this.formations.splice(endingIndex, 0, ...moved);
+	}
 	clear() {
 		this.units = [];
 		this.formations = [{ id: "unassigned", name: "Unassigned units", type: "none", units: [] }];

@@ -124,7 +124,7 @@
 			<div class="edit-sublist-stats">
 				<p>
 					<span class="muted">Units:</span>
-					<span class={{ error: list.options?.sublistMaxUnits && count > list.options.sublistMaxUnits }}>{count}</span
+					<span class={{ error: list.options?.sublistMaxUnits && (count ?? 0) > list.options.sublistMaxUnits }}>{count}</span
 					>{`${list.options?.sublistMaxUnits ? `/${list.options.sublistMaxUnits}` : ""}`}
 				</p>
 				<p>

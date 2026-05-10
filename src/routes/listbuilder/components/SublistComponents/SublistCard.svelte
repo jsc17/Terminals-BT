@@ -2,13 +2,13 @@
 	import { type List, type Sublist, type SublistStats, type ListUnit } from "$lib/types/list.svelte";
 	import { getRulesByName } from "$lib/rules/rulesets";
 	import { DropdownMenu, Popover, Separator } from "$lib/generic";
-	import { dragHandle } from "svelte-dnd-action";
 	import ExportSublistModal from "./ExportSublistModal.svelte";
 	import type { MenuItem } from "$lib/generic/types";
 	import PlayModal from "$lib/sharedDialogs/PlayModal.svelte";
 	import { toastController } from "$lib/stores";
 	import { DragIndicatorIcon, InformationIcon, MenuIcon } from "$lib/icons";
 	import { getBfsById } from "$lib/data/battlefieldSupport";
+	import { createSortable } from "@dnd-kit/svelte/sortable";
 
 	type Props = {
 		sublist: Sublist;
@@ -18,9 +18,11 @@
 		unitSortOrder: "name" | "name-reverse" | "pv" | "pv-reverse";
 		layout: string;
 		playModal?: PlayModal;
+		index: number;
+		isOverlay?: boolean;
 	};
 
-	const { sublist, list, scenarioList, openSublistEditModal, unitSortOrder, layout, playModal }: Props = $props();
+	const { sublist, list, scenarioList, openSublistEditModal, unitSortOrder, layout, playModal, index, isOverlay = false }: Props = $props();
 
 	let exportSublistModalOpen = $state(false);
 
@@ -142,127 +144,140 @@
 			onSelect: () => list.deleteSublist(sublist.id)
 		}
 	];
+
+	const sortable = createSortable({
+		get id() {
+			return sublist.id;
+		},
+		get index() {
+			return index;
+		},
+		type: "sublist",
+		get data() {
+			return { id: sublist.id };
+		}
+	});
 </script>
 
-<div class="sublist-container" class:sublist-container-mobile={layout == "mobile"}>
-	{#if layout == "mobile"}
-		<div class="mobile-sublist-drag-handle" use:dragHandle>
-			<DragIndicatorIcon fill="var(--text-color)" />
-		</div>
-	{/if}
-
-	<div class="sublist-body">
-		<div class="sublist-header">
-			<select id={`scenario${sublist.id}`} bind:value={sublist.scenario}>
-				{#each scenarioList as scenario}
-					<option value={scenario}>{scenario}</option>
-				{/each}
-			</select>
-			{#if layout == "mobile"}
-				<Popover>
-					{#snippet trigger()}
-						<div class="inline">
-							<div class="mobile-sublist-stats">
-								<p><span class="muted">PV:</span> {`${stats.pv ?? 0}`}{sublistMaxPv ? `/${sublistMaxPv}` : ""}</p>
-								<p><span class="muted">Units:</span> {`${stats.count ?? 0}`}{sublistMaxUnits ? `/${sublistMaxUnits}` : ""}</p>
-							</div>
-							<InformationIcon width="15" height="15" fill="var(--text-color)" />
-						</div>
-					{/snippet}
-					<div class="stats-popover-body">
-						<p class="muted">Total Health:</p>
-						<p>{stats.health ?? 0}</p>
-						<p class="muted">Total Short:</p>
-						<p>{stats.short ?? 0}</p>
-						<p class="muted">Total Medium:</p>
-						<p>{stats.medium ?? 0}</p>
-						<p class="muted">Total Long:</p>
-						<p>{stats.long ?? 0}</p>
-						<p class="muted">Total Size:</p>
-						<p>{stats.size ?? 0}</p>
-						{#if stats.bsp > 0}
-							<p class="muted">BSP:</p>
-							<p>{stats.bsp ?? 0}</p>
-						{/if}
-					</div>
-				</Popover>
-			{/if}
-			<div>
-				<DropdownMenu items={dropdownOptions}>
-					{#snippet trigger()}
-						<div class="sublist-menu-button">
-							<MenuIcon width="15" height="15" />
-						</div>
-					{/snippet}
-				</DropdownMenu>
+<div class={{ "sublist-container": true, "sublist-container-mobile": layout == "mobile", "drag-outline": sortable.isDragging && !isOverlay }} {@attach sortable.attach}>
+	<div class={{ "drag-wrapper": true, "drag-wrapper-dragging": sortable.isDragging && !isOverlay }}>
+		{#if layout == "mobile"}
+			<div class="mobile-sublist-drag-handle" {@attach sortable.attachHandle}>
+				<DragIndicatorIcon fill="var(--text-color)" />
 			</div>
-		</div>
-
-		{#if layout == "vertical"}
-			<div class="sublist-selected-container">
-				<div class="sublist-unit-list">
-					<div class="sublist-unit-row">
-						<p class="muted">Unit</p>
-						<p class="muted center">Skill</p>
-					</div>
-					{#each sortedUnits as unit}
-						<div class="sublist-unit-row">
-							<div>{unit.baseUnit.name}</div>
-							<div class="center">{unit.skill}</div>
-						</div>
-					{:else}
-						<div class="sublist-unit-row">
-							<p>No Units Selected</p>
-						</div>
+		{/if}
+		<div class="sublist-body">
+			<div class="sublist-header">
+				<select id={`scenario${sublist.id}`} bind:value={sublist.scenario}>
+					{#each scenarioList as scenario}
+						<option value={scenario}>{scenario}</option>
 					{/each}
-				</div>
-				{#if sublist.checkedBFS.size > 0}
-					<div class="sublist-bs-list">
-						<div class="sublist-bs-row">
-							<p class="muted">Battlefield Support</p>
+				</select>
+				{#if layout == "mobile"}
+					<Popover>
+						{#snippet trigger()}
+							<div class="inline">
+								<div class="mobile-sublist-stats">
+									<p><span class="muted">PV:</span> {`${stats.pv ?? 0}`}{sublistMaxPv ? `/${sublistMaxPv}` : ""}</p>
+									<p><span class="muted">Units:</span> {`${stats.count ?? 0}`}{sublistMaxUnits ? `/${sublistMaxUnits}` : ""}</p>
+								</div>
+								<InformationIcon width="15" height="15" fill="var(--text-color)" />
+							</div>
+						{/snippet}
+						<div class="stats-popover-body">
+							<p class="muted">Total Health:</p>
+							<p>{stats.health ?? 0}</p>
+							<p class="muted">Total Short:</p>
+							<p>{stats.short ?? 0}</p>
+							<p class="muted">Total Medium:</p>
+							<p>{stats.medium ?? 0}</p>
+							<p class="muted">Total Long:</p>
+							<p>{stats.long ?? 0}</p>
+							<p class="muted">Total Size:</p>
+							<p>{stats.size ?? 0}</p>
+							{#if stats.bsp > 0}
+								<p class="muted">BSP:</p>
+								<p>{stats.bsp ?? 0}</p>
+							{/if}
 						</div>
-						{#each sublist.checkedBFS.entries() as [id, count]}
-							{@const bsData = getBfsById(id)}
-							<div class="sublist-bs-row">
-								<p>{bsData?.name}</p>
-								<p>x{count}</p>
+					</Popover>
+				{/if}
+				<div>
+					<DropdownMenu items={dropdownOptions}>
+						{#snippet trigger()}
+							<div class="sublist-menu-button">
+								<MenuIcon width="15" height="15" />
+							</div>
+						{/snippet}
+					</DropdownMenu>
+				</div>
+			</div>
+			{#if layout == "vertical"}
+				<div class="sublist-selected-container">
+					<div class="sublist-unit-list">
+						<div class="sublist-unit-row">
+							<p class="muted">Unit</p>
+							<p class="muted center">Skill</p>
+						</div>
+						{#each sortedUnits as unit}
+							<div class="sublist-unit-row">
+								<div>{unit.baseUnit.name}</div>
+								<div class="center">{unit.skill}</div>
+							</div>
+						{:else}
+							<div class="sublist-unit-row">
+								<p>No Units Selected</p>
 							</div>
 						{/each}
 					</div>
+					{#if sublist.checkedBFS.size > 0}
+						<div class="sublist-bs-list">
+							<div class="sublist-bs-row">
+								<p class="muted">Battlefield Support</p>
+							</div>
+							{#each sublist.checkedBFS.entries() as [id, count]}
+								{@const bsData = getBfsById(id)}
+								<div class="sublist-bs-row">
+									<p>{bsData?.name}</p>
+									<p>x{count}</p>
+								</div>
+							{/each}
+						</div>
+					{/if}
+				</div>
+			{:else}
+				<p><span class="muted">Units:</span> {unitString}</p>
+				{#if sublist.checkedBFS.size > 0}
+					<p><span class="muted">BF Sup:</span> {bfsString}</p>
 				{/if}
-			</div>
-		{:else}
-			<p><span class="muted">Units:</span> {unitString}</p>
-			{#if sublist.checkedBFS.size > 0}
-				<p><span class="muted">BF Sup:</span> {bfsString}</p>
 			{/if}
-		{/if}
-		{#if layout == "vertical" || layout == "horizontal"}
-			<div class={layout == "vertical" ? "sublist-stats-vertical" : "sublist-stats-horizontal"}>
-				<p class="muted">PV:</p>
-				<p class:error={sublistMaxPv && stats.pv > sublistMaxPv}>
-					{`${stats.pv ?? 0}`}{sublistMaxPv ? `/${sublistMaxPv}` : ``}
-				</p>
-				<p class="muted">Units:</p>
-				<p class:error={sublistMaxUnits && stats.count > sublistMaxUnits}>
-					{`${stats.count ?? 0}`}{sublistMaxUnits ? `/${sublistMaxUnits}` : ``}
-				</p>
-				<p class="muted">Total Health:</p>
-				<p>{stats.health ?? 0}</p>
-				<p class="muted">Total Short:</p>
-				<p>{stats.short ?? 0}</p>
-				<p class="muted">Total Medium:</p>
-				<p>{stats.medium ?? 0}</p>
-				<p class="muted">Total Long:</p>
-				<p>{stats.long ?? 0}</p>
-				<p class="muted">Total Size:</p>
-				<p>{stats.size ?? 0}</p>
-				{#if stats.bsp > 0}
-					<p class="muted">BSP:</p>
-					<p>{stats.bsp ?? 0}</p>
-				{/if}
-			</div>
-		{/if}
+			{#if layout == "vertical" || layout == "horizontal"}
+				<div class={layout == "vertical" ? "sublist-stats-vertical" : "sublist-stats-horizontal"}>
+					<p class="muted">PV:</p>
+					<p class:error={sublistMaxPv && stats.pv > sublistMaxPv}>
+						{`${stats.pv ?? 0}`}{sublistMaxPv ? `/${sublistMaxPv}` : ``}
+					</p>
+					<p class="muted">Units:</p>
+					<p class:error={sublistMaxUnits && stats.count > sublistMaxUnits}>
+						{`${stats.count ?? 0}`}{sublistMaxUnits ? `/${sublistMaxUnits}` : ``}
+					</p>
+					<p class="muted">Total Health:</p>
+					<p>{stats.health ?? 0}</p>
+					<p class="muted">Total Short:</p>
+					<p>{stats.short ?? 0}</p>
+					<p class="muted">Total Medium:</p>
+					<p>{stats.medium ?? 0}</p>
+					<p class="muted">Total Long:</p>
+					<p>{stats.long ?? 0}</p>
+					<p class="muted">Total Size:</p>
+					<p>{stats.size ?? 0}</p>
+					{#if stats.bsp > 0}
+						<p class="muted">BSP:</p>
+						<p>{stats.bsp ?? 0}</p>
+					{/if}
+				</div>
+			{/if}
+		</div>
 	</div>
 </div>
 
@@ -276,6 +291,7 @@
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		display: grid;
+		cursor: grab;
 	}
 	.sublist-container-mobile {
 		grid-template-columns: max-content 1fr;
@@ -284,7 +300,8 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		padding: 0px 2px;
+		padding: 0px 4px;
+		border-right: 2px solid var(--border);
 	}
 	.sublist-header {
 		display: flex;
@@ -347,5 +364,15 @@
 	}
 	.error {
 		color: var(--error);
+	}
+	.drag-wrapper {
+		display: contents;
+	}
+	.drag-wrapper-dragging {
+		visibility: hidden;
+	}
+	.drag-outline {
+		background-color: hsl(from var(--primary) h s l / 30%);
+		border: 1px solid var(--primary);
 	}
 </style>

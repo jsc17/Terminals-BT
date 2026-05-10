@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { dndzone, dragHandleZone, type DndEvent, dragHandle } from "svelte-dnd-action";
-	import { appWindow } from "$lib/stores";
 	import { Collapsible, Popover } from "$lib/generic";
 	import { List, type ListFormation } from "$lib/types/list.svelte";
 	import { getFormationStats } from "$lib/utilities/formationUtilities";
@@ -8,84 +6,108 @@
 	import { validateFormation } from "$lib/utilities/formationRequirementValidation.svelte";
 	import PlayModal from "$lib/sharedDialogs/PlayModal.svelte";
 	import { DragIndicatorIcon } from "$lib/icons";
+	import { createSortable } from "@dnd-kit/svelte/sortable";
+	import { createDroppable } from "@dnd-kit/svelte";
 
-	type Props = { formation: ListFormation; draggingColumns: boolean; unitCustomizationModal?: UnitCustomizationModal; list: List; playModal?: PlayModal };
+	type Props = {
+		formationId: string;
+		draggingFormation: boolean;
+		draggingUnit: boolean;
+		unitCustomizationModal?: UnitCustomizationModal;
+		index: number;
+		list: List;
+		playModal?: PlayModal;
+		isOverlay?: boolean;
+	};
 
-	let { formation = $bindable(), draggingColumns, unitCustomizationModal, list = $bindable(), playModal }: Props = $props();
+	let { formationId, draggingFormation, draggingUnit, unitCustomizationModal, list = $bindable(), playModal, isOverlay = false, index }: Props = $props();
+
+	const formation = $derived(list.getFormation(formationId)!);
 	let editModalOpen = $state(false);
 	let availabilityModal = $state<FindUnitAvailabilityModal>();
 
-	let flipDurationMs = 100;
 	let open = $state(true);
 	let secondaryOpen = $state(true);
 
 	let formationStats = $derived(getFormationStats(formation, list));
 	let validationResults = $derived(validateFormation(formation, list));
 
-	function handleSort(e: CustomEvent<DndEvent<{ id: string }>>) {
-		formation.units = e.detail.items;
-	}
-	function handleSecondarySort(e: CustomEvent<DndEvent<{ id: string }>>) {
-		formation.secondary!.units = e.detail.items;
-	}
+	const sortable = createSortable({
+		get id() {
+			return formation.id;
+		},
+		get index() {
+			return index;
+		},
+		type: "formation",
+		accept: ["formation"],
+		get data() {
+			return { id: formation.id };
+		}
+	});
+
+	const droppablePrimary = createDroppable({
+		get id() {
+			return `${formation.id}p`;
+		},
+		accept: ["unit"],
+		type: "unit-drop",
+		data: { primary: true }
+	});
+	const droppableSecondary = $derived(createDroppable({ id: `${formation.id}s`, accept: ["unit"], type: "unit-drop", data: { primary: false } }));
 </script>
 
-<div id={`formation-${formation.id}`} class="formation-card">
-	{#if list.formations.length != 1}
-		<div class="formation-header">
-			{#if appWindow.isNarrow}
-				<div class="drag-handles" use:dragHandle>
+<div id={`formation-${formation.id}`} class={{ "formation-card": true, "dragging-outline": sortable.isDragging && !isOverlay }} {@attach sortable.attach}>
+	<div class={{ "dragging-hidden": sortable.isDragging && !isOverlay }}>
+		{#if list.formations.length != 1}
+			<div class="formation-header">
+				<div class="drag-handles" {@attach sortable.attachHandle}>
 					<DragIndicatorIcon fill="var(--text-color)" width="25" height="25" />
 				</div>
-			{/if}
-			<div class="formation-header-details">
-				{#if formation.id == "unassigned"}
-					<p>Unassigned Units</p>
-				{:else}
-					<p>{formation.name}</p>
-					<p class="muted">{formation.type}</p>
-				{/if}
-				<div class="formation-error">
-					{#if formation.id != "unassigned" && !validationResults.primary.valid}
-						<Popover>
-							{#snippet trigger()}
-								<img src="/icons/alert-outline.svg" alt="Formation errors button" class="formation-error-icon" />
-							{/snippet}
-							<div class="formation-error-content">
-								{#each validationResults.primary.requirements.filter((req) => req.met == -1 || req.met == 0) as requirement}
-									<p>• {requirement.requirement}</p>
-								{/each}
-							</div>
-						</Popover>
+				<div class="formation-header-details">
+					{#if formation.id == "unassigned"}
+						<p>Unassigned Units</p>
+					{:else}
+						<p>{formation.name}</p>
+						<p class="muted">{formation.type}</p>
 					{/if}
+					<div class="formation-error">
+						{#if formation.id != "unassigned" && !validationResults.primary.valid}
+							<Popover>
+								{#snippet trigger()}
+									<img src="/icons/alert-outline.svg" alt="Formation errors button" class="formation-error-icon" />
+								{/snippet}
+								<div class="formation-error-content">
+									{#each validationResults.primary.requirements.filter((req) => req.met == -1 || req.met == 0) as requirement}
+										<p>• {requirement.requirement}</p>
+									{/each}
+								</div>
+							</Popover>
+						{/if}
+					</div>
+				</div>
+				<div class="formation-header-buttons">
+					<FormationInfoPopover {formationStats} />
+					<FormationMenu {formation} {list} bind:editModalOpen availabilityModal={availabilityModal!} {playModal} />
+					<button
+						onclick={() => {
+							open = !open;
+						}}
+						class="transparent-button expand-collapse">{open ? "collapse" : "expand"}</button
+					>
 				</div>
 			</div>
-			<div class="formation-header-buttons">
-				<FormationInfoPopover {formationStats} />
-				<FormationMenu {formation} {list} bind:editModalOpen availabilityModal={availabilityModal!} {playModal} />
-				<button
-					onclick={() => {
-						open = !open;
-					}}
-					class="transparent-button expand-collapse">{open ? "collapse" : "expand"}</button
-				>
-			</div>
-		</div>
-	{/if}
-	{#if !draggingColumns}
-		{#if !formation.units.length}
-			<div class="drop-message">Drop units here to add them to this formation</div>
 		{/if}
-		{#if appWindow.isNarrow}
+		{#if !draggingFormation}
+			{#if !formation.units.length}
+				<div class={{ "unit-cards": true, "drop-target": droppablePrimary.isDropTarget }} {@attach droppablePrimary.attach}>
+					<p class="drop-message">Drop units here to add them to this formation</p>
+				</div>
+			{/if}
 			<Collapsible bind:open>
-				<div
-					class="unit-cards"
-					use:dragHandleZone={{ items: formation.units, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
-					onconsider={handleSort}
-					onfinalize={handleSort}
-				>
-					{#each formation.units as unit (unit.id)}
-						<UnitCard {unit} {unitCustomizationModal} {list}></UnitCard>
+				<div class={{ "unit-cards": true, "dragging-unit": draggingUnit }}>
+					{#each formation.units as unit, index (unit.id)}
+						<UnitCard {unit} {unitCustomizationModal} {list} formation={formation.id} {index} secondary={false}></UnitCard>
 					{/each}
 				</div>
 			</Collapsible>
@@ -97,10 +119,10 @@
 					}}>Expand collapsed formation <img src="/icons/expand.svg" alt="Expand formation" /></button
 				>
 			{/if}
-			{#if formation.secondary && !draggingColumns}
+			{#if formation.secondary}
 				<div class="secondary-formation-header">
 					<p>{formation.secondary.type}</p>
-					<p>
+					<p class="muted">
 						PV:
 						{formation.secondary.units.reduce((total, current) => {
 							return (total += list.units.find((unit) => unit.id == current.id)?.cost ?? 0);
@@ -129,16 +151,13 @@
 				</div>
 				<Collapsible bind:open={secondaryOpen}>
 					{#if !formation.secondary.units.length}
-						<div class="drop-message">Drop units here to add them to this sub-formation</div>
+						<div class={{ "unit-cards": true, "drop-target": droppablePrimary.isDropTarget }} {@attach droppableSecondary.attach}>
+							<div class="drop-message">Drop units here to add them to this formation</div>
+						</div>
 					{/if}
-					<div
-						class="unit-cards"
-						use:dragHandleZone={{ items: formation.secondary.units, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
-						onconsider={handleSecondarySort}
-						onfinalize={handleSecondarySort}
-					>
-						{#each formation.secondary.units as unit (unit.id)}
-							<UnitCard {unit} {unitCustomizationModal} {list}></UnitCard>
+					<div class={{ "unit-cards": true, "dragging-unit": draggingUnit }}>
+						{#each formation.secondary.units as unit, index (unit.id)}
+							<UnitCard {unit} {unitCustomizationModal} {list} formation={formation.id} {index} secondary={true}></UnitCard>
 						{/each}
 					</div>
 				</Collapsible>
@@ -152,87 +171,12 @@
 				{/if}
 			{/if}
 		{:else}
-			<Collapsible bind:open>
-				<div
-					class="unit-cards"
-					use:dndzone={{ items: formation.units, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
-					onconsider={handleSort}
-					onfinalize={handleSort}
-				>
-					{#each formation.units as unit (unit.id)}
-						<UnitCard {unit} {unitCustomizationModal} {list}></UnitCard>
-					{/each}
-				</div>
-			</Collapsible>
-			{#if !open}
-				<button
-					class="transparent-button expand-button"
-					onclick={() => {
-						open = true;
-					}}>Expand collapsed formation <img src="/icons/expand.svg" alt="Expand formation" /></button
-				>
-			{/if}
-			{#if formation.secondary && !draggingColumns}
-				<div class="secondary-formation-header">
-					<p>{formation.secondary.type}</p>
-					<div class="formation-error">
-						{#if formation.id != "unassigned" && !validationResults.secondary.valid}
-							<Popover>
-								{#snippet trigger()}
-									<img src="/icons/alert-outline.svg" alt="Formation errors button" class="formation-error-icon" />
-								{/snippet}
-								<div class="formation-error-content">
-									{#each validationResults.secondary.requirements.filter((req) => req.met == -1 || req.met == 0) as requirement}
-										<p>• {requirement.requirement}</p>
-									{/each}
-								</div>
-							</Popover>
-						{/if}
-					</div>
-					<p class="muted">
-						PV:
-						{formation.secondary.units.reduce((total, current) => {
-							return (total += list.units.find((unit) => unit.id == current.id)?.cost ?? 0);
-						}, 0)}
-					</p>
-					<button
-						onclick={() => {
-							secondaryOpen = !secondaryOpen;
-						}}
-						class="transparent-button expand-collapse">{secondaryOpen ? "collapse" : "expand"}</button
-					>
-				</div>
-				<Collapsible bind:open={secondaryOpen}>
-					{#if !formation.secondary.units.length}
-						<div class="drop-message">Drop units here to add them to this sub-formation</div>
-					{/if}
-					<div
-						class="unit-cards"
-						use:dndzone={{ items: formation.secondary.units, dropTargetClasses: ["droppable"], flipDurationMs, type: "units" }}
-						onconsider={handleSecondarySort}
-						onfinalize={handleSecondarySort}
-					>
-						{#each formation.secondary.units as unit (unit.id)}
-							<UnitCard {unit} {unitCustomizationModal} {list}></UnitCard>
-						{/each}
-					</div>
-				</Collapsible>
-				{#if !secondaryOpen}
-					<button
-						class="transparent-button expand-button"
-						onclick={() => {
-							secondaryOpen = true;
-						}}>Expand collapsed formation <img src="/icons/expand.svg" alt="Expand formation" /></button
-					>
-				{/if}
-			{/if}
+			<div class="drop-message">Unit list collapsed while dragging formations</div>
 		{/if}
-	{:else}
-		<div class="drop-message">Unit list collapsed while dragging formations</div>
-	{/if}
+	</div>
 </div>
 
-<EditFormationModal bind:open={editModalOpen} bind:formation {list} {validationResults}></EditFormationModal>
+<EditFormationModal bind:open={editModalOpen} {formation} {list} {validationResults}></EditFormationModal>
 <FindUnitAvailabilityModal bind:this={availabilityModal} {formation} {list} />
 
 <style>
@@ -243,9 +187,7 @@
 		flex-shrink: 0;
 		border: 1px solid var(--border);
 	}
-	.formation-card:hover {
-		cursor: row-resize;
-	}
+
 	.formation-header {
 		padding: 4px;
 		background-color: var(--background);
@@ -253,6 +195,7 @@
 		align-items: center;
 		border: 1px solid var(--border);
 	}
+
 	.formation-header-details {
 		display: grid;
 		grid-template-columns: 1fr max-content max-content;
@@ -298,6 +241,10 @@
 		flex-direction: column;
 		justify-content: center;
 	}
+	.dragging-unit {
+		padding: 8px 2px;
+		gap: 8px;
+	}
 	.secondary-formation-header {
 		display: grid;
 		grid-template-columns: 1fr max-content max-content max-content;
@@ -309,13 +256,9 @@
 		border: 1px solid var(--border);
 		font-size: 0.9em;
 	}
-	:global(.droppable) {
-		outline: 2px solid var(--primary);
-		min-height: 2em;
-	}
 
 	.drop-message {
-		margin-top: 4px;
+		padding: 4px;
 		align-self: center;
 		justify-self: center;
 	}
@@ -324,6 +267,9 @@
 		align-items: center;
 		justify-items: center;
 		padding: 0px 2px;
+	}
+	.drag-handles:hover {
+		cursor: grab;
 	}
 	.expand-button {
 		display: flex;
@@ -334,5 +280,13 @@
 		& img {
 			filter: var(--primary-filter);
 		}
+	}
+	.dragging-hidden {
+		visibility: hidden;
+	}
+	.dragging-outline,
+	.drop-target {
+		background-color: hsl(from var(--primary) h s l / 30%);
+		border: 1px solid var(--primary);
 	}
 </style>

@@ -39,6 +39,12 @@
 		}
 	}
 
+	function moveFormation(dir: "up" | "down") {
+		const index = list.formations.findIndex((f) => f.id == formation.id);
+		if (dir == "up") list.moveFormation(index, index - 1);
+		else list.moveFormation(index, index + 1);
+	}
+
 	const dropdownItems = $derived.by(() => {
 		const items: MenuItem[] = [];
 		if (formation.id != "unassigned") items.push({ type: "item", label: "Edit Formation", onSelect: () => (editModalOpen = true) });
@@ -56,6 +62,22 @@
 				})
 		});
 		items.push({ type: "item", label: "Export Formation", onSelect: exportFormationToJeff });
+		items.push({ type: "separator", classes: "muted" });
+		items.push({
+			type: "item",
+			label: "Move Formation Up",
+			onSelect: () => {
+				moveFormation("up");
+			}
+		});
+		items.push({
+			type: "item",
+			label: "Move Formation Down",
+			onSelect: () => {
+				moveFormation("down");
+			}
+		});
+
 		items.push({ type: "separator", classes: "muted" });
 		items.push({ type: "item", label: "Clear Formation", onSelect: clearFormation });
 		if (formation.id != "unassigned") items.push({ type: "item", label: "Remove Formation", onSelect: removeFormation });

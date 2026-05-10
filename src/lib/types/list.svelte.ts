@@ -167,6 +167,7 @@ export class List {
 		});
 	}
 	moveFormation(startingIndex: number, endingIndex: number) {
+		if (endingIndex < 0 || endingIndex >= this.formations.length) return;
 		const moved = this.formations.splice(startingIndex, 1);
 		this.formations.splice(endingIndex, 0, ...moved);
 	}

@@ -6,7 +6,6 @@
 	import { CreateMatchWithListSchema, JoinPrivateMatchWithListSchema } from "$routes/play/schema/matchlistSchema";
 	import { nanoid } from "nanoid";
 	import { toastController } from "$lib/stores";
-	import type { SvelteMap } from "svelte/reactivity";
 
 	let openState = $state(false);
 	const nickname = await getNickname();

@@ -13,7 +13,7 @@ export const CreateMatchWithListSchema = v.object({
 	...CreateMatchSchema.entries,
 	formations: v.array(v.string()),
 	listName: v.string(),
-	battlefieldSupport: v.array(v.string())
+	battlefieldSupport: v.optional(v.array(v.string()), [])
 });
 
 export const ConvertMatchSchema = v.object({

@@ -61,16 +61,18 @@
 	<div class={{ "dragging-hidden": sortable.isDragging && !isOverlay }}>
 		{#if list.formations.length != 1}
 			<div class="formation-header">
-				<div class="drag-handles" {@attach sortable.attachHandle}>
-					<DragIndicatorIcon fill="var(--text-color)" width="25" height="25" />
-				</div>
 				<div class="formation-header-details">
-					{#if formation.id == "unassigned"}
-						<p>Unassigned Units</p>
-					{:else}
-						<p>{formation.name}</p>
-						<p class="muted">{formation.type}</p>
-					{/if}
+					<div class="contents grab" {@attach sortable.attachHandle}>
+						<div class="drag-handles">
+							<DragIndicatorIcon fill="var(--text-color)" width="25" height="25" />
+						</div>
+						{#if formation.id == "unassigned"}
+							<p>Unassigned Units</p>
+						{:else}
+							<p>{formation.name}</p>
+							<p class="muted">{formation.type}</p>
+						{/if}
+					</div>
 					<div class="formation-error">
 						{#if formation.id != "unassigned" && !validationResults.primary.valid}
 							<Popover>
@@ -198,7 +200,7 @@
 
 	.formation-header-details {
 		display: grid;
-		grid-template-columns: 1fr max-content max-content;
+		grid-template-columns: max-content 1fr max-content max-content;
 		flex: 1;
 
 		& * {

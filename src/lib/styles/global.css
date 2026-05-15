@@ -92,3 +92,11 @@ button:disabled {
 	width: 100%;
 	box-shadow: 1px 3px 3px var(--surface-color-shadow);
 }
+
+.contents {
+	display: contents;
+}
+
+.grab:hover {
+	cursor: grab;
+}

@@ -97,9 +97,8 @@ export const ruleSets: Ruleset[] = [
 	},
 	{
 		name: "wn350v3",
-		display: "Wolfnet 350 v3.0",
-		shortDisplay: "WN350v3",
-		notice: "Off-Board Artillery supports have been moved from units to the Battlefield Support tab",
+		display: "Wolfnet 350 v3.1",
+		shortDisplay: "WN350v3.1",
 		singleEraFaction: true,
 		eraFactionRestriction: true,
 		maxPv: 350,
@@ -136,8 +135,10 @@ export const ruleSets: Ruleset[] = [
 			"King of the Hill",
 			"Overrun",
 			"Stand Up Fight",
-			"Pressure Plate",
-			"Stranglehold"
+			"Escalation",
+			"Stranglehold",
+			"Resource Recovery",
+			"Hot Drop"
 		],
 		bfs: { allowedPacks: ["wn350v3"], maxCountPerType: 2 },
 		allowFormations: false,
@@ -145,10 +146,8 @@ export const ruleSets: Ruleset[] = [
 	},
 	{
 		name: "wn350v3d",
-		display: "Wolfnet 350 v3.0 Doubles",
-		shortDisplay: "WN350v3 Dbls",
-		notice: "Off-Board Artillery supports have been moved from units to the Battlefield Support tab",
-
+		display: "Wolfnet 350 v3.1 Doubles",
+		shortDisplay: "WN350v3.1 Dbls",
 		singleEraFaction: true,
 		eraFactionRestriction: true,
 		maxPv: 250,
@@ -176,28 +175,15 @@ export const ruleSets: Ruleset[] = [
 		uniqueMaxLimit: 1,
 		sublistMaxUnits: 10,
 		sublistMaxPv: 250,
-		sublistScenarios: [
-			"Bunkers",
-			"Capture the Flag",
-			"Domination",
-			"Headhunter",
-			"Hold the Line",
-			"King of the Hill",
-			"Overrun",
-			"Stand Up Fight",
-			"Pressure Plate",
-			"Stranglehold"
-		],
+		sublistScenarios: [],
 		bfs: { allowedPacks: ["wn350v3"], maxCountPerType: 2 },
 		allowFormations: true,
 		allowSCA: false
 	},
 	{
 		name: "wn350v3e",
-		display: "Wolfnet 350 v3.0 Epic",
-		shortDisplay: "WN350v3 Epic",
-		notice: "Off-Board Artillery supports have been moved from units to the Battlefield Support tab",
-
+		display: "Wolfnet 350 v3.1 Epic",
+		shortDisplay: "WN350v3.1 Epic",
 		singleEraFaction: true,
 		eraFactionRestriction: true,
 		maxPv: 600,
@@ -227,18 +213,7 @@ export const ruleSets: Ruleset[] = [
 		uniqueMaxLimit: 1,
 		sublistMaxUnits: 10,
 		sublistMaxPv: 250,
-		sublistScenarios: [
-			"Bunkers",
-			"Capture the Flag",
-			"Domination",
-			"Headhunter",
-			"Hold the Line",
-			"King of the Hill",
-			"Overrun",
-			"Stand Up Fight",
-			"Pressure Plate",
-			"Stranglehold"
-		],
+		sublistScenarios: [],
 		bfs: { allowedPacks: ["wn350v3"], maxCountPerType: 2 },
 		allowFormations: true,
 		allowSCA: false

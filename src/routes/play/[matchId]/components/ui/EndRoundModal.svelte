@@ -20,8 +20,8 @@
 		End of the round. Scores will be updated and all pending damage and effects will be applied.
 	{/snippet}
 	<form
-		{...endRound.enhance(async ({ submit, data }) => {
-			if (!data.endMatch || confirm("Are you sure you wish to end the match?")) {
+		{...endRound.enhance(async ({ submit }) => {
+			if (!endRound.fields.endMatch.value || confirm("Are you sure you wish to end the match?")) {
 				await submit();
 				endRound.fields.teamScores.set(teams.map(() => 0));
 				open = false;

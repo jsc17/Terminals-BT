@@ -89,7 +89,7 @@
 		<Tabs.Content value="newMatch">
 			<form
 				class="create-match"
-				{...createMatchWithList.preflight(CreateMatchWithListSchema).enhance(async ({ submit, data }) => {
+				{...createMatchWithList.preflight(CreateMatchWithListSchema).enhance(async ({ submit }) => {
 					await submit();
 					if (createMatchWithList.result?.status == "success") {
 						openState = false;

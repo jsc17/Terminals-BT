@@ -120,9 +120,8 @@
 		<section>
 			<form
 				id="unit-management"
-				{...addUnitToCollection.enhance(async ({ submit, data }) => {
+				{...addUnitToCollection.enhance(async ({ submit }) => {
 					try {
-						console.log(data);
 						await submit();
 						toastController.addToast(addUnitToCollection.result?.message ?? "Invalid message recieved");
 					} catch (error) {
@@ -167,8 +166,7 @@
 			</form>
 
 			<form
-				{...addTagToUnit.preflight(addTagToUnitSchema).enhance(async ({ data, submit }) => {
-					console.log(data);
+				{...addTagToUnit.preflight(addTagToUnitSchema).enhance(async ({ submit }) => {
 					try {
 						await submit();
 						toastController.addToast(addTagToUnit.result?.message ?? "Invalid message recieved");

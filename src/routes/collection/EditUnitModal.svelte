@@ -35,8 +35,7 @@
 			<input type="hidden" name="unitId" value={unit.id} />
 		</form>
 		<form
-			{...addTagToUnit.for(unit.id).enhance(async ({ submit, data }) => {
-				console.log(data);
+			{...addTagToUnit.for(unit.id).enhance(async ({ submit }) => {
 				try {
 					await submit();
 					toastController.addToast(addTagToUnit.result?.message ?? "Invalid message recieved");

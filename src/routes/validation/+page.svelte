@@ -329,8 +329,7 @@
 		<form
 			class={{ section: true, "locked-section": !selectedTournament || issues == undefined || issues?.issueList.size > 0 }}
 			enctype="multipart/form-data"
-			{...submitList.preflight(SubmitListSchema).enhance(async ({ submit, data }) => {
-				console.log(data);
+			{...submitList.preflight(SubmitListSchema).enhance(async ({ submit }) => {
 				if (files) {
 					toastController.addToast("Submitting list. Please Wait..");
 					submitted = true;

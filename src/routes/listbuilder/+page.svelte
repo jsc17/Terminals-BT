@@ -5,11 +5,10 @@
 	import { type ListCode, List } from "$lib/types/list.svelte";
 	import { Tabs, ContextMenu } from "bits-ui";
 	import { loadExistingListsFromLocalStorage } from "$lib/utilities/listImport";
-	import { toastController } from "$lib/stores";
 	import { db } from "$lib/local/dexie/db";
 	import { AddNotesIcon } from "$lib/icons";
 	import NewListDialog from "./components/modals/NewListDialog.svelte";
-	import { getNewListDialogContext, setNewListDialogContext } from "./utilities/context";
+	import { setNewListDialogContext } from "./utilities/context";
 
 	let activeLists = $state<List[]>([]);
 	let selectedList = $state<string>("");

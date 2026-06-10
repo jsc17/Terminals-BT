@@ -41,8 +41,7 @@
 		<section class="card">
 			<h2 class="section-header">Create new tournament</h2>
 			<form
-				{...createTournament.preflight(FormCreationSchema).enhance(async ({ submit, data }) => {
-					console.log(data);
+				{...createTournament.preflight(FormCreationSchema).enhance(async ({ submit }) => {
 					await submit();
 					console.log(createTournament.result?.status);
 					if (createTournament.result?.status == "success") {

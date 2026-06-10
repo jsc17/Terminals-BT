@@ -7,7 +7,6 @@
 	import { PersistedState, watch } from "runed";
 	import PrintUnitCard from "$lib/cardgeneration/templates/PrintUnitCard.svelte";
 	import * as v from "valibot";
-	import { getMulImage } from "$lib/remote/mulImages.remote";
 	import { DropdownMenu } from "$lib/generic";
 	import PlayModal from "$lib/sharedDialogs/PlayModal.svelte";
 	import PrintModal from "$lib/sharedDialogs/PrintModal.svelte";

@@ -1,10 +1,6 @@
 import { fail } from "@sveltejs/kit";
 import { prisma } from "$lib/server/prisma.js";
 import { type ListCode } from "$lib/types/listTypes";
-import playwright from "playwright";
-import { render } from "svelte/server";
-import { SublistTemplate } from "./printing/templates";
-import { PDFDocument } from "pdf-lib";
 
 export const load = async ({ url }) => {
 	let sharedList;
@@ -44,7 +40,6 @@ export const actions = {
 		}
 
 		const parsedBody: ListCode = JSON.parse(body.toString());
-		console.log("parsedBody", parsedBody);
 		const data = {
 			userId: locals.user.id,
 			id: parsedBody.id,

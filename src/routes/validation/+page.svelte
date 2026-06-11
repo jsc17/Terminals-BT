@@ -344,8 +344,8 @@
 		>
 			<h2>5. Submit your list to the T.O.</h2>
 
-			<label>Player Name: <input type="text" name="playerName" required disabled={issues == undefined || issues?.issueList.size > 0} value="Test" /></label>
-			<label>Email address: <input type="email" name="playerEmail" required disabled={issues == undefined || issues?.issueList.size > 0} value="hinujwb@ing.com" /></label>
+			<label>Player Name: <input type="text" name="playerName" required disabled={issues == undefined || issues?.issueList.size > 0} /></label>
+			<label>Email address: <input type="email" name="playerEmail" required disabled={issues == undefined || issues?.issueList.size > 0} /></label>
 			<label
 				><input type="checkbox" name="permission" bind:checked={submitApproval} required disabled={issues == undefined || issues?.issueList.size > 0} /> By submitting this list, you
 				acknowledge your email address and name will be provided to the tournament organizer. Any personal data stored Terminal.tools will be removed after the tournament has completed.</label

@@ -7,8 +7,10 @@
 	import { toastController } from "$lib/stores";
 	import { goto } from "$app/navigation";
 
-	let [myMatches, publicMatches] = $derived(getMatches().current ?? [[], []]);
-	let nickname = $derived(getNickname().current);
+	let matchPromise = $derived(getMatches());
+	let [myMatches, publicMatches] = $derived(await matchPromise);
+	let nicknamePromise = $derived(getNickname());
+	let nickname = $derived(await nicknamePromise);
 
 	let user: { username: string | undefined } = getContext("user");
 

@@ -121,10 +121,10 @@ export const submitList = form(
 					era,
 					faction,
 					tournamentRules: getRulesByName(tournament.tournamentRules)?.display ?? "Not Found",
-					parsedAddedUnits: [],
-					parsedFixedUnits: [],
-					parsedAddedBfs: [],
-					parsedFixedBfs: []
+					parsedAddedUnits,
+					parsedFixedUnits,
+					parsedAddedBfs,
+					parsedFixedBfs
 				}
 			});
 			await tournamentEmailTransporter.sendMail({

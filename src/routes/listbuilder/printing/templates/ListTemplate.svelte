@@ -244,60 +244,26 @@
 	<div class="formation-container">
 		{#if printOptions.printCardsByFormation}
 			{#each listData.formations as formation}
-				{@const formationPv = formation.units.reduce((a, v) => (a += getNewSkillCost(unitData.get(v)!.skill, mulUnitData.get(unitData.get(v)!.mulId)!.pv)), 0)}
-				<div class={{ "formation-break": formation.units.length + (formation.secondary?.units.length ?? 0) > 4, "formation-side": printOptions.formationHeaderStyle == "side" }}>
-					{#if printOptions.formationHeaderStyle == "inline" && formation.type != "none"}
-						<h2 class="formation-header-inline">
-							{`${formation.name} - ${formation.type} Formation - ${formation.units.length} Units - ${formationPv}pv`}
-						</h2>
-					{:else if formation.type != "none"}
-						<div>
-							<h2 class="formation-header-side">
-								{`${formation.name} - ${formation.type} Formation`} <br />
-								{`${formation.units.length} Units - ${formationPv}pv`}
-							</h2>
-						</div>
-					{:else}
-						<div></div>
-					{/if}
-					<div class="unit-card-container">
-						{#each formation.units as unitId}
-							{@const unit = unitData.get(unitId)}
-							{@const mulData = mulUnitData.get(unit!.mulId)}
-							{#if printOptions.cardStyle == "mul" || unit!.mulId < 0}
-								<img src={unitCardImages?.get(`${unit!.mulId}-${unit!.skill}`)} class="unit-card" alt="unit card" />
-							{:else}
-								<div class="unit-card-wrapper">
-									<PrintUnitCard
-										unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
-										image={unitImages?.get(mulData!.imageLink ?? "") ?? ""}
-										formationSPAs={[]}
-										measurementUnits={printOptions.measurementUnits}
-										numbering={counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) ?? -1}
-										numberingType={printOptions.printDuplicateMarkingsType}
-										printDuplicateMarkings={printOptions.printDuplicateMarkings}
-									/>
-								</div>
-							{/if}
-						{/each}
-					</div>
-					{#if formation.secondary}
-						{#if printOptions.formationHeaderStyle == "inline" && formation.secondary}
+				{#if formation.units.length != 0}
+					<p>{formation.name}</p>
+					{@const formationPv = formation.units.reduce((a, v) => (a += getNewSkillCost(unitData.get(v)!.skill, mulUnitData.get(unitData.get(v)!.mulId)!.pv)), 0)}
+					<div class={{ "formation-break": formation.units.length + (formation.secondary?.units.length ?? 0) > 4, "formation-side": printOptions.formationHeaderStyle == "side" }}>
+						{#if printOptions.formationHeaderStyle == "inline" && formation.type != "none"}
 							<h2 class="formation-header-inline">
-								{`${formation.name} - ${formation.secondary.type} Formation - ${formation.secondary.units.length} Units - ${formationPv}pv`}
+								{`${formation.name} - ${formation.type} Formation - ${formation.units.length} Units - ${formationPv}pv`}
 							</h2>
 						{:else if formation.type != "none"}
 							<div>
 								<h2 class="formation-header-side">
-									{`${formation.name} - ${formation.secondary.type} Formation`} <br />
-									{`${formation.secondary.units.length} Units - ${formationPv}pv`}
+									{`${formation.name} - ${formation.type} Formation`} <br />
+									{`${formation.units.length} Units - ${formationPv}pv`}
 								</h2>
 							</div>
 						{:else}
 							<div></div>
 						{/if}
 						<div class="unit-card-container">
-							{#each formation.secondary.units as unitId}
+							{#each formation.units as unitId}
 								{@const unit = unitData.get(unitId)}
 								{@const mulData = mulUnitData.get(unit!.mulId)}
 								{#if printOptions.cardStyle == "mul" || unit!.mulId < 0}
@@ -317,10 +283,47 @@
 								{/if}
 							{/each}
 						</div>
-					{/if}
-				</div>
+						{#if formation.secondary}
+							{#if printOptions.formationHeaderStyle == "inline" && formation.secondary}
+								<h2 class="formation-header-inline">
+									{`${formation.name} - ${formation.secondary.type} Formation - ${formation.secondary.units.length} Units - ${formationPv}pv`}
+								</h2>
+							{:else if formation.type != "none"}
+								<div>
+									<h2 class="formation-header-side">
+										{`${formation.name} - ${formation.secondary.type} Formation`} <br />
+										{`${formation.secondary.units.length} Units - ${formationPv}pv`}
+									</h2>
+								</div>
+							{:else}
+								<div></div>
+							{/if}
+							<div class="unit-card-container">
+								{#each formation.secondary.units as unitId}
+									{@const unit = unitData.get(unitId)}
+									{@const mulData = mulUnitData.get(unit!.mulId)}
+									{#if printOptions.cardStyle == "mul" || unit!.mulId < 0}
+										<img src={unitCardImages?.get(`${unit!.mulId}-${unit!.skill}`)} class="unit-card" alt="unit card" />
+									{:else}
+										<div class="unit-card-wrapper">
+											<PrintUnitCard
+												unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
+												image={unitImages?.get(mulData!.imageLink ?? "") ?? ""}
+												formationSPAs={[]}
+												measurementUnits={printOptions.measurementUnits}
+												numbering={counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) ?? -1}
+												numberingType={printOptions.printDuplicateMarkingsType}
+												printDuplicateMarkings={printOptions.printDuplicateMarkings}
+											/>
+										</div>
+									{/if}
+								{/each}
+							</div>
+						{/if}
+					</div>
+				{/if}
 			{/each}
-			{#if printOptions.printBFSCards}
+			{#if printOptions.printBFSCards && bfsList.size != 0}
 				<div class={{ "formation-side": printOptions.formationHeaderStyle == "side" }}>
 					<h2 class={`formation-header-${printOptions.formationHeaderStyle}`}>Battlefield Support</h2>
 					<div class="unit-card-container">

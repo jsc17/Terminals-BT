@@ -4,6 +4,7 @@
 	import { toastController } from "$lib/stores";
 	import { nanoid } from "nanoid";
 	import type { Participant } from "$lib/generated/prisma/browser";
+	import { dev } from "$app/environment";
 
 	type Props = {
 		fixedEra: boolean;
@@ -39,6 +40,7 @@
 					<th>Era</th>
 				{/if}
 				<th>Faction</th>
+				<th>Approval Status</th>
 				<th></th>
 				<th></th>
 			</tr>
@@ -53,6 +55,18 @@
 						<td>{participant.era}</td>
 					{/if}
 					<td>{participant.faction}</td>
+					<td
+						>{#if participant.approved}
+							<p class="primary">Approved</p>
+						{:else}
+							<div class="center inline">
+								<p class="warning">Pending</p>
+								<a class="approval-link" href={`${dev ? `https://localhost:5173` : `https://terminal.tools`}/validation/approve/${participant.id}`} target="_blank">
+									(Approve Now)</a
+								>
+							</div>
+						{/if}</td
+					>
 					<td>
 						<DropdownMenu
 							items={[
@@ -78,7 +92,7 @@
 							{/snippet}
 						</DropdownMenu>
 					</td>
-					<td class={{ last: true, warning: participant.fixedUnits?.length }}>{participant.fixedUnits?.length ? "List was manually fixed" : ""}</td>
+					<td class={{ last: true, warning: participant.fixedUnits != "[]" }}>{participant.fixedUnits != "[]" ? "List was manually fixed" : ""}</td>
 				</tr>
 			{/each}
 		</tbody>

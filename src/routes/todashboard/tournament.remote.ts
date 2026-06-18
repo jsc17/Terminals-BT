@@ -4,11 +4,11 @@ import * as fs from "fs/promises";
 import * as v from "valibot";
 import { calculateTournamentStatistics } from "./statistics";
 import { tournamentEmailTransporter } from "$lib/server/emails/mailer.server";
-import { FormCreationSchema } from "./schema";
+import { TournamentCreationSchema } from "./schema";
 import { env } from "$env/dynamic/private";
 import { redirect } from "@sveltejs/kit";
 
-export const createTournament = form(FormCreationSchema, async (data) => {
+export const createTournament = form(TournamentCreationSchema, async (data) => {
 	let { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failed", message: "user is not logged in" };
 

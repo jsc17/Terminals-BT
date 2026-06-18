@@ -50,11 +50,11 @@ function exportArrayToCSV(units: MulUnit[]) {
 	downloadElement.click();
 }
 
-function exportRowsToCSV(rows: string[]) {
+function exportRowsToCSV(rows: string[], filename: string | undefined = undefined) {
 	const csv = rows.join("\n");
 	const blob = new Blob([csv], { type: "text/csv" });
 	const downloadElement = document.createElement("a");
-	downloadElement.download = `export-${nanoid(10)}`;
+	downloadElement.download = filename ? filename : `export-${nanoid(10)}`;
 	downloadElement.href = URL.createObjectURL(blob);
 	downloadElement.click();
 }

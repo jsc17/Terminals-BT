@@ -50,7 +50,12 @@
 			{#snippet pending()}
 				Loading participant data
 			{/snippet}
-			<TournamentParticipants participants={tournamentData!.participants} fixedEra={tournamentData!.era != null} teams={tournamentData!.teams} />
+			<TournamentParticipants
+				participants={tournamentData!.participants}
+				fixedEra={tournamentData!.era != null}
+				teams={tournamentData!.teams}
+				tournamentName={tournamentData!.name}
+			/>
 		</svelte:boundary>
 		<svelte:boundary>
 			{#if tournamentData!.participants.length}

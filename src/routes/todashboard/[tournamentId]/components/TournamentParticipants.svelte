@@ -13,9 +13,10 @@
 		fixedEra: boolean;
 		participants: Participant[];
 		teams: boolean;
+		tournamentName: string;
 	};
 
-	let { participants, fixedEra, teams }: Props = $props();
+	let { participants, fixedEra, teams, tournamentName }: Props = $props();
 	let setTeamDialogBinding = $state<SetTeamDialog>();
 
 	async function downloadList(id: string) {
@@ -34,13 +35,13 @@
 	function exportPlayersToCryodex() {
 		const rows: string[] = ['"Name","First Name","Last Name"'];
 		for (const participant of participants) rows.push(`"","${participant.name}",""`);
-		exportRowsToCSV(rows);
+		exportRowsToCSV(rows, `${tournamentName}-export-players-${nanoid(5)}`);
 	}
 
 	function exportTeamsToCryodex() {
 		const rows: string[] = ['"Name","First Name","Last Name"'];
 		for (const team of [...new Set(participants.map((p) => p.teamName).filter((t) => t != null))]) rows.push(`"","${team}",""`);
-		exportRowsToCSV(rows);
+		exportRowsToCSV(rows, `${tournamentName}-export-teams-${nanoid(5)}`);
 	}
 
 	const exportMenuItems = $derived.by(() => {

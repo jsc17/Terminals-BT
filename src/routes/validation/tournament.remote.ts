@@ -18,14 +18,14 @@ import { getBfsById } from "$lib/data/battlefieldSupport";
 export const getApprovedTournamentList = query(async () => {
 	const data = await prisma.tournament.findMany({
 		where: { tournament_date: { gte: new Date() }, approved: true },
-		select: { id: true, name: true, location: true, era: true, tournament_date: true, tournamentRules: true }
+		select: { id: true, name: true, location: true, era: true, tournament_date: true, tournamentRules: true, teams: true }
 	});
 	return { status: "success", data };
 });
 
 export const submitList = form(
 	SubmitListSchema,
-	async ({ tournamentId, playerName, playerEmail, listFile, eraId, factionId, unit, addedUnits, fixedUnits, bfs, addedBfs, fixedBfs }) => {
+	async ({ tournamentId, playerName, playerEmail, teamName, listFile, eraId, factionId, unit, addedUnits, fixedUnits, bfs, addedBfs, fixedBfs }) => {
 		const tournament = await prisma.tournament.findUnique({
 			where: {
 				id: Number(tournamentId)
@@ -34,13 +34,13 @@ export const submitList = form(
 		if (tournament) {
 			const era = await getEraName(Number(eraId));
 			const faction = await getFactionName(Number(factionId));
-
 			const pdfData = await listFile.arrayBuffer();
 			const buffer = Buffer.from(pdfData);
 			const base64String = buffer.toString("base64");
 
 			const id = nanoid();
 			const filename = `./files/tournament-lists/${id}.pdf`;
+			console.log(teamName);
 			await fs.writeFile(filename, buffer);
 			await prisma.tournament.update({
 				where: { id: Number(tournamentId) },
@@ -53,11 +53,12 @@ export const submitList = form(
 							era,
 							faction,
 							units: JSON.stringify(unit),
-							addedUnits: JSON.stringify(addedUnits),
-							fixedUnits: JSON.stringify(fixedUnits),
-							bfs: JSON.stringify(bfs),
-							addedBfs: JSON.stringify(addedBfs),
-							fixedBfs: JSON.stringify(fixedBfs)
+							addedUnits: addedUnits.length ? JSON.stringify(addedUnits) : undefined,
+							fixedUnits: fixedUnits.length ? JSON.stringify(fixedUnits) : undefined,
+							bfs: bfs.length ? JSON.stringify(bfs) : undefined,
+							addedBfs: addedBfs.length ? JSON.stringify(addedBfs) : undefined,
+							fixedBfs: fixedBfs.length ? JSON.stringify(fixedBfs) : undefined,
+							teamName
 						}
 					}
 				}
@@ -101,7 +102,8 @@ export const submitList = form(
 					parsedAddedUnits,
 					parsedFixedUnits,
 					parsedAddedBfs,
-					parsedFixedBfs
+					parsedFixedBfs,
+					teamName
 				}
 			});
 			const info = await tournamentEmailTransporter.sendMail({
@@ -124,7 +126,8 @@ export const submitList = form(
 					parsedAddedUnits,
 					parsedFixedUnits,
 					parsedAddedBfs,
-					parsedFixedBfs
+					parsedFixedBfs,
+					teamName: teamName
 				}
 			});
 			await tournamentEmailTransporter.sendMail({

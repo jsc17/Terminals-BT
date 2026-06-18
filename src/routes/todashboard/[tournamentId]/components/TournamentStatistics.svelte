@@ -10,35 +10,35 @@
 
 	let { tournamentId, fixedEra }: Props = $props();
 
-	let statistics = getTournamentStatistics(tournamentId);
+	let statistics = $derived(await getTournamentStatistics(tournamentId));
 	let placeLimit = $state(3);
 
 	const tournamentStatisticList = $derived(
-		statistics.current
+		statistics
 			? [
-					{ title: "Lowest PV Lists", display: `<span class="primary">[player]</span> - [pv]pv - [unitCount] units`, data: statistics.current.data.achievements.lowestPVList },
-					{ title: "Highest PV Units", display: `<span class="primary">[unit] ([skill])</span> - [pv]pv - [player]`, data: statistics.current.data.achievements.highestPVUnit },
-					{ title: "Most Common Units", display: `<span class="primary">[unit]</span> - [count]x`, data: statistics.current.data.achievements.mostCommonUnit }
+					{ title: "Lowest PV Lists", display: `<span class="primary">[player]</span> - [pv]pv - [unitCount] units`, data: statistics.data.achievements.lowestPVList },
+					{ title: "Highest PV Units", display: `<span class="primary">[unit] ([skill])</span> - [pv]pv - [player]`, data: statistics.data.achievements.highestPVUnit },
+					{ title: "Most Common Units", display: `<span class="primary">[unit]</span> - [count]x`, data: statistics.data.achievements.mostCommonUnit }
 				]
 			: []
 	);
 
 	let tournamentCharts = $derived.by(() => {
-		if (!statistics.current) return [];
+		if (!statistics) return [];
 
 		let chartData = [
-			{ title: "Unit Types", data: statistics.current.data.breakdowns.unitTypes },
-			{ title: "Factions", data: statistics.current.data.breakdowns.factionList }
+			{ title: "Unit Types", data: statistics.data.breakdowns.unitTypes },
+			{ title: "Factions", data: statistics.data.breakdowns.factionList }
 		];
 		if (!fixedEra) {
-			chartData.push({ title: "Eras", data: statistics.current.data.breakdowns.eraList });
+			chartData.push({ title: "Eras", data: statistics.data.breakdowns.eraList });
 		}
 		return chartData;
 	});
 </script>
 
 <section class="card">
-	{#if statistics.current?.status == "success"}
+	{#if statistics?.status == "success"}
 		<div class="stat-row">
 			{#each tournamentStatisticList as list}
 				<TournamentStatisticList title={list.title} display={list.display} data={list.data} {placeLimit} />

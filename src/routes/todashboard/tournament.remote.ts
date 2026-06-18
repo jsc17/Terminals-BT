@@ -6,6 +6,7 @@ import { calculateTournamentStatistics } from "./statistics";
 import { tournamentEmailTransporter } from "$lib/server/emails/mailer.server";
 import { FormCreationSchema } from "./schema";
 import { env } from "$env/dynamic/private";
+import { redirect } from "@sveltejs/kit";
 
 export const createTournament = form(FormCreationSchema, async (data) => {
 	let { locals } = getRequestEvent();
@@ -22,7 +23,8 @@ export const createTournament = form(FormCreationSchema, async (data) => {
 				tournament_date: new Date(data.tournamentDate),
 				era: data.tournamentEra ? Number(data.tournamentEra) : undefined,
 				tournamentRules: data.tournamentRules,
-				approvalMessage: data.tournamentMessage
+				approvalMessage: data.tournamentMessage,
+				teams: data.teams
 			}
 		});
 
@@ -54,6 +56,19 @@ export const createTournament = form(FormCreationSchema, async (data) => {
 	}
 });
 
+export const getTournamentData = query(v.number(), async (tournamentId) => {
+	const { locals } = getRequestEvent();
+	if (!locals.user) return { status: "failed", message: "User not logged in" };
+
+	const tournamentData = await prisma.tournament.findUnique({
+		where: { id: tournamentId, userId: locals.user.id == env.ADMIN_USER_ID ? undefined : locals.user.id },
+		include: { participants: true }
+	});
+
+	if (!tournamentData) return { status: "failed", message: "Tournament does not exist, or user does not have access" };
+	return { status: "success", data: tournamentData };
+});
+
 export const getUsersTournamentList = query(async () => {
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failed", message: "User not logged in" };
@@ -73,7 +88,9 @@ export const getUsersTournamentList = query(async () => {
 });
 
 export const deleteParticipant = command(v.string(), async (participantId) => {
-	await prisma.participant.delete({ where: { id: participantId } });
+	const result = await prisma.participant.delete({ where: { id: participantId } });
+	getTournamentData(result.tournamentId).refresh();
+	getTournamentStatistics(result.tournamentId).refresh();
 });
 
 export const getParticipantsGameList = query(v.string(), async (participantId) => {
@@ -83,6 +100,11 @@ export const getParticipantsGameList = query(v.string(), async (participantId) =
 		return { status: "success", data: file };
 	}
 	return { status: "failed", message: "List not found" };
+});
+
+export const setParticipantTeam = form(v.object({ participantId: v.string(), teamName: v.string() }), async ({ participantId, teamName }) => {
+	const result = await prisma.participant.update({ where: { id: participantId }, data: { teamName } });
+	getTournamentData(result.tournamentId).refresh();
 });
 
 export const getTournamentStatistics = query(v.number(), async (tournamentId) => {

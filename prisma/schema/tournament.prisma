@@ -12,6 +12,7 @@ model Tournament {
   participants Participant[]
   approved Boolean @default(false)
   approvalMessage String?
+  teams Boolean @default(false)
 }
 
 model Participant {
@@ -30,4 +31,5 @@ model Participant {
   addedBfs String? @db.Text
   fixedBfs String? @db.Text
   approved Boolean @default(false)
+  teamName String?
 }

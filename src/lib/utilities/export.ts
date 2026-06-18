@@ -2,7 +2,7 @@ import type { MulUnit } from "$lib/types/listTypes";
 import { nanoid } from "nanoid";
 import { createAbilityLineString, createSingleAbilityString } from "./abilityUtilities";
 
-function exportResultsToCSV(units: MulUnit[]) {
+function exportArrayToCSV(units: MulUnit[]) {
 	const rows = [];
 
 	rows.push(
@@ -44,12 +44,19 @@ function exportResultsToCSV(units: MulUnit[]) {
 
 	const csv = rows.join("\n");
 	const blob = new Blob([csv], { type: "text/csv" });
-	const url = URL.createObjectURL(blob);
-
 	const downloadElement = document.createElement("a");
 	downloadElement.download = `export-${nanoid(10)}`;
 	downloadElement.href = URL.createObjectURL(blob);
 	downloadElement.click();
 }
 
-export { exportResultsToCSV as exportArrayToCSV };
+function exportRowsToCSV(rows: string[]) {
+	const csv = rows.join("\n");
+	const blob = new Blob([csv], { type: "text/csv" });
+	const downloadElement = document.createElement("a");
+	downloadElement.download = `export-${nanoid(10)}`;
+	downloadElement.href = URL.createObjectURL(blob);
+	downloadElement.click();
+}
+
+export { exportArrayToCSV, exportRowsToCSV };

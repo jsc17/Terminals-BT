@@ -32,4 +32,6 @@ model Participant {
   fixedBfs String? @db.Text
   approved Boolean @default(false)
   teamName String?
+  userId String?
+  user User? @relation(references: [id], fields: [userId], onDelete: Cascade)
 }

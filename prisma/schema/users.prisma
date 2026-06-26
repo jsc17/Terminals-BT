@@ -16,6 +16,7 @@ model User {
   models CollectionModel[]
   matches UsersInMatch[]
   playModeNickname String @default("")
+  submissions Participant[]
 }
 
 model Session {

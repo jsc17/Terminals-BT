@@ -1,4 +1,4 @@
-import { query, form } from "$app/server";
+import { query, form, getRequestEvent } from "$app/server";
 import { tournamentEmailTransporter } from "$lib/server/emails/mailer.server";
 import { ListSubmission } from "$lib/server/emails/templates";
 import { render } from "svelty-email";
@@ -26,6 +26,7 @@ export const getApprovedTournamentList = query(async () => {
 export const submitList = form(
 	SubmitListSchema,
 	async ({ tournamentId, playerName, playerEmail, teamName, listFile, eraId, factionId, unit, addedUnits, fixedUnits, bfs, addedBfs, fixedBfs }) => {
+		const { locals } = getRequestEvent();
 		const tournament = await prisma.tournament.findUnique({
 			where: {
 				id: Number(tournamentId)
@@ -58,7 +59,8 @@ export const submitList = form(
 							bfs: bfs.length ? JSON.stringify(bfs) : undefined,
 							addedBfs: addedBfs.length ? JSON.stringify(addedBfs) : undefined,
 							fixedBfs: fixedBfs.length ? JSON.stringify(fixedBfs) : undefined,
-							teamName
+							teamName,
+							user: locals.user?.id ? { connect: { id: locals.user?.id } } : undefined
 						}
 					}
 				}

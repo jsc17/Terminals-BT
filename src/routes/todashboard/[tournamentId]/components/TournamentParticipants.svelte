@@ -154,7 +154,7 @@
 					</td>
 					<td class={{ last: true, warning: participant.fixedUnits != "[]" }}>
 						<p>
-							{participant.fixedUnits != null || participant.fixedBfs != null || participant.addedUnits != null || participant.addedBfs != null ? "List was manually editted" : ""}
+							{participant.fixedUnits != null || participant.fixedBfs != null || participant.addedUnits != null || participant.addedBfs != null ? "List was manually edited" : ""}
 						</p>
 					</td>
 				</tr>

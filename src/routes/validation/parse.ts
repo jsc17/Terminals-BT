@@ -106,7 +106,7 @@ function parseTerminalV2(content: TextContent, keywords: string) {
 	const bfsStart = content.items.findIndex((i) => /Battlefield Support/.test((i as TextItem).str));
 	const bfsEnd = content.items.findIndex((i) => /^\d+ BFS Selection($|s$)/.test((i as TextItem).str));
 	const includesBSP = (content.items[bfsStart + 2] as TextItem).str == "BSP";
-	const includesPV = (content.items[bfsStart + (includesBSP ? 4 : 2)] as TextItem).str == "PV";
+	const includesPV = (content.items[bfsStart + (includesBSP ? 4 : 2)] as TextItem).str == "PV (Total)";
 	const bfsStepCount = 1 + (includesPV ? 2 : 0) + (includesBSP ? 2 : 0);
 	const parsedBfsData: { name: string; count: number }[] = [];
 

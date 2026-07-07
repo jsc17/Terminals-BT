@@ -99,7 +99,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
 			self.postMessage({ type: WorkerMessageType.GET_UNIT_AVAILABILITY_RESPONSE, id: e.data.id, payload: unitAvailability });
 			break;
 		case WorkerMessageType.GET_RESULT_LIST:
-			const resultQuery = buildResultListQuery(payload.factions, payload.eras, payload.eraSearchType, payload.factionSearchType);
+			const resultQuery = buildResultListQuery(payload.factions, payload.eras, payload.eraSearchType, payload.factionSearchType, payload.includeUnavailable);
 			const result = db.exec(resultQuery, { rowMode: "object", returnValue: "resultRows" });
 			self.postMessage({ type: WorkerMessageType.GET_RESULT_LIST_RESPONSE, id: e.data.id, payload: result });
 			break;
@@ -132,11 +132,12 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
 	}
 };
 
-function buildResultListQuery(factions: number[], eras: number[], eraSearchType: "any" | "every", factionSearchType: "any" | "every") {
+function buildResultListQuery(factions: number[], eras: number[], eraSearchType: "any" | "every", factionSearchType: "any" | "every", includeUnavailable: boolean) {
 	let sql = `SELECT * FROM Unit u`;
 	const clauses: string[] = [];
 
-	if (factions.length == 0 && eras.length == 0) return (sql += ` order by tonnage nulls last, name`);
+	if (factions.length == 0 && eras.length == 0)
+		return (sql += ` ${includeUnavailable ? "" : "WHERE EXISTS (SELECT 1 FROM Availability a WHERE u.id = a.unitId)"} order by tonnage nulls last, name`);
 
 	sql += ` WHERE `;
 

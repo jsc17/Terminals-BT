@@ -23,6 +23,7 @@
 	let eraSelectMode = $state<"any" | "every">("any");
 	let factionSelectMode = $state<"any" | "every">("any");
 	let factionFilter = $state<string>();
+	let includeUnavailable = $state<boolean>(true);
 
 	onMount(async () => {
 		getErasAndFactionsLocal().then((result) => (eraList = new SvelteMap(result)));
@@ -62,6 +63,7 @@
 	function handleApply() {
 		resultList.eraSearchType = eraSelectMode;
 		resultList.factionSearchType = factionSelectMode;
+		resultList.includeUnavailable = includeUnavailable;
 		if (list) {
 			list.details.eras = [...selectedEras];
 			list.details.factions = [...selectedFactions];
@@ -84,6 +86,7 @@
 			for (const faction of resultList.factions) {
 				selectedFactions.add(faction);
 			}
+			includeUnavailable = resultList.includeUnavailable;
 		}
 		changed = false;
 	}
@@ -237,12 +240,16 @@
 
 		<div class="inline">
 			<input type="checkbox" id="include-general-list" bind:checked={includeGeneral} disabled={selectedEras.size != 1 || selectedFactions.size != 1} />
-			<label for="include-general-list">Official General:</label>
+			<label for="include-general-list" class={{ strikethrough: selectedEras.size != 1 || selectedFactions.size != 1 }}>Official General:</label>
 			{#if selectedEras.size == 1 && selectedFactions.size == 1}
 				<a href={`http://masterunitlist.info/Era/FactionEraDetails?FactionId=${[...selectedFactions][0]}&EraId=${[...selectedEras][0]}`}>{factionLookup.get(general)}</a>
 			{:else}
 				<p class="general-notice">Select a single Era and Faction</p>
 			{/if}
+		</div>
+		<div class="inline">
+			<input type="checkbox" id="include-unavailable-units" bind:checked={includeUnavailable} disabled={selectedEras.size != 0 || selectedFactions.size != 0} />
+			<label for="include-unavailable-units" class={{ strikethrough: selectedEras.size != 0 || selectedFactions.size != 0 }}>Include units with no official availability</label>
 		</div>
 		<hr />
 		<div class="selection-buttons">

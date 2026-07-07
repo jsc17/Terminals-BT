@@ -69,6 +69,7 @@ export class ResultList {
 
 	eraSearchType = $state<"any" | "every">("any");
 	factionSearchType = $state<"any" | "every">("any");
+	includeUnavailable = $state<boolean>(true);
 
 	get eras(): number[] {
 		return this.#eras;
@@ -128,7 +129,6 @@ export class ResultList {
 			return Number(faction);
 		});
 		this.general = general;
-
 		this.status = new Promise((resolve, reject) => {
 			this.loadUnits().then((result) => resolve("Units Loaded"));
 		});
@@ -142,7 +142,8 @@ export class ResultList {
 				.concat($state.snapshot(this.general) ?? [])
 				.filter((f) => f != -1),
 			eraSearchType: this.#eras.length > 1 ? this.eraSearchType : "any",
-			factionSearchType: this.#factions.length > 1 ? this.factionSearchType : "any"
+			factionSearchType: this.#factions.length > 1 ? this.factionSearchType : "any",
+			includeUnavailable: this.includeUnavailable
 		}).then((result) => {
 			for (const unit of result) {
 				this.resultList.push(convertUnitDataToMulUnit(unit));

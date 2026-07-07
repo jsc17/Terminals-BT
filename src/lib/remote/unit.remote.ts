@@ -143,9 +143,10 @@ const resultListSchema = v.object({
 	factions: v.array(v.number()),
 	eras: v.array(v.number()),
 	eraSearchType: v.union([v.literal("any"), v.literal("every")]),
-	factionSearchType: v.union([v.literal("any"), v.literal("every")])
+	factionSearchType: v.union([v.literal("any"), v.literal("every")]),
+	includeUnavailable: v.boolean()
 });
-export const getResultList = query(resultListSchema, async ({ eras, eraSearchType, factions, factionSearchType }) => {
+export const getResultList = query(resultListSchema, async ({ eras, eraSearchType, factions, factionSearchType, includeUnavailable }) => {
 	if (!eras.length) eraSearchType = "any";
 	if (!factions.length) factionSearchType = "any";
 

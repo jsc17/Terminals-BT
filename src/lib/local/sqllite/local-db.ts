@@ -115,12 +115,19 @@ export async function getUnitAvailabilityLocal(unitId: number) {
 	if (!(await isLocalDBAvailable())) return getSingleUnitAvailability(unitId);
 	return sendMessage<{ era: number; factions: number[] }[]>({ type: WorkerMessageType.GET_UNIT_AVAILABILITY, payload: unitId });
 }
-export async function getResultListLocal(data: { factions: number[]; eras: number[]; eraSearchType: "any" | "every"; factionSearchType: "any" | "every" }) {
+export async function getResultListLocal(data: {
+	factions: number[];
+	eras: number[];
+	eraSearchType: "any" | "every";
+	factionSearchType: "any" | "every";
+	includeUnavailable: boolean;
+}) {
 	if (!(await isLocalDBAvailable())) return getResultList(data);
 	return sendMessage<MulUnit[]>({ type: WorkerMessageType.GET_RESULT_LIST, payload: data });
 }
 export async function getUniqueListLocal(eras: number[]) {
-	if (!(await isLocalDBAvailable())) return (await getResultList({ eras, eraSearchType: "any", factions: [4], factionSearchType: "every" })).map((u) => u.id);
+	if (!(await isLocalDBAvailable()))
+		return (await getResultList({ eras, eraSearchType: "any", factions: [4], factionSearchType: "every", includeUnavailable: false })).map((u) => u.id);
 	return sendMessage<number[]>({ type: WorkerMessageType.GET_UNIQUE_LIST, payload: eras });
 }
 export async function getErasAndFactionsLocal() {

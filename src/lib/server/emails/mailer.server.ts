@@ -7,7 +7,7 @@ export const transporter = nodemailer.createTransport({
 	host: env.EMAIL_HOST,
 	port: 587,
 	auth: {
-		user: env.EMAIL,
+		user: env.EMAIL_SENDER,
 		pass: env.EMAIL_PASSWORD
 	}
 });
@@ -25,9 +25,9 @@ export async function sendResetEmail(email: string, token: string) {
 	//@ts-ignore
 	const emailHTML = render({ template: ResetPassword, props: { token } });
 	const info = await transporter.sendMail({
-		from: "support@terminl.xyz", // sender address
+		from: "support@terminal.tools", // sender address
 		to: email, // list of receivers
-		subject: "Terminl.xyz Password Reset Link", // Subject line
+		subject: "Terminal.tools Password Reset Link", // Subject line
 		html: emailHTML
 	});
 	console.log("Message sent: %s", info.messageId);

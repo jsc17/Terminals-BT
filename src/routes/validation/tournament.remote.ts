@@ -26,6 +26,7 @@ export const getApprovedTournamentList = query(async () => {
 export const submitList = form(
 	SubmitListSchema,
 	async ({ tournamentId, playerName, playerEmail, teamName, listFile, eraId, factionId, unit, addedUnits, fixedUnits, bfs, addedBfs, fixedBfs }) => {
+		console.log(fixedUnits);
 		const { locals } = getRequestEvent();
 		const tournament = await prisma.tournament.findUnique({
 			where: {
@@ -33,6 +34,7 @@ export const submitList = form(
 			}
 		});
 		if (tournament) {
+			console.log(eraId, factionId);
 			const era = await getEraName(Number(eraId));
 			const faction = await getFactionName(Number(factionId));
 			const pdfData = await listFile.arrayBuffer();
@@ -41,7 +43,6 @@ export const submitList = form(
 
 			const id = nanoid();
 			const filename = `./files/tournament-lists/${id}.pdf`;
-			console.log(teamName);
 			await fs.writeFile(filename, buffer);
 			await prisma.tournament.update({
 				where: { id: Number(tournamentId) },
@@ -74,15 +75,15 @@ export const submitList = form(
 			}
 			const parsedFixedUnits = [];
 			for (const unit of fixedUnits ?? []) {
-				const { id, sk } = JSON.parse(unit);
-				const name = (await getMULDataFromId(id))?.name ?? "Unknown";
-				parsedFixedUnits.push({ name, skill: sk });
+				const { original, fixed } = JSON.parse(unit);
+				const name = (await getMULDataFromId(fixed.id))?.name ?? "Unknown";
+				parsedFixedUnits.push({ name, skill: fixed.sk });
 			}
 			const parsedFixedBfs = [];
 			for (const bfs of fixedBfs ?? []) {
-				const { id, count } = JSON.parse(bfs);
-				const bfsData = getBfsById(id);
-				if (bfsData) parsedFixedBfs.push({ name: bfsData.name, count });
+				const { original, fixed } = JSON.parse(bfs);
+				const bfsData = getBfsById(fixed.id);
+				if (bfsData) parsedFixedBfs.push({ name: bfsData.name, count: fixed.count });
 			}
 			const parsedAddedBfs = [];
 			for (const bfs of addedBfs ?? []) {
@@ -90,6 +91,7 @@ export const submitList = form(
 				const bfsData = getBfsById(id);
 				if (bfsData) parsedAddedBfs.push({ name: bfsData.name, count });
 			}
+
 			const emailHTML = render({
 				//@ts-ignore
 				template: ListSubmission,

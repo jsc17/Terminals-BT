@@ -86,8 +86,8 @@ export const getPossibleUnitList = form(v.object({ searchTerm: v.string() }), as
 });
 
 export const getSingleUnitData = form(
-	v.object({ mulId: v.string(), eraId: v.string(), factionId: v.string(), unitSkill: v.number() }),
-	async ({ mulId, eraId, factionId, unitSkill }) => {
+	v.object({ id: v.string(), mulId: v.string(), eraId: v.string(), factionId: v.string(), unitSkill: v.number() }),
+	async ({ id, mulId, eraId, factionId, unitSkill }) => {
 		const mulData = await getMULDataFromId(Number(mulId));
 		if (mulData) {
 			const skill = Number(unitSkill);
@@ -103,7 +103,7 @@ export const getSingleUnitData = form(
 				const available = await isUnitAvailable({ unitId: mulData.id, eras: [era], factions: [faction, general ?? 0] });
 
 				let unitData: ValidationUnitData = {
-					id: crypto.randomUUID(),
+					id,
 					name: mulData.name,
 					skill,
 					pv: getNewSkillCost(skill, mulData.pv),

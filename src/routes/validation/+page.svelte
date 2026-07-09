@@ -240,7 +240,7 @@
 								<td>{data ?? "-"}</td>
 							{/each}
 							<td>
-								<FixUnitDialog unitId={unit.id} bind:unitData bind:fixedUnits bind:issues {selectedRules} {selectedEra} {selectedFaction} />
+								<FixUnitDialog unitId={unit.id} bind:unitData bind:fixedUnits bind:issues {selectedRules} {selectedEra} {selectedFaction} {index} />
 							</td>
 						</tr>
 					{:else}
@@ -250,6 +250,7 @@
 					{/each}
 				</tbody>
 			</table>
+			<p>{fixedUnits}</p>
 			<div class="space-between">
 				<h3>
 					Battlefield Support <span class="error">{bfsData.filter((b) => !b.available).length ? "(Not all BFS found, check the selected ruleset)" : ""}</span>

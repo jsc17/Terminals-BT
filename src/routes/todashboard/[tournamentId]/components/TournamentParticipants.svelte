@@ -8,6 +8,7 @@
 	import SetTeamDialog from "./SetTeamDialog.svelte";
 	import { exportRowsToCSV } from "$lib/utilities/export";
 	import type { MenuItem } from "$lib/generic/types";
+	import { SortAscendingIcon, SortDescendingIcon, SortIcon } from "$lib/icons";
 
 	type Props = {
 		fixedEra: boolean;
@@ -18,6 +19,25 @@
 
 	let { participants, fixedEra, teams, tournamentName }: Props = $props();
 	let setTeamDialogBinding = $state<SetTeamDialog>();
+
+	let sortKey = $state("name");
+	let sortDirection = $state<"asc" | "des">("asc");
+	const sortedParticipants = $derived(
+		participants.toSorted((a: Participant & { [key: string]: any }, b: Participant & { [key: string]: any }) => {
+			const first = sortDirection == "asc" ? a : b;
+			const second = sortDirection == "asc" ? b : a;
+			if (sortKey == "dateSubmitted") return first.dateSubmitted.getTime() - second.dateSubmitted.getTime();
+			if (sortKey == "approved") return Number(first.approved) - Number(second.approved);
+			return first[sortKey].localeCompare(second[sortKey]);
+		})
+	);
+
+	function setSortKey(key: string) {
+		if (key == sortKey) return (sortDirection = sortDirection == "asc" ? "des" : "asc");
+
+		sortDirection = "asc";
+		sortKey = key;
+	}
 
 	async function downloadList(id: string) {
 		const result = await getParticipantsGameList(id);
@@ -77,23 +97,94 @@
 	<table>
 		<thead>
 			<tr>
-				<th>Name</th>
-				<th>Email</th>
-				<th>Date Submitted</th>
+				<th onclick={() => setSortKey("name")}
+					>Name
+					{#if sortKey == "name"}
+						{#if sortDirection == "asc"}
+							<SortAscendingIcon fill="var(--primary)" width="20" height="20" />
+						{:else}
+							<SortDescendingIcon fill="var(--primary)" width="20" height="20" />
+						{/if}
+					{:else}
+						<SortIcon fill="var(--surface-color-light-text-color)" width="20" height="20" />
+					{/if}
+				</th>
+				<th onclick={() => setSortKey("email")}
+					>Email {#if sortKey == "email"}
+						{#if sortDirection == "asc"}
+							<SortAscendingIcon fill="var(--primary)" width="20" height="20" />
+						{:else}
+							<SortDescendingIcon fill="var(--primary)" width="20" height="20" />
+						{/if}
+					{:else}
+						<SortIcon fill="var(--surface-color-light-text-color)" width="20" height="20" />
+					{/if}</th
+				>
+				<th onclick={() => setSortKey("dateSubmitted")}
+					>Date Submitted {#if sortKey == "dateSubmitted"}
+						{#if sortDirection == "asc"}
+							<SortAscendingIcon fill="var(--primary)" width="20" height="20" />
+						{:else}
+							<SortDescendingIcon fill="var(--primary)" width="20" height="20" />
+						{/if}
+					{:else}
+						<SortIcon fill="var(--surface-color-light-text-color)" width="20" height="20" />
+					{/if}</th
+				>
 				{#if !fixedEra}
-					<th>Era</th>
+					<th onclick={() => setSortKey("era")}
+						>Era {#if sortKey == "era"}
+							{#if sortDirection == "asc"}
+								<SortAscendingIcon fill="var(--primary)" width="20" height="20" />
+							{:else}
+								<SortDescendingIcon fill="var(--primary)" width="20" height="20" />
+							{/if}
+						{:else}
+							<SortIcon fill="var(--surface-color-light-text-color)" width="20" height="20" />
+						{/if}</th
+					>
 				{/if}
-				<th>Faction</th>
+				<th onclick={() => setSortKey("faction")}
+					>Faction {#if sortKey == "faction"}
+						{#if sortDirection == "asc"}
+							<SortAscendingIcon fill="var(--primary)" width="20" height="20" />
+						{:else}
+							<SortDescendingIcon fill="var(--primary)" width="20" height="20" />
+						{/if}
+					{:else}
+						<SortIcon fill="var(--surface-color-light-text-color)" width="20" height="20" />
+					{/if}</th
+				>
 				{#if teams}
-					<th>Team</th>
+					<th onclick={() => setSortKey("teamName")}
+						>Team {#if sortKey == "teamName"}
+							{#if sortDirection == "asc"}
+								<SortAscendingIcon fill="var(--primary)" width="20" height="20" />
+							{:else}
+								<SortDescendingIcon fill="var(--primary)" width="20" height="20" />
+							{/if}
+						{:else}
+							<SortIcon fill="var(--surface-color-light-text-color)" width="20" height="20" />
+						{/if}</th
+					>
 				{/if}
-				<th>Approval Status</th>
+				<th onclick={() => setSortKey("approved")}
+					>Approval Status {#if sortKey == "approved"}
+						{#if sortDirection == "asc"}
+							<SortAscendingIcon fill="var(--primary)" width="20" height="20" />
+						{:else}
+							<SortDescendingIcon fill="var(--primary)" width="20" height="20" />
+						{/if}
+					{:else}
+						<SortIcon fill="var(--surface-color-light-text-color)" width="20" height="20" />
+					{/if}</th
+				>
 				<th></th>
 				<th></th>
 			</tr>
 		</thead>
 		<tbody>
-			{#each participants as participant}
+			{#each sortedParticipants as participant}
 				<tr>
 					<td>{participant.name}</td>
 					<td>{participant.email}</td>

@@ -13,7 +13,7 @@ export async function calculateTournamentStatistics(participants: { name: string
 		for (const unit of unitIds) {
 			let tempId = unit.id;
 			const data = await getMULDataFromIdLocal(tempId);
-			const cost = getNewSkillCost(unit.sk, data!.pv);
+			const cost = getNewSkillCost(unit.sk, data?.pv ?? 0);
 			unitData.push({ player: participant.name, data: data!, skill: unit.sk, pv: cost });
 			listPV += cost;
 		}

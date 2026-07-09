@@ -62,7 +62,7 @@ export const getTournamentData = query(v.number(), async (tournamentId) => {
 
 	const tournamentData = await prisma.tournament.findUnique({
 		where: { id: tournamentId, userId: locals.user.id == env.ADMIN_USER_ID ? undefined : locals.user.id },
-		include: { participants: true }
+		include: { participants: { orderBy: { name: "asc" } } }
 	});
 
 	if (!tournamentData) return { status: "failed", message: "Tournament does not exist, or user does not have access" };

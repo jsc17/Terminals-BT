@@ -26,7 +26,6 @@ export const getApprovedTournamentList = query(async () => {
 export const submitList = form(
 	SubmitListSchema,
 	async ({ tournamentId, playerName, playerEmail, teamName, listFile, eraId, factionId, unit, addedUnits, fixedUnits, bfs, addedBfs, fixedBfs }) => {
-		console.log(fixedUnits);
 		const { locals } = getRequestEvent();
 		const tournament = await prisma.tournament.findUnique({
 			where: {
@@ -34,7 +33,6 @@ export const submitList = form(
 			}
 		});
 		if (tournament) {
-			console.log(eraId, factionId);
 			const era = await getEraName(Number(eraId));
 			const faction = await getFactionName(Number(factionId));
 			const pdfData = await listFile.arrayBuffer();

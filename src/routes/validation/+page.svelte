@@ -105,312 +105,311 @@
 </svelte:head>
 
 <main>
-	<div class="validation-body">
-		<p class="muted">MUL or Terminal PDF's only, others will probably error out, but at the very least will not read correctly</p>
-		<form
-			enctype="multipart/form-data"
-			{...getUnitData.enhance(async ({ submit }) => {
-				issues = undefined;
-				await submit();
-				if (getUnitData.result?.status == "success") {
-					unitData = getUnitData.result.data?.unitData ?? [];
-					bfsData = getUnitData.result.data?.bfsData ?? [];
-					formationCount = getUnitData.result.data?.formationCount ?? 0;
-					scaCount = getUnitData.result.data?.scaCount ?? 0;
-					lockSelections = true;
-				} else {
-					toastController.addToast(getUnitData.result?.message ?? "Invalid message recieved");
-				}
-			})}
-		>
-			<div class="section">
-				<h2 class="tournament-select-header">
-					1. Select a tournament to autofill details and allow for submission to the Tournament Organizer, or skip this step if you just want to validate a list
-				</h2>
-				<a class="tournament-select-link" href="/todashboard">Click here to create or manage a tournament</a>
-				<label
-					>Tournament <span class="muted">(Optional)</span>:
-					<select bind:value={selectedTournament} disabled={lockSelections}>
-						<option value={undefined}>None</option>
-						{#each tournamentList as tournament}
-							<option value={tournament}>{tournament.name}</option>
-						{/each}
-					</select></label
-				>
-				<div class="tournament-details">
-					<p class="muted tournament-detail">Date:</p>
-					<p class="tournament-detail">
-						{selectedTournament?.tournament_date.toLocaleDateString("en-US", {
-							timeZone: "UTC",
-							weekday: "long",
-							month: "long",
-							day: "numeric",
-							year: "numeric"
-						}) ?? "-"}
-					</p>
-					<p class="muted tournament-detail">Location:</p>
-					<p class="tournament-detail">{selectedTournament?.location ?? "-"}</p>
-					<p class="muted tournament-detail">Era:</p>
-					<p class="tournament-detail">{selectedTournament ? (selectedTournament.era ? await getEraName(selectedTournament.era) : "Any Era") : "-"}</p>
-					<p class="muted tournament-detail">Rules:</p>
-					<p class="tournament-detail">{selectedTournament?.tournamentRules ? rulesDetails?.display : "-"}</p>
-				</div>
-			</div>
-
-			<div class="section">
-				<h2>2. Select an era, faction, and ruleset to check list validity. If you have chosen a tournament, some of these options may already be set and locked</h2>
-				<label>
-					Rules:
-					<select name="selectedRules" bind:value={selectedRules} required disabled={selectedTournament?.tournamentRules != undefined || lockSelections}>
-						{#each ruleSets as rules}
-							{#if !rules.archived}
-								<option value={rules.name}>{rules.display}</option>
-							{/if}
-						{/each}
-					</select>
-				</label>
-				<label>
-					Era:
-					<select bind:value={selectedEra} required disabled={selectedTournament?.era != undefined || lockSelections}>
-						{#each eraList.keys() as era}
-							<option value={era}>{eraNames.get(era)}</option>
-						{/each}
-					</select>
-					<input type="hidden" name="selectedEra" value={selectedEra} />
-				</label>
-				<label
-					>Faction:
-					<select name="selectedFaction" bind:value={selectedFaction} required disabled={lockSelections}>
-						{#each eraList.get(selectedEra)?.factions as faction}
-							<option value={faction.id}>{faction.name}</option>
-						{/each}
-					</select>
-				</label>
-				<div class="inline">
-					<input type="file" name="listFile" id="listFile" accept="application/pdf" required bind:files disabled={lockSelections} />
-				</div>
-				<div class="inline">
-					<button disabled={lockSelections}>Get Unit Data</button>
-				</div>
-			</div>
-			<input {...getUnitData.fields.rules.as("hidden", selectedRules)} />
-		</form>
-		<div class={{ section: true, "locked-section": unitData.length == 0 }}>
-			<h2 class="tournament-select-header">3. Review Unit Data (You shouldn't have to do anything here unless it misread any of the units from the uploaded pdf)</h2>
-			<div class="space-between">
-				<h3>Units</h3>
-				<AddUnitDialog bind:unitData bind:addedUnits bind:issues {selectedRules} {selectedEra} {selectedFaction} />
-			</div>
-			<table>
-				<thead>
-					<tr>
-						<th>Found</th>
-						{#each innerWidth.current! >= 600 ? ["Name", "Skill", "PV", "Rules", "Type", "Abilities", "Available", "Unique"] : ["Name", "Skill"] as header}
-							<th>{header}</th>
-						{/each}
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each unitData ?? [] as unit, index (unit.id)}
-						{@const unitFixed = fixedUnits.find((u) => u.original.id == unit.id) != undefined}
-						{@const unitAdded = addedUnits.find((u) => u.id == unit.id) != undefined}
-						<tr>
-							<td>
-								{#if unit.mulData}
-									<span class="center" style="color: green; font-weight: bold;">✔</span>
-								{:else}
-									<span class="center" style="color: red; font-weight: bold;">X</span>
-								{/if}
-							</td>
-							<td>
-								{#if unit.link}
-									<a href={unit.link} target="_blank">{unit.name}</a>
-								{:else}
-									{unit.name}
-								{/if}
-								{#if unitFixed}
-									<span class="warning"> (Unit modified)</span>
-								{/if}
-								{#if unitAdded}
-									<span class="warning"> (Unit manually added)</span>
-								{/if}
-							</td>
-							{#each innerWidth.current! >= 600 ? [unit.skill, unit.pv, unit.mulData?.rulesLevel, unit.mulData?.subtype, createAbilityLineString(unit.mulData?.abilities ?? []), (unit.mulData?.mulId ?? 0) < 0 ? true : unit.available, unit.unique] : [unit.skill] as data}
-								<td>{data ?? "-"}</td>
-							{/each}
-							<td>
-								<FixUnitDialog unitId={unit.id} bind:unitData bind:fixedUnits bind:issues {selectedRules} {selectedEra} {selectedFaction} {index} />
-							</td>
-						</tr>
-					{:else}
-						<tr>
-							<td colspan="10">Upload a file to display units</td>
-						</tr>
+	<p class="muted">MUL or Terminal PDF's only, others will probably error out, but at the very least will not read correctly</p>
+	<a href="/validation/status">Click here to check the status on a previous list submission</a>
+	<form
+		enctype="multipart/form-data"
+		{...getUnitData.enhance(async ({ submit }) => {
+			issues = undefined;
+			await submit();
+			if (getUnitData.result?.status == "success") {
+				unitData = getUnitData.result.data?.unitData ?? [];
+				bfsData = getUnitData.result.data?.bfsData ?? [];
+				formationCount = getUnitData.result.data?.formationCount ?? 0;
+				scaCount = getUnitData.result.data?.scaCount ?? 0;
+				lockSelections = true;
+			} else {
+				toastController.addToast(getUnitData.result?.message ?? "Invalid message recieved");
+			}
+		})}
+	>
+		<div class="section">
+			<h2 class="tournament-select-header">
+				1. Select a tournament to autofill details and allow for submission to the Tournament Organizer, or skip this step if you just want to validate a list
+			</h2>
+			<a class="tournament-select-link" href="/todashboard">Click here to create or manage a tournament</a>
+			<label
+				>Tournament <span class="muted">(Optional)</span>:
+				<select bind:value={selectedTournament} disabled={lockSelections}>
+					<option value={undefined}>None</option>
+					{#each tournamentList as tournament}
+						<option value={tournament}>{tournament.name}</option>
 					{/each}
-				</tbody>
-			</table>
-			<p>{fixedUnits}</p>
-			<div class="space-between">
-				<h3>
-					Battlefield Support <span class="error">{bfsData.filter((b) => !b.available).length ? "(Not all BFS found, check the selected ruleset)" : ""}</span>
-				</h3>
-				<AddBFSDialog bind:bfsData {selectedRules} bind:addedBfs />
+				</select></label
+			>
+			<div class="tournament-details">
+				<p class="muted tournament-detail">Date:</p>
+				<p class="tournament-detail">
+					{selectedTournament?.tournament_date.toLocaleDateString("en-US", {
+						timeZone: "UTC",
+						weekday: "long",
+						month: "long",
+						day: "numeric",
+						year: "numeric"
+					}) ?? "-"}
+				</p>
+				<p class="muted tournament-detail">Location:</p>
+				<p class="tournament-detail">{selectedTournament?.location ?? "-"}</p>
+				<p class="muted tournament-detail">Era:</p>
+				<p class="tournament-detail">{selectedTournament ? (selectedTournament.era ? await getEraName(selectedTournament.era) : "Any Era") : "-"}</p>
+				<p class="muted tournament-detail">Rules:</p>
+				<p class="tournament-detail">{selectedTournament?.tournamentRules ? rulesDetails?.display : "-"}</p>
 			</div>
-			<div class="bfs-table">
-				<div class="bfs-row">
-					<p>Found</p>
-					<p>Name</p>
-					<p>Count</p>
-					<p>BSP (Total)</p>
-					<p>PV (Total)</p>
-					<div></div>
-				</div>
+		</div>
 
-				{#each bfsData as bfs, index}
-					{@const bfsFixed = fixedBfs.find((b) => b.fixed.id == bfs.id) != undefined}
-					{@const bfsAdded = addedBfs.find((b) => b.id == bfs.id) != undefined}
-					<div class="bfs-row">
-						<div>
-							{#if bfs?.available}
+		<div class="section">
+			<h2>2. Select an era, faction, and ruleset to check list validity. If you have chosen a tournament, some of these options may already be set and locked</h2>
+			<label>
+				Rules:
+				<select name="selectedRules" bind:value={selectedRules} required disabled={selectedTournament?.tournamentRules != undefined || lockSelections}>
+					{#each ruleSets as rules}
+						{#if !rules.archived}
+							<option value={rules.name}>{rules.display}</option>
+						{/if}
+					{/each}
+				</select>
+			</label>
+			<label>
+				Era:
+				<select bind:value={selectedEra} required disabled={selectedTournament?.era != undefined || lockSelections}>
+					{#each eraList.keys() as era}
+						<option value={era}>{eraNames.get(era)}</option>
+					{/each}
+				</select>
+				<input type="hidden" name="selectedEra" value={selectedEra} />
+			</label>
+			<label
+				>Faction:
+				<select name="selectedFaction" bind:value={selectedFaction} required disabled={lockSelections}>
+					{#each eraList.get(selectedEra)?.factions as faction}
+						<option value={faction.id}>{faction.name}</option>
+					{/each}
+				</select>
+			</label>
+			<div class="inline">
+				<input type="file" name="listFile" id="listFile" accept="application/pdf" required bind:files disabled={lockSelections} />
+			</div>
+			<div class="inline">
+				<button disabled={lockSelections}>Get Unit Data</button>
+			</div>
+		</div>
+		<input {...getUnitData.fields.rules.as("hidden", selectedRules)} />
+	</form>
+	<div class={{ section: true, "locked-section": unitData.length == 0 }}>
+		<h2 class="tournament-select-header">3. Review Unit Data (You shouldn't have to do anything here unless it misread any of the units from the uploaded pdf)</h2>
+		<div class="space-between">
+			<h3>Units</h3>
+			<AddUnitDialog bind:unitData bind:addedUnits bind:issues {selectedRules} {selectedEra} {selectedFaction} />
+		</div>
+		<table>
+			<thead>
+				<tr>
+					<th>Found</th>
+					{#each innerWidth.current! >= 600 ? ["Name", "Skill", "PV", "Rules", "Type", "Abilities", "Available", "Unique"] : ["Name", "Skill"] as header}
+						<th>{header}</th>
+					{/each}
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each unitData ?? [] as unit, index (unit.id)}
+					{@const unitFixed = fixedUnits.find((u) => u.original.id == unit.id) != undefined}
+					{@const unitAdded = addedUnits.find((u) => u.id == unit.id) != undefined}
+					<tr>
+						<td>
+							{#if unit.mulData}
 								<span class="center" style="color: green; font-weight: bold;">✔</span>
 							{:else}
 								<span class="center" style="color: red; font-weight: bold;">X</span>
 							{/if}
-						</div>
-						<p>
-							{bfs.name}
-							{#if bfsFixed}
-								<span class="warning"> (BFS modified)</span>
+						</td>
+						<td>
+							{#if unit.link}
+								<a href={unit.link} target="_blank">{unit.name}</a>
+							{:else}
+								{unit.name}
 							{/if}
-							{#if bfsAdded}
-								<span class="warning"> (BFS manually added)</span>
+							{#if unitFixed}
+								<span class="warning"> (Unit modified)</span>
 							{/if}
-						</p>
-						<p>{bfs.count}</p>
-						<p>{bfs.bsp ? `${bfs.bsp} (${bfs.bsp * bfs.count})` : "-"}</p>
-						<p>{bfs.pv ? `${bfs.pv} (${bfs.pv * bfs.count})` : "-"}</p>
-						<div><FixBFSDialog bind:bfsData bfsIndex={index} {selectedRules} bind:fixedBfs /></div>
-					</div>
-				{/each}
-			</div>
-		</div>
-
-		<div class={{ section: true, "locked-section": unfoundUnits > 0 || unitData.length == 0 }}>
-			<h2 class="no-margin">4. Check for any list issues</h2>
-			<div class="inline">
-				<button onclick={handleValidation} disabled={unfoundUnits > 0 || unitData.length == 0}>Validate</button>
-				{#if unfoundUnits > 0}
-					<p class="error">Fix all unfound units in the previous section to validate</p>
-				{/if}
-				{#if unitData.length == 0}
-					<p class="muted">Upload a file to validate list</p>
-				{/if}
-			</div>
-			<table>
-				<thead>
-					<tr>
-						<th>Issue</th>
-						<th>Problem Units</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#if issues == undefined}
-						<tr>
-							<td colspan="2">Validate list to show any potential issues</td>
-						</tr>
-					{:else if issues?.issueList.size}
-						{#each issues.issueList as [issue, units]}
-							<tr>
-								<td class="error">{issue}</td>
-								<td>{Array.from(units).join(", ")}</td>
-							</tr>
+							{#if unitAdded}
+								<span class="warning"> (Unit manually added)</span>
+							{/if}
+						</td>
+						{#each innerWidth.current! >= 600 ? [unit.skill, unit.pv, unit.mulData?.rulesLevel, unit.mulData?.subtype, createAbilityLineString(unit.mulData?.abilities ?? []), (unit.mulData?.mulId ?? 0) < 0 ? true : unit.available, unit.unique] : [unit.skill] as data}
+							<td>{data ?? "-"}</td>
 						{/each}
-					{:else}
-						<tr>
-							<td colspan="2">No list issues found! Use the following section if you are submitting your list for a tournament.</td>
-						</tr>
-					{/if}
-				</tbody>
-			</table>
+						<td>
+							<FixUnitDialog unitId={unit.id} bind:unitData bind:fixedUnits bind:issues {selectedRules} {selectedEra} {selectedFaction} {index} />
+						</td>
+					</tr>
+				{:else}
+					<tr>
+						<td colspan="10">Upload a file to display units</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+		<p>{fixedUnits}</p>
+		<div class="space-between">
+			<h3>
+				Battlefield Support <span class="error">{bfsData.filter((b) => !b.available).length ? "(Not all BFS found, check the selected ruleset)" : ""}</span>
+			</h3>
+			<AddBFSDialog bind:bfsData {selectedRules} bind:addedBfs />
 		</div>
+		<div class="bfs-table">
+			<div class="bfs-row">
+				<p>Found</p>
+				<p>Name</p>
+				<p>Count</p>
+				<p>BSP (Total)</p>
+				<p>PV (Total)</p>
+				<div></div>
+			</div>
 
-		<form
-			class={{ section: true, "locked-section": !selectedTournament || issues == undefined || issues?.issueList.size > 0 }}
-			enctype="multipart/form-data"
-			{...submitList.preflight(SubmitListSchema).enhance(async ({ submit }) => {
-				if (files) {
-					toastController.addToast("Submitting list. Please Wait..");
-					submitted = true;
-					await submit();
-					if (submitList.fields.allIssues()?.length) {
-						logError(JSON.stringify(submitList.fields.allIssues()?.map((i) => i.message)));
-						submitted = false;
-					}
-					toastController.addToast(submitList.result?.message ?? "Invalid Message Received");
-				}
-			})}
-		>
-			<h2>5. Submit your list to the T.O.</h2>
-
-			<label>Player Name: <input type="text" name="playerName" required disabled={issues == undefined || issues?.issueList.size > 0} /></label>
-			<label>Email address: <input type="email" name="playerEmail" required disabled={issues == undefined || issues?.issueList.size > 0} /></label>
-			{#if selectedTournament?.teams}
-				<label>Team Name (optional): <input {...submitList.fields.teamName.as("text")} /></label>
-			{:else}
-				<input {...submitList.fields.teamName.as("hidden", "")} />
-			{/if}
-			<label
-				><input type="checkbox" name="permission" bind:checked={submitApproval} required disabled={issues == undefined || issues?.issueList.size > 0} /> By submitting this list, you
-				acknowledge your email address and name will be provided to the tournament organizer. Any personal data stored Terminal.tools will be removed after the tournament has completed.</label
-			>
-			<button class="submit" disabled={!selectedTournament || !submitApproval || issues == undefined || issues?.issueList.size > 0 || submitted}>Submit</button>
-			<input type="file" name="listFile" bind:files class="hidden" aria-hidden="true" />
-			<input type="hidden" name="tournamentId" value={selectedTournament?.id} />
-			<input type="hidden" name="eraId" value={selectedEra} />
-			<input type="hidden" name="factionId" value={selectedFaction} />
-			{#each unitData as unit}
-				<input type="hidden" name="unit[]" value={JSON.stringify({ id: unit.mulData?.mulId, sk: unit.skill })} />
+			{#each bfsData as bfs, index}
+				{@const bfsFixed = fixedBfs.find((b) => b.fixed.id == bfs.id) != undefined}
+				{@const bfsAdded = addedBfs.find((b) => b.id == bfs.id) != undefined}
+				<div class="bfs-row">
+					<div>
+						{#if bfs?.available}
+							<span class="center" style="color: green; font-weight: bold;">✔</span>
+						{:else}
+							<span class="center" style="color: red; font-weight: bold;">X</span>
+						{/if}
+					</div>
+					<p>
+						{bfs.name}
+						{#if bfsFixed}
+							<span class="warning"> (BFS modified)</span>
+						{/if}
+						{#if bfsAdded}
+							<span class="warning"> (BFS manually added)</span>
+						{/if}
+					</p>
+					<p>{bfs.count}</p>
+					<p>{bfs.bsp ? `${bfs.bsp} (${bfs.bsp * bfs.count})` : "-"}</p>
+					<p>{bfs.pv ? `${bfs.pv} (${bfs.pv * bfs.count})` : "-"}</p>
+					<div><FixBFSDialog bind:bfsData bfsIndex={index} {selectedRules} bind:fixedBfs /></div>
+				</div>
 			{/each}
-			{#each addedUnits as unit}
-				<input type="hidden" name="addedUnits[]" value={JSON.stringify({ id: unit.mulData?.mulId, sk: unit.skill })} />
-			{/each}
-
-			{#each fixedUnits as unit}
-				<input
-					type="hidden"
-					name="fixedUnits[]"
-					value={JSON.stringify({
-						original: { id: unit.original.mulData?.mulId, sk: unit.original.skill },
-						fixed: { id: unit.fixed.mulData?.mulId, sk: unit.fixed.skill }
-					})}
-				/>
-			{/each}
-			{#each bfsData as bfs}
-				<input type="hidden" name="bfs[]" value={JSON.stringify({ id: bfs.id, count: bfs.count })} />
-			{/each}
-			{#each addedBfs as bfs}
-				<input type="hidden" name="addedBfs[]" value={JSON.stringify({ id: bfs.id, count: bfs.count })} />
-			{/each}
-			{#each fixedBfs as bfs}
-				<input
-					type="hidden"
-					name="fixedBfs[]"
-					value={JSON.stringify({ original: { id: bfs.original.id, count: bfs.original.count }, fixed: { id: bfs.fixed.id, count: bfs.fixed.count } })}
-				/>
-			{/each}
-			{#each submitList.fields.allIssues() as issue}
-				<p>{issue.message}</p>
-			{/each}
-		</form>
+		</div>
 	</div>
+
+	<div class={{ section: true, "locked-section": unfoundUnits > 0 || unitData.length == 0 }}>
+		<h2 class="no-margin">4. Check for any list issues</h2>
+		<div class="inline">
+			<button onclick={handleValidation} disabled={unfoundUnits > 0 || unitData.length == 0}>Validate</button>
+			{#if unfoundUnits > 0}
+				<p class="error">Fix all unfound units in the previous section to validate</p>
+			{/if}
+			{#if unitData.length == 0}
+				<p class="muted">Upload a file to validate list</p>
+			{/if}
+		</div>
+		<table>
+			<thead>
+				<tr>
+					<th>Issue</th>
+					<th>Problem Units</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#if issues == undefined}
+					<tr>
+						<td colspan="2">Validate list to show any potential issues</td>
+					</tr>
+				{:else if issues?.issueList.size}
+					{#each issues.issueList as [issue, units]}
+						<tr>
+							<td class="error">{issue}</td>
+							<td>{Array.from(units).join(", ")}</td>
+						</tr>
+					{/each}
+				{:else}
+					<tr>
+						<td colspan="2">No list issues found! Use the following section if you are submitting your list for a tournament.</td>
+					</tr>
+				{/if}
+			</tbody>
+		</table>
+	</div>
+
+	<form
+		class={{ section: true, "locked-section": !selectedTournament || issues == undefined || issues?.issueList.size > 0 }}
+		enctype="multipart/form-data"
+		{...submitList.preflight(SubmitListSchema).enhance(async ({ submit }) => {
+			if (files) {
+				toastController.addToast("Submitting list. Please Wait..");
+				submitted = true;
+				await submit();
+				if (submitList.fields.allIssues()?.length) {
+					logError(JSON.stringify(submitList.fields.allIssues()?.map((i) => i.message)));
+					submitted = false;
+				}
+				toastController.addToast(submitList.result?.message ?? "Invalid Message Received");
+			}
+		})}
+	>
+		<h2>5. Submit your list to the T.O.</h2>
+
+		<label>Player Name: <input type="text" name="playerName" required disabled={issues == undefined || issues?.issueList.size > 0} /></label>
+		<label>Email address: <input type="email" name="playerEmail" required disabled={issues == undefined || issues?.issueList.size > 0} /></label>
+		{#if selectedTournament?.teams}
+			<label>Team Name (optional): <input {...submitList.fields.teamName.as("text")} /></label>
+		{:else}
+			<input {...submitList.fields.teamName.as("hidden", "")} />
+		{/if}
+		<label
+			><input type="checkbox" name="permission" bind:checked={submitApproval} required disabled={issues == undefined || issues?.issueList.size > 0} /> By submitting this list, you acknowledge
+			your email address and name will be provided to the tournament organizer. Any personal data stored Terminal.tools will be removed after the tournament has completed.</label
+		>
+		<button class="submit" disabled={!selectedTournament || !submitApproval || issues == undefined || issues?.issueList.size > 0 || submitted}>Submit</button>
+		<input type="file" name="listFile" bind:files class="hidden" aria-hidden="true" />
+		<input type="hidden" name="tournamentId" value={selectedTournament?.id} />
+		<input type="hidden" name="eraId" value={selectedEra} />
+		<input type="hidden" name="factionId" value={selectedFaction} />
+		{#each unitData as unit}
+			<input type="hidden" name="unit[]" value={JSON.stringify({ id: unit.mulData?.mulId, sk: unit.skill })} />
+		{/each}
+		{#each addedUnits as unit}
+			<input type="hidden" name="addedUnits[]" value={JSON.stringify({ id: unit.mulData?.mulId, sk: unit.skill })} />
+		{/each}
+
+		{#each fixedUnits as unit}
+			<input
+				type="hidden"
+				name="fixedUnits[]"
+				value={JSON.stringify({
+					original: { id: unit.original.mulData?.mulId, sk: unit.original.skill },
+					fixed: { id: unit.fixed.mulData?.mulId, sk: unit.fixed.skill }
+				})}
+			/>
+		{/each}
+		{#each bfsData as bfs}
+			<input type="hidden" name="bfs[]" value={JSON.stringify({ id: bfs.id, count: bfs.count })} />
+		{/each}
+		{#each addedBfs as bfs}
+			<input type="hidden" name="addedBfs[]" value={JSON.stringify({ id: bfs.id, count: bfs.count })} />
+		{/each}
+		{#each fixedBfs as bfs}
+			<input
+				type="hidden"
+				name="fixedBfs[]"
+				value={JSON.stringify({ original: { id: bfs.original.id, count: bfs.original.count }, fixed: { id: bfs.fixed.id, count: bfs.fixed.count } })}
+			/>
+		{/each}
+		{#each submitList.fields.allIssues() as issue}
+			<p>{issue.message}</p>
+		{/each}
+	</form>
 </main>
 
 <style>
-	.contents {
+	main {
 		display: flex;
 		flex-direction: column;
-		gap: 4px;
+		gap: 16px;
 	}
 	.section {
 		background-color: var(--surface-color);
@@ -420,10 +419,12 @@
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
-		margin-top: 16px;
 	}
-	h2.tournament-select-header {
+	.section h2.tournament-select-header {
 		margin-bottom: 0px;
+	}
+	form .section:not(:nth-of-type(1)) {
+		margin-top: 16px;
 	}
 
 	.tournament-select-link {

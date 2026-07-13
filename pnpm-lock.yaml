@@ -2044,6 +2044,7 @@ packages:
 
   glob@10.5.0:
     resolution: {integrity: sha512-DfXN8DfhJ7NH3Oe7cFmu3NCu1wKbkReJ8TorzSAFbSKrlNaQSKfIzqYqVY8zlbs2NLBbWpRiU52GX2PbaBVNkg==}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   globals@14.0.0:
@@ -2817,7 +2818,7 @@ packages:
     resolution: {integrity: sha512-CWcIK3Df7FEJGuF0BKIvMEdQFVT7YH1xgNT8g/MlNKcBwGx4TkX+tsSpQXzFvAagiYX4UhtS4ve1F9UswWB+xA==}
 
   svelty-email@https://codeload.github.com/socketopp/svelty-email/tar.gz/9f341077e8f2ed0c41b828c1ab52e69c16fd80cf:
-    resolution: {tarball: https://codeload.github.com/socketopp/svelty-email/tar.gz/9f341077e8f2ed0c41b828c1ab52e69c16fd80cf}
+    resolution: {gitHosted: true, tarball: https://codeload.github.com/socketopp/svelty-email/tar.gz/9f341077e8f2ed0c41b828c1ab52e69c16fd80cf}
     version: 0.0.10
     peerDependencies:
       '@sveltejs/kit': ^1.5.0 || ^2.0.0

@@ -1,7 +1,6 @@
 import type { MulUnit } from "$lib/types/listTypes";
 import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 import { type TournamentStatistics } from "./types";
-import { getMULDataFromId } from "$lib/remote/unit.remote";
 import { getMULDataFromIdLocal } from "$lib/local/sqllite/local-db";
 
 export async function calculateTournamentStatistics(participants: { name: string; units: string; era: string; faction: string }[]): Promise<TournamentStatistics> {
@@ -12,6 +11,7 @@ export async function calculateTournamentStatistics(participants: { name: string
 		let listPV = 0;
 		for (const unit of unitIds) {
 			let tempId = unit.id;
+			if (tempId < 0) continue;
 			const data = await getMULDataFromIdLocal(tempId);
 			const cost = getNewSkillCost(unit.sk, data?.pv ?? 0);
 			unitData.push({ player: participant.name, data: data!, skill: unit.sk, pv: cost });

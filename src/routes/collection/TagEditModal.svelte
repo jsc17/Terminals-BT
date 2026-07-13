@@ -25,10 +25,10 @@
 
 	<div class="edit-tags-body">
 		<form
-			{...addTag.enhance(async ({ form, submit }) => {
+			{...addTag.enhance(async ({ element, submit }) => {
 				try {
 					await submit();
-					form.reset();
+					element.reset();
 					toastController.addToast(addTag.result?.message ?? "Invalid Message recieved");
 				} catch (error) {
 					console.log(error);

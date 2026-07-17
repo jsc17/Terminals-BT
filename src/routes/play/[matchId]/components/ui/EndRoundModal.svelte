@@ -11,8 +11,6 @@
 	};
 
 	let { matchData, teams, open = $bindable() }: Props = $props();
-
-	endRound.fields.teamScores.set(teams.map(() => 0));
 </script>
 
 <Dialog title="End Round {matchData.currentRound}" bind:open triggerClasses="transparent-button">
@@ -38,6 +36,7 @@
 						<th>Team</th>
 						<th>Current Score</th>
 						<th>Points Gained</th>
+						<th>New Score</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -45,7 +44,12 @@
 						<tr>
 							<td>{team.name}</td>
 							<td>{team.objectivePoints}</td>
-							<td><input {...endRound.fields.teamScores[index].as("number")} /></td>
+							<td>
+								<button type="button" onclick={() => endRound.fields.teamScores[index].set((endRound.fields.teamScores[index].value() ?? 0) - 1)}>-</button>
+								<input style="width: 50px;text-align: center" {...endRound.fields.teamScores[index].as("number", 0)} />
+								<button type="button" onclick={() => endRound.fields.teamScores[index].set((endRound.fields.teamScores[index].value() ?? 0) + 1)}>+</button></td
+							>
+							<td>{team.objectivePoints + (endRound.fields.teamScores[index].value() ?? 0)}</td>
 						</tr>
 					{/each}
 				</tbody>
@@ -67,7 +71,7 @@
 	}
 	th,
 	td {
-		padding: 4px 8px;
+		padding: var(--responsive-padding);
 	}
 	td {
 		border: 1px solid var(--table-border);

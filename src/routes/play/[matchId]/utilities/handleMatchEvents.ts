@@ -89,6 +89,8 @@ export function processMessage(
 			matchUnits.forEach((u) => {
 				handleUnitUpdate(u.data.id, matchUnits);
 			});
+			toastController.addToast(`Host has ended the round. It is now round ${update.round}`);
+
 			break;
 		case "MATCH_UPDATE":
 			getMatchDetails(update.matchId).refresh();

@@ -51,7 +51,7 @@ button {
 		0px -3px 0px var(--button-dark) inset,
 		0px 4px 5px -3px var(--button-dark); */
 }
-button:hover {
+button:hover:not(:disabled) {
 	cursor: pointer;
 }
 

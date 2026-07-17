@@ -9,7 +9,7 @@
 	type Props = {
 		options: PlaymodeOptionsOutput;
 		username?: string;
-		myData?: { playerNickname: string; id: number };
+		myData?: { playerNickname: string; id: number; joined: boolean };
 		componentsOpen: { join: boolean; addList: boolean };
 		matchLists: PlayList[];
 	};
@@ -78,6 +78,7 @@
 
 		if (!username) options.push({ type: "info", label: `Please login to join match` });
 		if (!myData) options.push({ type: "item", label: "Join Match", onSelect: () => (componentsOpen.join = true) });
+		else if (myData && !myData.joined) options.push({ type: "info", label: `Waiting for host to approve match join` });
 		else
 			options = options.concat([
 				{ type: "info", label: `Joined match as ${myData.playerNickname}` },

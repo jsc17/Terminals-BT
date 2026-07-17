@@ -1,0 +1,14 @@
+/*
+  Warnings:
+
+  - You are about to drop the column `joinCode` on the `Match` table. All the data in the column will be lost.
+
+*/
+-- AlterTable
+ALTER TABLE `Match` DROP COLUMN `joinCode`;
+
+-- AlterTable
+ALTER TABLE `MatchLog` MODIFY `type` ENUM('MATCH_CREATED', 'MATCH_START', 'MATCH_UPDATE', 'MATCH_END', 'MATCH_DELETE', 'MATCH_RESET', 'MATCH_PAUSED', 'MATCH_RESUMED', 'PLAYER_JOIN_REQUEST', 'PLAYER_JOIN_DENIED', 'PLAYER_JOINED', 'PLAYER_ADDED_LIST', 'PLAYER_LEFT', 'REMOVE_PLAYER', 'REMOVE_LIST', 'ROUND_END', 'UNIT_DAMAGE', 'UNIT_DAMAGE_REMOVED', 'UNIT_HEAT', 'UNIT_CRIT', 'UNIT_CRIT_REMOVED', 'HEARTBEAT', 'BFS_USED', 'BFS_RESTORED') NOT NULL;
+
+-- AlterTable
+ALTER TABLE `UsersInMatch` ADD COLUMN `joined` BOOLEAN NOT NULL DEFAULT true;

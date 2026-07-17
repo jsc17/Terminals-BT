@@ -2,7 +2,6 @@ model Match {
     id String @id 
     name String?
     private Boolean
-    joinCode String? 
     players UsersInMatch[]
     createdAt DateTime @default(now())
     logEntries MatchLog[]
@@ -29,6 +28,7 @@ model UsersInMatch {
     team MatchTeam? @relation(references: [id], fields: [teamId], onDelete: Cascade)
     teamId Int?
     logs MatchLog[]
+    joined Boolean @default(true)
     
     @@unique([matchId, playerId], name: "match_player")
 }
@@ -127,6 +127,8 @@ enum LogType {
     MATCH_RESET
     MATCH_PAUSED
     MATCH_RESUMED
+    PLAYER_JOIN_REQUEST
+    PLAYER_JOIN_DENIED
     PLAYER_JOINED
     PLAYER_ADDED_LIST
     PLAYER_LEFT

@@ -13,6 +13,7 @@
 	import { numberToRomanNumeral } from "$lib/utilities/utilities";
 	import type { PlaymodeOptionsOutput } from "../../../schema/playmode";
 	import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
+	import { getJoinedContext } from "$routes/listbuilder/utilities/context";
 
 	type Props = {
 		unit: PlayUnit;
@@ -23,6 +24,7 @@
 	let { unit, options, assignedBonuses }: Props = $props();
 
 	const { data, reference, image } = $derived(unit);
+	let joined = getJoinedContext();
 
 	let openDamageModal = $state(false),
 		openHeatModal = $state(false),
@@ -199,7 +201,7 @@
 					{/if}
 				</div>
 				{#if typeIncludes([...mechTypes, ...aeroTypes], reference)}
-					<button onclick={handleHeat} class="unit-card-block unit-heat-block">
+					<button onclick={handleHeat} class="unit-card-block unit-heat-block" disabled={joined.joined != true}>
 						<div class="flex-4">
 							<p>OV: <span class="bold">{reference.overheat}</span></p>
 						</div>
@@ -240,7 +242,7 @@
 						</div>
 					</button>
 				{/if}
-				<button class="unit-card-block unit-health-block" class:aero-health-block={typeIncludes([...aeroTypes], reference)} onclick={handleDamage}>
+				<button class="unit-card-block unit-health-block" class:aero-health-block={typeIncludes([...aeroTypes], reference)} onclick={handleDamage} disabled={joined.joined != true}>
 					<p>A ({armorRemaining.pending}/{reference?.armor}):</p>
 					<div class="health-pips">
 						{#each { length: reference?.armor ?? 0 }, index}
@@ -311,7 +313,7 @@
 					{/if}
 				</div>
 				{#if !typeIncludes([...infTypes], reference)}
-					<button onclick={handleCrit} class="unit-card-block">
+					<button onclick={handleCrit} class="unit-card-block" disabled={joined.joined != true}>
 						{#if typeIncludes([...mechTypes], reference)}
 							<CritBoxMech unit={data} {critCount}></CritBoxMech>
 						{:else if typeIncludes([...aeroTypes], reference)}

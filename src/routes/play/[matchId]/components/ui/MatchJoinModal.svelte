@@ -5,7 +5,6 @@
 
 	type Props = {
 		open: boolean;
-		joinCode: string;
 		matchId: string;
 		teams: { id: number; name: string }[];
 		host: boolean;
@@ -27,9 +26,6 @@
 	>
 		<input {...joinMatch.fields.matchId.as("hidden", matchId)} />
 		<label>Nickname: <input {...joinMatch.fields.nickname.as("text")} /></label>
-		{#if !host}
-			<label>Join Code:<input {...joinMatch.fields.joinCode.as("text")} /></label>
-		{/if}
 		<label>
 			Team:
 			<select {...joinMatch.fields.teamId.as("select")}>

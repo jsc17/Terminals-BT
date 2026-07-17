@@ -4,9 +4,10 @@ import { getPlayerData, getMatchUnitData, getMatchDetails, getTeamData, getMyDat
 import type { PlayBFS, PlayFormation, PlayList, PlayUnit, PlayUnitData } from "../../types/types";
 import { SvelteMap } from "svelte/reactivity";
 import { getMulImage } from "$lib/remote/mulImages.remote";
-import type { MatchCrit, MatchFormation, MatchLog, MatchUnit, UsersInMatch, MatchList, MatchBFS } from "$lib/generated/prisma/browser";
+import type { MatchCrit, MatchFormation, MatchLog, MatchUnit, UsersInMatch, MatchList, MatchBFS, PlayerRole } from "$lib/generated/prisma/browser";
 import { goto } from "$app/navigation";
 import { getMULDataFromIdLocal } from "$lib/local/sqllite/local-db";
+import { confirmPlayerJoin, declinePlayerJoin } from "../remote/matchPlayer.remote";
 
 export function processMessage(
 	message: string,
@@ -14,7 +15,9 @@ export function processMessage(
 	matchUnits: SvelteMap<number, PlayUnit>,
 	matchBFS: SvelteMap<number, PlayBFS>,
 	matchLogs: MatchLog[],
-	matchLists: PlayList[]
+	matchLists: PlayList[],
+	autodecline: boolean,
+	myData?: { id: number; role: PlayerRole }
 ) {
 	const update: MatchLog = JSON.parse(message, (key, value) => (key == "updated_at" ? new Date(value) : value));
 
@@ -22,7 +25,7 @@ export function processMessage(
 		const lastLogId = matchLogs.at(-1)!.id;
 		if (update.id > lastLogId) {
 			getLogs({ matchId: update.matchId, lastLogId: lastLogId }).then((r) => {
-				for (const log of r) processMessage(JSON.stringify(log), playerList, matchUnits, matchBFS, matchLogs, matchLists);
+				for (const log of r) processMessage(JSON.stringify(log), playerList, matchUnits, matchBFS, matchLogs, matchLists, autodecline, myData);
 			});
 		}
 		return;
@@ -30,7 +33,26 @@ export function processMessage(
 
 	matchLogs.push(update);
 	switch (update.type) {
+		case "PLAYER_JOIN_REQUEST":
+			const { nickname, id } = JSON.parse(update.details as string);
+			if (myData?.role == "HOST" || myData?.role == "MODERATOR") {
+				if (!autodecline && confirm(`${nickname} is attempting to join the match as a player. Allow them to join?`)) confirmPlayerJoin({ matchId: update.matchId, playerId: id });
+				else declinePlayerJoin({ matchId: update.matchId, playerId: id });
+			}
+			break;
+		case "PLAYER_JOIN_DENIED":
+			const playerId = Number(update.details);
+			if (myData?.id == playerId) {
+				toastController.addToast("Host has declined your request to join the match", 30000);
+				getMyData(update.matchId).refresh();
+			}
+			break;
 		case "PLAYER_JOINED":
+			if (update.submitterId == myData?.id) {
+				toastController.addToast("Host has approved your request to join the match", 30000);
+				getMyData(update.matchId).refresh();
+			}
+
 			getPlayerData({ playerId: update.submitterId }).then((r) => {
 				if (r) playerList.push({ id: r.id, team: r.teamId ?? undefined, nickname: r.playerNickname, role: r.playerRole });
 			});

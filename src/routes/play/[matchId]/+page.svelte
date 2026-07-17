@@ -19,6 +19,7 @@
 	import type { PageProps } from "./$types";
 	import RoundTimer from "./components/ui/RoundTimer.svelte";
 	import PlayBFSDialog from "./components/PlayBFSDialog.svelte";
+	import { setJoinedContext } from "$routes/listbuilder/utilities/context";
 
 	let { params, data }: PageProps = $props();
 
@@ -26,6 +27,8 @@
 
 	// svelte-ignore state_referenced_locally
 	setContext("matchId", matchId);
+	let joined = $state<{ joined?: boolean }>({ joined: undefined });
+	setJoinedContext(joined);
 
 	const options = new PersistedState<PlaymodeOptionsOutput>("playOptions", v.parse(PlaymodeOptionsSchema, {}), {
 		serializer: {
@@ -44,6 +47,10 @@
 	const myData = $derived(await getMyData(matchId));
 	const teamData = $derived(await getTeamData(matchId));
 
+	$effect(() => {
+		joined.joined = myData?.joined;
+	});
+
 	// svelte-ignore state_referenced_locally
 	getAllPlayerData(matchId).then((results) => {
 		results.forEach(async (r) => {
@@ -55,6 +62,7 @@
 	getLogs({ matchId, lastLogId: 0 }).then((results) => (matchLogs = matchLogs.concat(results)));
 
 	const componentsOpen = $state({ join: false, addList: false, management: false, matchLog: false, matchResults: false, matchOverAlert: false, endRound: false });
+	let autodecline = $state(false);
 
 	let listContainer = $state<HTMLDivElement>();
 	let activeList = $state<number>();
@@ -62,7 +70,8 @@
 
 	onMount(() => {
 		const es = new EventSource(`/play/${matchId}/stream`);
-		es.onmessage = ({ data }) => processMessage(data, matchPlayers, matchUnits, matchBFS, matchLogs, matchLists);
+		es.onmessage = ({ data }) =>
+			processMessage(data, matchPlayers, matchUnits, matchBFS, matchLogs, matchLists, autodecline, myData ? { id: myData.id, role: myData.playerRole } : undefined);
 
 		observer = new IntersectionObserver(
 			(entries) => {
@@ -129,7 +138,7 @@
 			{/if}
 			<div class="toolbar-section" style="justify-self: end;">
 				{#if myData?.playerRole == "HOST"}
-					<MenuHost {matchData} {componentsOpen} />
+					<MenuHost {matchData} {componentsOpen} bind:autodecline />
 				{/if}
 			</div>
 		</div>
@@ -166,14 +175,13 @@
 
 <MatchJoinModal
 	bind:open={componentsOpen.join}
-	joinCode={matchData?.joinCode ?? ""}
 	matchId={matchData?.id.toString() ?? ""}
 	teams={teamData.map((t) => ({ id: t.id, name: t.name }))}
 	host={myData?.playerRole == "HOST"}
 />
 
 <LoadListModal bind:open={componentsOpen.addList} matchId={matchData?.id.toString() ?? ""} teams={teamData.map((t) => ({ id: t.id, name: t.name }))} />
-<MatchManagementModal bind:open={componentsOpen.management} {matchData} {teamData} {matchLists} />
+<MatchManagementModal bind:open={componentsOpen.management} {matchData} {teamData} {matchLists} {matchPlayers} />
 <EndRoundModal matchData={matchData!} teams={teamData} bind:open={componentsOpen.endRound} />
 <MatchResults bind:open={componentsOpen.matchResults} {teamData} {matchData} {matchLists} {matchUnits} />
 

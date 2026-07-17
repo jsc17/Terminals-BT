@@ -1,9 +1,6 @@
-import { query, command, getRequestEvent, form } from "$app/server";
+import { command, getRequestEvent, form } from "$app/server";
 import * as v from "valibot";
 import { prisma } from "$lib/server/prisma";
-import type { MatchUnit, MatchCrit, UsersInMatch } from "$lib/generated/prisma/browser";
-import { UpdateMatchSchema } from "../../schema/matchlistSchema";
-import { nothing } from "$lib/remote/utilities.remote";
 import { invalid } from "@sveltejs/kit";
 import { getMyData } from "./matchData.remote";
 
@@ -14,7 +11,6 @@ export const joinMatch = form(
 			v.transform((input) => Number(input))
 		),
 		matchId: v.string(),
-		joinCode: v.optional(v.string()),
 		nickname: v.string()
 	}),
 	async (data, issue) => {
@@ -26,7 +22,6 @@ export const joinMatch = form(
 		const match = await prisma.match.findUnique({ where: { id: data.matchId }, include: { players: true } });
 
 		if (!match) throw invalid(issue.matchId("Invalid Match Id"));
-		if (!data.joinCode || data.joinCode != match!.joinCode) throw invalid(issue.joinCode("Invalid join code for this match"));
 
 		let newPlayer = await prisma.usersInMatch.create({
 			data: {
@@ -34,18 +29,18 @@ export const joinMatch = form(
 				player: { connect: { id: locals.user.id } },
 				playerNickname: data.nickname,
 				playerRole: "PLAYER",
-				team: { connect: { id: data.teamId } }
+				team: { connect: { id: data.teamId } },
+				joined: false
 			}
 		});
 
-		if (newPlayer == null) console.log("");
-
 		await prisma.matchLog.create({
 			data: {
-				type: "PLAYER_JOINED",
+				type: "PLAYER_JOIN_REQUEST",
 				round: match?.currentRound ?? 0,
 				match: { connect: { id: data.matchId } },
-				submitter: { connect: { id: newPlayer?.id } }
+				submitter: { connect: { id: newPlayer?.id } },
+				details: JSON.stringify({ nickname: data.nickname, id: newPlayer.id })
 			}
 		});
 
@@ -54,6 +49,41 @@ export const joinMatch = form(
 		return "Success";
 	}
 );
+
+export const confirmPlayerJoin = command(v.object({ matchId: v.string(), playerId: v.number() }), async ({ matchId, playerId }) => {
+	const match = await prisma.match.findUnique({ where: { id: matchId }, include: { players: true } });
+	if (!match) return;
+
+	await prisma.usersInMatch.update({ where: { id: playerId }, data: { joined: true } });
+
+	await prisma.matchLog.create({
+		data: {
+			type: "PLAYER_JOINED",
+			round: match?.currentRound ?? 0,
+			match: { connect: { id: matchId } },
+			submitter: { connect: { id: playerId } }
+		}
+	});
+});
+
+export const declinePlayerJoin = command(v.object({ matchId: v.string(), playerId: v.number() }), async ({ matchId, playerId }) => {
+	const match = await prisma.match.findUnique({ where: { id: matchId }, include: { players: true } });
+	if (!match) return;
+	console.log(match);
+
+	console.log("declined");
+	await prisma.usersInMatch.delete({ where: { id: playerId } });
+
+	await prisma.matchLog.create({
+		data: {
+			type: "PLAYER_JOIN_DENIED",
+			round: match?.currentRound ?? 0,
+			match: { connect: { id: matchId } },
+			submitter: { connect: { id: match.players.find((p) => p.playerRole == "HOST")!.id } },
+			details: playerId
+		}
+	});
+});
 
 export const loadList = form(
 	v.object({

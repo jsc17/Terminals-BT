@@ -9,9 +9,10 @@
 	type Props = {
 		matchData?: Match;
 		componentsOpen: { addList: boolean; management: boolean; matchLog: boolean; matchResults: boolean; matchOverAlert: boolean; endRound: boolean };
+		autodecline: boolean;
 	};
 
-	let { matchData, componentsOpen }: Props = $props();
+	let { matchData, componentsOpen, autodecline = $bindable() }: Props = $props();
 
 	const menuOptions: MenuItem[] = $derived([
 		{
@@ -51,9 +52,17 @@
 				if (confirm("Reset match? This will remove all damage and criticals, and set the round and scores to zero")) resetMatch(matchData!.id);
 			}
 		},
+		{
+			type: "check",
+			label: "Auto-decline attempts to join match",
+			checked: autodecline,
+			onCheckedChange: (v) => {
+				autodecline = v;
+			}
+		},
 		{ type: "separator" },
 		{ type: "hiddenInfo", label: `Match Id`, hidden: `${matchData!.id}` },
-		{ type: "hiddenInfo", label: `Join Code`, hidden: `${matchData!?.joinCode}` }
+		{ type: "info", label: "Join code no longer required. Host will now approve player joining" }
 	]);
 </script>
 

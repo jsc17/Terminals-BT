@@ -10,16 +10,16 @@
 		matchData?: Match;
 		teamData: MatchTeam[];
 		matchLists: PlayList[];
+		matchPlayers: { id: number; team?: number; nickname: string; role: string }[];
 	};
 
-	let { open = $bindable(), matchData, teamData, matchLists }: Props = $props();
+	let { open = $bindable(), matchData, teamData, matchLists, matchPlayers }: Props = $props();
 
 	$effect(() => {
 		if (open && matchData) {
 			updateMatchData.fields.set({
 				matchId: matchData.id.toString(),
 				name: matchData.name ?? "",
-				joinCode: matchData.joinCode ?? "",
 				currentRound: matchData.currentRound,
 				privateMatch: matchData.private,
 				teamNames: teamData.map((t) => t.name),
@@ -45,7 +45,6 @@
 		<fieldset>
 			<legend>Match Details</legend>
 			<label for="matchName">Match Name: </label><input {...updateMatchData.fields.name.as("text")} id="matchName" />
-			<label for="joinCode">Join Code: </label><input {...updateMatchData.fields.joinCode.as("text")} id="joinCode" />
 			<label for="currentRound">Current Round: </label><input {...updateMatchData.fields.currentRound.as("number")} id="currentRound" />
 			<label><input {...updateMatchData.fields.privateMatch.as("checkbox")} /> Private Match</label>
 		</fieldset>
@@ -62,8 +61,26 @@
 	<table>
 		<thead>
 			<tr>
+				<th>Player</th>
+				<th>Role</th>
+			</tr>
+		</thead>
+		<tbody>
+			{#each matchPlayers as player}
+				<tr>
+					<td>{player.nickname}</td>
+					<td>{player.role}</td>
+					<td><button class="transparent-button" onclick={() => kickPlayer({ matchId: matchData!.id, playerId: player.id })}>Kick</button></td>
+				</tr>
+			{/each}
+		</tbody>
+	</table>
+	<table>
+		<thead>
+			<tr>
 				<th>List</th>
 				<th>Team</th>
+				<th>Owner</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -71,6 +88,7 @@
 				<tr>
 					<td>{list.name}</td>
 					<td>{teamData.find((t) => t.id == list.team)?.name}</td>
+					<td>{matchPlayers.find((p) => p.id == list.owner)?.nickname}</td>
 					<td><button class="transparent-button" onclick={() => removeList({ matchId: matchData!.id, listId: Number(list.id) })}>Remove</button></td>
 				</tr>
 			{/each}

@@ -37,7 +37,7 @@
 		</DropdownMenu.Sub>
 	{:else if item.type == "check"}
 		<DropdownMenu.CheckboxItem
-			class="inline"
+			class="inline center"
 			bind:checked={item.checked}
 			onCheckedChange={item.onCheckedChange}
 			closeOnSelect={item.closeOnSelect ?? false}

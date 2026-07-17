@@ -3,6 +3,7 @@
 	import { abilityReferences } from "$lib/data";
 	import type { UnitAbility } from "$lib/data/abilities";
 	import type { PlayUnitData } from "../../../types/types";
+	import { getJoinedContext } from "$routes/listbuilder/utilities/context";
 
 	type Props = {
 		ability?: UnitAbility;
@@ -11,6 +12,7 @@
 	};
 
 	let { ability, open = $bindable(false), unit }: Props = $props();
+	let joined = getJoinedContext();
 
 	let abilityDetails = $derived(abilityReferences.find((reference) => reference.abbr == ability?.name));
 
@@ -27,10 +29,12 @@
 <Dialog bind:open title={ability?.name ?? "No ability selected"}>
 	<div class="special-dialog-body">
 		<p class="ability-reference">{abilityDetails?.name} (<span class="italic">{abilityDetails?.page}</span>)</p>
-		<div class="row">
-			<button class="disable-ability-button" onclick={disableAbility}>{disabledIndex == -1 ? `Disable Ability` : `Enable Ability`}</button>
-			<p class="muted">Disables abilities that have been used. (Ex. C3 Emergency Master that has been used and burnt out)</p>
-		</div>
+		{#if joined.joined == true}
+			<div class="row">
+				<button class="disable-ability-button" onclick={disableAbility}>{disabledIndex == -1 ? `Disable Ability` : `Enable Ability`}</button>
+				<p class="muted">Disables abilities that have been used. (Ex. C3 Emergency Master that has been used and burnt out)</p>
+			</div>
+		{/if}
 	</div>
 </Dialog>
 

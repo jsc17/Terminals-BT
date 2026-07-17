@@ -8,6 +8,7 @@ export const takeDamage = command(RemoteDamageSchema, async ({ matchId, unitId, 
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
 
 	const match = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { player: { id: locals.user.id } } } } });
+	if (!match || !match.players.length) return { status: "failure", message: "Match does not exist, or user is not a player" };
 
 	const data = pending ? { pendingDamage: { increment: damage } } : { currentDamage: { increment: damage } };
 	await prisma.matchUnit.update({ where: { id: unitId }, data });
@@ -29,6 +30,7 @@ export const removeDamage = command(RemoteDamageSchema, async ({ matchId, unitId
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
 	const match = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { player: { id: locals.user.id } } } } });
+	if (!match || !match.players.length) return { status: "failure", message: "Match does not exist, or user is not a player" };
 
 	const data = pending ? { pendingDamage: { decrement: damage } } : { currentDamage: { decrement: damage } };
 	await prisma.matchUnit.update({ where: { id: unitId }, data });
@@ -52,6 +54,7 @@ export const setHeat = command(
 		const { locals } = getRequestEvent();
 		if (!locals.user) return { status: "failure", message: "User is not logged in" };
 		const match = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { player: { id: locals.user.id } } } } });
+		if (!match || !match.players.length) return { status: "failure", message: "Match does not exist, or user is not a player" };
 
 		await prisma.matchUnit.update({
 			where: { id: unitId },
@@ -78,6 +81,7 @@ export const takeCritical = command(
 		const { locals } = getRequestEvent();
 		if (!locals.user) return { status: "failure", message: "User is not logged in" };
 		const match = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { player: { id: locals.user.id } } } } });
+		if (!match || !match.players.length) return { status: "failure", message: "Match does not exist, or user is not a player" };
 
 		const currentround = (await prisma.match.findUnique({ where: { id: matchId }, select: { currentRound: true } }))?.currentRound;
 		const result = await prisma.matchCrit.create({
@@ -102,6 +106,7 @@ export const removeCritical = command(v.object({ matchId: v.string(), critId: v.
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
 
 	const match = await prisma.match.findUnique({ where: { id: matchId }, include: { players: { where: { player: { id: locals.user.id } } } } });
+	if (!match || !match.players.length) return { status: "failure", message: "Match does not exist, or user is not a player" };
 
 	const result = await prisma.matchCrit.delete({ where: { id: critId } });
 	await prisma.matchLog.create({

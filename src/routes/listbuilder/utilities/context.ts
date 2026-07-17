@@ -5,3 +5,5 @@ type newListDialogContext = {
 };
 
 export const [getNewListDialogContext, setNewListDialogContext] = createContext<newListDialogContext>();
+
+export const [getJoinedContext, setJoinedContext] = createContext<{ joined?: boolean }>();

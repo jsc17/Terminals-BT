@@ -77,8 +77,7 @@ export const endRound = form(
 		await nothing().refresh();
 	}
 );
-
-export const updateMatchData = form(UpdateMatchSchema, async ({ matchId, name, joinCode, teamNames, teamScores, currentRound, privateMatch }) => {
+export const updateMatchData = form(UpdateMatchSchema, async ({ matchId, name, teamNames, teamScores, currentRound, privateMatch }) => {
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
 
@@ -88,7 +87,6 @@ export const updateMatchData = form(UpdateMatchSchema, async ({ matchId, name, j
 			where: { id: matchId },
 			data: {
 				name,
-				joinCode,
 				currentRound,
 				private: privateMatch,
 				logEntries: { create: { round: matchData.currentRound, type: "MATCH_UPDATE", submitter: { connect: { id: matchData.players[0].id } } } }

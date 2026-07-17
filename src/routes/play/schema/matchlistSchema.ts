@@ -1,8 +1,7 @@
 import * as v from "valibot";
 
 export const CreateMatchSchema = v.object({
-	private: v.optional(v.boolean(), true),
-	joinCode: v.pipe(v.string(), v.minLength(3, "The match join code must be at least 3 characters")),
+	private: v.optional(v.boolean(), false),
 	name: v.pipe(v.string(), v.minLength(3, "The match name must be at least 3 characters")),
 	hostNickname: v.pipe(v.string(), v.nonEmpty("Your nickname must include at least one character")),
 	teamNames: v.optional(v.array(v.string()), ["Red", "Blue"]),
@@ -54,7 +53,6 @@ export const NicknameSchema = v.object({ nickname: v.pipe(v.string(), v.minLengt
 export const UpdateMatchSchema = v.object({
 	matchId: v.string(),
 	name: v.string(),
-	joinCode: v.string(),
 	teamNames: v.array(v.string()),
 	teamScores: v.array(v.number()),
 	currentRound: v.number(),
@@ -67,7 +65,6 @@ export const FindPrivateMatchSchema = v.object({
 
 export const JoinPrivateMatchWithListSchema = v.object({
 	matchId: v.string(),
-	joinCode: v.string(),
 	teamId: v.pipe(
 		v.string(),
 		v.transform((input) => Number(input))

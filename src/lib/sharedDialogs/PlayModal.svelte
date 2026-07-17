@@ -65,7 +65,6 @@
 		}
 
 		createMatchWithList.fields.set({
-			joinCode: nanoid(6).replaceAll("_", "Z"),
 			private: true,
 			name: formation ? formation.name : list.details.name,
 			hostNickname: nickname,
@@ -108,13 +107,6 @@
 				<div>
 					<label>Match Name: <input {...createMatchWithList.fields.name.as("text")} /></label>
 					{#each createMatchWithList.fields.name.issues() as issue}
-						<p class="error">{issue.message}</p>
-					{/each}
-				</div>
-				<div>
-					<label>Join Code: <input {...createMatchWithList.fields.joinCode.as("text")} /></label>
-					<p class="muted">Players will use this code to join the match and load lists</p>
-					{#each createMatchWithList.fields.joinCode.issues() as issue}
 						<p class="error">{issue.message}</p>
 					{/each}
 				</div>
@@ -172,7 +164,6 @@
 					}
 				})}
 			>
-				<label>Join Code: <input {...joinPrivateMatchWithList.fields.joinCode.as("text")} disabled={!findPrivateMatch.result} /></label>
 				<label
 					>Team: <select {...joinPrivateMatchWithList.fields.teamId.as("select")} disabled={!findPrivateMatch.result}>
 						{#each findPrivateMatch.result?.data?.teams as team}

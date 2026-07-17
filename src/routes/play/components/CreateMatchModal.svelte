@@ -11,16 +11,10 @@
 
 	let { nickname }: Props = $props();
 
-	function onOpenChange() {
-		if (open) {
-			createMatch.fields.set({ joinCode: nanoid(6).replaceAll("_", "Z"), private: true, name: "", hostNickname: nickname, teamNames: ["Red", "Blue"] });
-		}
-	}
-
 	let open = $state(false);
 </script>
 
-<Dialog title="Create Match" triggerClasses="create-match-trigger" bind:open {onOpenChange}>
+<Dialog title="Create Match" triggerClasses="create-match-trigger" bind:open>
 	{#snippet trigger()}
 		Create Match
 	{/snippet}
@@ -42,18 +36,12 @@
 			{/each}
 		</div>
 		<div>
-			<label>Join Code: <input {...createMatch.fields.joinCode.as("text")} /></label>
-			{#each createMatch.fields.joinCode.issues() as issue}
-				<p class="error">{issue.message}</p>
-			{/each}
-		</div>
-		<div>
-			<label><input {...createMatch.fields.private.as("checkbox")} /> Private Game?</label>
+			<label><input {...createMatch.fields.private.as("checkbox", true)} /> Private Game?</label>
 			<p class="muted">Private games will not show up in the games list, and will require a join code for other players to join</p>
 		</div>
 		<div>
-			<label>Team 1 Name: <input {...createMatch.fields.teamNames[0].as("text")} /></label>
-			<label>Team 2 Name: <input {...createMatch.fields.teamNames[1].as("text")} /></label>
+			<label>Team 1 Name: <input {...createMatch.fields.teamNames[0].as("text", "Red")} /></label>
+			<label>Team 2 Name: <input {...createMatch.fields.teamNames[1].as("text", "Blue")} /></label>
 
 			{#each createMatch.fields.hostNickname.issues() as issue}
 				<p class="error">{issue.message}</p>
@@ -67,7 +55,7 @@
 		</div>
 		<hr />
 		<div>
-			<label>Host Nickname: <input {...createMatch.fields.hostNickname.as("text")} /></label>
+			<label>Host Nickname: <input {...createMatch.fields.hostNickname.as("text", nickname)} /></label>
 			{#each createMatch.fields.hostNickname.issues() as issue}
 				<p class="error">{issue.message}</p>
 			{/each}

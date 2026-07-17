@@ -62,7 +62,6 @@ export const createMatch = form(CreateMatchSchema, async (data) => {
 			data: {
 				id,
 				name: data.name,
-				joinCode: data.joinCode,
 				private: data.private,
 				matchDuration: data.matchDuration,
 				players: {
@@ -81,8 +80,6 @@ export const createMatch = form(CreateMatchSchema, async (data) => {
 				switch (error.meta?.target) {
 					case "Match_name_key":
 						return { status: "failure", message: "Match name already exists. Please choose a different name." };
-					case "Match_joinCode_key":
-						return { status: "failure", message: "Join code already in use. Please try a different code." };
 				}
 			}
 		} else {
@@ -103,7 +100,6 @@ export const createMatchWithList = form(CreateMatchWithListSchema, async (data) 
 			data: {
 				id,
 				name: data.name,
-				joinCode: data.joinCode,
 				private: data.private,
 				matchDuration: data.matchDuration,
 				players: {
@@ -165,8 +161,6 @@ export const createMatchWithList = form(CreateMatchWithListSchema, async (data) 
 				switch (error.meta?.target) {
 					case "Match_name_key":
 						return { status: "failure", message: "Match name already exists. Please choose a different name." };
-					case "Match_joinCode_key":
-						return { status: "failure", message: "Join code already in use. Please try a different code." };
 				}
 			}
 		} else {
@@ -192,7 +186,6 @@ export const convertLocalMatchToServer = command(ConvertMatchSchema, async (data
 			id,
 			name: matchName,
 			private: true,
-			joinCode: nanoid(6),
 			players: {
 				create: { player: { connect: { id: locals.user.id } }, playerNickname: nickname, playerRole: "HOST" }
 			},
@@ -246,8 +239,7 @@ export const joinPrivateMatchWithList = form(JoinPrivateMatchWithListSchema, asy
 	const { locals } = getRequestEvent();
 	if (!locals.user) return { status: "failure", message: "User is not logged in" };
 
-	const match = await prisma.match.findUnique({ where: { id: data.matchId }, select: { joinCode: true, currentRound: true } });
-	if (match?.joinCode != data.joinCode) invalid(issue.joinCode("Invalid Join Code"));
+	const match = await prisma.match.findUnique({ where: { id: data.matchId }, select: { currentRound: true } });
 
 	const player = await prisma.usersInMatch.upsert({
 		where: { match_player: { playerId: locals.user.id, matchId: data.matchId } },

@@ -55,7 +55,7 @@
 	getAllPlayerData(matchId).then((results) => {
 		results.forEach(async (r) => {
 			matchPlayers.push({ id: r.id, team: r.teamId ?? undefined, nickname: r.playerNickname, role: r.playerRole });
-			for (const list of r.lists) matchLists.push(await initializePlayerList(list, matchUnits, matchBFS));
+			for (const list of r.lists) if (list.active) matchLists.push(await initializePlayerList(list, matchUnits, matchBFS));
 		});
 	});
 	// svelte-ignore state_referenced_locally

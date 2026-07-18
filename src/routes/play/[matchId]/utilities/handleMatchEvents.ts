@@ -104,8 +104,11 @@ export function processMessage(
 			});
 			break;
 		case "REMOVE_PLAYER": {
-			const index = playerList.findIndex((p) => p.id == Number(update.details));
+			const playerToRemove = Number(update.details);
+			if (myData?.id == playerToRemove) toastController.addToast("You have been removed from the game");
+			const index = playerList.findIndex((p) => p.id == playerToRemove);
 			if (index !== -1) playerList.splice(index, 1);
+			matchLists.splice(0, matchLists.length, ...matchLists.filter((l) => l.owner != playerToRemove));
 			getMyData(update.matchId).refresh();
 			break;
 		}
@@ -232,8 +235,9 @@ async function handleUnitUpdate(unitId: number, matchUnits: SvelteMap<number, Pl
 }
 
 async function handleBFSUpdate(id: number, matchBFS: SvelteMap<number, PlayBFS>) {
+	console.log("tada");
 	const updatedBFSData = await getMatchBFSData(id);
 	if (!updatedBFSData) return;
-
+	console.log(updatedBFSData);
 	matchBFS.set(id, { id: updatedBFSData.id, bfsId: updatedBFSData.bfsId, count: updatedBFSData.count, used: updatedBFSData.used });
 }

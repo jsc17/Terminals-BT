@@ -4,7 +4,6 @@
 	import { Tabs } from "bits-ui";
 	import { createMatchWithList, findPrivateMatch, getNickname, joinPrivateMatchWithList } from "$routes/play/remote/matchlist.remote";
 	import { CreateMatchWithListSchema, JoinPrivateMatchWithListSchema } from "$routes/play/schema/matchlistSchema";
-	import { nanoid } from "nanoid";
 	import { toastController } from "$lib/stores";
 
 	let openState = $state(false);
@@ -181,11 +180,14 @@
 						<input {...joinPrivateMatchWithList.fields.formations[index].as("hidden", formation)} />
 					{/each}
 					{#each bfsStrings as bfs, index}
-						<input {...createMatchWithList.fields.battlefieldSupport[index].as("hidden", bfs)} />
+						<input {...joinPrivateMatchWithList.fields.battlefieldSupport[index].as("hidden", bfs)} />
 					{/each}
 
 					<input {...joinPrivateMatchWithList.fields.matchId.as("hidden", findPrivateMatch.result?.data?.id ?? "")} />
 				{/if}
+				{#each joinPrivateMatchWithList.fields.allIssues() as issue}
+					<p>{issue}</p>
+				{/each}
 			</form>
 		</Tabs.Content>
 	</Tabs.Root>

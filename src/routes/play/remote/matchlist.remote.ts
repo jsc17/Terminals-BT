@@ -289,6 +289,7 @@ export const joinPrivateMatchWithList = form(JoinPrivateMatchWithListSchema, asy
 			match: { connect: { id: data.matchId } },
 			player: { connect: { id: locals.user.id } },
 			team: { connect: { id: data.teamId } },
+			joined: false,
 			lists: {
 				create: {
 					name: data.listName,
@@ -315,21 +316,24 @@ export const joinPrivateMatchWithList = form(JoinPrivateMatchWithListSchema, asy
 								}
 							};
 						})
-					}
+					},
+					active: false
 				}
 			}
 		},
 		select: { id: true, lists: true }
 	});
+
 	await prisma.matchLog.create({
 		data: {
-			type: "PLAYER_ADDED_LIST",
+			type: "PLAYER_JOIN_REQUEST",
 			round: match?.currentRound ?? 0,
 			match: { connect: { id: data.matchId } },
-			submitter: { connect: { id: player.id } },
-			details: player.lists.at(-1)?.id
+			submitter: { connect: { id: player?.id } },
+			details: JSON.stringify({ nickname: data.nickname, id: player.id })
 		}
 	});
+
 	await nothing().refresh();
 	return { status: "success" };
 });

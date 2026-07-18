@@ -53,6 +53,7 @@ model MatchList {
     teamId Int
     formations MatchFormation[]
     battlefieldSupport MatchBFS[]
+    active Boolean @default(true)
 }
 
 model MatchFormation {

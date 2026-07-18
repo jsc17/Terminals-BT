@@ -70,7 +70,7 @@ export const JoinPrivateMatchWithListSchema = v.object({
 		v.transform((input) => Number(input))
 	),
 	formations: v.array(v.string()),
-	battlefieldSupport: v.array(v.string()),
+	battlefieldSupport: v.optional(v.array(v.string()), []),
 	nickname: v.string(),
 	listName: v.string()
 });

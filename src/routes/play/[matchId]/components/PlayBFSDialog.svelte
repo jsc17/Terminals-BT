@@ -2,6 +2,7 @@
 	import { getBfsById } from "$lib/data/battlefieldSupport";
 	import type { MatchBFS } from "$lib/generated/prisma/browser";
 	import { Dialog } from "$lib/generic";
+	import { getJoinedContext } from "$routes/listbuilder/utilities/context";
 	import { useBFS, undoBFS } from "../remote/matchBFS.remote";
 
 	type Props = {
@@ -9,6 +10,7 @@
 	};
 
 	let { bfs }: Props = $props();
+	let joined = $derived(getJoinedContext().joined);
 
 	const { id, bfsId, count, used } = $derived(bfs);
 	const bfsData = $derived(getBfsById(bfsId));
@@ -31,25 +33,30 @@
 			<p class="dialog-text">
 				<span class={{ primary: true, error: used == count }}> {count - used}</span>/<span class={{ primary: true, error: used == count }}>{count}</span> uses remaining
 			</p>
-			<button
-				disabled={used >= count}
-				onclick={() => {
-					useBFS(id);
-					open = false;
-				}}>Use BFS</button
-			>
+			{#if joined}
+				<button
+					disabled={used >= count}
+					onclick={() => {
+						useBFS(id);
+						open = false;
+					}}>Use BFS</button
+				>
+			{/if}
 		</div>
 		<div class="space-between">
-			<button
-				disabled={used <= 0}
-				onclick={async () => {
-					if (confirm("Undo the Battlefield support usage and restore a use to the counter?")) {
-						await undoBFS(id);
-						open = false;
-					}
-				}}
-				>Undo BFS Usage
-			</button>
+			{#if joined}
+				<button
+					disabled={used <= 0}
+					onclick={async () => {
+						if (confirm("Undo the Battlefield support usage and restore a use to the counter?")) {
+							await undoBFS(id);
+							open = false;
+						}
+					}}
+					>Undo BFS Usage
+				</button>
+			{/if}
+
 			<p class="muted">{bfsData?.source}</p>
 		</div>
 	</div>

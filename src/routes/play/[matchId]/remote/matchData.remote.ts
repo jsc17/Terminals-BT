@@ -20,7 +20,7 @@ export const getMyData = query(v.string(), async (matchId) => {
 export const getPlayerData = query(v.object({ playerId: v.number() }), async ({ playerId }) => {
 	const results = await prisma.usersInMatch.findUnique({
 		where: { id: playerId },
-		include: { lists: { include: { formations: { include: { units: { include: { criticals: true } } } }, battlefieldSupport: true } } }
+		include: { lists: { where: { active: true }, include: { formations: { include: { units: { include: { criticals: true } } } }, battlefieldSupport: true } } }
 	});
 	return results != null ? results : undefined;
 });
@@ -30,7 +30,8 @@ export const getAllPlayerData = query(v.string(), async (matchId) => {
 		where: { matchId },
 		include: {
 			lists: { include: { formations: { include: { units: { include: { criticals: true } } } }, player: { select: { id: true, playerNickname: true } }, battlefieldSupport: true } }
-		}
+		},
+		orderBy: { id: "asc" }
 	});
 	return results != null ? results : [];
 });

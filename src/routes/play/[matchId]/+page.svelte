@@ -53,10 +53,12 @@
 
 	// svelte-ignore state_referenced_locally
 	getAllPlayerData(matchId).then((results) => {
-		results.forEach(async (r) => {
-			matchPlayers.push({ id: r.id, team: r.teamId ?? undefined, nickname: r.playerNickname, role: r.playerRole });
-			for (const list of r.lists) if (list.active) matchLists.push(await initializePlayerList(list, matchUnits, matchBFS));
-		});
+		Promise.all(
+			results.map(async (r) => {
+				matchPlayers.push({ id: r.id, team: r.teamId ?? undefined, nickname: r.playerNickname, role: r.playerRole });
+				for (const list of r.lists) if (list.active) matchLists.push(await initializePlayerList(list, matchUnits, matchBFS));
+			})
+		).then(() => (activeList = matchLists.find((l) => l.team == teamData?.[0].id)?.id));
 	});
 	// svelte-ignore state_referenced_locally
 	getLogs({ matchId, lastLogId: 0 }).then((results) => (matchLogs = matchLogs.concat(results)));

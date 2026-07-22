@@ -20,22 +20,26 @@
 			label: matchData!?.currentRound == 0 ? "Start Match" : "End Round",
 			onSelect: () => (matchData?.currentRound == 0 ? startGame(matchData!.id) : (componentsOpen.endRound = true))
 		},
-		matchData?.timePaused
-			? {
-					type: "item",
-					label: "Resume Timer",
-					onSelect: () => resumeTimer(matchData!.id)
-				}
-			: matchData?.timeStarted
-				? {
-						type: "item",
-						label: "Pause Timer",
-						onSelect: () => pauseTimer(matchData!.id)
-					}
-				: {
-						type: "info",
-						label: "Start match to start timer"
-					},
+		...(matchData?.matchDuration
+			? ([
+					matchData?.timePaused
+						? {
+								type: "item",
+								label: "Resume Timer",
+								onSelect: () => resumeTimer(matchData!.id)
+							}
+						: matchData?.timeStarted
+							? {
+									type: "item",
+									label: "Pause Timer",
+									onSelect: () => pauseTimer(matchData!.id)
+								}
+							: {
+									type: "info",
+									label: "Start match to start timer"
+								}
+				] as MenuItem[])
+			: []),
 		{ type: "separator" },
 		{ type: "item", label: "Manage Match", onSelect: () => (componentsOpen.management = true) },
 		{

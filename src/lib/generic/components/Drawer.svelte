@@ -38,7 +38,7 @@
 	class:drawer-right={side == "right"}
 	class:show-drawer-right={side == "right" && open}
 >
-	<button class="transparent-button" onclick={() => (open = false)} aria-label="Close user menu sidebar"><CloseIcon fill="var(--primary)" width="25" height="25" /></button>
+	<button class="transparent-button" onclick={() => (open = false)} aria-label="Close Drawer"><CloseIcon fill="var(--primary)" width="25" height="25" /></button>
 	{@render children()}
 </div>
 
@@ -48,10 +48,11 @@
 		top: 0;
 		width: min(max-content, 90%);
 		height: 100%;
-		z-index: 10;
+		z-index: 100;
 		display: flex;
 		flex-direction: column;
 		background-color: var(--background);
+		z-index: 100;
 	}
 	.drawer-left {
 		left: -100%;

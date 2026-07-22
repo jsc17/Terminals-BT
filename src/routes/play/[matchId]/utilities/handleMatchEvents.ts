@@ -36,7 +36,8 @@ export function processMessage(
 		case "PLAYER_JOIN_REQUEST":
 			const { nickname, id } = JSON.parse(update.details as string);
 			if (myData?.role == "HOST" || myData?.role == "MODERATOR") {
-				if (!autodecline && confirm(`${nickname} is attempting to join the match as a player. Allow them to join?`)) confirmPlayerJoin({ matchId: update.matchId, playerId: id });
+				if (true || (!autodecline && confirm(`${nickname} is attempting to join the match as a player. Allow them to join?`)))
+					confirmPlayerJoin({ matchId: update.matchId, playerId: id });
 				else declinePlayerJoin({ matchId: update.matchId, playerId: id });
 			}
 			break;
@@ -88,6 +89,9 @@ export function processMessage(
 			getTeamData(update.matchId).refresh();
 			matchUnits.forEach((u) => {
 				handleUnitUpdate(u.data.id, matchUnits);
+			});
+			matchLogs.forEach((l) => {
+				l.applied = false;
 			});
 			toastController.addToast(`Host has ended the round. It is now round ${update.round}`);
 

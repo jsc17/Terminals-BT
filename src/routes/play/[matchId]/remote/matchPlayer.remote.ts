@@ -4,7 +4,14 @@ import { prisma } from "$lib/server/prisma";
 import { invalid } from "@sveltejs/kit";
 import { getMyData } from "./matchData.remote";
 
-async function createList(listName: string, list: { name: string; formations: string; units: string }, teamId: number, matchId: string, playerId: string, active: boolean) {
+async function createList(
+	listName: string,
+	list: { name: string; formations: string; units: string; bs: string | null },
+	teamId: number,
+	matchId: string,
+	playerId: string,
+	active: boolean
+) {
 	const newList = await prisma.matchList.create({
 		data: {
 			name: listName.length > 0 ? listName : list.name,
@@ -42,6 +49,22 @@ async function createList(listName: string, list: { name: string; formations: st
 							}
 						}
 					]
+				}
+			}
+		});
+	}
+	if (list.bs) {
+		const bfs = JSON.parse(list.bs);
+		await prisma.matchList.update({
+			where: { id: newList.id },
+			data: {
+				battlefieldSupport: {
+					create: bfs.map(([id, count]: [number, number]) => {
+						return {
+							bfsId: id,
+							count: count
+						};
+					})
 				}
 			}
 		});
@@ -91,7 +114,7 @@ export const joinMatch = form(
 		});
 
 		if (listId) {
-			const list = await prisma.listV3.findUnique({ where: { userId: locals.user.id, id: listId }, select: { units: true, name: true, formations: true } });
+			const list = await prisma.listV3.findUnique({ where: { userId: locals.user.id, id: listId }, select: { units: true, name: true, formations: true, bs: true } });
 			if (list == null) throw invalid(issue.listId("List could not be loaded. Please try again"));
 			await createList(listName ?? list.name, list, teamId, matchId, locals.user.id, false);
 		}
@@ -162,9 +185,8 @@ export const loadList = form(
 		const match = await prisma.match.findUnique({ where: { id: matchId } });
 		if (!match) throw invalid(issue.matchId("Invalid Match Id"));
 
-		const list = await prisma.listV3.findUnique({ where: { userId: locals.user.id, id: listId }, select: { units: true, name: true, formations: true } });
+		const list = await prisma.listV3.findUnique({ where: { userId: locals.user.id, id: listId }, select: { units: true, name: true, formations: true, bs: true } });
 		if (list == null) throw invalid(issue.listId("List could not be loaded. Please try again"));
-
 		const newList = await createList(listName, list, teamId, matchId, locals.user.id, true);
 
 		await prisma.matchLog.create({

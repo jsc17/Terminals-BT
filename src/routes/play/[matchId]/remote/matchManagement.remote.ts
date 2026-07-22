@@ -56,6 +56,8 @@ export const endRound = form(
 			})
 		);
 
+		await prisma.matchLog.updateMany({ where: { matchId, applied: true }, data: { applied: false } });
+
 		if (endMatch) {
 			await prisma.matchLog.create({
 				data: {

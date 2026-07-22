@@ -1,18 +1,21 @@
 <script lang="ts">
 	import type { MatchLog } from "$lib/generated/prisma/browser";
 	import type { SvelteMap } from "svelte/reactivity";
-	import type { PlayList, PlayUnit } from "../../../types/types";
+	import type { PlayBFS, PlayList, PlayUnit } from "../../../types/types";
 	import MatchLogEntry from "./MatchLogEntry.svelte";
 	import { tick } from "svelte";
+	import { Drawer } from "$lib/generic";
+	import { CloseIcon } from "$lib/icons";
 
 	type Props = {
 		matchLogs: MatchLog[];
 		matchUnits: SvelteMap<number, PlayUnit>;
+		matchBFS: SvelteMap<number, PlayBFS>;
 		playerList: { id: number; team?: number; nickname: string; list?: PlayList }[];
 		open: boolean;
 	};
 
-	let { matchLogs, matchUnits, playerList, open = $bindable() }: Props = $props();
+	let { matchLogs, matchUnits, matchBFS, playerList, open = $bindable() }: Props = $props();
 	let logElement = $state<HTMLDivElement>();
 
 	$effect.pre(() => {
@@ -22,32 +25,22 @@
 			logElement!.scrollTo(0, logElement!.scrollHeight);
 		});
 	});
+
+	let matchLogsOpen = $state(false);
 </script>
 
-<div class="match-log" bind:this={logElement}>
-	<div class="log-header">
-		<p>Match Log</p>
-		<button
-			class="transparent-button"
-			onclick={() => {
-				open = !open;
-			}}>{open ? "Hide..." : "Show ..."}</button
-		>
+<button onclick={() => (matchLogsOpen = true)}>Match Logs</button>
+
+<Drawer bind:open={matchLogsOpen} side="right">
+	<div class="log-container">
+		{#each matchLogs as log}
+			<MatchLogEntry {log} {matchUnits} {matchBFS} submitter={playerList.find((p) => p.id == log.submitterId)} />
+		{/each}
 	</div>
-	{#if open}
-		<div class="log-container">
-			{#each matchLogs as log}
-				<MatchLogEntry {log} unit={log.unitId ? matchUnits.get(log.unitId) : undefined} submitter={playerList.find((p) => p.id == log.submitterId)} />
-			{/each}
-		</div>
-	{/if}
-</div>
+</Drawer>
 
 <style>
-	.match-log {
-		position: absolute;
-		top: 0;
-		right: 0;
+	/* .match-log {
 		height: 100%;
 		display: flex;
 		flex-direction: column;
@@ -62,10 +55,12 @@
 		border-bottom: 1px solid var(--border);
 		display: flex;
 		gap: 24px;
-	}
+	} */
 	.log-container {
+		position: relative;
 		overflow: auto;
 		scroll-snap-type: mandatory;
-		padding: 0px 16px;
+		width: 33dvw;
+		border-top: 1px solid var(--border);
 	}
 </style>

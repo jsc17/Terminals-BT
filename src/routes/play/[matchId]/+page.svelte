@@ -20,6 +20,7 @@
 	import RoundTimer from "./components/ui/RoundTimer.svelte";
 	import PlayBFSDialog from "./components/PlayBFSDialog.svelte";
 	import { setJoinedContext } from "$routes/listbuilder/utilities/context";
+	import MatchLogWindow from "./components/ui/MatchLogWindow.svelte";
 
 	let { params, data }: PageProps = $props();
 
@@ -139,6 +140,7 @@
 				<button class="jump-link-button" data-team={teamData.findIndex((t) => t.id == (list?.team ?? 0))}>{list?.name}</button>
 			{/if}
 			<div class="toolbar-section" style="justify-self: end;">
+				<MatchLogWindow {matchLogs} {matchUnits} {matchBFS} playerList={matchPlayers} bind:open={componentsOpen.matchLog} />
 				{#if myData?.playerRole == "HOST"}
 					<MenuHost {matchData} {componentsOpen} bind:autodecline />
 				{/if}
@@ -171,8 +173,6 @@
 			<p class="center" style="width: 100%;">No Lists have been loaded yet</p>
 		{/each}
 	</div>
-
-	<!-- <MatchLogWindow {matchLogs} {matchUnits} playerList={matchPlayers} bind:open={componentsOpen.matchLog} /> -->
 </div>
 
 <MatchJoinModal

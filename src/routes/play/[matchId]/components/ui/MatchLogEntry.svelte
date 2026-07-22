@@ -1,36 +1,41 @@
 <script lang="ts">
 	import type { MatchLog } from "$lib/generated/prisma/browser";
-	import type { PlayList, PlayUnit } from "../../../types/types";
+	import type { SvelteMap } from "svelte/reactivity";
+	import type { PlayBFS, PlayList, PlayUnit } from "../../../types/types";
+	import { getBfsById } from "$lib/data/battlefieldSupport";
 
 	type Props = {
 		log: MatchLog;
-		unit?: PlayUnit;
+		matchUnits: SvelteMap<number, PlayUnit>;
+		matchBFS: SvelteMap<number, PlayBFS>;
 		submitter?: { id: number; team?: number; nickname: string; list?: PlayList };
 	};
 
-	let { log, unit, submitter }: Props = $props();
+	let { log, matchUnits, matchBFS, submitter }: Props = $props();
 
-	const visibleLogs = ["MATCH_START", "ROUND_END", "UNIT_DAMAGE", "UNIT_DAMAGE_REMOVED", "UNIT_HEAT", "UNIT_CRIT", "UNIT_CRIT_REMOVED"];
+	const unit = $derived(log.unitId ? matchUnits.get(log.unitId) : undefined);
+
+	const visibleLogs = ["MATCH_START", "ROUND_END", "UNIT_DAMAGE", "UNIT_DAMAGE_REMOVED", "UNIT_HEAT", "UNIT_CRIT", "UNIT_CRIT_REMOVED", "BFS_USED", "BFS_RESTORED"];
 </script>
 
 {#if visibleLogs.includes(log.type)}
-	<div class="log">
+	<div class={{log: true, "round-header": log.type == "MATCH_START" || log.type == "ROUND_END"}}>
 		{#if log.type == "MATCH_START"}
-			<p class="round-header">Round 1 <span class="info">({submitter?.nickname} started the match)</span></p>
-			<p class="info">{log.updated_at.toUTCString()}</p>
+			<p>Round 1</p>
+			<p class="info">{log.updated_at.toLocaleTimeString()}</p>
 		{:else if log.type == "ROUND_END"}
-			<p class="round-header">Round {log.round}</p>
-			<p class="info">{log.updated_at.toUTCString()}</p>
+			<p>Round {log.round}</p>
+			<p class="info">{log.updated_at.toLocaleTimeString()}</p>
 		{:else if log.type == "UNIT_DAMAGE"}
 			{@const damage = Number(log.details)}
 			<p>
 				{unit?.owner}'s {unit?.reference?.class}
 				{#if unit?.data.number}
 					({unit?.data.number})
-				{/if} took {damage} points of damage
+				{/if} took {damage} points of damage <span class="pending">{log.applied ? "(Pending)" : ""}</span>
 			</p>
 			<p class="info">
-				{log.updated_at.toUTCString()}
+				{log.updated_at.toLocaleTimeString()}
 				{#if unit?.owner != submitter?.nickname}
 					(applied by {submitter?.nickname})
 				{/if}
@@ -40,10 +45,10 @@
 				{unit?.owner}'s {unit?.reference?.class}
 				{#if unit?.data.number}
 					({unit?.data.number})
-				{/if} removed {log.details} previously taken points of damage
+				{/if} removed {log.details} previously taken points of damage <span class="pending">{log.applied ? "(Pending)" : ""}</span>
 			</p>
 			<p class="info">
-				{log.updated_at.toUTCString()}
+				{log.updated_at.toLocaleTimeString()}
 				{#if unit?.owner != submitter?.nickname}
 					(applied by {submitter?.nickname})
 				{/if}
@@ -54,10 +59,10 @@
 				{unit?.owner}'s {unit?.reference?.class}
 				{#if unit?.data.number}
 					({unit?.data.number})
-				{/if} heat level set to {heat}
+				{/if} heat level set to {heat} <span class="pending">{log.applied ? "(Pending)" : ""}</span>
 			</p>
 			<p class="info">
-				{log.updated_at.toUTCString()}
+				{log.updated_at.toLocaleTimeString()}
 				{#if unit?.owner != submitter?.nickname}
 					(applied by {submitter?.nickname})
 				{/if}
@@ -69,10 +74,10 @@
 				{#if unit?.data.number}
 					({unit?.data.number})
 				{/if} suffered {RegExp(/[aeiou]/i).test((log.details! as string).at(0)!) ? "an" : "a"}
-				{critical.at(0)?.toUpperCase() + critical!.slice(1)} critical hit
+				{critical.at(0)?.toUpperCase() + critical!.slice(1)} critical hit <span class="pending">{log.applied ? "(Pending)" : ""}</span>
 			</p>
 			<p class="info">
-				{log.updated_at.toUTCString()}
+				{log.updated_at.toLocaleTimeString()}
 				{#if unit?.owner != submitter?.nickname}
 					(applied by {submitter?.nickname})
 				{/if}
@@ -88,13 +93,31 @@
 				{critical.at(0)?.toUpperCase() + critical.slice(1)} critical hit
 			</p>
 			<p class="info">
-				{log.updated_at.toUTCString()}
+				{log.updated_at.toLocaleTimeString()}
 				{#if unit?.owner != submitter?.nickname}
 					(applied by {submitter?.nickname})
 				{/if}
 			</p>
-			<!-- {:else}
-		<p>{log.type}</p> -->
+		{:else if log.type == "BFS_USED"}
+				{let bfsId = $derived(matchBFS.get(Number(log.details))?.bfsId)}
+			{let bfsData = $derived(bfsId != undefined ? getBfsById(bfsId) : undefined);}
+			<p>
+				{submitter?.nickname} used {bfsData?.name ?? "(BFS Not Found)"}
+			</p>
+			<p class="info">
+				{log.updated_at.toLocaleTimeString()}
+			</p>
+		{:else if log.type == "BFS_RESTORED"}
+			{let bfsId = $derived(matchBFS.get(Number(log.details))?.bfsId)}
+			{let bfsData = $derived(bfsId != undefined ? getBfsById(bfsId) : undefined);}
+			<p>
+				{submitter?.nickname} restored a use of {bfsData?.name ?? "(BFS Not Found)"}
+			</p>
+			<p class="info">
+				{log.updated_at.toLocaleTimeString()}
+			</p>
+		{:else}
+			<p>{log.type}</p>
 		{/if}
 	</div>
 {/if}
@@ -102,13 +125,18 @@
 <style>
 	.log {
 		scroll-snap-align: start;
-		padding: 4px 6px;
+		padding: 4px 16px;
 		border-bottom: 1px solid var(--border);
 	}
+
 	.round-header {
-		font-weight: bold;
+		background-color: var(--surface-color)
 	}
-	.info {
+	.round-header p:not(.info) {
+		font-weight: bold;
+		font-size: 1.15rem;
+	}
+	.info, .pending {
 		font-size: 0.9em;
 		color: var(--surface-color-light-text-color);
 		font-style: italic;

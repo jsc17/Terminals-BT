@@ -28,11 +28,12 @@
 			const second = sortDirection == "asc" ? b : a;
 			if (sortKey == "dateSubmitted") return first.dateSubmitted.getTime() - second.dateSubmitted.getTime();
 			if (sortKey == "approved") return Number(first.approved) - Number(second.approved);
-			return first[sortKey].localeCompare(second[sortKey]);
+			return (first[sortKey] ?? "-").localeCompare(second[sortKey] ?? "-");
 		})
 	);
 
 	function setSortKey(key: string) {
+		console.log(key);
 		if (key == sortKey) return (sortDirection = sortDirection == "asc" ? "des" : "asc");
 
 		sortDirection = "asc";
@@ -82,6 +83,7 @@
 	});
 </script>
 
+<p>{sortKey}</p>
 <section class="card">
 	<div class="flex-between">
 		<div>

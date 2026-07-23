@@ -47,7 +47,7 @@
 		<div class="chart-row">
 			{#each tournamentCharts as chart}
 				<div>
-					<TournamentStatisticsChart title={chart.title} data={chart.data} />
+					<!-- <TournamentStatisticsChart title={chart.title} data={chart.data} /> -->
 				</div>
 			{/each}
 		</div>

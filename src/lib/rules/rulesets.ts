@@ -97,8 +97,8 @@ export const ruleSets: Ruleset[] = [
 	},
 	{
 		name: "wn350v3",
-		display: "Wolfnet 350 v3.1",
-		shortDisplay: "WN350v3.1",
+		display: "Wolfnet 350 v3.2",
+		shortDisplay: "WN350v3.2",
 		singleEraFaction: true,
 		eraFactionRestriction: true,
 		maxPv: 350,
@@ -146,8 +146,8 @@ export const ruleSets: Ruleset[] = [
 	},
 	{
 		name: "wn350v3d",
-		display: "Wolfnet 350 v3.1 Doubles",
-		shortDisplay: "WN350v3.1 Dbls",
+		display: "Wolfnet 350 v3.2 Doubles",
+		shortDisplay: "WN350v3.2 Dbls",
 		singleEraFaction: true,
 		eraFactionRestriction: true,
 		maxPv: 250,
@@ -182,8 +182,8 @@ export const ruleSets: Ruleset[] = [
 	},
 	{
 		name: "wn350v3e",
-		display: "Wolfnet 350 v3.1 Epic",
-		shortDisplay: "WN350v3.1 Epic",
+		display: "Wolfnet 350 v3.2 Epic",
+		shortDisplay: "WN350v3.2 Epic",
 		singleEraFaction: true,
 		eraFactionRestriction: true,
 		maxPv: 600,

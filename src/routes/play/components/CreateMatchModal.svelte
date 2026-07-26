@@ -4,6 +4,7 @@
 	import { nanoid } from "nanoid";
 	import { CreateMatchSchema } from "../schema/matchlistSchema";
 	import { toastController } from "$lib/stores";
+	import { goto } from "$app/navigation";
 
 	type Props = {
 		nickname: string;
@@ -24,6 +25,7 @@
 			await submit();
 			if (createMatch.result?.status == "success") {
 				open = false;
+				goto(`/play/${createMatch.result.message}`);
 			} else {
 				toastController.addToast(createMatch.result!.message);
 			}

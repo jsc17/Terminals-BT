@@ -73,7 +73,7 @@ export const createMatch = form(CreateMatchSchema, async (data) => {
 		});
 		await prisma.matchLog.create({ data: { round: 0, type: "MATCH_CREATED", match: { connect: { id: match.id } }, submitter: { connect: { id: match.players[0].id } } } });
 		await getMatches().refresh();
-		return { status: "success", message: "Match created" };
+		return { status: "success", message: match.id };
 	} catch (error: unknown) {
 		if (error instanceof PrismaClientKnownRequestError) {
 			if (error.code == "P2002") {

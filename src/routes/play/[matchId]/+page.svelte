@@ -6,7 +6,7 @@
 	import * as v from "valibot";
 	import { safeParseJSON } from "$lib/utilities/utilities";
 	import { onMount, setContext } from "svelte";
-	import { getAllPlayerData, getTeamData, getMyData, getMatchDetails, getLogs } from "./remote/matchData.remote";
+	import { getAllPlayerData, getTeamData, getMyData, getMatchDetails, getLogs, getRoundSummaries } from "./remote/matchData.remote";
 	import { SvelteMap } from "svelte/reactivity";
 	import { initializePlayerList, processMessage } from "./utilities/handleMatchEvents";
 	import type { MatchLog } from "$lib/generated/prisma/browser";
@@ -21,6 +21,7 @@
 	import PlayBFSDialog from "./components/PlayBFSDialog.svelte";
 	import { setJoinedContext } from "$routes/listbuilder/utilities/context";
 	import MatchLogWindow from "./components/ui/MatchLogWindow.svelte";
+	import RoundResults from "./components/ui/RoundResults.svelte";
 
 	let { params, data }: PageProps = $props();
 
@@ -47,6 +48,7 @@
 	const matchData = $derived(await getMatchDetails(matchId));
 	const myData = $derived(await getMyData(matchId));
 	const teamData = $derived(await getTeamData(matchId));
+	const roundSummaries = $derived(new SvelteMap((await getRoundSummaries(matchId)).map((r) => [r.round, r])));
 
 	$effect(() => {
 		joined.joined = myData?.joined;
@@ -64,10 +66,19 @@
 	// svelte-ignore state_referenced_locally
 	getLogs({ matchId, lastLogId: 0 }).then((results) => (matchLogs = matchLogs.concat(results)));
 
-	const componentsOpen = $state({ join: false, addList: false, management: false, matchLog: false, matchResults: false, matchOverAlert: false, endRound: false });
+	const componentsOpen = $state({
+		join: false,
+		addList: false,
+		management: false,
+		matchLog: false,
+		matchResults: false,
+		matchOverAlert: false,
+		endRound: false,
+		roundSummaries: false
+	});
+
 	let autodecline = $state(false);
 
-	let listContainer = $state<HTMLDivElement>();
 	let activeList = $state<number>();
 	let observer = $state<IntersectionObserver>();
 
@@ -120,7 +131,7 @@
 		</div>
 		<div class="match-list-bar">
 			<div class="toolbar-section" style="justify-self: start;">
-				<MenuPlayer bind:options={options.current} username={data.username} {myData} {componentsOpen} {matchLists} />
+				<MenuPlayer bind:options={options.current} username={data.username} {myData} {componentsOpen} {matchLists} roundSummariesExist={roundSummaries.size != 0} />
 			</div>
 			{#if !appWindow.isMobile}
 				<div class="team-lists">
@@ -140,15 +151,14 @@
 				<button class="jump-link-button" data-team={teamData.findIndex((t) => t.id == (list?.team ?? 0))}>{list?.name}</button>
 			{/if}
 			<div class="toolbar-section" style="justify-self: end;">
-				<MatchLogWindow {matchLogs} {matchUnits} {matchBFS} playerList={matchPlayers} bind:open={componentsOpen.matchLog} />
 				{#if myData?.playerRole == "HOST"}
-					<MenuHost {matchData} {componentsOpen} bind:autodecline />
+					<MenuHost matchData={matchData!} {componentsOpen} bind:autodecline />
 				{/if}
 			</div>
 		</div>
 	</div>
 
-	<div class="list-scroll-container" bind:this={listContainer}>
+	<div class="list-scroll-container">
 		{#each matchLists.toSorted((a, b) => (a.team ?? 0) - (b.team ?? 0)) as list}
 			<div id={`slide-${list.id}`} class={{ "list-scroll-slide": true, "list-scroll-slide-active": list.id == activeList }} {@attach observeList}>
 				<div class="list" id={`list-${list.id}`}>
@@ -174,6 +184,7 @@
 		{/each}
 	</div>
 </div>
+<MatchLogWindow {matchLogs} {matchUnits} {matchBFS} playerList={matchPlayers} bind:open={componentsOpen.matchLog} />
 
 <MatchJoinModal
 	bind:open={componentsOpen.join}
@@ -185,6 +196,7 @@
 <LoadListModal bind:open={componentsOpen.addList} matchId={matchData?.id.toString() ?? ""} teams={teamData.map((t) => ({ id: t.id, name: t.name }))} />
 <MatchManagementModal bind:open={componentsOpen.management} {matchData} {teamData} {matchLists} {matchPlayers} />
 <EndRoundModal matchData={matchData!} teams={teamData} bind:open={componentsOpen.endRound} />
+<RoundResults bind:open={componentsOpen.roundSummaries} teams={teamData.map((t) => ({ id: t.id, name: t.name }))} {roundSummaries} />
 <MatchResults bind:open={componentsOpen.matchResults} {teamData} {matchData} {matchLists} {matchUnits} />
 
 <style>

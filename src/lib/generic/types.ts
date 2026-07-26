@@ -4,15 +4,11 @@ type Item = {
 	disabled?: boolean;
 };
 
-type MenuGetSet<T> = {
-	get: () => T;
-	set: (v: T) => void;
-};
-
 type MenuSimpleItem = {
 	type: "item";
 	label: string;
 	onSelect?: () => void;
+	disabled?: boolean;
 };
 
 type MenuInfoItem = {
@@ -72,6 +68,7 @@ type MenuNumber = {
 };
 
 type MenuItem = MenuSimpleItem | MenuSeparator | MenuCheck | MenuRadioGroup | Submenu | MenuInfoItem | MenuHiddenInfoItem | MenuNumber;
+type MenuBarItem = MenuSimpleItem | Submenu;
 
 type Notification = {
 	date: Date;
@@ -81,4 +78,4 @@ type Notification = {
 	type: string;
 };
 
-export type { Item, MenuItem, Notification };
+export type { Item, MenuItem, MenuBarItem, Notification };

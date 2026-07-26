@@ -7,9 +7,10 @@
 		open: boolean;
 		children: Snippet;
 		side?: "left" | "right";
+		title?: string;
 	};
 
-	let { open = $bindable(), children, side = "left" }: Props = $props();
+	let { open = $bindable(), children, side = "left", title }: Props = $props();
 	let drawer = $state<HTMLElement>();
 
 	const closeListener = onClickOutside(
@@ -38,7 +39,10 @@
 	class:drawer-right={side == "right"}
 	class:show-drawer-right={side == "right" && open}
 >
-	<button class="transparent-button" onclick={() => (open = false)} aria-label="Close Drawer"><CloseIcon fill="var(--primary)" width="25" height="25" /></button>
+	<div class="inline">
+		<button class="transparent-button" onclick={() => (open = false)} aria-label="Close Drawer"><CloseIcon fill="var(--primary)" width="25" height="25" /></button>
+		<h2>{title}</h2>
+	</div>
 	{@render children()}
 </div>
 
@@ -73,6 +77,9 @@
 	.transparent-button {
 		width: fit-content;
 		padding: 16px;
-		align-self: flex-end;
+	}
+	h2 {
+		margin: 0;
+		color: var(--surface-color-light-text-color);
 	}
 </style>

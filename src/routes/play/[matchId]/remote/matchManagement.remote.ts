@@ -1,7 +1,7 @@
 import { command, form, getRequestEvent } from "$app/server";
 import * as v from "valibot";
 import { prisma } from "$lib/server/prisma";
-import { getSubmitter } from "./utilities";
+import { getRoundSummaryTeamStatistics, getSubmitter } from "./utilities";
 import { nothing } from "$lib/remote/utilities.remote";
 import { UpdateMatchSchema } from "../../schema/matchlistSchema";
 import { getAllPlayerData } from "./matchData.remote";
@@ -12,9 +12,43 @@ export const startGame = command(v.string(), async (matchId) => {
 	const submitter = await getSubmitter(matchId, locals.user.id);
 	if (submitter?.playerRole != "HOST" && submitter?.playerRole != "MODERATOR") return { status: "failure", message: "User does not have permission to start this game" };
 
+	const teams = await prisma.matchTeam.findMany({ where: { matchId } });
+
+	const teamStatistics = new Map(
+		(
+			await Promise.all(
+				teams.map(async (t) => {
+					return getRoundSummaryTeamStatistics(t.id);
+				})
+			)
+		)
+			.filter((t) => t != undefined)
+			.map((t) => [t.teamId, { unitCount: t.unitCount, pv: t.pv }])
+	);
+
 	await prisma.match.update({
 		where: { id: matchId },
-		data: { currentRound: 1, timeStarted: new Date(), logEntries: { create: { submitter: { connect: { id: submitter.id } }, round: 1, type: "MATCH_START" } } }
+		data: {
+			currentRound: 1,
+			timeStarted: new Date(),
+			logEntries: { create: { submitter: { connect: { id: submitter.id } }, round: 1, type: "MATCH_START" } },
+			matchRoundSummaries: {
+				create: {
+					round: 0,
+					timeElapsedMS: 0,
+					matchEnded: false,
+					teams: {
+						create: teams.map((t) => ({
+							team: { connect: { id: t.id } },
+							objectivePoints: t.objectivePoints,
+							unitsRemaining: teamStatistics.get(t.id)?.unitCount,
+							pvRemaining: teamStatistics.get(t.id)?.pv,
+							unitUpdates: JSON.stringify([])
+						}))
+					}
+				}
+			}
+		}
 	});
 });
 
@@ -56,21 +90,48 @@ export const endRound = form(
 			})
 		);
 
+		const previousRound = await prisma.matchRoundSummary.findFirst({ where: { matchId, round: match.currentRound - 2 } });
+		const roundTime = new Date().getTime() - (match.timeStarted?.getTime() ?? 0) - (previousRound?.timeElapsedMS ?? 0);
+
+		const teamStatistics = new Map(
+			(
+				await Promise.all(
+					updatedTeams.map(async (t) => {
+						return getRoundSummaryTeamStatistics(t.id);
+					})
+				)
+			)
+				.filter((t) => t != undefined)
+				.map((t) => [t.teamId, { unitCount: t.unitCount, pv: t.pv }])
+		);
+
+		await prisma.match.update({
+			where: { id: matchId },
+			data: {
+				matchRoundSummaries: {
+					create: {
+						round: match.currentRound - 1,
+						timeElapsedMS: roundTime,
+						matchEnded: endMatch,
+						teams: {
+							create: updatedTeams.map((t) => ({
+								team: { connect: { id: t.id } },
+								objectivePoints: t.objectivePoints,
+								unitsRemaining: teamStatistics.get(t.id)?.unitCount,
+								pvRemaining: teamStatistics.get(t.id)?.pv,
+								unitUpdates: JSON.stringify([])
+							}))
+						}
+					}
+				}
+			}
+		});
+
 		await prisma.matchLog.updateMany({ where: { matchId, applied: true }, data: { applied: false } });
 
-		if (endMatch) {
-			await prisma.matchLog.create({
-				data: {
-					type: "MATCH_END",
-					round: match?.currentRound ?? 0,
-					match: { connect: { id: matchId } },
-					submitter: { connect: { id: match?.players[0].id } }
-				}
-			});
-		}
 		await prisma.matchLog.create({
 			data: {
-				type: "ROUND_END",
+				type: endMatch ? "MATCH_END" : "ROUND_END",
 				round: match?.currentRound ?? 0,
 				match: { connect: { id: matchId } },
 				submitter: { connect: { id: match?.players[0].id } }

@@ -1,22 +1,23 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import { DropdownMenu } from "$lib/generic";
-	import type { MenuItem } from "$lib/generic/types";
+	import { MenuBar } from "$lib/generic";
 	import type { PlaymodeOptionsOutput } from "$routes/play/schema/playmode";
 	import * as v from "valibot";
 	import type { PlayList } from "$routes/play/types/types";
+	import type { MenuBarItem, MenuItem } from "$lib/generic/types";
 
 	type Props = {
 		options: PlaymodeOptionsOutput;
 		username?: string;
 		myData?: { playerNickname: string; id: number; joined: boolean };
-		componentsOpen: { join: boolean; addList: boolean };
+		componentsOpen: { join: boolean; addList: boolean; matchLog: boolean; roundSummaries: boolean };
 		matchLists: PlayList[];
+		roundSummariesExist: boolean;
 	};
 
-	let { options = $bindable(), username, myData, componentsOpen, matchLists }: Props = $props();
+	let { options = $bindable(), username, myData, componentsOpen, matchLists, roundSummariesExist }: Props = $props();
 
-	const settingsMenuOptions = $state<MenuItem[]>([
+	const settingsMenuOptions = $derived<MenuItem[]>([
 		{ type: "number", label: "Cards Per Row", value: options.cardsPerRow, onValueChange: (v: number) => (options.cardsPerRow = v) },
 		{
 			type: "check",
@@ -70,32 +71,24 @@
 		}
 	]);
 
-	const standardMenuOptions: MenuItem[] = $derived.by(() => {
-		//login or join match
-		//settings
-		//return to match selection
-		let options: MenuItem[] = [];
-
-		if (!username) options.push({ type: "info", label: `Please login to join match` });
-		if (!myData) options.push({ type: "item", label: "Join Match", onSelect: () => (componentsOpen.join = true) });
-		else if (myData && !myData.joined) options.push({ type: "info", label: `Waiting for host to approve match join` });
-		else
-			options = options.concat([
-				{ type: "info", label: `Joined match as ${myData.playerNickname}` },
-				{ type: "item", label: matchLists.find((l) => l.owner == myData?.id) ? "Load Additional List" : "Load List", onSelect: () => (componentsOpen.addList = true) }
-			]);
-
-		options = options.concat([
-			{ type: "submenu", label: "Display Settings", subitems: [...settingsMenuOptions] },
-			{ type: "item", label: "Return to match selection", onSelect: () => goto("/play") }
-		]);
-
-		return options;
-	});
+	const playerMenuItems: MenuItem[] = $derived([
+		...(!username ? [{ type: "info", label: `Please login to join match` } satisfies MenuItem] : []),
+		...(!myData
+			? [{ type: "item", label: "Join Match", onSelect: () => (componentsOpen.join = true) } satisfies MenuItem]
+			: !myData.joined
+				? [{ type: "info", label: `Waiting for host to approve match join` } satisfies MenuItem]
+				: ([
+						{ type: "info", label: `Joined match as ${myData.playerNickname}` },
+						{ type: "item", label: matchLists.find((l) => l.owner == myData?.id) ? "Load Additional List" : "Load List", onSelect: () => (componentsOpen.addList = true) }
+					] satisfies MenuItem[])),
+		{ type: "item", label: "Return to match selection", onSelect: () => goto("/play") }
+	]);
+	const menubarItems: MenuBarItem[] = $derived([
+		{ type: "submenu", label: "Menu", subitems: playerMenuItems },
+		{ type: "submenu", label: "Display Settings", subitems: settingsMenuOptions },
+		{ type: "item", label: "Match Logs", onSelect: () => (componentsOpen.matchLog = true) },
+		...(roundSummariesExist ? [{ type: "item", label: "Round Summaries", onSelect: () => (componentsOpen.roundSummaries = true) } satisfies MenuBarItem] : [])
+	]);
 </script>
 
-<DropdownMenu items={standardMenuOptions} triggerClasses="detailed-button">
-	{#snippet trigger()}
-		Menu
-	{/snippet}
-</DropdownMenu>
+<MenuBar items={menubarItems} />

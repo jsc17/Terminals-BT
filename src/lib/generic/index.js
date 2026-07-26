@@ -10,5 +10,6 @@ import RadioGroup from "./components/RadioGroup.svelte";
 import DropdownMenu from "./components/DropdownMenu.svelte";
 import ScrollArea from "./components/ScrollArea.svelte";
 import Switch from "./components/Switch.svelte";
+import MenuBar from "./components/MenuBar.svelte";
 
-export { Select, Dialog, Combobox, Collapsible, Slider, Drawer, Popover, Separator, RadioGroup, DropdownMenu, ScrollArea, Switch };
+export { Select, Dialog, Combobox, Collapsible, Slider, Drawer, Popover, Separator, RadioGroup, DropdownMenu, MenuBar, ScrollArea, Switch };

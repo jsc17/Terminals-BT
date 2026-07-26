@@ -80,3 +80,8 @@ export const getLogs = query(v.object({ matchId: v.string(), lastLogId: v.number
 	const logs = await prisma.matchLog.findMany({ where: { matchId: matchId, id: { gt: lastLogId } } });
 	return logs;
 });
+
+export const getRoundSummaries = query(v.string(), async (matchId) => {
+	const results = await prisma.matchRoundSummary.findMany({ where: { matchId }, include: { teams: { orderBy: { teamId: "asc" } } }, orderBy: { round: "asc" } });
+	return results;
+});

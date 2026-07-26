@@ -5,7 +5,6 @@
 	import MatchLogEntry from "./MatchLogEntry.svelte";
 	import { tick } from "svelte";
 	import { Drawer } from "$lib/generic";
-	import { CloseIcon } from "$lib/icons";
 
 	type Props = {
 		matchLogs: MatchLog[];
@@ -26,41 +25,28 @@
 		});
 	});
 
-	let matchLogsOpen = $state(false);
+	const visibleLogs = ["MATCH_START", "ROUND_END", "UNIT_DAMAGE", "UNIT_DAMAGE_REMOVED", "UNIT_HEAT", "UNIT_CRIT", "UNIT_CRIT_REMOVED", "BFS_USED", "BFS_RESTORED"];
 </script>
 
-<button onclick={() => (matchLogsOpen = true)}>Match Logs</button>
-
-<Drawer bind:open={matchLogsOpen} side="right">
+<Drawer bind:open side="right" title="Match Logs">
 	<div class="log-container">
-		{#each matchLogs as log}
+		{#each matchLogs.filter((l) => visibleLogs.includes(l.type)) as log}
 			<MatchLogEntry {log} {matchUnits} {matchBFS} submitter={playerList.find((p) => p.id == log.submitterId)} />
+		{:else}
+			<p>No actions have been taken yet</p>
 		{/each}
 	</div>
 </Drawer>
 
 <style>
-	/* .match-log {
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-		flex-shrink: 0;
-		z-index: 15;
-	}
-	.log-header {
-		flex-shrink: 0;
-		background-color: var(--surface-color);
-		padding: 6px 16px;
-		border-top: 1px solid var(--primary);
-		border-bottom: 1px solid var(--border);
-		display: flex;
-		gap: 24px;
-	} */
 	.log-container {
 		position: relative;
 		overflow: auto;
 		scroll-snap-type: mandatory;
 		width: 33dvw;
 		border-top: 1px solid var(--border);
+	}
+	p {
+		padding: 16px 16px;
 	}
 </style>

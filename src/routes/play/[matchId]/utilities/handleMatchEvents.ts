@@ -1,11 +1,10 @@
 import { toastController } from "$lib/stores";
 import { nanoid } from "nanoid";
-import { getPlayerData, getMatchUnitData, getMatchDetails, getTeamData, getMyData, getMatchList, getLogs, getMatchBFSData } from "../remote/matchData.remote";
+import { getPlayerData, getMatchUnitData, getMatchDetails, getTeamData, getMyData, getMatchList, getLogs, getMatchBFSData, getRoundSummaries } from "../remote/matchData.remote";
 import type { PlayBFS, PlayFormation, PlayList, PlayUnit, PlayUnitData } from "../../types/types";
 import { SvelteMap } from "svelte/reactivity";
 import { getMulImage } from "$lib/remote/mulImages.remote";
-import type { MatchCrit, MatchFormation, MatchLog, MatchUnit, UsersInMatch, MatchList, MatchBFS, PlayerRole } from "$lib/generated/prisma/browser";
-import { goto } from "$app/navigation";
+import type { MatchCrit, MatchFormation, MatchLog, MatchUnit, MatchList, MatchBFS, PlayerRole } from "$lib/generated/prisma/browser";
 import { getMULDataFromIdLocal } from "$lib/local/sqllite/local-db";
 import { confirmPlayerJoin, declinePlayerJoin } from "../remote/matchPlayer.remote";
 
@@ -68,6 +67,7 @@ export function processMessage(
 		case "MATCH_PAUSED":
 		case "MATCH_RESUMED":
 			getMatchDetails(update.matchId).refresh();
+			getRoundSummaries(update.matchId).refresh();
 			break;
 		case "UNIT_DAMAGE":
 		case "UNIT_DAMAGE_REMOVED":
@@ -87,13 +87,14 @@ export function processMessage(
 		case "ROUND_END":
 			getMatchDetails(update.matchId).refresh();
 			getTeamData(update.matchId).refresh();
+			getRoundSummaries(update.matchId).refresh();
 			matchUnits.forEach((u) => {
 				handleUnitUpdate(u.data.id, matchUnits);
 			});
 			matchLogs.forEach((l) => {
 				l.applied = false;
 			});
-			toastController.addToast(`Host has ended the round. It is now round ${update.round}`);
+			toastController.addToast(`It is now round ${update.round}`);
 
 			break;
 		case "MATCH_UPDATE":
@@ -123,6 +124,7 @@ export function processMessage(
 		}
 		case "MATCH_END":
 			getMatchDetails(update.matchId).refresh();
+			getRoundSummaries(update.matchId).refresh();
 			break;
 		default:
 			console.log("Unhandled Event:", update.type);

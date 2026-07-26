@@ -1,47 +1,32 @@
 <script lang="ts">
-	import { DropdownMenu } from "$lib/generic";
-	import type { MenuItem } from "$lib/generic/types";
+	import { DropdownMenu, MenuBar } from "$lib/generic";
+	import type { MenuBarItem, MenuItem } from "$lib/generic/types";
 	import type { Match } from "$lib/generated/prisma/browser";
 	import { resetMatch, startGame } from "../../remote/matchManagement.remote";
 	import { deleteMatch } from "../../remote/matchData.remote";
 	import { resumeTimer, pauseTimer } from "../../remote/timer.remote";
 
 	type Props = {
-		matchData?: Match;
+		matchData: Match;
 		componentsOpen: { addList: boolean; management: boolean; matchLog: boolean; matchResults: boolean; matchOverAlert: boolean; endRound: boolean };
 		autodecline: boolean;
 	};
 
 	let { matchData, componentsOpen, autodecline = $bindable() }: Props = $props();
 
-	const menuOptions: MenuItem[] = $derived([
-		{
-			type: "item",
-			label: matchData!?.currentRound == 0 ? "Start Match" : "End Round",
-			onSelect: () => (matchData?.currentRound == 0 ? startGame(matchData!.id) : (componentsOpen.endRound = true))
-		},
-		...(matchData?.matchDuration
-			? ([
-					matchData?.timePaused
-						? {
-								type: "item",
-								label: "Resume Timer",
-								onSelect: () => resumeTimer(matchData!.id)
-							}
-						: matchData?.timeStarted
-							? {
-									type: "item",
-									label: "Pause Timer",
-									onSelect: () => pauseTimer(matchData!.id)
-								}
-							: {
-									type: "info",
-									label: "Start match to start timer"
-								}
-				] as MenuItem[])
-			: []),
-		{ type: "separator" },
+	const hostMenuOptions: MenuItem[] = $derived([
 		{ type: "item", label: "Manage Match", onSelect: () => (componentsOpen.management = true) },
+		{
+			type: "check",
+			label: "Auto-decline attempts to join match",
+			checked: autodecline,
+			onCheckedChange: (v) => {
+				autodecline = v;
+			}
+		},
+		{ type: "separator" },
+		{ type: "info", label: `Match Id: ${matchData!.id}` },
+		{ type: "info", label: "Join code no longer required. Host will now approve player joining" },
 		{
 			type: "item",
 			label: "Delete Match",
@@ -55,23 +40,23 @@
 			onSelect: () => {
 				if (confirm("Reset match? This will remove all damage and criticals, and set the round and scores to zero")) resetMatch(matchData!.id);
 			}
-		},
-		{
-			type: "check",
-			label: "Auto-decline attempts to join match",
-			checked: autodecline,
-			onCheckedChange: (v) => {
-				autodecline = v;
-			}
-		},
-		{ type: "separator" },
-		{ type: "hiddenInfo", label: `Match Id`, hidden: `${matchData!.id}` },
-		{ type: "info", label: "Join code no longer required. Host will now approve player joining" }
+		}
+	]);
+
+	const menubarItems: MenuBarItem[] = $derived([
+		...((matchData.matchDuration && matchData.timeStarted
+			? [
+					matchData?.timePaused
+						? { type: "item", label: "Resume Timer", onSelect: () => resumeTimer(matchData!.id) }
+						: { type: "item", label: "Pause Timer", onSelect: () => pauseTimer(matchData!.id) }
+				]
+			: []) satisfies MenuBarItem[]),
+		...((!matchData.currentRound
+			? [{ type: "item", label: "Start Match", onSelect: () => startGame(matchData!.id) }]
+			: [{ type: "item", label: "End Round", onSelect: () => (componentsOpen.endRound = true) }]) satisfies MenuBarItem[]),
+
+		{ type: "submenu", label: "Host Menu", subitems: hostMenuOptions }
 	]);
 </script>
 
-<DropdownMenu items={menuOptions} triggerClasses="detailed-button">
-	{#snippet trigger()}
-		Host Menu
-	{/snippet}
-</DropdownMenu>
+<MenuBar items={menubarItems} />

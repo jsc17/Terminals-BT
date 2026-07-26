@@ -13,6 +13,7 @@ model Match {
     timePaused DateTime?
     timePausedDurationMs Int @default(0)
     matchDuration Int?
+    matchRoundSummaries MatchRoundSummary[]
 }
 
 model UsersInMatch {
@@ -41,6 +42,7 @@ model MatchTeam {
     matchId String
     lists MatchList[]
     teammates UsersInMatch[]
+    roundSummaries MatchRoundSummaryTeam[]
 }
 
 model MatchList {
@@ -111,6 +113,29 @@ model MatchLog {
     unitId Int?
     applied Boolean?
     details Json?
+}
+
+model MatchRoundSummary {
+    id String @id @default(uuid(7))
+    match Match @relation(references: [id], fields: [matchId], onDelete: Cascade)
+    matchId String
+    round Int
+    timeElapsedMS Int
+    teams MatchRoundSummaryTeam[]
+    matchEnded Boolean?
+}
+
+model MatchRoundSummaryTeam {
+    id String @id @default(uuid(7))
+    roundSummary MatchRoundSummary @relation(references: [id], fields: [roundSummaryId], onDelete: Cascade)
+    roundSummaryId String
+    team MatchTeam @relation(references: [id], fields: [teamId], onDelete: Cascade)
+    teamId Int
+    unitsRemaining Int
+    pvRemaining Int
+    objectivePoints Int
+    /// [roundSummaryUnitUpdate[]]
+    unitUpdates Json
 }
 
 enum PlayerRole {

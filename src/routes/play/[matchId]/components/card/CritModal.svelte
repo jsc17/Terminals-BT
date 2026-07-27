@@ -51,7 +51,11 @@
 			</Tabs.List>
 			<Tabs.Content value="add">
 				<div class="crit-modal-body">
-					{#if criticalLists.get(reference.subtype)?.crits}
+					{const critLists = criticalLists.get(reference.subtype)}
+					{#if critLists?.crits}
+						{#if critLists.crits.find(c=>c.label =="Ammo Hit") && reference.abilities.find(a=> ["ENE", "CASE", "CASEII"].includes(a.name))}
+							<p class="warning">Unit has ENE or CASE and should not take an Ammo Critical</p>
+						{/if}
 						<fieldset class="crit-button-list">
 							<legend>Critical Hits</legend>
 							{#each criticalLists.get(reference.subtype)?.crits as critical, index}
@@ -64,7 +68,7 @@
 						<p>Unknown unit type, you shouldn't have been able to get here.</p>
 					{/if}
 
-					{#if criticalLists.get(reference.subtype)?.motive}
+					{#if critLists?.motive}
 						{#if reference.move?.some((m) => motiveModifiers.has(m.type))}
 							{@const motive = reference.move.find((m) => motiveModifiers.has(m.type))}
 							<p class="warning">Add +{motiveModifiers.get(motive!.type)} to the motive roll for movement type "{motive!.type}"</p>

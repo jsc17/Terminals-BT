@@ -2,7 +2,18 @@ import type { MulUnit } from "$lib/types/listTypes";
 import type { PlayUnitData } from "../../types/types";
 import { mechTypes, typeIncludes, vTypes } from "$lib/cardgeneration/unitTypeUtilities";
 
-export type CritList = { [key: string]: any; engine: number; firecontrol: number; mp: number; weapon: number; destroyed: number; mhit: number; mhalf: number; mimm: number };
+export type CritList = {
+	[key: string]: any;
+	engine: number;
+	firecontrol: number;
+	mp: number;
+	weapon: number;
+	destroyed: number;
+	mhit: number;
+	mhalf: number;
+	mimm: number;
+	crewstunned: number;
+};
 
 export function countCrits(unit: PlayUnitData) {
 	let current: CritList = {
@@ -13,7 +24,8 @@ export function countCrits(unit: PlayUnitData) {
 		destroyed: 0,
 		mhit: 0,
 		mhalf: 0,
-		mimm: 0
+		mimm: 0,
+		crewstunned: 0
 	};
 
 	let pending: CritList = {
@@ -24,15 +36,17 @@ export function countCrits(unit: PlayUnitData) {
 		destroyed: 0,
 		mhit: 0,
 		mhalf: 0,
-		mimm: 0
+		mimm: 0,
+		crewstunned: 0
 	};
 
 	for (const crit of unit.current.crits) {
-		current[crit.type] += 1;
+		if (crit.roundsRemaining == null || crit.roundsRemaining != 0) current[crit.type] += 1;
 	}
 	for (const crit of unit.pending.crits) {
-		pending[crit.type] += 1;
+		if (crit.roundsRemaining == null || crit.roundsRemaining != 0) pending[crit.type] += 1;
 	}
+
 	return { current, pending };
 }
 

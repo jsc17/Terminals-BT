@@ -14,6 +14,7 @@
 	import type { PlaymodeOptionsOutput } from "../../../schema/playmode";
 	import { getNewSkillCost } from "$lib/utilities/genericBattletechUtilities";
 	import { getJoinedContext } from "$routes/listbuilder/utilities/context";
+	import { CloseIcon } from "$lib/icons";
 
 	type Props = {
 		unit: PlayUnit;
@@ -305,12 +306,30 @@
 				>
 					<img src={image} alt="unit" class="unit-image" />
 
-					{#if structRemaining.current <= 0 || critCount.current.engine >= 2 || critCount.current.destroyed}
-						<img src="/icons/close.svg" alt="Destroyed" class="destroyed" />
+					{#if data.number}
+						<p class={{ numbering: true, "numbering-roman": options.duplicateUnitMarkings == "roman" }}>{createMarking()}</p>
 					{/if}
-					{#if data.current.heat >= 4}
-						<p class="shutdown-message">Shutdown</p>
+
+					{#if structRemaining.pending <= 0 || structRemaining.current <= 0}
+						<div class="destroyed">
+							<CloseIcon width="100%" height="100%" fill={structRemaining.current <= 0 ? "red" : "yellow"} stroke="black" stroke-width="12px" />
+						</div>
 					{/if}
+
+					<div class="unit-message">
+						{#if critCount.pending.engine + critCount.current.engine >= 2}
+							<p class={{ "message-applied": true, "message-pending": critCount.current.engine < 2 }}>Engine Destroyed</p>
+						{/if}
+						{#if critCount.pending.destroyed || critCount.current.destroyed}
+							<p class={{ "message-applied": true, "message-pending": critCount.pending.destroyed }}>Destroyed Critical</p>
+						{/if}
+						{#if critCount.pending.crewstunned || critCount.current.crewstunned}
+							<p class={{ "message-applied": true, "message-pending": !critCount.current.crewstunned }}>Crew Stunned</p>
+						{/if}
+						{#if data.current.heat >= 4}
+							<p class="message-applied">Shutdown</p>
+						{/if}
+					</div>
 				</div>
 				{#if !typeIncludes([...infTypes], reference)}
 					<button onclick={handleCrit} class="unit-card-block" disabled={joined.joined != true}>
@@ -324,9 +343,6 @@
 							<CritBoxProto unit={data} {critCount}></CritBoxProto>
 						{/if}
 					</button>
-				{/if}
-				{#if data.number}
-					<p class={{ numbering: true, "numbering-roman": options.duplicateUnitMarkings == "roman" }}>{createMarking()}</p>
 				{/if}
 			</div>
 		</div>
@@ -582,21 +598,33 @@
 	.destroyed {
 		width: 100%;
 		height: 100%;
-		filter: invert(11%) sepia(73%) saturate(6763%) hue-rotate(3deg) brightness(123%) contrast(120%);
+		/* filter: invert(11%) sepia(73%) saturate(6763%) hue-rotate(3deg) brightness(123%) contrast(120%); */
 		position: absolute;
 		top: 0;
 		left: 0;
 	}
-	.shutdown-message {
+	.unit-message {
 		position: absolute;
-		color: red;
-		font-size: 7cqmax;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+	.message-applied,
+	.message-pending {
+		font-size: 6cqmax;
 		font-weight: bold;
+		text-align: center;
 		text-shadow:
 			-1px -1px 0 black,
 			1px -1px 0 black,
 			-1px 1px 0 black,
 			1px 1px 0 black;
+	}
+	.message-applied {
+		color: red;
+	}
+	.message-pending {
+		color: yellow;
 	}
 	.hex-symbol {
 		font-size: 0.8em;
@@ -607,7 +635,7 @@
 		color: black;
 		border: 1cqmax solid rgb(36, 36, 36);
 		padding: 2cqmin;
-		font-size: 32px;
+		font-size: 24px;
 		top: 0;
 		right: 0;
 		min-width: 12cqw;

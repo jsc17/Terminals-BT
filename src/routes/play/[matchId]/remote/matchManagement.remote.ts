@@ -84,7 +84,12 @@ export const endRound = form(
 						currentDamage: { increment: u.pendingDamage },
 						pendingDamage: 0,
 						currentHeat: u.pendingHeat,
-						criticals: { updateMany: { where: { unitId: u.id }, data: { pending: false } } }
+						criticals: {
+							updateMany: [
+								{ where: { unitId: u.id, pending: false, roundsRemaining: { gt: 0 } }, data: { roundsRemaining: { decrement: 1 } } },
+								{ where: { unitId: u.id }, data: { pending: false } }
+							]
+						}
 					}
 				});
 			})

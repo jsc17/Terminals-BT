@@ -245,7 +245,6 @@
 		{#if printOptions.printCardsByFormation}
 			{#each listData.formations as formation}
 				{#if formation.units.length != 0}
-					<p>{formation.name}</p>
 					{@const formationPv = formation.units.reduce((a, v) => (a += getNewSkillCost(unitData.get(v)!.skill, mulUnitData.get(unitData.get(v)!.mulId)!.pv)), 0)}
 					<div class={{ "formation-break": formation.units.length + (formation.secondary?.units.length ?? 0) > 4, "formation-side": printOptions.formationHeaderStyle == "side" }}>
 						{#if printOptions.formationHeaderStyle == "inline" && formation.type != "none"}

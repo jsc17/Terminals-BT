@@ -12,7 +12,7 @@
 
 	let { open = $bindable(), teams, roundSummaries }: Props = $props();
 
-	let activeRound = $state(0);
+	let activeRound = $derived([...roundSummaries.keys()][0]);
 </script>
 
 <Dialog title="Round Results" bind:open>

@@ -96,8 +96,7 @@ export const endRound = form(
 		);
 
 		const previousRound = await prisma.matchRoundSummary.findFirst({ where: { matchId, round: match.currentRound - 2 } });
-		const roundTime = new Date().getTime() - (match.timeStarted?.getTime() ?? 0) - (previousRound?.timeElapsedMS ?? 0);
-
+		const roundTime = Math.min(new Date().getTime() - (match.timeStarted?.getTime() ?? new Date().getTime()) - (previousRound?.timeElapsedMS ?? 0), 86400000);
 		const teamStatistics = new Map(
 			(
 				await Promise.all(

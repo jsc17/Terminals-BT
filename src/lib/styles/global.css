@@ -100,3 +100,7 @@ button:disabled {
 .grab:hover {
 	cursor: grab;
 }
+
+.height-100 {
+	height: 100%;
+}

@@ -5,10 +5,10 @@
 
 	type Props = {
 		matchData?: Match;
-		componentsOpen: { matchOverAlert: boolean };
+		matchOverAlertOpen: boolean;
 	};
 
-	let { matchData, componentsOpen }: Props = $props();
+	let { matchData, matchOverAlertOpen = $bindable() }: Props = $props();
 
 	let interval = $state<NodeJS.Timeout>();
 
@@ -38,7 +38,7 @@
 		const elapsed = Date.now() - matchData!.timeStarted!.getTime() - matchData!.timePausedDurationMs;
 		remainingMS = Math.max(0, totalDurationMs - elapsed);
 
-		if (remainingMS == 0) componentsOpen.matchOverAlert = true;
+		if (remainingMS == 0) matchOverAlertOpen = true;
 		if (remainingMS == 0 || matchData.timeEnded) clearInterval(interval);
 	}
 
@@ -53,10 +53,10 @@
 
 {#if matchData?.matchDuration}
 	<p class={{ paused: matchData.timePaused, ended: remainingMS == 0 }}>{remainingHours}:{remainingMinutes}:{remainingSeconds}</p>
-	<Dialog bind:open={componentsOpen.matchOverAlert} title="Match Timer Expired" contentProps={{ interactOutsideBehavior: "ignore" }}>
+	<Dialog bind:open={matchOverAlertOpen} title="Match Timer Expired" contentProps={{ interactOutsideBehavior: "ignore" }}>
 		<p>The match has run out of time, but you may still continue playing.</p>
 		<div class="center" style="margin: 1rem">
-			<button class="detailed-button" onclick={() => (componentsOpen.matchOverAlert = false)}>Close</button>
+			<button class="detailed-button" onclick={() => (matchOverAlertOpen = false)}>Close</button>
 		</div>
 	</Dialog>
 {/if}

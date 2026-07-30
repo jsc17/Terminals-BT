@@ -113,7 +113,6 @@
 /* Dropdown Menu */
 [data-dropdown-menu-trigger] {
 	width: max-content;
-	height: max-content;
 }
 [data-dropdown-menu-trigger]:hover {
 	cursor: pointer;
@@ -135,6 +134,10 @@
 	padding: 8px 24px;
 	border-radius: var(--radius);
 	text-align: center;
+
+	& a {
+		color: var(--text-color)
+	}
 }
 [data-dropdown-menu-item].dropdown-button:hover {
 	color: var(--primary);

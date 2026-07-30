@@ -20,6 +20,10 @@
 		<DropdownMenu.Item class="dropdown-button" textValue={item.label} onSelect={item.onSelect}>
 			{item.label}
 		</DropdownMenu.Item>
+	{:else if item.type == "link"}
+		<DropdownMenu.Item class="dropdown-button" textValue={item.label}>
+			<a href={item.href}>{item.label}</a>
+		</DropdownMenu.Item>
 	{:else if item.type == "info"}
 		<DropdownMenu.Item class="dropdown-info" textValue={item.label}>
 			{item.label}
@@ -65,7 +69,7 @@
 	{:else if item.type == "submenu"}
 		<DropdownMenu.Sub>
 			<DropdownMenu.SubTrigger class="dropdown-button">{item.label}</DropdownMenu.SubTrigger>
-			<DropdownMenu.SubContent>
+			<DropdownMenu.SubContent side="bottom">
 				{#each item.subitems as subitem}
 					{@render renderItem(subitem)}
 				{/each}
@@ -95,7 +99,7 @@
 	{/if}
 {/snippet}
 
-<DropdownMenu.Root {onOpenChange}>
+<DropdownMenu.Root {onOpenChange} bind:open>
 	{#if trigger}
 		<DropdownMenu.Trigger class={triggerClasses}>
 			{@render trigger()}

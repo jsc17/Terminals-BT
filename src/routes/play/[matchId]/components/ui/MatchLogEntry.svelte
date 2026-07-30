@@ -123,6 +123,7 @@
 		scroll-snap-align: start;
 		padding: 4px 16px;
 		border-bottom: 1px solid var(--border);
+		width: 100%;
 	}
 
 	.round-header {

@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import { MenuBar } from "$lib/generic";
+	import { DropdownMenu, MenuBar } from "$lib/generic";
 	import type { PlaymodeOptionsOutput } from "$routes/play/schema/playmode";
 	import * as v from "valibot";
 	import type { PlayList } from "$routes/play/types/types";
 	import type { MenuBarItem, MenuItem } from "$lib/generic/types";
+	import { appWindow } from "$lib/stores";
 
 	type Props = {
 		options: PlaymodeOptionsOutput;
@@ -83,12 +84,37 @@
 					] satisfies MenuItem[])),
 		{ type: "item", label: "Return to match selection", onSelect: () => goto("/play") }
 	]);
-	const menubarItems: MenuBarItem[] = $derived([
+	const menuItems: MenuBarItem[] = $derived([
 		{ type: "submenu", label: "Menu", subitems: playerMenuItems },
+		{ type: "submenu", label: "Display Settings", subitems: settingsMenuOptions },
+		{ type: "item", label: "Match Logs", onSelect: () => (componentsOpen.matchLog = true) },
+		...(roundSummariesExist ? [{ type: "item", label: "Round Summaries", onSelect: () => (componentsOpen.roundSummaries = true) } satisfies MenuBarItem] : [])
+	]);
+	const dropdownMenuItems: MenuItem[] = $derived([
+		...playerMenuItems,
 		{ type: "submenu", label: "Display Settings", subitems: settingsMenuOptions },
 		{ type: "item", label: "Match Logs", onSelect: () => (componentsOpen.matchLog = true) },
 		...(roundSummariesExist ? [{ type: "item", label: "Round Summaries", onSelect: () => (componentsOpen.roundSummaries = true) } satisfies MenuBarItem] : [])
 	]);
 </script>
 
-<MenuBar items={menubarItems} />
+{#if !appWindow.isMobile}
+	<MenuBar items={menuItems} />
+{:else}
+	<DropdownMenu items={dropdownMenuItems} triggerClasses="matchMenuButtons">
+		{#snippet trigger()}
+			Menu
+		{/snippet}
+	</DropdownMenu>
+{/if}
+
+<style>
+	:global(.matchMenuButtons) {
+		color: var(--text-color);
+		padding: 8px 24px;
+		border-radius: var(--radius);
+		text-align: center;
+		border: 1px solid var(--border);
+		background-color: var(--surface-color-light);
+	}
+</style>

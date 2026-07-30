@@ -41,8 +41,8 @@ export const startGame = command(v.string(), async (matchId) => {
 						create: teams.map((t) => ({
 							team: { connect: { id: t.id } },
 							objectivePoints: t.objectivePoints,
-							unitsRemaining: teamStatistics.get(t.id)?.unitCount,
-							pvRemaining: teamStatistics.get(t.id)?.pv,
+							unitsRemaining: teamStatistics.get(t.id)?.unitCount ?? 0,
+							pvRemaining: teamStatistics.get(t.id)?.pv ?? 0,
 							unitUpdates: JSON.stringify([])
 						}))
 					}
@@ -122,8 +122,8 @@ export const endRound = form(
 							create: updatedTeams.map((t) => ({
 								team: { connect: { id: t.id } },
 								objectivePoints: t.objectivePoints,
-								unitsRemaining: teamStatistics.get(t.id)?.unitCount,
-								pvRemaining: teamStatistics.get(t.id)?.pv,
+								unitsRemaining: teamStatistics.get(t.id)?.unitCount ?? 0,
+								pvRemaining: teamStatistics.get(t.id)?.pv ?? 0,
 								unitUpdates: JSON.stringify([])
 							}))
 						}

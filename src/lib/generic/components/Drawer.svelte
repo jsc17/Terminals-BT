@@ -50,7 +50,7 @@
 	.drawer {
 		position: fixed;
 		top: 0;
-		width: min(max-content, 90%);
+		width: min(75%, 500px);
 		height: 100%;
 		z-index: 100;
 		display: flex;

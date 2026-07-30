@@ -43,7 +43,7 @@
 		position: relative;
 		overflow: auto;
 		scroll-snap-type: mandatory;
-		width: 33dvw;
+		width: 100%;
 		border-top: 1px solid var(--border);
 	}
 	p {

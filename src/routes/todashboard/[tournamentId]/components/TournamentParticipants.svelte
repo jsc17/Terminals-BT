@@ -83,7 +83,6 @@
 	});
 </script>
 
-<p>{sortKey}</p>
 <section class="card">
 	<div class="flex-between">
 		<div>

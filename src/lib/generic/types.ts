@@ -67,7 +67,13 @@ type MenuNumber = {
 	step?: number;
 };
 
-type MenuItem = MenuSimpleItem | MenuSeparator | MenuCheck | MenuRadioGroup | Submenu | MenuInfoItem | MenuHiddenInfoItem | MenuNumber;
+type MenuLink = {
+	type: "link";
+	label: string;
+	href: string;
+};
+
+type MenuItem = MenuSimpleItem | MenuSeparator | MenuCheck | MenuRadioGroup | Submenu | MenuInfoItem | MenuHiddenInfoItem | MenuNumber | MenuLink;
 type MenuBarItem = MenuSimpleItem | Submenu;
 
 type Notification = {

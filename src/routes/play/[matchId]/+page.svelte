@@ -22,6 +22,7 @@
 	import { setJoinedContext } from "$routes/listbuilder/utilities/context";
 	import MatchLogWindow from "./components/ui/MatchLogWindow.svelte";
 	import RoundResults from "./components/ui/RoundResults.svelte";
+	import DropdownMenu from "$lib/generic/components/DropdownMenu.svelte";
 
 	let { params, data }: PageProps = $props();
 
@@ -122,7 +123,7 @@
 			</div>
 			<div class="match-details">
 				<p>Round: {matchData?.currentRound} {matchData?.gameCompleted ? "(Match Ended)" : ""}</p>
-				<RoundTimer {matchData} {componentsOpen} />
+				<RoundTimer {matchData} matchOverAlertOpen={componentsOpen.matchOverAlert} />
 			</div>
 			<div class="team-name-blue">
 				<div class="toolbar-item">{teamData?.[1]?.name}</div>
@@ -147,12 +148,20 @@
 					{/each}
 				</div>
 			{:else}
-				{@const list = matchLists.find((l) => l.id == activeList)}
-				<button class="jump-link-button" data-team={teamData.findIndex((t) => t.id == (list?.team ?? 0))}>{list?.name}</button>
+				{const list = $derived(matchLists.find((l) => l.id == activeList))}
+				{const team = $derived(teamData.findIndex((t) => t.id == (list?.team ?? 0)))}
+				<DropdownMenu items={matchLists.map(l=>({type: "link", label: l.name ?? "Not Found",href:`#list-${l.id}`}))}  triggerClasses="transparent-button height-100">
+					{#snippet trigger()}
+						<div class="jump-link-button" data-team={team ?? 0}>
+							{list?.name}
+						</div>
+					{/snippet}
+				</DropdownMenu>
+
 			{/if}
 			<div class="toolbar-section" style="justify-self: end;">
 				{#if myData?.playerRole == "HOST"}
-					<MenuHost matchData={matchData!} {componentsOpen} bind:autodecline />
+					<MenuHost matchData={matchData!} bind:managementModalOpen={componentsOpen.management} bind:endRoundModalOpen={componentsOpen.endRound} bind:autodecline />
 				{/if}
 			</div>
 		</div>
@@ -265,6 +274,8 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		align-content: center;
+		border-radius: var(--radius);
+		height: 100%;
 	}
 	.jump-link-button:hover {
 		transform: translateY(-2px);

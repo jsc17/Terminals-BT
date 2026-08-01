@@ -104,9 +104,10 @@
 			<li><a href="/listbuilder" aria-current={basePath === "/listbuilder"} onclick={closeNav}>Alpha Strike Listbuilder</a></li>
 			<li><a href="/unitsearch" aria-current={basePath === "/unitsearch"} onclick={closeNav}>Alpha Strike Unit Search</a></li>
 			<li><a href="/play" aria-current={basePath === "/play"} onclick={closeNav}>Alpha Strike Matches</a></li>
+			<li><a href="/collection" aria-current={basePath === "/collection"} onclick={closeNav}>Collection Manager</a></li>
+			<hr />
 			<li><a href="/validation" aria-current={basePath === "/validation"} onclick={closeNav}>Tournament List Validator</a></li>
 			<li><a href="/todashboard" aria-current={basePath === "/todashboard"} onclick={closeNav}>T.O. Dashboard</a></li>
-			<li><a href="/collection" aria-current={basePath === "/collection"} onclick={closeNav}>Collection Manager</a></li>
 			<hr />
 			<li><a href="http://masterunitlist.info" target="_blank">Master Unit List</a></li>
 			<li><a href="https://wolfsdragoons.com/alpha-strike-core-tournament-rules-2/" target="_blank">Wolfnet 350 Rules</a></li>

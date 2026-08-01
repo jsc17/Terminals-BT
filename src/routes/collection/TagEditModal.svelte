@@ -1,35 +1,26 @@
 <script lang="ts">
+	import { type CollectionTag } from "$lib/generated/prisma/browser";
 	import { Dialog, Popover } from "$lib/generic";
-	import { getUserTags, addTag, removeTag, updateTag } from "$lib/remote/collection.remote";
+	import { getUserTags, addTag, updateTag, deleteTag } from "$lib/remote/collection.remote";
 	import { toastController } from "$lib/stores";
+	import { includesIgnoreCase, reviveNumber } from "$lib/utilities/utilities";
 	import ColorSelect, { type RGB } from "svelte-color-select";
-
-	let userTags = getUserTags();
-
-	let newTagColor = $state<RGB>({ r: 0.15, g: 0.15, b: 0.15 });
-
-	let selectedEditTag = $state(userTags.current?.[0]);
-	let newName = $derived(selectedEditTag?.label);
-	let editTagColor = $derived(JSON.parse(selectedEditTag?.color ?? `{"r":"0.20", "g":"0.20", "b":"0.20" }`));
-	let editTagId = $derived(selectedEditTag?.id);
-
-	function onOpenChange() {
-		newTagColor = { r: Math.random(), g: Math.random(), b: Math.random() };
-	}
 </script>
 
-<Dialog title="Edit Users Tags" {onOpenChange}>
+<Dialog title="Edit Users Tags">
 	{#snippet trigger()}
-		Edit Custom Tags
+		Add/Edit Tags
 	{/snippet}
 
 	<div class="edit-tags-body">
+		{let newTagColor = $state<RGB>({ r: Math.random(), g: Math.random(), b: Math.random() })}
 		<form
 			{...addTag.enhance(async ({ element, submit }) => {
 				try {
 					await submit();
 					element.reset();
 					toastController.addToast(addTag.result?.message ?? "Invalid Message recieved");
+					newTagColor = { r: Math.random(), g: Math.random(), b: Math.random() };
 				} catch (error) {
 					console.log(error);
 				}
@@ -37,7 +28,6 @@
 		>
 			<fieldset class="new-tag-field">
 				<legend>Add New Tag</legend>
-				<p class="muted">Add a new tag to sort and organize units</p>
 				<div class="inline">
 					<label>Name: <input type="text" name="newTag" id="newTag" required /></label>
 					<p>Color:</p>
@@ -50,79 +40,88 @@
 						{/snippet}
 						<ColorSelect bind:rgb={newTagColor} />
 					</Popover>
-					<input type="hidden" name="tagColor" value={JSON.stringify({ r: newTagColor.r.toFixed(3), g: newTagColor.g.toFixed(3), b: newTagColor.b.toFixed(3) })} />
+					<input
+						type="hidden"
+						name="tagColor"
+						value={JSON.stringify({ r: Number(newTagColor.r.toFixed(3)), g: Number(newTagColor.g.toFixed(3)), b: Number(newTagColor.b.toFixed(3)) })}
+					/>
 					<button class="add-button">Add new tag</button>
 				</div>
 			</fieldset>
 		</form>
-		<form
-			{...updateTag.enhance(async ({ submit }) => {
-				try {
-					await submit();
-					toastController.addToast(updateTag.result?.message ?? "Invalid Message recieved");
-				} catch (error) {
-					console.log(error);
-				}
-			})}
-		>
-			<fieldset>
-				<legend>Update Tag</legend>
-				<p class="muted">Updates the existing tag without removing it from models</p>
-				<select bind:value={selectedEditTag}>
-					{#each userTags.current ?? [] as tag}
-						<option value={tag}>{tag.label}</option>
-					{:else}
-						<option>No Custom Tags</option>
-					{/each}
-				</select>
-				<label>Name: <input type="text" name="newName" bind:value={newName} /></label>
-				<div class="inline">
-					<p>Color:</p>
-					<Popover>
-						{#snippet trigger()}
-							<div
-								class="color-preview"
-								style={`background-color: rgb(${Number(Number(editTagColor.r).toFixed(3)) * 255}, ${Number(Number(editTagColor.g).toFixed(3)) * 255}, ${Number(Number(editTagColor.b).toFixed(3)) * 255})`}
-							></div>
-						{/snippet}
-						<ColorSelect bind:rgb={editTagColor} />
-					</Popover>
-				</div>
-				<input type="hidden" name="tagToUpdate" value={editTagId} />
 
-				<input
-					type="hidden"
-					name="tagColor"
-					value={JSON.stringify({ r: Number(editTagColor.r).toFixed(3), g: Number(editTagColor.g).toFixed(3), b: Number(editTagColor.b).toFixed(3) })}
-				/>
-				<button disabled={userTags.current?.length == 0}>Update Tag</button>
-			</fieldset>
-		</form>
-		<form
-			{...removeTag.enhance(async ({ submit }) => {
-				try {
-					if (confirm(`Are you sure you want to delete the tag and remove it from all units it's applied to?`)) await submit();
-					toastController.addToast(removeTag.result?.message ?? "Invalid Message recieved");
-				} catch (error) {
-					console.log(error);
-				}
-			})}
-		>
+		<fieldset>
+			{let tagFilter = $state("")}
+			<legend>Edit/Remove Existing Tag <label>Filter <input type="text" bind:value={tagFilter} /></label></legend>
+
+			{const tags = $derived(await getUserTags())}
+			{let selectedTag = $state<Pick<CollectionTag, "color" | "id" | "label">>()}
+
+			<div class="tag-list">
+				{#if tags.length}
+					{#each tags.filter((t) => includesIgnoreCase(t.label, tagFilter)) as tag}
+						{const rgb = $derived<RGB>(JSON.parse(tag.color, (key, value) => reviveNumber(key, value)))}
+						<button style={`--rgb: rgb(${rgb.r * 255} ${rgb.g * 255} ${rgb.b * 255})`} class={{ tag: true }} onclick={() => (selectedTag = tag)}>
+							{tag.label}
+						</button>
+					{:else}
+						<p class="tag">No Tags available</p>
+					{/each}
+				{:else}
+					<p class="tag">No Existing User Tags</p>
+				{/if}
+			</div>
 			<fieldset>
-				<legend>Remove existing tag</legend>
-				<p class="muted">This will remove the tag from all existing units and cannot be undone.</p>
-				<div class="inline">
-					<select name="tagToRemove" id="tagToRemove">
-						{#each userTags.current ?? [] as tag}
-							<option value={tag.id}>{tag.label}</option>
-						{:else}
-							<option>No Custom Tags</option>
-						{/each}
-					</select>
-					<button disabled={userTags.current?.length == 0}>Remove Tag</button>
+				<legend>Selected Tag</legend>
+				<div class="space-between">
+					{const rgb = $derived(JSON.parse(selectedTag?.color ?? '{"r": 0.15, "g": 0.15, "b": 0.15}', (key, value) => reviveNumber(key, value)))}
+					<p style={`--rgb: rgb(${rgb.r * 255} ${rgb.g * 255} ${rgb.b * 255})`} class={{ tag: true }}>
+						{selectedTag?.label ?? "No Tag Selected"}
+					</p>
+					<button
+						disabled={selectedTag == undefined}
+						onclick={() => {
+							if (confirm(`Are you sure you want to delete "${selectedTag!.label}" and remove it from all units it's applied to?`))
+								deleteTag(selectedTag!.id).then((r) => {
+									toastController.addToast(r.message);
+									selectedTag = undefined;
+								});
+						}}
+					>
+						Remove Tag
+					</button>
 				</div>
+
+				{let updatedName = $derived(selectedTag?.label ?? "")}
+				{let updatedColor = $derived<RGB>(JSON.parse(selectedTag?.color ?? '{"r": 0.15, "g": 0.15, "b": 0.15}', (key, value) => reviveNumber(key, value)))}
+				<form
+					{...updateTag.enhance(async (form) => {
+						await form.submit();
+						selectedTag = undefined;
+					})}
+					class="edit-tags-body"
+				>
+					<input {...updateTag.fields.tagId.as("hidden", selectedTag?.id ?? -1)} />
+					<input {...updateTag.fields.updatedColor.as("hidden", JSON.stringify(updatedColor))} />
+					<label>Name: <input {...updateTag.fields.updatedName.as("text", updatedName)} disabled={!selectedTag} placeholder="New Tag Name" /></label>
+					<div class="space-between">
+						<div class="inline">
+							<p>Color:</p>
+							<Popover>
+								{#snippet trigger()}
+									<div
+										class="color-preview"
+										style={`background-color: rgb(${Number(updatedColor.r.toFixed(3)) * 255}, ${Number(updatedColor.g.toFixed(3)) * 255}, ${Number(updatedColor.b.toFixed(3)) * 255})`}
+									></div>
+								{/snippet}
+								<ColorSelect bind:rgb={updatedColor} />
+							</Popover>
+						</div>
+						<button disabled={!selectedTag}>Update Tag</button>
+					</div>
+				</form>
 			</fieldset>
-		</form>
+		</fieldset>
 	</div>
 </Dialog>
 
@@ -138,6 +137,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
+		padding: var(--responsive-padding);
 	}
 	.add-button {
 		width: max-content;
@@ -150,5 +150,24 @@
 	.color-preview:hover {
 		cursor: pointer;
 		border: 2px solid var(--primary);
+	}
+
+	.tag-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 16px 10px;
+		max-width: 60dvw;
+		max-height: 60dvh;
+	}
+	.tag {
+		font-size: 0.9em;
+		padding: 4px 8px;
+		border-radius: var(--radius);
+		display: flex;
+		gap: 8px;
+		color: var(--surface-color-light-text-color);
+		height: max-content;
+		background-color: var(--rgb, var(--surface-color-light));
+		color: hwb(from oklch(from var(--rgb, var(--surface-color-light)) l 0 0) h calc(((b - 50) * 999)) calc(((w - 50) * 999)));
 	}
 </style>

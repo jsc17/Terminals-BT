@@ -45,19 +45,23 @@ const roles = [
 ];
 
 const movementTypes = [
-	{ value: "st", label: "Standard Only" },
-	{ value: "j", label: "Jump" },
+	{ value: "a", label: "Aerodyne" },
+	{ value: "f", label: "Foot" },
+	{ value: "g", label: "WiGE" },
 	{ value: "h", label: "Hover" },
+	{ value: "i", label: "Airship" },
+	{ value: "j", label: "Jump" },
+	{ value: "m", label: "Motorized" },
+	{ value: "n", label: "Naval" },
+	{ value: "qw", label: "Quadvee Wheeled" },
+	{ value: "qt", label: "Quadvee Tracked" },
+	{ value: "s", label: "Submersible" },
+	{ value: "st", label: "Standard Only" },
 	{ value: "t", label: "Tracked" },
 	{ value: "v", label: "VTOL" },
 	{ value: "w", label: "Wheeled" },
-	{ value: "g", label: "WiGE" },
-	{ value: "f", label: "Foot" },
-	{ value: "m", label: "Motorized" },
-	{ value: "s", label: "Submersible" },
-	{ value: "a", label: "Aerodyne" },
-	{ value: "i", label: "Airship" },
-	{ value: "p", label: "Spheriod" }
+	{ value: "w(b)", label: "Wheeled (Bicycle)" },
+	{ value: "w(m)", label: "Wheeled (Monocycle)" }
 ];
 
 export const filters: Filter[] = [

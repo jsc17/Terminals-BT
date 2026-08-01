@@ -1,17 +1,19 @@
 <script lang="ts">
+	import type { CollectionModel, CollectionTag } from "$lib/generated/prisma/browser";
 	import { Dialog } from "$lib/generic";
-	import { removeTagfromUnit, removeUnitFromCollection, getTags, addTagToUnit, updateQuantity } from "$lib/remote/collection.remote";
+	import { removeUnitFromCollection, getTags, updateUnit } from "$lib/remote/collection.remote";
 	import { toastController } from "$lib/stores";
 	import { appWindow } from "$lib/stores";
+	import { includesIgnoreCase, reviveNumber } from "$lib/utilities/utilities";
+	import { type RGB } from "svelte-color-select";
 
 	type Props = {
-		unit: any;
+		unit: CollectionModel & { unitTags: { tag: Omit<CollectionTag, "userId"> }[] };
 	};
 
 	let { unit }: Props = $props();
 
 	let open = $state(false);
-	let userTags = getTags();
 </script>
 
 <Dialog title={`Edit ${unit.label}`} triggerClasses={"transparent-button"} bind:open>
@@ -19,74 +21,71 @@
 		{appWindow.isMobile ? `Edit` : "Edit Unit"}
 	{/snippet}
 	<div class="edit-unit-body">
-		<form
-			{...updateQuantity.enhance(async ({ submit }) => {
-				try {
-					await submit();
-					toastController.addToast(updateQuantity.result?.message ?? "Invalid message recieved");
-				} catch (error) {
-					console.log(error);
-				}
-			})}
-		>
-			<label class="muted" for="updateQuantity"> Update Quantity </label>
-			<input type="number" name="updateQuantity" id="updateQuantity" min="0" defaultvalue={unit.quantity} />
-			<button>Update</button>
-			<input type="hidden" name="unitId" value={unit.id} />
-		</form>
-		<form
-			{...addTagToUnit.for(unit.id).enhance(async ({ submit }) => {
-				try {
-					await submit();
-					toastController.addToast(addTagToUnit.result?.message ?? "Invalid message recieved");
-				} catch (error) {
-					console.log(error);
-				}
-			})}
-			class="add-tag-form"
-		>
-			<label class="muted" for="tag"> Add Tag </label>
-			<select name="tag[]" id="tag">
-				{#each userTags.current?.filter((value) => {
-					return unit.unitTags.find(({ tag }: { tag: { id: number } }) => {
-							return value.id == tag.id;
-						}) == undefined;
-				}) ?? [] as tag}
-					<option value={tag.id}>{tag.label}</option>
+		{const tags = $derived(await getTags())}
+		{let appliedTags = $derived(unit.unitTags.map((t) => t.tag))}
+		{let availableTags = $derived(tags.filter((t) => !appliedTags.find((a) => a.id == t.id)))}
+		<fieldset>
+			<legend>Applied Tags</legend>
+
+			<div class="tag-list">
+				{#each appliedTags as tag, index}
+					{const rgb = $derived<RGB>(JSON.parse(tag.color, (key, value) => reviveNumber(key, value)))}
+					<button style={`--rgb: rgb(${rgb.r * 255} ${rgb.g * 255} ${rgb.b * 255})`} class="tag" onclick={() => (appliedTags = appliedTags.toSpliced(index, 1))}>
+						{tag.label}
+					</button>
+				{:else}
+					<p class="tag">No Tags Applied</p>
 				{/each}
-			</select>
-			<button>Add</button>
-			<input type="hidden" name="unitId[]" value={unit.id} />
-		</form>
+			</div>
+		</fieldset>
+		{let tagFilter = $state("")}
 
-		<div class="tag-container">
-			<p class="tag-header">Existing Tags</p>
-			{#each unit.unitTags as { tag }}
-				<form
-					class="tag-line"
-					{...removeTagfromUnit.for(tag).enhance(async ({ submit }) => {
-						try {
-							await submit();
-							console.log(removeTagfromUnit.for(tag).result);
+		<fieldset>
+			<legend> <label>Available Tags - Filter <input type="text" bind:value={tagFilter} /></label> </legend>
 
-							toastController.addToast(removeTagfromUnit.for(tag).result?.message ?? "Invalid message recieved");
-						} catch (error) {
-							console.log(error);
-						}
-					})}
-				>
-					<p>{tag.label}</p>
-					<input type="hidden" name="unitId" value={unit.id} />
-					<input type="hidden" name="tagToRemove" value={tag.id} />
-					<button class="transparent-button">remove</button>
-				</form>
-			{/each}
-		</div>
+			<div class="tag-list">
+				{#if availableTags.length}
+					{#each availableTags.filter((t) => includesIgnoreCase(t.label, tagFilter)) as tag}
+						{const rgb = $derived<RGB>(JSON.parse(tag.color, (key, value) => reviveNumber(key, value)))}
+						<button style={`--rgb: rgb(${rgb.r * 255} ${rgb.g * 255} ${rgb.b * 255})`} class="tag" onclick={() => (appliedTags = [...appliedTags, tag])}>
+							{tag.label}
+						</button>
+					{:else}
+						<p class="tag">No Tags available</p>
+					{/each}
+				{:else}
+					<p class="tag">No Existing User Tags</p>
+				{/if}
+			</div>
+		</fieldset>
+
 		<form
-			{...removeUnitFromCollection.enhance(async ({ submit }) => {
+			{...updateUnit.for(unit.id).enhance(async ({ submit }) => {
 				try {
 					await submit();
-					toastController.addToast(removeUnitFromCollection.result?.message ?? "Invalid message recieved");
+					toastController.addToast(updateUnit.for(unit.id).result?.message ?? "Invalid message recieved");
+					open = false;
+				} catch (error) {
+					console.log(error);
+				}
+			})}
+		>
+			<input {...updateUnit.fields.unitId.as("hidden", unit.id)} />
+			{#each appliedTags as tag, index}
+				<input {...updateUnit.fields.tags[index].as("hidden", tag.id)} />
+			{/each}
+			<label>Update Model Quantity <input {...updateUnit.fields.quantity.as("number", unit.quantity)} /></label>
+			<div class="buttons">
+				<button type="button" onclick={() => (open = false)}>Cancel</button>
+				<button>Update</button>
+			</div>
+		</form>
+		<hr />
+		<form
+			{...removeUnitFromCollection.for(unit.id).enhance(async ({ submit }) => {
+				try {
+					await submit();
+					toastController.addToast(removeUnitFromCollection.for(unit.id).result?.message ?? "Invalid message recieved");
 					open = false;
 				} catch (error) {
 					console.log(error);
@@ -108,28 +107,35 @@
 		gap: 20px;
 		padding: 12px 4px;
 	}
-	.add-tag-form {
-		display: flex;
-		gap: 12px;
-		align-items: center;
-	}
-	.tag-container {
+
+	fieldset {
 		display: flex;
 		flex-direction: column;
-		border: 1px solid var(--border);
+		padding: var(--responsive-padding);
 	}
-	.tag-header {
-		padding: 8px;
-		border-bottom: 2px solid var(--border);
-	}
-	.tag-line {
+	.tag-list {
 		display: flex;
-		justify-content: space-between;
-		background-color: var(--surface-color);
-		padding: 4px 16px;
-		border-bottom: 2px solid var(--border);
+		flex-wrap: wrap;
+		gap: 16px 10px;
+		max-width: 60dvw;
+		max-height: 60dvh;
 	}
-	.tag-line:hover {
-		background-color: var(--surface-color-light);
+	.tag {
+		font-size: 0.9em;
+		padding: 4px 8px;
+		border-radius: var(--radius);
+		display: flex;
+		gap: 8px;
+		color: var(--surface-color-light-text-color);
+		height: max-content;
+		background-color: var(--rgb, var(--surface-color-light));
+		color: hwb(from oklch(from var(--rgb, var(--surface-color-light)) l 0 0) h calc(((b - 50) * 999)) calc(((w - 50) * 999)));
+	}
+	.buttons {
+		display: flex;
+		gap: 16px;
+		align-items: center;
+		justify-content: end;
+		padding-top: 16px;
 	}
 </style>

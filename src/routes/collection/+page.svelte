@@ -1,348 +1,409 @@
 <script lang="ts">
 	import VirtualList from "@humanspeak/svelte-virtual-list";
-	import { getTags, getTaggedUnits, getUnitGroups, addUnitToCollection, addTagToUnit } from "$lib/remote/collection.remote";
+	import { getTags, getTaggedUnits, bulkRemoveUnitsFromCollection, bulkAddTagsToUnits, bulkRemoveTagsFromUnits, bulkSetTagsOnUnits } from "$lib/remote/collection.remote";
 	import { getContext } from "svelte";
 	import { SvelteMap, SvelteSet } from "svelte/reactivity";
 	import TagEditModal from "./TagEditModal.svelte";
 	import EditUnitModal from "./EditUnitModal.svelte";
-	import { toastController } from "$lib/stores";
-	import { addTagToUnitSchema } from "$lib/types/collection";
+	import { includesIgnoreCase } from "$lib/utilities/utilities";
+	import type { CollectionTag } from "$lib/generated/prisma/browser";
+	import { appWindow, toastController } from "$lib/stores";
+	import AddUnitModal from "./AddUnitModal.svelte";
+	import { Drawer, Switch } from "$lib/generic";
 
 	let user: { username: string | undefined } = getContext("user");
-
-	let nameFilter = $state("");
-	let filteredTags = new SvelteMap<number, string>();
-	let addUnitTags = new SvelteMap<number, string>([[1, "Owned"]]);
-	let checkedUnitIds = new SvelteSet<number>();
-
-	let taggedUnits = getTaggedUnits();
-	let userTags = getTags();
-
-	let filteredUnits = $derived(taggedUnits.current?.data?.filter((value) => filterUnit(value)) ?? []);
-
-	let filterTagList = $derived(userTags.current?.filter((value) => !filteredTags.has(value.id)) ?? []);
-	let addTagList = $derived(userTags.current?.filter((value) => !addUnitTags.has(value.id)) ?? []);
-
-	let selectedFilterTag = $derived(filterTagList[0]);
-	let selectedAddUnitTag = $derived(addTagList[0]);
-
-	let unitGroupListPromise = getUnitGroups();
-	let unitFilter = $state<string>();
-	let unitGroupList = $derived<{ group: string; type?: string }[]>(
-		unitGroupListPromise.current?.filter((v) => v.group.toLowerCase().includes(unitFilter?.toLowerCase() ?? "")) ?? []
-	);
-
-	function filterUnit(item: any) {
-		if (!item.label.toLowerCase().includes(nameFilter.toLowerCase())) return false;
-
-		const unitTags = item.unitTags.map(({ tag }: { tag: { id: number } }) => tag.id);
-		for (const [tagId, tagLabel] of filteredTags) if (!unitTags.includes(tagId)) return false;
-		return true;
-	}
+	let selectedTags = $state<SvelteMap<number, Pick<CollectionTag, "color" | "id" | "label">>>(new SvelteMap());
+	let drawerOpen = $state(false);
+	let tagFilterByAll = $state(false);
 </script>
+
+{#snippet tagContainer()}
+	{let tagFilter = $state("")}
+	<div>
+		<div class="space-between">
+			<label>Filter by Name <input type="text" bind:value={tagFilter} /></label>
+			<TagEditModal />
+		</div>
+		<p class="muted">You may select a tag by tapping on it</p>
+	</div>
+	<svelte:boundary>
+		{#snippet pending()}
+			<p>Retrieving Tags from server...</p>
+		{/snippet}
+
+		{const tags = $derived(await getTags())}
+		<div class="tag-list">
+			{#each tags.filter((t) => includesIgnoreCase(t.label, tagFilter)) as tag}
+				{const rgb = $derived(JSON.parse(tag.color))}
+				<button
+					style={`--rgb: rgb(${Number(rgb.r) * 255} ${Number(rgb.g) * 255} ${Number(rgb.b) * 255})`}
+					class={{ tag: true, "tag-highlight": selectedTags.has(tag.id) }}
+					onclick={() => {
+						if (selectedTags.has(tag.id)) selectedTags.delete(tag.id);
+						else selectedTags.set(tag.id, tag);
+					}}
+				>
+					{tag.label}
+				</button>
+			{:else}
+				<p class="tag">No Tags available</p>
+			{/each}
+		</div>
+		<hr />
+		<div class="space-between">
+			<h3>Selected Tags</h3>
+			<Switch bind:checked={tagFilterByAll}>
+				{#snippet leftValue()}
+					<span class={{ muted: tagFilterByAll }}>Any</span>
+				{/snippet}
+				{#snippet rightValue()}
+					<span class={{ muted: !tagFilterByAll }}>All</span>
+				{/snippet}
+			</Switch>
+		</div>
+		<div class="tag-list">
+			{#each selectedTags.values() as tag}
+				{const rgb = JSON.parse(tag.color)}
+				<button style={`--rgb: rgb(${Number(rgb.r) * 255} ${Number(rgb.g) * 255} ${Number(rgb.b) * 255})`} class="tag" onclick={() => selectedTags.delete(tag.id)}>
+					{tag.label}
+				</button>
+			{:else}
+				<p class="tag">No Tags Selected</p>
+			{/each}
+		</div>
+	</svelte:boundary>
+{/snippet}
 
 <main>
 	{#if user.username == undefined}
 		<p class="login-message">Please login or register to use this feature</p>
 	{:else}
-		<section class="filter-bar">
-			<label for="name-filter" class="name-filter">Filter by Name: <input type="text" name="name-filter" id="name-filter" bind:value={nameFilter} /></label>
-			<div class="manage-tag-container">
-				<div class="manage-tag-header">
-					<label for="tag-filter">
-						<select name="tag-filter" id="tag-filter" bind:value={selectedFilterTag}>
-							{#each filterTagList as tag}
-								<option value={tag}>{tag.label}</option>
-							{/each}
-						</select>
-					</label>
-					<button onclick={() => filteredTags.set(selectedFilterTag!.id, selectedFilterTag!.label)}>Add Tag to Filters</button>
+		{#if appWindow.isNarrow}
+			<Drawer bind:open={drawerOpen}>
+				<div class="drawer-wrapper">{@render tagContainer()}</div>
+			</Drawer>
+		{:else}
+			<section class="tag-container">
+				{@render tagContainer()}
+			</section>
+		{/if}
+		<section>
+			{let unitNameFilter = $state("")}
+			{let filterByTags = $state(true)}
+			{let bulkEditActive = $state(false)}
+			{let checkedUnits = $state(new SvelteSet<number>())}
+
+			<div class="space-between">
+				<div class="filter-options">
+					<label>{appWindow.isNarrow ? "Filter" : "Filter by Name"} <input type="text" bind:value={unitNameFilter} /></label>
+					<label>{appWindow.isNarrow ? "Filter by Tags" : "Filter by Selected Tags"} <input type="checkbox" bind:checked={filterByTags} /></label>
 				</div>
-				<div class="manage-tags">
-					{#each filteredTags as [tagId, tagLabel]}
-						<button class="tag-button" onclick={() => filteredTags.delete(tagId)}>
-							<span class="primary">x</span>
-							{tagLabel}
-						</button>
-					{:else}
-						<div class="tag">No Tags Selected</div>
-					{/each}
+				<div class="inline">
+					<button onclick={() => (bulkEditActive = !bulkEditActive)}>{bulkEditActive ? "Cancel Edit" : "Edit Multiple"}</button>
+					<AddUnitModal {selectedTags} />
 				</div>
 			</div>
-			<div class="edit-button">
-				<TagEditModal />
-			</div>
-		</section>
-		<svelte:boundary>
-			{#snippet pending()}
-				<p>Retrieving collection from server...</p>
-			{/snippet}
-			<section class="unit-list">
-				{#if taggedUnits.current?.status == "success" && taggedUnits.current.data}
-					{#if taggedUnits.current.data?.length == 0}
-						<p class="add-message">Add units to your collection</p>
-					{:else}
-						<VirtualList items={filteredUnits} itemsClass="test-collection">
+			<svelte:boundary>
+				{#snippet pending()}
+					<p>Retrieving collection from server...</p>
+				{/snippet}
+
+				{const units = $derived(await getTaggedUnits())}
+				{const filteredUnits = $derived(
+					units.filter(
+						(u) => includesIgnoreCase(u.label, unitNameFilter) && (selectedTags.size == 0 || !filterByTags || u.unitTags.find(({ tag }) => selectedTags.has(tag.id)) != undefined)
+					)
+				)}
+
+				{#if units.length == 0}
+					<p class="add-message">Add units to your collection</p>
+				{:else}
+					<div class="virtual-list-wrapper">
+						<div class="collection-model-row virtual-list-header">
+							{#if bulkEditActive}
+								{let allChecked = $state(false)}
+								<input
+									class="center"
+									type="checkbox"
+									bind:checked={allChecked}
+									onchange={() => {
+										const checkElements = document.querySelectorAll("[id^=check]");
+										checkElements.forEach((e) =>
+											allChecked ? checkedUnits.add(Number(e.getAttribute("data-unitid") ?? -1)) : checkedUnits.delete(Number(e.getAttribute("data-unitid") ?? -1))
+										);
+									}}
+								/>
+							{:else}
+								<div></div>
+							{/if}
+							<p>Name</p>
+							<p class="center">Type</p>
+							<p class="center">{appWindow.isNarrow ? "Cnt" : "Count"}</p>
+							{#if !appWindow.isNarrow}
+								<p>Tags</p>
+							{/if}
+							<div></div>
+						</div>
+						<VirtualList items={filteredUnits}>
 							{#snippet renderItem(item)}
 								<div class="collection-model-row">
-									<input
-										type="checkbox"
-										bind:checked={
-											() => checkedUnitIds.has(item.id),
-											(checked) => {
-												checked ? checkedUnitIds.add(item.id) : checkedUnitIds.delete(item.id);
-											}
-										}
-										form="unit-management"
-									/>
-									<p class="tagged-unit-name">{item.label}</p>
-									<p>{item.type ? `${item.type}` : "-"}</p>
-									<p class="tagged-unit-quantity">x{item.quantity}</p>
-									<div class="selected-tags">
-										{#each item.unitTags as { tag }}
-											{@const rgb = JSON.parse(tag.color)}
-											{@const rgbString = `rgb(${Number(rgb.r) * 255} ${Number(rgb.g) * 255} ${Number(rgb.b) * 255})`}
-											<div style={`background-color: ${rgbString}; color: hwb(from oklch(from ${rgbString} l 0 0) h calc(((b - 50) * 999)) calc(((w - 50) * 999)));`} class="tag">
-												{tag.label}
-											</div>
-										{:else}
-											<div class="tag">No Tags</div>
-										{/each}
-									</div>
+									{#if bulkEditActive}
+										<input
+											id={`check-${item.id}`}
+											type="checkbox"
+											data-unitid={item.id}
+											bind:checked={() => checkedUnits.has(item.id), (v) => (v ? checkedUnits.add(item.id) : checkedUnits.delete(item.id))}
+										/>
+									{:else}
+										<div></div>
+									{/if}
+									<label for={`check-${item.id}`}>{item.label}</label>
+									<p class="center">{item.type ? `${item.type}` : "-"}</p>
+									<p class="center tagged-unit-quantity">x{item.quantity}</p>
+									{#if !appWindow.isNarrow}
+										<div class="tag-list">
+											{#each item.unitTags as { tag }}
+												{const rgb = $derived(JSON.parse(tag.color))}
+												<button
+													style={`--rgb: rgb(${Number(rgb.r) * 255} ${Number(rgb.g) * 255} ${Number(rgb.b) * 255})`}
+													class={{ tag: true, "tag-highlight": selectedTags.has(tag.id) }}
+													onclick={() => {
+														if (selectedTags.has(tag.id)) selectedTags.delete(tag.id);
+														else selectedTags.set(tag.id, tag);
+													}}
+												>
+													{tag.label}
+												</button>
+											{:else}
+												<p class="tag">No Tags</p>
+											{/each}
+										</div>
+									{/if}
 									<EditUnitModal unit={item} />
 								</div>
+								{#if appWindow.isNarrow}
+									<div class="tag-list-mobile">
+										{#each item.unitTags as { tag }}
+											{const rgb = $derived(JSON.parse(tag.color))}
+											<button
+												style={`--rgb: rgb(${Number(rgb.r) * 255} ${Number(rgb.g) * 255} ${Number(rgb.b) * 255})`}
+												class={{ "tag-mobile": true, "tag-highlight": selectedTags.has(tag.id) }}
+												onclick={() => {
+													if (selectedTags.has(tag.id)) selectedTags.delete(tag.id);
+													else selectedTags.set(tag.id, tag);
+												}}
+											>
+												{tag.label}
+											</button>
+										{:else}
+											<p class="tag-mobile">No Tags</p>
+										{/each}
+									</div>
+								{/if}
 							{/snippet}
 						</VirtualList>
-					{/if}
+					</div>
 				{/if}
-			</section>
-		</svelte:boundary>
-		<section>
-			<form
-				id="unit-management"
-				{...addUnitToCollection.enhance(async ({ submit }) => {
-					try {
-						await submit();
-						toastController.addToast(addUnitToCollection.result?.message ?? "Invalid message recieved");
-					} catch (error) {
-						console.log(error);
-					}
-				})}
-				class="manage-bar"
-			>
-				<div class="manage-bar-add-unit">
-					<p class="muted">Adds the selected model to your collection with the currently selected tags</p>
-					<div class="justify-end">
-						<label>Filter: <input type="text" bind:value={unitFilter} style="width: 150px;" /></label>
-						<select name="newUnit" id="new-unit-name" style="width: 250px;">
-							{#each unitGroupList as group}
-								<option value={JSON.stringify(group)}>{group.group} {group.type ? `(${group.type})` : ""}</option>
+				{#if bulkEditActive}
+					<div class="bulk-edit-buttons">
+						<button
+							onclick={() =>
+								bulkSetTagsOnUnits({ unitIds: [...checkedUnits], tagIds: [...selectedTags.keys()] }).then((r) => {
+									toastController.addToast(r.message);
+									if (r.status == "success") {
+										bulkEditActive = false;
+										checkedUnits.clear();
+									}
+								})}>Set Tags on Units</button
+						>
+						<button
+							onclick={() =>
+								bulkRemoveTagsFromUnits({ unitIds: [...checkedUnits], tagIds: [...selectedTags.keys()] }).then((r) => {
+									toastController.addToast(r.message);
+									if (r.status == "success") {
+										bulkEditActive = false;
+										checkedUnits.clear();
+									}
+								})}>Remove Selected Tags</button
+						>
+						<button
+							onclick={() =>
+								bulkAddTagsToUnits({ unitIds: [...checkedUnits], tagIds: [...selectedTags.keys()] }).then((r) => {
+									toastController.addToast(r.message);
+									if (r.status == "success") {
+										bulkEditActive = false;
+										checkedUnits.clear();
+									}
+								})}>Add Selected Tags</button
+						>
+						<button
+							onclick={() => {
+								if (confirm("Delete selected units? This cannot be undone"))
+									bulkRemoveUnitsFromCollection([...checkedUnits]).then((r) => {
+										toastController.addToast(r.message);
+										if (r.status == "success") {
+											bulkEditActive = false;
+											checkedUnits.clear();
+										}
+									});
+							}}>Delete Units</button
+						>
+					</div>
+				{/if}
+				{#if appWindow.isNarrow}
+					<div class="mobile-tag-bar">
+						<div class="tag-list">
+							{#each selectedTags.values() as tag}
+								{const rgb = $derived(JSON.parse(tag.color))}
+								<button style={`--rgb: rgb(${Number(rgb.r) * 255} ${Number(rgb.g) * 255} ${Number(rgb.b) * 255})`} class="tag">
+									{tag.label}
+								</button>
+							{:else}
+								<p class="tag">No Tags Selected</p>
 							{/each}
-						</select>
-						<button>Add</button>
+						</div>
+						<button class="tag-button" onclick={() => (drawerOpen = true)}>Select Tags</button>
 					</div>
-				</div>
-				<div class="manage-tag-container">
-					<div class="manage-tag-header">
-						<label>
-							<select id="tagFilter" bind:value={selectedAddUnitTag}>
-								{#each addTagList as tag}
-									<option value={tag}>{tag.label}</option>
-								{/each}
-							</select>
-						</label>
-						<button type="button" onclick={() => addUnitTags.set(selectedAddUnitTag!.id, selectedAddUnitTag!.label)}>Add Tag</button>
-					</div>
-					<div class="manage-tags">
-						{#each addUnitTags as [tagId, tagLabel]}
-							<button type="button" class="tag-button" onclick={() => addUnitTags.delete(tagId)}>
-								<span class="primary">x</span>
-								{tagLabel}
-							</button>
-							<input type="hidden" name="tag[]" value={tagId} />
-						{/each}
-					</div>
-				</div>
-			</form>
-
-			<form
-				{...addTagToUnit.preflight(addTagToUnitSchema).enhance(async ({ submit }) => {
-					try {
-						await submit();
-						toastController.addToast(addTagToUnit.result?.message ?? "Invalid message recieved");
-					} catch (error) {
-						console.log(error);
-					}
-				})}
-				class="inline"
-			>
-				<p class="muted">Add selected tags to all checked models:</p>
-				<button>Add</button>
-				{#each addUnitTags as [tagId], index}
-					<input {...addTagToUnit.fields.tag[index].as("hidden", tagId.toString())} />
-				{/each}
-				{#each checkedUnitIds as unitId, index}
-					<input {...addTagToUnit.fields.unitId[index].as("hidden", unitId.toString())} />
-				{/each}
-			</form>
+				{/if}
+			</svelte:boundary>
 		</section>
 	{/if}
 </main>
 
 <style>
-	:global(.test-collection) {
-		display: grid;
-		grid-template-columns: max-content fit-content(30%) max-content max-content 1fr max-content;
-		column-gap: 16px;
-	}
-	:global(.test-collection > div) {
-		display: grid;
-		grid-template-columns: subgrid;
-		grid-column: span 6;
-	}
 	main {
-		display: flex;
-		flex-direction: column;
-		gap: 16px;
+		display: grid;
+		grid-template-columns: 1fr 3fr;
+		gap: 4px;
 		height: 100%;
+		padding: var(--responsive-padding);
+
+		@media (max-width: 875px) {
+			grid-template-columns: 1fr;
+		}
 	}
 	section {
 		padding: 16px;
 		background-color: var(--surface-color);
 		border: 1px solid var(--border);
+		border-radius: var(--radius);
 		display: flex;
-		gap: 24px;
+		flex-direction: column;
+		gap: 12px;
+
+		@media (max-width: 875px) {
+			padding: 4px;
+		}
 	}
-	.unit-list {
-		flex: 1;
-		padding-right: 0px;
-		overflow: auto;
-	}
-	.add-message {
-		flex: 1;
-		font-size: 24px;
-		align-self: center;
-		margin-top: 16px;
-	}
-	.login-message {
-		margin-top: 16px;
-		font-size: 24px;
-		align-self: center;
-	}
-	.filter-header {
-		color: var(--surface-color-light-text-color);
-		font-size: 0.95em;
-	}
-	.selected-tags {
+
+	.drawer-wrapper {
+		padding: 16px;
 		display: flex;
-		gap: 4px;
+		flex-direction: column;
+		gap: 12px;
+	}
+	.tag-list,
+	.tag-list-mobile {
+		display: flex;
 		flex-wrap: wrap;
+		gap: 10px;
+	}
+
+	.tag-list-mobile {
+		border-bottom: 1px solid var(--border);
+		padding-bottom: 4px;
+		gap: 6px;
 	}
 	.tag,
-	.tag-button {
+	.tag-mobile {
 		font-size: 0.9em;
-		background-color: var(--surface-color-light);
 		padding: 4px 8px;
 		border-radius: var(--radius);
 		display: flex;
 		gap: 8px;
 		color: var(--surface-color-light-text-color);
 		height: max-content;
+		background-color: var(--rgb, var(--surface-color-light));
+		color: hwb(from oklch(from var(--rgb, var(--surface-color-light)) l 0 0) h calc(((b - 50) * 999)) calc(((w - 50) * 999)));
 	}
-	.tag-button:hover {
-		cursor: pointer;
+	.tag-mobile {
+		font-size: 0.7em;
+		padding: 2px 4px;
 	}
-	.filter-bar {
-		& * {
-			align-self: center;
+	.tag-highlight {
+		box-shadow: 0px 0px 3px 3px var(--text-color);
+
+		@media (max-width: 875px) {
+			box-shadow: 0px 0px 2px 2px var(--text-color);
 		}
 	}
-	.filter-bar {
-		display: grid;
-		grid-template-columns: 1fr 1fr 1fr;
-		column-gap: 24px;
+	h3 {
+		margin: 0;
 	}
-	.manage-bar {
+	.filter-options {
+		display: flex;
+		gap: 20px;
+
+		@media (max-width: 875px) {
+			gap: 6px;
+			flex-direction: column;
+		}
+	}
+	.virtual-list-wrapper {
+		width: 100%;
+		position: relative;
 		display: grid;
-		grid-template-columns: 1fr 1fr;
-		column-gap: 24px;
+		grid-template-rows: max-content 1fr;
+		flex: 1;
+		background-color: var(--surface-color);
+		column-gap: 16px;
+	}
+
+	.virtual-list-header {
+		border-bottom: 3px solid var(--border);
 	}
 	.collection-model-row {
-		padding: 8px 16px;
-		border-bottom: 1px solid var(--border);
+		width: 100%;
+		padding: 8px 4px 8px 0px;
 		display: grid;
-		grid-template-columns: subgrid;
-		grid-column: span 6;
-
+		grid-template-columns: 3% 22% 5% 5% 60% 5%;
+		&:hover {
+			background-color: var(--surface-color-light);
+		}
 		& * {
 			align-self: center;
 		}
-	}
-	.collection-model-row:hover {
-		background-color: var(--surface-color-light);
-	}
-	.tagged-unit-name {
-		padding: 0px 16px;
-		justify-self: center;
+		@media (min-width: 875px) {
+			border-bottom: 1px solid var(--border);
+		}
+		@media (max-width: 875px) {
+			grid-template-columns: max-content 1fr 12% 8% 12%;
+			padding: 2px 2px;
+		}
 	}
 	.tagged-unit-quantity {
 		color: var(--surface-color-light-text-color);
 		padding: 0px 16px;
 	}
-	.manage-bar-add-unit {
+	.bulk-edit-buttons {
 		display: flex;
-		flex-direction: column;
-		gap: 8px;
-		align-items: end;
-		align-self: center;
+		gap: 16px;
+		justify-content: end;
 	}
-	.manage-tag-container {
-		border: 1px solid var(--border);
-		border-radius: var(--radius);
-	}
-	.manage-tag-header {
-		border-bottom: 1px solid var(--border);
-		padding: 4px 8px;
-		background-color: var(--background);
-		border-radius: var(--radius) var(--radius) 0 0;
-	}
-	.manage-tags {
-		display: flex;
-		gap: 8px;
-		flex-wrap: wrap;
-		padding: 6px;
-	}
-	.edit-button {
-		width: max-content;
-		justify-self: end;
-	}
-	.name-filter {
-		justify-self: end;
-	}
-	@media (max-width: 600px) {
-		section {
-			padding: 4px;
+	.mobile-tag-bar {
+		display: grid;
+		grid-template-columns: 1fr 20%;
+		border-top: 3px solid var(--border);
+		padding: 4px 4px;
+		min-height: 8dvh;
+
+		& .tag-list {
+			border-bottom: unset;
 		}
-		.collection-model-row {
-			padding: 4px;
-			gap: 2px;
-		}
-		.tagged-unit-name {
-			justify-self: start;
-			padding: 0px 4px;
-			white-space: nowrap;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			width: 100%;
-		}
-		.tagged-unit-quantity {
-			padding: 0px 4px;
-		}
-		.filter-bar,
-		.manage-bar {
-			display: flex;
-			flex-direction: column;
-			gap: 8px;
-		}
+	}
+	.tag-button {
+		background-color: var(--surface-color-light);
+		color: var(--surface-color-light-text-color);
+		border: 1px solid var(--button-dark-text-color);
 	}
 </style>

@@ -58,3 +58,12 @@ export function genericGetSet(e: any) {
 		}
 	};
 }
+
+export function includesIgnoreCase(text: string, search: string) {
+	return text.toLocaleLowerCase().includes(search.toLocaleLowerCase());
+}
+
+export function reviveNumber(key: any, value: any) {
+	if (typeof value === "string" && !isNaN(Number(value))) return Number(value);
+	else return value;
+}

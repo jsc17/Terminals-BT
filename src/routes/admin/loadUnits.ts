@@ -2,7 +2,7 @@ import { deserialize, enhance } from "$app/forms";
 import { calculateTMM } from "$lib/utilities/genericBattletechUtilities";
 import { toastController } from "$lib/stores/toastController.svelte";
 import SendNotification from "./SendNotification.svelte";
-import { getImage, setCollectionTypes } from "./admin.remote";
+import { getImage } from "./admin.remote";
 
 async function loadUnits() {
 	const links: { type: string; link: string }[] = [];

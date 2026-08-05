@@ -1,11 +1,12 @@
 import type { MulUnit } from "$lib/types/listTypes";
 import type { Filter } from "./filter";
-import { deserialize } from "$app/forms";
 import { filters as filtersImport, additionalFilters as additionalFiltersImport } from "$lib/data/filters";
 import type { Ruleset } from "../rules/rulesets";
 import { ruleSets } from "../rules/rulesets";
 import { getResultListLocal, getUniqueListLocal } from "$lib/local/sqllite/local-db";
 import { convertUnitDataToMulUnit } from "$lib/utilities/unitData";
+import { getUnitsWithTags } from "$lib/remote/collection.remote";
+import { SvelteMap } from "svelte/reactivity";
 
 type SearchConstraint = {
 	equals?: number;
@@ -91,31 +92,33 @@ export class ResultList {
 	resultList = $state<MulUnit[]>([]);
 	uniqueList = $state<number[]>([]);
 	customUnits = $state<MulUnit[]>([]);
-	taggedUnits = $state<{ group: string; type: string }[]>([]);
-
-	options = $state<Ruleset>();
-	filterByRules = $state(true);
-	availableList = $derived.by(() => {
-		let availableUnits = this.resultList;
-		availableUnits = [...new Map(availableUnits.map((u) => [u.id, u]))].map((v) => v[1]);
-
-		if (this.taggedUnits.length) {
-			availableUnits = availableUnits.filter((u) => {
-				if (u.group && u.group != "") {
-					return this.taggedUnits.find((t) => t.group == u.group && t.type == u.subtype);
-				}
-				return this.taggedUnits.find((t) => t.group == u.class && t.type == u.subtype);
-			});
-		}
-		availableUnits.sort((a, b) => {
-			return (a.tonnage ?? 0) - (b.tonnage ?? 0);
-		});
-		return availableUnits;
-	});
-
+	collectionUnits = new SvelteMap<string, number>();
+	listGroupCounts = $state<SvelteMap<string, number>>();
 	restrictedList = $derived.by(() => this.applyOptions());
 	filters = $state<Filter[]>(filtersImport);
 	additionalFilters = $state<Filter[]>(additionalFiltersImport);
+	tagFilter = $derived(this.filters.find((f) => f.type == "tag"));
+	options = $state<Ruleset>();
+	filterByRules = $state(true);
+
+	availableList = $derived.by(() => {
+		//deduplicate unit results
+		let availableUnits = [...new Map(this.resultList.map((u) => [u.id, u])).values()];
+
+		if (this.tagFilter?.maximumBehavior == "hide")
+			availableUnits = availableUnits.filter(
+				(u) =>
+					(this.collectionUnits.get((u.group && u.group.length ? u.group : u.class) + u.subtype) ?? 0) >
+					(this.listGroupCounts?.get((u.group && u.group.length ? u.group : u.class) + u.subtype) ?? 0)
+			);
+
+		if (this.tagFilter?.any.length || this.tagFilter?.all.length || this.tagFilter?.none.length)
+			availableUnits = availableUnits.filter((u) => this.collectionUnits.has((u.group && u.group.length ? u.group : u.class) + u.subtype));
+
+		availableUnits.sort((a, b) => (a.tonnage ?? 0) - (b.tonnage ?? 0));
+		return availableUnits;
+	});
+
 	filteredList = $derived(this.filterList(this.filters, this.additionalFilters));
 	sortKeys = $state<{ id: string; label: string; order: "asc" | "desc"; extra?: any }[]>([]);
 	sortedList = $derived(this.sortList(this.filteredList, this.sortKeys));
@@ -150,6 +153,15 @@ export class ResultList {
 			}
 		});
 		this.uniqueList = await getUniqueListLocal($state.snapshot(this.#eras));
+	}
+	applyCollectionFilters() {
+		this.collectionUnits.clear();
+		if (this.tagFilter)
+			return getUnitsWithTags({
+				any: this.tagFilter.any.map((t) => t.id),
+				all: this.tagFilter.all.map((t) => t.id),
+				none: this.tagFilter.none.map((t) => t.id)
+			}).then((r) => r.forEach((u) => this.collectionUnits.set(u.group + u.type, u.quantity)));
 	}
 	async setOptions(newRules: string) {
 		this.options = ruleSets.find((rules) => rules.name == newRules) ?? ruleSets[0];
@@ -442,26 +454,6 @@ export class ResultList {
 			if (meetsAllFilters) tempResultList.push(unit);
 		}
 		return tempResultList;
-	}
-	async resetFilters() {
-		this.filters.concat(this.additionalFilters).forEach((filter) => {
-			if (filter.type == "number") {
-				filter.valueMin = undefined;
-				filter.valueMax = undefined;
-			} else if (filter.type == "numberGroup") {
-				filter.values!.forEach((value, index, values) => {
-					values[index] = {};
-				});
-			} else if (filter.type == "select") {
-				filter.value = [];
-			} else if (filter.type == "movement") {
-				filter.speedMaxValue = undefined;
-				filter.speedMinValue = undefined;
-				filter.typeValue = [];
-			} else if (filter.type != "unique") {
-				filter.value = "";
-			}
-		});
 	}
 	sortList(filteredUnits: MulUnit[], sortKeys: { id: string; label: string; order: "asc" | "desc"; extra?: any }[]) {
 		return filteredUnits.toSorted((a, b) => {

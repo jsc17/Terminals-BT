@@ -227,6 +227,7 @@
 								bulkRemoveTagsFromUnits({ unitIds: [...checkedUnits], tagIds: [...selectedTags.keys()] }).then((r) => {
 									toastController.addToast(r.message);
 									if (r.status == "success") {
+										selectedTags.clear();
 										bulkEditActive = false;
 										checkedUnits.clear();
 									}

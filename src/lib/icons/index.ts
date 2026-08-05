@@ -17,8 +17,10 @@ import CaretUpDownIcon from "$lib/icons/caret-up-down.svg?component";
 import CaretUpIcon from "$lib/icons/caret-up.svg?component";
 import CaretDownIcon from "$lib/icons/caret-down.svg?component";
 import DiscordLogoIcon from "$lib/icons/Discord-Symbol-Black.svg?component";
+import AlertIcon from "$lib/icons/alert-outline.svg?component";
 
 export {
+	AlertIcon,
 	GearIcon,
 	SortIcon,
 	SortAscendingIcon,

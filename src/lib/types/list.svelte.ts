@@ -25,6 +25,14 @@ export class List {
 	id: string = $state(crypto.randomUUID());
 
 	unitCount = $derived(this.units.length);
+	unitGroupCounts = $derived.by(() => {
+		const map = new SvelteMap<string, number>();
+		for (const unit of this.units) {
+			const key = (unit.baseUnit.group ? unit.baseUnit.group : unit.baseUnit.class) + unit.baseUnit.subtype;
+			map.set(key, (map.get(key) ?? 0) + 1);
+		}
+		return map;
+	});
 	pv = $derived(
 		this.units.reduce((total, current) => total + current.cost, 0) +
 			[...this.bsList.entries()].reduce((total, [id, count]) => {

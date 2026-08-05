@@ -16,7 +16,7 @@
 	import { createDroppable } from "@dnd-kit/svelte";
 	import { move } from "@dnd-kit/helpers";
 
-	import { GearIcon, SortIcon, SortAscendingIcon, SortDescendingIcon, DragIndicatorIcon, TrashIcon } from "$lib/icons";
+	import { GearIcon, SortIcon, SortAscendingIcon, SortDescendingIcon, DragIndicatorIcon, TrashIcon, AlertIcon } from "$lib/icons";
 
 	type Props = {
 		list?: List;
@@ -246,7 +246,16 @@
 									{:else}
 										<div></div>
 									{/if}
-									<a class="unit-name" href="http://masterunitlist.info/Unit/Details/{item.mulId}" target="_blank">{item.name ?? "Not found"}</a>
+									<div class="inline">
+										{const collectionCount = $state(resultList.collectionUnits.get((item.group.length ? item.group : item.class) + item.subtype) ?? 0)}
+										{const listCount = $state(list?.unitGroupCounts.get((item.group.length ? item.group : item.class) + item.subtype) ?? 0)}
+										<a class={{ "unit-name": true }} href="http://masterunitlist.info/Unit/Details/{item.mulId}" target="_blank">
+											{#if resultList.tagFilter?.maximumBehavior == "warn" && collectionCount <= listCount}
+												<AlertIcon fill="var(--warning)" height="15" />
+											{/if}
+											{item.name ?? "Not found"}</a
+										>
+									</div>
 									<div class="align-center">{item.subtype ?? "-"}</div>
 									<div class="align-center">{item.pv ?? "-"}</div>
 									{#if !appWindow.isMobile}

@@ -70,7 +70,10 @@ button:disabled {
 .transparent-button:hover {
 	cursor: pointer;
 }
-
+.input-button  {
+	background-color: var(--input);
+	color: var(--surface-color-light-text-color);
+}
 .primary-filter {
 	filter: var(--primary-filter);
 }

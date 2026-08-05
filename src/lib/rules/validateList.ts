@@ -182,7 +182,7 @@ export async function validateRules(
 				let filteredUnits = unitList.filter((unit) => {
 					return limit.types.includes("All") || limit.types.includes(unit.data.subtype);
 				});
-				let chassisList = Object.groupBy(filteredUnits, (unit) => unit.data.class);
+				let chassisList = Object.groupBy(filteredUnits, (unit) => unit.data.class + ` (${unit.data.subtype})`);
 				for (const [chassisKey, chassisValue] of Object.entries(chassisList)) {
 					if (chassisValue?.length && limit.max && failsMax(limit.max, chassisValue.length, unitList.length)) {
 						if (issueList.has("Maximum chassis")) {
@@ -191,7 +191,7 @@ export async function validateRules(
 							issueList.set("Maximum chassis", new Set([chassisKey]));
 						}
 						for (const unit of unitList) {
-							if (unit.data.class == chassisKey) {
+							if (unit.data.class == chassisValue[0].data.class && unit.data.subtype == chassisValue[0].data.subtype) {
 								issueUnits.add(unit.id!);
 							}
 						}

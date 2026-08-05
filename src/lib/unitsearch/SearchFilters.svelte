@@ -2,12 +2,14 @@
 	import { type Filter } from "$lib/types/filter";
 	import { ResultList } from "$lib/types/resultList.svelte";
 	import { Select, Popover } from "$lib/generic";
-	import { getTags, getUnitsWithTags } from "$lib/remote/collection.remote";
 	import { getContext } from "svelte";
-	import { toastController } from "$lib/stores";
 	import { watch } from "runed";
 	import { nanoid } from "nanoid";
-	import { InformationIcon } from "$lib/icons";
+	import { AlertIcon, InformationIcon } from "$lib/icons";
+	import TagFilterDialog from "./TagFilterDialog.svelte";
+	import { type RGB } from "svelte-color-select";
+	import { capitalize, reviveNumber } from "$lib/utilities/utilities";
+	import { getUnitsWithTags } from "$lib/remote/collection.remote";
 
 	type Props = {
 		resultList: ResultList;
@@ -18,10 +20,6 @@
 	let tabId = $state(nanoid());
 	let showAdditionalFilters = $state(false);
 	let showAbilitiesDropdown = $state(false);
-
-	const tags = getTags();
-	const filterTags = $derived(tags.current?.map((t) => ({ value: t.id.toString(), label: t.label })) ?? []);
-	let selectedTags = $state<string[]>([]);
 
 	let user: { username: string | undefined } = getContext("user");
 
@@ -53,6 +51,11 @@
 				filter.speedMaxValue = undefined;
 				filter.speedMinValue = undefined;
 				filter.typeValue = [];
+			} else if (filter.type == "tag") {
+				filter.all = [];
+				filter.any = [];
+				filter.none = [];
+				filter.maximumBehavior = "none";
 			} else if (filter.type != "unique") {
 				filter.value = "";
 			}
@@ -60,7 +63,7 @@
 	}
 </script>
 
-{#snippet filters(filterList: Filter[], showTags: boolean)}
+{#snippet filters(filterList: Filter[])}
 	<div class="filter-list">
 		{#each filterList as filter}
 			<div class="filter">
@@ -163,68 +166,69 @@
 						<input id={filter.name + "max"} type="number" min="0" bind:value={filter.speedMaxValue} placeholder="max" />
 					</div>
 					<div class="select-filter-wrapper"><Select bind:value={filter.typeValue} type="multiple" items={filter.possibleTypeValues} placeholder="Any"></Select></div>
+				{:else if filter.type == "tag"}
+					<TagFilterDialog {filter} updateResults={() => resultList.applyCollectionFilters()} />
+					<Popover>
+						{#snippet trigger()}
+							<div class="tag-list">
+								{#each ["any", "all", "none"].filter((type) => filter[type].length) as type (type)}
+									<div class="tag">
+										{capitalize(type)}: {filter[type].length} Tags
+									</div>
+								{:else}
+									<div class="tag">No Collection Filters</div>
+								{/each}
+								{#if filter.maximumBehavior != "none"}
+									<div class="tag">
+										<p>
+											{#if filter.maximumBehavior == "warn"}
+												Warn <AlertIcon fill="var(--warning)" height="10px" /> by Collection Count
+											{:else}
+												Filter Results by Collection Count
+											{/if}
+										</p>
+									</div>
+								{/if}
+							</div>
+						{/snippet}
+
+						<div class="popover-body">
+							{#if filter.maximumBehavior != "none"}
+								<p>
+									{#if filter.maximumBehavior == "warn"}
+										Mark results with a warning <AlertIcon fill="var(--warning)" height="15px" /> when unit count in list exceeds collection model count
+									{:else}
+										Hide results when unit count in list exceeds collection model count
+									{/if}
+								</p>
+							{/if}
+							<hr />
+							{#each ["any", "all", "none"].filter((type) => filter[type].length) as type}
+								<fieldset class="tag-list">
+									<legend>{capitalize(type)} of</legend>
+									{#each filter[type] as tag}
+										{const rgb = $derived<RGB>(JSON.parse(tag.color, (key, value) => reviveNumber(key, value)))}
+										<div style={`--rgb: rgb(${rgb.r * 255} ${rgb.g * 255} ${rgb.b * 255})`} class="tag">
+											{tag.label}
+										</div>
+									{/each}
+								</fieldset>
+							{:else}
+								<p>Not filtering by any collection tags</p>
+							{/each}
+						</div>
+					</Popover>
 				{:else if filter.type == "unique"}
 					<input type="checkbox" name={filter.name} id={filter.name} bind:checked={filter.checked} />
 				{/if}
 			</div>
 		{/each}
-		{#if showTags}
-			<form
-				class="tag-container"
-				{...getUnitsWithTags.for(tabId).enhance(async ({ submit }) => {
-					if (resultList.taggedUnits.length == 0 && selectedTags.length) {
-						await submit();
-						resultList.taggedUnits = getUnitsWithTags.for(tabId).result?.data ?? [];
-						if (getUnitsWithTags.for(tabId).result?.data?.length == 0) {
-							toastController.addToast("No units found that match all selected tags");
-						} else if (getUnitsWithTags.for(tabId).result?.message == "failed") {
-							toastController.addToast(getUnitsWithTags.for(tabId).result?.message ?? "Invalid message recieved");
-						}
-					} else {
-						resultList.taggedUnits = [];
-						toastController.addToast("Tag filters removed");
-					}
-				})}
-			>
-				<div class="tag-header">
-					<Select bind:value={selectedTags} items={filterTags} type="multiple" placeholder="Tags" disabled={resultList.taggedUnits.length != 0} />
-					<button class="tag-filter-button" disabled={user.username == undefined || selectedTags.length == 0}
-						>{resultList.taggedUnits.length == 0 ? `Filter` : "Remove Filter"}</button
-					>
-					<a class="collection-link" href="/collection" target="_blank">Edit Collection</a>
-				</div>
-				<div class="tag-list">
-					{#if user.username}
-						{#each selectedTags as tag, index}
-							{@const currentTag = tags.current?.find((t) => t.id.toString() == tag)}
-							{@const rgb = JSON.parse(currentTag?.color ?? `{"r":"0.2","g":"0.2","b":"0.2"}`)}
-							{@const rgbString = `rgb(${Number(rgb.r) * 255} ${Number(rgb.g) * 255} ${Number(rgb.b) * 255})`}
-							<input type="hidden" name="tagId[]" value={tag} />
-							<button
-								type="button"
-								class="tag"
-								style={`background-color: ${rgbString}; color: hwb(from oklch(from ${rgbString} l 0 0) h calc(((b - 50) * 999)) calc(((w - 50) * 999)));`}
-								onclick={() => {
-									if (resultList.taggedUnits.length != 0) {
-										toastController.addToast("Remove the tag filter to continue editting tags");
-									} else {
-										selectedTags.splice(index, 1);
-									}
-								}}>{currentTag?.label}</button
-							>
-						{/each}
-					{:else}
-						<p class="muted">Log in to use custom tag filtering</p>
-					{/if}
-				</div>
-			</form>
-		{/if}
 	</div>
 {/snippet}
 
 <main>
 	<div class="card">
-		{@render filters(tempFilters, true)}
+		{@render filters(tempFilters)}
 		<div class="space-between filter-buttons">
 			<button
 				class="transparent-button"
@@ -245,7 +249,7 @@
 			<button class="clear" onclick={() => resetFilters()}>Clear Filters</button>
 		</div>
 		{#if showAdditionalFilters}
-			{@render filters(tempAdditionalFilters, false)}
+			{@render filters(tempAdditionalFilters)}
 		{/if}
 	</div>
 </main>
@@ -284,14 +288,6 @@
 	label {
 		margin-left: 4px;
 	}
-	.accordian {
-		width: 100%;
-		background-color: var(--surface-color);
-		border: 1px solid var(--border);
-		border-radius: var(--radius);
-		color: var(--text-color);
-		padding: 8px;
-	}
 	li {
 		margin-top: 6px;
 	}
@@ -303,43 +299,30 @@
 	.select-filter-wrapper {
 		width: 5em;
 	}
-	.tag-container {
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-		max-width: 300px;
-	}
-	.tag-header {
-		display: grid;
-		grid-template-columns: 100px max-content 1fr;
-		gap: 8px;
-	}
-	.tag-filter-button {
-		width: max-content;
-		height: max-content;
-	}
 	.tag-list {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 4px;
+		gap: 4px 6px;
+		padding: var(--responsive-padding);
+		align-items: center;
 	}
 	.tag {
-		font-size: 0.9em;
-		background-color: var(--background);
-		border: 1px solid var(--border);
-		padding: 2px 4px;
+		font-size: 0.75em;
+		padding: 4px 8px;
 		border-radius: var(--radius);
 		display: flex;
 		gap: 8px;
 		color: var(--surface-color-light-text-color);
 		height: max-content;
+		background-color: var(--rgb, var(--surface-color-extra-light));
+		color: hwb(from oklch(from var(--rgb, var(--surface-color-light)) l 0 0) h calc(((b - 50) * 999)) calc(((w - 50) * 999)));
 	}
-	.tag:hover {
-		cursor: pointer;
-	}
-	.collection-link {
-		font-size: 0.85em;
-		height: max-content;
+	.popover-body {
+		padding: var(--responsive-padding);
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		width: min(300px, 90dvw);
 	}
 	.era-dates-popover {
 		display: grid;

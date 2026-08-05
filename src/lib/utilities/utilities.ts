@@ -67,3 +67,7 @@ export function reviveNumber(key: any, value: any) {
 	if (typeof value === "string" && !isNaN(Number(value))) return Number(value);
 	else return value;
 }
+
+export function capitalize(text: string) {
+	return text.charAt(0).toLocaleUpperCase() + text.slice(1);
+}

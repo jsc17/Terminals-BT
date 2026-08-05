@@ -1,3 +1,5 @@
+import type { CollectionTag } from "$lib/generated/prisma/browser";
+
 type NumberFilter = {
 	name: string;
 	label: string;
@@ -55,5 +57,16 @@ type AbilityFilter = {
 	value: string;
 };
 
-export type Filter = AbilityFilter | UniqueFilter | MovementFilter | StringFilter | NumberFilter | SelectFilter | NumberGroupFilter;
+type TagFilter = {
+	[key: string]: any;
+	name: string;
+	label: string;
+	type: "tag";
+	any: Omit<CollectionTag, "userId">[];
+	all: Omit<CollectionTag, "userId">[];
+	none: Omit<CollectionTag, "userId">[];
+	maximumBehavior: "none" | "hide" | "warn";
+};
+
+export type Filter = AbilityFilter | UniqueFilter | MovementFilter | StringFilter | NumberFilter | SelectFilter | NumberGroupFilter | TagFilter;
 // { name: "name", type: "string", values: [{ label: "", value: "", default: "" }] },

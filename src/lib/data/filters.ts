@@ -81,7 +81,8 @@ export const filters: Filter[] = [
 		defaults: [0, 0, 0]
 	},
 	{ name: "size", label: "Size", type: "number" },
-	{ name: "abilities", label: "Abilities", type: "abilities", value: "" }
+	{ name: "abilities", label: "Abilities", type: "abilities", value: "" },
+	{ name: "collection", label: "Collection", type: "tag", any: [], all: [], none: [], maximumBehavior: "none" }
 ];
 
 export const additionalFilters: Filter[] = [

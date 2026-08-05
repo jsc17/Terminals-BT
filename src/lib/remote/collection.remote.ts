@@ -174,14 +174,20 @@ export const getUnitsWithGroups = query(async () => {
 	return unitList.sort((a, b) => a.class.localeCompare(b.class));
 });
 
-export const getUnitsWithTags = form(v.object({ tagId: v.array(v.pipe(v.string(), v.transform(Number))) }), async ({ tagId }) => {
+export const getUnitsWithTags = query(v.object({ any: v.array(v.number()), all: v.array(v.number()), none: v.array(v.number()) }), async ({ any, all, none }) => {
 	const { locals } = getRequestEvent();
-	if (!locals.user) return { status: "failed", message: "Invalid User" };
+	if (!locals.user) return [];
 
 	const units = await prisma.collectionModel.findMany({
-		where: { userId: locals.user.id, AND: tagId.map((t) => ({ unitTags: { some: { tagId: t } } })) },
-		select: { label: true, type: true }
+		where: {
+			userId: locals.user.id,
+			AND: [
+				...(any.length ? [{ unitTags: { some: { tagId: { in: any } } } }] : []),
+				...all.map((t) => ({ unitTags: { some: { tagId: t } } })),
+				...(none.length ? [{ unitTags: { none: { tagId: { in: none } } } }] : [])
+			]
+		},
+		select: { label: true, type: true, quantity: true }
 	});
-
-	return { status: "success", data: units.map((u) => ({ group: u.label, type: u.type! })) };
+	return units.map((u) => ({ group: u.label, type: u.type, quantity: u.quantity }));
 });

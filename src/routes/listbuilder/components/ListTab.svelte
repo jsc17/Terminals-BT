@@ -28,6 +28,13 @@
 	});
 
 	watch(
+		() => list.unitGroupCounts,
+		() => {
+			resultList.listGroupCounts = list.unitGroupCounts;
+		}
+	);
+
+	watch(
 		() => list.rules,
 		() => {
 			resultList.setOptions(list.rules);

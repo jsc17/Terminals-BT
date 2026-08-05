@@ -503,6 +503,18 @@ export class ResultList {
 		});
 	}
 
+	setSortKeyOrder(key: string, newOrder?: "asc" | "desc") {
+		const sortKey = this.sortKeys.find((sort) => sort.id == key);
+		if (!sortKey) return;
+
+		sortKey.order = newOrder ? newOrder : sortKey.order == "asc" ? "desc" : "asc";
+	}
+
+	removeSortKey(key: string) {
+		const index = this.sortKeys.findIndex((sort) => sort.id == key);
+		if (index != -1) this.sortKeys.splice(index, 1);
+	}
+
 	getSortKeyIndex(key: string): number {
 		return this.sortKeys.findIndex((sort) => sort.id == key);
 	}

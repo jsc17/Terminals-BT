@@ -13,10 +13,10 @@
 
 	import { DragDropProvider, DragOverlay } from "@dnd-kit/svelte";
 	import { createSortable } from "@dnd-kit/svelte/sortable";
-	import { createDroppable } from "@dnd-kit/svelte";
 	import { move } from "@dnd-kit/helpers";
 
 	import { GearIcon, SortIcon, SortAscendingIcon, SortDescendingIcon, DragIndicatorIcon, TrashIcon, AlertIcon } from "$lib/icons";
+	import SortTag from "./SortTag.svelte";
 
 	type Props = {
 		list?: List;
@@ -47,6 +47,7 @@
 	let listHeight = $state(500);
 	let listWidth = $state(0);
 	let draggingSortTag = $state(false);
+	let sortKeys = $derived(resultList.sortKeys);
 
 	let availabilityDialogOpen = $state(false);
 	let availabilityResults = $state<{ era: string; factions: string[] }[]>([]);
@@ -79,63 +80,40 @@
 		draggingSortTag = true;
 	}
 	function onDragOver(event: any) {
-		const { source, target } = event.operation;
-
-		if (target?.id == "trash") return;
-
+		const { source } = event.operation;
 		if (source?.sortable) {
-			resultList.sortKeys = move(resultList.sortKeys, event);
+			sortKeys = move(sortKeys, event);
 		}
 	}
 	function onDragEnd(event: any) {
 		if (event.canceled) return;
-		const { source, target } = event.operation;
+		const { source } = event.operation;
 
-		if (target?.id == "trash") {
-			resultList.sortKeys = resultList.sortKeys.filter((e) => e.id != source?.id);
+		if (source?.sortable) {
+			resultList.sortKeys = sortKeys;
 		}
 		draggingSortTag = false;
 	}
 </script>
-
-{#snippet drawSortTag(id: string, index: number, label: string, order: "asc" | "desc", isOverlay: boolean, extra?: any)}
-	{@const sortable = createSortable({ id, index, data: { id, index, label, order } })}
-	<div class={{ "dragging-outline": sortable.isDragging && !isOverlay }} {@attach sortable.attach}>
-		<div class={{ "sort-tag": true, "dragging-hidden": sortable.isDragging && !isOverlay }}>
-			<DragIndicatorIcon width="20" height="20" />
-			{index + 1} -
-			{label}
-			{#if order == "asc"}
-				<SortAscendingIcon width="20" height="20" />
-			{:else}
-				<SortDescendingIcon width="20" height="20" />
-			{/if}
-		</div>
-	</div>{/snippet}
 
 <div class="search-results card">
 	<div class="search-results-multisort-tags">
 		{#if resultList.sortKeys.length > 1}
 			<DragDropProvider {onDragStart} {onDragOver} {onDragEnd}>
 				<div class="multisort-draggable-container">
-					{#each resultList.sortKeys as sortKey, index (sortKey.id)}
-						{@render drawSortTag(sortKey.id, index, sortKey.label, sortKey.order, false)}
+					{#each sortKeys as sortKey, index (sortKey.id)}
+						<SortTag id={sortKey.id} {index} label={sortKey.label} order={sortKey.order} isOverlay={false} {resultList} />
 					{/each}
+					<div class="spacer"></div>
 				</div>
-				{#if draggingSortTag}
-					{@const trash = createDroppable({ id: "trash" })}
-					<div class="clear-sort-droppable" {@attach trash.attach}>
-						<TrashIcon width="20" height="20" />
-					</div>
-				{:else}
-					<button onclick={() => (resultList.sortKeys = [])} class="clear-sort-button">Clear All</button>
-				{/if}
+
 				<DragOverlay>
 					{#snippet children(source: any)}
-						{@render drawSortTag(source.data.id, source.data.index, source.data.label, source.data.order, true)}
+						<SortTag id={source.data.id} index={source.data.index} label={source.data.label} order={source.data.order} isOverlay={true} {resultList} />
 					{/snippet}
 				</DragOverlay>
 			</DragDropProvider>
+			<button onclick={() => (resultList.sortKeys = [])} class="clear-sort-button">Clear All</button>
 		{/if}
 	</div>
 	<div class:result-list-header={!appWindow.isMobile} class:result-list-header-mobile={appWindow.isMobile}>
@@ -344,35 +322,20 @@
 	.multisort-draggable-container {
 		display: flex;
 		gap: 8px;
+		row-gap: 12px;
 		align-items: center;
 		flex-wrap: wrap;
 	}
+	.spacer {
+		flex: 1;
+	}
 	.search-results-multisort-tags {
 		display: flex;
-		gap: 4px 32px;
 		align-items: center;
 		margin-bottom: 4px;
+		padding: var(--responsive-padding);
 	}
-	.sort-tag {
-		display: flex;
-		background-color: var(--button-background);
-		color: var(--button-text);
-		align-items: center;
-		text-align: center;
-		border-radius: 4px;
-		height: 100%;
-		cursor: grab;
-		font-size: 0.85rem;
-		padding: 0px 4px;
-		gap: 6px;
-		font-weight: 500;
-		line-height: 1;
-		color: var(--button-text);
-		font-size: 0.85rem;
-	}
-	.sort-tag:active {
-		cursor: grabbing;
-	}
+
 	.clear-sort-button {
 		display: flex;
 		align-items: center;
@@ -381,18 +344,9 @@
 		min-height: 20px;
 		height: max-content;
 		padding: 0px 8px;
-		margin-left: 32px;
-	}
-	.clear-sort-droppable {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		height: 20px;
-		width: 64px;
-		background-color: palevioletred;
-		border: 1px solid red;
-		border-radius: 2px;
-		margin-left: 32px;
+		background-color: var(--error);
+		align-self: flex-end;
+		justify-self: flex-end;
 	}
 	.result-list-header {
 		display: grid;
@@ -545,13 +499,5 @@
 	.role-text {
 		font-size: 0.8em;
 		align-self: center;
-	}
-	.dragging-hidden {
-		visibility: hidden;
-	}
-	.dragging-outline {
-		background-color: hsl(from var(--primary) h s l / 30%);
-		border: 1px solid var(--primary);
-		border-radius: 4px;
 	}
 </style>

@@ -204,14 +204,14 @@
 			<div class="virtual-list-container" bind:clientHeight={listHeight}>
 				<svelte:boundary>
 					{#snippet failed(error, reset)}
-						<p>
-							Sorry about this, but something failed. Press the button below to reset the result list. If this happens repeatedly, please take a screenshot and create an issue on
-							my <a href="https://github.com/jsc17/Terminals-BT/issues" target="_blank">Github</a>
-						</p>
-
-						<button onclick={reset}>Reset</button>
-
-						<p>{error}</p>
+						<div>
+							<p>
+								Sorry about this, but something failed. Press the button below to reset the result list. If this happens repeatedly, please take a screenshot and create an issue on
+								my <a href="https://github.com/jsc17/Terminals-BT/issues" target="_blank">Github</a>
+							</p>
+							<button onclick={reset}>Reset</button>
+							<p>{error}</p>
+						</div>
 					{/snippet}
 					<VirtualList items={resultList.sortedList ?? []}>
 						{#snippet renderItem(item)}
@@ -225,10 +225,9 @@
 										<div></div>
 									{/if}
 									<div class="inline">
-										{const collectionCount = $state(resultList.collectionUnits.get((item.group.length ? item.group : item.class) + item.subtype) ?? 0)}
-										{const listCount = $state(list?.unitGroupCounts.get((item.group.length ? item.group : item.class) + item.subtype) ?? 0)}
 										<a class={{ "unit-name": true }} href="http://masterunitlist.info/Unit/Details/{item.mulId}" target="_blank">
-											{#if resultList.tagFilter?.maximumBehavior == "warn" && collectionCount <= listCount}
+											{const key = $derived((item.group?.length ? item.group : item.class) + item.subtype)}
+											{#if resultList.tagFilter?.maximumBehavior == "warn" && (!resultList.collectionUnits.has(key) || resultList.warnList.has(key))}
 												<AlertIcon fill="var(--warning)" height="15" />
 											{/if}
 											{item.name ?? "Not found"}</a

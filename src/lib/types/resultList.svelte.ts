@@ -94,6 +94,17 @@ export class ResultList {
 	customUnits = $state<MulUnit[]>([]);
 	collectionUnits = new SvelteMap<string, number>();
 	listGroupCounts = $state<SvelteMap<string, number>>();
+	warnList = $derived(
+		new Set(
+			this.listGroupCounts
+				?.entries()
+				.filter(([key, value]) => {
+					const collectionCount = this.collectionUnits.get(key) ?? 0;
+					return value >= collectionCount;
+				})
+				.map((v) => v[0])
+		)
+	);
 	restrictedList = $derived.by(() => this.applyOptions());
 	filters = $state<Filter[]>(filtersImport);
 	additionalFilters = $state<Filter[]>(additionalFiltersImport);

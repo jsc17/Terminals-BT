@@ -73,14 +73,12 @@ export async function GET(event: RequestEvent): Promise<Response> {
 								pv: unitPv
 							};
 							teamUnits.get(team.id)?.push(data);
-							const mov = destroyed ? 0 : crippled.current ? Math.ceil(unitPv / 2) : unitPv;
-							console.log(mov);
+							const mov = destroyed ? 0 : crippled.current ? Math.floor(unitPv / 2) : unitPv;
 							pvRemaining.set(team.id, pvRemaining.get(team.id)! + mov);
 						}
 			}
 		}
 	}
-
 	return json({
 		id: matchDetails?.id,
 		name: matchDetails?.name,

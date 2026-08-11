@@ -64,6 +64,8 @@ export const createMatch = form(CreateMatchSchema, async (data) => {
 				name: data.name,
 				private: data.private,
 				matchDuration: data.matchDuration,
+				maxPv: data.maxPv,
+				scenario: data.scenario,
 				players: {
 					create: { player: { connect: { id: locals.user.id } }, playerNickname: data.hostNickname, playerRole: "HOST" }
 				},
@@ -102,6 +104,8 @@ export const createMatchWithList = form(CreateMatchWithListSchema, async (data) 
 				name: data.name,
 				private: data.private,
 				matchDuration: data.matchDuration,
+				maxPv: data.maxPv,
+				scenario: data.scenario,
 				players: {
 					create: { player: { connect: { id: locals.user.id } }, playerNickname: data.hostNickname, playerRole: "HOST" }
 				},

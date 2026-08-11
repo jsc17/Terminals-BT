@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `Match` ADD COLUMN `maxPv` INTEGER NULL,
+    ADD COLUMN `scenario` VARCHAR(191) NULL;

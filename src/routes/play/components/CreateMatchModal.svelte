@@ -55,6 +55,8 @@
 				<p class="error">{issue.message}</p>
 			{/each}
 		</div>
+		<label>Max PV: <input {...createMatch.fields.maxPv.as("number")} placeholder="optional" /></label>
+		<label>Scenario: <input {...createMatch.fields.scenario.as("text")} placeholder="optional" /></label>
 		<hr />
 		<div>
 			<label>Host Nickname: <input {...createMatch.fields.hostNickname.as("text", nickname)} /></label>

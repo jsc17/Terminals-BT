@@ -159,7 +159,7 @@ export function calculateSkill(unit: PlayUnitData, critCount: CritList, referenc
 
 export function calculateMovement(unit: PlayUnitData, measurementUnits: "inches" | "hexes", reference?: MulUnit) {
 	if (unit.current.heat >= 4) {
-		return [{ speed: 0, type: "I", tmm: -4, damaged: true }];
+		return [{ speed: 0, type: "SD", tmm: -4, damaged: true }];
 	}
 	let moveSpeeds: { speed: number; type: string; tmm: number; damaged: boolean }[] = [];
 	for (const { speed, type } of reference?.move ?? []) {
@@ -255,4 +255,25 @@ export function calculatePhysical(tmm: number, sDamage: number, reference?: MulU
 		physical.am = sDamage;
 	}
 	return physical;
+}
+
+export function calculateCrippled(
+	moveSpeeds: { type: string }[],
+	firepower: { m: number; mMin: boolean; l: number; lMin: boolean },
+	armorRemaining: { current: number; pending: number },
+	structRemaining: { current: number; pending: number },
+	reference: MulUnit
+) {
+	let current = false,
+		pending = false;
+
+	if (
+		structRemaining.current <= reference.structure! / 2 ||
+		(reference.armor && armorRemaining.current == 0 && reference.structure == 1) ||
+		!moveSpeeds.find((m) => m.type != "I") ||
+		((reference.damageM || reference.damageMMin || reference.damageL || reference.damageLMin) && !(firepower.m || firepower.l || firepower.mMin || firepower.lMin))
+	)
+		current = true;
+
+	return { current, pending };
 }

@@ -5,7 +5,9 @@ export const CreateMatchSchema = v.object({
 	name: v.pipe(v.string(), v.minLength(3, "The match name must be at least 3 characters")),
 	hostNickname: v.pipe(v.string(), v.nonEmpty("Your nickname must include at least one character")),
 	teamNames: v.optional(v.array(v.string()), ["Red", "Blue"]),
-	matchDuration: v.optional(v.number())
+	matchDuration: v.optional(v.number()),
+	maxPv: v.optional(v.number()),
+	scenario: v.optional(v.string())
 });
 
 export const CreateMatchWithListSchema = v.object({

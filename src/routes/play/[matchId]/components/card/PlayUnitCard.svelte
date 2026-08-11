@@ -45,6 +45,8 @@
 	let firepowerRemaining = $derived(automation.calculateFirepower(data, reference));
 	let currentSkill = $derived(automation.calculateSkill(data, critCount.current, reference));
 	let physical = $derived(automation.calculatePhysical(moveSpeeds[0].tmm, firepowerRemaining.s, reference));
+	let crippled = $derived(automation.calculateCrippled(moveSpeeds, firepowerRemaining, armorRemaining, structRemaining, reference!));
+
 	let formationBonuses = $derived.by(() => {
 		return [];
 		// const bonusAbilities: string[] = [];
@@ -109,7 +111,7 @@
 			</div>
 			<div class="flex-between">
 				<p class="unit-name bold">{reference?.class}</p>
-				{#if options.showCrippled && reference.armor && reference.structure && (structRemaining.current <= reference.structure / 2 || (armorRemaining.current == 0 && reference.structure == 1))}
+				{#if options.showCrippled && crippled.current}
 					<p class="unit-half-pv">Half: {Math.round(getNewSkillCost(data.skill, reference.pv) / 2)}</p>
 				{/if}
 			</div>
@@ -297,13 +299,7 @@
 				</div>
 			</div>
 			<div class="unit-card-right">
-				<div
-					class="unit-image-block"
-					class:unit-crippled={options.showCrippled &&
-						reference.armor &&
-						reference.structure &&
-						(structRemaining.current <= reference.structure / 2 || (armorRemaining.current == 0 && reference.structure == 1))}
-				>
+				<div class="unit-image-block" class:unit-crippled={options.showCrippled && crippled.current}>
 					<img src={image} alt="unit" class="unit-image" />
 
 					{#if data.number}

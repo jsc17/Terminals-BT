@@ -123,6 +123,9 @@
 					{/each}
 				</div>
 
+				<label>Max PV: <input {...createMatchWithList.fields.maxPv.as("number")} placeholder="optional" /></label>
+				<label>Scenario: <input {...createMatchWithList.fields.scenario.as("text")} placeholder="optional" /></label>
+
 				{#each createMatchWithList.fields.hostNickname.issues() as issue}
 					<p class="error">{issue.message}</p>
 				{/each}

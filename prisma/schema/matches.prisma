@@ -14,6 +14,8 @@ model Match {
     timePausedDurationMs Int @default(0)
     matchDuration Int?
     matchRoundSummaries MatchRoundSummary[]
+    maxPv Int?
+    scenario String?
 }
 
 model UsersInMatch {

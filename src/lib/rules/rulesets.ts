@@ -242,6 +242,124 @@ export const ruleSets: Ruleset[] = [
 		uniqueMaxLimit: 1,
 		allowFormations: false,
 		allowSCA: false
+	},
+	{
+		name: "sa2026",
+		display: "Southern Assault 2026",
+		shortDisplay: "SA2026",
+		singleEraFaction: true,
+		eraFactionRestriction: true,
+		maxPv: 375,
+		maxUnits: 16,
+		uniqueMaxLimit: 1,
+		allowedTypes: ["BA", "BM", "CV", "CI", "IM", "PM"],
+		allowFormations: false,
+		allowSCA: false,
+		allowedRules: ["Introductory", "Advanced", "Standard"],
+		disallowedAbilities: ["DRO", "BIM", "DCC", "HPG", "LAM", "RBT"],
+		unitLimits: [
+			{ types: ["BM", "IM"], max: 15 },
+			{ types: ["CV"], max: 12 },
+			{ types: ["BA", "CI"], max: 5 },
+			{ types: ["PM"], max: 5 }
+		],
+		chassisLimits: [{ types: ["BM", "IM", "CV"], max: 2 }],
+		variantLimits: [{ types: ["BM", "IM"], max: 1 }],
+		skillLimits: [
+			{ types: ["2"], max: 2 },
+			{ types: ["6"], max: 2 }
+		],
+		abilityLimits: [
+			{ types: ["JMPS"], max: 2 },
+			{ types: ["ART"], max: 2, requirements: { skill: { min: 3 } } },
+			{ types: ["HT"], max: 5 }
+		]
+	},
+
+	{
+		name: "wn350v3",
+		display: "Wolfnet 350 v3.2",
+		shortDisplay: "WN350v3.2",
+		singleEraFaction: true,
+		eraFactionRestriction: true,
+		maxPv: 350,
+		maxUnits: 16,
+		allowedTypes: ["BA", "BM", "CV", "CI", "IM", "PM", "BS"],
+		allowedRules: ["Introductory", "Advanced", "Standard"],
+		disallowedAbilities: ["DRO"],
+		maxSkill: 6,
+		minSkill: 2,
+		unitLimits: [
+			{ types: ["BM", "IM"], max: 12 },
+			{ types: ["CV"], max: 6 },
+			{ types: ["BA", "CI"], max: 5 },
+			{ types: ["PM"], equal: [0, 5] }
+		],
+		chassisLimits: [{ types: ["All"], max: 2 }],
+		variantLimits: [
+			{ types: ["BM", "IM"], max: 1 },
+			{ types: ["CV"], max: 1, exceptions: { ability: [{ name: "IT", min: 3, max: 2 }] } }
+		],
+		skillLimits: [{ types: ["2", "6"], max: 2 }],
+		requireHitch: true,
+		abilityLimits: [{ types: ["JMPS"], max: 2 }],
+		unitMinPV: 7,
+		uniqueMaxLimit: 1,
+		sublistMaxUnits: 10,
+		sublistMaxPv: 250,
+		sublistScenarios: [
+			"Bunkers",
+			"Capture the Flag",
+			"Domination",
+			"Headhunter",
+			"Hold the Line",
+			"King of the Hill",
+			"Overrun",
+			"Stand Up Fight",
+			"Escalation",
+			"Stranglehold",
+			"Resource Recovery",
+			"Hot Drop"
+		],
+		bfs: { allowedPacks: ["wn350v3"], maxCountPerType: 2 },
+		allowFormations: false,
+		allowSCA: false
+	},
+	{
+		name: "wn350v3d",
+		display: "Wolfnet 350 v3.2 Doubles",
+		shortDisplay: "WN350v3.2 Dbls",
+		singleEraFaction: true,
+		eraFactionRestriction: true,
+		maxPv: 250,
+		maxUnits: 10,
+		allowedTypes: ["BA", "BM", "CV", "CI", "IM", "PM", "BS"],
+		allowedRules: ["Introductory", "Advanced", "Standard"],
+		disallowedAbilities: ["DRO"],
+		maxSkill: 6,
+		minSkill: 2,
+		unitLimits: [
+			{ types: ["BM", "IM"], max: 12 },
+			{ types: ["CV"], max: 6 },
+			{ types: ["BA", "CI"], max: 5 },
+			{ types: ["PM"], equal: [0, 5] }
+		],
+		chassisLimits: [{ types: ["All"], max: 2 }],
+		variantLimits: [
+			{ types: ["BM", "IM"], max: 1 },
+			{ types: ["CV"], max: 1, exceptions: { ability: [{ name: "IT", min: 3, max: 2 }] } }
+		],
+		skillLimits: [{ types: ["2", "6"], max: 2 }],
+		requireHitch: true,
+		abilityLimits: [{ types: ["JMPS"], max: 2 }],
+		unitMinPV: 7,
+		uniqueMaxLimit: 1,
+		sublistMaxUnits: 10,
+		sublistMaxPv: 250,
+		sublistScenarios: [],
+		bfs: { allowedPacks: ["wn350v3"], maxCountPerType: 2 },
+		allowFormations: true,
+		allowSCA: false
 	}
 ];
 

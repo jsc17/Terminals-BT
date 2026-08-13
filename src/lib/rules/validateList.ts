@@ -279,7 +279,8 @@ export async function validateRules(
 					});
 					const count = limitedUnits.reduce((total, unit) => {
 						const unitAbility = unit.data.abilities.find((ability) => limitedAbility == ability.name);
-						return (total += (unitAbility?.v ?? 0) + (unitAbility?.vhid ?? 0));
+
+						return (total += (unitAbility?.v ?? 0) + Math.max(unitAbility?.s ?? 0, unitAbility?.m ?? 0, unitAbility?.l ?? 0) + (unitAbility?.vhid ?? 0));
 					}, 0);
 					if (limit.max && failsMax(limit.max, count, unitList.length)) {
 						issueList.set(`${limit.types} limit exceeded`, new Set(limitedUnits.map((unit) => unit.data.name)));

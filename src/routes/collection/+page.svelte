@@ -33,7 +33,7 @@
 
 		{const tags = $derived(await getTags())}
 		<div class="tag-list">
-			{#each tags.filter((t) => includesIgnoreCase(t.label, tagFilter)) as tag}
+			{#each tags.filter((t) => includesIgnoreCase(t.label, tagFilter)) as tag (tag.id)}
 				{const rgb = $derived(JSON.parse(tag.color))}
 				<button
 					style={`--rgb: rgb(${Number(rgb.r) * 255} ${Number(rgb.g) * 255} ${Number(rgb.b) * 255})`}
@@ -62,7 +62,7 @@
 			</Switch>
 		</div>
 		<div class="tag-list">
-			{#each selectedTags.values() as tag}
+			{#each selectedTags.values() as tag (tag.id)}
 				{const rgb = JSON.parse(tag.color)}
 				<button style={`--rgb: rgb(${Number(rgb.r) * 255} ${Number(rgb.g) * 255} ${Number(rgb.b) * 255})`} class="tag" onclick={() => selectedTags.delete(tag.id)}>
 					{tag.label}
@@ -168,7 +168,7 @@
 									<p class="center tagged-unit-quantity">x{item.quantity}</p>
 									{#if !appWindow.isNarrow}
 										<div class="tag-list">
-											{#each item.unitTags as { tag }}
+											{#each item.unitTags as { tag } (tag.id)}
 												{const rgb = $derived(JSON.parse(tag.color))}
 												<button
 													style={`--rgb: rgb(${Number(rgb.r) * 255} ${Number(rgb.g) * 255} ${Number(rgb.b) * 255})`}
@@ -189,7 +189,7 @@
 								</div>
 								{#if appWindow.isNarrow}
 									<div class="tag-list-mobile">
-										{#each item.unitTags as { tag }}
+										{#each item.unitTags as { tag } (tag.id)}
 											{const rgb = $derived(JSON.parse(tag.color))}
 											<button
 												style={`--rgb: rgb(${Number(rgb.r) * 255} ${Number(rgb.g) * 255} ${Number(rgb.b) * 255})`}
@@ -260,7 +260,7 @@
 				{#if appWindow.isNarrow}
 					<div class="mobile-tag-bar">
 						<div class="tag-list">
-							{#each selectedTags.values() as tag}
+							{#each selectedTags.values() as tag (tag.id)}
 								{const rgb = $derived(JSON.parse(tag.color))}
 								<button style={`--rgb: rgb(${Number(rgb.r) * 255} ${Number(rgb.g) * 255} ${Number(rgb.b) * 255})`} class="tag">
 									{tag.label}

@@ -184,11 +184,21 @@ export class ResultList {
 				tempRestrictedList = tempRestrictedList.concat(this.customUnits);
 			}
 			for (const unit of this.availableList) {
-				if (this.options.allowedTypes && !this.options.allowedTypes?.includes(unit.subtype)) {
-					continue;
+				if (this.options.allowedTypes) {
+					const allowedType = this.options.allowedTypes.find((t) => t.value == unit.subtype);
+					const meetsRequirements =
+						allowedType?.abilityRequirement == undefined || allowedType.abilityRequirement.ability.some((ra) => unit.abilities.map((da) => da.name).includes(ra));
+					if (!allowedType || !meetsRequirements) {
+						continue;
+					}
 				}
-				if (this.options.allowedRules && !this.options.allowedRules?.includes(unit.rulesLevel)) {
-					continue;
+				if (this.options.allowedRules) {
+					const allowedRule = this.options.allowedRules.find((t) => t.value == unit.rulesLevel);
+					const meetsRequirements =
+						allowedRule?.abilityRequirement == undefined || allowedRule.abilityRequirement.ability.some((ra) => unit.abilities.map((da) => da.name).includes(ra));
+					if (!allowedRule || !meetsRequirements) {
+						continue;
+					}
 				}
 				if (this.options.disallowUnique && this.uniqueList.includes(unit.id)) {
 					continue;

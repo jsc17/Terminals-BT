@@ -58,21 +58,31 @@ export async function validateRules(
 				}
 				issueUnits.add(unit.id!);
 			}
-			if (rulesData.allowedTypes && !rulesData.allowedTypes.includes(unit.data.subtype)) {
-				if (issueList.has("Invalid Type")) {
-					issueList.get("Invalid Type")?.add(unit.data.name);
-				} else {
-					issueList.set("Invalid Type", new Set([unit.data.name]));
+			if (rulesData.allowedTypes) {
+				const allowedType = rulesData.allowedTypes.find((t) => t.value == unit.data.subtype);
+				const meetsRequirements =
+					allowedType?.abilityRequirement == undefined || allowedType.abilityRequirement.ability.some((ra) => unit.data.abilities.map((da) => da.name).includes(ra));
+				if (!allowedType || !meetsRequirements) {
+					if (issueList.has("Invalid Type")) {
+						issueList.get("Invalid Type")?.add(unit.data.name);
+					} else {
+						issueList.set("Invalid Type", new Set([unit.data.name]));
+					}
+					issueUnits.add(unit.id!);
 				}
-				issueUnits.add(unit.id!);
 			}
-			if (rulesData.allowedRules && !rulesData.allowedRules.includes(unit.data.rulesLevel)) {
-				if (issueList.has("Invalid Rules Level")) {
-					issueList.get("Invalid Rules Level")?.add(unit.data.name);
-				} else {
-					issueList.set("Invalid Rules Level", new Set([unit.data.name]));
+			if (rulesData.allowedRules) {
+				const allowedRule = rulesData.allowedRules.find((t) => t.value == unit.data.rulesLevel);
+				const meetsRequirements =
+					allowedRule?.abilityRequirement == undefined || allowedRule.abilityRequirement.ability.some((ra) => unit.data.abilities.map((da) => da.name).includes(ra));
+				if (!allowedRule || !meetsRequirements) {
+					if (issueList.has("Invalid Rules Level")) {
+						issueList.get("Invalid Rules Level")?.add(unit.data.name);
+					} else {
+						issueList.set("Invalid Rules Level", new Set([unit.data.name]));
+					}
+					issueUnits.add(unit.id!);
 				}
-				issueUnits.add(unit.id!);
 			}
 			if (rulesData.disallowUnique && (await isUnitUniqueLocal({ unitId: unit.data.id, eras }))) {
 				if (issueList.has("Unique Units")) {
@@ -279,11 +289,11 @@ export async function validateRules(
 					});
 					const count = limitedUnits.reduce((total, unit) => {
 						const unitAbility = unit.data.abilities.find((ability) => limitedAbility == ability.name);
-
-						return (total += (unitAbility?.v ?? 0) + Math.max(unitAbility?.s ?? 0, unitAbility?.m ?? 0, unitAbility?.l ?? 0) + (unitAbility?.vhid ?? 0));
+						if (!unitAbility) return total;
+						return (total += Math.max((unitAbility.v ?? 0) + Math.max(unitAbility.s ?? 0, unitAbility.m ?? 0, unitAbility.l ?? 0) + (unitAbility?.vhid ?? 0), 1));
 					}, 0);
 					if (limit.max && failsMax(limit.max, count, unitList.length)) {
-						issueList.set(`${limit.types} limit exceeded`, new Set(limitedUnits.map((unit) => unit.data.name)));
+						issueList.set(`${limit.types.join("/")} limit exceeded`, new Set(limitedUnits.map((unit) => unit.data.name)));
 						for (const unit of limitedUnits) {
 							issueUnits.add(unit.id!);
 						}

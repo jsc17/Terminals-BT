@@ -97,6 +97,8 @@
 </script>
 
 <div class="search-results card">
+	<p class="center error">Links are updated, but I haven't even started on any data updates MUL2.0 might have. I'll be taking a look after work tonight</p>
+
 	<div class="search-results-multisort-tags">
 		{#if resultList.sortKeys.length > 1}
 			<DragDropProvider {onDragStart} {onDragOver} {onDragEnd}>
@@ -225,7 +227,7 @@
 										<div></div>
 									{/if}
 									<div class="inline">
-										<a class={{ "unit-name": true }} href="http://masterunitlist.info/Unit/Details/{item.mulId}" target="_blank">
+										<a class={{ "unit-name": true }} href="http://masterunitlist.battletech.com/units/{item.name.replaceAll(/[^\w\s]/g, '').replaceAll(' ', '-')}" target="_blank">
 											{const key = $derived((item.group?.length ? item.group : item.class) + item.subtype)}
 											{#if resultList.tagFilter?.maximumBehavior == "warn" && (!resultList.collectionUnits.has(key) || resultList.warnList.has(key))}
 												<AlertIcon fill="var(--warning)" height="15" />

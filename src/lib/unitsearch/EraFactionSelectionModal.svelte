@@ -242,7 +242,7 @@
 			<input type="checkbox" id="include-general-list" bind:checked={includeGeneral} disabled={selectedEras.size != 1 || selectedFactions.size != 1} />
 			<label for="include-general-list" class={{ strikethrough: selectedEras.size != 1 || selectedFactions.size != 1 }}>Official General:</label>
 			{#if selectedEras.size == 1 && selectedFactions.size == 1}
-				<a href={`http://masterunitlist.info/Era/FactionEraDetails?FactionId=${[...selectedFactions][0]}&EraId=${[...selectedEras][0]}`}>{factionLookup.get(general)}</a>
+				<p>{factionLookup.get(general)}</p>
 			{:else}
 				<p class="general-notice">Select a single Era and Faction</p>
 			{/if}

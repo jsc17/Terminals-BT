@@ -45,7 +45,7 @@ export const getUnitData = form(
 					skill: parsedUnit.skill,
 					pv: parsedUnit.pv,
 					mulData: unit,
-					link: unit ? `http://masterunitlist.info/Unit/Details/${unit.mulId}` : undefined,
+					link: unit ? `http://masterunitlist.battletech.com/units/${unit.name.replaceAll(/[^\w\s]/g, "").replaceAll(" ", "-")}` : undefined,
 					unique: unique,
 					available: available
 				});
@@ -108,7 +108,7 @@ export const getSingleUnitData = form(
 					skill,
 					pv: getNewSkillCost(skill, mulData.pv),
 					mulData: mulData,
-					link: mulData.mulId > 0 ? `http://masterunitlist.info/Unit/Details/${mulData.mulId}` : undefined,
+					link: mulData.mulId > 0 ? `http://masterunitlist.battletech.com/units/${mulData.name.replaceAll(/[^\w\s]/g, "").replaceAll(" ", "-")}` : undefined,
 					unique,
 					available
 				};

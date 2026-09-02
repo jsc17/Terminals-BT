@@ -11,8 +11,11 @@ function exportArrayToCSV(units: MulUnit[]) {
 	for (const unit of units) {
 		const unitValues = [
 			unit.mulId,
-			`"=hyperlink(""${`http://masterunitlist.battletech.com/units/${unit.name.replaceAll(/[^\w\s]/g, "").replaceAll(" ", "-")}`}"", ""${unit.name.replaceAll(`"`, ``)}"")"`,
-			`"=hyperlink(""${`https://www.sarna.net/wiki/${unit.class.replaceAll(" ", "_").replaceAll(`"`, ``)}`}"", ""${unit.class.replaceAll(`"`, ``)}"")"`,
+			`"=hyperlink(""${`http://masterunitlist.battletech.com/units/${unit.name
+				.normalize("NFD")
+				.replaceAll(/[^\w\s\-]/g, "")
+				.replaceAll(" ", "-")}`}"", ""${unit.name.replaceAll(`"`, ``)}"")"`,
+			`"=hyperlink(""${`https://www.sarna.net/wiki/${unit.class.normalize("NFD").replaceAll(" ", "_").replaceAll(`"`, ``)}`}"", ""${unit.class.replaceAll(`"`, ``)}"")"`,
 			unit.variant,
 			unit.type,
 			unit.subtype,

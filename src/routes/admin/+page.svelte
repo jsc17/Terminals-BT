@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { uploadAbilities, linkUnitAbilities, uploadSPAs } from "./abilities.remote";
 	import SendNotification from "./SendNotification.svelte";
 	import { getPendingTournaments, approveTournament } from "./tournament-admin.remote";
 
@@ -21,6 +22,12 @@
 		<button onclick={() => approveTournament({ tournamentId: selectedPendingTournament ?? 0 })}>Approve</button>
 	</form>
 	<p>{selectedPendingTournament ?? "not set"}</p>
+
+	<div class="card">
+		<button onclick={() => uploadAbilities()}>Upload Abilities</button>
+		<button onclick={() => uploadSPAs()}>Upload SPAs</button>
+		<button onclick={() => linkUnitAbilities()}>Link Unit Abilities</button>
+	</div>
 </main>
 
 <style>

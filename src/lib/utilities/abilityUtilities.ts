@@ -1,39 +1,13 @@
 import { abilityReferences, numberedAbilityReference, type UnitAbility } from "$lib/data/abilities";
 
 function parseValues(values: string[]) {
-	let v, vmin, s, smin, m, mmin, l, lmin, e, emin;
-	switch (values.length) {
-		case 4:
-			if (values[3].includes("*")) {
-				emin = true;
-			}
-			e = Number(values[3].replace("*", "").replace("-", "0"));
+	const parsedValues = values.map((value): [number, boolean] => [Number(value.replace("*", "").replace("-", "0")), value.includes("*")]);
+	const [v, vmin]: [number | undefined, boolean | undefined] = parsedValues.length === 1 ? parsedValues[0] : [undefined, undefined];
+	const [s, smin]: [number | undefined, boolean | undefined] = parsedValues.length > 1 ? parsedValues[0] : [undefined, undefined];
+	const [m, mmin]: [number | undefined, boolean | undefined] = parsedValues.length > 1 ? parsedValues[1] : [undefined, undefined];
+	const [l, lmin]: [number | undefined, boolean | undefined] = parsedValues.length > 2 ? parsedValues[2] : [undefined, undefined];
+	const [e, emin]: [number | undefined, boolean | undefined] = parsedValues.length > 3 ? parsedValues[3] : [undefined, undefined];
 
-		case 3:
-			if (values[2].includes("*")) {
-				lmin = true;
-			}
-			l = Number(values[2].replace("*", "").replace("-", "0"));
-		case 2:
-			if (values[1].includes("*")) {
-				mmin = true;
-				values[1].replace("*", "");
-			}
-			m = Number(values[1].replace("*", "").replace("-", "0"));
-
-			if (values[0].includes("*")) {
-				smin = true;
-				values[0].replace("*", "");
-			}
-			s = Number(values[0].replace("*", "").replace("-", "0"));
-
-			break;
-		case 1:
-			if (values[0].includes("*")) {
-				vmin = true;
-			}
-			v = Number(values[0].replace("*", ""));
-	}
 	return { v, vmin, s, smin, m, mmin, l, lmin, e, emin };
 }
 
@@ -46,10 +20,12 @@ function parseAbility(ability: string): UnitAbility {
 	) {
 		return { name: ability };
 	} else {
+		//looks for the first number not followed by c3 letter in the string and gets it's index
+		ability = ability.replace("LRM-", "LRM0");
 		const index = ability.search(/\d(?:[^emsbi]|$)/i);
 		let abilityName = "";
 		if (index != -1) {
-			abilityName = ability.slice(0, index);
+			abilityName = ability.slice(0, index).trim();
 			const values = ability.slice(index, ability.length).split("/");
 			const { v, vmin, s, smin, m, mmin, l, lmin, e, emin } = parseValues(values);
 			let parse: UnitAbility = { name: abilityName, v, vmin, s, smin, m, mmin, l, lmin, e, emin };
@@ -64,58 +40,56 @@ function parseAbility(ability: string): UnitAbility {
 }
 
 export function handleParse(abilityString: string) {
-	const parsedAbilities = [];
-	let turret: UnitAbility, bimLam: UnitAbility, artAbility: UnitAbility;
+	const parsedAbilities: UnitAbility[] = [];
+
+	//parse turret abilities first because they are nested within the main ability string
 	const turretMatch = abilityString.match(/TUR\(([^)]+)\)/i);
-	const bimlamMatch = abilityString.match(/(BIM|LAM)(\([^)]+\))/i);
-	const artMatch = abilityString.match(/(ART)(.*?-)(\d+)/i);
-	if (bimlamMatch !== null) {
-		bimLam = { name: bimlamMatch[1], extracted: bimlamMatch[2] };
-		abilityString = abilityString.replace(/(BIM|LAM)(\([^)]+\))/i, bimlamMatch[1]);
-	}
+	let turret: UnitAbility = { name: "TUR", turretAbilities: [] };
+
 	if (turretMatch !== null) {
 		const turretAbilities = turretMatch[1].split(",").map((ability) => ability.trim());
-		if (turretAbilities[0] == "-" || !isNaN(Number(turretAbilities[0][0]))) {
-			const turretDamageValues = turretAbilities[0].split("/");
+		if (turretAbilities[0][0] == "-" || !isNaN(Number(turretAbilities[0][0]))) {
+			const turretDamageValues = turretAbilities.shift()!.split("/");
 			const { s, smin, m, mmin, l, lmin, e, emin } = parseValues(turretDamageValues);
-			const parsedTurretAbilities: UnitAbility[] = [];
-			for (const ability of turretAbilities.slice(1)) {
-				parsedTurretAbilities.push(parseAbility(ability));
-			}
-			const parsedTurret = { name: "TUR", s, smin, m, mmin, l, lmin, e, emin, turretAbilities: parsedTurretAbilities };
-			turret = parsedTurret;
-		} else {
-			const parsedTurretAbilities: UnitAbility[] = [];
-			for (const ability of turretAbilities) {
-				parsedTurretAbilities.push(parseAbility(ability));
-			}
-			const parsedTurret = { name: "TUR", turretAbilities: parsedTurretAbilities };
-			turret = parsedTurret;
+			turret = { ...turret, s, smin, m, mmin, l, lmin, e, emin };
 		}
-		abilityString = abilityString.replace(/TUR\(([^)]+)\)/, "TUR");
+		for (let turretAbility of turretAbilities) {
+			const artMatch = turretAbility.match(/(ART)(.*?)-(\d+)/i);
+			if (artMatch !== null) {
+				const artAbility = { name: "ART", artType: artMatch[2], v: Number(artMatch[3]) };
+				turret.turretAbilities!.push(artAbility);
+			} else {
+				turret.turretAbilities!.push(parseAbility(turretAbility));
+			}
+		}
+		abilityString = abilityString.replace(/TUR\(([^)]+)\)/i, "TUR");
 	}
-	if (artMatch !== null) {
-		artAbility = { name: "ART", artType: artMatch[2], v: Number(artMatch[3]) };
-		abilityString = abilityString.replace(/(ART)(.*?-)(\d+)/i, "ART");
-	}
+
 	const unitAbilities = abilityString.split(",").map((ability) => ability.trim());
-	for (const ability of unitAbilities) {
-		switch (ability) {
-			case "TUR":
-				parsedAbilities.push(turret!);
-				break;
-			case "BIM":
-			case "LAM":
-				parsedAbilities.push(bimLam!);
-				break;
-			case "ART":
-				parsedAbilities.push(artAbility!);
-				break;
-			case "":
-				break;
-			default:
-				parsedAbilities.push(parseAbility(ability));
+
+	for (let ability of unitAbilities) {
+		if (ability == "") continue;
+		//check if the ability is a turret ability and if so, add previously parsed data
+		if (ability == "TUR") {
+			parsedAbilities.push(turret);
+			continue;
 		}
+
+		//check if ability is artillery
+		const artMatch = ability.match(/(ART)(.*?)-(\d+)/i);
+		if (artMatch !== null) {
+			parsedAbilities.push({ name: "ART", artType: artMatch[2], v: Number(artMatch[3]) });
+			continue;
+		}
+
+		//check if ability is a BIM or LAM and if so, extract the data within the parentheses
+		const bimlamMatch = ability.match(/(BIM|LAM)(\([^)]+\))/i);
+		if (bimlamMatch !== null) {
+			parsedAbilities.push({ name: bimlamMatch[1], extracted: bimlamMatch[2] });
+			continue;
+		}
+
+		parsedAbilities.push(parseAbility(ability));
 	}
 	return parsedAbilities;
 }

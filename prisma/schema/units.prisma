@@ -28,17 +28,57 @@ model Unit {
   overheat Int
   pv Int
   abilities String?
+  unitAbilities UnitAbility[]
+  unitSpecialPilotAbilities SpecialPilotAbility[]
   tonnage Int? @default(0)
   image_url String?
   availability Availability[]
 }
 
-model SPA {
+model UnitAbility {
   id Int @id @default(autoincrement())
+  unitId Int
+  abilityId String
+  unit Unit @relation(fields: [unitId], references: [id])
+  ability AbilityData @relation(fields: [abilityId], references: [abbreviation])
+
+  value Int?
+  valueMin Boolean?
+  short Int?
+  shortMin Boolean?
+  medium Int?
+  mediumMin Boolean?
+  long Int?
+  longMin Boolean?
+  extreme Int?
+  extremeMin Boolean?
+  
+  lamData String?
+  artilleryType String?
+
+  turretId Int?
+  turret UnitAbility? @relation("TurretAbilities", fields: [turretId], references: [id])
+  turretAbilities UnitAbility[] @relation("TurretAbilities")
+}
+
+model AbilityData {
   name String
+  abbreviation String @id
+  page String
+  weapon Boolean
+  ammo Boolean
+  numbered Boolean
+
+  UnitAbilities UnitAbility[]
+}
+
+model SpecialPilotAbility {
+  id Int @id @default(autoincrement())
+  name String @unique
   cost Int
   page String
-  max Int?
+
+  linkUnits Unit[]
 }
 
 model Ammo {

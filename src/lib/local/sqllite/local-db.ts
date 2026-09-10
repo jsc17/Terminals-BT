@@ -100,6 +100,7 @@ export const isLocalDBAvailable = async () => {
 };
 
 export async function getMULDataFromIdLocal(mulId: number) {
+	if (mulId <= 0) return undefined;
 	if (!(await isLocalDBAvailable())) return getMULDataFromId(mulId);
 	return sendMessage<MulUnit>({ type: WorkerMessageType.GET_UNIT, payload: mulId });
 }

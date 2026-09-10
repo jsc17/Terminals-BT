@@ -280,6 +280,7 @@ export class List {
 		return `{${tempUnitArray.join(",")}}`;
 	}
 	async loadList(data: ListCode) {
+		console.log("loading list");
 		const listCode: ListCode = data;
 
 		db.previousLists.delete(this.id);
@@ -306,7 +307,7 @@ export class List {
 			}
 		}
 
-		const unitPromises = (await Promise.allSettled(listCode.units.map((u) => getMULDataFromIdLocal(u.mulId))))
+		const unitPromises = (await Promise.allSettled(listCode.units.filter((u) => u.mulId > 0).map((u) => getMULDataFromIdLocal(u.mulId))))
 			.map((p) => {
 				if (p.status == "fulfilled" && p.value) {
 					return { mulId: p.value.mulId, data: p.value };

@@ -17,13 +17,12 @@
 		mulUnitData: Map<number, MulUnit>;
 		ammoReferenceList: string[];
 		unitImages?: Map<string, string>;
-		unitCardImages?: Map<string, string>;
 		bfsList: Map<number, number>;
 		scaList: number[];
 		counts: Map<number, string[]>;
 	};
 
-	let { listData, printOptions, mulUnitData, ammoReferenceList, unitImages, unitCardImages, bfsList, scaList, counts }: Props = $props();
+	let { listData, printOptions, mulUnitData, ammoReferenceList, unitImages, bfsList, scaList, counts }: Props = $props();
 
 	const unitData = $derived(new Map(listData.units.map((u) => [u.id, u])));
 
@@ -265,21 +264,18 @@
 							{#each formation.units as unitId}
 								{@const unit = unitData.get(unitId)}
 								{@const mulData = mulUnitData.get(unit!.mulId)}
-								{#if printOptions.cardStyle == "mul" || unit!.mulId < 0}
-									<img src={unitCardImages?.get(`${unit!.mulId}-${unit!.skill}`)} class="unit-card" alt="unit card" />
-								{:else}
-									<div class="unit-card-wrapper">
-										<PrintUnitCard
-											unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
-											image={unitImages?.get(mulData!.imageLink ?? "") ?? ""}
-											formationSPAs={[]}
-											measurementUnits={printOptions.measurementUnits}
-											numbering={counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) ?? -1}
-											numberingType={printOptions.printDuplicateMarkingsType}
-											printDuplicateMarkings={printOptions.printDuplicateMarkings}
-										/>
-									</div>
-								{/if}
+
+								<div class="unit-card-wrapper">
+									<PrintUnitCard
+										unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
+										image={unitImages?.get(mulData!.imageLink ?? "") ?? ""}
+										formationSPAs={[]}
+										measurementUnits={printOptions.measurementUnits}
+										numbering={counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) ?? -1}
+										numberingType={printOptions.printDuplicateMarkingsType}
+										printDuplicateMarkings={printOptions.printDuplicateMarkings}
+									/>
+								</div>
 							{/each}
 						</div>
 						{#if formation.secondary}
@@ -301,21 +297,17 @@
 								{#each formation.secondary.units as unitId}
 									{@const unit = unitData.get(unitId)}
 									{@const mulData = mulUnitData.get(unit!.mulId)}
-									{#if printOptions.cardStyle == "mul" || unit!.mulId < 0}
-										<img src={unitCardImages?.get(`${unit!.mulId}-${unit!.skill}`)} class="unit-card" alt="unit card" />
-									{:else}
-										<div class="unit-card-wrapper">
-											<PrintUnitCard
-												unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
-												image={unitImages?.get(mulData!.imageLink ?? "") ?? ""}
-												formationSPAs={[]}
-												measurementUnits={printOptions.measurementUnits}
-												numbering={counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) ?? -1}
-												numberingType={printOptions.printDuplicateMarkingsType}
-												printDuplicateMarkings={printOptions.printDuplicateMarkings}
-											/>
-										</div>
-									{/if}
+									<div class="unit-card-wrapper">
+										<PrintUnitCard
+											unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
+											image={unitImages?.get(mulData!.imageLink ?? "") ?? ""}
+											formationSPAs={[]}
+											measurementUnits={printOptions.measurementUnits}
+											numbering={counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) ?? -1}
+											numberingType={printOptions.printDuplicateMarkingsType}
+											printDuplicateMarkings={printOptions.printDuplicateMarkings}
+										/>
+									</div>
 								{/each}
 							</div>
 						{/if}
@@ -340,21 +332,18 @@
 				{#each listData.formations.flatMap((f) => f.units.concat(f.secondary?.units ?? [])) as unitId}
 					{@const unit = unitData.get(unitId)}
 					{@const mulData = mulUnitData.get(unit!.mulId)}
-					{#if printOptions.cardStyle == "mul"}
-						<img src={unitCardImages?.get(`${unit!.mulId}-${unit!.skill}`)} class="unit-card" alt="unit card" />
-					{:else}
-						<div class="unit-card-wrapper">
-							<PrintUnitCard
-								unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
-								image={unitImages?.get(mulData!.imageLink ?? "") ?? ""}
-								formationSPAs={[]}
-								measurementUnits={printOptions.measurementUnits}
-								numbering={counts.has(unit!.mulId) ? counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) : -1}
-								numberingType={printOptions.printDuplicateMarkingsType}
-								printDuplicateMarkings={printOptions.printDuplicateMarkings}
-							/>
-						</div>
-					{/if}
+
+					<div class="unit-card-wrapper">
+						<PrintUnitCard
+							unit={{ id: unit!.id, baseUnit: mulData!, skill: unit!.skill, cost: getNewSkillCost(unit!.skill, mulData!.pv), customization: unit!.customization }}
+							image={unitImages?.get(mulData!.imageLink ?? "") ?? ""}
+							formationSPAs={[]}
+							measurementUnits={printOptions.measurementUnits}
+							numbering={counts.has(unit!.mulId) ? counts.get(unit!.mulId)?.findIndex((u) => u == unit!.id) : -1}
+							numberingType={printOptions.printDuplicateMarkingsType}
+							printDuplicateMarkings={printOptions.printDuplicateMarkings}
+						/>
+					</div>
 				{/each}
 				{#if printOptions.printBFSCards}
 					{#each bfsList.entries() as [bsfId, bfsCount]}

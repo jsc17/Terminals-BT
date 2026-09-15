@@ -67,16 +67,7 @@
 			<legend>Unit Options</legend>
 			<fieldset>
 				<legend>Card Print Style</legend>
-				<div>
-					<input type="radio" name="cardStyle" id="card-type-mul" value="mul" bind:group={settings.print.cardStyle} /><label for="card-type-mul"
-						>Print cards downloaded from the MUL</label
-					>
-				</div>
-				<div>
-					<input type="radio" name="cardStyle" id="card-type-generated" value="generated" bind:group={settings.print.cardStyle} /><label for="card-type-generated"
-						>Print generated cards. Required for printing SPA's and Alt. Ammo. May take a few seconds to print.</label
-					>
-				</div>
+				<p class="warning">Due to MUL 2.0, There is no good way to print "official" card images anymore, so all lists will print with generated cards now</p>
 			</fieldset>
 			<fieldset>
 				<legend>Unit Markings</legend>

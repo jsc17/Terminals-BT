@@ -5,7 +5,6 @@ export const PrintOptionsSchema = v.object({
 	printFormations: v.fallback(v.boolean(), true),
 	printCardsByFormation: v.fallback(v.boolean(), true),
 	printFormationBonuses: v.fallback(v.boolean(), true),
-	cardStyle: v.fallback(v.picklist(["mul", "generated"]), "generated"),
 	formationHeaderStyle: v.fallback(v.picklist(["inline", "side"]), "inline"),
 	measurementUnits: v.fallback(v.picklist(["inches", "hexes"]), "inches"),
 	printReferences: v.fallback(v.boolean(), true),

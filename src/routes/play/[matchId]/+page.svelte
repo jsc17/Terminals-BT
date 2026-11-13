@@ -73,7 +73,6 @@
 		management: false,
 		matchLog: false,
 		matchResults: false,
-		matchOverAlert: false,
 		endRound: false,
 		roundSummaries: false
 	});
@@ -123,7 +122,7 @@
 			</div>
 			<div class="match-details">
 				<p>Round: {matchData?.currentRound} {matchData?.gameCompleted ? "(Match Ended)" : ""}</p>
-				<RoundTimer {matchData} matchOverAlertOpen={componentsOpen.matchOverAlert} />
+				<RoundTimer {matchData} />
 			</div>
 			<div class="team-name-blue">
 				<div class="toolbar-item">{teamData?.[1]?.name}</div>
@@ -150,14 +149,13 @@
 			{:else}
 				{const list = $derived(matchLists.find((l) => l.id == activeList))}
 				{const team = $derived(teamData.findIndex((t) => t.id == (list?.team ?? 0)))}
-				<DropdownMenu items={matchLists.map(l=>({type: "link", label: l.name ?? "Not Found",href:`#list-${l.id}`}))}  triggerClasses="transparent-button height-100">
+				<DropdownMenu items={matchLists.map((l) => ({ type: "link", label: l.name ?? "Not Found", href: `#list-${l.id}` }))} triggerClasses="transparent-button height-100">
 					{#snippet trigger()}
 						<div class="jump-link-button" data-team={team ?? 0}>
 							{list?.name}
 						</div>
 					{/snippet}
 				</DropdownMenu>
-
 			{/if}
 			<div class="toolbar-section" style="justify-self: end;">
 				{#if myData?.playerRole == "HOST"}

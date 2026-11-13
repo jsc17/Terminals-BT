@@ -5,12 +5,13 @@
 
 	type Props = {
 		matchData?: Match;
-		matchOverAlertOpen: boolean;
 	};
 
-	let { matchData, matchOverAlertOpen = $bindable() }: Props = $props();
+	let { matchData }: Props = $props();
 
 	let interval = $state<NodeJS.Timeout>();
+	let matchOverAlertOpen = $state<boolean>(false);
+	let matchOverAlertOpened = $state<boolean>(false);
 
 	const totalDurationMs = $derived((matchData?.matchDuration ?? 0) * 60 * 1000);
 	let remainingMS = $state<number>();
@@ -38,7 +39,10 @@
 		const elapsed = Date.now() - matchData!.timeStarted!.getTime() - matchData!.timePausedDurationMs;
 		remainingMS = Math.max(0, totalDurationMs - elapsed);
 
-		if (remainingMS == 0) matchOverAlertOpen = true;
+		if (remainingMS == 0 && !matchOverAlertOpened) {
+			matchOverAlertOpen = true;
+			matchOverAlertOpened = true;
+		}
 		if (remainingMS == 0 || matchData.timeEnded) clearInterval(interval);
 	}
 
